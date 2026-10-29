@@ -40,6 +40,12 @@
   .inst text { fill: var(--ink); font-size: 12px; font-weight: 700; text-anchor: middle; }
   .inst.dead rect { fill: var(--track); }
   .inst.dead text { fill: var(--faint); }
+  .rack { fill: var(--panel-2); stroke: var(--line); }
+  .unit { fill: var(--line); }
+  .lyou { fill: var(--accent-text); opacity: .85; }
+  .laws { fill: var(--teal); opacity: .55; }
+  .tiny { fill: var(--ink); font-family: var(--mono); font-size: 9.5px; }
+  .fastnet { stroke: var(--teal); stroke-width: 4; }
 </style>
 </head>
 <body>
@@ -54,6 +60,30 @@
     <h1>Cloud Computing Basics</h1>
     <ul class="lede"><li><b>Cloud computing</b> = on-demand IT (compute, storage, databases, networking) over the internet.</li><li><b>Pay as you go</b>: rent instead of buy, scale in minutes instead of months.</li><li>You choose <b>how much of the stack you manage</b>: IaaS, PaaS or SaaS.</li><li>AWS runs in <b>Regions</b>, each made of isolated <b>Availability Zones</b>, plus <b>edge locations</b> near users.</li></ul>
   </header>
+
+  <section aria-labelledby="whatH">
+    <h2 id="whatH">In .NET / Azure terms</h2>
+    <p class="sub">If you know Azure, most of these ideas already have a name in your head.</p>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest .NET / Azure idea</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Region</span><span class="like">Azure region (Central India…)</span><span>Geographic area; you choose it per resource.</span></div>
+      <div class="row"><span class="aws">Availability Zone</span><span class="like">Azure availability zone</span><span>Isolated data centres inside a Region; spread apps across them.</span></div>
+      <div class="row"><span class="aws">Edge location</span><span class="like">Azure Front Door / CDN POP</span><span>Used by CloudFront and Route 53, not for your servers.</span></div>
+      <div class="row"><span class="aws">IaaS / PaaS / SaaS</span><span class="like">Azure VM / App Service / Microsoft 365</span><span>How much of the stack you manage.</span></div>
+      <div class="row"><span class="aws">Pay-as-you-go</span><span class="like">Azure consumption billing</span><span>Pay per second/GB; no upfront hardware.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="cbStoryH">
+    <h2 class="stage-title" id="cbStoryH">Walkthrough: from your own data centre to AWS</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story" id="cbStory">
+      <div class="scroll"><svg class="diagram" id="cbStorySvg" style="min-width:0" viewBox="0 0 700 440" aria-label="Own data centre vs AWS cloud, service models, then a Region with three Availability Zones and edge locations"></svg></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Now break things and watch what changes.</p>
 
   <section aria-labelledby="stackTitle">
     <h2 class="stage-title" id="stackTitle">Who manages what?</h2>
@@ -150,6 +180,18 @@
     <p class="sub" style="margin-top:8px">Counts from AWS's global infrastructure page, October 2026. They grow every year, so the exam tests the structure, not the numbers.</p>
   </section>
 
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Pay only for what you use</span><span class="arrow">→</span><span class="then">Pay-as-you-go (variable expense)</span></li>
+      <li><span class="if">Resources in minutes, not weeks</span><span class="arrow">→</span><span class="then">Agility</span></li>
+      <li><span class="if">Survive a data-centre failure</span><span class="arrow">→</span><span class="then">Deploy across multiple AZs</span></li>
+      <li><span class="if">Data must stay in a country</span><span class="arrow">→</span><span class="then">Choose that Region (compliance)</span></li>
+      <li><span class="if">Run servers on the edge network?</span><span class="arrow">→</span><span class="then">No: edges are for CloudFront / Route 53</span></li>
+      <li><span class="if">You manage OS and up</span><span class="arrow">→</span><span class="then">IaaS (EC2)</span></li>
+    </ul>
+  </section>
+
   <section aria-labelledby="pickH">
     <h2 id="pickH">How to choose a Region</h2>
     <div class="cards">
@@ -200,6 +242,76 @@
 <script>
 (function () {
   const K = Kit, $ = K.$;
+
+  /* ========== 0. Guided walkthrough ========== */
+  (function () {
+    const sv = $('cbStorySvg');
+    const E = {}, N = {};
+    const sx = (k, el) => { el.classList.add('sx'); E[k] = el; return el; };
+    const grp = k => sx(k, K.el('g', {}, sv));
+    // scene A: on-prem vs cloud
+    const A = grp('A');
+    K.el('rect', { x: 8, y: 8, width: 330, height: 250, rx: 14, class: 'zone' }, A); K.text(A, 22, 30, 'YOUR OWN DATA CENTRE', 'zone-label');
+    for (let j = 0; j < 3; j++) { K.el('rect', { x: 40 + j * 95, y: 60, width: 70, height: 130, rx: 6, class: 'rack' }, A); for (let r = 0; r < 5; r++) K.el('rect', { x: 48 + j * 95, y: 70 + r * 23, width: 54, height: 15, rx: 3, class: 'unit' }, A); }
+    const aT = K.text(A, 173, 225, 'buy upfront · wait weeks · guess capacity', 'mlabel'); aT.style.textAnchor = 'middle';
+    const Bc = grp('B');
+    K.el('rect', { x: 362, y: 8, width: 330, height: 250, rx: 14, class: 'zone' }, Bc); K.text(Bc, 376, 30, 'AWS CLOUD', 'zone-label');
+    N.req = K.node(Bc, 527, 85, 220, 50, 'Need 3 servers', 'click / API call');
+    N.got = K.node(Bc, 527, 170, 220, 50, 'Running in minutes', 'pay per second');
+    K.el('line', { x1: 527, y1: 110, x2: 527, y2: 145, class: 'msg solid' }, Bc);
+    const bT = K.text(Bc, 527, 236, 'rent · scale up and down · stop paying anytime', 'mlabel'); bT.style.textAnchor = 'middle';
+    // service models
+    const M = grp('models');
+    K.text(M, 22, 290, 'WHO MANAGES WHAT (yellow = you, green = AWS)', 'zone-label');
+    const MODELS = [['On-premises', 6, 'your servers'], ['IaaS', 3, 'EC2'], ['PaaS', 1, 'Elastic Beanstalk'], ['SaaS', 0, 'Gmail, Amazon Connect']];
+    const LAY = ['Data & app', 'Runtime', 'OS', 'Virtualisation', 'Servers', 'Network'];
+    MODELS.forEach(([n, you, ex], c) => {
+      const x = 30 + c * 166;
+      K.text(M, x + 70, 312, n, 'mlabel').style.textAnchor = 'middle';
+      LAY.forEach((l, r) => { K.el('rect', { x, y: 320 + r * 17, width: 140, height: 15, rx: 3, class: r < you ? 'lyou' : 'laws' }, M); const t = K.text(M, x + 70, 331 + r * 17, l, 'tiny'); t.style.textAnchor = 'middle'; });
+      const e = K.text(M, x + 70, 432, ex, 'mlabel muted'); e.style.textAnchor = 'middle';
+    });
+    // scene C: region / AZ / edge
+    const R = grp('R');
+    K.el('rect', { x: 8, y: 8, width: 470, height: 300, rx: 14, class: 'zone' }, R); K.text(R, 22, 30, 'REGION ap-south-1 (Mumbai)', 'zone-label');
+    const AZ = grp('AZ');
+    ['ap-south-1a', 'ap-south-1b', 'ap-south-1c'].forEach((n, j) => { K.el('rect', { x: 26 + j * 150, y: 50, width: 138, height: 150, rx: 10, class: 'zone' }, AZ); K.text(AZ, 36 + j * 150, 70, n, 'zone-label'); for (let d = 0; d < 2; d++) K.node(AZ, 95 + j * 150, 105 + d * 58, 110, 44, 'data centre', ''); });
+    sx('links', K.el('g', {}, sv));
+    [[164, 125], [314, 125]].forEach(([x, y]) => K.el('line', { x1: x, y1: y, x2: x + 12, y2: y, class: 'fastnet' }, E.links));
+    const lk = K.text(E.links, 243, 230, 'private low-latency links · separate power, flood plains', 'mlabel muted'); lk.style.textAnchor = 'middle';
+    const EG = grp('edges');
+    K.el('rect', { x: 494, y: 8, width: 198, height: 300, rx: 14, class: 'zone' }, EG); K.text(EG, 506, 30, 'EDGE LOCATIONS', 'zone-label');
+    ['Chennai', 'Delhi', 'Singapore', 'London'].forEach((c, j) => K.node(EG, 593, 72 + j * 60, 160, 44, c, 'CloudFront · Route 53'));
+    const GL = grp('glob');
+    K.el('rect', { x: 8, y: 322, width: 684, height: 112, rx: 14, class: 'zone' }, GL);
+    K.text(GL, 22, 344, 'GLOBAL vs REGIONAL SERVICES', 'zone-label');
+    const g1 = K.text(GL, 30, 375, 'Global: IAM · Route 53 · CloudFront · WAF', 'mlabel'); g1.style.textAnchor = 'start';
+    const g2 = K.text(GL, 30, 402, 'Regional: EC2 · S3 buckets · RDS · Lambda · most others (pick the Region)', 'mlabel'); g2.style.textAnchor = 'start';
+    const VIS = [['A'], ['A', 'B'], ['A', 'B', 'models'], ['R'], ['R', 'AZ', 'links'], ['R', 'AZ', 'links', 'edges'], ['R', 'AZ', 'links', 'edges', 'glob']];
+    const FOC = [null, ['B'], ['models'], null, ['AZ', 'links', 'R'], ['edges'], ['glob']];
+    const P = K.el('g', {}, sv);
+    function show(i) { P.textContent = ''; for (const k in E) { E[k].classList.toggle('gone', !VIS[i].includes(k)); E[k].classList.toggle('fade-out', !!FOC[i] && !FOC[i].includes(k)); } }
+    const STEPS = [
+      { title: 'Before the cloud: your own data centre',
+        text: 'Traditional IT means buying servers, racks, power and cooling up front, waiting weeks for delivery, and guessing next year\'s capacity. Guess low and the site falls over; guess high and money sits idle.' },
+      { title: 'Cloud computing: rent it, on demand',
+        text: 'With AWS you ask for servers, storage or databases by API or console and get them in <b>minutes</b>, pay only for what you use (<b>pay-as-you-go</b>), and give them back anytime. Capital expense becomes variable expense.',
+        tip: 'Advantages AWS lists: trade capex for variable expense, economies of scale, stop guessing capacity, speed and agility, no data-centre spending, go global in minutes.',
+        play: async run => { E.B.classList.remove('gone'); const p = K.pill(P, 'RunInstances', 'alt'); await K.move(p, [527, 110], [527, 145], 500, run); p.remove(); } },
+      { title: 'How much do you manage? IaaS, PaaS, SaaS',
+        text: '<b>IaaS</b> (EC2): AWS runs hardware and virtualisation; you run the OS up. <b>PaaS</b> (Elastic Beanstalk, like Azure App Service): you bring code and data. <b>SaaS</b>: you just use the software. Yellow is your job, green is AWS\'s.' },
+      { title: 'Regions: where your resources live',
+        text: 'AWS is split into <b>Regions</b> (39 today), each a geographic area such as Mumbai or Frankfurt. You choose one for each resource, based on <b>compliance</b> (data residency), <b>latency</b> to users, which <b>services</b> exist there, and <b>price</b>.' },
+      { title: 'Availability Zones: failure-isolated parts of a Region',
+        text: 'Each Region has <b>3 or more Availability Zones</b>: separate data centres with their own power and networking, far enough apart that a fire or flood hits only one, close enough for fast private links. Spread your app across AZs and it survives losing one.',
+        tip: 'Multi-AZ = high availability inside a Region.' },
+      { title: 'Edge locations: close to users',
+        text: '<b>Edge locations</b> (750+) sit in many more cities than Regions. You can\'t run your servers there; AWS uses them for <b>CloudFront</b> caching and <b>Route 53</b> DNS so users get answers from nearby.' },
+      { title: 'Global or regional?',
+        text: 'A few services are <b>global</b> (IAM, Route 53, CloudFront, WAF). Most are <b>regional</b>: an EC2 instance or S3 bucket lives in the Region you pick, and data doesn\'t leave it unless you copy it.' }
+    ];
+    K.story({ root: $('cbStory'), steps: STEPS, show });
+  })();
 
   /* ================= Who manages what ================= */
   const LAYERS = ['Applications', 'Data', 'Runtime', 'Middleware', 'Operating system', 'Virtualisation', 'Servers', 'Storage', 'Networking'];

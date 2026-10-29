@@ -25,6 +25,17 @@
   .duty.shared text { fill: var(--on-accent); }
   .duty.na text { fill: var(--faint); }
   .verdict-zone { fill: none; stroke: var(--line); stroke-width: 2; stroke-dasharray: 6 5; }
+  .lay rect { stroke-width: 2; transition: fill .35s, stroke .35s; }
+  .lay.aws rect { fill: var(--teal-wash); stroke: var(--teal); }
+  .lay.you rect { fill: var(--panel); stroke: var(--accent-text); }
+  .lay.shared rect { stroke-dasharray: 6 4; }
+  .lay text { fill: var(--fg); }
+  .lay.aws text:last-child { fill: var(--good-text); font-weight: 700; }
+  .lay.you text:last-child { fill: var(--accent-text); font-weight: 700; }
+  .side { font-family: var(--mono); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .side.you { fill: var(--accent-text); }
+  .side.aws { fill: var(--good-text); }
+  .divider { stroke: var(--red); stroke-width: 3; transition: all .4s; }
 </style>
 </head>
 <body>
@@ -39,6 +50,30 @@
     <h1>Shared Responsibility Model</h1>
     <ul class="lede"><li><b>AWS: security <i>of</i> the cloud</b>. Data centres, hardware, network, and the software running its services.</li><li><b>You: security <i>in</i> the cloud</b>. Your data, who can access it, and how you configure each service.</li><li>The line <b>moves with the service</b>: the more AWS manages, the less you do.</li></ul>
   </header>
+
+  <section aria-labelledby="whatH">
+    <h2 id="whatH">In everyday terms</h2>
+    <p class="sub">Think of renting a flat in a managed building.</p>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest .NET / Azure idea</span><span>The difference</span></div>
+      <div class="row"><span class="aws">AWS: security OF the cloud</span><span class="like">The building owner</span><span>Walls, locks on the main door, lifts, power, guards.</span></div>
+      <div class="row"><span class="aws">You: security IN the cloud</span><span class="like">The tenant</span><span>Who gets a key to your flat and what you leave unlocked.</span></div>
+      <div class="row"><span class="aws">EC2 (IaaS)</span><span class="like">Unfurnished flat</span><span>You maintain almost everything inside.</span></div>
+      <div class="row"><span class="aws">RDS / Lambda (managed)</span><span class="like">Serviced apartment</span><span>Staff maintain more; your belongings and guests are still yours.</span></div>
+      <div class="row"><span class="aws">Shared controls</span><span class="like">Fire safety drills</span><span>Both sides patch, configure and train their own part.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="srStoryH">
+    <h2 class="stage-title" id="srStoryH">Walkthrough: where AWS stops and you start</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story" id="srStory">
+      <div class="scroll"><svg class="diagram" id="srStorySvg" style="min-width:0" viewBox="0 0 700 440" aria-label="Eight security layers from data centre to your data, with a line showing where AWS&#x27;s responsibility ends"></svg></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Now break things and watch what changes.</p>
 
   <section aria-labelledby="slideTitle">
     <h2 class="stage-title" id="slideTitle">Pick a service, watch the duties move</h2>
@@ -71,6 +106,18 @@
       <svg class="diagram narrow" id="blame" viewBox="0 0 1000 200" aria-label="An incident card moves to the AWS side or the customer side"></svg>
     </div>
     <p class="status-line" id="blameWhy">Pick an incident above.</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Physical security, hardware, hypervisor</span><span class="arrow">→</span><span class="then">AWS</span></li>
+      <li><span class="if">Customer data, IAM, encryption choice</span><span class="arrow">→</span><span class="then">Customer (always)</span></li>
+      <li><span class="if">Guest OS patching on EC2</span><span class="arrow">→</span><span class="then">Customer</span></li>
+      <li><span class="if">Database engine patching on RDS</span><span class="arrow">→</span><span class="then">AWS</span></li>
+      <li><span class="if">Security group rules</span><span class="arrow">→</span><span class="then">Customer</span></li>
+      <li><span class="if">Patch & configuration management, training</span><span class="arrow">→</span><span class="then">Shared</span></li>
+    </ul>
   </section>
 
   <section aria-labelledby="ctrlH">
@@ -112,6 +159,65 @@
 <script>
 (function () {
   const K = Kit, $ = K.$;
+
+  /* ========== 0. Guided walkthrough ========== */
+  (function () {
+    const sv = $('srStorySvg');
+    const LAY = ['Your data & who can access it (IAM)', 'Application / function code', 'Network & firewall config (security groups)', 'Database engine / runtime patching', 'Guest operating system patching', 'Virtualisation (hypervisor)', 'Servers, storage & network hardware', 'Data centres: buildings, power, guards'];
+    const L = LAY.map((n, j) => {
+      const g = K.el('g', { class: 'lay aws' }, sv);
+      K.el('rect', { x: 120, y: 14 + j * 52, width: 460, height: 44, rx: 9 }, g);
+      const t = K.text(g, 140, 41 + j * 52, n, 'mlabel'); t.style.textAnchor = 'start';
+      const w = K.text(g, 565, 41 + j * 52, '', 'mlabel'); w.style.textAnchor = 'end';
+      return { g, w };
+    });
+    const youL = K.text(sv, 60, 30, 'YOU', 'side you'); const awsL = K.text(sv, 60, 420, 'AWS', 'side aws');
+    const line = K.el('line', { x1: 110, x2: 590, y1: 0, y2: 0, class: 'divider' }, sv);
+    const tag = K.text(sv, 640, 0, '', 'mlabel accent');
+    tag.style.textAnchor = 'middle';
+    // how many top layers are yours per scenario
+    const SC = [
+      { you: 0, label: '' },
+      { you: 0, label: 'AWS: OF the cloud' },
+      { you: 3, label: 'You: IN the cloud' },
+      { you: 5, label: 'EC2' },
+      { you: 3, label: 'RDS' },
+      { you: 2, label: 'Lambda' },
+      { you: 1, label: 'S3' },
+      { you: 3, label: 'shared' }
+    ];
+    function setLine(n) { const y = 14 + n * 52 - 4; line.setAttribute('y1', y); line.setAttribute('y2', y); tag.setAttribute('y', y + 4); }
+    function show(i) {
+      const s = SC[i];
+      L.forEach((l, j) => { const you = j < s.you; l.g.setAttribute('class', 'lay ' + (you ? 'you' : 'aws') + (i === 7 && (j === 2 || j === 4 || j === 0) ? ' shared' : '')); l.w.textContent = i === 0 ? '' : you ? 'you' : 'AWS'; });
+      if (i === 7) { L[4].w.textContent = 'both (patching)'; L[2].w.textContent = 'both (config)'; L[0].w.textContent = 'both (training)'; }
+      line.style.opacity = i === 0 || i === 1 || i === 7 ? 0 : 1;
+      setLine(s.you); tag.textContent = s.label && i > 2 && i < 7 ? s.label : '';
+    }
+    const STEPS = [
+      { title: 'Security has many layers',
+        text: 'From the building down the road to who can read a patient file, a cloud app has many layers of security. AWS and you split them. The <b>Shared Responsibility Model</b> says exactly where the split is.' },
+      { title: 'AWS: security OF the cloud',
+        text: 'AWS always owns the bottom: <b>data centres</b> (guards, power, cooling), the <b>hardware</b> and global network, and the <b>virtualisation</b> layer that keeps customers apart. You can\'t touch these, and you never need to.',
+        tip: 'AWS proves it with audits; download the reports from AWS Artifact.' },
+      { title: 'You: security IN the cloud',
+        text: 'You always own the top: <b>your data</b>, <b>who can access it</b> (IAM users, roles, MFA), how you <b>configure</b> each service (security groups, bucket policies) and whether you turn on <b>encryption</b>.',
+        tip: 'A public S3 bucket or a weak password is always the customer\'s fault.' },
+      { title: 'With EC2 (IaaS), you do a lot',
+        text: 'An EC2 instance is your server: you patch the <b>guest operating system</b>, install and update the runtime, run the app and set the firewall. AWS stops at the hypervisor.',
+        play: async run => { for (let n = 3; n <= 5; n++) { show(2); SC[3].you = n; show(3); await K.sleep(250, run); } } },
+      { title: 'With RDS (managed), AWS takes more',
+        text: 'Move the database to <b>RDS</b> and the line slides up: AWS patches the <b>OS and the database engine</b> and runs backups. You still own the data, users, network access and whether it\'s encrypted.' },
+      { title: 'With Lambda (serverless), even more',
+        text: 'With <b>Lambda</b> there is no OS or runtime to patch. You own your <b>code</b>, its <b>IAM role</b> and the data it touches.' },
+      { title: 'With S3, mostly your data and access',
+        text: 'With <b>S3</b> AWS runs everything underneath; your job is the <b>data</b>, <b>bucket policies</b>, Block Public Access, encryption and versioning choices.',
+        tip: 'The more managed the service, the higher the line, but data and access are always yours.' },
+      { title: 'Some controls are shared',
+        text: '<b>Patch management</b> (AWS patches the infrastructure, you patch your OS and apps), <b>configuration management</b> (AWS configures its devices, you configure your resources) and <b>awareness &amp; training</b> (each trains its own people) belong to both sides.' }
+    ];
+    K.story({ root: $('srStory'), steps: STEPS, show });
+  })();
   const DUTIES = [
     'Data centres & physical security',
     'Hardware, host & hypervisor',

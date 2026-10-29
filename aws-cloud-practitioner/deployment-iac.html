@@ -41,6 +41,31 @@
     </ul>
   </header>
 
+  <section aria-labelledby="whatH">
+    <h2 id="whatH">In .NET / Azure terms</h2>
+    <p class="sub">These tools mirror what you use around Azure and .NET today.</p>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest .NET / Azure idea</span><span>The difference</span></div>
+      <div class="row"><span class="aws">CloudFormation</span><span class="like">ARM / Bicep templates</span><span>Declarative template → a stack of resources.</span></div>
+      <div class="row"><span class="aws">CDK</span><span class="like">Pulumi / Bicep with real code</span><span>C#, TypeScript… that compiles to CloudFormation.</span></div>
+      <div class="row"><span class="aws">Elastic Beanstalk</span><span class="like">Azure App Service</span><span>PaaS: upload code, AWS runs the servers.</span></div>
+      <div class="row"><span class="aws">CodePipeline + CodeBuild + CodeDeploy</span><span class="like">Azure DevOps Pipelines</span><span>Orchestrate build, test and deploy.</span></div>
+      <div class="row"><span class="aws">CodeArtifact</span><span class="like">Azure Artifacts / a private NuGet feed</span><span>Package repository.</span></div>
+      <div class="row"><span class="aws">Systems Manager</span><span class="like">Azure Arc / Automation + Bastion</span><span>Patch, run commands, shell without SSH.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="depStoryH">
+    <h2 class="stage-title" id="depStoryH">Walkthrough: from console clicks to automation</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story" id="depStory">
+      <div class="scroll"><svg class="diagram" id="depStorySvg" style="min-width:0" viewBox="0 0 700 440" aria-label="What you provide, the AWS service that acts on it, and the resources it creates"></svg></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Now break things and watch what changes.</p>
+
   <section aria-labelledby="cfnH">
     <h2 class="stage-title" id="cfnH">CloudFormation: one template, one stack</h2>
     <div class="stage-kind">Create the stack, then cause drift, update or delete</div>
@@ -87,6 +112,18 @@
       <svg class="diagram narrow" id="sh" viewBox="0 0 1000 230" aria-label="Admin laptop, security group, EC2 instance with SSM agent, and the Systems Manager service"></svg>
     </div>
     <p class="status-line" id="shStatus">Pick a method.</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Infrastructure as code, repeatable across Regions</span><span class="arrow">→</span><span class="then">CloudFormation</span></li>
+      <li><span class="if">Define infrastructure in a programming language</span><span class="arrow">→</span><span class="then">CDK</span></li>
+      <li><span class="if">Deploy a web app, least effort (PaaS)</span><span class="arrow">→</span><span class="then">Elastic Beanstalk</span></li>
+      <li><span class="if">Orchestrate CI/CD</span><span class="arrow">→</span><span class="then">CodePipeline</span></li>
+      <li><span class="if">Deploy to EC2 and on-premises</span><span class="arrow">→</span><span class="then">CodeDeploy</span></li>
+      <li><span class="if">Patch a fleet / shell without port 22</span><span class="arrow">→</span><span class="then">Systems Manager / Session Manager</span></li>
+    </ul>
   </section>
 
   <section aria-labelledby="refH">
@@ -141,6 +178,68 @@
 <script>
 (function () {
   const K = Kit, $ = K.$;
+
+  /* ========== 0. Guided walkthrough ========== */
+  (function () {
+    const sv = $('depStorySvg');
+    const head = (x, t) => { const h = K.text(sv, x, 22, t, 'zone-label'); h.style.textAnchor = 'middle'; };
+    head(100, 'YOU PROVIDE'); head(340, 'AWS SERVICE'); head(580, 'WHAT GETS CREATED');
+    const inp = K.node(sv, 100, 140, 170, 70, '', '');
+    const svc = K.node(sv, 340, 140, 170, 70, '', '');
+    svc.g.classList.add('teal');
+    const RES = [0, 1, 2, 3].map(j => K.node(sv, 580, 60 + j * 62, 190, 48, '', ''));
+    const l1 = K.el('line', { x1: 185, y1: 140, x2: 255, y2: 140, class: 'msg solid' }, sv);
+    const l2 = K.el('line', { x1: 425, y1: 140, x2: 485, y2: 140, class: 'msg solid' }, sv);
+    const bot = K.el('g', { class: 'sx' }, sv);
+    K.el('rect', { x: 8, y: 300, width: 684, height: 134, rx: 14, class: 'zone' }, bot);
+    const botL = K.text(bot, 22, 322, '', 'zone-label');
+    const BN = [0, 1, 2, 3].map(j => K.node(bot, 98 + j * 168, 375, 150, 54, '', ''));
+    const P = K.el('g', {}, sv);
+    const ST = [
+      { inp: ['Console clicks', 'by hand, every time'], svc: ['AWS Console', 'manual'], res: [['Security group', 'port 443'], ['EC2 instance', 't3.small'], ['S3 bucket', 'versioned'], null] },
+      { inp: ['template.yaml', 'declares the end state'], svc: ['CloudFormation', 'creates in order'], res: [['Security group', 'stack: web-prod'], ['EC2 instance', 'stack: web-prod'], ['S3 bucket', 'stack: web-prod'], null] },
+      { inp: ['template.yaml', 'same file'], svc: ['CloudFormation', 'one stack per env'], res: [['Stack: web-dev', 'ap-south-1'], ['Stack: web-test', 'ap-south-1'], ['Stack: web-prod', 'ap-south-1'], ['Stack: web-dr', 'ap-south-2 (Hyderabad)']] },
+      { inp: ['C# CDK code', 'new Bucket(this, …)'], svc: ['cdk synth', '→ CloudFormation'], res: [['Security group', 'stack: web-prod'], ['EC2 instance', 'stack: web-prod'], ['S3 bucket', 'stack: web-prod'], null] },
+      { inp: ['app.zip', 'your code only'], svc: ['Elastic Beanstalk', 'PaaS'], res: [['Load balancer', 'managed for you'], ['Auto Scaling group', 'managed for you'], ['EC2 instances', 'managed for you'], ['CloudWatch health', 'managed for you']] },
+      { inp: ['git push', 'new commit'], svc: ['CodePipeline', 'orchestrates'], res: [['EC2 fleet', 'v42 deployed'], ['On-prem servers', 'v42 deployed'], null, null], bot: ['CI/CD PIPELINE', [['CodeCommit', 'source'], ['CodeBuild', 'build + test'], ['CodeDeploy', 'deploy'], ['CodeArtifact', 'packages']]] },
+      { inp: ['"Patch all servers"', 'one command'], svc: ['Systems Manager', 'SSM agent on each'], res: [['EC2 #1', 'patched'], ['EC2 #2', 'patched'], ['On-prem server', 'patched'], ['Session Manager', 'shell, no port 22']], bot: ['SYSTEMS MANAGER TOOLS', [['Run Command', 'any fleet'], ['Patch Manager', 'OS updates'], ['Session Manager', 'no SSH keys'], ['Parameter Store', 'config + secrets']]] }
+    ];
+    function show(i) {
+      P.textContent = '';
+      const st = ST[i];
+      inp.title.textContent = st.inp[0]; inp.sub.textContent = st.inp[1];
+      svc.title.textContent = st.svc[0]; svc.sub.textContent = st.svc[1];
+      inp.g.setAttribute('class', 'node ' + (i === 0 ? 'bad' : 'on'));
+      RES.forEach((n, j) => { const r = st.res[j]; n.g.style.opacity = r ? 1 : 0; if (r) { n.title.textContent = r[0]; n.sub.textContent = r[1]; } n.g.setAttribute('class', 'node' + (r && i > 0 ? ' ok' : '')); });
+      bot.classList.toggle('gone', !st.bot);
+      if (st.bot) { botL.textContent = st.bot[0]; BN.forEach((n, j) => { n.title.textContent = st.bot[1][j][0]; n.sub.textContent = st.bot[1][j][1]; }); }
+    }
+    async function build(run) { RES.forEach(n => n.g.style.opacity = 0); for (const n of RES) { const t = n.title.textContent; if (!t) continue; const p = K.pill(P, 'create', 'alt'); await K.move(p, [425, 140], [485, n.g.querySelector('rect').y.baseVal.value + 24], 380, run); p.remove(); n.g.style.opacity = 1; } }
+    const STEPS = [
+      { title: 'Building by hand doesn\'t repeat well',
+        text: 'Clicking through the console to create a security group, a server and a bucket works once. Doing it again for test, prod and a second Region, <b>exactly the same</b>, is slow and error-prone. Nobody remembers every checkbox.' },
+      { title: 'CloudFormation: describe it, AWS builds it',
+        text: 'Write a <b>template</b> (YAML or JSON) that says <i>what</i> you want. <b>CloudFormation</b> works out the order (security group before the instance that uses it) and creates everything as one <b>stack</b>. Delete the stack and every resource goes with it.',
+        tip: '"Infrastructure as code", "repeatable", "template" → CloudFormation.',
+        play: async run => { show(1); await build(run); } },
+      { title: 'Same template, many environments',
+        text: 'Run the same template again for dev, test, prod, or another <b>Region</b> for disaster recovery: identical every time. If someone changes a resource by hand, <b>drift detection</b> shows the difference.',
+        play: async run => { show(2); await build(run); } },
+      { title: 'CDK: write the infrastructure in C#',
+        text: 'Prefer real code to YAML? The <b>AWS CDK</b> lets you define infrastructure in C#, TypeScript, Python or Java with loops and classes. <span class="mono">cdk synth</span> turns it into a CloudFormation template, and CloudFormation still does the deploying.' },
+      { title: 'Elastic Beanstalk: just upload your code',
+        text: '<b>Elastic Beanstalk</b> is <b>PaaS</b> (like Azure App Service). Upload your app; it creates and manages the load balancer, Auto Scaling group, instances and health monitoring. Beanstalk itself is free; you pay for what it creates.',
+        tip: '"Developer just wants to deploy code, least effort" → Elastic Beanstalk.',
+        play: async run => { show(4); await build(run); } },
+      { title: 'CI/CD: from commit to production',
+        text: '<b>CodePipeline</b> orchestrates the stages (like Azure DevOps Pipelines): code in <b>CodeCommit</b> (or GitHub) → <b>CodeBuild</b> compiles and runs tests → <b>CodeDeploy</b> updates EC2 and even on-prem servers. <b>CodeArtifact</b> hosts NuGet/npm packages.',
+        play: async run => { show(5); const p = K.pill(P, 'commit', 'alt'); for (let j = 0; j < 3; j++) await K.move(p, [98 + j * 168, 335], [98 + (j + 1) * 168, 335], 450, run); p.remove(); } },
+      { title: 'Systems Manager: run the whole fleet',
+        text: '<b>Systems Manager</b> manages EC2 and on-prem servers through an agent: run a command or patch everything at once, open a shell with <b>Session Manager</b> (no SSH keys, no port 22), and store config and secrets in <b>Parameter Store</b>.',
+        tip: '"Patch a fleet" or "shell without opening port 22" → Systems Manager.' }
+    ];
+    K.story({ root: $('depStory'), steps: STEPS, show });
+  })();
 
   /* ========== 1. CloudFormation ========== */
   const YAML = [

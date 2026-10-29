@@ -55,6 +55,30 @@
     </ul>
   </header>
 
+  <section aria-labelledby="whatH">
+    <h2 id="whatH">In .NET / Azure terms</h2>
+    <p class="sub">You've probably put IIS servers behind a load balancer or used Azure scale sets. Same ideas, AWS names.</p>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest .NET / Azure idea</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Elastic Load Balancer (ALB)</span><span class="like">Azure Application Gateway / IIS ARR</span><span>Managed, scales itself; one DNS name, health checks.</span></div>
+      <div class="row"><span class="aws">Network Load Balancer</span><span class="like">Azure Load Balancer</span><span>Layer 4 TCP/UDP, static IP, very high throughput.</span></div>
+      <div class="row"><span class="aws">Auto Scaling group</span><span class="like">VM Scale Set</span><span>Keeps min/desired/max instances, replaces failed ones.</span></div>
+      <div class="row"><span class="aws">Scaling policy</span><span class="like">Autoscale rule</span><span>Target tracking, step, scheduled or predictive.</span></div>
+      <div class="row"><span class="aws">Target group</span><span class="like">Backend pool</span><span>The set of instances (or IPs, Lambdas) the ALB sends to.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="elbStoryH">
+    <h2 class="stage-title" id="elbStoryH">Walkthrough: keeping a booking site up at peak time</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story" id="elbStory">
+      <div class="scroll"><svg class="diagram" id="elbStorySvg" style="min-width:0" viewBox="0 0 700 440" aria-label="Users, an Application Load Balancer and an Auto Scaling group with instances in two Availability Zones"></svg></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Now break things and watch what changes.</p>
+
   <section aria-labelledby="simH">
     <h2 class="stage-title" id="simH">A day in an Auto Scaling group</h2>
     <div class="stage-kind">Clinic booking traffic · pick a scaling policy, then break things</div>
@@ -102,6 +126,18 @@
       <svg class="diagram narrow" id="terms" viewBox="0 0 1000 200" aria-label="Four boxes: scalability, elasticity, agility, high availability"></svg>
     </div>
     <p class="status-line" id="tStatus">Pick a statement.</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Survive an AZ failure</span><span class="arrow">→</span><span class="then">Multi-AZ ASG + load balancer</span></li>
+      <li><span class="if">Add/remove instances automatically with demand</span><span class="arrow">→</span><span class="then">Auto Scaling (elasticity)</span></li>
+      <li><span class="if">Replace failed instances automatically</span><span class="arrow">→</span><span class="then">Auto Scaling group</span></li>
+      <li><span class="if">HTTP path/host routing</span><span class="arrow">→</span><span class="then">ALB</span></li>
+      <li><span class="if">Static IP, TCP/UDP, extreme performance</span><span class="arrow">→</span><span class="then">NLB</span></li>
+      <li><span class="if">Third-party firewall appliances</span><span class="arrow">→</span><span class="then">GWLB</span></li>
+    </ul>
   </section>
 
   <section aria-labelledby="refH">
@@ -157,6 +193,83 @@
 <script>
 (function () {
   const K = Kit, $ = K.$;
+
+  /* ========== 0. Guided walkthrough ========== */
+  (function () {
+    const sv = $('elbStorySvg');
+    const E = {}, N = {};
+    const sx = (k, el) => { el.classList.add('sx'); E[k] = el; return el; };
+    const zone = (k, x, y, w, h, label) => { const g = sx(k, K.el('g', {}, sv)); K.el('rect', { x, y, width: w, height: h, rx: 12, class: 'zone' }, g); const t = K.text(g, x + 12, y + 20, label, 'zone-label'); return t; };
+    const asgL = zone('asg', 8, 150, 684, 282, 'AUTO SCALING GROUP');
+    E.asg.querySelector('rect').setAttribute('stroke-dasharray', '8 6');
+    const azAL = zone('azA', 22, 180, 322, 236, 'AZ ap-south-1a');
+    zone('azB', 356, 180, 322, 236, 'AZ ap-south-1b');
+    const usr = K.node(sv, 350, 30, 200, 44, 'Patients', 'booking site'); sx('usr', usr.g);
+    const alb = K.node(sv, 350, 105, 280, 46, 'Application Load Balancer', 'one DNS name'); sx('alb', alb.g); N.alb = alb;
+    sx('l0', K.el('line', { x1: 350, y1: 52, x2: 350, y2: 82, class: 'msg solid' }, sv));
+    const SL = { a0: [85, 260], a1: [183, 260], a2: [281, 260], b0: [419, 260], b1: [517, 260], b2: [615, 260] };
+    for (const k in SL) { const n = K.node(sv, SL[k][0], SL[k][1], 86, 50, 'EC2', ''); sx(k, n.g); N[k] = n; }
+    const cpu = K.text(sv, 350, 360, '', 'ms'); cpu.style.textAnchor = 'middle';
+    const P = K.el('g', {}, sv);
+    // per-step state: which slots exist and their status
+    const S = [
+      { on: { a0: 'bad' }, cpu: 'CPU 100% · requests failing' },
+      { on: { a0: 'ok', b0: 'ok', a1: 'ok' }, cpu: 'CPU 35% each' },
+      { on: { a0: 'ok', b0: 'ok', a1: 'ok' }, cpu: 'traffic spread evenly', alb: 1 },
+      { on: { a0: 'ok', b0: 'bad', a1: 'ok' }, cpu: 'health check failed on one instance', alb: 1 },
+      { on: { a0: 'ok', b0: 'new', a1: 'ok' }, cpu: 'min 2 · desired 3 · max 6', alb: 1, asg: 1 },
+      { on: { a0: 'ok', b0: 'ok', a1: 'ok', a2: 'new', b1: 'new' }, cpu: 'CPU 80% → added 2 · back to ~50%', alb: 1, asg: 1 },
+      { on: { a0: 'bad', a1: 'bad', a2: 'bad', b0: 'ok', b1: 'ok', b2: 'new' }, cpu: 'AZ a down · site still up', alb: 1, asg: 1, down: 1 },
+      { on: { a0: 'ok', b0: 'ok' }, cpu: 'night: scaled in to 2 · paying for 2', alb: 1, asg: 1 },
+      { on: { a0: 'ok', b0: 'ok', a1: 'ok' }, cpu: '', alb: 1, asg: 1 }
+    ];
+    function show(i) {
+      P.textContent = '';
+      const st = S[i];
+      for (const k in SL) {
+        const v = st.on[k];
+        E[k].classList.toggle('gone', !v);
+        N[k].g.setAttribute('class', 'node sx' + (v ? '' : ' gone') + (v === 'bad' ? ' bad' : v === 'ok' || v === 'new' ? ' ok' : ''));
+        N[k].sub.textContent = v === 'bad' ? (st.down ? 'AZ down' : i === 0 ? 'overloaded' : 'unhealthy') : v === 'new' ? 'new' : v ? 'healthy' : '';
+      }
+      E.alb.classList.toggle('gone', !st.alb); E.l0.classList.toggle('gone', !st.alb);
+      E.asg.classList.toggle('gone', !st.asg);
+      E.azA.querySelector('rect').style.stroke = st.down ? 'var(--red)' : '';
+      cpu.textContent = st.cpu;
+      alb.sub.textContent = i === 8 ? 'ALB: HTTP (layer 7) routing' : 'one DNS name · health checks';
+      asgL.textContent = 'AUTO SCALING GROUP · min 2 · max 6';
+    }
+    async function spread(run, keys) {
+      await Promise.all(keys.map(async (k, j) => { await K.sleep(j * 140, run); const p = K.pill(P, 'req', 'ghost'); await K.move(p, [350, 130], [SL[k][0], SL[k][1] - 34], 550, run); p.remove(); }));
+    }
+    const STEPS = [
+      { title: 'One server can only take so much',
+        text: 'The clinic\'s booking site runs on a single EC2 instance. At peak time it hits <b>100% CPU</b> and requests start failing. And if that one server dies, the site is gone.' },
+      { title: 'Scale out: add more servers',
+        text: '<b>Horizontal scaling</b> adds more instances instead of a bigger one, and spreads them across <b>two Availability Zones</b>. But now there are three addresses: how do users know which one to use?',
+        tip: 'Bigger instance = vertical (scale up). More instances = horizontal (scale out).' },
+      { title: 'Load balancer: one front door',
+        text: 'An <b>Elastic Load Balancer</b> gives users <b>one DNS name</b> and spreads each request across the healthy instances. AWS runs and scales the load balancer itself; you just configure it.',
+        play: async run => { E.alb.classList.remove('gone'); E.l0.classList.remove('gone'); await spread(run, ['a0', 'b0', 'a1']); } },
+      { title: 'Health checks hide failures',
+        text: 'The load balancer regularly checks each instance (for example <span class="mono">GET /health</span>). When one stops answering it\'s marked <b>unhealthy</b> and gets no more traffic. Users don\'t notice.',
+        play: async run => { await spread(run, ['a0', 'a1', 'a0']); } },
+      { title: 'Auto Scaling group: keeps the right number running',
+        text: 'An <b>Auto Scaling group (ASG)</b> owns the instances. You set <b>min</b>, <b>max</b> and <b>desired</b> counts. It saw the unhealthy instance, <b>terminated it and launched a replacement</b>, then registered it with the load balancer. That\'s self-healing.',
+        tip: 'ELB spreads traffic. ASG decides how many instances exist. They\'re different jobs.' },
+      { title: 'Scale out when it gets busy',
+        text: 'A scaling policy watches a metric. With <b>target tracking</b> you say "keep average CPU near 50%"; when it climbs to 80% the ASG adds instances, and the load balancer starts using them automatically.',
+        tip: 'Known time → scheduled scaling. Forecast from history → predictive scaling.' },
+      { title: 'Lose a whole AZ, keep the site',
+        text: 'A power failure takes out <b>AZ a</b>. The load balancer sends everything to AZ b, and the ASG launches replacement capacity there. Running in <b>at least two AZs</b> is what makes the app <b>highly available</b>.' },
+      { title: 'Scale in at night',
+        text: 'When traffic drops, the ASG removes instances (never below min). You pay only for what runs. Growing and shrinking automatically with demand is <b>elasticity</b>.',
+        tip: 'EC2 Auto Scaling itself is free; you pay for the instances.' },
+      { title: 'Which load balancer?',
+        text: '<b>ALB</b> (layer 7): HTTP/HTTPS, routes by path or host, e.g. <span class="mono">/api</span> vs <span class="mono">/images</span>. <b>NLB</b> (layer 4): TCP/UDP, extreme performance, <b>static IP</b>. <b>GWLB</b> (layer 3): sends traffic through firewall appliances. <b>Classic</b>: previous generation.' }
+    ];
+    K.story({ root: $('elbStory'), steps: STEPS, show });
+  })();
 
   /* ========== 1. ASG simulation ========== */
   const sv = $('sim');

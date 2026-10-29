@@ -29,6 +29,9 @@
   .svc .sm { fill: var(--muted); font-family: var(--mono); font-size: 10.5px; font-weight: 400; }
   .svc.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
   .svc.fade text { opacity: .45; }
+  .hostbox { fill: var(--panel); stroke: var(--accent-text); stroke-width: 1.5; stroke-dasharray: 6 4; }
+  .oslayer { fill: var(--panel-2); stroke: var(--accent-text); }
+  .ctr { fill: var(--teal-wash); stroke: var(--teal); stroke-width: 2; }
 </style>
 </head>
 <body>
@@ -48,6 +51,31 @@
       <li><b>API Gateway</b> turns Lambda into an HTTP API. <b>Batch</b> runs long jobs; <b>Lightsail</b> is the simple fixed-price option.</li>
     </ul>
   </header>
+
+  <section aria-labelledby="whatH">
+    <h2 id="whatH">In .NET / Azure terms</h2>
+    <p class="sub">Each AWS compute option maps to something in the Azure / .NET world.</p>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest .NET / Azure idea</span><span>The difference</span></div>
+      <div class="row"><span class="aws">ECR</span><span class="like">Azure Container Registry</span><span>Private registry for your Docker images.</span></div>
+      <div class="row"><span class="aws">ECS</span><span class="like">Azure Container Apps / Service Fabric</span><span>AWS's own container orchestrator.</span></div>
+      <div class="row"><span class="aws">Fargate</span><span class="like">Azure Container Instances</span><span>Run containers without managing VMs.</span></div>
+      <div class="row"><span class="aws">EKS</span><span class="like">AKS</span><span>Managed Kubernetes.</span></div>
+      <div class="row"><span class="aws">Lambda</span><span class="like">Azure Functions</span><span>Event-driven functions, 15-minute max, pay per use.</span></div>
+      <div class="row"><span class="aws">API Gateway</span><span class="like">Azure API Management</span><span>HTTP front door with auth, throttling, API keys.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="csStoryH">
+    <h2 class="stage-title" id="csStoryH">Walkthrough: from a VM to containers to functions</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story" id="csStory">
+      <div class="scroll"><svg class="diagram" id="csStorySvg" style="min-width:0" viewBox="0 0 700 440" aria-label="An ECR registry and container image, a cluster of EC2 hosts with containers, and a serverless Lambda event chain"></svg></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Now break things and watch what changes.</p>
 
   <section aria-labelledby="stackH">
     <h2 class="stage-title" id="stackH">Who manages what?</h2>
@@ -88,6 +116,18 @@
       <svg class="diagram" id="pick" viewBox="0 0 1000 250" aria-label="Compute services from most control to least management"></svg>
     </div>
     <p class="status-line" id="pickStatus">Pick a scenario.</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Run Docker containers on AWS</span><span class="arrow">→</span><span class="then">ECS</span></li>
+      <li><span class="if">Containers without managing servers</span><span class="arrow">→</span><span class="then">Fargate</span></li>
+      <li><span class="if">Kubernetes</span><span class="arrow">→</span><span class="then">EKS</span></li>
+      <li><span class="if">Store container images</span><span class="arrow">→</span><span class="then">ECR</span></li>
+      <li><span class="if">Run code on events, pay per use</span><span class="arrow">→</span><span class="then">Lambda (max 15 min)</span></li>
+      <li><span class="if">Serverless REST API</span><span class="arrow">→</span><span class="then">API Gateway + Lambda</span></li>
+    </ul>
   </section>
 
   <section aria-labelledby="refH">
@@ -142,6 +182,86 @@
 <script>
 (function () {
   const K = Kit, $ = K.$;
+
+  /* ========== 0. Guided walkthrough ========== */
+  (function () {
+    const sv = $('csStorySvg');
+    const E = {}, N = {};
+    const sx = (k, el) => { el.classList.add('sx'); E[k] = el; return el; };
+    const grp = k => sx(k, K.el('g', {}, sv));
+    const node = (k, x, y, w, h, t, sub) => { const n = K.node(sv, x, y, w, h, t, sub); sx(k, n.g); N[k] = n; return n; };
+    node('ecr', 95, 60, 150, 50, 'Amazon ECR', 'image registry');
+    node('img', 95, 165, 150, 56, 'Container image', 'api:1.4 + .NET runtime');
+    sx('lImg', K.el('line', { x1: 95, y1: 85, x2: 95, y2: 137, class: 'msg dash' }, sv));
+    const cl = grp('cluster'); K.el('rect', { x: 196, y: 8, width: 496, height: 272, rx: 14, class: 'zone' }, cl);
+    const clL = K.text(cl, 210, 30, '', 'zone-label');
+    const H = [];
+    [[210, 'host1'], [452, 'host2']].forEach(([x, k]) => { const g = grp(k); K.el('rect', { x, y: 44, width: 228, height: 220, rx: 12, class: 'hostbox' }, g); const t = K.text(g, x + 12, 66, 'EC2 HOST', 'zone-label'); H.push({ g, t }); });
+    const OS = [];
+    [[210], [452]].forEach(([x], j) => { const g = grp('os' + j); K.el('rect', { x: x + 12, y: 216, width: 204, height: 36, rx: 8, class: 'oslayer' }, g); const t = K.text(g, x + 114, 239, 'OS + Docker · you patch', 'mlabel'); t.style.textAnchor = 'middle'; OS.push(t); });
+    const C = [[270, 110], [380, 110], [512, 110], [622, 110], [325, 170], [567, 170]].map(([x, y], j) => { const g = grp('c' + j); K.el('rect', { x: x - 46, y: y - 20, width: 92, height: 40, rx: 8, class: 'ctr' }, g); const t = K.text(g, x, y + 5, 'api', 'mlabel'); t.style.textAnchor = 'middle'; return g; });
+    const lam = grp('lam'); K.el('rect', { x: 8, y: 296, width: 684, height: 138, rx: 14, class: 'zone' }, lam); K.text(lam, 22, 318, 'SERVERLESS: FUNCTIONS THAT RUN ON EVENTS', 'zone-label');
+    N.src = K.node(lam, 130, 372, 180, 54, 'S3 upload', 'event');
+    N.fn = K.node(lam, 350, 372, 180, 54, 'Lambda function', 'runs ~200 ms');
+    N.dst = K.node(lam, 570, 372, 180, 54, 'DynamoDB', 'saves metadata');
+    K.el('line', { x1: 220, y1: 372, x2: 260, y2: 372, class: 'msg solid' }, lam); K.el('line', { x1: 440, y1: 372, x2: 480, y2: 372, class: 'msg solid' }, lam);
+    const P = K.el('g', {}, sv);
+    const ALLC = ['c0', 'c1', 'c2', 'c3', 'c4', 'c5'];
+    const ST = [
+      { show: ['cluster', 'host1', 'os0'], focus: null, cl: 'YOUR .NET API ON ONE EC2 INSTANCE', ctr: ['c0'] },
+      { show: ['ecr', 'img', 'lImg', 'cluster', 'host1', 'os0'], focus: ['ecr', 'img', 'lImg'], cl: 'YOUR .NET API ON ONE EC2 INSTANCE', ctr: ['c0'] },
+      { show: ['ecr', 'img', 'lImg', 'cluster', 'host1', 'host2', 'os0', 'os1'], focus: null, cl: 'ECS CLUSTER · EC2 LAUNCH TYPE', ctr: ['c0', 'c1', 'c2', 'c3', 'c4', 'c5'] },
+      { show: ['ecr', 'img', 'lImg', 'cluster'], focus: null, cl: 'ECS ON FARGATE · NO HOSTS TO MANAGE', ctr: ALLC },
+      { show: ['ecr', 'img', 'lImg', 'cluster'], focus: null, cl: 'EKS (KUBERNETES) · NODES ON EC2 OR FARGATE', ctr: ALLC, pod: 1 },
+      { show: ['lam'], focus: null, cl: '', ctr: [], fn: ['S3 upload', 'event', 'Lambda function', 'makes a thumbnail', 'DynamoDB', 'saves metadata'] },
+      { show: ['lam'], focus: null, cl: '', ctr: [], fn: ['API Gateway', 'GET /appointments', 'Lambda function', 'business logic', 'DynamoDB', 'reads data'] },
+      { show: ['lam', 'cluster', 'host1', 'os0'], focus: ['lam'], cl: 'EC2: BILLED 24 × 7, EVEN WHEN IDLE', ctr: ['c0'], fn: ['API Gateway', '1M requests/month', 'Lambda function', 'billed per ms', 'DynamoDB', 'billed per request'] },
+      { show: ['ecr', 'img', 'lImg', 'cluster', 'lam'], focus: null, cl: 'CONTAINERS (ECS / EKS / FARGATE)', ctr: ALLC, fn: ['API Gateway', 'HTTP', 'Lambda', 'events', 'DynamoDB', 'data'] }
+    ];
+    const ALL = Object.keys(E);
+    function show(i) {
+      P.textContent = '';
+      const st = ST[i];
+      ALL.forEach(k => {
+        const on = st.show.includes(k) || (k.startsWith('c') && k.length === 2 && st.ctr.includes(k));
+        E[k].classList.toggle('gone', !on);
+        E[k].classList.toggle('fade-out', !!st.focus && on && !st.focus.includes(k));
+      });
+      clL.textContent = st.cl;
+      C.forEach(g => g.querySelector('text').textContent = st.pod ? 'pod' : 'api');
+      if (st.fn) { const f = st.fn; N.src.title.textContent = f[0]; N.src.sub.textContent = f[1]; N.fn.title.textContent = f[2]; N.fn.sub.textContent = f[3]; N.dst.title.textContent = f[4]; N.dst.sub.textContent = f[5]; }
+    }
+    const reveal = async (keys, run) => { for (const k of keys) { E[k].classList.remove('gone', 'fade-out'); await K.sleep(200, run); } };
+    const flow = async run => { for (const [a, b] of [[130, 350], [350, 570]]) { const p = K.pill(P, 'event', 'alt'); await K.move(p, [a, 340], [b, 340], 500, run); p.remove(); } };
+    const STEPS = [
+      { title: 'Start: your .NET API on one EC2 instance',
+        text: 'Today the API runs on a VM. You patch its OS, install the runtime, deploy the app and keep it running. It works, but every server is yours to look after.' },
+      { title: 'Package the app as a container',
+        text: 'A <b>container image</b> bundles your app with its runtime and dependencies, so it runs the same everywhere (like a <span class="mono">Dockerfile</span> build). Push images to <b>Amazon ECR</b>, AWS\'s private registry (like Azure Container Registry).',
+        play: async run => { await reveal(['ecr', 'img', 'lImg'], run); const p = K.pill(P, 'docker push', 'alt'); await K.move(p, [95, 137], [95, 88], 450, run); p.remove(); } },
+      { title: 'ECS runs containers for you',
+        text: '<b>Amazon ECS</b> decides where containers run, starts them, restarts failed ones and connects them to a load balancer. With the <b>EC2 launch type</b>, the cluster\'s EC2 hosts are still <b>yours</b> to size and patch.',
+        play: async run => { await reveal(['host2', 'os1'], run); await reveal(['c1', 'c2', 'c3', 'c4', 'c5'], run); } },
+      { title: 'Fargate: containers with no servers',
+        text: 'Switch to <b>Fargate</b> and the hosts disappear from your view: you say "run 6 copies, 0.5 vCPU and 1 GB each" and pay for exactly that per second. AWS runs the machines underneath. This is <b>serverless containers</b>.',
+        tip: '"Containers with least operational overhead" → Fargate.',
+        play: async run => { for (const k of ['os0', 'os1', 'host1', 'host2']) { E[k].classList.add('gone'); await K.sleep(250, run); } } },
+      { title: 'EKS: if your team uses Kubernetes',
+        text: '<b>Amazon EKS</b> is managed <b>Kubernetes</b> (like AKS). Containers run as <b>pods</b> on EC2 nodes or on Fargate. Choose it when you already use Kubernetes or need to stay portable across clouds; otherwise ECS is simpler.',
+        tip: 'The word "Kubernetes" in a question → EKS.' },
+      { title: 'Lambda: just a function, run by events',
+        text: 'For small pieces of work, skip servers and containers entirely. A <b>Lambda</b> function runs when an <b>event</b> happens (a file lands in S3, a message arrives, a schedule fires), scales automatically to thousands of parallel runs, and stops. Max <b>15 minutes</b> per run.',
+        play: flow },
+      { title: 'API Gateway: put an HTTP API in front',
+        text: 'A Lambda function has no URL of its own. <b>API Gateway</b> gives it one, plus authentication, throttling and API keys (like Azure API Management). API Gateway + Lambda + DynamoDB is the classic <b>serverless API</b>.',
+        play: flow },
+      { title: 'Pay only while code runs',
+        text: 'An EC2 instance is billed every second it\'s on, busy or idle. Lambda bills <b>per request</b> ($0.20 per million) plus <b>duration × memory</b> (GB-seconds). The free tier covers 1M requests and 400,000 GB-seconds a month. Idle costs nothing.' },
+      { title: 'Which one when?',
+        text: '<b>EC2</b>: full control. <b>ECS</b>: containers, AWS-native. <b>EKS</b>: Kubernetes. <b>Fargate</b>: containers without servers. <b>Lambda</b>: short event-driven code. <b>Batch</b>: long jobs from a queue (Spot-friendly). <b>Lightsail</b>: simple, fixed-price server for beginners.' }
+    ];
+    K.story({ root: $('csStory'), steps: STEPS, show });
+  })();
 
   /* ========== 1. Stack ========== */
   const LAYERS = ['Your code / function', 'Scaling & capacity', 'Container runtime & orchestration', 'Operating system & patches', 'Server instances (EC2)', 'Virtualisation', 'Physical hardware & data centre'];

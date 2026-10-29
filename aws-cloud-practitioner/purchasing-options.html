@@ -35,6 +35,10 @@
   .prog-bg { fill: var(--panel-2); }
   .prog { fill: var(--teal); }
   .ckpt { stroke: var(--accent-text); stroke-width: 2; }
+  .prog.full { fill: var(--accent-text); }
+  .mcell { fill: var(--panel-2); stroke: var(--line); }
+  .mcell.on { fill: var(--teal); }
+  .mcell.lock { fill: var(--teal-wash); stroke: var(--teal); }
 </style>
 </head>
 <body>
@@ -55,6 +59,31 @@
       <li><b>Dedicated</b> and <b>Capacity Reservations</b> solve isolation and capacity, not price.</li>
     </ul>
   </header>
+
+  <section aria-labelledby="whatH">
+    <h2 id="whatH">In everyday terms</h2>
+    <p class="sub">The same choices you make for a car or a hotel room, applied to servers.</p>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest .NET / Azure idea</span><span>The difference</span></div>
+      <div class="row"><span class="aws">On-Demand</span><span class="like">Taxi meter / Azure pay-as-you-go</span><span>Full price, stop any time.</span></div>
+      <div class="row"><span class="aws">Reserved Instance</span><span class="like">1–3 year lease / Azure Reserved VM</span><span>Big discount for a fixed instance type; paid even if idle.</span></div>
+      <div class="row"><span class="aws">Savings Plan</span><span class="like">Prepaid mobile plan / Azure savings plan</span><span>Commit $/hour; discount follows whatever you run.</span></div>
+      <div class="row"><span class="aws">Spot</span><span class="like">Standby airline seat / Azure Spot VM</span><span>Cheapest, but you can be bumped with 2 minutes' notice.</span></div>
+      <div class="row"><span class="aws">Dedicated Host</span><span class="like">Renting the whole building</span><span>Whole physical server for licences and compliance.</span></div>
+      <div class="row"><span class="aws">Capacity Reservation</span><span class="like">Booking a table you might not use</span><span>Guarantees room in an AZ; no discount.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="poStoryH">
+    <h2 class="stage-title" id="poStoryH">Walkthrough: one server, six ways to pay</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story" id="poStory">
+      <div class="scroll"><svg class="diagram" id="poStorySvg" style="min-width:0" viewBox="0 0 700 440" aria-label="Relative hourly price bars for six EC2 purchasing options with an illustration of each"></svg></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Now break things and watch what changes.</p>
 
   <section aria-labelledby="treeH">
     <h2 class="stage-title" id="treeH">Which option fits this workload?</h2>
@@ -89,6 +118,18 @@
       <svg class="diagram narrow" id="spot" viewBox="0 0 1000 220" aria-label="A Spot worker processing a job, with a progress bar and checkpoints"></svg>
     </div>
     <p class="status-line" id="spotStatus">Spot is cheap because it is interruptible. The design question is how much work you lose.</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Steady 24/7 for 1–3 years</span><span class="arrow">→</span><span class="then">Reserved Instance or Savings Plan</span></li>
+      <li><span class="if">Short-term, unpredictable, can't be interrupted</span><span class="arrow">→</span><span class="then">On-Demand</span></li>
+      <li><span class="if">Batch / fault-tolerant, cheapest</span><span class="arrow">→</span><span class="then">Spot</span></li>
+      <li><span class="if">Per-core licence (BYOL), compliance</span><span class="arrow">→</span><span class="then">Dedicated Host</span></li>
+      <li><span class="if">Commitment that also covers Fargate and Lambda</span><span class="arrow">→</span><span class="then">Compute Savings Plan</span></li>
+      <li><span class="if">Guarantee capacity in one AZ, no discount</span><span class="arrow">→</span><span class="then">Capacity Reservation</span></li>
+    </ul>
   </section>
 
   <section aria-labelledby="refH">
@@ -146,6 +187,85 @@
 <script>
 (function () {
   const K = Kit, $ = K.$;
+
+  /* ========== 0. Guided walkthrough ========== */
+  (function () {
+    const sv = $('poStorySvg');
+    const E = {}, N = {};
+    const sx = (k, el) => { el.classList.add('sx'); E[k] = el; return el; };
+    const OPTS = [
+      ['od', 'On-Demand', 100, 'full price · no commitment'],
+      ['ri', 'Reserved Instance', 28, 'up to 72% off · 1 or 3 yrs'],
+      ['sp', 'Savings Plan', 28, 'up to 72% off · $/hour for 1–3 yrs'],
+      ['spot', 'Spot', 10, 'up to 90% off · can be taken back'],
+      ['dh', 'Dedicated Host', 100, 'you pay for the whole server'],
+      ['cr', 'Capacity Reservation', 100, 'no discount · billed even if unused']
+    ];
+    const t0 = K.text(sv, 20, 26, 'PRICE PER HOUR FOR THE SAME INSTANCE (illustrative)', 'zone-label');
+    OPTS.forEach(([k, n, pct, note], i) => {
+      const y = 50 + i * 42, g = sx(k, K.el('g', {}, sv));
+      const lb = K.text(g, 20, y + 21, n, 'mlabel'); lb.style.fontWeight = '700'; lb.style.textAnchor = 'start';
+      K.el('rect', { x: 200, y: y + 6, width: 380, height: 22, rx: 5, class: 'prog-bg' }, g);
+      N[k] = K.el('rect', { x: 200, y: y + 6, width: 380 * pct / 100, height: 22, rx: 5, class: 'prog' + (pct === 100 ? ' full' : '') }, g);
+      K.text(g, 590, y + 22, pct + '%', 'mlabel').style.textAnchor = 'start';
+      K.text(g, 200, y + 40, note, 'mlabel muted').style.textAnchor = 'start';
+    });
+    // bottom illustrations
+    K.el('rect', { x: 10, y: 312, width: 680, height: 122, rx: 12, class: 'zone' }, sv);
+    const ill = {};
+    const I = k => (ill[k] = sx('i_' + k, K.el('g', {}, sv)));
+    const cap = (g, t) => { const x = K.text(g, 350, 334, t, 'zone-label'); x.style.textAnchor = 'middle'; };
+    const months = (g, used, lock) => { for (let m = 0; m < 12; m++) { const r = K.el('rect', { x: 80 + m * 46, y: 352, width: 40, height: 34, rx: 6, class: used.includes(m) ? 'mcell on' : lock ? 'mcell lock' : 'mcell' }, g); K.text(g, 100 + m * 46, 405, 'JFMAMJJASOND'[m], 'mlabel muted').style.textAnchor = 'middle'; } };
+    { const g = I('base'); cap(g, 'ONE INSTANCE: m7i.large · Linux · Mumbai'); K.node(g, 350, 380, 240, 50, 'Same server, same speed', 'only the billing changes'); }
+    { const g = I('od'); cap(g, 'ON-DEMAND: PAY ONLY FOR THE MONTHS (SECONDS) YOU RUN IT'); months(g, [2, 3, 7, 10], false); }
+    { const g = I('ri'); cap(g, 'RESERVED: EVERY MONTH IS PAID, USED OR NOT'); months(g, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], true); }
+    { const g = I('sp'); cap(g, 'SAVINGS PLAN: COMMIT $/HOUR, IT FOLLOWS YOUR USAGE'); [['EC2 · any family', 170], ['Fargate', 350], ['Lambda', 530]].forEach(([t, x]) => K.node(g, x, 385, 150, 44, t, 'discounted')); }
+    { const g = I('spot'); cap(g, 'SPOT: SPARE CAPACITY AWS CAN RECLAIM'); N.spotNode = K.node(g, 250, 385, 200, 50, 'Spot instance', 'running · 90% off'); N.spotRep = K.node(g, 500, 385, 200, 50, 'Replacement', 'job resumes from checkpoint'); }
+    { const g = I('dh'); cap(g, 'DEDICATED HOST: THE WHOLE PHYSICAL SERVER IS YOURS'); K.el('rect', { x: 150, y: 345, width: 400, height: 80, rx: 10, class: 'zone' }, g); [0, 1, 2, 3].forEach(j => K.node(g, 210 + j * 93, 385, 80, 40, 'your VM', '')); }
+    { const g = I('cr'); cap(g, 'CAPACITY RESERVATION: A SLOT HELD FOR YOU IN ONE AZ'); K.el('rect', { x: 150, y: 345, width: 400, height: 80, rx: 10, class: 'zone' }, g); K.node(g, 260, 385, 150, 44, 'reserved slot', 'empty · still billed'); K.node(g, 440, 385, 150, 44, 'reserved slot', 'in use'); }
+    { const g = I('end'); cap(g, 'RULE OF THUMB'); const t = K.text(g, 350, 385, 'steady → commit (RI / Savings Plan) · spiky → On-Demand · can restart → Spot', 'mlabel'); t.style.textAnchor = 'middle'; const t2 = K.text(g, 350, 410, 'licence per core → Dedicated Host · must launch in that AZ → Capacity Reservation', 'mlabel'); t2.style.textAnchor = 'middle'; }
+    const P = K.el('g', {}, sv);
+    const ORDER = ['base', 'od', 'ri', 'sp', 'spot', 'dh', 'cr', 'end'];
+    const ROW = [null, 'od', 'ri', 'sp', 'spot', 'dh', 'cr', null];
+    function show(i) {
+      P.textContent = '';
+      OPTS.forEach(([k], j) => { E[k].classList.toggle('gone', i < j + 1 && i !== 0 ? true : i === 0); E[k].classList.toggle('fade-out', !!ROW[i] && ROW[i] !== k); });
+      if (i === 0) OPTS.forEach(([k]) => E[k].classList.add('gone'));
+      if (i === 7) OPTS.forEach(([k]) => E[k].classList.remove('gone', 'fade-out'));
+      ORDER.forEach((k, j) => E['i_' + k].classList.toggle('gone', j !== i));
+      if (N.spotNode) { N.spotNode.g.setAttribute('class', 'node'); N.spotNode.sub.textContent = 'running · 90% off'; N.spotRep.g.setAttribute('class', 'node ' + (i === 4 ? 'ok' : '')); }
+      if (i === 4) { N.spotNode.g.classList.add('bad'); N.spotNode.sub.textContent = 'reclaimed'; }
+    }
+    const STEPS = [
+      { title: 'Same server, six ways to pay',
+        text: 'Every EC2 purchasing option runs the <b>exact same instance</b>. What changes is the <b>bill</b>: how much you commit, how much discount you get, and whether AWS can take it back.' },
+      { title: 'On-Demand: pay as you go',
+        text: 'No commitment. You pay per second only while it runs, at the <b>full price</b>. Best for short, spiky or unpredictable work, and for anything you\'re still testing.',
+        tip: 'Default choice when you don\'t know the usage yet.' },
+      { title: 'Reserved Instance: commit for a discount',
+        text: 'Promise to run a specific instance type in a Region for <b>1 or 3 years</b> and get <b>up to 72% off</b>. Every month is paid even if the server sits idle, so it only pays off for <b>steady 24/7</b> loads like a database. Paying all upfront gives the biggest discount.',
+        play: async run => { E.ri.classList.remove('gone'); N.ri.setAttribute('width', 380); await K.sleep(200, run); for (let w = 380; w >= 106; w -= 22) { N.ri.setAttribute('width', w); await K.sleep(30, run); } } },
+      { title: 'Savings Plan: commit to spend, not to a server',
+        text: 'Commit to, say, <b>$4.20 per hour</b> for 1 or 3 years. The discount (up to 72%) applies automatically to whatever you run. A <b>Compute Savings Plan</b> even follows you across instance families, Regions, Fargate and Lambda.',
+        tip: 'Flexible commitment → Savings Plan. AWS now recommends it over RIs.' },
+      { title: 'Spot: up to 90% off, but interruptible',
+        text: 'Spot uses AWS\'s <b>spare capacity</b>. When AWS needs it back you get a <b>2-minute warning</b> and the instance stops. Great for batch jobs, rendering and CI that can restart; never for a database that must stay up.',
+        play: async run => {
+          E.spot.classList.remove('gone'); E.i_spot.classList.remove('gone');
+          N.spotNode.g.setAttribute('class', 'node ok'); N.spotRep.g.setAttribute('class', 'node dim');
+          await K.sleep(500, run);
+          const w = K.pill(P, '2-minute warning', 'bad'); await K.move(w, [250, 330], [250, 355], 450, run); await K.sleep(600, run); w.remove();
+        } },
+      { title: 'Dedicated Host: the whole physical server',
+        text: 'You rent an <b>entire server</b>. You see its sockets and cores and control placement, which per-core software licences (Oracle, Windows Server, "<b>BYOL</b>") and some compliance rules require. The most expensive option.',
+        tip: 'Dedicated Instance = hardware not shared with other customers, but no host control.' },
+      { title: 'Capacity Reservation: guarantee room in one AZ',
+        text: 'Reserve On-Demand capacity in a <b>specific AZ</b> for as long as you like, so your launch can\'t fail during a big event. There\'s <b>no discount</b>, and you pay whether you use the slot or not.' },
+      { title: 'How to choose',
+        text: 'Ask two questions: <b>How steady is the usage?</b> and <b>Can it be interrupted?</b> Steady → commit. Unknown → On-Demand. Restartable → Spot. Licences or isolation → Dedicated. "Must be able to launch" → Capacity Reservation.' }
+    ];
+    K.story({ root: $('poStory'), steps: STEPS, show });
+  })();
 
   /* ========== 1. Decision path ========== */
   const QS = [

@@ -23,6 +23,11 @@
   .cat { fill: var(--muted); font-family: var(--mono); font-size: 11px; letter-spacing: .06em; }
   .link { stroke: var(--line); stroke-width: 2; fill: none; transition: stroke .2s; }
   .link.on { stroke: var(--cyan); stroke-width: 3; }
+  .chore rect { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; transition: fill .3s, stroke .3s; }
+  .chore.you rect { stroke: var(--accent-text); }
+  .chore.aws rect { stroke: var(--teal); fill: var(--teal-wash); }
+  .chore.you text:last-child { fill: var(--accent-text); font-weight: 700; }
+  .chore.aws text:last-child { fill: var(--good-text); font-weight: 700; }
   .zone.down { stroke: var(--red); }
   .ptoggles { display: flex; flex-wrap: wrap; gap: 8px; }
 </style>
@@ -44,6 +49,31 @@
       <li><b>Analytics</b>: Kinesis streams in, Glue prepares, Athena / Redshift / EMR query, QuickSight shows.</li>
     </ul>
   </header>
+
+  <section aria-labelledby="whatH">
+    <h2 id="whatH">In .NET / Azure terms</h2>
+    <p class="sub">Mostly the same databases you know from SQL Server and Azure, with AWS doing the operations.</p>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest .NET / Azure idea</span><span>The difference</span></div>
+      <div class="row"><span class="aws">RDS</span><span class="like">Azure SQL Database / SQL Server you'd host</span><span>Managed MySQL, PostgreSQL, SQL Server, Oracle…; no OS access.</span></div>
+      <div class="row"><span class="aws">Multi-AZ</span><span class="like">SQL Server Always On (sync replica)</span><span>Automatic failover to a standby in another AZ.</span></div>
+      <div class="row"><span class="aws">Read replica</span><span class="like">Readable secondary</span><span>Async copy for reporting; manual promotion.</span></div>
+      <div class="row"><span class="aws">DynamoDB</span><span class="like">Azure Cosmos DB</span><span>Serverless NoSQL key-value, ms latency at any scale.</span></div>
+      <div class="row"><span class="aws">ElastiCache</span><span class="like">Azure Cache for Redis</span><span>In-memory cache in front of a database.</span></div>
+      <div class="row"><span class="aws">Redshift</span><span class="like">Azure Synapse dedicated SQL pool</span><span>Columnar data warehouse for analytics (OLAP).</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="dbStoryH">
+    <h2 class="stage-title" id="dbStoryH">Walkthrough: from a self-managed database to the right AWS service</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story" id="dbStory">
+      <div class="scroll"><svg class="diagram" id="dbStorySvg" style="min-width:0" viewBox="0 0 700 440" aria-label="A database in AZ a with a standby and read replica in AZ b, plus panels for Aurora, DynamoDB, caching and analytics"></svg></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Now break things and watch what changes.</p>
 
   <section aria-labelledby="rdsH">
     <h2 class="stage-title" id="rdsH">RDS: Multi-AZ vs read replica</h2>
@@ -82,6 +112,18 @@
       <svg class="diagram" id="an" viewBox="0 0 1000 330" aria-label="Sources, ingestion, S3 data lake, Glue, query engines and QuickSight"></svg>
     </div>
     <p class="status-line" id="anStatus">Pick a job.</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Managed relational, automated backups</span><span class="arrow">→</span><span class="then">RDS</span></li>
+      <li><span class="if">Automatic failover to another AZ</span><span class="arrow">→</span><span class="then">RDS Multi-AZ</span></li>
+      <li><span class="if">Offload heavy reads / reports</span><span class="arrow">→</span><span class="then">Read replica</span></li>
+      <li><span class="if">Serverless NoSQL, single-digit ms</span><span class="arrow">→</span><span class="then">DynamoDB</span></li>
+      <li><span class="if">Reduce load from repeated queries</span><span class="arrow">→</span><span class="then">ElastiCache</span></li>
+      <li><span class="if">Data warehouse, OLAP</span><span class="arrow">→</span><span class="then">Redshift</span></li>
+    </ul>
   </section>
 
   <section aria-labelledby="refH">
@@ -138,6 +180,91 @@
 <script>
 (function () {
   const K = Kit, $ = K.$;
+
+  /* ========== 0. Guided walkthrough ========== */
+  (function () {
+    const sv = $('dbStorySvg');
+    const E = {}, N = {};
+    const sx = (k, el) => { el.classList.add('sx'); E[k] = el; return el; };
+    const grp = k => sx(k, K.el('g', {}, sv));
+    const node = (k, x, y, w, h, t, sub, parent) => { const n = K.node(parent || sv, x, y, w, h, t, sub); if (!parent) sx(k, n.g); N[k] = n; return n; };
+    // chores column
+    grp('chores');
+    K.text(E.chores, 20, 26, 'WHO DOES THE CHORES?', 'zone-label');
+    const CH = ['Patching', 'Backups', 'Failover', 'Scaling', 'Monitoring'];
+    const chT = CH.map((c, j) => { const g = K.el('g', { class: 'chore' }, E.chores); K.el('rect', { x: 18, y: 40 + j * 40, width: 170, height: 32, rx: 8 }, g); const t = K.text(g, 30, 61 + j * 40, c, 'mlabel'); t.style.textAnchor = 'start'; const o = K.text(g, 178, 61 + j * 40, '', 'mlabel'); o.style.textAnchor = 'end'; return { g, o }; });
+    const zA = grp('azA'); K.el('rect', { x: 206, y: 8, width: 236, height: 232, rx: 12, class: 'zone' }, zA); K.text(zA, 218, 28, 'AZ a', 'zone-label');
+    const zB = grp('azB'); K.el('rect', { x: 456, y: 8, width: 236, height: 232, rx: 12, class: 'zone' }, zB); K.text(zB, 468, 28, 'AZ b', 'zone-label');
+    sx('lSync', K.el('line', { x1: 404, y1: 80, x2: 500, y2: 80, class: 'msg solid' }, sv));
+    sx('lAsync', K.el('path', { d: 'M324 108 C 324 190, 420 190, 500 180', class: 'msg dash', fill: 'none' }, sv));
+    node('app', 324, 190, 150, 44, 'Booking app', 'writes + reads');
+    node('pri', 324, 80, 160, 56, 'EC2 + MySQL', 'you manage it');
+    node('stb', 574, 80, 160, 56, 'Standby', 'sync copy');
+    node('rr', 574, 180, 160, 50, 'Read replica', 'async copy');
+    // bottom panels
+    const BOT = (k, label) => { const g = grp(k); K.el('rect', { x: 206, y: 262, width: 486, height: 170, rx: 12, class: 'zone' }, g); K.text(g, 218, 282, label, 'zone-label'); return g; };
+    const au = BOT('aur', 'AURORA STORAGE · 6 COPIES ACROSS 3 AZs · GROWS AUTOMATICALLY');
+    for (let j = 0; j < 6; j++) K.node(au, 250 + j * 76, 350, 64, 44, 'copy', ['AZ a', 'AZ a', 'AZ b', 'AZ b', 'AZ c', 'AZ c'][j]);
+    const dd = BOT('ddb', 'DYNAMODB TABLE · Appointments · key-value, no joins');
+    [['patientId (key)', 'date', 'doctor', 'notes?'], ['P-1001', '2026-11-02', 'Dr Rao', ''], ['P-1002', '2026-11-02', 'Dr Iyer', 'follow-up'], ['P-1003', '2026-11-03', 'Dr Rao', '']].forEach((r, ri) => r.forEach((c, ci) => { const t = K.text(dd, 230 + ci * 118, 312 + ri * 30, c, ri ? 'mlabel' : 'mlabel muted'); t.style.textAnchor = 'start'; }));
+    const ca = BOT('cache', 'CACHE IN FRONT OF THE DATABASE');
+    N.ec = K.node(ca, 330, 360, 170, 50, 'ElastiCache', 'in memory · <1 ms');
+    N.dbb = K.node(ca, 570, 360, 170, 50, 'RDS', 'only on a cache miss');
+    K.el('line', { x1: 415, y1: 360, x2: 485, y2: 360, class: 'msg dash' }, ca);
+    const an = BOT('ana', 'ANALYTICS · separate from the transactional DB');
+    [['S3 data lake', 260], ['Athena', 380], ['Redshift', 500], ['QuickSight', 620]].forEach(([t, x], j) => K.node(an, x, 360, 108, 46, t, ['files', 'SQL on S3', 'warehouse', 'dashboards'][j]));
+    const P = K.el('g', {}, sv);
+    const VIS = { chores: 0, azA: 0, app: 0, pri: 0, azB: 2, stb: 2, lSync: 2, rr: 3, lAsync: 3, aur: 4, ddb: 5, cache: 6, ana: 7 };
+    const FOC = [['chores', 'pri', 'azA', 'app'], ['chores', 'pri', 'app'], ['pri', 'stb', 'lSync', 'azB', 'azA'], ['pri', 'rr', 'lAsync', 'app', 'azB'], ['aur', 'pri'], ['ddb'], ['cache', 'app'], ['ana'], null];
+    const BOTS = ['aur', 'ddb', 'cache', 'ana'];
+    function show(i) {
+      P.textContent = '';
+      for (const k in VIS) {
+        let gone = i < VIS[k];
+        if (BOTS.includes(k)) gone = VIS[k] !== i;
+        E[k].classList.toggle('gone', gone);
+        E[k].classList.toggle('fade-out', !!FOC[i] && !FOC[i].includes(k));
+      }
+      const aws = i >= 1;
+      chT.forEach(c => { c.o.textContent = aws ? 'AWS' : 'YOU'; c.g.setAttribute('class', 'chore ' + (aws ? 'aws' : 'you')); });
+      N.pri.title.textContent = i === 0 ? 'EC2 + MySQL' : i === 4 ? 'Aurora' : 'RDS primary';
+      N.pri.sub.textContent = i === 0 ? 'you manage it' : i === 2 ? 'sync to standby' : 'managed by AWS';
+      ['pri', 'stb', 'rr', 'app'].forEach(k => N[k].g.classList.remove('ok', 'bad', 'on'));
+      if (i === 2) N.stb.g.classList.add('on');
+      if (i === 3) N.rr.g.classList.add('ok');
+    }
+    const reveal = async (keys, run) => { for (const k of keys) { E[k].classList.remove('gone', 'fade-out'); await K.sleep(220, run); } };
+    const STEPS = [
+      { title: 'Running a database yourself is a lot of work',
+        text: 'You could install MySQL on an EC2 instance. Then <b>you</b> patch the OS and engine, take backups, build failover, scale it and monitor it. That\'s the same chore list as an on-prem SQL Server (AWS still owns the physical hardware).' },
+      { title: 'RDS: AWS does the chores',
+        text: '<b>Amazon RDS</b> is a managed relational database (MySQL, PostgreSQL, MariaDB, Oracle, SQL Server, Db2, Aurora). AWS patches, backs up (with point-in-time restore), monitors and replaces hardware. You still own the <b>schema, data, users and network access</b>. You can\'t SSH into it.',
+        tip: '"Least operational overhead" for a relational DB → RDS (not a DB on EC2).',
+        play: async run => { for (const c of chT) { c.o.textContent = 'AWS'; c.g.setAttribute('class', 'chore aws'); await K.sleep(200, run); } } },
+      { title: 'Multi-AZ: a standby for when things break',
+        text: 'Turn on <b>Multi-AZ</b> and RDS keeps a <b>standby</b> in another AZ, copied <b>synchronously</b> (every write lands on both). If the primary or its AZ fails, RDS <b>fails over automatically</b> to the same endpoint. The standby doesn\'t serve reads.',
+        tip: 'Multi-AZ = high availability.',
+        play: async run => { await reveal(['azB', 'stb', 'lSync'], run); const p = K.pill(P, 'write', 'alt'); await K.move(p, [404, 62], [494, 62], 500, run); p.remove(); } },
+      { title: 'Read replica: more capacity for reads',
+        text: 'Monthly reports were slowing bookings down. A <b>read replica</b> gets an <b>asynchronous</b> copy (a second or so behind) and serves read-only queries, so heavy reports run there instead of on the primary. Replicas can also live in another Region.',
+        tip: 'Read replica = read scaling, not automatic failover.',
+        play: async run => { await reveal(['rr', 'lAsync'], run); const p = K.pill(P, 'SELECT report'); await K.move(p, [324, 170], [574, 158], 650, run); p.remove(); } },
+      { title: 'Aurora: AWS\'s cloud-native engine',
+        text: '<b>Aurora</b> speaks MySQL or PostgreSQL but was rebuilt for the cloud: storage keeps <b>6 copies across 3 AZs</b>, grows automatically, and up to 15 fast replicas can read from it. <b>Aurora Serverless</b> scales capacity up and down for spiky or occasional use.' },
+      { title: 'Not everything is relational: DynamoDB',
+        text: '<b>DynamoDB</b> is a <b>serverless NoSQL</b> key-value store: no servers or patching, single-digit millisecond reads at any scale, pay per request or capacity. Each item is found by its key; items can have different attributes; there are no joins. <b>Global Tables</b> replicate it across Regions.',
+        tip: 'Other NoSQL: DocumentDB = MongoDB, Neptune = graph, ElastiCache = in-memory.' },
+      { title: 'Caches make repeated reads instant',
+        text: '<b>ElastiCache</b> (Valkey, Redis or Memcached) keeps hot data in memory in front of any database: repeated queries are answered in under a millisecond and RDS only sees cache misses. <b>DAX</b> does the same, but only for DynamoDB.',
+        play: async run => { const p = K.pill(P, 'GET product:42', 'ok'); await K.move(p, [324, 214], [330, 330], 550, run); p.remove(); } },
+      { title: 'Analytics lives in different services',
+        text: 'Don\'t run big analytics on the booking database. Land data in <b>S3</b>, query files in place with <b>Athena</b> (pay per TB scanned), load a <b>Redshift</b> data warehouse for heavy BI, and show dashboards in <b>QuickSight</b>. <b>Glue</b> prepares the data; <b>Kinesis</b> streams it in real time.',
+        play: async run => { const p = K.pill(P, 'data', 'alt'); for (const [a, b] of [[260, 380], [380, 500], [500, 620]]) await K.move(p, [a, 325], [b, 325], 420, run); p.remove(); } },
+      { title: 'Pick by the keyword',
+        text: '<b>SQL + managed</b> → RDS. <b>Best performance, MySQL/PG</b> → Aurora. <b>Serverless key-value</b> → DynamoDB. <b>Cache</b> → ElastiCache. <b>MongoDB</b> → DocumentDB. <b>Graph</b> → Neptune. <b>Warehouse / OLAP</b> → Redshift. <b>SQL on S3</b> → Athena. <b>Move a database</b> → DMS.' }
+    ];
+    K.story({ root: $('dbStory'), steps: STEPS, show });
+  })();
 
   /* ========== 1. RDS ========== */
   const rs = $('rds');

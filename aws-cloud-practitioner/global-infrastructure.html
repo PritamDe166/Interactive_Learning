@@ -29,6 +29,9 @@
   .svc .sm { fill: var(--muted); font-family: var(--mono); font-size: 10.5px; font-weight: 400; }
   .svc.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
   .svc.fade text { opacity: .45; }
+  .udot { fill: var(--accent-text); }
+  .netpub { stroke: var(--muted); stroke-width: 2; stroke-dasharray: 3 5; }
+  .netaws { stroke: var(--teal); stroke-width: 4; }
   .ms { fill: var(--accent-text); font-family: var(--mono); font-size: 12px; font-weight: 700; text-anchor: middle; }
 </style>
 </head>
@@ -50,6 +53,30 @@
       <li>Regions, AZs and edge locations themselves are on <a href="cloud-basics.html">Cloud Computing Basics</a>; DNS basics on <a href="../system-design-explainers/client-server-dns.html">Client-Server &amp; DNS</a>.</li>
     </ul>
   </header>
+
+  <section aria-labelledby="whatH">
+    <h2 id="whatH">In .NET / Azure terms</h2>
+    <p class="sub">Azure has the same building blocks under different names.</p>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest .NET / Azure idea</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Route 53</span><span class="like">Azure DNS + Traffic Manager</span><span>DNS plus routing policies (latency, failover, weighted…).</span></div>
+      <div class="row"><span class="aws">CloudFront</span><span class="like">Azure Front Door / Azure CDN</span><span>Caches content at 750+ edge locations.</span></div>
+      <div class="row"><span class="aws">Global Accelerator</span><span class="like">Front Door (anycast) for TCP/UDP</span><span>Two static anycast IPs over AWS's network; no cache.</span></div>
+      <div class="row"><span class="aws">S3 Transfer Acceleration</span><span class="like">(no direct equivalent)</span><span>Uploads enter the nearest edge, then AWS's network.</span></div>
+      <div class="row"><span class="aws">Region / AZ / edge location</span><span class="like">Region / Availability Zone / Front Door POP</span><span>You run apps in Regions; edges only serve AWS services.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="giStoryH">
+    <h2 class="stage-title" id="giStoryH">Walkthrough: serving patients around the world</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story" id="giStory">
+      <div class="scroll"><svg class="diagram" id="giStorySvg" style="min-width:0" viewBox="0 0 700 440" aria-label="Schematic map with Mumbai and Frankfurt Regions, users in Chennai, London and Sydney, edge locations and Route 53"></svg></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Now break things and watch what changes.</p>
 
   <section aria-labelledby="r53H">
     <h2 class="stage-title" id="r53H">Route 53: where does each user go?</h2>
@@ -97,6 +124,18 @@
       <svg class="diagram" id="gpick" viewBox="0 0 1000 220" aria-label="Global services"></svg>
     </div>
     <p class="status-line" id="gStatus">Pick a requirement.</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Lowest latency Region per user</span><span class="arrow">→</span><span class="then">Route 53 latency routing</span></li>
+      <li><span class="if">Primary / backup Region</span><span class="arrow">→</span><span class="then">Route 53 failover routing</span></li>
+      <li><span class="if">CDN, cache static content</span><span class="arrow">→</span><span class="then">CloudFront</span></li>
+      <li><span class="if">Static IPs, TCP/UDP, fast regional failover</span><span class="arrow">→</span><span class="then">Global Accelerator</span></li>
+      <li><span class="if">Faster uploads to a distant S3 bucket</span><span class="arrow">→</span><span class="then">S3 Transfer Acceleration</span></li>
+      <li><span class="if">Run AWS on-premises</span><span class="arrow">→</span><span class="then">Outposts</span></li>
+    </ul>
   </section>
 
   <section aria-labelledby="refH">
@@ -152,6 +191,66 @@
 <script>
 (function () {
   const K = Kit, $ = K.$;
+
+  /* ========== 0. Guided walkthrough ========== */
+  (function () {
+    const sv = $('giStorySvg');
+    const E = {}, N = {};
+    const sx = (k, el) => { el.classList.add('sx'); E[k] = el; return el; };
+    const node = (k, x, y, w, h, t, sub) => { const n = K.node(sv, x, y, w, h, t, sub); sx(k, n.g); N[k] = n; return n; };
+    // schematic map
+    sx('map', K.el('g', {}, sv));
+    K.el('rect', { x: 8, y: 8, width: 684, height: 426, rx: 14, class: 'zone' }, E.map);
+    K.text(E.map, 22, 30, 'SCHEMATIC WORLD MAP', 'zone-label');
+    node('mum', 470, 230, 140, 50, 'Mumbai Region', 'your app');
+    node('fra', 330, 110, 140, 50, 'Frankfurt Region', 'second copy');
+    node('r53', 350, 380, 170, 44, 'Route 53', 'DNS');
+    const user = (k, x, y, t) => { const g = sx(k, K.el('g', {}, sv)); K.el('circle', { cx: x, cy: y, r: 9, class: 'udot' }, g); const tt = K.text(g, x, y + 26, t, 'mlabel'); tt.style.textAnchor = 'middle'; return g; };
+    user('uChe', 520, 320, 'Chennai'); user('uLon', 200, 120, 'London'); user('uSyd', 640, 395, 'Sydney');
+    node('edge', 600, 300, 150, 44, 'Edge location', 'Sydney');
+    node('edgeL', 170, 210, 150, 44, 'Edge location', 'London');
+    sx('pub', K.el('path', { d: 'M640 386 C 600 360, 560 330, 520 255', class: 'netpub', fill: 'none' }, sv));
+    sx('aws', K.el('path', { d: 'M600 278 C 580 262, 560 250, 540 240', class: 'netaws', fill: 'none' }, sv));
+    const P = K.el('g', {}, sv);
+    const VIS = { map: 0, mum: 0, uChe: 0, uLon: 1, uSyd: 1, pub: 1, fra: 2, r53: 3, edge: 4, edgeL: 4, aws: 5 };
+    const FOC = [['map', 'mum', 'uChe'], ['map', 'mum', 'uLon', 'uSyd', 'pub', 'uChe'], ['map', 'mum', 'fra'], ['map', 'r53', 'mum', 'fra', 'uLon', 'uChe'], ['map', 'edge', 'edgeL', 'uSyd', 'uLon', 'mum'], ['map', 'edge', 'aws', 'uSyd', 'mum'], null];
+    function show(i) {
+      P.textContent = '';
+      for (const k in VIS) { E[k].classList.toggle('gone', i < VIS[k] || (k === 'pub' && i > 1)); E[k].classList.toggle('fade-out', !!FOC[i] && !FOC[i].includes(k)); }
+      Object.values(N).forEach(n => n.g.classList.remove('ok', 'bad', 'on'));
+      N.edge.sub.textContent = i === 5 ? 'Global Accel.' : 'CloudFront cache'; N.edgeL.sub.textContent = 'CloudFront cache';
+      if (i === 1) N.mum.g.classList.add('on');
+      if (i === 2) N.fra.g.classList.add('ok');
+      if (i === 4) { N.edge.g.classList.add('ok'); N.edgeL.g.classList.add('ok'); }
+      if (i === 5) N.edge.g.classList.add('on');
+    }
+    const STEPS = [
+      { title: 'Your app lives in one Region',
+        text: 'The clinic app runs in <b>Mumbai</b> (across its AZs). Patients in Chennai are close by and get fast responses.' },
+      { title: 'Far-away users wait longer',
+        text: 'A patient in <b>Sydney</b> or <b>London</b> crosses many public internet hops to reach Mumbai. Every request pays that distance: <b>latency</b> grows with the trip.',
+        play: async run => { const p = K.pill(P, '320 ms', 'bad'); await K.move(p, [640, 380], [520, 260], 900, run); p.remove(); } },
+      { title: 'Deploy in a second Region',
+        text: 'Run a copy in <b>Frankfurt</b>. European users get a nearby server, and if Mumbai has a Region-wide outage, Frankfurt keeps the clinic online (<b>disaster recovery</b>).',
+        tip: 'Multi-AZ = high availability. Multi-Region = disaster recovery + lower latency far away.' },
+      { title: 'Route 53 sends each user to the right Region',
+        text: '<b>Route 53</b> is AWS\'s DNS. Its <b>routing policies</b> decide the answer: <b>latency</b> (closest-feeling Region), <b>failover</b> (primary unless its health check fails), <b>weighted</b> (e.g. 90/10 for a new version), <b>geolocation</b> (by country).',
+        play: async run => {
+          let p = K.pill(P, 'clinic-app.com?', 'ghost'); await K.move(p, [200, 135], [350, 360], 600, run); p.remove();
+          p = K.pill(P, '→ Frankfurt', 'ok'); await K.move(p, [350, 360], [330, 140], 600, run); p.remove();
+        } },
+      { title: 'CloudFront caches content near users',
+        text: '<b>CloudFront</b> is AWS\'s CDN with 750+ edge locations. The first Sydney request fetches an image from Mumbai; the edge keeps a copy, so the next Sydney users get it in a few milliseconds. It also absorbs DDoS traffic (with Shield and WAF).',
+        tip: '"CDN" on the exam → CloudFront.',
+        play: async run => { const p = K.pill(P, 'HIT 20 ms', 'ok'); await K.move(p, [640, 380], [612, 325], 450, run); p.remove(); } },
+      { title: 'Global Accelerator: AWS\'s network, no cache',
+        text: 'For dynamic or non-HTTP traffic (APIs, games over UDP), <b>Global Accelerator</b> gives you <b>two static IPs</b>. Users enter AWS\'s private network at the nearest edge and ride it to Mumbai: faster and steadier than the public internet, with quick failover. Nothing is cached.',
+        play: async run => { const p = K.pill(P, 'AWS backbone', 'alt'); await K.move(p, [610, 300], [500, 245], 600, run); p.remove(); } },
+      { title: 'Which global service?',
+        text: '<b>Route 53</b>: which Region answers (DNS). <b>CloudFront</b>: cache content at the edge. <b>Global Accelerator</b>: static IPs + AWS network for any TCP/UDP. <b>S3 Transfer Acceleration</b>: faster long-distance uploads to one bucket. Need compute <i>near</i> users? <b>Local Zones</b>, <b>Wavelength</b> (5G), <b>Outposts</b> (your data centre).' }
+    ];
+    K.story({ root: $('giStory'), steps: STEPS, show });
+  })();
 
   /* ========== 1. Route 53 ========== */
   const mp = $('map');

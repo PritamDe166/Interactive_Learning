@@ -49,6 +49,31 @@
     <ul class="lede"><li><b>EC2</b> (Elastic Compute Cloud) rents you virtual servers called <b>instances</b>. It's IaaS.</li><li>You pick the <b>AMI</b> (OS image), <b>instance type</b> (CPU, memory), <b>storage</b> and <b>security group</b> (firewall).</li><li>An optional <b>user data</b> script sets the machine up on first boot.</li><li>Around it sit EBS volumes, load balancers and Auto Scaling groups.</li></ul>
   </header>
 
+  <section aria-labelledby="whatH">
+    <h2 id="whatH">In .NET / Azure terms</h2>
+    <p class="sub">If you've run an app on an Azure VM or your own IIS server, EC2 is the same idea with AWS names.</p>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest .NET / Azure idea</span><span>The difference</span></div>
+      <div class="row"><span class="aws">EC2 instance</span><span class="like">Azure VM / your IIS server</span><span>Billed per second; stop it and the compute bill stops.</span></div>
+      <div class="row"><span class="aws">AMI</span><span class="like">VM image / golden image</span><span>The OS disk an instance boots from; AWS, Marketplace or your own.</span></div>
+      <div class="row"><span class="aws">Instance type</span><span class="like">VM size (B2s, D4s…)</span><span>Family + generation + size, e.g. t3.micro, m7i.2xlarge.</span></div>
+      <div class="row"><span class="aws">Security group</span><span class="like">Azure NSG / Windows Firewall</span><span>Allow rules only, attached to the instance, stateful.</span></div>
+      <div class="row"><span class="aws">User data</span><span class="like">Startup script / Custom Script Extension</span><span>Runs once, as root, on the first boot.</span></div>
+      <div class="row"><span class="aws">EBS volume</span><span class="like">Azure managed disk</span><span>Network disk locked to one Availability Zone.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="ec2StoryH">
+    <h2 class="stage-title" id="ec2StoryH">Walkthrough: launching a clinic web server</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story" id="ec2Story">
+      <div class="scroll"><svg class="diagram" id="ec2StorySvg" style="min-width:0" viewBox="0 0 700 440" aria-label="A physical server hosting your EC2 instance, with an AMI, an EBS disk, a security group and two visitors"></svg></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Now break things and watch what changes.</p>
+
   <section aria-labelledby="decH">
     <h2 class="stage-title" id="decH">Read an instance type name</h2>
     <div class="stage-kind">Pick a name · the parts fly into place</div>
@@ -111,6 +136,18 @@
     <div class="card" style="margin-top:14px"><div class="label">Event log</div><ul class="log" id="lifeLog" aria-live="polite"><li>Press Launch.</li></ul></div>
   </section>
 
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">"Rent a virtual server" / IaaS compute</span><span class="arrow">→</span><span class="then">EC2</span></li>
+      <li><span class="if">Request times out</span><span class="arrow">→</span><span class="then">Check the security group</span></li>
+      <li><span class="if">Connection refused</span><span class="arrow">→</span><span class="then">App not listening; SG is fine</span></li>
+      <li><span class="if">Script that installs software at first launch</span><span class="arrow">→</span><span class="then">User data</span></li>
+      <li><span class="if">Linux admin port / Windows admin port</span><span class="arrow">→</span><span class="then">22 (SSH) / 3389 (RDP)</span></li>
+      <li><span class="if">Keep the same public IP after stop/start</span><span class="arrow">→</span><span class="then">Elastic IP</span></li>
+    </ul>
+  </section>
+
   <section aria-labelledby="moreH">
     <h2 id="moreH">Connecting and the ports to know</h2>
     <div class="cards">
@@ -163,6 +200,86 @@
 <script>
 (function () {
   const K = Kit, $ = K.$;
+
+  /* ========== 0. Guided walkthrough ========== */
+  (function () {
+    const sv = $('ec2StorySvg');
+    const E = {}, N = {};
+    const sx = (k, el) => { el.classList.add('sx'); E[k] = el; return el; };
+    const node = (k, x, y, w, h, t, sub) => { const n = K.node(sv, x, y, w, h, t, sub); sx(k, n.g); N[k] = n; return n; };
+    sx('zone', K.el('g', {}, sv));
+    K.el('rect', { x: 240, y: 10, width: 452, height: 420, rx: 14, class: 'zone' }, E.zone);
+    K.text(E.zone, 254, 32, 'AWS REGION ap-south-1 · AZ a', 'zone-label');
+    sx('host', K.el('g', {}, sv));
+    K.el('rect', { x: 258, y: 48, width: 416, height: 214, rx: 12, class: 'zone' }, E.host);
+    K.text(E.host, 272, 68, 'PHYSICAL SERVER (AWS manages)', 'zone-label');
+    sx('wall', K.el('g', {}, sv));
+    K.el('rect', { x: 186, y: 40, width: 30, height: 380, rx: 8, class: 'sg-wall' }, E.wall);
+    const wl = K.text(E.wall, 201, 436, 'SECURITY GROUP', 'zone-label'); wl.style.textAnchor = 'middle';
+    sx('rules', K.el('g', {}, sv));
+    [['SG rules:', 196], ['allow 443 · anywhere', 214], ['allow 22 · my IP only', 232]].forEach(([t, y]) => { const x = K.text(E.rules, 92, y, t, 'mlabel muted'); x.style.textAnchor = 'middle'; });
+    sx('ebsLine', K.el('line', { x1: 400, y1: 195, x2: 560, y2: 330, class: 'msg dash' }, sv));
+    sx('amiLine', K.el('line', { x1: 330, y1: 330, x2: 380, y2: 195, class: 'msg dash' }, sv));
+    node('vm', 400, 155, 210, 80, 'Your EC2 instance', 'virtual server');
+    node('o1', 600, 110, 120, 40, 'other VM', 'another customer');
+    node('o2', 600, 205, 120, 40, 'other VM', 'another customer');
+    node('ami', 330, 345, 170, 56, 'AMI', 'Amazon Linux 2023');
+    node('ebs', 565, 345, 170, 56, 'EBS root volume', '8 GiB gp3 · network disk');
+    node('pat', 85, 120, 140, 50, 'Patient browser', 'HTTPS');
+    node('hack', 85, 300, 140, 50, 'Unknown laptop', 'tries SSH');
+    const P = K.el('g', {}, sv);
+    const T = ['zone', 'host', 'vm', 'o1', 'o2', 'ami', 'amiLine', 'ebs', 'ebsLine', 'wall', 'rules', 'pat', 'hack'];
+    const VIS = { zone: 0, host: 0, vm: 0, o1: 0, o2: 0, ami: 1, amiLine: 1, ebs: 3, ebsLine: 3, wall: 4, rules: 4, pat: 6, hack: 6 };
+    const FOCUS = [['zone', 'host', 'vm', 'o1', 'o2'], ['vm', 'ami', 'amiLine'], ['vm'], ['vm', 'ebs', 'ebsLine'], ['vm', 'wall', 'rules'], ['vm'], ['pat', 'hack', 'wall', 'rules', 'vm'], ['vm', 'ebs', 'ebsLine'], ['vm', 'ebs', 'ebsLine']];
+    const SUB = ['virtual server', 'AMI: Amazon Linux 2023', 't3.micro · 2 vCPU · 1 GiB', 't3.micro · root disk attached', 't3.micro · firewall in front', 'web server running ✓', 'serving HTTPS', 'stopped · $0 compute', 'terminated'];
+    function show(i) {
+      P.textContent = '';
+      T.forEach(k => { E[k].classList.toggle('gone', i < VIS[k]); E[k].classList.toggle('fade-out', !FOCUS[i].includes(k)); });
+      ['vm', 'ebs', 'pat', 'hack'].forEach(k => N[k].g.classList.remove('ok', 'bad', 'on', 'dim'));
+      N.vm.sub.textContent = SUB[i];
+      N.ebs.sub.textContent = '8 GiB gp3 · network disk';
+      if (i < 7) N.vm.g.classList.add('on');
+      if (i === 6) { N.pat.g.classList.add('ok'); N.hack.g.classList.add('bad'); }
+      if (i === 7) { N.vm.g.classList.add('dim'); N.ebs.g.classList.add('ok'); N.ebs.sub.textContent = 'kept · still billed'; }
+      if (i === 8) { N.vm.g.classList.add('bad'); N.ebs.g.classList.add('bad'); N.ebs.sub.textContent = 'deleted with instance'; }
+    }
+    const reveal = async (keys, run) => { for (const k of keys) { E[k].classList.remove('gone', 'fade-out'); await K.sleep(250, run); } };
+    const STEPS = [
+      { title: 'EC2 = renting a virtual server',
+        text: 'AWS owns the physical server and splits it into isolated <b>virtual machines</b>. One of them is <b>your instance</b>; the others belong to other customers and can\'t see yours. This is <b>IaaS</b>: AWS runs the hardware, you run everything inside the VM.',
+        tip: 'Same idea as an Azure VM. You pay per second while it runs.' },
+      { title: 'Choose the image: an AMI',
+        text: 'An <b>AMI</b> (Amazon Machine Image) is the starting disk: the operating system plus any pre-installed software. Pick an AWS one (Amazon Linux, Windows, Ubuntu), one from the Marketplace, or your own "golden image".',
+        play: async run => { await reveal(['ami', 'amiLine'], run); const p = K.pill(P, 'Amazon Linux 2023', 'alt'); await K.move(p, [330, 330], [400, 160], 650, run); p.remove(); } },
+      { title: 'Choose the size: instance type',
+        text: 'The <b>instance type</b> sets CPU and memory. <span class="mono">t3.micro</span> means family <b>t</b> (general purpose, burstable), generation <b>3</b>, size <b>micro</b> (2 vCPU, 1 GiB). Need more power? Stop it and pick a bigger type.',
+        tip: 'Families: T/M general · C compute · R memory · I storage · P/G GPUs.',
+        play: async run => { const p = K.pill(P, 't3.micro · 2 vCPU · 1 GiB'); await K.move(p, [400, 0], [400, 110], 650, run); p.remove(); } },
+      { title: 'Give it a disk: EBS',
+        text: 'The root disk is an <b>EBS volume</b>: a <b>network drive</b> in the same AZ. Because it\'s separate from the server, your data survives a stop or a hardware failure.',
+        play: async run => { await reveal(['ebs', 'ebsLine'], run); } },
+      { title: 'Put a firewall in front: security group',
+        text: 'A <b>security group</b> is a list of <b>allow</b> rules for incoming traffic (there are no deny rules). Here: HTTPS 443 from anyone, SSH 22 from your IP only. Anything not listed is dropped. Outgoing traffic is allowed by default.',
+        tip: 'Request times out → check the security group first.',
+        play: async run => { await reveal(['wall', 'rules'], run); } },
+      { title: 'Boot it: user data runs once',
+        text: 'On the <b>first boot</b>, a <b>user data</b> script runs as root: update packages, install the web server, write the home page. It never runs again on later restarts.',
+        play: async run => { for (const t of ['dnf update -y', 'dnf install -y httpd', 'systemctl start httpd']) { N.vm.sub.textContent = t + ' …'; await K.sleep(650, run); } } },
+      { title: 'Traffic arrives: allowed or dropped',
+        text: 'The patient\'s HTTPS request matches the 443 rule and reaches the web server. The unknown laptop tries SSH on port 22 from a different IP: no rule matches, so it\'s <b>silently dropped</b> and times out.',
+        play: async run => {
+          await reveal(['pat', 'hack'], run);
+          const a = K.pill(P, 'HTTPS :443', 'ok'); await K.move(a, [155, 120], [300, 150], 650, run); a.remove();
+          const b = K.pill(P, 'SSH :22', 'bad'); await K.move(b, [155, 300], [178, 300], 450, run); await K.sleep(500, run); b.remove();
+        } },
+      { title: 'Stop it: pay only for the disk',
+        text: '<b>Stopping</b> shuts the VM down: no compute charge, but the EBS volume (and its data) stays and is still billed. When you start it again it may land on a new physical server and get a <b>new public IP</b> (use an Elastic IP to keep one).' },
+      { title: 'Terminate it: gone for good',
+        text: '<b>Terminating</b> deletes the instance permanently. By default its <b>root EBS volume is deleted too</b> ("delete on termination"); extra volumes are kept unless you change that.',
+        tip: 'Stop = pause (disk kept). Terminate = delete.' }
+    ];
+    K.story({ root: $('ec2Story'), steps: STEPS, show });
+  })();
 
   /* ========== 1. Decoder ========== */
   const FAM = {

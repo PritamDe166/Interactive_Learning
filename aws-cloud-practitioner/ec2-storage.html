@@ -47,6 +47,31 @@
     </ul>
   </header>
 
+  <section aria-labelledby="whatH">
+    <h2 id="whatH">In .NET / Azure terms</h2>
+    <p class="sub">Each EC2 storage option has a close cousin in Azure or a Windows server.</p>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest .NET / Azure idea</span><span>The difference</span></div>
+      <div class="row"><span class="aws">EBS volume</span><span class="like">Azure managed disk</span><span>Network disk for one instance, locked to one AZ.</span></div>
+      <div class="row"><span class="aws">Instance store</span><span class="like">Azure temporary disk (D: drive)</span><span>Physically in the host; lost when the VM stops.</span></div>
+      <div class="row"><span class="aws">EBS snapshot</span><span class="like">Disk snapshot / backup</span><span>Incremental, stored at Region level; restore anywhere in the Region.</span></div>
+      <div class="row"><span class="aws">AMI</span><span class="like">VM image / Sysprep golden image</span><span>Snapshots + boot settings; launch identical servers.</span></div>
+      <div class="row"><span class="aws">EFS</span><span class="like">Azure Files (NFS) / a shared network folder</span><span>Many Linux instances, all AZs, same files.</span></div>
+      <div class="row"><span class="aws">FSx for Windows</span><span class="like">Windows file server with SMB + AD</span><span>Shared drive for Windows apps and users.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stoStoryH">
+    <h2 class="stage-title" id="stoStoryH">Walkthrough: where an instance keeps its data</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story" id="stoStory">
+      <div class="scroll"><svg class="diagram" id="stoStorySvg" style="min-width:0" viewBox="0 0 700 440" aria-label="Two Availability Zones with an EC2 instance, EBS volumes, an instance store, snapshots, an AMI and EFS"></svg></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Now break things and watch what changes.</p>
+
   <section aria-labelledby="survH">
     <h2 class="stage-title" id="survH">What survives?</h2>
     <div class="stage-kind">Do something to the instance · watch each disk</div>
@@ -78,6 +103,18 @@
       <svg class="diagram" id="pick" viewBox="0 0 1000 330" aria-label="Decision path: shared or not, performance, Windows, HPC"></svg>
     </div>
     <p class="status-line" id="pickStatus">Pick a scenario.</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Durable disk for one EC2 instance</span><span class="arrow">→</span><span class="then">EBS</span></li>
+      <li><span class="if">Highest disk performance, OK to lose data</span><span class="arrow">→</span><span class="then">Instance store</span></li>
+      <li><span class="if">Move an EBS volume to another AZ</span><span class="arrow">→</span><span class="then">Snapshot → new volume</span></li>
+      <li><span class="if">Launch many identical, pre-configured servers</span><span class="arrow">→</span><span class="then">AMI (built with EC2 Image Builder)</span></li>
+      <li><span class="if">Shared file system for many Linux instances</span><span class="arrow">→</span><span class="then">EFS</span></li>
+      <li><span class="if">Shared Windows file system (SMB, AD)</span><span class="arrow">→</span><span class="then">FSx for Windows File Server</span></li>
+    </ul>
   </section>
 
   <section aria-labelledby="refH">
@@ -133,6 +170,88 @@
 <script>
 (function () {
   const K = Kit, $ = K.$;
+
+  /* ========== 0. Guided walkthrough ========== */
+  (function () {
+    const sv = $('stoStorySvg');
+    const E = {}, N = {};
+    const sx = (k, el) => { el.classList.add('sx'); E[k] = el; return el; };
+    const node = (k, x, y, w, h, t, sub) => { const n = K.node(sv, x, y, w, h, t, sub); sx(k, n.g); N[k] = n; return n; };
+    const zone = (k, x, y, w, h, label) => { const g = sx(k, K.el('g', {}, sv)); K.el('rect', { x, y, width: w, height: h, rx: 12, class: 'zone' }, g); K.text(g, x + 12, y + 20, label, 'zone-label'); return g; };
+    zone('azA', 8, 8, 334, 262, 'AZ ap-south-1a');
+    zone('azB', 358, 8, 334, 262, 'AZ ap-south-1b');
+    zone('host', 22, 36, 306, 112, 'PHYSICAL HOST');
+    zone('reg', 8, 284, 684, 150, 'REGION-LEVEL STORAGE (spans AZs)');
+    const line = (k, a, b, cls) => sx(k, K.el('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], class: cls || 'msg dash' }, sv));
+    line('lRoot', [100, 118], [100, 190]); line('lData', [120, 118], [250, 190]);
+    line('lEfsA', [100, 118], [520, 342], 'msg solid'); line('lEfsB', [520, 118], [540, 342], 'msg solid');
+    node('ec2', 100, 95, 150, 46, 'EC2 instance', 'app server');
+    node('ist', 250, 95, 130, 46, 'Instance store', 'local NVMe');
+    node('root', 100, 215, 150, 46, 'EBS root', 'OS · 8 GiB');
+    node('data', 250, 215, 150, 46, 'EBS data', 'patient files');
+    node('ec2b', 520, 95, 160, 46, 'EC2 instance', 'in AZ b');
+    node('volb', 520, 215, 160, 46, 'New EBS volume', 'restored copy');
+    node('snap', 130, 342, 170, 46, 'EBS snapshot', 'backup of a volume');
+    node('ami', 130, 405, 170, 46, 'AMI', 'snapshots + launch recipe');
+    node('efs', 520, 365, 220, 50, 'EFS', 'shared Linux file system');
+    const P = K.el('g', {}, sv);
+    const ALL = Object.keys(E);
+    const VIS = { azA: 0, host: 0, ec2: 0, root: 1, lRoot: 1, data: 2, lData: 2, ist: 3, azB: 4, ec2b: 4, reg: 5, snap: 5, volb: 5, ami: 6, efs: 7, lEfsA: 7, lEfsB: 7 };
+    const FOCUS = [['azA', 'host', 'ec2'], ['ec2', 'root', 'lRoot'], ['ec2', 'data', 'lData', 'root'], ['host', 'ist', 'ec2', 'root', 'data', 'lRoot', 'lData'], ['data', 'azB', 'ec2b', 'azA'], ['data', 'snap', 'volb', 'reg', 'ec2b'], ['ami', 'snap', 'reg', 'ec2b'], ['efs', 'lEfsA', 'lEfsB', 'ec2', 'ec2b', 'reg'], null];
+    function show(i) {
+      P.textContent = '';
+      ALL.forEach(k => { E[k].classList.toggle('gone', i < (VIS[k] ?? 0)); E[k].classList.toggle('fade-out', !!FOCUS[i] && !FOCUS[i].includes(k)); });
+      Object.values(N).forEach(n => n.g.classList.remove('ok', 'bad', 'on'));
+      N.ist.sub.textContent = 'local NVMe'; N.ec2b.sub.textContent = 'in AZ b'; N.root.sub.textContent = 'OS · 8 GiB'; N.data.sub.textContent = 'patient files';
+      if (i === 3) { N.ist.g.classList.add('bad'); N.ist.sub.textContent = 'wiped on stop'; N.root.g.classList.add('ok'); N.data.g.classList.add('ok'); }
+      if (i === 4) N.ec2b.g.classList.add('bad');
+      if (i === 5) { N.volb.g.classList.add('ok'); N.ec2b.sub.textContent = 'has the data'; }
+      if (i === 6) { N.ec2b.sub.textContent = 'launched from AMI'; N.ec2b.g.classList.add('ok'); }
+      if (i === 7) N.efs.g.classList.add('ok');
+    }
+    const reveal = async (keys, run) => { for (const k of keys) { E[k].classList.remove('gone', 'fade-out'); await K.sleep(220, run); } };
+    const STEPS = [
+      { title: 'An instance needs somewhere to keep data',
+        text: 'Your EC2 instance runs on a physical host in one Availability Zone. Where its files live decides what happens when the instance stops, crashes or moves. EC2 has three choices: <b>EBS</b>, <b>instance store</b> and shared file systems (<b>EFS / FSx</b>).' },
+      { title: 'EBS: a network drive',
+        text: 'The root disk is an <b>EBS volume</b>, a drive reached over the network (like a USB stick plugged in by cable). It lives <b>separately from the server</b>, so the data survives a stop, a crash or a reboot.',
+        tip: 'EBS = block storage for one instance, in one AZ.',
+        play: async run => reveal(['root', 'lRoot'], run) },
+      { title: 'Add more volumes as you need them',
+        text: 'Attach extra EBS volumes for data. You choose size and speed (gp3, io2…). By default the <b>root</b> volume is deleted when the instance is terminated and <b>extra</b> volumes are kept. A volume attaches to <b>one instance at a time</b>.',
+        play: async run => reveal(['data', 'lData'], run) },
+      { title: 'Instance store: fast but temporary',
+        text: 'Some instance types come with an <b>instance store</b>: a disk physically inside the host. It\'s the fastest option, but it belongs to that machine: <b>stop, terminate or a hardware failure wipes it</b>. Use it only for caches and scratch files.',
+        play: async run => {
+          await reveal(['ist'], run);
+          const p = K.pill(P, 'stop instance', 'bad'); await K.move(p, [100, 20], [100, 60], 450, run); await K.sleep(400, run); p.remove();
+        } },
+      { title: 'EBS is locked to its AZ',
+        text: 'Now an instance in <b>AZ b</b> needs the patient files. It can\'t simply attach the volume: an EBS volume can only be used <b>inside its own Availability Zone</b>.',
+        play: async run => {
+          await reveal(['azB', 'ec2b'], run);
+          const p = K.pill(P, 'attach vol?', 'bad'); await K.move(p, [250, 190], [345, 120], 550, run); await K.sleep(500, run); p.remove();
+        } },
+      { title: 'Snapshot: the bridge between AZs',
+        text: 'Take a <b>snapshot</b>: a point-in-time backup stored at <b>Region level</b> (in S3, managed by AWS). From it, create a <b>new volume in AZ b</b>. It\'s an independent copy, not a live sync. You can also copy snapshots to another Region for disaster recovery.',
+        play: async run => {
+          await reveal(['reg', 'snap'], run);
+          let p = K.pill(P, 'snapshot', 'alt'); await K.move(p, [250, 240], [180, 320], 550, run); p.remove();
+          await reveal(['volb'], run);
+          p = K.pill(P, 'restore', 'ok'); await K.move(p, [215, 330], [470, 238], 650, run); p.remove();
+        } },
+      { title: 'AMI: snapshots plus a launch recipe',
+        text: 'An <b>AMI</b> bundles snapshots of all the disks with what\'s needed to boot (OS, architecture, settings). Launch any number of identical servers from it, in any AZ, or copy it to another Region. <b>EC2 Image Builder</b> automates building them.',
+        play: async run => { await reveal(['ami'], run); const p = K.pill(P, 'launch', 'ok'); await K.move(p, [215, 400], [470, 118], 700, run); p.remove(); } },
+      { title: 'EFS: one shared folder for many servers',
+        text: '<b>EFS</b> is a managed network file system (NFS) at Region level. Hundreds of <b>Linux</b> instances in <b>any AZ</b> mount it and see the <b>same files</b> at once. It grows automatically and you pay for what you store.',
+        tip: 'Shared + Linux → EFS. Shared + Windows (SMB, Active Directory) → FSx for Windows File Server.',
+        play: async run => reveal(['efs', 'lEfsA', 'lEfsB'], run) },
+      { title: 'Choosing, in one sentence each',
+        text: '<b>EBS</b>: durable disk for one instance. <b>Instance store</b>: fastest, disposable. <b>Snapshot</b>: backup and move EBS across AZs/Regions. <b>AMI</b>: clone whole servers. <b>EFS</b>: shared files for Linux. <b>FSx</b>: shared files for Windows (or HPC with Lustre).' }
+    ];
+    K.story({ root: $('stoStory'), steps: STEPS, show });
+  })();
 
   /* ========== 1. What survives ========== */
   const sv = $('surv');

@@ -16,6 +16,14 @@
    Continuous simulations should advance time with Kit.tick(dt) so they
    follow speed and pause. Pages without discrete steps set
    <body data-anim="continuous"> to hide the step-by-step option.
+
+   Guided story (narrated walkthrough with Back / Next):
+     Kit.story({ root, steps, show })
+       root  : an element with class "story"; Kit fills the caption + nav
+       steps : [{ title, text, tip?, play?: async run => {} }]
+       show(i): draw the finished state of step i instantly (used for Back,
+                dot jumps and after each play). Keep it declarative.
+     Forward moves call steps[i].play(run) (Kit.move / Kit.sleep), then show(i).
    ========================================================================= */
 (function () {
   const NS = 'http://www.w3.org/2000/svg';
@@ -149,7 +157,56 @@
       }));
     },
 
-    fmt: n => n.toLocaleString('en-US')
+    fmt: n => n.toLocaleString('en-US'),
+
+    /** narrated walkthrough; see header */
+    story({ root, steps, show }) {
+      const ch = 'story-' + (root.id || Math.random().toString(36).slice(2));
+      const cap = document.createElement('div');
+      cap.className = 'story-cap';
+      cap.innerHTML = `<div class="count"></div><h3></h3><p class="txt"></p><p class="tip" hidden></p>
+        <div class="story-nav"><button class="btn" type="button" data-a="back">◀ Back</button><button class="btn primary" type="button" data-a="next">Next ▶</button><button class="btn" type="button" data-a="auto">Play all</button></div>
+        <div class="story-dots" role="group" aria-label="Steps"></div>`;
+      root.appendChild(cap);
+      const $c = sel => cap.querySelector(sel);
+      const dots = $c('.story-dots');
+      dots.innerHTML = steps.map((st, i) => `<button type="button" aria-label="Step ${i + 1}: ${st.title.replace(/"/g, '')}"></button>`).join('');
+      let cur = -1, auto = false, seen = new Set();
+      function paint() {
+        const st = steps[cur];
+        $c('.count').textContent = `Step ${cur + 1} of ${steps.length}`;
+        $c('h3').innerHTML = st.title;
+        $c('.txt').innerHTML = st.text;
+        const tip = $c('.tip'); tip.hidden = !st.tip; tip.innerHTML = st.tip ? '<b>Exam tip:</b> ' + st.tip : '';
+        $c('[data-a=back]').disabled = cur === 0;
+        $c('[data-a=next]').textContent = cur === steps.length - 1 ? 'Start again ↺' : 'Next ▶';
+        $c('[data-a=auto]').textContent = auto ? 'Stop' : 'Play all';
+        dots.querySelectorAll('button').forEach((b, i) => { b.classList.toggle('on', i === cur); b.classList.toggle('seen', seen.has(i)); });
+      }
+      async function go(i, animate) {
+        const run = K.newRun(ch);
+        cur = i; seen.add(i); paint();
+        if (animate && steps[i].play) {
+          if (i > 0) show(i - 1);
+          try { await steps[i].play(run); } catch (e) { if (!(e instanceof Stop)) throw e; return; }
+        }
+        if (K.alive(run)) show(i);
+        if (auto && K.alive(run)) {
+          try { await K.sleep(2600, run); } catch (e) { return; }
+          if (!auto) return;
+          if (cur < steps.length - 1) go(cur + 1, true); else { auto = false; paint(); }
+        }
+      }
+      cap.addEventListener('click', e => {
+        const a = e.target.closest('[data-a]'); if (!a) return;
+        if (a.dataset.a === 'back' && cur > 0) { auto = false; go(cur - 1, false); }
+        if (a.dataset.a === 'next') { auto = false; cur === steps.length - 1 ? go(0, false) : go(cur + 1, true); }
+        if (a.dataset.a === 'auto') { auto = !auto; if (auto) go(cur === steps.length - 1 ? 0 : cur + 1, true); else { K.cancel(ch); show(cur); paint(); } }
+      });
+      dots.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; auto = false; go([...dots.children].indexOf(b), false); });
+      go(0, false);
+      return { go };
+    }
   };
 
   /* ---------- playback control bar ---------- */

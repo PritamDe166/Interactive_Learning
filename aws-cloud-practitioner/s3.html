@@ -32,6 +32,10 @@
   .cls rect.cost { fill: var(--cyan); opacity: .75; }
   .cls text { fill: var(--fg); font-size: 13px; font-weight: 600; }
   .cls .sm { fill: var(--muted); font-family: var(--mono); font-size: 10.5px; font-weight: 400; }
+  .bucket-box { fill: var(--panel); stroke: var(--teal); stroke-width: 2; }
+  .obj rect { fill: var(--panel-2); stroke: var(--line); }
+  .obj.marker rect { stroke: var(--red); stroke-dasharray: 5 4; }
+  .obj text { font-size: 11.5px; }
   .daylbl { fill: var(--accent-text); font-family: var(--mono); font-size: 13px; font-weight: 700; }
 </style>
 </head>
@@ -52,6 +56,31 @@
       <li><b>11 nines durability</b> in every storage class; classes trade price against retrieval speed and availability.</li>
     </ul>
   </header>
+
+  <section aria-labelledby="whatH">
+    <h2 id="whatH">In .NET / Azure terms</h2>
+    <p class="sub">S3 is closest to Azure Blob Storage: files in containers, reached over HTTPS.</p>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest .NET / Azure idea</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Bucket</span><span class="like">Blob container (inside a storage account)</span><span>Lives in one Region; name unique across all of AWS.</span></div>
+      <div class="row"><span class="aws">Object + key</span><span class="like">Blob + blob name</span><span>Folders are just prefixes in the key.</span></div>
+      <div class="row"><span class="aws">Bucket policy</span><span class="like">Container access policy / SAS rules</span><span>JSON resource policy; can grant other accounts or public.</span></div>
+      <div class="row"><span class="aws">Storage classes</span><span class="like">Hot / Cool / Archive tiers</span><span>Eight classes; lifecycle rules move data automatically.</span></div>
+      <div class="row"><span class="aws">Pre-signed URL</span><span class="like">SAS token</span><span>Time-limited access to a private object.</span></div>
+      <div class="row"><span class="aws">Versioning</span><span class="like">Blob versioning / soft delete</span><span>Delete adds a marker; old versions kept and billed.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="s3StoryH">
+    <h2 class="stage-title" id="s3StoryH">Walkthrough: storing a clinic's scans</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story" id="s3Story">
+      <div class="scroll"><svg class="diagram" id="s3StorySvg" style="min-width:0" viewBox="0 0 700 440" aria-label="An S3 bucket with objects in a Region, copies in three AZs, requesters, storage classes and a replica bucket"></svg></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Now break things and watch what changes.</p>
 
   <section aria-labelledby="accH">
     <h2 class="stage-title" id="accH">Who can read <span class="mono">scans/xray-0042.png</span>?</h2>
@@ -106,6 +135,18 @@
     <p class="status-line" id="clsStatus">Bar = relative storage price per GB-month (illustrative). Cheaper storage costs more to retrieve and has a minimum duration.</p>
   </section>
 
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Unlimited object storage, static files, data lake</span><span class="arrow">→</span><span class="then">S3</span></li>
+      <li><span class="if">Recover a deleted/overwritten file</span><span class="arrow">→</span><span class="then">Versioning</span></li>
+      <li><span class="if">Copy to another Region for compliance/DR</span><span class="arrow">→</span><span class="then">Cross-Region Replication</span></li>
+      <li><span class="if">Unknown access pattern</span><span class="arrow">→</span><span class="then">Intelligent-Tiering</span></li>
+      <li><span class="if">Cheapest archive, hours to restore is fine</span><span class="arrow">→</span><span class="then">Glacier Deep Archive</span></li>
+      <li><span class="if">Make objects public</span><span class="arrow">→</span><span class="then">Block Public Access off + bucket policy</span></li>
+    </ul>
+  </section>
+
   <section aria-labelledby="moreH">
     <h2 id="moreH">More S3 you'll be asked about</h2>
     <div class="cards" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr))">
@@ -150,6 +191,97 @@
 <script>
 (function () {
   const K = Kit, $ = K.$;
+
+  /* ========== 0. Guided walkthrough ========== */
+  (function () {
+    const sv = $('s3StorySvg');
+    const E = {}, N = {};
+    const sx = (k, el) => { el.classList.add('sx'); E[k] = el; return el; };
+    const node = (k, x, y, w, h, t, sub) => { const n = K.node(sv, x, y, w, h, t, sub); sx(k, n.g); N[k] = n; return n; };
+    sx('reg', K.el('g', {}, sv));
+    K.el('rect', { x: 150, y: 8, width: 410, height: 300, rx: 14, class: 'zone' }, E.reg);
+    K.text(E.reg, 164, 30, 'REGION ap-south-1 (Mumbai)', 'zone-label');
+    sx('bucket', K.el('g', {}, sv));
+    K.el('rect', { x: 180, y: 44, width: 350, height: 150, rx: 14, class: 'bucket-box' }, E.bucket);
+    const bt = K.text(E.bucket, 355, 68, 'Bucket: clinic-scans', 'n-title'); bt.style.textAnchor = 'middle'; bt.style.fill = 'var(--fg)'; bt.style.fontWeight = '700';
+    const OBJ = [];
+    for (let j = 0; j < 3; j++) {
+      const g = K.el('g', { class: 'obj' }, E.bucket);
+      K.el('rect', { x: 196, y: 82 + j * 36, width: 318, height: 28, rx: 7 }, g);
+      const t = K.text(g, 208, 101 + j * 36, '', 'mlabel'); t.style.textAnchor = 'start';
+      OBJ.push({ g, t });
+    }
+    sx('azs', K.el('g', {}, sv));
+    ['AZ a', 'AZ b', 'AZ c'].forEach((n, j) => { K.node(E.azs, 245 + j * 110, 250, 96, 44, n, 'copy'); });
+    node('web', 72, 70, 124, 46, 'Browser', 'anonymous');
+    node('app', 72, 200, 124, 46, 'EC2 app', 'IAM role');
+    node('rep', 630, 120, 120, 56, 'Bucket', 'Hyderabad');
+    sx('repL', K.el('line', { x1: 530, y1: 120, x2: 570, y2: 120, class: 'msg dash' }, sv));
+    const TIERS = [['Standard', 'ms · $$$$'], ['Standard-IA', 'ms · $$ + retrieval'], ['Glacier Flexible', 'minutes–hours · $'], ['Deep Archive', '12–48 h · ¢']];
+    sx('tiers', K.el('g', {}, sv));
+    K.text(E.tiers, 20, 336, 'STORAGE CLASSES · cheaper to store →, slower/costlier to read', 'zone-label');
+    const TN = TIERS.map(([t, s], j) => K.node(E.tiers, 95 + j * 170, 385, 156, 50, t, s));
+    const P = K.el('g', {}, sv);
+    const VIS = { reg: 0, bucket: 0, azs: 1, web: 2, app: 3, tiers: 5, rep: 6, repL: 6 };
+    const FOCUS = [['reg', 'bucket'], ['bucket', 'azs', 'reg'], ['web', 'bucket'], ['app', 'bucket', 'web'], ['bucket'], ['tiers', 'bucket'], ['bucket', 'rep', 'repL', 'reg'], null];
+    const OBJS = [
+      ['scans/2026/xray-0042.png', 'scans/2026/xray-0043.png', 'reports/june.pdf'],
+      ['scans/2026/xray-0042.png', 'scans/2026/xray-0043.png', 'reports/june.pdf'],
+      ['scans/2026/xray-0042.png', 'scans/2026/xray-0043.png', 'reports/june.pdf'],
+      ['scans/2026/xray-0042.png', 'scans/2026/xray-0043.png', 'reports/june.pdf'],
+      ['reports/june.pdf · v1 (noncurrent)', 'reports/june.pdf · v2 (noncurrent)', 'reports/june.pdf · DELETE MARKER'],
+      ['scans/2026/xray-0042.png', 'scans/2026/xray-0043.png', 'reports/june.pdf'],
+      ['scans/2026/xray-0042.png', 'scans/2026/xray-0043.png', 'reports/june.pdf'],
+      ['scans/2026/xray-0042.png  🔒 SSE-S3', 'scans/2026/xray-0043.png  🔒 SSE-S3', 'reports/june.pdf  🔒 SSE-S3']
+    ];
+    function show(i) {
+      P.textContent = '';
+      for (const k in VIS) { E[k].classList.toggle('gone', i < VIS[k]); E[k].classList.toggle('fade-out', !!FOCUS[i] && !FOCUS[i].includes(k)); }
+      OBJ.forEach((o, j) => { o.t.textContent = OBJS[i][j]; o.g.setAttribute('class', 'obj' + (i === 4 && j === 2 ? ' marker' : '')); });
+      Object.values(N).forEach(n => n.g.classList.remove('ok', 'bad'));
+      TN.forEach(n => n.g.classList.remove('on'));
+      N.web.sub.textContent = 'anonymous'; N.rep.sub.textContent = 'Hyderabad';
+      if (i === 2) { N.web.g.classList.add('bad'); N.web.sub.textContent = '403 Access Denied'; }
+      if (i === 3) { N.app.g.classList.add('ok'); N.web.g.classList.add('bad'); }
+      if (i === 5) TN[3].g.classList.add('on');
+      if (i === 6) { N.rep.g.classList.add('ok'); N.rep.sub.textContent = 'replica (CRR)'; }
+    }
+    const reveal = async (keys, run) => { for (const k of keys) { E[k].classList.remove('gone', 'fade-out'); await K.sleep(220, run); } };
+    const STEPS = [
+      { title: 'S3 stores objects in buckets',
+        text: 'A <b>bucket</b> is a container in one Region; its name is unique across all of AWS. Each file is an <b>object</b> with a <b>key</b> such as <span class="mono">scans/2026/xray-0042.png</span>. The "folders" are just part of the key. Storage is virtually unlimited and you pay per GB.',
+        tip: 'Object storage (whole files via API/URL), not a disk you mount.' },
+      { title: 'Copies in at least three AZs',
+        text: 'Every object is stored redundantly across <b>three or more Availability Zones</b>. That gives <b>11 nines of durability</b> (99.999999999%): lose one object in 10 million every 10,000 years.',
+        play: async run => reveal(['azs'], run) },
+      { title: 'Private by default',
+        text: 'A new bucket is <b>private</b> and <b>Block Public Access</b> is on. An anonymous browser asking for a scan gets <b>403 Access Denied</b>.',
+        play: async run => { await reveal(['web'], run); const p = K.pill(P, 'GET xray-0042', 'bad'); await K.move(p, [134, 70], [180, 70], 450, run); await K.sleep(500, run); p.remove(); } },
+      { title: 'Grant access deliberately',
+        text: 'The app on EC2 reads scans through its <b>IAM role</b> (identity policy). To share with another account or the public, add a <b>bucket policy</b> (resource policy). Public access needs <b>both</b> Block Public Access off <b>and</b> a public policy.',
+        tip: 'Explicit Deny in either policy always wins.',
+        play: async run => { await reveal(['app'], run); const p = K.pill(P, 's3:GetObject', 'ok'); await K.move(p, [134, 200], [200, 100], 550, run); p.remove(); } },
+      { title: 'Versioning undoes mistakes',
+        text: 'With <b>versioning</b> on, overwriting keeps the old version, and a delete only adds a <b>delete marker</b>. Remove the marker and the file is back. Every version is billed, so pair it with lifecycle rules.' },
+      { title: 'Storage classes: pay less for cold data',
+        text: 'Old scans are rarely opened. A <b>lifecycle rule</b> moves them automatically: Standard → <b>Standard-IA</b> after 30 days → <b>Glacier</b> after 90 → <b>Deep Archive</b> after 180. Cheaper to store, slower and costlier to read. Unsure? <b>Intelligent-Tiering</b> moves them for you.',
+        play: async run => {
+          await reveal(['tiers'], run);
+          const p = K.pill(P, 'june.pdf', 'alt');
+          let at = [95, 350];
+          await K.move(p, [355, 170], at, 500, run);
+          for (let j = 1; j < 4; j++) { TN[j - 1].g.classList.add('on'); const to = [95 + j * 170, 350]; await K.move(p, at, to, 500, run); at = to; TN[j - 1].g.classList.remove('on'); }
+          p.remove();
+        } },
+      { title: 'Replicate to another Region',
+        text: '<b>Cross-Region Replication</b> copies new objects to a bucket in another Region (compliance, disaster recovery, lower latency). <b>Same-Region Replication</b> does it within a Region. Both need versioning on.',
+        play: async run => { await reveal(['rep', 'repL'], run); const p = K.pill(P, 'copy', 'ok'); await K.move(p, [530, 100], [600, 100], 450, run); p.remove(); } },
+      { title: 'Encrypted, and more',
+        text: 'Every new object is <b>encrypted at rest by default</b> (SSE-S3); choose SSE-KMS to control and audit keys. S3 can also host a <b>static website</b> (add CloudFront for HTTPS). <b>Storage Gateway</b> lets on-premises servers use S3 as a file share.',
+        tip: 'You configure access, encryption and versioning; AWS runs the storage.' }
+    ];
+    K.story({ root: $('s3Story'), steps: STEPS, show });
+  })();
 
   /* ========== 1. Access ========== */
   const acc = $('acc');

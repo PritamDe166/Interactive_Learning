@@ -35,6 +35,13 @@
   .ptoggles { display: grid; gap: 8px; }
   .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
   .ptoggles code { font-size: 11.5px; }
+  .sx { transition: opacity .35s; }
+  .sx.gone { opacity: 0; pointer-events: none; }
+  .gate-line { stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 6 6; }
+  .member2 { stroke: var(--cyan); stroke-width: 2.5; }
+  .member2.guard { stroke: var(--red); stroke-dasharray: 5 4; }
+  .policy-json { margin: 6px 0 0; font-family: var(--mono); font-size: 12px; line-height: 1.5; background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; white-space: pre; overflow-x: auto; color: var(--fg); }
+  .part-title { margin-top: 48px; }
 </style>
 </head>
 <body>
@@ -49,6 +56,30 @@
     <h1>IAM: Users, Groups, Policies &amp; Roles</h1>
     <ul class="lede"><li><b>IAM decides who can do what</b> in your account. Global and free.</li><li><b>Users</b>: people or apps with long-term credentials. <b>Groups</b>: hand permissions to many users at once.</li><li><b>Policies</b>: JSON documents that allow or deny API actions.</li><li><b>Roles</b>: temporary credentials for whoever assumes them, such as an EC2 instance.</li><li>Everything starts at <b>deny</b>.</li></ul>
   </header>
+
+  <section aria-labelledby="whatH">
+    <h2 id="whatH">IAM in .NET terms</h2>
+    <p class="sub">If you've secured an ASP.NET app with Active Directory, you already know most of this.</p>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest .NET / Azure idea</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Root user</span><span class="like">Subscription owner / break-glass admin</span><span>Can't be restricted at all. Lock it away.</span></div>
+      <div class="row"><span class="aws">IAM user</span><span class="like">An Active Directory user account</span><span>One per person (or use IAM Identity Center for SSO).</span></div>
+      <div class="row"><span class="aws">IAM group</span><span class="like">AD security group / ASP.NET role</span><span>Holds users only, never other groups.</span></div>
+      <div class="row"><span class="aws">Policy</span><span class="like"><span class="mono">[Authorize(Policy = …)]</span> rules</span><span>Written as JSON, checked on <b>every AWS API call</b>.</span></div>
+      <div class="row"><span class="aws">IAM role</span><span class="like">Azure Managed Identity</span><span>No password or keys: whoever assumes it gets short-lived credentials.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: securing a clinic's AWS account</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story" id="iamStory">
+      <div class="scroll"><svg class="diagram" id="sto" style="min-width:0" viewBox="0 0 700 440" aria-label="An AWS account with the root user, three IAM users, two groups, an IAM check line and AWS services"></svg></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Now break things: change memberships and policies and watch the result.</p>
 
   <section aria-labelledby="grpTitle">
     <h2 class="stage-title" id="grpTitle">Users inherit from groups</h2>
@@ -107,6 +138,18 @@
       <svg class="diagram" id="role" viewBox="0 0 1000 250" aria-label="EC2 instance obtains credentials and calls S3; an attacker tries reusing leaked credentials"></svg>
     </div>
     <p class="status-line" id="roleStatus"></p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">"Give an EC2 instance or Lambda access to S3"</span><span class="arrow">→</span><span class="then">IAM role</span></li>
+      <li><span class="if">"Many users need the same permissions"</span><span class="arrow">→</span><span class="then">Put them in a group</span></li>
+      <li><span class="if">"Only grant what's needed"</span><span class="arrow">→</span><span class="then">Least privilege</span></li>
+      <li><span class="if">"Which users have no MFA / old keys?"</span><span class="arrow">→</span><span class="then">Credential report</span></li>
+      <li><span class="if">"Which permissions are never used?"</span><span class="arrow">→</span><span class="then">Access Advisor</span></li>
+      <li><span class="if">Allow and Deny both match</span><span class="arrow">→</span><span class="then">Deny wins</span></li>
+    </ul>
   </section>
 
   <section aria-labelledby="secH">
@@ -171,6 +214,114 @@
 <script>
 (function () {
   const K = Kit, $ = K.$;
+
+  /* ========== 0. Guided walkthrough ========== */
+  (function () {
+    const sv = $('sto');
+    const E = {};
+    const sx = (k, el) => { el.classList.add('sx'); E[k] = el; return el; };
+    K.el('rect', { x: 8, y: 8, width: 455, height: 424, rx: 14, class: 'zone' }, sv);
+    K.text(sv, 22, 30, 'AWS ACCOUNT · IAM IS GLOBAL', 'zone-label');
+    sx('gate', K.el('g', {}, sv));
+    K.el('line', { x1: 492, y1: 44, x2: 492, y2: 428, class: 'gate-line' }, E.gate);
+    const gl = K.text(E.gate, 492, 30, 'IAM CHECKS EVERY CALL', 'zone-label'); gl.style.textAnchor = 'middle';
+    // lines first (under nodes)
+    const L = (k, a, b, cls) => sx(k, K.el('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], class: cls || 'member2' }, sv));
+    L('lA', [155, 165], [240, 200]); L('lB', [155, 235], [240, 205]); L('lC', [155, 305], [240, 210]); L('lC2', [155, 305], [240, 310]);
+    L('lG', [330, 142], [330, 174], 'member2 guard');
+    const N = (k, x, y, w, h, t, sub) => { const n = K.node(sv, x, y, w, h, t, sub); sx(k, n.g); E[k + 'N'] = n; return n; };
+    N('root', 110, 62, 170, 48, 'Root user', 'sign-up email');
+    N('alice', 90, 165, 130, 44, 'Alice', 'developer');
+    N('bob', 90, 235, 130, 44, 'Bob', 'developer');
+    N('charles', 90, 305, 130, 44, 'Charles', 'dev + auditor');
+    N('dev', 330, 200, 180, 52, 'Developers group', 'policy: S3 on scans');
+    N('audit', 330, 310, 180, 52, 'Audit group', 'policy: read-only');
+    N('guard', 330, 120, 180, 44, 'Guard policy', 'Deny s3:DeleteObject');
+    N('s3', 600, 110, 170, 50, 'S3 bucket', 'clinic-scans');
+    N('iamapi', 600, 215, 170, 50, 'IAM API', 'create users');
+    N('ec2', 600, 318, 170, 50, 'EC2 app server', 'role: ScanReader');
+    N('sts', 600, 405, 170, 40, 'AWS STS', 'temporary credentials');
+    const P = K.el('g', {}, sv);
+    const USERS = ['alice', 'bob', 'charles'];
+    const VIS = { root: 0, alice: 1, bob: 1, charles: 1, dev: 2, audit: 2, lA: 2, lB: 2, lC: 2, lC2: 2, gate: 4, s3: 4, iamapi: 5, guard: 6, lG: 6, ec2: 7, sts: 7 };
+    const FOCUS = [
+      ['root'], USERS, [...USERS, 'dev', 'audit', 'lA', 'lB', 'lC', 'lC2'], ['dev', 'lA', 'lB', 'lC'],
+      ['alice', 'gate', 's3'], ['alice', 'gate', 'iamapi'], ['bob', 'dev', 'guard', 'lG', 'lB', 'gate', 's3'],
+      ['ec2', 'sts', 's3', 'gate'], null
+    ];
+    function show(i) {
+      P.textContent = '';
+      for (const k in E) {
+        if (k.endsWith('N')) continue;
+        const el = E[k];
+        el.classList.toggle('gone', i < (VIS[k] ?? 0));
+        const f = FOCUS[i];
+        el.classList.toggle('fade-out', !!f && !f.includes(k));
+      }
+      ['root', 'alice', 'bob', 'charles', 'dev', 'audit', 'guard', 's3', 'iamapi', 'ec2', 'sts'].forEach(k => E[k].classList.remove('ok', 'bad', 'on'));
+      E.s3N.sub.textContent = 'clinic-scans'; E.iamapiN.sub.textContent = 'create users'; E.rootN.sub.textContent = 'sign-up email';
+      E.aliceN.sub.textContent = 'developer'; E.bobN.sub.textContent = 'developer'; E.charlesN.sub.textContent = 'dev + auditor';
+      if (i === 0) E.root.classList.add('on');
+      if (i === 1) USERS.forEach(u => { E[u + 'N'].sub.textContent = 'no permissions yet'; });
+      if (i === 3) E.dev.classList.add('on');
+      const ACT = { 4: 'alice', 5: 'alice', 6: 'bob', 7: 'ec2' }; if (ACT[i]) E[ACT[i]].classList.add('on');
+      if (i === 4) { E.s3.classList.add('ok'); E.s3N.sub.textContent = '200 OK · allowed'; }
+      if (i === 5) { E.iamapi.classList.add('bad'); E.iamapiN.sub.textContent = '403 · implicit deny'; }
+      if (i === 6) { E.s3.classList.add('bad'); E.s3N.sub.textContent = '403 · explicit deny'; E.guard.classList.add('bad'); }
+      if (i === 7) { E.s3.classList.add('ok'); E.s3N.sub.textContent = '200 OK · via role'; E.sts.classList.add('ok'); }
+      if (i === 8) { E.rootN.sub.textContent = 'MFA on · no access keys'; USERS.forEach(u => E[u + 'N'].sub.textContent = 'MFA on'); }
+    }
+    const reveal = async (keys, run) => { for (const k of keys) { E[k].classList.remove('gone', 'fade-out'); await K.sleep(260, run); } };
+    const STEPS = [
+      { title: 'One account, one all-powerful root user',
+        text: 'When the clinic signs up, AWS creates the <b>root user</b> from the sign-up email. It can do <b>everything</b>, including closing the account, and no IAM policy can limit it.',
+        tip: 'Enable MFA on root, create no root access keys, and use it only for root-only tasks.' },
+      { title: 'Give every person their own IAM user',
+        text: 'Alice, Bob and Charles each get an <b>IAM user</b> (their own sign-in). A brand-new user has <b>no permissions at all</b>: everything is denied until a policy allows it.',
+        play: async run => { E.root.classList.add('fade-out'); await reveal(USERS, run); } },
+      { title: 'Groups hand out permissions',
+        text: 'Instead of giving each person rights one by one, add them to <b>groups</b>. All three join <b>Developers</b>; Charles also joins <b>Audit</b>, so he gets the <b>union</b> of both groups\' permissions.',
+        tip: 'Groups contain users only, never other groups.',
+        play: async run => { await reveal(['dev', 'audit'], run); await reveal(['lA', 'lB', 'lC', 'lC2'], run); } },
+      { title: 'A policy is a small JSON document',
+        text: 'The Developers group has this policy attached. It reads: <b>allow</b> any S3 action on the scans bucket.<pre class="policy-json">{\n  "Effect": "Allow",\n  "Action": "s3:*",\n  "Resource": "arn:aws:s3:::clinic-scans/*"\n}</pre>' },
+      { title: 'Alice opens a scan: allowed',
+        text: 'Every AWS request (console, CLI or SDK) is an <b>API call</b>, and IAM checks it. Alice asks for <span class="mono">s3:GetObject</span>; her group\'s policy allows it, so S3 returns the file.',
+        play: async run => {
+          await reveal(['gate', 's3'], run);
+          const p = K.pill(P, 's3:GetObject'); await K.move(p, [160, 165], [492, 130], 700, run);
+          await K.sleep(350, run); await K.move(p, [492, 130], [515, 110], 300, run); p.remove();
+        } },
+      { title: 'Alice tries to create a user: denied',
+        text: 'Nothing allows <span class="mono">iam:CreateUser</span>, so the answer is <b>deny</b>. This is the <b>implicit deny</b>: if no policy says Allow, the request fails.',
+        tip: 'The default for everything in IAM is deny.',
+        play: async run => {
+          await reveal(['iamapi'], run);
+          const p = K.pill(P, 'iam:CreateUser', 'bad'); await K.move(p, [160, 165], [480, 215], 700, run);
+          await K.sleep(500, run); p.remove();
+        } },
+      { title: 'An explicit Deny beats any Allow',
+        text: 'The clinic attaches a <b>guard policy</b> to Developers: <i>Deny s3:DeleteObject</i>. Bob\'s group still allows <span class="mono">s3:*</span>, but when Allow and Deny both match, <b>Deny wins</b>. Scans can\'t be deleted by mistake.',
+        play: async run => {
+          await reveal(['guard', 'lG'], run);
+          const p = K.pill(P, 's3:DeleteObject', 'bad'); await K.move(p, [160, 235], [480, 120], 700, run);
+          await K.sleep(500, run); p.remove();
+        } },
+      { title: 'Apps use a role, not stored keys',
+        text: 'The app on EC2 must read scans too. Instead of saving a user\'s access keys on the server, the instance gets an <b>IAM role</b>. It asks <b>STS</b> for <b>temporary credentials</b> that expire and rotate on their own, then calls S3.',
+        tip: '"EC2/Lambda needs access to another service" → IAM role.',
+        play: async run => {
+          await reveal(['ec2', 'sts'], run);
+          let p = K.pill(P, 'AssumeRole', 'alt'); await K.move(p, [600, 345], [600, 382], 450, run); p.remove();
+          p = K.pill(P, 'temp creds', 'ok'); await K.move(p, [640, 382], [640, 345], 450, run); p.remove();
+          p = K.pill(P, 's3:GetObject'); await K.move(p, [600, 292], [600, 138], 650, run); p.remove();
+        } },
+      { title: 'Keep it secure',
+        text: 'Turn on <b>MFA</b> for root and every user, set a <b>password policy</b>, grant <b>least privilege</b>, and review regularly: the <b>credential report</b> lists who lacks MFA or has old keys; <b>Access Advisor</b> shows permissions nobody uses.',
+        tip: 'IAM is global and free. You configure it; AWS runs it (shared responsibility).' }
+    ];
+    K.story({ root: $('iamStory'), steps: STEPS, show });
+  })();
 
   /* ========== Groups ========== */
   const GROUPS = { dev: { name: 'Developers', x: 200, perms: ['Allow s3:* on patient-images/*', 'Allow ec2:Describe*'] }, ops: { name: 'Operations', x: 500, perms: ['Allow ec2:* (start, stop, terminate)', 'Allow cloudwatch:*'] }, audit: { name: 'Audit', x: 800, perms: ['Allow s3:Get*, s3:List* on *', 'Allow cloudtrail:LookupEvents'] } };
