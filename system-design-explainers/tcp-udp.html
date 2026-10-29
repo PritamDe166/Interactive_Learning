@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TCP vs UDP</title>
+<meta name="description" content="Day 3: a side-by-side race of TCP and UDP sending the same five packets with one lost, showing the three-way handshake, duplicate ACKs, retransmission and in-order delivery.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+</head>
+<body data-anim="continuous">
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← System Design roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Week 1 · Day 3 · Networking Fundamentals</div>
+    <h1>TCP vs UDP</h1>
+    <p class="lede">Both carry data between applications, with opposite trade-offs. <b>TCP</b> sets up a connection first, then guarantees every byte arrives once and in order. <b>UDP</b> just sends: no setup, no recovery, lower delay. The right choice depends on whether a late packet is still useful.</p>
+  </header>
+
+  <section aria-labelledby="raceTitle">
+    <h2 class="stage-title" id="raceTitle">Same five packets, two protocols</h2>
+    <div class="stage-kind">Time flows downward · one step down ≈ one network trip</div>
+    <div class="scroll">
+      <svg class="diagram" id="race" viewBox="0 0 1000 470" aria-label="Sequence diagram: TCP on the left with handshake, loss and retransmission; UDP on the right with loss and reordering">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead" d="M0 0 L10 5 L0 10 z"/></marker>
+          <marker id="arrHot" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead hot" d="M0 0 L10 5 L0 10 z"/></marker>
+        </defs>
+        <text class="stage-kind-svg mlabel accent" x="260" y="22" style="font-size:15px;font-weight:600">TCP</text>
+        <text class="mlabel accent" x="750" y="22" style="font-size:15px;font-weight:600">UDP</text>
+        <g id="lanes"></g>
+        <g id="msgs"></g>
+        <g id="pills"></g>
+      </svg>
+    </div>
+    <div class="controls">
+      <button class="btn primary" id="playBtn" type="button">Play</button>
+      <label class="toggle" for="loss"><input type="checkbox" id="loss" checked> Lose packet 2</label>
+      <label class="toggle" for="delay"><input type="checkbox" id="delay" checked> Delay packet 4</label>
+      <button class="btn" id="resetBtn" type="button">Reset</button>
+    </div>
+
+    <div class="two">
+      <div class="card">
+        <div class="label">TCP · receive buffer (in the OS, before your app)</div>
+        <div class="cells" id="tcpBuf"></div>
+        <div class="label">TCP · your app reads</div>
+        <div class="cells" id="tcpApp"></div>
+        <p class="sub" id="tcpNote" style="margin:0">Segments that arrive early wait in the buffer until the gap is filled.</p>
+      </div>
+      <div class="card">
+        <div class="label">UDP · your app reads (in arrival order)</div>
+        <div class="cells" id="udpApp"></div>
+        <p class="sub" id="udpNote" style="margin:0">No buffer that reorders, no retransmission. The app gets what arrives, when it arrives.</p>
+      </div>
+    </div>
+    <div class="kpis">
+      <div class="kpi good"><b id="kTcp">–</b><span>TCP: all data delivered at</span></div>
+      <div class="kpi accent"><b id="kUdp">–</b><span>UDP: last packet handed over at</span></div>
+      <div class="kpi"><b id="kUdpGot">–</b><span>UDP: packets the app received</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="hsH">
+    <h2 id="hsH">The three-way handshake</h2>
+    <p class="sub">Both sides pick a random starting sequence number and confirm the other's.</p>
+    <div class="cards">
+      <div class="card"><h3>1 · SYN</h3><p>Client: "I want to connect; my bytes start at <span class="mono">seq=1000</span>."</p></div>
+      <div class="card"><h3>2 · SYN-ACK</h3><p>Server: "Got it, I expect <span class="mono">1001</span> next (<span class="mono">ack=1001</span>); mine start at <span class="mono">seq=5000</span>."</p></div>
+      <div class="card"><h3>3 · ACK</h3><p>Client: "I expect <span class="mono">5001</span> next." Now both directions are confirmed. Data can ride along with this ACK.</p></div>
+    </div>
+    <div class="note"><span class="flag add">Why not two?</span><p>After two messages the server still doesn't know its SYN reached the client. The third message proves the client received the server's starting number, so both sides agree.</p></div>
+  </section>
+
+  <section aria-labelledby="cmpH">
+    <h2 id="cmpH">Side by side</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Feature</th><th>TCP</th><th>UDP</th></tr></thead>
+        <tbody>
+          <tr><td>Setup</td><td>Three-way handshake (1 round trip)</td><td>None, send immediately</td></tr>
+          <tr><td>Delivery</td><td>Retransmits lost data</td><td>Lost is lost</td></tr>
+          <tr><td>Order</td><td>Reassembled in order</td><td>Arrival order</td></tr>
+          <tr><td>Duplicates</td><td>Removed</td><td>Possible</td></tr>
+          <tr><td>Flow control</td><td>Yes: protects the <b>receiver</b> (receive window)</td><td>No</td></tr>
+          <tr><td>Congestion control</td><td>Yes: protects the <b>network</b></td><td>No (the app must be careful)</td></tr>
+          <tr><td>Data model</td><td>Byte stream</td><td>Separate datagrams</td></tr>
+          <tr><td>Header</td><td>20 bytes minimum</td><td>8 bytes</td></tr>
+          <tr><td>Typical uses</td><td>HTTP/1.1, HTTP/2, databases, SSH, email</td><td>DNS, voice, video calls, games, QUIC (HTTP/3)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>"TCP guarantees error-free data" is too strong.</b> TCP's 16-bit checksum catches most corruption, not all. Systems that must be certain add their own checks; TLS's integrity protection does this for HTTPS.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>The UDP checksum is optional only on IPv4.</b> On IPv6 it is mandatory. Either way it only detects damage; nothing repairs or resends.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="httpH">
+    <h2 id="httpH">HTTP versions and the transport underneath</h2>
+    <div class="cards">
+      <div class="card"><h3>HTTP/1.1 · TCP</h3><p><b>Keep-alive</b> reuses one connection for many requests, but one at a time. Browsers open ~6 connections per site to work around it.</p></div>
+      <div class="card"><h3>HTTP/2 · TCP</h3><p><b>Multiplexes</b> many requests on one connection. But if one TCP packet is lost, every stream waits for it: <b>head-of-line blocking</b>.</p></div>
+      <div class="card"><h3>HTTP/3 · QUIC · UDP</h3><p>QUIC rebuilds reliability <b>per stream</b> on top of UDP, so one loss stalls only its own stream. TLS 1.3 is built in, setup takes one round trip, and connections survive a Wi-Fi → mobile switch.</p></div>
+    </div>
+    <div class="note"><span class="flag add">Added</span><p><b>Why QUIC uses UDP:</b> TCP lives in operating-system kernels and network gear, so it is hard to change. UDP is a thin, universally allowed wrapper, so QUIC can add its own reliability, ordering per stream and encryption in user space.</p></div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>A multiplayer game sends player positions 30 times a second. TCP or UDP?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>UDP.</b> A resent old position is worse than the next fresh one. A late packet is as bad as a lost one.</p></div></details>
+      <details><summary>Flow control vs congestion control in one line each?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Flow control</b> stops you overwhelming the receiver. <b>Congestion control</b> stops you overwhelming the network between you.</p></div></details>
+      <details><summary>Segment 3 arrives before segment 2. What does your application see?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Nothing yet.</b> TCP holds segment 3 in the kernel's receive buffer and hands over 2, 3 in order once 2 arrives.</p></div></details>
+      <details><summary>How does a TCP sender learn a segment was lost, without waiting for a timeout?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Three duplicate ACKs</b> for the same number trigger a fast retransmit. Otherwise the retransmission timer fires.</p></div></details>
+      <details><summary>Does HTTP always run on TCP?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>No.</b> HTTP/1.1 and HTTP/2 use TCP; HTTP/3 uses QUIC, which runs over UDP.</p></div></details>
+      <details><summary>Why does every new connection to your database cost latency?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>The handshake</b> (plus TLS if used) costs round trips before any query. That's why apps use connection pools.</p></div></details>
+    </div>
+  </section>
+
+  <footer>The race is a simplified model: equal one-way delay for every packet, no congestion window. Sources: Day 3 notes, "TCP vs UDP: Transport Layer Protocols", "The request, TCP explained".</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const lanes = $('lanes'), msgsG = $('msgs'), pillsG = $('pills');
+  const X = { tcp: { c: 110, s: 410 }, udp: { c: 600, s: 900 } };
+  const Y0 = 70, S = 42, UNIT = 620;
+  const y = t => Y0 + t * S;
+
+  // lanes
+  for (const side of ['tcp', 'udp']) {
+    for (const who of ['c', 's']) {
+      const x = X[side][who];
+      K.el('line', { x1: x, y1: 50, x2: x, y2: 455, class: 'lane' }, lanes);
+      K.text(lanes, x, 44, who === 'c' ? 'Sender' : 'Receiver', 'mlabel muted');
+    }
+  }
+  K.el('line', { x1: 505, y1: 30, x2: 505, y2: 460, class: 'axis' }, lanes);
+
+  let state, raf = null;
+
+  function cells(el, items) { el.innerHTML = items.map(([txt, cls]) => `<span class="cell ${cls || ''}">${txt}</span>`).join(''); }
+
+  function reset() {
+    if (raf) cancelAnimationFrame(raf); raf = null;
+    msgsG.textContent = ''; pillsG.textContent = '';
+    state = {
+      t: 0, msgs: [], playing: false,
+      tcp: { expected: 1, buf: {}, app: [], dup: 0, lastAck: 0, retx: false, doneAt: null },
+      udp: { app: [], lastAt: null }
+    };
+    paintBuffers();
+    ['kTcp', 'kUdp', 'kUdpGot'].forEach(id => $(id).textContent = '–');
+    $('playBtn').textContent = 'Play';
+  }
+
+  function add(m) { m.drawn = false; m.arrived = false; state.msgs.push(m); }
+
+  function schedule() {
+    const loss = $('loss').checked, delay = $('delay').checked;
+    // TCP handshake
+    add({ side: 'tcp', from: 'c', t0: 0, t1: 1, label: 'SYN seq=1000', pill: 'SYN' });
+    add({ side: 'tcp', from: 's', t0: 1, t1: 2, label: 'SYN-ACK seq=5000 ack=1001', pill: 'SYN-ACK' });
+    add({ side: 'tcp', from: 'c', t0: 2, t1: 3, label: 'ACK ack=5001', pill: 'ACK' });
+    for (let i = 1; i <= 5; i++) {
+      const t0 = 2.25 + (i - 1) * 0.5;
+      add({ side: 'tcp', from: 'c', t0, t1: t0 + 1, label: `seg ${i}`, pill: `${i}`, seg: i, lost: loss && i === 2 });
+      // UDP: no handshake
+      const u0 = (i - 1) * 0.5;
+      add({ side: 'udp', from: 'c', t0: u0, t1: u0 + (delay && i === 4 ? 2.2 : 1), label: `datagram ${i}`, pill: `${i}`, dg: i, lost: loss && i === 2 });
+    }
+  }
+
+  function onArrive(m) {
+    if (m.side === 'udp' && m.dg) {
+      state.udp.app.push(m.dg); state.udp.lastAt = m.t1; paintBuffers();
+    }
+    if (m.side === 'tcp' && m.seg) {
+      const T = state.tcp;
+      T.buf[m.seg] = true;
+      while (T.buf[T.expected]) { T.app.push(T.expected); T.expected++; }
+      if (T.expected > 5 && T.doneAt === null) T.doneAt = m.t1;
+      paintBuffers();
+      add({ side: 'tcp', from: 's', t0: m.t1, t1: m.t1 + 1, label: `ACK ${T.expected}`, pill: `ACK ${T.expected}`, ack: T.expected, small: true });
+    }
+    if (m.side === 'tcp' && m.ack) {
+      const T = state.tcp;
+      if (m.ack === T.lastAck) T.dup++; else { T.lastAck = m.ack; T.dup = 0; }
+      if (T.dup === 3 && !T.retx && m.ack <= 5) {
+        T.retx = true;
+        add({ side: 'tcp', from: 'c', t0: m.t1, t1: m.t1 + 1, label: `seg ${m.ack} resent (3 dup ACKs)`, pill: `${m.ack}`, seg: m.ack, hot: true });
+      }
+    }
+  }
+
+  function pos(m, t) {
+    const a = [X[m.side][m.from], y(m.t0)], b = [X[m.side][m.from === 'c' ? 's' : 'c'], y(m.t1)];
+    const k = Math.max(0, Math.min(1, (t - m.t0) / (m.t1 - m.t0)));
+    return { a, b, k, p: [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k] };
+  }
+
+  function draw(m) {
+    const { a, b } = pos(m, m.t1);
+    const right = m.from === 'c';
+    if (m.lost) {
+      const mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+      K.el('line', { x1: a[0], y1: a[1], x2: mid[0], y2: mid[1], class: 'msg bad dash' }, msgsG);
+      K.text(msgsG, mid[0], mid[1] + 6, '✕', 'xmark');
+      K.text(msgsG, mid[0] + 14, mid[1] - 6, `${m.label} lost`, 'mlabel bad halo').style.textAnchor = 'start';
+      return;
+    }
+    K.el('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], class: 'msg ' + (m.hot ? 'hot' : m.small ? '' : 'solid'), 'marker-end': `url(#${m.hot ? 'arrHot' : 'arr'})` }, msgsG);
+    const lx = right ? a[0] + 10 : a[0] - 10, ly = a[1] + (m.small ? 12 : -4);
+    const t = K.text(msgsG, lx, ly, m.label, 'mlabel halo ' + (m.hot ? 'accent' : m.small ? 'muted' : ''));
+    t.style.textAnchor = right ? 'start' : 'end';
+    if (m.small) t.style.fontSize = '10.5px';
+  }
+
+  function frame(now) {
+    if (!state.playing) return;
+    const dt = Math.min(64, now - (state.last || now)); state.last = now;
+    state.t += K.tick(dt) / UNIT;
+    const t = state.t;
+    for (const m of state.msgs.slice()) {
+      if (t < m.t0 || m.drawn) continue;
+      if (!m.pillEl) { m.pillEl = K.pill(pillsG, m.pill, m.lost ? 'bad' : m.hot ? 'alt' : m.small ? 'ghost' : ''); }
+      const { p, k } = pos(m, t);
+      if (m.lost && k >= 0.5) { m.pillEl.remove(); m.drawn = true; draw(m); continue; }
+      m.pillEl.setAttribute('transform', `translate(${p[0].toFixed(1)},${p[1].toFixed(1)})`);
+      if (k >= 1) { m.pillEl.remove(); m.drawn = true; draw(m); if (!m.lost) onArrive(m); }
+    }
+    const pending = state.msgs.some(m => !m.drawn);
+    if (!pending) { finish(); return; }
+    raf = requestAnimationFrame(frame);
+  }
+
+  function finish() {
+    state.playing = false; raf = null;
+    $('playBtn').textContent = 'Replay';
+    const T = state.tcp, U = state.udp;
+    $('kTcp').textContent = T.doneAt !== null ? `≈ ${(T.doneAt / 2).toFixed(1)} RTT` : '–';
+    $('kUdp').textContent = U.lastAt !== null ? `≈ ${(U.lastAt / 2).toFixed(1)} RTT` : '–';
+    $('kUdpGot').textContent = `${U.app.length} of 5 · order ${U.app.join(' ')}`;
+  }
+
+  function paintBuffers() {
+    const T = state.tcp, U = state.udp;
+    cells($('tcpBuf'), [1, 2, 3, 4, 5].map(i => [i, T.app.includes(i) ? 'done' : T.buf[i] ? 'held' : '']));
+    cells($('tcpApp'), T.app.length ? T.app.map(i => [i, 'done']) : [['waiting…', '']]);
+    cells($('udpApp'), U.app.length ? U.app.map(i => [i, 'done']) : [['waiting…', '']]);
+    const held = [1, 2, 3, 4, 5].filter(i => T.buf[i] && !T.app.includes(i));
+    $('tcpNote').textContent = held.length ? `Holding ${held.join(', ')} until segment ${T.expected} arrives. Your app sees nothing new meanwhile.` : (T.app.length === 5 ? 'All five delivered once, in order.' : 'Segments that arrive early wait in the buffer until the gap is filled.');
+    const missing = [1, 2, 3, 4, 5].filter(i => !U.app.includes(i));
+    $('udpNote').textContent = U.app.length && missing.length && state && !state.playing && U.lastAt !== null ? `Missing ${missing.join(', ')}. UDP never tells the app.` : 'No buffer that reorders, no retransmission. The app gets what arrives, when it arrives.';
+  }
+
+  function play() {
+    reset(); schedule();
+    state.playing = true; state.last = null;
+    $('playBtn').textContent = 'Playing…';
+    if (K.reduce) { state.t = 100; }
+    raf = requestAnimationFrame(frame);
+  }
+
+  $('playBtn').addEventListener('click', play);
+  $('resetBtn').addEventListener('click', reset);
+  $('loss').addEventListener('change', reset);
+  $('delay').addEventListener('change', reset);
+  reset();
+})();
+</script>
+</body>
+</html>

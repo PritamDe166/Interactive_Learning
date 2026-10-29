@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Week 1 Review: Journey of a Request</title>
+<meta name="description" content="Day 7: the whole of Week 1 in two views — a timeline of DNS, TCP, TLS and HTTP costs you can tune, and the protocol stack showing how a request is wrapped layer by layer.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .gantt-bar { rx: 6; }
+  .g-dns { fill: var(--blue); }
+  .g-tcp { fill: var(--faint); }
+  .g-tls { fill: var(--teal); }
+  .g-quic { fill: var(--violet); }
+  .g-http { fill: var(--yellow); }
+  .playhead { stroke: var(--red); stroke-width: 2; }
+  .layer rect { stroke-width: 2; }
+  .layer.l-http rect { fill: var(--yellow); stroke: transparent; }
+  .layer.l-tls rect { fill: color-mix(in srgb, var(--teal) 28%, var(--panel)); stroke: var(--teal); }
+  .layer.l-tcp rect { fill: color-mix(in srgb, var(--blue) 22%, var(--panel)); stroke: var(--blue); }
+  .layer.l-ip rect { fill: color-mix(in srgb, var(--violet) 22%, var(--panel)); stroke: var(--violet); }
+  .layer.l-link rect { fill: color-mix(in srgb, var(--orange) 20%, var(--panel)); stroke: var(--orange); }
+  .layer text { fill: var(--fg); font-family: var(--mono); font-size: 12px; }
+  .layer.l-http text { fill: var(--ink); font-weight: 600; }
+  .stacklist li.on { color: var(--fg); }
+  .draw-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+  .draw-list li { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .draw-list a { color: var(--cyan); font-family: var(--mono); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← System Design roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Week 1 · Day 7 · Review</div>
+    <h1>Journey of a Request</h1>
+    <p class="lede">Everything from Week 1 in two pictures. The <b>timeline</b> answers "what happens, and how long does it take?": <b>DNS</b> finds the server, <b>TCP</b> connects, <b>TLS</b> secures, <b>HTTP</b> asks. The <b>stack</b> answers "what carries it?": each layer wraps the one above.</p>
+  </header>
+
+  <section aria-labelledby="tlTitle">
+    <h2 class="stage-title" id="tlTitle">Timeline: what does the first byte cost?</h2>
+    <div class="stage-kind">Opening https://api.example.com/patients/123</div>
+    <div class="controls">
+      <div class="seg" id="distSeg" role="group" aria-label="Distance to server">
+        <button type="button" data-v="5" aria-pressed="false">Same city · 5 ms RTT</button>
+        <button type="button" data-v="30" aria-pressed="true">Bengaluru → Mumbai · ~30 ms</button>
+        <button type="button" data-v="230" aria-pressed="false">Bengaluru → US East · ~230 ms</button>
+      </div>
+    </div>
+    <div class="controls">
+      <label class="toggle" for="dnsCached"><input type="checkbox" id="dnsCached"> DNS answer cached</label>
+      <label class="toggle" for="tls12"><input type="checkbox" id="tls12"> Use TLS 1.2</label>
+      <label class="toggle" for="reuse"><input type="checkbox" id="reuse"> Reuse open connection</label>
+      <label class="toggle" for="h3"><input type="checkbox" id="h3"> HTTP/3 (QUIC)</label>
+      <button class="btn primary" id="tlPlay" type="button">Play</button>
+    </div>
+    <div class="scroll">
+      <svg class="diagram" id="gantt" viewBox="0 0 1000 250" aria-label="Gantt chart of request phases over time"></svg>
+    </div>
+    <div class="kpis">
+      <div class="kpi accent"><b id="kTtfb">–</b><span>Time to first byte</span></div>
+      <div class="kpi"><b id="kSetup">–</b><span>Spent before the request leaves</span></div>
+      <div class="kpi"><b id="kRtts">–</b><span>Network round trips</span></div>
+    </div>
+    <p class="hint" id="tlHint"></p>
+  </section>
+
+  <section aria-labelledby="stTitle">
+    <h2 class="stage-title" id="stTitle">Stack: how the request is wrapped</h2>
+    <div class="stage-kind">Encapsulation on the way down, unwrapping on the way up</div>
+    <div class="controls">
+      <button class="btn primary" id="stPlay" type="button">Send the request</button>
+      <div class="seg" id="stackSeg" role="group" aria-label="Protocol stack">
+        <button type="button" data-v="https" aria-pressed="true">HTTPS (HTTP/1.1, HTTP/2)</button>
+        <button type="button" data-v="h3" aria-pressed="false">HTTP/3</button>
+        <button type="button" data-v="dns" aria-pressed="false">DNS query</button>
+      </div>
+    </div>
+    <div class="scroll">
+      <svg class="diagram" id="stack" viewBox="0 0 1000 420" aria-label="A request is wrapped by each layer at the sender, crosses the network, and is unwrapped at the receiver"></svg>
+    </div>
+    <p class="status-line" id="stStatus">Press "Send the request".</p>
+    <div class="note"><span class="flag add">Timeline ≠ stack</span><p>The timeline runs DNS → TCP → TLS → HTTP because things <i>happen</i> in that order. The stack is drawn HTTP over TLS over TCP over IP because each layer <i>carries</i> the one above. DNS isn't "below" HTTP: it's another application protocol, usually over UDP.</p></div>
+  </section>
+
+  <section aria-labelledby="hopH">
+    <h2 id="hopH">What can fail at each step</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Step</th><th>Job</th><th>Typical failure</th><th>What the user sees</th></tr></thead>
+        <tbody>
+          <tr><td><a href="client-server-dns.html">DNS</a></td><td>Name → IP</td><td>Resolver down, wrong record, expired domain</td><td>"Server not found"</td></tr>
+          <tr><td><a href="tcp-udp.html">TCP</a></td><td>Reliable connection</td><td>Port closed, firewall, server overloaded</td><td>"Connection refused" or a timeout</td></tr>
+          <tr><td><a href="https-tls.html">TLS</a></td><td>Identity + encryption</td><td>Expired or mismatched certificate</td><td>"Your connection is not private"</td></tr>
+          <tr><td><a href="http.html">HTTP</a></td><td>The actual request</td><td>Bad input, auth, bugs, upstream issues</td><td>4xx / 5xx status codes</td></tr>
+          <tr><td><a href="latency-throughput.html">Load</a></td><td>Enough capacity</td><td>Saturation, queueing</td><td>Slow pages, rising p99, timeouts</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="wbH">
+    <h2 id="wbH">Whiteboard drill</h2>
+    <p class="sub">Day 7 is for drawing. Close this page and sketch each one from memory, then check against the linked explainer.</p>
+    <div class="card">
+      <ol class="draw-list">
+        <li><b>1.</b> DNS lookup chain with caches and TTL <a href="client-server-dns.html">Day 1 →</a></li>
+        <li><b>2.</b> Request and response anatomy, plus 401 vs 403 and 502 vs 503 vs 504 <a href="http.html">Day 2 →</a></li>
+        <li><b>3.</b> SYN / SYN-ACK / ACK with sequence numbers, and a lost-packet retransmit <a href="tcp-udp.html">Day 3 →</a></li>
+        <li><b>4.</b> TLS 1.3 handshake, plus the certificate chain to a root CA <a href="https-tls.html">Day 4 →</a></li>
+        <li><b>5.</b> The latency-vs-utilisation curve and Little's Law <a href="latency-throughput.html">Day 5 →</a></li>
+        <li><b>6.</b> SLI → SLO → error budget → SLA, plus series vs parallel availability <a href="availability-slos.html">Day 6 →</a></li>
+        <li><b>7.</b> Both diagrams on this page: timeline and stack</li>
+      </ol>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Explain the lifecycle of an HTTPS request in four steps.<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>DNS</b> finds the IP → <b>TCP</b> three-way handshake → <b>TLS</b> handshake (identity + keys) → <b>HTTP</b> request and response over the encrypted channel.</p></div></details>
+      <details><summary>Users in the US say your Bengaluru-hosted API is slow, but server time is 20 ms. Why?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Round trips × distance.</b> At ~230 ms RTT, TCP + TLS + HTTP cost ~0.7 s before any server work. Fixes: CDN/edge, connection reuse, TLS 1.3, HTTP/3, or a US region.</p></div></details>
+      <details><summary>Why does reusing connections matter so much?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>It skips the TCP and TLS handshakes</b>, which are pure round trips. That's why browsers keep connections alive and services use pools.</p></div></details>
+      <details><summary>Which layer adds the IP addresses, and which adds the ports?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>IP</b> adds source/destination addresses (which machine). <b>TCP/UDP</b> adds ports (which program on that machine).</p></div></details>
+      <details><summary>Is DNS "below" HTTP in the stack?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>No.</b> DNS is a separate application protocol, usually over UDP. It just happens <i>first</i> in time.</p></div></details>
+      <details><summary>HTTPS is on. What can someone on the café Wi-Fi still learn?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>IP addresses, timing, sizes</b> and usually the hostname (SNI). Not the path, headers or body.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Timings are a simple model: one RTT per handshake round, fixed 50 ms server time, ~30 ms for an uncached DNS lookup. Sources: "The request, TCP explained", "Diagrams explained", and Days 1–6.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  /* ================= Timeline ================= */
+  let rtt = 30;
+  const SERVER = 50, DNS_MISS = 30;
+  function phases() {
+    const cached = $('dnsCached').checked, tls12 = $('tls12').checked, reuse = $('reuse').checked, h3 = $('h3').checked;
+    $('tls12').disabled = h3; $('tls12').parentElement.style.opacity = h3 ? .5 : 1;
+    const out = []; let t = 0, rtts = 0;
+    const push = (cls, name, d, note) => { out.push({ cls, name, t0: t, d, note }); t += d; };
+    push('g-dns', 'DNS', cached ? 0 : DNS_MISS, cached ? 'cached: 0 ms' : 'resolver lookup');
+    if (!reuse) {
+      if (h3) { push('g-quic', 'QUIC + TLS 1.3', rtt, '1 RTT: transport and crypto together'); rtts += 1; }
+      else {
+        push('g-tcp', 'TCP handshake', rtt, 'SYN → SYN-ACK → ACK'); rtts += 1;
+        push('g-tls', tls12 ? 'TLS 1.2' : 'TLS 1.3', rtt * (tls12 ? 2 : 1), tls12 ? '2 RTT' : '1 RTT'); rtts += tls12 ? 2 : 1;
+      }
+    } else {
+      out.push({ cls: 'g-tcp', name: 'Connection', t0: t, d: 0, note: 'already open: no handshakes' });
+    }
+    const setup = t;
+    push('g-http', 'HTTP request + server work', rtt + SERVER, `1 RTT + ${SERVER} ms server`); rtts += 1;
+    return { out, total: t, setup, rtts };
+  }
+  const g = $('gantt');
+  let playhead = null;
+  function drawGantt() {
+    const { out, total, setup, rtts } = phases();
+    g.textContent = '';
+    const X0 = 230, X1 = 700, scale = Math.max(total, 120);
+    const xOf = ms => X0 + ms / scale * (X1 - X0);
+    K.el('line', { x1: X0, y1: 215, x2: X1, y2: 215, class: 'axis' }, g);
+    const step = scale > 600 ? 200 : scale > 250 ? 100 : 25;
+    for (let v = 0; v <= scale; v += step) { K.el('line', { x1: xOf(v), y1: 20, x2: xOf(v), y2: 215, class: 'grid-line' }, g); K.text(g, xOf(v), 234, v + ' ms', 'mlabel muted'); }
+    out.forEach((p, i) => {
+      const y = 30 + i * 46;
+      const lab = K.text(g, X0 - 14, y + 20, p.name, 'mlabel'); lab.style.textAnchor = 'end'; lab.style.fontWeight = '600';
+      if (p.d > 0) K.el('rect', { x: xOf(p.t0), y, width: Math.max(2, xOf(p.t0 + p.d) - xOf(p.t0)), height: 28, rx: 6, class: p.cls }, g);
+      const nt = K.text(g, xOf(p.t0 + p.d) + 8, y + 19, `${Math.round(p.d)} ms · ${p.note}`, 'mlabel muted halo'); nt.style.textAnchor = 'start';
+    });
+    playhead = K.el('line', { x1: X0, y1: 16, x2: X0, y2: 218, class: 'playhead', opacity: 0 }, g);
+    $('kTtfb').textContent = Math.round(total) + ' ms';
+    $('kSetup').textContent = Math.round(setup) + ' ms';
+    $('kRtts').textContent = rtts;
+    const share = setup / total;
+    $('tlHint').innerHTML = rtt >= 200 && !$('reuse').checked ? `At this distance, <b>${Math.round(share * 100)}%</b> of the wait happens before the request even leaves. Try "Reuse open connection" or "HTTP/3".`
+      : $('reuse').checked ? 'A reused connection pays only for the request itself. That is why keep-alive and connection pools matter.'
+      : 'Switch the distance to US East to see handshakes dominate.';
+    g.dataset.total = total; g.dataset.scale = scale;
+    return { X0, X1, scale, total };
+  }
+  async function playGantt() {
+    const { X0, X1, scale, total } = drawGantt();
+    const run = K.newRun('tl');
+    playhead.setAttribute('opacity', 1);
+    try {
+      const steps = 60;
+      for (let i = 0; i <= steps; i++) {
+        const x = X0 + (total * i / steps) / scale * (X1 - X0);
+        playhead.setAttribute('x1', x); playhead.setAttribute('x2', x);
+        await K.sleep(25, run);
+      }
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  K.seg($('distSeg'), v => { rtt = +v; drawGantt(); });
+  ['dnsCached', 'tls12', 'reuse', 'h3'].forEach(id => $(id).addEventListener('change', drawGantt));
+  $('tlPlay').addEventListener('click', playGantt);
+  drawGantt();
+
+  /* ================= Stack / encapsulation ================= */
+  const STACKS = {
+    https: [
+      { k: 'l-http', name: 'HTTP', text: 'GET /patients/123  Host: api.example.com' },
+      { k: 'l-tls', name: 'TLS', text: 'TLS record · encrypted: 7f3a…c91e' },
+      { k: 'l-tcp', name: 'TCP', text: 'port 52344 → 443 · seq 1001' },
+      { k: 'l-ip', name: 'IP', text: '192.168.1.20 → 203.0.113.10' },
+      { k: 'l-link', name: 'Wi-Fi', text: 'MAC a4:83… → router 3c:22…' }
+    ],
+    h3: [
+      { k: 'l-http', name: 'HTTP/3', text: 'GET /patients/123 (stream 4)' },
+      { k: 'l-tls', name: 'QUIC + TLS', text: 'QUIC packet · encrypted, reliable per stream' },
+      { k: 'l-tcp', name: 'UDP', text: 'port 52344 → 443' },
+      { k: 'l-ip', name: 'IP', text: '192.168.1.20 → 203.0.113.10' },
+      { k: 'l-link', name: 'Wi-Fi', text: 'MAC a4:83… → router 3c:22…' }
+    ],
+    dns: [
+      { k: 'l-http', name: 'DNS', text: 'A? www.example.com' },
+      { k: 'l-tcp', name: 'UDP', text: 'port 53122 → 53' },
+      { k: 'l-ip', name: 'IP', text: '192.168.1.20 → 8.8.8.8' },
+      { k: 'l-link', name: 'Wi-Fi', text: 'MAC a4:83… → router 3c:22…' }
+    ]
+  };
+  let stackKey = 'https';
+  const st = $('stack');
+  function drawStackIdle() {
+    st.textContent = '';
+    const S = STACKS[stackKey];
+    K.text(st, 160, 26, 'Your laptop', 'mlabel accent');
+    K.text(st, 840, 26, 'Server', 'mlabel accent');
+    S.forEach((l, i) => {
+      const y = 50 + i * 54;
+      const t1 = K.text(st, 160, y + 24, l.name, 'mlabel'); t1.style.fontWeight = '600';
+      const t2 = K.text(st, 840, y + 24, l.name, 'mlabel'); t2.style.fontWeight = '600';
+    });
+    K.el('line', { x1: 240, y1: 390, x2: 760, y2: 390, class: 'msg solid dash' }, st);
+    K.text(st, 500, 410, 'network (routers only read the IP layer)', 'mlabel muted');
+  }
+  function packet(depth, cx, cy) {
+    // draw nested boxes for layers [0..depth]
+    const S = STACKS[stackKey], grp = K.el('g', {}, st);
+    const W0 = 330, H0 = 34, pad = 14;
+    for (let i = 0; i <= depth; i++) {
+      const lvl = depth - i; // outermost first
+      const l = S[lvl], w = W0 + lvl * pad * 2, h = H0 + lvl * 26;
+      const gg = K.el('g', { class: 'layer ' + l.k }, grp);
+      K.el('rect', { x: cx - w / 2, y: cy - h / 2, width: w, height: h, rx: 8 }, gg);
+      if (lvl > 0) { const t = K.text(gg, cx - w / 2 + 8, cy - h / 2 + 12, l.text, ''); t.style.fontSize = '10.5px'; }
+      else { const t = K.text(gg, cx, cy + 4, l.text, ''); t.style.textAnchor = 'middle'; }
+    }
+    return grp;
+  }
+  async function playStack() {
+    const run = K.newRun('st');
+    const S = STACKS[stackKey];
+    drawStackIdle();
+    let p = null;
+    try {
+      for (let d = 0; d < S.length; d++) {
+        if (p) p.remove();
+        p = packet(d, 500, 64 + d * 54);
+        $('stStatus').innerHTML = d === 0 ? `<b>${S[0].name}</b> creates the message` : `<b>${S[d].name}</b> wraps it: ${S[d].text}`;
+        await K.sleep(1100, run);
+      }
+      $('stStatus').innerHTML = 'The frame crosses the network. Routers look at the IP header to forward it.';
+      p.remove(); p = packet(S.length - 1, 500, 300);
+      await K.sleep(1200, run);
+      for (let d = S.length - 1; d >= 0; d--) {
+        if (p) p.remove();
+        p = packet(d, 500, 64 + d * 54);
+        $('stStatus').innerHTML = d === 0 ? `Server's app receives <b>${S[0].text}</b>` : `Server's <b>${S[d].name}</b> layer removes its wrapper`;
+        await K.sleep(900, run);
+      }
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  K.seg($('stackSeg'), v => { stackKey = v; K.cancel('st'); drawStackIdle(); $('stStatus').textContent = 'Press "Send the request".'; });
+  $('stPlay').addEventListener('click', playStack);
+  drawStackIdle();
+})();
+</script>
+</body>
+</html>

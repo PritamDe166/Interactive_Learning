@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Latency, Percentiles & Queueing</title>
+<meta name="description" content="Day 5: latency vs throughput, why p95/p99 beat averages, and a live queue that shows latency exploding as a server nears saturation, with Little's Law.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .bar-rect { fill: var(--teal); }
+  .bar-rect.tail { fill: var(--red); }
+  .pmark { stroke-width: 2; }
+  .pmark.p50 { stroke: var(--fg); }
+  .pmark.p95 { stroke: var(--accent-text); }
+  .pmark.p99 { stroke: var(--red); }
+  .pmark.avg { stroke: var(--cyan); stroke-dasharray: 5 4; }
+  .curve { fill: none; stroke: var(--teal); stroke-width: 3; }
+  .curve-dot { fill: var(--cyan); stroke: var(--bg); stroke-width: 3; }
+  .req { fill: var(--pill); }
+  .req.serving { fill: var(--yellow); }
+  .danger { fill: color-mix(in srgb, var(--red) 12%, transparent); }
+</style>
+</head>
+<body data-anim="continuous">
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← System Design roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Week 1 · Day 5 · Networking Fundamentals</div>
+    <h1>Latency, Percentiles & Queueing</h1>
+    <p class="lede"><b>Latency</b> is how long one request takes. <b>Throughput</b> is how many requests finish per second. <b>Percentiles</b> show how latency is spread, especially the slow tail. As load approaches capacity, requests start <b>queueing</b>, and latency rises much faster than load.</p>
+  </header>
+
+  <section aria-labelledby="defH">
+    <h2 id="defH">Four numbers, four questions</h2>
+    <div class="cards">
+      <div class="card"><h3>Latency · how long?</h3><p>Time for one request, end to end: network + queueing + processing + dependencies. Example: <span class="mono">120 ms</span>.</p></div>
+      <div class="card"><h3>Throughput · how much?</h3><p>Work finished per unit time. Example: <span class="mono">10,000 RPS</span>. High throughput can coexist with high latency.</p></div>
+      <div class="card"><h3>Concurrency · how many at once?</h3><p>Requests in flight right now. Linked to the other two by <b>Little's Law</b>: concurrency = throughput × latency.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="histTitle">
+    <h2 class="stage-title" id="histTitle">Why the average lies</h2>
+    <div class="stage-kind">1,000 simulated requests · log-scale latency axis</div>
+    <div class="ranges">
+      <div class="range"><label for="tailPct">Slow requests <output id="tailPctOut"></output></label><input type="range" id="tailPct" min="0" max="8" step="0.5" value="2"></div>
+      <div class="range"><label for="tailMs">How slow they are <output id="tailMsOut"></output></label><input type="range" id="tailMs" min="200" max="3000" step="100" value="1200"></div>
+    </div>
+    <div class="scroll">
+      <svg class="diagram" id="hist" viewBox="0 0 1000 300" aria-label="Histogram of request latencies with markers for average, p50, p95 and p99"></svg>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><b id="kAvg" style="color:var(--cyan)">–</b><span>Average</span></div>
+      <div class="kpi"><b id="kP50">–</b><span>p50 · typical user</span></div>
+      <div class="kpi accent"><b id="kP95">–</b><span>p95 · 1 in 20 slower</span></div>
+      <div class="kpi bad"><b id="kP99">–</b><span>p99 · 1 in 100 slower</span></div>
+    </div>
+    <p class="hint">Drag "Slow requests" from 0 to 2%. p50 barely moves, the average creeps up, and p99 jumps. The average describes nobody's real experience.</p>
+  </section>
+
+  <section aria-labelledby="qTitle">
+    <h2 class="stage-title" id="qTitle">Load, queueing and saturation</h2>
+    <div class="stage-kind">One server · capacity 10 requests/s (100 ms each, on average)</div>
+    <div class="ranges">
+      <div class="range"><label for="lam">Incoming load <output id="lamOut"></output></label><input type="range" id="lam" min="1" max="12" step="0.5" value="5"></div>
+    </div>
+    <div class="scroll">
+      <svg class="diagram" id="queue" viewBox="0 0 1000 170" aria-label="Requests arrive, wait in a queue, are served one at a time, and leave"></svg>
+    </div>
+    <div class="info-grid">
+      <div class="card">
+        <div class="label">Average latency vs utilisation (theory, M/M/1)</div>
+        <svg class="diagram" id="curve" viewBox="0 0 560 260" style="min-width:0" aria-label="Latency curve rising sharply as utilisation approaches 100 percent"></svg>
+      </div>
+      <div class="side">
+        <div class="kpis" style="margin-top:0;grid-template-columns:repeat(2,minmax(0,1fr))">
+          <div class="kpi"><b id="kRho">–</b><span>Utilisation</span></div>
+          <div class="kpi accent"><b id="kW">–</b><span>Avg latency (theory)</span></div>
+          <div class="kpi"><b id="kL">–</b><span>In flight (Little's Law)</span></div>
+          <div class="kpi"><b id="kQ">–</b><span>Queue right now</span></div>
+        </div>
+        <div class="card"><div class="label">What to notice</div><p id="qNote" style="margin:0"></p></div>
+      </div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>Why the curve bends:</b> for a simple queue, average time in system ≈ service time ÷ (1 − utilisation). At 50% load that's 2× the service time, at 90% it's 10×, and at 99% it's 100×. Real systems aim to run their bottleneck well below 100%.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Overload feeds itself.</b> Timeouts trigger client retries, retries add load, and more load means more timeouts. This is a retry storm, and Week 15 (backoff, circuit breakers) exists to stop it.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="calcH">
+    <h2 id="calcH">Two quick calculators</h2>
+    <div class="two">
+      <div class="card">
+        <div class="label">Little's Law: how many requests are in flight?</div>
+        <div class="ranges" style="margin-top:4px">
+          <div class="range"><label for="llRps">Throughput <output id="llRpsOut"></output></label><input type="range" id="llRps" min="100" max="50000" step="100" value="10000"></div>
+          <div class="range"><label for="llMs">Latency <output id="llMsOut"></output></label><input type="range" id="llMs" min="10" max="1000" step="10" value="100"></div>
+        </div>
+        <p style="margin:6px 0 0">Concurrency = <span class="mono" id="llEq"></span></p>
+        <p class="sub" style="margin:0">Size thread pools, connection pools and memory for this number, not for the RPS.</p>
+      </div>
+      <div class="card">
+        <div class="label">Fan-out: one request calls many services</div>
+        <div class="ranges" style="margin-top:4px">
+          <div class="range"><label for="fan">Services called in parallel <output id="fanOut"></output></label><input type="range" id="fan" min="1" max="200" step="1" value="100"></div>
+        </div>
+        <p style="margin:6px 0 0">If each is slow 1% of the time (its p99), <b class="accent" id="fanPct"></b> of user requests hit at least one slow call.</p>
+        <p class="sub" style="margin:0">That's why big systems care about p99 and p99.9 of every dependency.</p>
+      </div>
+    </div>
+    <div class="note"><span class="flag add">Added</span><p><b>Percentiles don't average.</b> The p99 of three servers is not the mean of their three p99s. Merge the raw histograms first; monitoring tools do this with histogram metrics.</p></div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Requirement: "50,000 RPS with p99 under 200 ms." Split it into its two kinds of requirement.<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Throughput:</b> 50,000 RPS (capacity). <b>Latency:</b> p99 &lt; 200 ms (performance). Design and test them separately.</p></div></details>
+      <details><summary>20,000 RPS at 200 ms average latency. How many requests are in flight?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>4,000.</b> Little's Law: 20,000 × 0.2 s.</p></div></details>
+      <details><summary>Under load, p50 went 30 → 40 ms but p99 went 70 → 800 ms. What is likely happening?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Queueing near saturation</b>, contention or a slow dependency hitting a minority of requests. Find the busiest resource.</p></div></details>
+      <details><summary>Your server runs at 90% CPU. Why is it risky even though it isn't "full"?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Latency is already ~10× service time</b>, and a small traffic bump pushes it far higher. There's no headroom for spikes.</p></div></details>
+      <details><summary>Why can p99 matter more than p50 for a page that calls 50 backends?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Fan-out amplifies the tail:</b> 1 − 0.99⁵⁰ ≈ 40% of page loads wait on at least one p99-slow call.</p></div></details>
+      <details><summary>High throughput, high latency: give a real example.<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>A batch job or a deep queue:</b> millions of items per hour, but each waits minutes. A truck full of hard drives has huge throughput too.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Simulations use a fixed random seed and textbook M/M/1 queueing; real systems differ in detail but bend the same way. Sources: Day 5 notes, "Latency, Throughput & Percentiles" and "Load, Concurrency, Queueing & Saturation".</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const fmtMs = v => v >= 1000 ? (v / 1000).toFixed(2) + ' s' : Math.round(v) + ' ms';
+
+  /* ================= Histogram ================= */
+  function rng(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function normal(r) { let u = 0, v = 0; while (!u) u = r(); while (!v) v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+  const N = 1000;
+  const hist = $('hist');
+  const X0 = 60, X1 = 970, Y0 = 250, YT = 40, LMIN = Math.log10(10), LMAX = Math.log10(5000);
+  const xOf = ms => X0 + (Math.log10(Math.max(10, Math.min(5000, ms))) - LMIN) / (LMAX - LMIN) * (X1 - X0);
+  const pct = (a, p) => a[Math.max(0, Math.ceil(p * a.length) - 1)];
+
+  function drawHist() {
+    const f = +$('tailPct').value / 100, slow = +$('tailMs').value;
+    $('tailPctOut').textContent = (f * 100).toFixed(1) + '%';
+    $('tailMsOut').textContent = '~' + fmtMs(slow);
+    const r = rng(7), lat = [], isTail = [];
+    for (let i = 0; i < N; i++) {
+      const tail = r() < f;
+      const v = tail ? slow * Math.exp(0.25 * normal(r)) : 50 * Math.exp(0.35 * normal(r));
+      lat.push(v); isTail.push(tail);
+    }
+    const sorted = lat.slice().sort((a, b) => a - b);
+    const avg = lat.reduce((s, v) => s + v, 0) / N, p50 = pct(sorted, .5), p95 = pct(sorted, .95), p99 = pct(sorted, .99);
+    const BINS = 48, counts = new Array(BINS).fill(0), tailC = new Array(BINS).fill(0);
+    lat.forEach((v, i) => { const b = Math.min(BINS - 1, Math.max(0, Math.floor((Math.log10(Math.max(10, v)) - LMIN) / (LMAX - LMIN) * BINS))); counts[b]++; if (isTail[i]) tailC[b]++; });
+    const maxC = Math.max(...counts);
+    hist.textContent = '';
+    K.el('line', { x1: X0, y1: Y0, x2: X1, y2: Y0, class: 'axis' }, hist);
+    [10, 30, 100, 300, 1000, 3000].forEach(t => { const x = xOf(t); K.el('line', { x1: x, y1: YT, x2: x, y2: Y0, class: 'grid-line' }, hist); K.text(hist, x, Y0 + 18, fmtMs(t), 'mlabel muted'); });
+    K.text(hist, X0 - 8, Y0 - 4, '0', 'mlabel muted').style.textAnchor = 'end';
+    K.text(hist, X0 - 8, YT + 4, String(maxC), 'mlabel muted').style.textAnchor = 'end';
+    const bw = (X1 - X0) / BINS;
+    counts.forEach((c, b) => {
+      if (!c) return;
+      const h = c / maxC * (Y0 - YT);
+      const th = tailC[b] / maxC * (Y0 - YT);
+      K.el('rect', { x: X0 + b * bw + 1, y: Y0 - h, width: bw - 2, height: h - th, class: 'bar-rect' }, hist);
+      if (th > 0) K.el('rect', { x: X0 + b * bw + 1, y: Y0 - th, width: bw - 2, height: th, class: 'bar-rect tail' }, hist);
+    });
+    const marks = [['avg', avg, 'avg'], ['p50', p50, 'p50'], ['p95', p95, 'p95'], ['p99', p99, 'p99']];
+    marks.forEach(([k, v, lab], i) => {
+      const x = xOf(v);
+      K.el('line', { x1: x, y1: YT - 10, x2: x, y2: Y0, class: 'pmark ' + k }, hist);
+      const t = K.text(hist, x + 5, YT - 14 + i * 14, `${lab} ${fmtMs(v)}`, 'mlabel halo'); t.style.textAnchor = 'start';
+      t.style.fill = `var(--${k === 'p50' ? 'fg' : k === 'p95' ? 'accent-text' : k === 'p99' ? 'red' : 'cyan'})`;
+    });
+    $('kAvg').textContent = fmtMs(avg); $('kP50').textContent = fmtMs(p50); $('kP95').textContent = fmtMs(p95); $('kP99').textContent = fmtMs(p99);
+  }
+  ['tailPct', 'tailMs'].forEach(id => $(id).addEventListener('input', drawHist));
+  drawHist();
+
+  /* ================= Queue simulation ================= */
+  const MU = 10, S = 1 / MU;
+  const q = $('queue');
+  K.text(q, 70, 40, 'Arrivals', 'mlabel muted');
+  const zone = K.el('rect', { x: 150, y: 55, width: 470, height: 70, rx: 12, class: 'zone' }, q);
+  K.text(q, 385, 46, 'QUEUE (waiting)', 'zone-label').style.textAnchor = 'middle';
+  const srv = K.node(q, 735, 90, 170, 76, 'Server', 'idle');
+  srv.g.classList.add('teal');
+  K.text(q, 930, 40, 'Done', 'mlabel muted');
+  const dotsG = K.el('g', {}, q);
+  const overflow = K.text(q, 170, 145, '', 'mlabel bad'); overflow.style.textAnchor = 'start';
+
+  let qs = { t: 0, next: 0, queue: [], busyUntil: null, serving: null, flying: [], done: [], r: rng(11) };
+  const expo = (r, rate) => -Math.log(1 - r()) / rate;
+  function lambda() { return +$('lam').value; }
+
+  function curveDraw() {
+    const c = $('curve'); c.textContent = '';
+    const cx0 = 50, cx1 = 540, cy0 = 220, cy1 = 20, WMAX = 2000;
+    const xr = rho => cx0 + rho * (cx1 - cx0), yr = w => cy0 - Math.min(w, WMAX) / WMAX * (cy0 - cy1);
+    K.el('rect', { x: xr(0.8), y: cy1, width: xr(1) - xr(0.8), height: cy0 - cy1, class: 'danger' }, c);
+    K.text(c, xr(0.9), cy1 + 14, 'danger zone', 'mlabel bad');
+    K.el('line', { x1: cx0, y1: cy0, x2: cx1, y2: cy0, class: 'axis' }, c);
+    K.el('line', { x1: cx0, y1: cy0, x2: cx0, y2: cy1, class: 'axis' }, c);
+    [0, .25, .5, .75, 1].forEach(v => K.text(c, xr(v), cy0 + 18, Math.round(v * 100) + '%', 'mlabel muted'));
+    [0, 500, 1000, 1500, 2000].forEach(v => { const t = K.text(c, cx0 - 6, yr(v) + 4, v ? fmtMs(v) : '0', 'mlabel muted'); t.style.textAnchor = 'end'; });
+    let d = '';
+    for (let i = 0; i <= 200; i++) { const rho = i / 200 * 0.97; const w = S / (1 - rho) * 1000; d += (i ? 'L' : 'M') + xr(rho).toFixed(1) + ' ' + yr(w).toFixed(1); }
+    K.el('path', { d, class: 'curve' }, c);
+    const rho = Math.min(lambda() / MU, 0.995);
+    const w = lambda() >= MU ? Infinity : S / (1 - rho) * 1000;
+    K.el('circle', { cx: xr(Math.min(rho, 1)), cy: yr(w === Infinity ? 99999 : w), r: 8, class: 'curve-dot' }, c);
+  }
+
+  function stats() {
+    const lam = lambda(), rho = lam / MU;
+    $('lamOut').textContent = `${lam} req/s`;
+    $('kRho').textContent = Math.round(rho * 100) + '%';
+    if (lam >= MU) {
+      $('kW').textContent = 'grows forever'; $('kL').textContent = 'grows forever';
+      $('qNote').innerHTML = '<span class="bad-text">Arrivals exceed capacity.</span> The queue grows without limit; every new request waits longer than the last until timeouts start. Only more capacity or less load fixes this.';
+    } else {
+      const W = S / (1 - rho);
+      $('kW').textContent = fmtMs(W * 1000);
+      $('kL').textContent = (lam * W).toFixed(1);
+      $('qNote').innerHTML = rho < 0.6 ? 'Plenty of headroom: most requests are served almost immediately. Latency ≈ service time.'
+        : rho < 0.85 ? 'Getting busy: bursts now form short queues. Average latency is already a few times the service time.'
+        : '<span class="accent">Near saturation:</span> small increases in load cause large increases in latency. This is where p99 explodes.';
+    }
+    curveDraw();
+  }
+  $('lam').addEventListener('input', stats);
+
+  let last = null;
+  function tick(now) {
+    const dt = K.tick(Math.min(0.1, last === null ? 0 : (now - last) / 1000)); last = now;
+    if (!document.hidden) {
+      qs.t += dt;
+      const lam = lambda();
+      while (qs.t >= qs.next) {
+        qs.queue.push({ born: qs.next, x: 60 });
+        qs.next += expo(qs.r, lam);
+      }
+      if (qs.serving && qs.t >= qs.busyUntil) {
+        qs.flying.push({ x: 820, born: qs.serving.born });
+        qs.serving = null;
+      }
+      if (!qs.serving && qs.queue.length) {
+        qs.serving = qs.queue.shift();
+        qs.busyUntil = qs.t + expo(qs.r, MU);
+      }
+      if (qs.queue.length > 400) qs.queue.splice(0, qs.queue.length - 400);
+      render(dt);
+    }
+    requestAnimationFrame(tick);
+  }
+  function render(dt) {
+    dotsG.textContent = '';
+    const MAXV = 22;
+    qs.queue.forEach((r, i) => {
+      if (i >= MAXV) return;
+      const target = 605 - i * 20;
+      r.x += (target - r.x) * Math.min(1, dt * 8);
+      K.el('circle', { cx: r.x.toFixed(1), cy: 90, r: 8, class: 'req' }, dotsG);
+    });
+    overflow.textContent = qs.queue.length > MAXV ? `+${qs.queue.length - MAXV} more waiting` : '';
+    if (qs.serving) K.el('circle', { cx: 735, cy: 118, r: 9, class: 'req serving' }, dotsG);
+    srv.sub.textContent = qs.serving ? 'busy' : 'idle';
+    qs.flying = qs.flying.filter(f => (f.x += dt * 260) < 960);
+    qs.flying.forEach(f => K.el('circle', { cx: f.x.toFixed(1), cy: 90, r: 7, class: 'req' }, dotsG));
+    $('kQ').textContent = qs.queue.length;
+  }
+  stats();
+  requestAnimationFrame(tick);
+
+  /* ================= Calculators ================= */
+  function ll() {
+    const r = +$('llRps').value, ms = +$('llMs').value;
+    $('llRpsOut').textContent = K.fmt(r) + ' RPS'; $('llMsOut').textContent = ms + ' ms';
+    $('llEq').textContent = `${K.fmt(r)} × ${(ms / 1000).toFixed(2)} s = ${K.fmt(Math.round(r * ms / 1000))} in flight`;
+  }
+  function fan() {
+    const n = +$('fan').value; $('fanOut').textContent = n;
+    $('fanPct').textContent = ((1 - Math.pow(0.99, n)) * 100).toFixed(0) + '%';
+  }
+  ['llRps', 'llMs'].forEach(id => $(id).addEventListener('input', ll));
+  $('fan').addEventListener('input', fan);
+  ll(); fan();
+})();
+</script>
+</body>
+</html>

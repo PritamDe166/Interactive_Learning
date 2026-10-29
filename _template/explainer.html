@@ -11,6 +11,7 @@
   3. Shared look comes from assets/css (theme → base → explainer). Never hard-code colours:
      use the tokens in assets/css/theme.css so light and dark both work.
   4. Page-specific animation code goes in the <script> at the bottom of this page.
+     Use window.Kit (assets/js/explainer-kit.js) for nodes, pills, moves and cancellable runs.
   5. Link the new page from the subject's index.html and the root RECENT list.
 -->
 <title>Explainer Title</title>
@@ -21,6 +22,7 @@
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
 <script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
 </head>
 <body>
 <div class="wrap explainer">

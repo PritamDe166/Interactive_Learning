@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Stateless Applications</title>
+<meta name="description" content="Day 9: a shopping cart under three designs — server memory, sticky sessions, and external state in Redis — with crashes and load balancing that show why stateless servers scale.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>.dead rect { stroke: var(--red) !important; stroke-dasharray: 6 4; }</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← System Design roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Week 2 · Day 9 · Scaling Fundamentals</div>
+    <h1>Stateless Applications</h1>
+    <p class="lede"><b>Stateless doesn't mean "no state".</b> It means no important state lives inside one particular server. Keep it in a database, a shared cache or the client's token, and every server becomes <b>interchangeable</b>: any one can handle any request.</p>
+  </header>
+
+  <section aria-labelledby="cartTitle">
+    <h2 class="stage-title" id="cartTitle">Where does the cart live?</h2>
+    <div class="stage-kind">One shopper · three app servers behind a load balancer (round robin)</div>
+    <div class="controls">
+      <div class="seg" id="modeSeg" role="group" aria-label="Design">
+        <button type="button" data-v="mem" aria-pressed="true">Stateful: server memory</button>
+        <button type="button" data-v="sticky" aria-pressed="false">Sticky sessions</button>
+        <button type="button" data-v="redis" aria-pressed="false">Stateless: cart in Redis</button>
+      </div>
+    </div>
+    <div class="scroll">
+      <svg class="diagram" id="cart" viewBox="0 0 1000 330" aria-label="Shopper, load balancer, three servers with local memory, and a shared Redis store"></svg>
+    </div>
+    <div class="controls">
+      <button class="btn primary" id="addBtn" type="button">Add an item</button>
+      <button class="btn" id="viewBtn" type="button">View cart</button>
+      <button class="btn" id="crashBtn" type="button">Crash the server you're on</button>
+      <button class="btn" id="resetBtn" type="button">Reset</button>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><b id="kAdded">0</b><span>Items you added</span></div>
+      <div class="kpi" id="kSeenBox"><b id="kSeen">–</b><span>Items the page showed last</span></div>
+      <div class="kpi accent"><b id="kServer">–</b><span>Last request served by</span></div>
+    </div>
+    <div class="info-grid">
+      <div class="card"><div class="label">What happened · newest first</div><ul class="log" id="log"><li>Add a few items, then view the cart.</li></ul></div>
+      <div class="card facts">
+        <div><div class="label">This design</div><p id="dTitle"></p></div>
+        <div><div class="label k-strength">Good</div><p id="dGood"></p></div>
+        <div><div class="label k-weak">Breaks when</div><p id="dBad"></p></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="whereH">
+    <h2 id="whereH">Where state can live instead</h2>
+    <div class="cards">
+      <div class="card"><h3>Database</h3><p>Durable business data: patients, orders, carts that must survive. Every server reads the same rows.</p></div>
+      <div class="card"><h3>Shared cache (Redis)</h3><p>Fast, shared, temporary data: sessions, carts, rate-limit counters. All servers see the same values.</p></div>
+      <div class="card"><h3>Client token (JWT)</h3><p>The client carries signed claims (<span class="mono">Authorization: Bearer …</span>). Any server can verify the signature without a lookup.</p></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>The JWT trade-off:</b> because no server stores the session, you can't easily "log someone out" before the token expires. Common fix: short-lived access tokens (minutes) plus a refresh token that <i>is</i> checked against a store, or a small revocation list.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>State didn't disappear, it moved.</b> Redis and the database are now critical shared dependencies. They need their own replication, monitoring and capacity planning (Weeks 3 and 7).</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Local caches are fine.</b> A server can keep a copy of reference data or compiled templates in memory. That's allowed as long as losing it only costs speed, not correctness.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>"Our API is stateless, so it doesn't use a database." What's wrong?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Stateless refers to the app instances.</b> A stateless API with a stateful database is the normal design.</p></div></details>
+      <details><summary>Why do sticky sessions make autoscaling awkward?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Users are pinned</b>, so new servers get only new users and scaling in kills sessions. Load drifts uneven.</p></div></details>
+      <details><summary>A server is replaced during a deploy. What happens to carts in the stateless design?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Nothing.</b> They live in Redis; the new server reads them on the next request.</p></div></details>
+      <details><summary>Name one new risk the stateless design introduces.<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Redis becomes a shared dependency:</b> if it's down or slow, every server is affected. It needs replication and monitoring.</p></div></details>
+      <details><summary>How does a server validate a JWT without asking anyone?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>It verifies the signature</b> with the issuer's key and checks expiry and claims. No session lookup is needed.</p></div></details>
+      <details><summary>When are sticky sessions still reasonable?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Legacy apps</b> that keep session state in memory and can't be changed yet, or for cache locality. Treat them as a stopgap.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: Day 9 notes, "Stateless Applications"; sticky sessions also appear in Days 10–13.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const ITEMS = ['Laptop', 'Mouse', 'Charger', 'Bag', 'Monitor', 'Keyboard'];
+  const DESIGN = {
+    mem: { t: 'Each server keeps carts in its own memory.', g: 'Simple and fast: no extra infrastructure.', b: 'The next request lands on a different server, or that server restarts. The cart seems to vanish.' },
+    sticky: { t: 'Load balancer pins you to the first server you hit (session affinity).', g: 'Lets memory-based apps run on several servers.', b: 'Your server crashes or is removed: your cart is gone. Load also becomes uneven.' },
+    redis: { t: 'Servers keep nothing; the cart lives in shared Redis.', g: 'Any server can serve any request. Crashes, deploys and autoscaling don\'t lose data.', b: 'Redis itself is down or slow, so it must be made highly available.' }
+  };
+  let mode = 'mem', S;
+  const svg = $('cart');
+  const SX = 560, SY = [75, 165, 255], NAMES = ['A', 'B', 'C'];
+
+  function fresh() { S = { mem: [[], [], []], alive: [true, true, true], redis: [], rr: 0, pin: null, added: 0, busy: false }; }
+
+  let N = {};
+  function draw() {
+    svg.textContent = '';
+    N.user = K.node(svg, 80, 165, 120, 60, 'Shopper', 'browser');
+    N.lb = K.node(svg, 270, 165, 150, 60, 'Load balancer', mode === 'sticky' ? 'sticky: pins you' : 'round robin');
+    N.lb.g.classList.add('teal');
+    K.el('line', { x1: 140, y1: 165, x2: 195, y2: 165, class: 'msg solid' }, svg);
+    N.srv = SY.map((y, i) => {
+      K.el('line', { x1: 345, y1: 165, x2: 445, y2: y, class: 'msg ' + (S.alive[i] ? 'solid' : 'bad dash') }, svg);
+      const memTxt = mode === 'redis' ? 'memory: (nothing kept)' : `memory: ${S.mem[i].length ? S.mem[i].join(', ') : 'empty'}`;
+      const nd = K.node(svg, SX, y, 230, 64, `Server ${NAMES[i]}${S.alive[i] ? '' : ' · down'}`, memTxt.length > 34 ? memTxt.slice(0, 32) + '…' : memTxt);
+      if (!S.alive[i]) nd.g.classList.add('dead', 'dim');
+      if (mode === 'redis') K.el('line', { x1: 675, y1: y, x2: 775, y2: 165, class: 'msg' }, svg);
+      return nd;
+    });
+    N.redis = K.node(svg, 870, 165, 190, 70, 'Redis', mode === 'redis' ? `cart: ${S.redis.length ? S.redis.length + ' items' : 'empty'}` : 'not used');
+    if (mode !== 'redis') N.redis.g.classList.add('dim'); else N.redis.g.classList.add('solid');
+    N.pills = K.el('g', {}, svg);
+    const d = DESIGN[mode];
+    $('dTitle').textContent = d.t; $('dGood').textContent = d.g; $('dBad').textContent = d.b;
+  }
+
+  function pick() {
+    const alive = [0, 1, 2].filter(i => S.alive[i]);
+    if (!alive.length) return -1;
+    if (mode === 'sticky') {
+      if (S.pin !== null && S.alive[S.pin]) return S.pin;
+      const lost = S.pin !== null; S.pin = alive[0];
+      if (lost) K.log($('log'), `<span class="bad-text">Your pinned server is gone.</span> The load balancer re-pins you to Server ${NAMES[S.pin]}`);
+      return S.pin;
+    }
+    let i; do { i = S.rr % 3; S.rr++; } while (!S.alive[i]);
+    return i;
+  }
+
+  async function request(kind) {
+    if (S.busy) return; S.busy = true; const run = K.newRun('cart');
+    try {
+      const i = pick();
+      if (i < 0) { K.log($('log'), '<span class="bad-text">No servers alive.</span>'); return; }
+      const item = ITEMS[S.added % ITEMS.length];
+      const label = kind === 'add' ? `add ${item}` : 'GET /cart';
+      let p = K.pill(N.pills, label);
+      await K.move(p, [140, 165], [195, 165], 300, run);
+      await K.move(p, [345, 165], [445, SY[i]], 450, run); p.remove();
+      N.srv[i].g.classList.add('on');
+      $('kServer').textContent = `Server ${NAMES[i]}`;
+      if (mode === 'redis') {
+        p = K.pill(N.pills, kind === 'add' ? 'write' : 'read', 'alt');
+        await K.move(p, [675, SY[i]], [775, 165], 350, run); p.remove();
+        if (kind === 'add') { S.redis.push(item); S.added++; }
+        N.redis.sub.textContent = `cart: ${S.redis.length} items`;
+        await K.move(p = K.pill(N.pills, 'ok', 'ok'), [775, 165], [675, SY[i]], 300, run); p.remove();
+      } else if (kind === 'add') { S.mem[i].push(item); S.added++; }
+      const cart = mode === 'redis' ? S.redis : S.mem[i];
+      N.srv[i].g.classList.remove('on');
+      draw();
+      const shown = cart.length, ok = shown === S.added;
+      $('kAdded').textContent = S.added;
+      $('kSeen').textContent = shown;
+      $('kSeenBox').className = 'kpi ' + (ok ? 'good' : 'bad');
+      const r = K.pill(N.pills, kind === 'add' ? `cart: ${shown} items` : `${shown} items`, ok ? 'ok' : 'bad');
+      await K.move(r, [445, SY[i]], [345, 165], 400, run); r.remove();
+      K.log($('log'), `${kind === 'add' ? `Add <b>${item}</b>` : 'View cart'} → Server ${NAMES[i]} → page shows <span class="${ok ? 'ok-text' : 'bad-text'}">${shown} of ${S.added} items</span>${ok ? '' : mode === 'redis' ? '' : ` (Server ${NAMES[i]} only knows what was added through it)`}`);
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; } finally { S.busy = false; }
+  }
+
+  $('addBtn').addEventListener('click', () => request('add'));
+  $('viewBtn').addEventListener('click', () => request('view'));
+  $('crashBtn').addEventListener('click', () => {
+    if (S.busy) return;
+    const last = $('kServer').textContent.replace('Server ', '');
+    const i = NAMES.indexOf(last); const target = i >= 0 ? i : 0;
+    if (!S.alive[target]) return;
+    S.alive[target] = false; S.mem[target] = [];
+    K.log($('log'), `<span class="bad-text">Server ${NAMES[target]} crashed.</span> ${mode === 'redis' ? 'It held nothing, so nothing is lost.' : 'Everything in its memory is gone.'}`);
+    draw();
+  });
+  function reset() { K.cancel('cart'); fresh(); draw(); $('kAdded').textContent = '0'; $('kSeen').textContent = '–'; $('kSeenBox').className = 'kpi'; $('kServer').textContent = '–'; K.resetLog($('log'), 'Add a few items, then view the cart.'); }
+  $('resetBtn').addEventListener('click', reset);
+  K.seg($('modeSeg'), v => { mode = v; reset(); });
+  reset();
+})();
+</script>
+</body>
+</html>

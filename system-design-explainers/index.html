@@ -37,7 +37,7 @@
       </svg>
     </div>
     <div class="stats">
-      <div class="stat"><b id="sLive">0</b><span>Explainers</span></div>
+      <div class="stat"><b id="sLive">0</b><span>Days covered</span></div>
       <div class="stat"><b id="sDays">0</b><span>Roadmap days</span></div>
       <div class="stat"><b id="sNext">–</b><span>Next up</span></div>
       <div class="meter">
@@ -72,19 +72,19 @@
 const ROADMAP = [
  {phase:"Phase 1", name:"Foundations", weeks:[
   {w:1,name:"Networking Fundamentals",days:[
-   {d:1,t:"Client-Server Architecture · DNS Resolution"},
-   {d:2,t:"HTTP Lifecycle · Methods · Status Codes"},
-   {d:3,t:"TCP · UDP · Three-Way Handshake"},
-   {d:4,t:"HTTPS · TLS Handshake · Certificates"},
-   {d:5,t:"Latency · Throughput · p50/p95/p99"},
-   {d:6,t:"Availability · SLA · SLO · SLI"},
-   {d:7,t:"Review: whiteboard everything",review:true}]},
+   {d:1,t:"Client-Server Architecture · DNS Resolution",file:"client-server-dns.html"},
+   {d:2,t:"HTTP Lifecycle · Methods · Status Codes",file:"http.html"},
+   {d:3,t:"TCP · UDP · Three-Way Handshake",file:"tcp-udp.html"},
+   {d:4,t:"HTTPS · TLS Handshake · Certificates",file:"https-tls.html"},
+   {d:5,t:"Latency · Throughput · p50/p95/p99",file:"latency-throughput.html"},
+   {d:6,t:"Availability · SLA · SLO · SLI",file:"availability-slos.html"},
+   {d:7,t:"Review: journey of a request",review:true,file:"week-1-review.html"}]},
   {w:2,name:"Scaling Fundamentals",days:[
-   {d:8,t:"Vertical vs Horizontal Scaling"},
-   {d:9,t:"Stateless Applications"},
-   {d:10,t:"Reverse Proxy · NGINX"},
-   {d:11,t:"API Gateway"},
-   {d:12,t:"Load Balancers: L4 vs L7"},
+   {d:8,t:"Vertical vs Horizontal Scaling",file:"scaling.html"},
+   {d:9,t:"Stateless Applications",file:"stateless.html"},
+   {d:10,t:"Reverse Proxy · NGINX",file:"proxy-lb-gateway.html"},
+   {d:11,t:"API Gateway",file:"proxy-lb-gateway.html"},
+   {d:12,t:"Load Balancers: L4 vs L7",file:"proxy-lb-gateway.html"},
    {d:13,t:"Load Balancing Algorithms",file:"load-balancing-algorithms.html"},
    {d:14,t:"Design: Scalable Web Application",review:true}]},
   {w:3,name:"Caching & CDN",days:[

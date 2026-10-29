@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Client-Server & DNS</title>
+<meta name="description" content="Day 1: how a client finds a server. Watch a live DNS lookup walk resolver, root, TLD and authoritative servers, with caching, TTL and outages.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← System Design roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Week 1 · Day 1 · Networking Fundamentals</div>
+    <h1>Client-Server & DNS</h1>
+    <p class="lede">The <b>client</b> asks, the <b>server</b> processes and answers. Before the client can ask anything, it has to find the server's IP address. <b>DNS</b> turns a name like <span class="mono">www.example.com</span> into that IP, and caching means most lookups never travel the whole chain.</p>
+  </header>
+
+  <section aria-labelledby="csH">
+    <h2 id="csH">Client and server</h2>
+    <p class="sub">Splitting the work lets each side change and scale on its own.</p>
+    <div class="cards">
+      <div class="card"><h3>Client</h3><p>Browser, mobile app, desktop app.</p><ul><li>Shows the UI</li><li>Sends requests</li><li>Displays responses</li></ul></div>
+      <div class="card"><h3>Server</h3><p>Runs where the client can't be trusted or can't reach.</p><ul><li>Business logic and authentication</li><li>Database access</li><li>Returns responses</li></ul></div>
+      <div class="card"><h3>Why it matters</h3><p>The server side can grow from one machine to many behind a load balancer without the client changing. That is where Week 2 picks up.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stageTitle">
+    <h2 class="stage-title" id="stageTitle">Live DNS lookup</h2>
+    <div class="stage-kind">www.example.com → 203.0.113.10 · TTL 300 s</div>
+    <div class="scroll">
+      <svg class="diagram" id="stage" viewBox="0 0 1000 420" aria-label="DNS lookup path from browser through operating system and recursive resolver to root, TLD and authoritative servers">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead muted" d="M0 0 L10 5 L0 10 z"/></marker>
+        </defs>
+        <rect class="zone" x="20" y="130" width="365" height="150" rx="16"/>
+        <text class="zone-label" x="36" y="152">YOUR DEVICE</text>
+        <rect class="zone" x="690" y="20" width="290" height="390" rx="16"/>
+        <text class="zone-label" x="706" y="42">DNS HIERARCHY</text>
+        <g id="lines"></g>
+        <g id="nodes"></g>
+        <g id="pills"></g>
+      </svg>
+    </div>
+
+    <div class="controls">
+      <button class="btn primary" id="lookupBtn" type="button">Look up www.example.com</button>
+      <button class="btn" id="clearBtn" type="button">Clear browser + OS cache</button>
+      <button class="btn" id="waitBtn" type="button">Wait 5 min (TTL expires)</button>
+      <label class="toggle" for="outage"><input type="checkbox" id="outage"> Resolver outage</label>
+      <button class="btn" id="resetBtn" type="button">Reset</button>
+    </div>
+    <p class="hint">Try it: look up twice. The second answer comes from the browser cache with no network trip. Then clear the device cache, and the resolver answers from its own cache.</p>
+
+    <div class="kpis" aria-live="polite">
+      <div class="kpi accent"><b id="kFrom">–</b><span>Answer came from</span></div>
+      <div class="kpi"><b id="kHops">–</b><span>DNS servers asked</span></div>
+      <div class="kpi"><b id="kMs">–</b><span>Lookup time (illustrative)</span></div>
+    </div>
+
+    <div class="info-grid">
+      <div class="card">
+        <div class="label">What just happened · newest first</div>
+        <ul class="log" id="log"><li>Press "Look up www.example.com" to start.</li></ul>
+      </div>
+      <div class="card facts">
+        <div><div class="label">Recursive resolver</div><p>Does the legwork for you, usually run by your ISP or a public service such as 8.8.8.8. It caches every answer.</p></div>
+        <div><div class="label">Root → TLD → Authoritative</div><p>Root and TLD servers only point the way. The authoritative server holds the actual record.</p></div>
+        <div><div class="label">TTL</div><p>Each record says how long it may be cached. Short TTL means changes spread quickly; long TTL means fewer lookups.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="addH">
+    <h2 id="addH">Worth knowing</h2>
+    <div class="notes">
+      <div class="note"><span class="flag add">Added</span><p><b>Your device checks more than a cache.</b> Before asking the resolver, the operating system also reads its <span class="mono">hosts</span> file. That is why editing <span class="mono">/etc/hosts</span> can override DNS.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Root servers are rarely asked.</b> Resolvers cache the referrals too. The <span class="mono">.com</span> server list has a TTL of about two days, so a busy resolver almost never needs the root for <span class="mono">.com</span> names.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Transport:</b> classic DNS uses <b>UDP port 53</b> because a query fits in one packet. It switches to TCP for large answers and zone transfers. Encrypted options exist too: DNS over HTTPS (DoH) and DNS over TLS (DoT).</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="recH">
+    <h2 id="recH">Common record types</h2>
+    <p class="sub">The authoritative server holds these. "What is the IP?" is just an A or AAAA query.</p>
+    <div class="scroll card table-card">
+      <table class="mini">
+        <thead><tr><th>Record</th><th>Maps</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td>A</td><td>Name → IPv4 address</td><td class="mono">www.example.com → 203.0.113.10</td></tr>
+          <tr><td>AAAA</td><td>Name → IPv6 address</td><td class="mono">www.example.com → 2001:db8::10</td></tr>
+          <tr><td>CNAME</td><td>Name → another name (alias)</td><td class="mono">shop.example.com → example.cdn.net</td></tr>
+          <tr><td>NS</td><td>Domain → its authoritative name servers</td><td class="mono">example.com → ns1.example.com</td></tr>
+          <tr><td>MX</td><td>Domain → mail servers</td><td class="mono">example.com → mail.example.com</td></tr>
+          <tr><td>TXT</td><td>Domain → free text (verification, SPF)</td><td class="mono">"v=spf1 include:…"</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="failH">
+    <h2 id="failH">When DNS fails</h2>
+    <div class="cards">
+      <div class="card"><h3>Healthy app, dead site</h3><p>If the name can't be resolved, no request ever reaches your servers. Every hop in the path is a possible failure point.</p></div>
+      <div class="card"><h3>Caches buy time</h3><p>Clients that still hold a cached answer keep working until its TTL runs out. Turn on "Resolver outage" and look up with a warm cache to see it.</p></div>
+      <div class="card"><h3>How big sites protect DNS</h3><ul><li>Several authoritative servers</li><li>Anycast: one IP served from many locations</li><li>More than one DNS provider</li></ul></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Your API servers are healthy, but users report the site is down. Name a cause outside the app.<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>DNS can't resolve the name</b> (or the load balancer or TLS is broken). Users never reach the healthy servers.</p></div></details>
+      <details><summary>What does the root server return for <span class="mono">www.example.com</span>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Not the IP.</b> It returns a referral to the <span class="mono">.com</span> TLD servers. Only the authoritative server returns the A record.</p></div></details>
+      <details><summary>You are moving to a new server IP tomorrow. What should you do with the TTL today?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Lower it in advance</b> (for example from 1 day to 60 s), so cached copies of the old IP expire quickly after the switch.</p></div></details>
+      <details><summary>Who does the recursive work: the browser or the resolver?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>The resolver.</b> The browser makes one request and gets one final answer; the resolver walks root, TLD and authoritative on its behalf.</p></div></details>
+      <details><summary>Why does DNS normally use UDP rather than TCP?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>A query and answer fit in one packet each</b>, so skipping the TCP handshake saves a round trip. DNS falls back to TCP when the answer is too large.</p></div></details>
+      <details><summary><span class="mono">shop.example.com</span> should point at your CDN's hostname, not a fixed IP. Which record?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>CNAME.</b> It aliases one name to another, so the CDN can change its IPs without you editing DNS.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Lookup timings are illustrative. Addresses use reserved documentation ranges (203.0.113.0/24, 2001:db8::/32). Sources: Day 1 notes and "DNS Architecture: How Domain Names Become IP Addresses".</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const IP = '203.0.113.10', TTL = 300;
+  const lines = $('lines'), nodesG = $('nodes'), pills = $('pills');
+
+  /* ---------- layout ---------- */
+  const P = {
+    browser:  { x: 100, y: 215, w: 150, t: 'Browser',            s: '' },
+    os:       { x: 295, y: 215, w: 150, t: 'Operating system',   s: '' },
+    resolver: { x: 530, y: 215, w: 190, t: 'Recursive resolver', s: '' },
+    root:     { x: 835, y: 95,  w: 230, t: 'Root server',        s: 'knows where .com lives' },
+    tld:      { x: 835, y: 215, w: 230, t: '.com TLD server',     s: 'knows example.com\'s NS' },
+    auth:     { x: 835, y: 335, w: 230, t: 'Authoritative server', s: 'ns1.example.com' },
+    web:      { x: 530, y: 360, w: 200, t: 'Web server',          s: IP }
+  };
+  const edge = {
+    'browser-os':    [[175, 215], [220, 215]],
+    'os-resolver':   [[370, 215], [435, 215]],
+    'resolver-root': [[625, 205], [720, 105]],
+    'resolver-tld':  [[625, 215], [720, 215]],
+    'resolver-auth': [[625, 225], [720, 325]],
+    'browser-web':   [[130, 247], [430, 352]]
+  };
+  const L = {};
+  for (const k in edge) L[k] = K.el('line', { x1: edge[k][0][0], y1: edge[k][0][1], x2: edge[k][1][0], y2: edge[k][1][1], class: 'msg' }, lines);
+  const N = {};
+  for (const k in P) N[k] = K.node(nodesG, P[k].x, P[k].y, P[k].w, 64, P[k].t, P[k].s);
+  N.web.g.classList.add('solid');
+
+  /* ---------- state ---------- */
+  let clock = 0, cache, busy = false;
+  function freshCache() { cache = { browser: null, os: null, resolver: null }; }
+  function valid(k) { return cache[k] !== null && cache[k] > clock; }
+  function paintCaches() {
+    const lab = { browser: 'cache', os: 'cache', resolver: 'cache' };
+    ['browser', 'os', 'resolver'].forEach(k => {
+      N[k].sub.textContent = valid(k) ? `cached · TTL ${cache[k] - clock}s` : `${lab[k]}: empty`;
+      N[k].g.classList.toggle('hit', valid(k));
+    });
+  }
+  function clearMarks() {
+    for (const k in N) N[k].g.classList.remove('on', 'ok', 'bad');
+    for (const k in L) L[k].setAttribute('class', 'msg');
+    pills.textContent = '';
+  }
+  function setK(from, hops, ms) { $('kFrom').textContent = from; $('kHops').textContent = hops; $('kMs').textContent = ms; }
+  const log = h => K.log($('log'), h);
+
+  async function hop(key, reverse, label, cls, run, ms = 650) {
+    const [a, b] = edge[key];
+    L[key].setAttribute('class', 'msg hot');
+    const p = K.pill(pills, label, cls);
+    await K.move(p, reverse ? b : a, reverse ? a : b, ms, run);
+    p.remove();
+    L[key].setAttribute('class', 'msg solid');
+  }
+  async function check(k, run) { N[k].g.classList.add('on'); await K.sleep(380, run); N[k].g.classList.remove('on'); }
+
+  async function lookup() {
+    if (busy) return;
+    busy = true; clearMarks();
+    const run = K.newRun();
+    let hops = 0;
+    try {
+      log(`<span class="rq">t=${clock}s</span> Browser needs the IP for www.example.com`);
+      await check('browser', run);
+      if (valid('browser')) {
+        N.browser.g.classList.add('ok');
+        log(`Browser cache hit: <span class="ok-text">${IP}</span>, no network needed`);
+        setK('Browser cache', '0', '0 ms');
+        return await connect(run);
+      }
+      await hop('browser-os', false, 'www.example.com?', '', run);
+      await check('os', run);
+      if (valid('os')) {
+        N.os.g.classList.add('ok');
+        log(`OS cache hit: <span class="ok-text">${IP}</span>`);
+        cache.browser = cache.os; paintCaches();
+        await hop('browser-os', true, IP, 'ok', run);
+        setK('OS cache', '0', '< 1 ms');
+        return await connect(run);
+      }
+      await hop('os-resolver', false, 'www.example.com?', '', run);
+      hops++;
+      if ($('outage').checked) {
+        N.resolver.g.classList.add('bad'); N.resolver.sub.textContent = 'not responding';
+        log(`<span class="bad-text">Resolver did not answer.</span> No cached copy on the device, so the site is unreachable even though the web server is fine.`);
+        await hop('os-resolver', true, 'timeout', 'bad', run, 500);
+        await hop('browser-os', true, 'DNS error', 'bad', run, 400);
+        N.browser.g.classList.add('bad');
+        setK('Nowhere', '1 (failed)', 'timeout');
+        return;
+      }
+      await check('resolver', run);
+      if (valid('resolver')) {
+        N.resolver.g.classList.add('ok');
+        log(`Resolver cache hit: <span class="ok-text">${IP}</span> (TTL ${cache.resolver - clock}s left)`);
+        cache.os = cache.browser = cache.resolver; paintCaches();
+        await hop('os-resolver', true, IP, 'ok', run);
+        await hop('browser-os', true, IP, 'ok', run);
+        setK('Resolver cache', '1', '~20 ms');
+        return await connect(run);
+      }
+      log('Resolver cache miss: it walks the hierarchy for you');
+      await hop('resolver-root', false, 'www.example.com?', '', run); hops++;
+      await check('root', run);
+      log('Root server: "I don\'t know, ask the <b>.com</b> TLD servers"');
+      await hop('resolver-root', true, 'ask .com TLD', 'alt', run);
+      await hop('resolver-tld', false, 'www.example.com?', '', run); hops++;
+      await check('tld', run);
+      log('.com TLD server: "ask <b>ns1.example.com</b>, it is authoritative"');
+      await hop('resolver-tld', true, 'ask ns1.example.com', 'alt', run);
+      await hop('resolver-auth', false, 'www.example.com?', '', run); hops++;
+      await check('auth', run);
+      N.auth.g.classList.add('ok');
+      log(`Authoritative server: <span class="ok-text">A ${IP}, TTL ${TTL}s</span>`);
+      await hop('resolver-auth', true, `A ${IP}`, 'ok', run);
+      cache.resolver = clock + TTL; paintCaches();
+      log('Resolver caches the answer for 300 s and returns it');
+      await hop('os-resolver', true, IP, 'ok', run);
+      cache.os = clock + TTL; paintCaches();
+      await hop('browser-os', true, IP, 'ok', run);
+      cache.browser = clock + TTL; paintCaches();
+      setK('Authoritative server', String(hops), '~120 ms');
+      await connect(run);
+    } catch (e) {
+      if (!(e instanceof K.Stop)) throw e;
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function connect(run) {
+    log(`Browser connects to <b>${IP}</b> and sends the request (client → server)`);
+    await hop('browser-web', false, 'GET /', '', run, 550);
+    N.web.g.classList.add('on'); await K.sleep(250, run); N.web.g.classList.remove('on');
+    await hop('browser-web', true, '200 OK', 'ok', run, 550);
+    clock += 5; paintCaches();
+  }
+
+  function reset() {
+    K.cancel(); busy = false; clock = 0; freshCache(); clearMarks();
+    N.resolver.sub.textContent = ''; paintCaches();
+    setK('–', '–', '–');
+    K.resetLog($('log'), 'Press "Look up www.example.com" to start.');
+  }
+
+  $('lookupBtn').addEventListener('click', lookup);
+  $('clearBtn').addEventListener('click', () => {
+    if (busy) return;
+    cache.browser = cache.os = null; paintCaches(); clearMarks();
+    log('Browser and OS caches cleared (like a restart or a new device)');
+  });
+  $('waitBtn').addEventListener('click', () => {
+    if (busy) return;
+    clock += 301; paintCaches(); clearMarks();
+    log(`<span class="rq">t=${clock}s</span> 5 minutes later: every cached copy has expired (TTL 300 s)`);
+  });
+  $('outage').addEventListener('change', () => { if (!busy) { clearMarks(); paintCaches(); } });
+  $('resetBtn').addEventListener('click', reset);
+  reset();
+})();
+</script>
+</body>
+</html>

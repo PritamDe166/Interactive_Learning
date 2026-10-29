@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HTTPS & the TLS Handshake</title>
+<meta name="description" content="Day 4: TLS 1.2 vs TLS 1.3 handshakes on a timeline showing where encryption starts, and a certificate validator you can break.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← System Design roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Week 1 · Day 4 · Networking Fundamentals</div>
+    <h1>HTTPS & the TLS Handshake</h1>
+    <p class="lede"><b>HTTPS is HTTP over TLS.</b> TLS does two separate jobs: it <b>proves the server's identity</b> with a certificate, and it <b>agrees on shared keys</b> so everything after the handshake is encrypted with fast symmetric crypto.</p>
+  </header>
+
+  <section aria-labelledby="propH">
+    <h2 id="propH">What TLS gives you</h2>
+    <div class="cards">
+      <div class="card"><h3>Confidentiality</h3><p>Eavesdroppers on the Wi-Fi or ISP can't read the request or response.</p></div>
+      <div class="card"><h3>Integrity</h3><p>Any change in transit is detected and the connection is dropped.</p></div>
+      <div class="card"><h3>Authentication</h3><p>The client can verify it is really talking to <span class="mono">api.example.com</span>, not an impostor.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="hsTitle">
+    <h2 class="stage-title" id="hsTitle">The handshake, on a timeline</h2>
+    <div class="stage-kind">Grey = plain text · cyan = encrypted</div>
+    <div class="controls" style="margin-top:12px">
+      <div class="seg" id="verSeg" role="group" aria-label="TLS version">
+        <button type="button" data-v="12" aria-pressed="false">TLS 1.2</button>
+        <button type="button" data-v="13" aria-pressed="true">TLS 1.3</button>
+        <button type="button" data-v="0rtt" aria-pressed="false">TLS 1.3 resumed (0-RTT)</button>
+      </div>
+      <button class="btn primary" id="hsPlay" type="button">Play</button>
+    </div>
+    <div class="scroll">
+      <svg class="diagram" id="hs" viewBox="0 0 1000 560" aria-label="Sequence diagram of TCP and TLS handshake messages between client and server">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead muted" d="M0 0 L10 5 L0 10 z"/></marker>
+          <marker id="arrHot" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead hot" d="M0 0 L10 5 L0 10 z"/></marker>
+          <marker id="arrFg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead" d="M0 0 L10 5 L0 10 z"/></marker>
+        </defs>
+        <g id="hsLanes"></g><g id="hsMsgs"></g><g id="hsPills"></g>
+      </svg>
+    </div>
+    <div class="kpis">
+      <div class="kpi accent"><b id="kRtt">–</b><span>Round trips before the request leaves</span></div>
+      <div class="kpi"><b id="kCert">–</b><span>Certificate travels</span></div>
+      <div class="kpi"><b id="kFs">–</b><span>Forward secrecy</span></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>In TLS 1.3, key agreement happens first, not after certificate validation.</b> The key shares ride in ClientHello and ServerHello, so both sides derive handshake keys immediately and the certificate is sent <i>encrypted</i>. The notes' order (certificate → validate → key establishment) matches TLS 1.2.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>In TLS 1.3 the server sends Finished first</b>, in its very first reply. The client sends its Finished after checking the certificate. Client-first is the TLS 1.2 order.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>0-RTT resumption:</b> a returning client can send its request inside the first TLS message. It's fastest, but an attacker could <i>replay</i> that early request, so servers allow it only for safe, idempotent requests such as GET.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="certTitle">
+    <h2 class="stage-title" id="certTitle">Can I trust this certificate?</h2>
+    <div class="stage-kind">Pick a scenario, then run the browser's checks</div>
+    <div class="chip-group">
+      <div class="chips" id="certChips"></div>
+    </div>
+    <div class="scroll">
+      <svg class="diagram narrow" id="chain" viewBox="0 0 1000 170" aria-label="Certificate chain: root CA signs intermediate CA which signs the server certificate">
+        <defs><marker id="arrC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead" d="M0 0 L10 5 L0 10 z"/></marker></defs>
+        <g id="chainG"></g>
+      </svg>
+    </div>
+    <div class="controls"><button class="btn primary" id="certRun" type="button">Run the checks</button></div>
+    <div class="info-grid">
+      <div class="card">
+        <div class="label">Browser checks, in order</div>
+        <ol class="steps" id="certSteps"></ol>
+        <p class="status-line" id="certResult" style="text-align:left"></p>
+      </div>
+      <div class="card facts">
+        <div><div class="label">What's in a certificate</div><p>Hostname(s), the server's <b>public key</b>, validity dates, issuer, and the issuer's <b>signature</b>. The private key never leaves the server.</p></div>
+        <div><div class="label">How trust works</div><p>The browser checks each signature using the issuer's public key, up to a root CA already in the OS or browser trust store. Nothing is "decrypted"; signatures are verified.</p></div>
+        <div><div class="label">Why a copied certificate is useless</div><p>Certificates are public. Only the holder of the private key can sign the handshake (<span class="mono">CertificateVerify</span>).</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="moreH">
+    <h2 id="moreH">Around the handshake</h2>
+    <div class="cards">
+      <div class="card"><h3>Asymmetric, then symmetric</h3><p>Public-key crypto (Diffie-Hellman, signatures) is slow but lets strangers agree on a secret. The bulk data then uses fast symmetric ciphers such as AES-GCM.</p></div>
+      <div class="card"><h3>TLS termination</h3><p>A load balancer or CDN can decrypt at the edge, which centralises certificates. Internal hops can be re-encrypted when the data is sensitive. More on Days 10–12.</p></div>
+      <div class="card"><h3>What HTTPS doesn't hide</h3><ul><li>IP addresses, timing and sizes</li><li>Usually the hostname, via SNI (unless Encrypted Client Hello is used)</li><li>DNS lookups, unless DoH or DoT is on</li></ul></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Name the two separate jobs TLS does.<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Authenticate the server</b> (certificate + CertificateVerify) and <b>agree on session keys</b> (ephemeral Diffie-Hellman).</p></div></details>
+      <details><summary>Why is a TLS 1.3 handshake faster than TLS 1.2?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>One round trip instead of two:</b> the client guesses the key exchange and sends its key share in the first message.</p></div></details>
+      <details><summary>An attacker records today's encrypted traffic and steals the server's private key next year. Can they decrypt it?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Not with ephemeral (EC)DHE</b>, which TLS 1.3 always uses: the session keys were never derived from the long-term key. That's forward secrecy.</p></div></details>
+      <details><summary>Why are POST requests not sent as 0-RTT early data?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Early data can be replayed</b> by an attacker. Replaying a payment POST could charge twice.</p></div></details>
+      <details><summary>The browser says "Your connection is not private" but the dates look fine. Two likely causes?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Hostname mismatch</b> (certificate for a different name) or <b>an untrusted chain</b> (self-signed, or a missing intermediate).</p></div></details>
+      <details><summary>Why do load balancers often terminate TLS?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>One place for certificates</b> and renewal, less crypto work on app servers, and the balancer can read HTTP to route by path.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Handshake diagrams simplify message batching. Sources: Day 4 notes, "TLS Handshake: Quick Revision Note", "The request, TCP explained".</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  /* ================= Handshake timeline ================= */
+  const lanes = $('hsLanes'), msgs = $('hsMsgs'), pills = $('hsPills');
+  const CX = 200, SX = 800, Y0 = 70, STEP = 46;
+  K.el('line', { x1: CX, y1: 50, x2: CX, y2: 550, class: 'lane' }, lanes);
+  K.el('line', { x1: SX, y1: 50, x2: SX, y2: 550, class: 'lane' }, lanes);
+  K.text(lanes, CX, 38, 'Client (browser)', 'mlabel accent');
+  K.text(lanes, SX, 38, 'Server', 'mlabel accent');
+
+  // dir: 1 = client→server, -1 = server→client. enc: encrypted? note: side note text
+  const FLOWS = {
+    '12': {
+      rtt: '3 (1 TCP + 2 TLS)', cert: 'In plain text', fs: 'Only with ECDHE',
+      m: [
+        { d: 1, l: 'SYN', tcp: 1 }, { d: -1, l: 'SYN-ACK', tcp: 1 }, { d: 1, l: 'ACK', tcp: 1 },
+        { d: 1, l: 'ClientHello · versions, cipher suites' },
+        { d: -1, l: 'ServerHello · Certificate · ServerKeyExchange · Done' },
+        { note: 'Client validates the certificate, then computes the shared secret' },
+        { d: 1, l: 'ClientKeyExchange · ChangeCipherSpec · Finished', enc: 'half' },
+        { d: -1, l: 'ChangeCipherSpec · Finished', enc: 1 },
+        { d: 1, l: 'GET /patients/123', enc: 1, app: 1 },
+        { d: -1, l: '200 OK', enc: 1, app: 1 }
+      ]
+    },
+    '13': {
+      rtt: '2 (1 TCP + 1 TLS)', cert: 'Encrypted', fs: 'Always',
+      m: [
+        { d: 1, l: 'SYN', tcp: 1 }, { d: -1, l: 'SYN-ACK', tcp: 1 }, { d: 1, l: 'ACK', tcp: 1 },
+        { d: 1, l: 'ClientHello · cipher suites · key share' },
+        { d: -1, l: 'ServerHello · key share' },
+        { note: 'Both derive handshake keys now: everything below is encrypted' },
+        { d: -1, l: 'Certificate · CertificateVerify · Finished', enc: 1, same: 1 },
+        { note: 'Client validates certificate + signature, derives traffic keys' },
+        { d: 1, l: 'Finished + GET /patients/123', enc: 1, app: 1 },
+        { d: -1, l: '200 OK', enc: 1, app: 1 }
+      ]
+    },
+    '0rtt': {
+      rtt: '1 (TCP only)', cert: 'Not resent (resumed)', fs: 'Not for early data',
+      m: [
+        { d: 1, l: 'SYN', tcp: 1 }, { d: -1, l: 'SYN-ACK', tcp: 1 }, { d: 1, l: 'ACK', tcp: 1 },
+        { d: 1, l: 'ClientHello · PSK + early data: GET /patients', enc: 'half', app: 1 },
+        { note: 'Early data uses a key from the previous session: replayable!' },
+        { d: -1, l: 'ServerHello · Finished · 200 OK', enc: 1, app: 1 },
+        { d: 1, l: 'Finished', enc: 1 }
+      ]
+    }
+  };
+  let ver = '13';
+
+  function drawStatic(f, upto) {
+    msgs.textContent = '';
+    let t = 0;
+    f.m.forEach((m, i) => {
+      if (i >= upto) return;
+      if (m.note) {
+        K.text(msgs, 500, Y0 + t * STEP + 14, m.note, 'mlabel accent halo').style.fontSize = '12px';
+        t += 0.8; return;
+      }
+      const y1 = Y0 + t * STEP, y2 = y1 + STEP * 0.8;
+      const a = m.d > 0 ? [CX, y1] : [SX, y1], b = m.d > 0 ? [SX, y2] : [CX, y2];
+      const enc = m.enc === 1 || m.enc === 'half';
+      K.el('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], class: 'msg ' + (enc ? 'hot' : m.tcp ? '' : 'solid') + (m.enc === 'half' ? ' dash' : ''), 'marker-end': `url(#${enc ? 'arrHot' : m.tcp ? 'arr' : 'arrFg'})` }, msgs);
+      const lab = K.text(msgs, 500, y1 + 3, m.l, 'mlabel halo ' + (m.tcp ? 'muted' : m.app ? 'accent' : ''));
+      lab.style.fontWeight = m.app ? '600' : '400';
+      if (m.tcp && i === 0) K.text(msgs, 60, y1 + 30, 'TCP', 'zone-label');
+      if (!m.tcp && f.m[i - 1] && f.m[i - 1].tcp) K.text(msgs, 60, y1 + 30, 'TLS', 'zone-label');
+      t += m.same ? 0.9 : 1;
+    });
+  }
+
+  async function play() {
+    const f = FLOWS[ver], run = K.newRun('hs');
+    $('kRtt').textContent = f.rtt; $('kCert').textContent = f.cert; $('kFs').textContent = f.fs;
+    pills.textContent = '';
+    try {
+      for (let i = 0; i <= f.m.length; i++) {
+        drawStatic(f, i);
+        const m = f.m[i];
+        if (!m) break;
+        if (m.note) { await K.sleep(500, run); continue; }
+        // compute this message's y
+        let t = 0; for (let j = 0; j < i; j++) t += f.m[j].note ? 0.8 : f.m[j].same ? 0.9 : 1;
+        const y1 = Y0 + t * STEP, y2 = y1 + STEP * 0.8;
+        const a = m.d > 0 ? [CX, y1] : [SX, y1], b = m.d > 0 ? [SX, y2] : [CX, y2];
+        const p = K.pill(pills, m.tcp ? m.l : (m.app ? 'HTTP' : 'TLS'), m.enc ? 'ok' : m.tcp ? 'ghost' : '');
+        await K.move(p, a, b, m.tcp ? 420 : 650, run); p.remove();
+      }
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  K.seg($('verSeg'), v => { ver = v; K.cancel('hs'); pills.textContent = ''; const f = FLOWS[v]; drawStatic(f, f.m.length); $('kRtt').textContent = f.rtt; $('kCert').textContent = f.cert; $('kFs').textContent = f.fs; });
+  $('hsPlay').addEventListener('click', play);
+  (function init() { const f = FLOWS[ver]; drawStatic(f, f.m.length); $('kRtt').textContent = f.rtt; $('kCert').textContent = f.cert; $('kFs').textContent = f.fs; })();
+
+  /* ================= Certificate checks ================= */
+  const CHECKS = [
+    'Chain: each signature verifies, ending at a root CA in the trust store',
+    'Hostname: certificate covers api.example.com',
+    'Dates: today is between "not before" and "not after"',
+    'Revocation: not revoked by the CA (OCSP / CRL)',
+    'Proof of key: server signed the handshake with the matching private key'
+  ];
+  const SCEN = [
+    { k: 'ok', label: 'Valid certificate', fail: -1, leaf: 'api.example.com', iss: 'Example Intermediate CA', root: 'Trusted Root CA', msg: 'All checks pass: secure session established.' },
+    { k: 'exp', label: 'Expired', fail: 2, leaf: 'api.example.com', iss: 'Example Intermediate CA', root: 'Trusted Root CA', msg: 'NET::ERR_CERT_DATE_INVALID: expired last week. Renew certificates automatically.' },
+    { k: 'host', label: 'Wrong hostname', fail: 1, leaf: 'shop.example.org', iss: 'Example Intermediate CA', root: 'Trusted Root CA', msg: 'NET::ERR_CERT_COMMON_NAME_INVALID: the certificate is valid, but for a different site.' },
+    { k: 'self', label: 'Self-signed / unknown CA', fail: 0, leaf: 'api.example.com', iss: 'api.example.com (itself)', root: 'not in trust store', msg: 'NET::ERR_CERT_AUTHORITY_INVALID: no path to a trusted root.' },
+    { k: 'rev', label: 'Revoked', fail: 3, leaf: 'api.example.com', iss: 'Example Intermediate CA', root: 'Trusted Root CA', msg: 'Certificate revoked (for example after a key leak). Connection refused.' },
+    { k: 'mitm', label: 'Attacker replays the real certificate', fail: 4, leaf: 'api.example.com', iss: 'Example Intermediate CA', root: 'Trusted Root CA', msg: 'The certificate is genuine, but the attacker has no private key, so CertificateVerify fails. Man-in-the-middle blocked.' }
+  ];
+  let scen = SCEN[0];
+  $('certChips').innerHTML = SCEN.map(s => `<button class="chip-btn" type="button" data-k="${s.k}" aria-pressed="${s === scen}">${s.label}</button>`).join('');
+  $('certChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('certChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    scen = SCEN.find(s => s.k === b.dataset.k); paintChain(); paintSteps(-1, -1); $('certResult').textContent = '';
+  }));
+
+  const cg = $('chainG');
+  let nodes = {};
+  function paintChain() {
+    cg.textContent = '';
+    nodes.root = K.node(cg, 150, 85, 230, 70, 'Root CA', scen.root);
+    nodes.int = K.node(cg, 500, 85, 230, 70, 'Intermediate CA', scen.k === 'self' ? '(none)' : 'signed by root');
+    nodes.leaf = K.node(cg, 850, 85, 230, 70, 'Server certificate', scen.leaf);
+    if (scen.k === 'self') nodes.int.g.classList.add('dim');
+    K.arrow(cg, [265, 85], [383, 85], 'solid', 'arrC');
+    K.arrow(cg, [615, 85], [733, 85], 'solid', 'arrC');
+    K.text(cg, 324, 74, 'signs', 'mlabel muted');
+    K.text(cg, 674, 74, 'signs', 'mlabel muted');
+  }
+  function paintSteps(active, failAt) {
+    $('certSteps').innerHTML = CHECKS.map((c, i) => {
+      let cls = '';
+      if (failAt >= 0 && i === failAt) cls = 'on';
+      else if (i < active || (active === CHECKS.length)) cls = 'done';
+      else if (i === active) cls = 'on';
+      const mark = failAt === i ? ' <span class="bad-text">✗ failed</span>' : (cls === 'done' ? ' <span class="ok-text">✓</span>' : '');
+      return `<li class="${cls}"><span>${c}${mark}</span></li>`;
+    }).join('');
+  }
+  async function runChecks() {
+    const run = K.newRun('cert');
+    $('certResult').textContent = '';
+    ['root', 'int', 'leaf'].forEach(k => nodes[k].g.classList.remove('ok', 'bad', 'on'));
+    try {
+      for (let i = 0; i < CHECKS.length; i++) {
+        paintSteps(i, -1);
+        const target = i === 0 ? (scen.fail === 0 ? 'root' : 'int') : 'leaf';
+        nodes[target].g.classList.add('on');
+        await K.sleep(650, run);
+        nodes[target].g.classList.remove('on');
+        if (scen.fail === i) {
+          paintSteps(i, i);
+          nodes[target].g.classList.add('bad');
+          $('certResult').innerHTML = `<span class="bad-text">Connection aborted.</span> ${scen.msg}`;
+          return;
+        }
+      }
+      paintSteps(CHECKS.length, -1);
+      ['root', 'int', 'leaf'].forEach(k => nodes[k].g.classList.add('ok'));
+      $('certResult').innerHTML = `<span class="ok-text">Trusted.</span> ${scen.msg}`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('certRun').addEventListener('click', runChecks);
+  paintChain(); paintSteps(-1, -1);
+})();
+</script>
+</body>
+</html>

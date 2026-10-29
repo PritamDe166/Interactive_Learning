@@ -15,7 +15,8 @@ Interactive_explainations/
 │   │   ├── hub.css                 # home pages: root hub + subject roadmaps
 │   │   └── explainer.css           # explainer building blocks: stage, controls, cards, quiz
 │   └── js/
-│       └── theme.js                # light/dark toggle, remembers the choice
+│       ├── theme.js                # light/dark toggle, remembers the choice
+│       └── explainer-kit.js        # shared animation helpers (move packets, cancel runs, logs)
 ├── _template/
 │   └── explainer.html              # copy this to start a new explainer
 └── system-design-explainers/
@@ -26,7 +27,7 @@ Interactive_explainations/
 ## Rules of the road
 
 - **Colours live only in `theme.css`.** Pages and other CSS files use tokens such as `var(--fg)`, `var(--cyan)`, `var(--accent-text)`, so both themes work automatically.
-- **Shared look goes in `assets/`; page-specific animation code stays in the page.**
+- **Shared look and helpers go in `assets/`; page-specific animation code stays in the page.** Explainers load `theme.js` and `explainer-kit.js`.
 - **Links point at files explicitly** (`folder/index.html`, not `folder/`), so pages work from disk, GitHub Pages and S3/CloudFront alike.
 - Pages one folder deep reference assets as `../assets/...`; the root hub uses `assets/...`.
 
@@ -35,7 +36,7 @@ Interactive_explainations/
 1. Copy `_template/explainer.html` into the subject folder and rename it (lowercase, hyphens).
 2. Fill in the content and the page's own script.
 3. Link it from the subject's `index.html` (for System Design, add `file:"name.html"` to that day).
-4. In the root `index.html`, bump `done` for the subject and add an entry to `RECENT`.
+4. In the root `index.html`, bump `done` (days covered) and `pages` (explainer files) for the subject, and add an entry to `RECENT`.
 5. Commit and push. GitHub Pages updates in about a minute.
 
 ## Starting a new subject

@@ -39,7 +39,7 @@
 const SUBJECTS = [
   {name:"System Design", path:"system-design-explainers/index.html", accent:"var(--teal)", icon:"net",
    blurb:"119-day roadmap: networking, scaling, caching, databases, distributed systems and reliability.",
-   done:1, total:119, unit:"days"},
+   done:13, total:119, unit:"days", pages:11},
   {name:"AWS", path:null, accent:"var(--orange)", icon:"cloud",
    blurb:"Cloud Practitioner (CLF-C02): core services, pricing models, shared responsibility, Well-Architected.",
    done:0, total:null, unit:"topics"},
@@ -51,6 +51,10 @@ const SUBJECTS = [
    done:0, total:null, unit:"topics"}
 ];
 const RECENT = [
+  {subject:"System Design", title:"Reverse Proxy, Load Balancer & API Gateway", note:"Days 10–12", href:"system-design-explainers/proxy-lb-gateway.html"},
+  {subject:"System Design", title:"Stateless Applications", note:"Day 9", href:"system-design-explainers/stateless.html"},
+  {subject:"System Design", title:"Vertical vs Horizontal Scaling", note:"Day 8", href:"system-design-explainers/scaling.html"},
+  {subject:"System Design", title:"Week 1 Review: Journey of a Request", note:"Day 7", href:"system-design-explainers/week-1-review.html"},
   {subject:"System Design", title:"Load Balancing Algorithms", note:"Day 13", href:"system-design-explainers/load-balancing-algorithms.html"}
 ];
 
@@ -63,7 +67,7 @@ const ICONS={
 };
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const $=id=>document.getElementById(id);
-const totalExplainers=SUBJECTS.reduce((n,s)=>n+s.done,0);
+const totalExplainers=SUBJECTS.reduce((n,s)=>n+(s.pages||s.done||0),0); /* pages: unique explainer files (one page can cover several days) */
 const activeSubjects=SUBJECTS.filter(s=>s.path).length;
 $('totals').innerHTML=`<span><b>${totalExplainers}</b> explainer${totalExplainers===1?'':'s'}</span><span><b>${activeSubjects}</b> of ${SUBJECTS.length} subjects started</span>`;
 

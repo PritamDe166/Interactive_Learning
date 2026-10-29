@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HTTP Requests & Status Codes</title>
+<meta name="description" content="Day 2: HTTP request and response anatomy, methods and idempotency you can test by sending twice, and which component returns each status code.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← System Design roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Week 1 · Day 2 · Networking Fundamentals</div>
+    <h1>HTTP Requests & Status Codes</h1>
+    <p class="lede">A request says <b>what to do</b> (method) to <b>which resource</b> (path), with metadata (headers) and optional data (body). The response answers with a <b>status code</b>, headers and an optional body. It travels over the connection that DNS, TCP and TLS set up first.</p>
+  </header>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">Anatomy</h2>
+    <div class="pair">
+      <div>
+        <div class="label">Request = method + path + headers + body</div>
+<pre class="codeblock"><span class="k">POST</span> /patients HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+Authorization: Bearer &lt;token&gt;
+
+{ "name": "John" }</pre>
+      </div>
+      <div>
+        <div class="label">Response = status + headers + body</div>
+<pre class="codeblock">HTTP/1.1 <span class="s">201 Created</span>
+Content-Type: application/json
+Location: /patients/124
+
+{ "id": 124, "name": "John" }</pre>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="idemTitle">
+    <h2 class="stage-title" id="idemTitle">Send it twice</h2>
+    <div class="stage-kind">Idempotent = repeating the request leaves the same final state</div>
+
+    <div class="chip-group">
+      <div class="label">Pick a request</div>
+      <div class="chips" id="methodChips"></div>
+    </div>
+
+    <div class="scroll">
+      <svg class="diagram narrow" id="idemStage" viewBox="0 0 1000 170" aria-label="Client sends the request to the API, which updates the database">
+        <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead muted" d="M0 0 L10 5 L0 10 z"/></marker></defs>
+        <g id="idemLines"></g><g id="idemNodes"></g><g id="idemPills"></g>
+      </svg>
+    </div>
+    <div class="controls">
+      <button class="btn primary" id="sendBtn" type="button">Send request</button>
+      <button class="btn" id="againBtn" type="button">Send the same request again</button>
+      <button class="btn" id="idemReset" type="button">Reset data</button>
+    </div>
+
+    <div class="pair">
+      <div>
+        <div class="label">Request</div>
+        <pre class="codeblock" id="reqText"></pre>
+      </div>
+      <div>
+        <div class="label">Last response</div>
+        <pre class="codeblock" id="resText"><span class="c">Nothing sent yet.</span></pre>
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div class="card">
+        <div class="label">Database: patients table</div>
+        <div class="scroll"><table class="mini"><thead><tr><th>id</th><th>name</th><th>age</th><th>allergies</th></tr></thead><tbody id="dbRows"></tbody></table></div>
+      </div>
+      <div class="card facts">
+        <div><div class="label">Safe?</div><p id="fSafe"></p></div>
+        <div><div class="label">Idempotent?</div><p id="fIdem"></p></div>
+        <div><div class="label">What to watch</div><p id="fWatch"></p></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="mH">
+    <h2 id="mH">Methods at a glance</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Method</th><th>Purpose</th><th>Safe</th><th>Idempotent</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>GET</td><td>Read a resource</td><td class="ok-text">Yes</td><td class="ok-text">Yes</td><td>Cacheable; never change data in a GET handler</td></tr>
+          <tr><td>HEAD</td><td>Like GET, headers only</td><td class="ok-text">Yes</td><td class="ok-text">Yes</td><td>Check size or freshness without downloading</td></tr>
+          <tr><td>OPTIONS</td><td>Ask what is allowed</td><td class="ok-text">Yes</td><td class="ok-text">Yes</td><td>Used by browsers for CORS preflight</td></tr>
+          <tr><td>POST</td><td>Create, or run an action</td><td class="bad-text">No</td><td class="bad-text">No</td><td>Make it safe to retry with an idempotency key</td></tr>
+          <tr><td>PUT</td><td>Replace the whole resource</td><td class="bad-text">No</td><td class="ok-text">Yes</td><td>Can also create at a client-chosen URL</td></tr>
+          <tr><td>PATCH</td><td>Change part of a resource</td><td class="bad-text">No</td><td>Depends</td><td>"Set age = 41" is; "append to list" is not</td></tr>
+          <tr><td>DELETE</td><td>Remove a resource</td><td class="bad-text">No</td><td class="ok-text">Yes</td><td>Second call may return 404, but the state is the same</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><span class="flag add">Added</span><p><b>Safe</b> means "doesn't change server state". Every safe method is idempotent, but not the other way round: PUT and DELETE change state, yet repeating them changes nothing further.</p></div>
+  </section>
+
+  <section aria-labelledby="scTitle">
+    <h2 class="stage-title" id="scTitle">Who sends which status code?</h2>
+    <div class="stage-kind">Client → gateway / load balancer → service</div>
+    <div class="chip-group" id="codeGroups"></div>
+    <div class="scroll">
+      <svg class="diagram narrow" id="scStage" viewBox="0 0 1000 190" aria-label="A request travels from client to gateway to service; the status code returns from whichever component answered">
+        <defs><marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead muted" d="M0 0 L10 5 L0 10 z"/></marker></defs>
+        <g id="scLines"></g><g id="scNodes"></g><g id="scPills"></g>
+        <text class="mlabel muted" id="scTimer" x="680" y="40"></text>
+      </svg>
+    </div>
+    <p class="status-line" id="scStatus">Pick a status code to see where it comes from.</p>
+    <div class="card facts" style="margin-top:12px">
+      <div><div class="label">Meaning</div><p id="scMeaning">–</p></div>
+      <div><div class="label">Typical fix or client action</div><p id="scFix">–</p></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>1xx and 3xx were empty in the notes.</b> 1xx: <span class="mono">100 Continue</span>, <span class="mono">101 Switching Protocols</span> (WebSocket upgrade). 3xx: <span class="mono">301</span>/<span class="mono">308</span> permanent move, <span class="mono">302</span>/<span class="mono">307</span> temporary move (307/308 keep the method and body), <span class="mono">304 Not Modified</span> (your cached copy is still valid).</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>401 is misnamed.</b> Its official name is "Unauthorized", but it means <i>not authenticated</i>: who are you? <b>403</b> means "I know who you are, and you're not allowed".</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>A user's payment POST timed out. The app retries. How do you avoid charging twice?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Idempotency key.</b> The client sends a unique key; the server stores key → result and returns the stored result for repeats.</p></div></details>
+      <details><summary>DELETE /patients/123 returns 204, then 404 on retry. Is DELETE still idempotent?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Yes.</b> Idempotency is about the final state, not identical responses. The patient is gone either way.</p></div></details>
+      <details><summary>Logged-in nurse tries to open the admin panel. 401 or 403?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>403.</b> The server knows who she is (authenticated) but she lacks permission (not authorized).</p></div></details>
+      <details><summary>The gateway waited 30 s and the service never answered. Which code?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>504 Gateway Timeout.</b> 502 would mean the service answered with something invalid; 503 means no capacity to try.</p></div></details>
+      <details><summary>Creating a patient with an email that already exists. Which code?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>409 Conflict.</b> The request is valid but clashes with the current state of the data.</p></div></details>
+      <details><summary>Why should a GET handler never change data?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>GET is safe and cacheable.</b> Browsers prefetch it, crawlers follow it and caches replay it, so side effects would fire unexpectedly.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: Day 2 notes, "HTTP Quick Revision Notes". Patient data is made up.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  /* =================== Part 1: idempotency =================== */
+  const START = () => ([{ id: 123, name: 'Asha', age: 40, allergies: ['penicillin'] }]);
+  let db = START(), nextId = 124, busy = false, sends = 0;
+  const REQS = [
+    { k: 'get',    m: 'GET',    path: '/patients/123', body: null, safe: true, idem: true,
+      watch: 'The data never changes. That is why GET responses can be cached and retried freely.',
+      run() { const p = db.find(r => r.id === 123); return p ? [200, 'OK', p] : [404, 'Not Found', null]; } },
+    { k: 'post',   m: 'POST',   path: '/patients', body: { name: 'John', age: 35 }, safe: false, idem: false,
+      watch: 'Each send creates another John. A retried POST is how duplicate orders and double charges happen.',
+      run() { const r = { id: nextId++, name: 'John', age: 35, allergies: [] }; db.push(r); return [201, 'Created', r]; } },
+    { k: 'put',    m: 'PUT',    path: '/patients/123', body: { name: 'Asha', age: 41, allergies: ['penicillin'] }, safe: false, idem: true,
+      watch: 'The first send changes the row; the second sets exactly the same values, so nothing else changes.',
+      run() { let p = db.find(r => r.id === 123); if (!p) { p = { id: 123 }; db.unshift(p); } Object.assign(p, { name: 'Asha', age: 41, allergies: ['penicillin'] }); return [200, 'OK', p]; } },
+    { k: 'patchset', m: 'PATCH', path: '/patients/123', body: { age: 41 }, label: 'PATCH (set age)', safe: false, idem: true,
+      watch: 'Setting a field to a value is idempotent: repeat it and age is still 41.',
+      run() { const p = db.find(r => r.id === 123); if (!p) return [404, 'Not Found', null]; p.age = 41; return [200, 'OK', p]; } },
+    { k: 'patchadd', m: 'PATCH', path: '/patients/123', body: { op: 'add', path: '/allergies/-', value: 'latex' }, label: 'PATCH (append)', safe: false, idem: false,
+      watch: 'Appending is not idempotent: every repeat adds "latex" again. Same method, different behaviour.',
+      run() { const p = db.find(r => r.id === 123); if (!p) return [404, 'Not Found', null]; p.allergies.push('latex'); return [200, 'OK', p]; } },
+    { k: 'delete', m: 'DELETE', path: '/patients/123', body: null, safe: false, idem: true,
+      watch: 'First call: 204. Repeat: 404. The responses differ, but the final state (no patient 123) is the same.',
+      run() { const i = db.findIndex(r => r.id === 123); if (i < 0) return [404, 'Not Found', null]; db.splice(i, 1); return [204, 'No Content', null]; } }
+  ];
+  let cur = REQS[2];
+
+  const chips = $('methodChips');
+  chips.innerHTML = REQS.map(r => `<button class="chip-btn" type="button" data-k="${r.k}" aria-pressed="${r === cur}">${r.label || r.m}</button>`).join('');
+  chips.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    chips.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    cur = REQS.find(r => r.k === b.dataset.k); sends = 0; paintReq();
+    $('resText').innerHTML = '<span class="c">Nothing sent yet.</span>';
+  }));
+
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  function paintReq() {
+    const body = cur.body ? `\nContent-Type: application/json\n\n${esc(JSON.stringify(cur.body, null, 1).replace(/\n\s*/g, ' '))}` : '';
+    $('reqText').innerHTML = `<span class="k">${cur.m}</span> ${cur.path} HTTP/1.1\nHost: api.example.com${body}`;
+    $('fSafe').innerHTML = cur.safe ? '<span class="ok-text">Yes</span>, it only reads.' : '<span class="bad-text">No</span>, it can change data.';
+    $('fIdem').innerHTML = cur.idem ? '<span class="ok-text">Yes</span>, repeats leave the same final state.' : '<span class="bad-text">No</span>, each repeat changes the data again.';
+    $('fWatch').textContent = cur.watch;
+  }
+  function paintDb(changedIds = []) {
+    $('dbRows').innerHTML = db.length ? db.map(r => `<tr${changedIds.includes(r.id) ? ' class="cur"' : ''}><td>${r.id}</td><td>${r.name}</td><td>${r.age}</td><td>${r.allergies.join(', ') || '–'}</td></tr>`).join('') : '<tr><td colspan="4" class="bad-text">Table is empty</td></tr>';
+  }
+
+  // stage
+  const iL = $('idemLines'), iN = $('idemNodes'), iP = $('idemPills');
+  K.node(iN, 120, 85, 160, 64, 'Client', 'mobile app');
+  const api = K.node(iN, 500, 85, 180, 64, 'Patient API', 'stateless');
+  const dbn = K.node(iN, 860, 85, 170, 64, 'Database', 'patients');
+  api.g.classList.add('teal'); dbn.g.classList.add('solid');
+  const e1 = [[200, 85], [410, 85]], e2 = [[590, 85], [775, 85]];
+  const l1 = K.el('line', { x1: 200, y1: 85, x2: 410, y2: 85, class: 'msg solid' }, iL);
+  const l2 = K.el('line', { x1: 590, y1: 85, x2: 775, y2: 85, class: 'msg solid' }, iL);
+  const countT = K.text(iL, 305, 140, '', 'mlabel muted');
+
+  async function send() {
+    if (busy) return; busy = true; const run = K.newRun('idem');
+    try {
+      sends++;
+      countT.textContent = sends > 1 ? `same request, send #${sends}` : 'send #1';
+      l1.setAttribute('class', 'msg hot');
+      const p = K.pill(iP, `${cur.m} ${cur.path}`);
+      await K.move(p, e1[0], e1[1], 650, run); p.remove(); l1.setAttribute('class', 'msg solid');
+      l2.setAttribute('class', 'msg hot');
+      const q = K.pill(iP, cur.safe ? 'SELECT' : 'write', cur.safe ? '' : 'alt');
+      await K.move(q, e2[0], e2[1], 450, run); q.remove(); l2.setAttribute('class', 'msg solid');
+      const before = JSON.stringify(db);
+      const [code, text, body] = cur.run();
+      const changed = before !== JSON.stringify(db);
+      dbn.g.classList.add('on'); await K.sleep(250, run); dbn.g.classList.remove('on');
+      paintDb(changed && body ? [body.id] : []);
+      dbn.sub.textContent = changed ? 'state changed' : 'no change';
+      const ok = code < 400;
+      const r = K.pill(iP, `${code} ${text}`, ok ? 'ok' : 'bad');
+      l1.setAttribute('class', 'msg hot');
+      await K.move(r, e1[1], e1[0], 650, run); r.remove(); l1.setAttribute('class', 'msg solid');
+      $('resText').innerHTML = `HTTP/1.1 <span class="${ok ? 's' : 'e'}">${code} ${text}</span>` + (body ? `\nContent-Type: application/json\n\n${esc(JSON.stringify(body))}` : '');
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; } finally { busy = false; }
+  }
+  $('sendBtn').addEventListener('click', () => { sends = 0; send(); });
+  $('againBtn').addEventListener('click', () => { if (!sends) return send(); send(); });
+  $('idemReset').addEventListener('click', () => { K.cancel('idem'); busy = false; iP.textContent = ''; db = START(); nextId = 124; sends = 0; countT.textContent = ''; dbn.sub.textContent = 'patients'; paintDb(); $('resText').innerHTML = '<span class="c">Nothing sent yet.</span>'; });
+  paintReq(); paintDb();
+
+  /* =================== Part 2: status codes =================== */
+  // at: who answers. up: what the service does (ok | garbage | slow | down | none)
+  const CODES = [
+    { c: 200, t: 'OK', at: 'svc', fam: '2xx · success', m: 'The request worked and the body has the result.', f: 'Nothing to fix.' },
+    { c: 201, t: 'Created', at: 'svc', fam: '2xx · success', m: 'A new resource was created; the Location header points to it.', f: 'Read the new id from the body or Location.' },
+    { c: 204, t: 'No Content', at: 'svc', fam: '2xx · success', m: 'Worked, and there is deliberately no body (common for DELETE).', f: 'Don\'t try to parse a body.' },
+    { c: 301, t: 'Moved Permanently', at: 'gw', fam: '3xx · redirect', m: 'The resource lives at a new URL for good. Often a gateway rule (for example http → https).', f: 'Follow Location; update bookmarks and links.' },
+    { c: 304, t: 'Not Modified', at: 'svc', fam: '3xx · redirect', m: 'The client sent If-None-Match with an ETag and nothing changed, so no body is sent.', f: 'Use your cached copy.' },
+    { c: 400, t: 'Bad Request', at: 'svc', fam: '4xx · client problem', m: 'The request itself is invalid: malformed JSON, missing field.', f: 'Fix the request; retrying the same one won\'t help.' },
+    { c: 401, t: 'Unauthorized', at: 'gw', fam: '4xx · client problem', m: 'Not authenticated: token missing, expired or invalid. Rejected before reaching the service.', f: 'Log in again or refresh the token.' },
+    { c: 403, t: 'Forbidden', at: 'gw', fam: '4xx · client problem', m: 'Authenticated, but this user lacks permission for this action.', f: 'Request access; retrying won\'t help.' },
+    { c: 404, t: 'Not Found', at: 'svc', fam: '4xx · client problem', m: 'No resource at this path (or the server hides that it exists).', f: 'Check the id or URL.' },
+    { c: 409, t: 'Conflict', at: 'svc', fam: '4xx · client problem', m: 'Valid request that clashes with current state: duplicate unique value, version mismatch.', f: 'Re-read the resource, resolve, then retry.' },
+    { c: 429, t: 'Too Many Requests', at: 'gw', fam: '4xx · client problem', m: 'Rate limit hit. The gateway answers so the service is protected.', f: 'Wait for the Retry-After header, then retry with backoff.' },
+    { c: 500, t: 'Internal Server Error', at: 'svc', up: 'crash', fam: '5xx · server problem', m: 'The service hit an unexpected error (an unhandled exception, a bug).', f: 'Check service logs; the client may retry later.' },
+    { c: 502, t: 'Bad Gateway', at: 'gw', up: 'garbage', fam: '5xx · server problem', m: 'The gateway reached the service but got an invalid reply: connection reset, crashed mid-response, malformed data.', f: 'Look at the service behind the gateway, not the gateway.' },
+    { c: 503, t: 'Service Unavailable', at: 'gw', up: 'down', fam: '5xx · server problem', m: 'No capacity right now: no healthy instances, overload or maintenance. The service can also send 503 itself when overloaded.', f: 'Retry after Retry-After with backoff; scale or fix health.' },
+    { c: 504, t: 'Gateway Timeout', at: 'gw', up: 'slow', fam: '5xx · server problem', m: 'The gateway waited for the service and gave up when its timeout expired.', f: 'Find the slow dependency; tune timeouts.' }
+  ];
+  const fams = [...new Set(CODES.map(x => x.fam))];
+  $('codeGroups').innerHTML = fams.map(f => `<div><div class="label">${f}</div><div class="chips">${CODES.filter(x => x.fam === f).map(x => `<button class="chip-btn" type="button" data-c="${x.c}" aria-pressed="false">${x.c} ${x.t}</button>`).join('')}</div></div>`).join('');
+
+  const sL = $('scLines'), sN = $('scNodes'), sP = $('scPills');
+  const cl = K.node(sN, 120, 100, 160, 64, 'Client', 'browser / app');
+  const gw = K.node(sN, 480, 100, 200, 64, 'Gateway / LB', 'auth · rate limit · timeout');
+  const sv = K.node(sN, 860, 100, 180, 64, 'Service', 'patient API');
+  gw.g.classList.add('teal');
+  const a1 = [[200, 100], [380, 100]], a2 = [[580, 100], [770, 100]];
+  const sl1 = K.el('line', { x1: 200, y1: 100, x2: 380, y2: 100, class: 'msg solid' }, sL);
+  const sl2 = K.el('line', { x1: 580, y1: 100, x2: 770, y2: 100, class: 'msg solid' }, sL);
+  const timer = $('scTimer');
+
+  async function showCode(x) {
+    const run = K.newRun('sc'); sP.textContent = ''; timer.textContent = '';
+    [cl, gw, sv].forEach(n => n.g.classList.remove('on', 'bad', 'ok', 'dim'));
+    sv.sub.textContent = 'patient API';
+    $('scMeaning').textContent = x.m; $('scFix').textContent = x.f;
+    $('scStatus').innerHTML = `<b>${x.c} ${x.t}</b> is sent by the <b>${x.at === 'gw' ? 'gateway' : 'service'}</b>`;
+    try {
+      if (x.up === 'down') { sv.g.classList.add('bad'); sv.sub.textContent = '0 healthy instances'; }
+      sl1.setAttribute('class', 'msg hot');
+      let p = K.pill(sP, 'GET /patients/123');
+      await K.move(p, a1[0], a1[1], 600, run); p.remove(); sl1.setAttribute('class', 'msg solid');
+      gw.g.classList.add('on'); await K.sleep(300, run);
+      if (x.at === 'svc' || x.up) {
+        if (x.up !== 'down') {
+          sl2.setAttribute('class', 'msg hot');
+          p = K.pill(sP, 'forward');
+          await K.move(p, a2[0], a2[1], 550, run); p.remove(); sl2.setAttribute('class', 'msg solid');
+          sv.g.classList.add('on'); await K.sleep(300, run);
+          if (x.up === 'slow') {
+            sv.sub.textContent = 'still working…';
+            for (let s = 1; s <= 30; s += 1) { timer.textContent = `gateway waiting… ${s}s / 30s timeout`; await K.sleep(55, run); }
+            sv.g.classList.add('bad'); timer.textContent = 'timeout expired: give up';
+          } else if (x.up === 'garbage' || x.up === 'crash') {
+            const bad = x.up === 'garbage';
+            sv.g.classList.add('bad'); sv.sub.textContent = bad ? 'crashed mid-response' : 'unhandled exception';
+            if (bad) {
+              p = K.pill(sP, 'connection reset', 'bad');
+              await K.move(p, a2[1], a2[0], 550, run); p.remove();
+            } else {
+              const r = K.pill(sP, '500 Internal Server Error', 'bad');
+              await K.move(r, a2[1], a2[0], 550, run); r.remove();
+            }
+          } else {
+            const r = K.pill(sP, `${x.c} ${x.t}`, x.c < 400 ? 'ok' : 'bad');
+            sv.g.classList.add(x.c < 400 ? 'ok' : 'bad');
+            await K.move(r, a2[1], a2[0], 550, run); r.remove();
+          }
+        }
+      }
+      gw.g.classList.remove('on');
+      if (x.at === 'gw') gw.g.classList.add(x.c < 400 ? 'ok' : 'bad');
+      const out = K.pill(sP, `${x.c} ${x.t}`, x.c < 400 ? 'ok' : 'bad');
+      sl1.setAttribute('class', 'msg hot');
+      await K.move(out, a1[1], a1[0], 600, run); out.remove();
+      sl1.setAttribute('class', 'msg solid');
+      cl.g.classList.add(x.c < 400 ? 'ok' : 'bad');
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('codeGroups').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('codeGroups').querySelectorAll('button').forEach(o => o.setAttribute('aria-pressed', String(o === b)));
+    showCode(CODES.find(x => x.c === +b.dataset.c));
+  }));
+})();
+</script>
+</body>
+</html>

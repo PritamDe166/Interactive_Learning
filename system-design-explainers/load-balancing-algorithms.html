@@ -11,8 +11,9 @@
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
 <script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
 </head>
-<body>
+<body data-anim="continuous">
 <div class="wrap explainer">
   <div class="topbar">
     <a class="back" href="index.html">← System Design roadmap</a>
@@ -76,9 +77,6 @@
       <button class="btn primary" id="playBtn" type="button">Pause traffic</button>
       <button class="btn" id="oneBtn" type="button">Send one request</button>
       <label class="toggle" for="slowB"><input type="checkbox" id="slowB"> Slow down Server B</label>
-      <label class="eyebrow speed" for="speed">Speed
-        <select class="select" id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select>
-      </label>
       <button class="btn" id="resetBtn" type="button">Reset</button>
     </div>
     <p class="hint" id="hint">Try it: turn on <b>Slow down Server B</b> and watch its open connections pile up under Round Robin. Then switch to <b>Least Connections</b>.</p>
@@ -319,7 +317,7 @@ function render(){
 function frame(ts){
   if(last===null)last=ts;
   const dt=Math.min(64,ts-last); last=ts;
-  simT+=dt*speed;
+  simT+=Kit.tick(dt);
   if(traffic&&simT>=nextSpawn){spawn();nextSpawn=simT+SPAWN;}
   step(); render();
   requestAnimationFrame(frame);
@@ -342,7 +340,6 @@ $('cmpBody').innerHTML=ALGOS.map(a=>`<tr><td>${a.name}</td><td><span class="tag 
 $('playBtn').addEventListener('click',()=>{traffic=!traffic;$('playBtn').textContent=traffic?'Pause traffic':'Resume traffic';if(traffic)nextSpawn=simT+200;});
 $('oneBtn').addEventListener('click',spawn);
 $('resetBtn').addEventListener('click',fresh);
-$('speed').addEventListener('change',e=>{speed=parseFloat(e.target.value)||1;});
 $('slowB').addEventListener('change',render);
 
 if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches){traffic=false;$('playBtn').textContent='Resume traffic';}

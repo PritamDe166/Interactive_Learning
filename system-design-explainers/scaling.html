@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vertical vs Horizontal Scaling</title>
+<meta name="description" content="Day 8: scale up a single server or scale out to many, push traffic until something saturates, find the bottleneck, and kill a server to see single points of failure.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .u-bg { fill: var(--track); }
+  .u-fill { fill: var(--teal); transition: width .3s; }
+  .u-fill.warm { fill: var(--yellow); }
+  .u-fill.hot { fill: var(--red); }
+  .dot { fill: var(--pill); }
+  .dot.drop { fill: var(--red); }
+  .dead rect { stroke: var(--red) !important; stroke-dasharray: 6 4; }
+</style>
+</head>
+<body data-anim="continuous">
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← System Design roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Week 2 · Day 8 · Scaling Fundamentals</div>
+    <h1>Vertical vs Horizontal Scaling</h1>
+    <p class="lede"><b>Scale up</b> = make one machine bigger. <b>Scale out</b> = add more machines behind a load balancer. Neither helps unless you scale the <b>bottleneck</b>: the component that saturates first.</p>
+  </header>
+
+  <section aria-labelledby="simTitle">
+    <h2 class="stage-title" id="simTitle">Push traffic until something breaks</h2>
+    <div class="stage-kind">App servers + one database that handles 5,000 requests/s</div>
+    <div class="controls">
+      <div class="seg" id="modeSeg" role="group" aria-label="Scaling approach">
+        <button type="button" data-v="v" aria-pressed="false">Scale up (vertical)</button>
+        <button type="button" data-v="h" aria-pressed="true">Scale out (horizontal)</button>
+      </div>
+    </div>
+    <div class="ranges">
+      <div class="range"><label for="traffic">Incoming traffic <output id="trafficOut"></output></label><input type="range" id="traffic" min="500" max="12000" step="250" value="2500"></div>
+      <div class="range" id="countWrap"><label for="count">App servers (4 vCPU, ~1,000 RPS each) <output id="countOut"></output></label><input type="range" id="count" min="1" max="10" step="1" value="3"></div>
+      <div class="range" id="sizeWrap" hidden><label for="size">Server size <output id="sizeOut"></output></label><input type="range" id="size" min="0" max="5" step="1" value="1"></div>
+    </div>
+    <div class="scroll">
+      <svg class="diagram" id="sim" viewBox="0 0 1000 340" aria-label="Users send traffic through a load balancer to app servers and a database; utilisation bars show load"></svg>
+    </div>
+    <div class="controls">
+      <button class="btn" id="killBtn" type="button">Kill a server</button>
+      <button class="btn" id="healBtn" type="button">Restart it</button>
+    </div>
+    <div class="kpis">
+      <div class="kpi good"><b id="kServed">–</b><span>Served per second</span></div>
+      <div class="kpi bad"><b id="kDrop">–</b><span>Failing or timing out</span></div>
+      <div class="kpi accent"><b id="kBottle">–</b><span>Bottleneck</span></div>
+      <div class="kpi"><b id="kCost">–</b><span>Relative cost</span></div>
+    </div>
+    <p class="hint" id="simHint"></p>
+  </section>
+
+  <section aria-labelledby="cmpH">
+    <h2 id="cmpH">Side by side</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>Vertical (scale up)</th><th>Horizontal (scale out)</th></tr></thead>
+        <tbody>
+          <tr><td>How</td><td>More CPU, RAM, disk on one machine</td><td>More machines, traffic spread by a load balancer</td></tr>
+          <tr><td>Ceiling</td><td>Largest machine you can buy</td><td>Far higher, often until a shared dependency saturates</td></tr>
+          <tr><td>Failure</td><td>One machine = single point of failure</td><td>Lose one, the rest keep serving</td></tr>
+          <tr><td>Change</td><td>Resize usually means a restart</td><td>Add or remove instances live; autoscaling</td></tr>
+          <tr><td>Complexity</td><td>Low: no distributed state</td><td>Higher: needs a load balancer and stateless apps</td></tr>
+          <tr><td>Good fit</td><td>Databases, simple apps, early stage</td><td>Stateless web and API tiers, spiky traffic</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>Bigger isn't linear.</b> Doubling cores rarely doubles throughput: locks, memory bandwidth and garbage collection eat into it. The simulator models this with a 0.9 exponent.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Autoscaling</b> adds or removes instances on a metric (CPU, request count, queue depth). It only works if any instance can serve any request, which is tomorrow's topic: <a href="stateless.html">stateless applications</a>.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Fixing a database bottleneck</b> means different tools: caching (Week 3), read replicas (Week 7) and sharding (Week 8). Adding app servers just sends more traffic to the same database.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>The API tier handles 20k RPS, the database 5k. You add 10 more API servers. What changes?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Nothing useful.</b> The database still caps the system at 5k RPS. Scale the bottleneck.</p></div></details>
+      <details><summary>Does horizontal scaling make the system highly available?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Only that tier.</b> A single database, load balancer or DNS provider can still take everything down.</p></div></details>
+      <details><summary>When is vertical scaling the right call?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>When a bigger box fixes the bottleneck cheaply</b> and the workload is hard to distribute, such as a primary database or an early-stage app.</p></div></details>
+      <details><summary>Horizontal scaling creates which new problem?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Where does state live?</b> A user's next request may land on a different server. That leads to stateless design.</p></div></details>
+      <details><summary>Which metrics tell you what the bottleneck is?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Utilisation and saturation per resource:</b> CPU, memory, connection pools, DB load, disk I/O, queue depth and rising p99.</p></div></details>
+      <details><summary>What usually happens during a vertical resize?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>A restart</b>, so a short outage unless something else takes the traffic meanwhile.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Capacities and costs are illustrative units, not cloud prices. Sources: Day 8 notes, "Vertical & Horizontal Scaling", and the bottleneck section of Day 5.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const DB_CAP = 5000, PER = 1000;
+  const SIZES = [2, 4, 8, 16, 32, 64];
+  let mode = 'h', dead = false;
+  const svg = $('sim');
+
+  function config() {
+    const traffic = +$('traffic').value;
+    let servers;
+    if (mode === 'h') {
+      const n = +$('count').value;
+      servers = Array.from({ length: n }, (_, i) => ({ cap: PER, alive: !(dead && i === 0), label: `App ${i + 1}`, sub: '4 vCPU' }));
+    } else {
+      const v = SIZES[+$('size').value];
+      servers = [{ cap: Math.round(PER * Math.pow(v / 4, 0.9)), alive: !dead, label: 'App server', sub: `${v} vCPU` }];
+    }
+    const appCap = servers.filter(s => s.alive).reduce((a, s) => a + s.cap, 0);
+    const toDb = Math.min(traffic, appCap);
+    const served = Math.min(toDb, DB_CAP);
+    const bottleneck = appCap === 0 ? 'No app server alive' : traffic <= Math.min(appCap, DB_CAP) ? 'None (headroom)' : appCap < DB_CAP ? 'App servers' : 'Database';
+    const cost = mode === 'h' ? servers.length : SIZES[+$('size').value] / 4;
+    return { traffic, servers, appCap, served, drop: traffic - served, bottleneck, cost, dbLoad: toDb / DB_CAP };
+  }
+
+  let layout = null;
+  function draw() {
+    const c = config();
+    $('trafficOut').textContent = K.fmt(c.traffic) + ' RPS';
+    $('countOut').textContent = $('count').value;
+    $('sizeOut').textContent = SIZES[+$('size').value] + ' vCPU';
+    svg.textContent = '';
+    const users = K.node(svg, 80, 170, 120, 60, 'Users', K.fmt(c.traffic) + ' RPS');
+    const lb = mode === 'h' ? K.node(svg, 270, 170, 140, 60, 'Load balancer', 'spreads traffic') : null;
+    if (lb) lb.g.classList.add('teal');
+    const db = K.node(svg, 880, 170, 170, 80, 'Database', `${K.fmt(DB_CAP)} RPS max`);
+    db.g.classList.add('solid');
+    const n = c.servers.length;
+    const boxH = mode === 'h' ? Math.min(52, (300 - (n - 1) * 6) / n) : 60 + +$('size').value * 30;
+    const totalH = n * boxH + (n - 1) * 6, top = 170 - totalH / 2;
+    const srvPos = [];
+    const aliveCap = c.appCap || 1;
+    c.servers.forEach((s, i) => {
+      const y = top + i * (boxH + 6) + boxH / 2;
+      srvPos.push([560, y]);
+      const share = s.alive ? Math.min(c.traffic, c.appCap) * (s.cap / aliveCap) : 0;
+      const util = s.alive ? Math.min(1.5, (c.traffic * (s.cap / aliveCap)) / s.cap) : 0;
+      const nd = K.node(svg, 560, y, 220, boxH, s.label, boxH > 40 ? `${s.sub} · ${s.alive ? Math.round(util * 100) + '%' : 'down'}` : undefined);
+      if (boxH <= 40) { nd.title.setAttribute('y', y + 2); nd.title.style.fontSize = '13px'; nd.title.textContent = `${s.label} · ${s.alive ? Math.round(util * 100) + '%' : 'down'}`; }
+      if (!s.alive) nd.g.classList.add('dead', 'dim');
+      else if (util >= 1) nd.g.classList.add('bad');
+      // util bar
+      const bw = 200, by = y + boxH / 2 - (boxH <= 40 ? 6 : 9);
+      K.el('rect', { x: 460, y: by, width: bw, height: 3, rx: 1.5, class: 'u-bg' }, svg);
+      K.el('rect', { x: 460, y: by, width: bw * Math.min(1, util), height: 3, rx: 2, class: 'u-fill ' + (util >= 1 ? 'hot' : util > .8 ? 'warm' : '') }, svg);
+      const from = lb ? [340, 170] : [140, 170];
+      K.el('line', { x1: from[0], y1: from[1], x2: 450, y2: y, class: 'msg ' + (s.alive ? 'solid' : 'bad dash') }, svg);
+      K.el('line', { x1: 670, y1: y, x2: 795, y2: 170, class: 'msg ' + (s.alive ? '' : 'dash') }, svg);
+    });
+    if (lb) K.el('line', { x1: 140, y1: 170, x2: 200, y2: 170, class: 'msg solid' }, svg);
+    // db util
+    const dbu = c.dbLoad;
+    K.el('rect', { x: 800, y: 222, width: 160, height: 5, rx: 2, class: 'u-bg' }, svg);
+    K.el('rect', { x: 800, y: 222, width: 160 * Math.min(1, dbu), height: 5, rx: 2, class: 'u-fill ' + (dbu >= 1 ? 'hot' : dbu > .8 ? 'warm' : '') }, svg);
+    if (dbu >= 1) db.g.classList.add('bad');
+    db.sub.textContent = `${Math.round(Math.min(dbu, 9.99) * 100)}% of ${K.fmt(DB_CAP)} RPS`;
+    K.text(svg, 880, 250, '', 'mlabel');
+    layout = { c, srvPos, from: lb ? [340, 170] : [140, 170] };
+
+    $('kServed').textContent = K.fmt(Math.round(c.served));
+    $('kDrop').textContent = K.fmt(Math.round(c.drop));
+    $('kBottle').textContent = c.bottleneck;
+    $('kCost').textContent = `${c.cost} units`;
+    $('simHint').innerHTML = c.appCap === 0 ? '<span class="bad-text">Total outage.</span> One big server is a single point of failure: nothing else can take the traffic.'
+      : dead && mode === 'h' ? 'One server died. The load balancer stops sending it traffic, and the rest carry on, if they have headroom.'
+      : c.bottleneck === 'Database' ? '<span class="accent">The database is saturated.</span> More app servers won\'t help now; try adding them and watch "served" stay at 5,000.'
+      : c.bottleneck === 'App servers' ? (mode === 'v' && +$('size').value === 5 ? '<span class="accent">You\'ve hit the biggest machine.</span> Vertical scaling has a ceiling.' : 'The app tier is the bottleneck. Add servers (or a bigger one).')
+      : 'Enough capacity everywhere. Keep pushing traffic.';
+  }
+
+  /* moving dots */
+  const dots = [];
+  let lastT = null, acc = 0;
+  function loop(now) {
+    const dt = K.tick(lastT === null ? 0 : Math.min(0.1, (now - lastT) / 1000)); lastT = now;
+    if (layout && !K.reduce) {
+      const { c, srvPos, from } = layout;
+      const rate = Math.min(40, c.traffic / 300);
+      acc += dt * rate;
+      while (acc >= 1) {
+        acc -= 1;
+        const alive = c.servers.map((s, i) => s.alive ? i : -1).filter(i => i >= 0);
+        const failing = c.drop > 0 && Math.random() < c.drop / c.traffic;
+        if (!alive.length) { dots.push({ a: [80, 170], b: [140, 170], t: 0, d: .5, drop: true }); continue; }
+        const i = alive[Math.floor(Math.random() * alive.length)];
+        dots.push({ a: from, b: [450, srvPos[i][1]], t: 0, d: .6, next: failing ? null : { a: [670, srvPos[i][1]], b: [795, 170] }, drop: failing });
+      }
+    }
+    // render
+    let g = svg.querySelector('#dotsG');
+    if (!g) { g = K.el('g', { id: 'dotsG' }, svg); }
+    g.textContent = '';
+    for (let k = dots.length - 1; k >= 0; k--) {
+      const d = dots[k]; d.t += dt / d.d;
+      if (d.t >= 1) {
+        dots.splice(k, 1);
+        if (d.next) dots.push({ a: d.next.a, b: d.next.b, t: 0, d: .5 });
+        continue;
+      }
+      const x = d.a[0] + (d.b[0] - d.a[0]) * d.t, y = d.a[1] + (d.b[1] - d.a[1]) * d.t;
+      K.el('circle', { cx: x.toFixed(1), cy: y.toFixed(1), r: 4.5, class: 'dot' + (d.drop && d.t > .6 ? ' drop' : '') }, g);
+    }
+    requestAnimationFrame(loop);
+  }
+
+  K.seg($('modeSeg'), v => { mode = v; dead = false; $('countWrap').hidden = v !== 'h'; $('sizeWrap').hidden = v !== 'v'; dots.length = 0; draw(); });
+  ['traffic', 'count', 'size'].forEach(id => $(id).addEventListener('input', () => { dots.length = 0; draw(); }));
+  $('killBtn').addEventListener('click', () => { dead = true; dots.length = 0; draw(); });
+  $('healBtn').addEventListener('click', () => { dead = false; dots.length = 0; draw(); });
+  draw();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

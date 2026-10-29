@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reverse Proxy, Load Balancer & API Gateway</title>
+<meta name="description" content="Days 10–12: follow requests through CDN, API gateway, load balancers and service instances; compare Layer 4 and Layer 7 load balancing; see what each layer is for.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>.dead rect { stroke: var(--red) !important; stroke-dasharray: 6 4; }</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← System Design roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Week 2 · Days 10–12 · Scaling Fundamentals</div>
+    <h1>Reverse Proxy, Load Balancer & API Gateway</h1>
+    <p class="lede">Three layers that sit between users and your code. A <b>reverse proxy</b> protects and optimises traffic for a backend. A <b>load balancer</b> spreads it across healthy instances. An <b>API gateway</b> applies API rules (auth, rate limits, routing) before anything reaches a service. Real products often do more than one of these.</p>
+  </header>
+
+  <section aria-labelledby="ladderH">
+    <h2 id="ladderH">Each layer adds capabilities</h2>
+    <div class="cards">
+      <div class="card"><h3>Reverse proxy</h3><p>"Protect and optimise access to my backend."</p><ul><li>TLS termination</li><li>Caching and compression</li><li>Hides backend IPs, filters bad requests</li><li>One public entry point</li></ul></div>
+      <div class="card"><h3>Load balancer</h3><p>"Spread traffic and survive instance failures."</p><ul><li>Distribution algorithms (<a href="load-balancing-algorithms.html">Day 13</a>)</li><li>Health checks and failover</li><li>Add or remove instances live</li></ul></div>
+      <div class="card"><h3>API gateway</h3><p>"Govern and expose APIs consistently."</p><ul><li>Authentication and authorisation</li><li>Rate limits and quotas per client or plan</li><li>Routing by path or version, request transformation</li><li>Central logs and metrics</li></ul></div>
+    </div>
+    <p class="sub" style="margin-top:12px">Tools: Nginx, HAProxy, Caddy and Envoy can do proxying and load balancing; Kong, AWS API Gateway, Apigee and Tyk are gateways; AWS ALB (Layer 7) and NLB (Layer 4) are managed load balancers.</p>
+  </section>
+
+  <section aria-labelledby="pathTitle">
+    <h2 class="stage-title" id="pathTitle">Follow a request through production</h2>
+    <div class="stage-kind">Pick a request · each layer either answers, rejects, or passes it on</div>
+    <div class="chip-group"><div class="chips" id="scenChips"></div></div>
+    <div class="controls" style="margin-top:10px">
+      <label class="toggle" for="o1down"><input type="checkbox" id="o1down"> orders-1 fails its health check</label>
+    </div>
+    <div class="scroll">
+      <svg class="diagram" id="path" viewBox="0 0 1000 420" aria-label="User, CDN edge, static origin, API gateway, two service load balancers and four service instances"></svg>
+    </div>
+    <div class="info-grid">
+      <div class="card"><div class="label">What each layer did</div><ol class="steps" id="pathSteps"></ol></div>
+      <div class="card facts">
+        <div><div class="label">Result</div><p id="pathResult">Pick a request above.</p></div>
+        <div><div class="label">Why this layer</div><p id="pathWhy">–</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="l4Title">
+    <h2 class="stage-title" id="l4Title">Layer 4 vs Layer 7 load balancing</h2>
+    <div class="stage-kind">Two users, each with one connection carrying two requests</div>
+    <div class="controls">
+      <div class="seg" id="lSeg" role="group" aria-label="Load balancer type">
+        <button type="button" data-v="4" aria-pressed="true">Layer 4 (TCP)</button>
+        <button type="button" data-v="7" aria-pressed="false">Layer 7 (HTTP)</button>
+      </div>
+      <button class="btn primary" id="lPlay" type="button">Send requests</button>
+    </div>
+    <div class="scroll">
+      <svg class="diagram" id="l4" viewBox="0 0 1000 320" aria-label="Load balancer routing two connections to backend pools"></svg>
+    </div>
+    <p class="status-line" id="lStatus"></p>
+    <div class="scroll card table-card" style="margin-top:12px">
+      <table>
+        <thead><tr><th></th><th>Layer 4 (transport)</th><th>Layer 7 (application)</th></tr></thead>
+        <tbody>
+          <tr><td>Sees</td><td>IP addresses, ports, TCP connections</td><td>HTTP: path, headers, cookies, host</td></tr>
+          <tr><td>Balances</td><td>Connections</td><td>Individual requests</td></tr>
+          <tr><td>TLS</td><td>Usually passes it through untouched</td><td>Terminates it to read HTTP</td></tr>
+          <tr><td>Strength</td><td>Very fast, any protocol (databases, gRPC, games)</td><td>Smart routing, retries, header rules</td></tr>
+          <tr><td>AWS example</td><td>Network Load Balancer</td><td>Application Load Balancer</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="fwdTitle">
+    <h2 id="fwdTitle">Forward vs reverse proxy</h2>
+    <div class="scroll">
+      <svg class="diagram narrow" id="fwd" viewBox="0 0 1000 220" aria-label="Forward proxy acts for clients; reverse proxy acts for servers"></svg>
+    </div>
+    <p class="sub">Same mechanism, different side. A forward proxy hides the <b>clients</b> (company egress proxy, VPN). A reverse proxy hides the <b>servers</b>.</p>
+  </section>
+
+  <section aria-labelledby="fixH">
+    <h2 id="fixH">Corrections and additions</h2>
+    <div class="notes">
+      <div class="note"><span class="flag">Corrected</span><p><b>A server with no proxy in front doesn't return 502.</b> 502 Bad Gateway is produced by a proxy or gateway when its upstream misbehaves. An overloaded bare server shows up as timeouts, refused connections or 503s.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>The server doesn't validate certificates in normal TLS</b>; the client does. The server's TLS cost is the key exchange and signing. Offloading that is what TLS termination saves (validation happens on the server only with mutual TLS).</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>"A load balancer is a reverse proxy" is true for Layer 7.</b> Layer 4 balancers often forward TCP connections without terminating them, so they never see HTTP.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>A CDN terminating TLS doesn't remove TLS from your origin.</b> The edge usually opens its own HTTPS connection to the origin. The saving is that it reuses a few long-lived connections instead of one handshake per user.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Health checks come in two kinds:</b> active (the balancer polls <span class="mono">/health</span> every few seconds) and passive (it notices real requests failing). <b>Connection draining</b> lets in-flight requests finish before an instance is removed for a deploy.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Every layer is itself a dependency.</b> Gateways and load balancers run as redundant pairs or managed services; otherwise you've moved the single point of failure, not removed it.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="needH">
+    <h2 id="needH">Which do you actually need?</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Situation</th><th>Usually enough</th></tr></thead>
+        <tbody>
+          <tr><td>One backend server needing HTTPS, compression, basic protection</td><td>Reverse proxy (Nginx, Caddy)</td></tr>
+          <tr><td>App outgrows one machine</td><td>Load balancer with health checks</td></tr>
+          <tr><td>Public API for partners or mobile apps: keys, quotas, versions</td><td>API gateway</td></tr>
+          <tr><td>Many microservices needing consistent auth and limits</td><td>Gateway at the edge + load balancers per service (maybe a service mesh later)</td></tr>
+          <tr><td>Users worldwide, lots of static content</td><td>Add a CDN in front</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Where should an expired token be rejected, and why there?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>At the gateway.</b> One consistent check, and bad requests never cost the services anything.</p></div></details>
+      <details><summary>You need /payments on an isolated, hardened pool. L4 or L7?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>L7.</b> Only an HTTP-aware balancer can see the path and route by it.</p></div></details>
+      <details><summary>Long-lived HTTP/2 connections leave one instance overloaded behind an L4 balancer. Why?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>L4 balances connections, not requests.</b> One busy connection carrying many streams sticks to one instance.</p></div></details>
+      <details><summary>A CDN serves logo.png. What reaches your origin on a cache hit?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Nothing.</b> The edge answers from its cache until the TTL expires.</p></div></details>
+      <details><summary>An instance crashes. What does the load balancer do?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Health checks fail, so it's removed from the pool</b> and traffic goes to healthy instances; it rejoins after recovering.</p></div></details>
+      <details><summary>Does a simple internal app with two servers need an API gateway?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Usually not.</b> A load balancer (or Nginx) is enough. Add layers for real needs, not for the diagram.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: Days 10–12 notes, "Reverse Proxy, Load Balancer, and API Gateway" and "Backend Architecture Layers: CDN, Reverse Proxy, Load Balancer, and API Gateway". Algorithms are covered in <a href="load-balancing-algorithms.html">Day 13</a>.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  /* ================= Production path ================= */
+  const svg = $('path');
+  const POS = {
+    user: [70, 200, 110, 'User', 'browser'],
+    cdn: [240, 200, 150, 'CDN edge', 'cache · TLS'],
+    origin: [440, 360, 170, 'Static origin', 'object storage'],
+    gw: [450, 200, 160, 'API gateway', 'auth · limits · routes'],
+    ulb: [660, 110, 140, 'Users LB', 'health checks'],
+    olb: [660, 290, 140, 'Orders LB', 'health checks'],
+    u1: [880, 60, 140, 'users-1', 'healthy'],
+    u2: [880, 155, 140, 'users-2', 'healthy'],
+    o1: [880, 245, 140, 'orders-1', 'healthy'],
+    o2: [880, 340, 140, 'orders-2', 'healthy']
+  };
+  const E = {
+    'user-cdn': [[125, 200], [165, 200]], 'cdn-gw': [[315, 200], [370, 200]], 'cdn-origin': [[290, 225], [380, 345]],
+    'gw-ulb': [[530, 190], [590, 115]], 'gw-olb': [[530, 210], [590, 285]],
+    'ulb-u1': [[730, 105], [810, 62]], 'ulb-u2': [[730, 115], [810, 152]],
+    'olb-o1': [[730, 285], [810, 247]], 'olb-o2': [[730, 295], [810, 338]]
+  };
+  const ND = {}, LN = {};
+  for (const k in E) LN[k] = K.el('line', { x1: E[k][0][0], y1: E[k][0][1], x2: E[k][1][0], y2: E[k][1][1], class: 'msg' }, svg);
+  for (const k in POS) { const [x, y, w, t, s] = POS[k]; ND[k] = K.node(svg, x, y, w, 60, t, s); }
+  ND.gw.g.classList.add('teal'); ND.ulb.g.classList.add('teal'); ND.olb.g.classList.add('teal');
+  ['u1', 'u2', 'o1', 'o2'].forEach(k => ND[k].g.classList.add('solid'));
+  const PILLS = K.el('g', {}, svg);
+  let rrU = 0, rrO = 0;
+
+  const SCEN = [
+    { k: 'hit', label: 'logo.png · cached', type: 'static-hit' },
+    { k: 'miss', label: 'logo.png · first request', type: 'static-miss' },
+    { k: 'users', label: 'GET /api/users/42', type: 'api', svc: 'users' },
+    { k: 'orders', label: 'POST /api/orders', type: 'api', svc: 'orders' },
+    { k: 'badtoken', label: 'GET /api/users/42 · expired token', type: 'reject', code: '401 Unauthorized' },
+    { k: 'ratelimit', label: '101st call this minute (free plan)', type: 'reject', code: '429 Too Many Requests' }
+  ];
+  $('scenChips').innerHTML = SCEN.map(s => `<button class="chip-btn" type="button" data-k="${s.k}" aria-pressed="false">${s.label}</button>`).join('');
+
+  function clear() {
+    PILLS.textContent = '';
+    for (const k in ND) ND[k].g.classList.remove('on', 'ok', 'bad');
+    for (const k in LN) LN[k].setAttribute('class', 'msg');
+    const down = $('o1down').checked;
+    ND.o1.g.classList.toggle('dead', down); ND.o1.g.classList.toggle('dim', down);
+    ND.o1.sub.textContent = down ? 'failing /health' : 'healthy';
+    LN['olb-o1'].setAttribute('class', down ? 'msg bad dash' : 'msg');
+  }
+  async function hop(key, rev, label, cls, run) {
+    LN[key].setAttribute('class', 'msg hot');
+    const [a, b] = E[key], p = K.pill(PILLS, label, cls);
+    await K.move(p, rev ? b : a, rev ? a : b, 520, run); p.remove();
+    LN[key].setAttribute('class', 'msg solid');
+  }
+  async function visit(k, run, ms = 320) { ND[k].g.classList.add('on'); await K.sleep(ms, run); ND[k].g.classList.remove('on'); }
+  function steps(list) { $('pathSteps').innerHTML = list.map(s => `<li class="done"><span>${s}</span></li>`).join(''); }
+
+  async function go(s) {
+    const run = K.newRun('path'); clear(); steps([]);
+    const st = [];
+    const step = t => { st.push(t); steps(st); };
+    try {
+      await hop('user-cdn', false, s.type.startsWith('static') ? 'GET /logo.png' : s.k === 'orders' ? 'POST /api/orders' : 'GET /api/…', '', run);
+      await visit('cdn', run);
+      step('<b>CDN edge</b> (nearby city) terminates TLS for the user');
+      if (s.type === 'static-hit') {
+        ND.cdn.g.classList.add('ok');
+        step('Cache <span class="ok-text">HIT</span>: serves logo.png from the edge');
+        await hop('user-cdn', true, '200 · from cache', 'ok', run);
+        $('pathResult').innerHTML = '<span class="ok-text">Served from the edge.</span> Your servers never saw this request.';
+        $('pathWhy').textContent = 'Static, cacheable content is best answered close to the user: low latency, and spikes are absorbed before the origin.';
+        return;
+      }
+      if (s.type === 'static-miss') {
+        step('Cache <span class="accent">MISS</span>: fetch from the static origin over the edge\'s own HTTPS connection');
+        await hop('cdn-origin', false, 'GET /logo.png', '', run);
+        await visit('origin', run);
+        await hop('cdn-origin', true, '200 · cache 1 day', 'ok', run);
+        step('Edge stores a copy (TTL from Cache-Control), then responds');
+        await hop('user-cdn', true, '200 OK', 'ok', run);
+        $('pathResult').innerHTML = 'Slower once; the next users nearby get a cache hit.';
+        $('pathWhy').textContent = 'The edge reuses a few long-lived connections to the origin instead of one TLS handshake per user.';
+        return;
+      }
+      step('Dynamic request: not cacheable, forward to the backend');
+      await hop('cdn-gw', false, 'forward', '', run);
+      await visit('gw', run, 400);
+      if (s.type === 'reject') {
+        ND.gw.g.classList.add('bad');
+        step(s.code.startsWith('401') ? 'Gateway: JWT expired → <span class="bad-text">reject</span>' : 'Gateway: free plan allows 100/min → <span class="bad-text">reject</span>, add Retry-After');
+        await hop('cdn-gw', true, s.code, 'bad', run);
+        await hop('user-cdn', true, s.code, 'bad', run);
+        $('pathResult').innerHTML = `<span class="bad-text">${s.code}</span> from the gateway. No service did any work.`;
+        $('pathWhy').textContent = s.code.startsWith('401') ? 'Authentication is enforced once, at the edge of the backend, instead of in every service.' : 'Rate limits per client or plan protect every service with one consistent rule.';
+        return;
+      }
+      const svc = s.svc, lbK = svc === 'users' ? 'ulb' : 'olb';
+      step(`Gateway: token valid ✓, under rate limit ✓, path <span class="mono">/api/${svc}</span> → ${svc} service`);
+      await hop(svc === 'users' ? 'gw-ulb' : 'gw-olb', false, svc === 'users' ? '/users/42' : '/orders', '', run);
+      await visit(lbK, run);
+      let inst;
+      if (svc === 'users') { inst = rrU++ % 2 ? 'u2' : 'u1'; }
+      else {
+        const down = $('o1down').checked;
+        inst = down ? 'o2' : (rrO++ % 2 ? 'o2' : 'o1');
+        if (down) step('Orders LB: orders-1 failed its last 3 health checks → <span class="bad-text">removed from pool</span>');
+      }
+      step(`${svc === 'users' ? 'Users' : 'Orders'} LB picks a healthy instance: <b>${POS[inst][3]}</b>`);
+      const ek = `${lbK}-${inst}`;
+      await hop(ek, false, 'req', '', run);
+      await visit(inst, run, 450);
+      ND[inst].g.classList.add('ok');
+      step(`<b>${POS[inst][3]}</b> runs the business logic only: no auth or rate-limit code needed`);
+      const code = svc === 'users' ? '200 OK' : '201 Created';
+      await hop(ek, true, code, 'ok', run);
+      await hop(svc === 'users' ? 'gw-ulb' : 'gw-olb', true, code, 'ok', run);
+      await hop('cdn-gw', true, code, 'ok', run);
+      await hop('user-cdn', true, code, 'ok', run);
+      $('pathResult').innerHTML = `<span class="ok-text">${code}</span> via ${POS[inst][3]}. Send it again to see the balancer alternate.`;
+      $('pathWhy').textContent = 'Each layer does one job: edge for distance, gateway for API policy, load balancer for instance health and spreading load.';
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('scenChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('scenChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    go(SCEN.find(s => s.k === b.dataset.k));
+  }));
+  $('o1down').addEventListener('change', clear);
+  clear();
+
+  /* ================= L4 vs L7 ================= */
+  const l4 = $('l4');
+  let lt = '4';
+  const REQS = [
+    { conn: 1, path: '/users/7' }, { conn: 2, path: '/payments' },
+    { conn: 1, path: '/payments' }, { conn: 2, path: '/users/9' }
+  ];
+  let LN4 = {};
+  function drawL() {
+    l4.textContent = ''; LN4 = {};
+    K.node(l4, 90, 100, 140, 56, 'Alice', 'connection 1');
+    K.node(l4, 90, 230, 140, 56, 'Bob', 'connection 2');
+    const lb = K.node(l4, 400, 165, 190, 70, lt === '4' ? 'L4 balancer' : 'L7 balancer', lt === '4' ? 'sees IP:port only' : 'reads HTTP path');
+    lb.g.classList.add('teal');
+    const pools = lt === '4'
+      ? [['app-1', 'serves every path', 80], ['app-2', 'serves every path', 165], ['app-3', 'serves every path', 250]]
+      : [['users-1', 'users pool', 70], ['users-2', 'users pool', 150], ['payments-1', 'payments pool · isolated', 255]];
+    pools.forEach(([n, s, y], i) => { const nd = K.node(l4, 820, y, 210, 58, n, s); nd.g.classList.add('solid'); LN4[i] = K.el('line', { x1: 495, y1: 165, x2: 715, y2: y, class: 'msg' }, l4); });
+    K.el('line', { x1: 160, y1: 100, x2: 305, y2: 155, class: 'msg solid' }, l4);
+    K.el('line', { x1: 160, y1: 230, x2: 305, y2: 175, class: 'msg solid' }, l4);
+    l4._pools = pools;
+    l4._p = K.el('g', {}, l4);
+    $('lStatus').textContent = lt === '4' ? 'L4 picks a backend once per connection; every request on it follows.' : 'L7 terminates TLS, reads each request, and routes by path.';
+  }
+  async function playL() {
+    drawL();
+    const run = K.newRun('l4');
+    const connMap = { 1: 0, 2: 1 };
+    try {
+      for (const r of REQS) {
+        const from = r.conn === 1 ? [160, 100] : [160, 230];
+        const p = K.pill(l4._p, lt === '4' ? `conn ${r.conn} · encrypted` : `${r.path}`, lt === '4' ? 'ghost' : '');
+        await K.move(p, from, [305, 165], 450, run);
+        await K.sleep(200, run);
+        let target = lt === '4' ? connMap[r.conn] : (r.path.startsWith('/payments') ? 2 : (r.conn === 1 ? 0 : 1));
+        const y = l4._pools[target][2];
+        LN4[target].setAttribute('class', 'msg hot');
+        await K.move(p, [495, 165], [715, y], 500, run);
+        p.remove(); LN4[target].setAttribute('class', 'msg solid');
+        $('lStatus').innerHTML = lt === '4'
+          ? `${r.path} on connection ${r.conn} → <b>${l4._pools[target][0]}</b> (it can't see the path)`
+          : `${r.path} → <b>${l4._pools[target][0]}</b>`;
+      }
+      $('lStatus').innerHTML = lt === '4' ? 'Done: payments landed on general app servers, because L4 never saw the path.' : 'Done: every payments request reached the isolated pool.';
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  K.seg($('lSeg'), v => { lt = v; K.cancel('l4'); drawL(); });
+  $('lPlay').addEventListener('click', playL);
+  drawL();
+
+  /* ================= Forward vs reverse ================= */
+  const f = $('fwd');
+  K.text(f, 250, 22, 'FORWARD PROXY · acts for clients', 'zone-label').style.textAnchor = 'middle';
+  K.text(f, 750, 22, 'REVERSE PROXY · acts for servers', 'zone-label').style.textAnchor = 'middle';
+  const cl = [[60, 70], [60, 120], [60, 170]];
+  cl.forEach(([x, y], i) => { K.node(f, x + 20, y, 80, 36, `Laptop ${i + 1}`); K.el('line', { x1: x + 60, y1: y, x2: 195, y2: 120, class: 'msg solid' }, f); });
+  const fp = K.node(f, 250, 120, 110, 60, 'Proxy', 'company egress'); fp.g.classList.add('teal');
+  K.el('line', { x1: 305, y1: 120, x2: 380, y2: 120, class: 'msg solid' }, f);
+  K.node(f, 430, 120, 100, 50, 'Internet', 'sites');
+  K.node(f, 570, 120, 100, 50, 'Users', 'internet');
+  K.el('line', { x1: 620, y1: 120, x2: 695, y2: 120, class: 'msg solid' }, f);
+  const rp = K.node(f, 750, 120, 110, 60, 'Proxy', 'Nginx'); rp.g.classList.add('teal');
+  [[70], [120], [170]].forEach(([y], i) => { K.el('line', { x1: 805, y1: 120, x2: 880, y2: y, class: 'msg solid' }, f); const n = K.node(f, 930, y, 100, 36, `app-${i + 1}`); n.g.classList.add('solid'); });
+  K.el('line', { x1: 500, y1: 30, x2: 500, y2: 210, class: 'axis' }, f);
+})();
+</script>
+</body>
+</html>

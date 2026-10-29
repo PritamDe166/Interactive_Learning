@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Availability, SLIs, SLOs & SLAs</title>
+<meta name="description" content="Day 6: what each extra nine costs in downtime, an error budget you can burn with incidents, and how series and redundant components combine into overall availability.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .budget { position: relative; height: 26px; border-radius: 8px; background: var(--track); overflow: hidden; margin-top: 8px; }
+  .budget i { position: absolute; inset: 0 auto 0 0; background: var(--teal); transition: width .4s, background .3s; }
+  .budget.low i { background: var(--yellow); }
+  .budget.out i { background: var(--red); }
+  .budget span { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--mono); font-size: 12px; color: var(--fg); }
+  .month { display: grid; grid-template-columns: repeat(30, minmax(0, 1fr)); gap: 2px; margin-top: 10px; }
+  .month b { height: 26px; border-radius: 3px; background: var(--teal); position: relative; overflow: hidden; }
+  .month b i { position: absolute; inset: 0 auto 0 0; background: var(--red); }
+  .chain-wrap { margin-top: 12px; }
+  .comp { display: grid; gap: 6px; }
+  .comp-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .comp-row .name { min-width: 120px; font-weight: 600; }
+  .comp-row select { font: 500 14px var(--display); color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← System Design roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Week 1 · Day 6 · Networking Fundamentals</div>
+    <h1>Availability, SLIs, SLOs & SLAs</h1>
+    <p class="lede"><b>SLI = measure</b> (what actually happened), <b>SLO = target</b> (what we aim for), <b>SLA = promise</b> (what customers are contractually owed). The gap between 100% and the SLO is the <b>error budget</b>: the amount of failure the team can spend on shipping changes.</p>
+  </header>
+
+  <section aria-labelledby="ninesTitle">
+    <h2 class="stage-title" id="ninesTitle">What each nine costs</h2>
+    <div class="stage-kind">Allowed downtime at a given availability</div>
+    <div class="controls">
+      <div class="seg" id="ninesSeg" role="group" aria-label="Availability target">
+        <button type="button" data-v="99" aria-pressed="false">99%</button>
+        <button type="button" data-v="99.5" aria-pressed="false">99.5%</button>
+        <button type="button" data-v="99.9" aria-pressed="true">99.9%</button>
+        <button type="button" data-v="99.95" aria-pressed="false">99.95%</button>
+        <button type="button" data-v="99.99" aria-pressed="false">99.99%</button>
+        <button type="button" data-v="99.999" aria-pressed="false">99.999%</button>
+      </div>
+    </div>
+    <div class="kpis">
+      <div class="kpi bad"><b id="dYear">–</b><span>Per year</span></div>
+      <div class="kpi"><b id="dMonth">–</b><span>Per 30-day month</span></div>
+      <div class="kpi"><b id="dWeek">–</b><span>Per week</span></div>
+      <div class="kpi"><b id="dDay">–</b><span>Per day</span></div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <div class="label">A 30-day month, each block is a day · red = allowed downtime, drawn to scale</div>
+      <div class="month" id="month"></div>
+      <p class="sub" id="monthNote" style="margin:8px 0 0"></p>
+    </div>
+  </section>
+
+  <section aria-labelledby="ebTitle">
+    <h2 class="stage-title" id="ebTitle">Spend the error budget</h2>
+    <div class="stage-kind">SLO 99.9% over 30 days · SLA promised to customers: 99.5%</div>
+    <div class="controls">
+      <button class="btn" type="button" data-inc="blip">Network blip · 100% errors for 3 min</button>
+      <button class="btn" type="button" data-inc="deploy">Bad deploy · 100% errors for 20 min</button>
+      <button class="btn" type="button" data-inc="db">Slow DB · 5% errors for 2 h</button>
+      <button class="btn" type="button" data-inc="region">Region outage · 100% errors for 4 h</button>
+      <button class="btn" id="ebReset" type="button">New month</button>
+    </div>
+    <div class="info-grid">
+      <div class="card">
+        <div class="label">Error budget left (43.2 bad minutes per month)</div>
+        <div class="budget" id="budget"><i id="budgetFill" style="width:100%"></i><span id="budgetTxt">100% left</span></div>
+        <div class="kpis">
+          <div class="kpi"><b id="sli">100%</b><span>SLI this month</span></div>
+          <div class="kpi" id="sloK"><b id="sloS">Met</b><span>SLO 99.9%</span></div>
+          <div class="kpi" id="slaK"><b id="slaS">Met</b><span>SLA 99.5%</span></div>
+        </div>
+      </div>
+      <div class="side">
+        <div class="card"><div class="label">Team policy right now</div><p id="policy" style="margin:0"></p></div>
+        <div class="card"><div class="label">Incidents this month</div><ul class="log" id="incLog"><li>None yet. Click an incident above.</li></ul></div>
+      </div>
+    </div>
+    <div class="note"><span class="flag add">Why SLO is stricter than SLA</span><p>The internal target (99.9%) trips long before the contract (99.5%) does. When the error budget runs out, the team slows risky releases <i>before</i> customers are owed service credits.</p></div>
+  </section>
+
+  <section aria-labelledby="compTitle">
+    <h2 class="stage-title" id="compTitle">Build a system, see its availability</h2>
+    <div class="stage-kind">Components in a chain multiply · redundant copies add up</div>
+    <div class="card chain-wrap">
+      <div class="comp" id="compRows"></div>
+    </div>
+    <div class="scroll">
+      <svg class="diagram" id="chainSvg" viewBox="0 0 1000 230" aria-label="Request path through components in series, each with one or more redundant copies"></svg>
+    </div>
+    <div class="kpis">
+      <div class="kpi accent"><b id="cAvail">–</b><span>Whole path availability</span></div>
+      <div class="kpi bad"><b id="cDown">–</b><span>Expected downtime per year</span></div>
+      <div class="kpi"><b id="cWeak">–</b><span>Weakest link</span></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>Series multiplies:</b> a request needing three 99.9% components succeeds 99.9% × 99.9% × 99.9% ≈ <b>99.7%</b> of the time, worse than any single part. <b>Redundancy adds nines:</b> two independent 99% copies give 1 − (0.01)² = <b>99.99%</b>, provided failover works and the copies don't fail together.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Availability = MTBF ÷ (MTBF + MTTR).</b> MTBF is the mean time between failures, MTTR the mean time to recover. Halving recovery time helps as much as halving failures, which is why fast rollbacks and alerts matter.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Two ways to measure:</b> time-based ("up 99.9% of minutes") or request-based ("99.9% of requests succeeded"). Request-based SLIs reflect what users actually felt, including partial outages.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>"99.95% of requests succeeded last month." SLI, SLO or SLA?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>SLI:</b> a measurement of what happened. The SLO is the target it's compared against.</p></div></details>
+      <details><summary>What is the monthly error budget for a 99.9% SLO?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>0.1% ≈ 43.2 minutes</b> of full downtime in a 30-day month, or the request-weighted equivalent.</p></div></details>
+      <details><summary>Why not aim for 100%?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Each nine costs far more</b> and users can't tell 99.999% from 100% through their own Wi-Fi. A budget lets teams trade reliability for speed deliberately.</p></div></details>
+      <details><summary>Your API is 99.99% but depends on a 99.9% database. Best case for the API?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>About 99.89%.</b> Series availability multiplies, so the API can't beat its weakest required dependency.</p></div></details>
+      <details><summary>The site returns pages fast, but with the wrong prices. Available? Reliable?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Available, not reliable.</b> Availability is about being usable; reliability also requires behaving correctly.</p></div></details>
+      <details><summary>Budget is exhausted on day 12. What changes?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Freeze risky releases</b> and spend effort on reliability (tests, rollbacks, capacity) until the budget recovers.</p></div></details>
+    </div>
+  </section>
+
+  <footer>All figures use 365-day years and 30-day months. Sources: Day 6 notes, "Availability, SLI, SLO & SLA".</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  function dur(min) {
+    if (min >= 1440) return (min / 1440).toFixed(2) + ' days';
+    if (min >= 60) return (min / 60).toFixed(2) + ' h';
+    if (min >= 1) return min.toFixed(1) + ' min';
+    return (min * 60).toFixed(1) + ' s';
+  }
+
+  /* ---------- nines ---------- */
+  function nines(v) {
+    const f = 1 - v / 100;
+    $('dYear').textContent = dur(f * 525600); $('dMonth').textContent = dur(f * 43200);
+    $('dWeek').textContent = dur(f * 10080); $('dDay').textContent = dur(f * 1440);
+    const bad = f * 43200; // minutes in month
+    const days = Array.from({ length: 30 }, (_, i) => {
+      const used = Math.max(0, Math.min(1440, bad - i * 1440));
+      return `<b title="Day ${i + 1}"><i style="width:${(used / 1440 * 100).toFixed(3)}%"></i></b>`;
+    });
+    $('month').innerHTML = days.join('');
+    $('monthNote').textContent = bad >= 1 ? `${dur(bad)} of red in the whole month${bad < 60 ? ': a sliver of the first day, often too thin to see.' : '.'}` : `${dur(bad)} a month: less than one pixel. One slow deploy blows it.`;
+  }
+  K.seg($('ninesSeg'), v => nines(+v));
+  nines(99.9);
+
+  /* ---------- error budget ---------- */
+  const BUDGET = 43.2, MONTH = 43200;
+  const INC = {
+    blip: { name: 'Network blip', min: 3, rate: 1 },
+    deploy: { name: 'Bad deploy', min: 20, rate: 1 },
+    db: { name: 'Slow DB (5% errors)', min: 120, rate: 0.05 },
+    region: { name: 'Region outage', min: 240, rate: 1 }
+  };
+  let spent = 0;
+  function paintBudget() {
+    const left = Math.max(0, 1 - spent / BUDGET);
+    $('budgetFill').style.width = (left === 0 ? 100 : left * 100).toFixed(1) + '%';
+    $('budget').className = 'budget' + (left === 0 ? ' out' : left < 0.3 ? ' low' : '');
+    $('budgetTxt').textContent = left === 0 ? `exhausted · ${spent.toFixed(1)} of 43.2 bad min used` : `${(left * 100).toFixed(0)}% left · ${spent.toFixed(1)} of 43.2 bad min used`;
+    const sli = 100 * (1 - spent / MONTH);
+    $('sli').textContent = sli.toFixed(sli > 99.99 ? 4 : 3) + '%';
+    const sloOk = sli >= 99.9, slaOk = sli >= 99.5;
+    $('sloS').textContent = sloOk ? 'Met' : 'Missed'; $('sloK').className = 'kpi ' + (sloOk ? 'good' : 'bad');
+    $('slaS').textContent = slaOk ? 'Met' : 'Breached'; $('slaK').className = 'kpi ' + (slaOk ? 'good' : 'bad');
+    $('policy').innerHTML = !slaOk ? '<span class="bad-text">SLA breached:</span> customers are owed service credits. Incident review, reliability work only.'
+      : !sloOk ? '<span class="bad-text">Budget exhausted:</span> freeze risky releases and fix reliability. Customers are still within the SLA.'
+      : left < 0.3 ? '<span class="accent">Budget running low:</span> ship carefully, prefer small changes and add safeguards.'
+      : '<span class="ok-text">Budget healthy:</span> keep shipping features at normal speed.';
+  }
+  document.querySelectorAll('[data-inc]').forEach(b => b.addEventListener('click', () => {
+    const i = INC[b.dataset.inc], cost = i.min * i.rate;
+    spent += cost;
+    K.log($('incLog'), `${i.name}: <span class="bad-text">${cost.toFixed(1)} bad min</span>${i.rate < 1 ? ` (${i.min} min × ${i.rate * 100}% failing)` : ''}`);
+    paintBudget();
+  }));
+  $('ebReset').addEventListener('click', () => { spent = 0; K.resetLog($('incLog'), 'None yet. Click an incident above.'); paintBudget(); });
+  paintBudget();
+
+  /* ---------- composite availability ---------- */
+  const COMPS = [
+    { name: 'DNS', a: 99.99, n: 1 },
+    { name: 'Load balancer', a: 99.99, n: 1 },
+    { name: 'API server', a: 99.5, n: 1 },
+    { name: 'Database', a: 99.9, n: 1 }
+  ];
+  const OPTS = [99, 99.5, 99.9, 99.95, 99.99];
+  function rows() {
+    $('compRows').innerHTML = COMPS.map((c, i) => `
+      <div class="comp-row">
+        <span class="name">${c.name}</span>
+        <label class="eyebrow" for="a${i}">each copy</label>
+        <select id="a${i}" data-i="${i}" data-k="a">${OPTS.map(o => `<option value="${o}"${o === c.a ? ' selected' : ''}>${o}%</option>`).join('')}</select>
+        <label class="eyebrow" for="n${i}">copies</label>
+        <select id="n${i}" data-i="${i}" data-k="n">${[1, 2, 3].map(o => `<option value="${o}"${o === c.n ? ' selected' : ''}>${o}</option>`).join('')}</select>
+      </div>`).join('');
+    $('compRows').querySelectorAll('select').forEach(s => s.addEventListener('change', () => { COMPS[+s.dataset.i][s.dataset.k] = +s.value; calc(); }));
+  }
+  function calc() {
+    const svg = $('chainSvg'); svg.textContent = '';
+    const xs = [140, 380, 620, 860];
+    let total = 1, weak = null;
+    COMPS.forEach((c, i) => {
+      const p = c.a / 100, eff = 1 - Math.pow(1 - p, c.n);
+      total *= eff;
+      if (!weak || eff < weak.eff) weak = { name: c.name, eff };
+      const h = 46, gap = 10, top = 100 - (c.n * h + (c.n - 1) * gap) / 2;
+      for (let k = 0; k < c.n; k++) {
+        const nd = K.node(svg, xs[i], top + k * (h + gap) + h / 2, 180, h, c.name, `${c.a}%`);
+        if (c.n > 1) nd.g.classList.add('ok');
+      }
+      K.text(svg, xs[i], 205, `→ ${(eff * 100).toFixed(c.n > 1 ? 5 : 3)}%`, 'mlabel ' + (c.n > 1 ? 'ok' : ''));
+      if (i < COMPS.length - 1) K.el('line', { x1: xs[i] + 95, y1: 100, x2: xs[i + 1] - 95, y2: 100, class: 'msg solid' }, svg);
+    });
+    $('cAvail').textContent = (total * 100).toFixed(3) + '%';
+    $('cDown').textContent = dur((1 - total) * 525600);
+    $('cWeak').textContent = weak.name;
+  }
+  rows(); calc();
+})();
+</script>
+</body>
+</html>
