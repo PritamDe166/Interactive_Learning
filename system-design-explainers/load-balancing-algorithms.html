@@ -1,128 +1,23 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Load Balancing Algorithms</title>
+<meta name="description" content="Day 13: watch six static and dynamic load balancing algorithms route live requests across three servers.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
-<style>
-/* Layout: one dark "whiteboard video" canvas. Taxonomy tree as navigation, a live routing stage, then reference + recall. */
-:root{
-  --bg:#242424; --panel:#2c2c2b; --line:#3b3b39; --fg:#f1f0ea; --muted:#a6a59d;
-  --yellow:#f5cd2a; --teal:#12a98d; --cyan:#33d4f2; --red:#ff5d70; --ink:#1d1d1b;
-  --display:"Barlow","DIN Alternate","Segoe UI",system-ui,sans-serif;
-  --body:"Barlow","Segoe UI",system-ui,sans-serif;
-  --mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
-  color-scheme:dark;
-}
-*{box-sizing:border-box}
-body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.55}
-.wrap{max-width:1120px;margin:0 auto;padding-block:36px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:44px}
-.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-h1{font-family:var(--display);font-weight:600;font-size:clamp(32px,5vw,52px);line-height:1.05;margin:8px 0 14px;text-wrap:balance}
-h2{font-family:var(--display);font-weight:600;font-size:26px;margin:0 0 6px;text-wrap:balance}
-.lede{max-width:66ch;color:#d9d8d1;margin:0}
-.lede b{color:var(--fg)} .lede .s{color:var(--fg)} .lede .d{color:var(--red)}
-.sub{color:var(--muted);margin:0 0 18px;max-width:66ch}
-.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-svg text{font-family:var(--body)}
-
-/* tree */
-.tree{min-width:720px;width:100%;display:block}
-.curve{fill:none;stroke:var(--fg);stroke-width:2.4}
-.knot{fill:var(--fg)}
-.leaf{cursor:pointer}
-.leaf rect{fill:var(--bg);stroke:var(--teal);stroke-width:2}
-.leaf text{fill:var(--fg);font-size:14px;font-weight:600;text-anchor:middle}
-.leaf:hover rect{fill:#1f3a34}
-.leaf.on rect{fill:var(--teal);stroke:var(--teal)}
-.leaf.on text{fill:#fff}
-.leaf:focus{outline:none} .leaf:focus-visible rect{stroke:var(--cyan);stroke-width:3}
-.cat{font-size:22px;font-weight:600;text-anchor:middle;fill:var(--fg);transition:opacity .3s}
-.cat.dim{opacity:.4}
-.cat.glow-s{filter:drop-shadow(0 0 8px rgba(255,255,255,.55))}
-.cat.dyn{fill:var(--red)} .cat.glow-d{filter:drop-shadow(0 0 10px rgba(255,93,112,.85))}
-.root{font-size:24px;font-weight:600;fill:var(--yellow);text-anchor:middle}
-
-/* stage */
-.stage-title{font-family:var(--display);font-weight:600;font-size:clamp(26px,3.4vw,36px);color:var(--yellow);text-align:center;margin:0}
-.stage-kind{text-align:center;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:4px}
-.stage-svg{min-width:640px;width:100%;display:block}
-.wire{stroke:var(--fg);stroke-width:2.2;fill:none;transition:stroke .2s}
-.wire.hot{stroke:var(--cyan);stroke-width:3}
-.cname{fill:var(--cyan);font-size:17px;font-weight:600;text-anchor:middle}
-.cip{fill:var(--muted);font-family:var(--mono)!important;font-size:11px;text-anchor:middle}
-.person{fill:none;stroke:var(--fg);stroke-width:2.2;transition:stroke .2s}
-.client.ping .person{stroke:var(--cyan)}
-.lb-box{fill:var(--teal)}
-.lb-txt{fill:#fff;font-size:19px;font-weight:600;text-anchor:middle}
-.lb-ico{fill:none;stroke:#fff;stroke-width:2}
-.port{fill:#fff}
-.srv-box{fill:var(--yellow);stroke:transparent;stroke-width:4;transition:stroke .25s}
-.srv.flash .srv-box{stroke:var(--cyan)}
-.srv-name{fill:var(--ink);font-size:20px;font-weight:700;text-anchor:middle}
-.srv-stat,.srv-extra{fill:var(--ink);font-family:var(--mono)!important;font-size:12px;text-anchor:middle}
-.dot{fill:rgba(29,29,27,.16)} .dot.on{fill:var(--ink)} .dot.hot{fill:#c8283d}
-.slowtag rect{fill:var(--red)} .slowtag text{fill:#fff;font-family:var(--mono)!important;font-size:11px;font-weight:600;text-anchor:middle}
-.pill rect{fill:var(--cyan)} .pill text{fill:var(--ink);font-size:13px;font-weight:700;text-anchor:middle}
-.chip rect{fill:var(--ink);stroke:var(--cyan);stroke-width:1.5} .chip text{fill:var(--cyan);font-family:var(--mono)!important;font-size:12px;font-weight:600;text-anchor:middle}
-
-.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin-top:6px}
-button,.select,.toggle{font:600 14px/1 var(--body);color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;cursor:pointer}
-button:hover,.toggle:hover{border-color:var(--muted)}
-button:focus-visible,.select:focus-visible,.toggle:focus-within{outline:2px solid var(--cyan);outline-offset:2px}
-button.primary{background:var(--cyan);border-color:var(--cyan);color:var(--ink)}
-.toggle{display:flex;align-items:center;gap:8px}
-.toggle input{accent-color:var(--red);width:16px;height:16px;margin:0}
-.select{appearance:auto;padding:9px 10px}
-.hint{text-align:center;color:var(--muted);font-size:14px;margin:10px auto 0;max-width:70ch}
-.hint b{color:var(--fg)}
-
-.grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px;margin-top:22px}
-@media (max-width:820px){.grid{grid-template-columns:minmax(0,1fr)}}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;min-width:0}
-.label{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
-.facts{display:grid;gap:14px}
-.facts p{margin:0}
-.facts .k-strength{color:#7fe3c9} .facts .k-weak{color:#ff9aa7}
-.log{list-style:none;margin:0;padding:0;font-family:var(--mono);font-size:12.5px;display:flex;flex-direction:column;gap:7px;min-height:9.5em}
-.log li{color:var(--muted);overflow-wrap:anywhere}
-.log li:first-child{color:var(--fg)}
-.log .rq{color:var(--cyan)} .log .sv{color:var(--yellow)}
-.bars{display:grid;gap:10px;margin-top:4px}
-.bar{display:grid;grid-template-columns:72px minmax(0,1fr) 84px;gap:10px;align-items:center;font-size:14px}
-.bar .track{height:12px;background:#383836;border-radius:6px;overflow:hidden}
-.bar .fill{height:100%;background:var(--yellow);width:0;transition:width .35s}
-.bar .num{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right;font-variant-numeric:tabular-nums}
-.side{display:grid;gap:18px;align-content:start}
-
-/* reference */
-table{border-collapse:collapse;width:100%;min-width:760px;font-size:14.5px}
-th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}
-th{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:500}
-td:first-child{font-weight:600;white-space:nowrap}
-.tag{font-family:var(--mono);font-size:11px;padding:3px 7px;border-radius:6px;border:1px solid}
-.tag.s{color:var(--fg);border-color:#6b6b66} .tag.d{color:var(--red);border-color:var(--red)}
-tr.cur td{background:#2f2f2d}
-
-.quiz{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:14px}
-details{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
-summary{cursor:pointer;list-style:none;font-weight:500}
-summary::-webkit-details-marker{display:none}
-summary .go{display:block;margin-top:10px;font-family:var(--mono);font-size:12px;color:var(--cyan)}
-details[open] summary .go{display:none}
-details .ans{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
-details .ans b{color:var(--yellow)}
-details p{margin:0}
-footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);padding-top:18px}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
-</style>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
 </head>
-<body style="margin:0">
-
-<div class="wrap">
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← System Design roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
   <header>
     <div class="eyebrow">Week 2 · Day 13 · Scaling Fundamentals</div>
     <h1>Load Balancing Algorithms</h1>
@@ -153,7 +48,7 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
     <div class="scroll">
       <svg class="stage-svg" id="stage" viewBox="0 0 1000 520" aria-label="Animated requests flowing from clients through a load balancer to three servers">
         <defs>
-          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#f1f0ea"/></marker>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead" d="M0 0 L10 5 L0 10 z"/></marker>
         </defs>
         <g id="clientWires"></g>
         <g id="srvWires"></g>
@@ -178,17 +73,17 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
     </div>
 
     <div class="controls">
-      <button class="primary" id="playBtn" type="button">Pause traffic</button>
-      <button id="oneBtn" type="button">Send one request</button>
+      <button class="btn primary" id="playBtn" type="button">Pause traffic</button>
+      <button class="btn" id="oneBtn" type="button">Send one request</button>
       <label class="toggle" for="slowB"><input type="checkbox" id="slowB"> Slow down Server B</label>
-      <label class="eyebrow" for="speed" style="display:flex;gap:8px;align-items:center">Speed
+      <label class="eyebrow speed" for="speed">Speed
         <select class="select" id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select>
       </label>
-      <button id="resetBtn" type="button">Reset</button>
+      <button class="btn" id="resetBtn" type="button">Reset</button>
     </div>
     <p class="hint" id="hint">Try it: turn on <b>Slow down Server B</b> and watch its open connections pile up under Round Robin. Then switch to <b>Least Connections</b>.</p>
 
-    <div class="grid">
+    <div class="info-grid">
       <div class="card facts" id="facts">
         <div><div class="label">How it picks</div><p id="fPick"></p></div>
         <div><div class="label k-strength">Strength</div><p id="fStrength"></p></div>
@@ -211,7 +106,7 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
   <section aria-labelledby="cmpH">
     <h2 id="cmpH">Side by side</h2>
     <p class="sub">The trade-off runs from simple and predictable (top) to adaptive but costly to run (bottom).</p>
-    <div class="scroll card" style="padding:4px 8px">
+    <div class="scroll card table-card">
       <table>
         <thead><tr><th>Algorithm</th><th>Type</th><th>Picks a server by</th><th>Strength</th><th>Weakness</th></tr></thead>
         <tbody id="cmpBody"></tbody>
@@ -236,7 +131,7 @@ footer{color:var(--muted);font-size:14px;border-top:1px solid var(--line);paddin
     </div>
   </section>
 
-  <footer>Simulation note: request timings and latencies are simulated, and each run uses a fixed random seed so you can replay it with Reset. Source: your Day 13 notes, "Load Balancing Algorithms: Static vs Dynamic".</footer>
+  <footer>Simulation note: request timings and latencies are simulated, and each run uses a fixed random seed so you can replay it with Reset. Source: Day 13 notes, "Load Balancing Algorithms: Static vs Dynamic".</footer>
 </div>
 
 <script>

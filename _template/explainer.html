@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!--
+  EXPLAINER TEMPLATE
+  1. Copy this file into a subject folder, e.g.  system-design-explainers/cache-aside.html
+     (paths below assume the page sits ONE folder below the site root).
+  2. Change <title>, the description, the back link, the header and the sections.
+  3. Shared look comes from assets/css (theme → base → explainer). Never hard-code colours:
+     use the tokens in assets/css/theme.css so light and dark both work.
+  4. Page-specific animation code goes in the <script> at the bottom of this page.
+  5. Link the new page from the subject's index.html and the root RECENT list.
+-->
+<title>Explainer Title</title>
+<meta name="description" content="One sentence on what this explainer shows.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Back to roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Subject · Day N · Week topic</div>
+    <h1>Explainer Title</h1>
+    <p class="lede">Two or three sentences: the one idea this page makes obvious, in plain words. <b>Bold</b> the key term.</p>
+  </header>
+
+  <section aria-labelledby="stageTitle">
+    <h2 class="stage-title" id="stageTitle">1. The flow</h2>
+    <div class="stage-kind">Replace with a one-line label</div>
+    <div class="scroll">
+      <svg class="stage-svg" id="stage" viewBox="0 0 1000 300" aria-label="A request travelling from a client to a service and back">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="arrowhead" d="M0 0 L10 5 L0 10 z"/></marker>
+        </defs>
+        <line class="wire" id="wire" x1="170" y1="150" x2="718" y2="150" marker-end="url(#arr)"/>
+        <g class="client">
+          <circle class="person" cx="110" cy="124" r="11"/>
+          <path class="person" d="M90 156 C90 138 99 138 110 138 C121 138 130 138 130 156 Z"/>
+          <text class="cname" x="110" y="182">Client</text>
+        </g>
+        <g class="srv" id="srv">
+          <rect class="srv-box" x="720" y="102" width="180" height="96" rx="16"/>
+          <text class="srv-name" x="810" y="146">Service</text>
+          <text class="srv-stat" x="810" y="170" id="srvStat">handled 0</text>
+        </g>
+        <g class="pill" id="pill" opacity="0">
+          <rect x="-33" y="-13" width="66" height="26" rx="8"/>
+          <text x="0" y="5" id="pillTxt">req 1</text>
+        </g>
+      </svg>
+    </div>
+    <div class="controls">
+      <button class="btn primary" id="sendBtn" type="button">Send a request</button>
+      <button class="btn" id="resetBtn" type="button">Reset</button>
+    </div>
+    <p class="hint">Replace with the one experiment the reader should try first.</p>
+
+    <div class="info-grid">
+      <div class="card facts">
+        <div><div class="label">How it works</div><p>Explain the mechanism in two sentences.</p></div>
+        <div><div class="label k-strength">Strength</div><p>What it does well.</p></div>
+        <div><div class="label k-weak">Weakness</div><p>Where it breaks down.</p></div>
+        <div><div class="label">Reach for it when</div><p>The situation where this is the right choice.</p></div>
+      </div>
+      <div class="side">
+        <div class="card">
+          <div class="label">Event log · newest first</div>
+          <ul class="log" id="log" aria-live="polite"><li>Press "Send a request" to start.</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Scenario question goes here?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Answer.</b> One or two sentences of reasoning.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Source: link or title of your notes for this day.</footer>
+</div>
+
+<script>
+/* Page-specific code. Keep colours out of JS: style through CSS classes. */
+(function () {
+  const $ = id => document.getElementById(id);
+  const pill = $('pill'), log = $('log');
+  let n = 0, busy = false;
+
+  function note(html) {
+    if (log.firstElementChild && log.firstElementChild.textContent.startsWith('Press')) log.innerHTML = '';
+    log.insertAdjacentHTML('afterbegin', `<li>${html}</li>`);
+    while (log.children.length > 6) log.lastElementChild.remove();
+  }
+
+  function send() {
+    if (busy) return;
+    busy = true; n++;
+    $('pillTxt').textContent = `req ${n}`;
+    pill.setAttribute('opacity', 1);
+    $('wire').classList.add('hot');
+    note(`<span class="rq">req ${n}</span> leaves the client`);
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const dur = reduce ? 1 : 900, t0 = performance.now();
+    (function step(t) {
+      const k = Math.min(1, (t - t0) / dur);
+      const x = 170 + (720 - 170) * (k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2);
+      pill.setAttribute('transform', `translate(${x},150)`);
+      if (k < 1) return requestAnimationFrame(step);
+      pill.setAttribute('opacity', 0);
+      $('wire').classList.remove('hot');
+      $('srv').classList.add('flash'); setTimeout(() => $('srv').classList.remove('flash'), 300);
+      $('srvStat').textContent = `handled ${n}`;
+      note(`<span class="sv">Service</span> handled req ${n}`);
+      busy = false;
+    })(t0);
+  }
+
+  $('sendBtn').addEventListener('click', send);
+  $('resetBtn').addEventListener('click', () => {
+    n = 0; $('srvStat').textContent = 'handled 0';
+    log.innerHTML = '<li>Press "Send a request" to start.</li>';
+  });
+})();
+</script>
+</body>
+</html>
