@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System Design Explainers</title>
+<meta name="description" content="Interactive, animated explainers for a 119-day system design roadmap.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: same dark whiteboard world as the explainers. Hero with progress, then phases → weeks → day cards. */
+:root{
+  --bg:#242424; --panel:#2c2c2b; --panel-2:#323230; --line:#3b3b39; --fg:#f1f0ea; --muted:#a6a59d; --faint:#6f6e68;
+  --yellow:#f5cd2a; --teal:#12a98d; --cyan:#33d4f2; --red:#ff5d70; --ink:#1d1d1b;
+  --display:"Barlow","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--display);font-size:16px;line-height:1.5}
+a{color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:40px max(16px,env(safe-area-inset-right,0px)) 72px max(16px,env(safe-area-inset-left,0px))}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:32px;align-items:end;padding-bottom:28px;border-bottom:1px solid var(--line)}
+@media (max-width:820px){.hero{grid-template-columns:minmax(0,1fr)}}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.back{display:inline-block;margin-bottom:14px;font-family:var(--mono);font-size:12px;color:var(--cyan);text-decoration:none}
+.back:hover{text-decoration:underline}
+h1{font-weight:600;font-size:clamp(34px,5.4vw,58px);line-height:1.02;margin:10px 0 14px;text-wrap:balance}
+h1 .y{color:var(--yellow)}
+.lede{color:#d9d8d1;max-width:58ch;margin:0}
+.flow{display:block;width:100%;height:auto;margin-top:22px}
+.flow .w{stroke:var(--fg);stroke-width:2;fill:none}
+.flow .n{fill:var(--panel-2);stroke:var(--line)}
+.flow .lb{fill:var(--teal)}
+.flow .sv{fill:var(--yellow)}
+.flow text{font-family:var(--display);font-size:12px;font-weight:600;text-anchor:middle}
+.flow .t-light{fill:var(--fg)} .flow .t-dark{fill:var(--ink)} .flow .t-white{fill:#fff}
+.flow .pkt{fill:var(--cyan)}
+
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.stat b{display:block;font-size:30px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat span{font-family:var(--mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.meter{grid-column:1/-1;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.meter .row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:8px}
+.track{height:10px;background:#3a3a37;border-radius:6px;overflow:hidden}
+.track i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--cyan));border-radius:6px}
+
+/* toolbar */
+.toolbar{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(6px);display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:14px 0;margin:8px 0 6px;border-bottom:1px solid var(--line)}
+.search{flex:1 1 240px;min-width:0;font:500 15px var(--display);color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.search::placeholder{color:var(--faint)}
+.seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{font:600 13px var(--display);color:var(--muted);background:none;border:0;border-radius:8px;padding:8px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--cyan);color:var(--ink)}
+.search:focus-visible,.seg button:focus-visible,a:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+@media (max-width:700px){.toolbar{position:static}}
+.jump{display:flex;flex-wrap:wrap;gap:6px;width:100%}
+.jump a{font-family:var(--mono);font-size:11px;letter-spacing:.05em;text-decoration:none;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 10px}
+.jump a:hover{color:var(--fg);border-color:var(--muted)}
+
+/* phases */
+.phase{margin-top:44px;scroll-margin-top:120px}
+.phase-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;margin-bottom:6px}
+.phase-head .num{font-family:var(--mono);font-size:12px;color:var(--yellow);letter-spacing:.08em;text-transform:uppercase}
+.phase-head h2{font-size:28px;font-weight:600;margin:0}
+.phase-head .weeks{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.week{margin-top:20px}
+.week h3{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;color:var(--muted);margin:0 0 10px}
+.week h3::after{content:"";flex:1;height:1px;background:var(--line)}
+.week h3 .wk{font-family:var(--mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:10px}
+
+.card{position:relative;display:flex;flex-direction:column;gap:6px;min-width:0;padding:14px 16px 15px;border-radius:12px;border:1px solid var(--line);background:transparent;text-decoration:none}
+.card .day{font-family:var(--mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--faint)}
+.card .topic{font-weight:600;font-size:16px;line-height:1.3;color:#cfcec7}
+.card .status{margin-top:auto;padding-top:6px;font-family:var(--mono);font-size:11px;color:var(--faint)}
+.card.live{background:var(--panel);border-color:var(--teal);transition:transform .15s,border-color .15s,background .15s}
+.card.live .day{color:var(--teal)}
+.card.live .topic{color:var(--fg)}
+.card.live .status{color:var(--cyan)}
+.card.live::after{content:"→";position:absolute;top:12px;right:14px;color:var(--cyan);font-weight:600;transition:transform .15s}
+.card.live:hover{transform:translateY(-2px);background:var(--panel-2);border-color:var(--cyan)}
+.card.live:hover::after{transform:translateX(3px)}
+.card.review{border-style:dashed}
+.empty{color:var(--muted);padding:40px 0;text-align:center}
+
+/* how-to */
+.howto{margin-top:56px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.howto .box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;min-width:0}
+.howto h4{margin:0 0 8px;font-size:16px}
+.howto p{margin:0;color:#d0cfc8}
+.howto code{font-family:var(--mono);font-size:12.5px;background:var(--ink);color:var(--yellow);padding:2px 6px;border-radius:5px;overflow-wrap:anywhere}
+footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div>
+      <a class="back" href="../index.html">← All subjects</a>
+      <div class="eyebrow">119 days · 17 weeks · built while learning</div>
+      <h1>System Design <span class="y">Explainers</span></h1>
+      <p class="lede">Animated, clickable walkthroughs for each topic in the roadmap. Open one, play with it, then close it and draw it from memory.</p>
+      <svg class="flow" viewBox="0 0 560 90" aria-hidden="true">
+        <path class="w" d="M70 45 H200"/><path class="w" d="M300 45 C340 45 350 18 400 18"/><path class="w" d="M300 45 H400"/><path class="w" d="M300 45 C340 45 350 72 400 72"/>
+        <rect class="n" x="10" y="28" width="60" height="34" rx="9"/><text class="t-light" x="40" y="50">Client</text>
+        <rect class="lb" x="200" y="26" width="100" height="38" rx="11"/><text class="t-white" x="250" y="50">Balancer</text>
+        <rect class="sv" x="400" y="4" width="84" height="28" rx="8"/><text class="t-dark" x="442" y="22">Server A</text>
+        <rect class="sv" x="400" y="31" width="84" height="28" rx="8"/><text class="t-dark" x="442" y="49">Server B</text>
+        <rect class="sv" x="400" y="58" width="84" height="28" rx="8"/><text class="t-dark" x="442" y="76">Server C</text>
+        <circle class="pkt" r="5"><animateMotion dur="2.4s" begin="0s" repeatCount="indefinite" path="M70 45 H300 C340 45 350 18 400 18"/></circle>
+        <circle class="pkt" r="5"><animateMotion dur="2.4s" begin="-0.8s" repeatCount="indefinite" path="M70 45 H400"/></circle>
+        <circle class="pkt" r="5"><animateMotion dur="2.4s" begin="-1.6s" repeatCount="indefinite" path="M70 45 H300 C340 45 350 72 400 72"/></circle>
+      </svg>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="sLive">0</b><span>Explainers</span></div>
+      <div class="stat"><b id="sDays">0</b><span>Roadmap days</span></div>
+      <div class="stat"><b id="sNext">–</b><span>Next up</span></div>
+      <div class="meter">
+        <div class="row"><span>Roadmap covered</span><span id="sPct">0%</span></div>
+        <div class="track"><i id="bar" style="width:0"></i></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <input class="search" id="q" type="search" placeholder="Search topics, e.g. caching, raft, kafka" aria-label="Search topics">
+    <div class="seg" role="group" aria-label="Filter">
+      <button type="button" data-f="all" aria-pressed="true">All days</button>
+      <button type="button" data-f="live" aria-pressed="false">Explainers only</button>
+    </div>
+    <nav class="jump" id="jump" aria-label="Jump to phase"></nav>
+  </div>
+
+  <main id="phases"></main>
+
+  <section class="howto" aria-label="How to use">
+    <div class="box"><h4>Study loop</h4><p>Open the explainer and run its experiments. Close it, sketch the diagram on paper, then explain it out loud without notes.</p></div>
+    <div class="box"><h4>Adding a new explainer</h4><p>Drop the file in this folder, then in <code>index.html</code> set its day's <code>file</code> to the file name, e.g. <code>file:"cache-aside.html"</code>. Commit and push.</p></div>
+    <div class="box"><h4>Embedding in Notion</h4><p>Copy an explainer's GitHub Pages URL, type <code>/embed</code> on the day's Notion page, paste it, and drag the block taller.</p></div>
+  </section>
+
+  <footer>Roadmap: networking → scaling → caching → databases → distributed data → distributed systems → architecture → reliability → observability → interview readiness.</footer>
+</div>
+
+<script>
+/* ===== Roadmap data. To publish a new explainer, add  file:"your-file.html"  to its day. ===== */
+const ROADMAP = [
+ {phase:"Phase 1", name:"Foundations", weeks:[
+  {w:1,name:"Networking Fundamentals",days:[
+   {d:1,t:"Client-Server Architecture · DNS Resolution"},
+   {d:2,t:"HTTP Lifecycle · Methods · Status Codes"},
+   {d:3,t:"TCP · UDP · Three-Way Handshake"},
+   {d:4,t:"HTTPS · TLS Handshake · Certificates"},
+   {d:5,t:"Latency · Throughput · p50/p95/p99"},
+   {d:6,t:"Availability · SLA · SLO · SLI"},
+   {d:7,t:"Review: whiteboard everything",review:true}]},
+  {w:2,name:"Scaling Fundamentals",days:[
+   {d:8,t:"Vertical vs Horizontal Scaling"},
+   {d:9,t:"Stateless Applications"},
+   {d:10,t:"Reverse Proxy · NGINX"},
+   {d:11,t:"API Gateway"},
+   {d:12,t:"Load Balancers: L4 vs L7"},
+   {d:13,t:"Load Balancing Algorithms",file:"load-balancing-algorithms.html"},
+   {d:14,t:"Design: Scalable Web Application",review:true}]},
+  {w:3,name:"Caching & CDN",days:[
+   {d:15,t:"Why Caching Exists"},{d:16,t:"Cache Aside"},{d:17,t:"Write Through"},
+   {d:18,t:"Write Behind"},{d:19,t:"LRU · LFU"},{d:20,t:"Cache Stampede"},{d:21,t:"CDN · Edge Caching"}]}
+ ]},
+ {phase:"Phase 2", name:"Databases", weeks:[
+  {w:4,name:"Database Fundamentals",days:[
+   {d:22,t:"SQL vs NoSQL"},{d:23,t:"ACID vs BASE"},{d:24,t:"B-Tree Indexes"},{d:25,t:"Composite Indexes"},
+   {d:26,t:"Covering Indexes"},{d:27,t:"Query Planner"},{d:28,t:"Normalization vs Denormalization"}]},
+  {w:5,name:"Database Internals",days:[
+   {d:29,t:"Storage Pages"},{d:30,t:"Segments"},{d:31,t:"WAL (Write-Ahead Logging)"},{d:32,t:"MVCC"},
+   {d:33,t:"Read Amplification"},{d:34,t:"Write Amplification"},{d:35,t:"PostgreSQL Architecture"}]},
+  {w:6,name:"Transactions & Concurrency",days:[
+   {d:36,t:"Locks"},{d:37,t:"Isolation Levels"},{d:38,t:"Dirty Reads"},{d:39,t:"Non-Repeatable Reads"},
+   {d:40,t:"Phantom Reads"},{d:41,t:"Deadlocks"},{d:42,t:"Optimistic vs Pessimistic Concurrency"}]}
+ ]},
+ {phase:"Phase 3", name:"Distributed Data", weeks:[
+  {w:7,name:"Replication",days:[
+   {d:43,t:"Leader-Follower Replication"},{d:44,t:"Sync Replication"},{d:45,t:"Async Replication"},
+   {d:46,t:"Replication Lag"},{d:47,t:"Read Replicas"},{d:48,t:"Failover"},{d:49,t:"Design Exercise",review:true}]},
+  {w:8,name:"Sharding",days:[
+   {d:50,t:"Horizontal Partitioning"},{d:51,t:"Range-Based Sharding"},{d:52,t:"Hash-Based Sharding"},
+   {d:53,t:"Hot Shards"},{d:54,t:"Consistent Hashing"},{d:55,t:"Virtual Nodes"},{d:56,t:"Design Exercise",review:true}]},
+  {w:9,name:"Consistency",days:[
+   {d:57,t:"CAP Theorem"},{d:58,t:"PACELC"},{d:59,t:"Strong Consistency"},{d:60,t:"Eventual Consistency"},
+   {d:61,t:"Quorum Reads"},{d:62,t:"Quorum Writes"},{d:63,t:"Trade-Off Analysis",review:true}]}
+ ]},
+ {phase:"Phase 4", name:"Distributed Systems", weeks:[
+  {w:10,name:"Coordination & Consensus",days:[
+   {d:64,t:"Distributed Locks"},{d:65,t:"Leader Election"},{d:66,t:"The Consensus Problem"},{d:67,t:"Raft"},
+   {d:68,t:"Paxos (Conceptual)"},{d:69,t:"ZooKeeper"},{d:70,t:"etcd"}]},
+  {w:11,name:"Distributed Transactions",days:[
+   {d:71,t:"Two-Phase Commit"},{d:72,t:"Saga Pattern"},{d:73,t:"Choreography"},{d:74,t:"Orchestration"},
+   {d:75,t:"Outbox Pattern"},{d:76,t:"Inbox Pattern"},{d:77,t:"Idempotency"}]},
+  {w:12,name:"Messaging Systems",days:[
+   {d:78,t:"Queue vs Pub/Sub"},{d:79,t:"Kafka Concepts"},{d:80,t:"RabbitMQ Concepts"},{d:81,t:"Delivery Guarantees"},
+   {d:82,t:"Dead Letter Queues"},{d:83,t:"Backpressure"},{d:84,t:"Event-Driven Architecture"}]}
+ ]},
+ {phase:"Phase 5", name:"Modern Architecture", weeks:[
+  {w:13,name:"Service Architecture",days:[
+   {d:85,t:"Monoliths"},{d:86,t:"Microservices"},{d:87,t:"Service Boundaries"},{d:88,t:"Service Discovery"},
+   {d:89,t:"API Gateway Deep Dive"},{d:90,t:"CQRS"},{d:91,t:"Event Sourcing (Conceptual)"}]},
+  {w:14,name:"APIs & Security",days:[
+   {d:92,t:"REST"},{d:93,t:"gRPC"},{d:94,t:"GraphQL"},{d:95,t:"Pagination"},{d:96,t:"JWT"},{d:97,t:"OAuth2"},
+   {d:98,t:"OpenID Connect · RBAC"}]}
+ ]},
+ {phase:"Phase 6", name:"Reliability, Cloud & Operations", weeks:[
+  {w:15,name:"Reliability",days:[
+   {d:99,t:"Retries"},{d:100,t:"Exponential Backoff"},{d:101,t:"Circuit Breakers"},{d:102,t:"Timeouts"},
+   {d:103,t:"Bulkheads"},{d:104,t:"Graceful Degradation"},{d:105,t:"Multi-Region Design"}]},
+  {w:16,name:"Cloud & Platform Concepts",days:[
+   {d:106,t:"Object Storage"},{d:107,t:"CDN Architecture"},{d:108,t:"Containers"},{d:109,t:"Docker Fundamentals"},
+   {d:110,t:"Kubernetes: Pods · Services"},{d:111,t:"Deployments · ConfigMaps · Secrets · Ingress"},{d:112,t:"Service Mesh (Conceptual)"}]}
+ ]},
+ {phase:"Phase 7", name:"Observability, Search & Analytics", weeks:[
+  {w:17,name:"Observability & Data",days:[
+   {d:113,t:"Logging"},{d:114,t:"Metrics"},{d:115,t:"Tracing"},{d:116,t:"OpenTelemetry"},
+   {d:117,t:"Search: Inverted Index · Tokenization · Ranking"},{d:118,t:"OLTP vs OLAP"},{d:119,t:"Data Warehouse · Data Lake"}]}
+ ]}
+];
+
+/* ===== Render ===== */
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const allDays=ROADMAP.flatMap(p=>p.weeks.flatMap(w=>w.days));
+const live=allDays.filter(d=>d.file);
+$('sLive').textContent=live.length;
+$('sDays').textContent=allDays.length;
+const lastLive=live.length?Math.max(...live.map(d=>d.d)):0;
+const next=allDays.find(d=>d.d>lastLive&&!d.file);
+$('sNext').textContent=next?`Day ${next.d}`:'Done';
+const pct=Math.round(live.length*100/allDays.length);
+$('sPct').textContent=`${live.length} / ${allDays.length} · ${pct}%`;
+$('bar').style.width=Math.max(pct,live.length?2:0)+'%';
+
+$('jump').innerHTML=ROADMAP.map((p,i)=>`<a href="#p${i+1}">${p.phase.replace('Phase ','P')} · ${esc(p.name)}</a>`).join('');
+
+let filter='all', query='';
+function card(d){
+  const cls=['card'];if(d.review)cls.push('review');
+  if(d.file){
+    cls.push('live');
+    return `<a class="${cls.join(' ')}" href="${esc(d.file)}"><span class="day">Day ${d.d}</span><span class="topic">${esc(d.t)}</span><span class="status">Open explainer</span></a>`;
+  }
+  return `<div class="${cls.join(' ')}"><span class="day">Day ${d.d}</span><span class="topic">${esc(d.t)}</span><span class="status">${d.review?'Practice day':'Coming soon'}</span></div>`;
+}
+function render(){
+  const q=query.trim().toLowerCase();
+  let html='';
+  ROADMAP.forEach((p,i)=>{
+    let weeks='';
+    p.weeks.forEach(w=>{
+      const days=w.days.filter(d=>(filter==='all'||d.file)&&(!q||d.t.toLowerCase().includes(q)||w.name.toLowerCase().includes(q)||String(d.d)===q));
+      if(!days.length)return;
+      weeks+=`<div class="week"><h3><span class="wk">Week ${w.w}</span>${esc(w.name)}</h3><div class="grid">${days.map(card).join('')}</div></div>`;
+    });
+    if(!weeks)return;
+    const wr=p.weeks.length>1?`Weeks ${p.weeks[0].w}–${p.weeks[p.weeks.length-1].w}`:`Week ${p.weeks[0].w}`;
+    html+=`<section class="phase" id="p${i+1}"><div class="phase-head"><span class="num">${p.phase}</span><h2>${esc(p.name)}</h2><span class="weeks">${wr}</span></div>${weeks}</section>`;
+  });
+  $('phases').innerHTML=html||`<p class="empty">No topics match “${esc(query)}”.</p>`;
+}
+$('q').addEventListener('input',e=>{query=e.target.value;render();});
+document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{
+  filter=b.dataset.f;
+  document.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  render();
+}));
+render();
+</script>
+</body>
+</html>

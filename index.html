@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interactive Explainers</title>
+<meta name="description" content="Animated, clickable explainers for system design, AWS, Python and AI, built while learning.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: hub for every subject. Short hero, then one large card per subject, each with its own accent. */
+:root{
+  --bg:#242424; --panel:#2c2c2b; --panel-2:#323230; --line:#3b3b39; --fg:#f1f0ea; --muted:#a6a59d; --faint:#6f6e68;
+  --yellow:#f5cd2a; --teal:#12a98d; --cyan:#33d4f2; --orange:#ff9f3f; --blue:#5aa2ff; --violet:#b78cff; --ink:#1d1d1b;
+  --display:"Barlow","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--display);font-size:16px;line-height:1.5}
+.wrap{max-width:1100px;margin:0 auto;padding:44px max(16px,env(safe-area-inset-right,0px)) 72px max(16px,env(safe-area-inset-left,0px))}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+h1{font-weight:600;font-size:clamp(36px,6vw,64px);line-height:1;margin:12px 0 16px;text-wrap:balance}
+h1 .y{color:var(--yellow)}
+.lede{color:#d9d8d1;max-width:60ch;margin:0}
+.totals{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.totals span{font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:5px 12px}
+.totals b{color:var(--fg);font-weight:600}
+
+.subjects{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:16px;margin-top:40px}
+.subj{--acc:var(--muted);position:relative;display:flex;flex-direction:column;gap:12px;min-width:0;padding:22px 22px 20px;border-radius:16px;border:1px solid var(--line);background:var(--panel);color:inherit;text-decoration:none}
+.subj .glyph{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--acc) 18%,transparent);border:1px solid color-mix(in srgb,var(--acc) 55%,transparent)}
+.subj .glyph svg{width:24px;height:24px;stroke:var(--acc);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.subj h2{margin:0;font-size:24px;font-weight:600}
+.subj p{margin:0;color:#cfcec7}
+.subj .meta{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:12px;border-top:1px solid var(--line);font-family:var(--mono);font-size:12px;color:var(--muted)}
+.subj .meta b{color:var(--acc);font-weight:600}
+.subj .track{height:6px;background:#3a3a37;border-radius:4px;overflow:hidden}
+.subj .track i{display:block;height:100%;background:var(--acc)}
+a.subj{transition:transform .15s,border-color .15s,background .15s}
+a.subj:hover{transform:translateY(-3px);border-color:var(--acc);background:var(--panel-2)}
+a.subj .go{color:var(--acc);font-weight:600;transition:transform .15s}
+a.subj:hover .go{transform:translateX(3px)}
+a.subj:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+.subj.soon{background:transparent;border-style:dashed}
+.subj.soon h2{color:#cfcec7}
+.recent{margin-top:48px}
+.recent h3{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:600;color:var(--muted);margin:0 0 12px}
+.recent h3::after{content:"";flex:1;height:1px;background:var(--line)}
+.recent ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.recent a{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;padding:12px 14px;border-radius:10px;border:1px solid var(--line);text-decoration:none;color:var(--fg)}
+.recent a:hover{border-color:var(--cyan);background:var(--panel)}
+.recent .tag{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.recent .t{font-weight:600}
+footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+footer code{font-family:var(--mono);font-size:12.5px;background:var(--ink);color:var(--yellow);padding:2px 6px;border-radius:5px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Learning in public · one diagram at a time</div>
+    <h1>Interactive <span class="y">Explainers</span></h1>
+    <p class="lede">Animated, clickable walkthroughs of what I'm learning. Each one is a single page: play with it, then close it and draw it from memory.</p>
+    <div class="totals" id="totals"></div>
+  </header>
+
+  <main class="subjects" id="subjects"></main>
+
+  <section class="recent" aria-labelledby="recentH">
+    <h3 id="recentH">Latest explainers</h3>
+    <ul id="recent"></ul>
+  </section>
+
+  <footer>To add a subject, create its folder with an <code>index.html</code>, then set <code>path</code> (e.g. <code>aws/index.html</code>) on its entry in this page's <code>SUBJECTS</code> list. Add new explainers to <code>RECENT</code>.</footer>
+</div>
+
+<script>
+/* ===== Edit these two lists as you add work. ===== */
+const SUBJECTS = [
+  {name:"System Design", path:"system-design-explainers/index.html", accent:"var(--teal)", icon:"net",
+   blurb:"119-day roadmap: networking, scaling, caching, databases, distributed systems and reliability.",
+   done:1, total:119, unit:"days"},
+  {name:"AWS", path:null, accent:"var(--orange)", icon:"cloud",
+   blurb:"Cloud Practitioner (CLF-C02): core services, pricing models, shared responsibility, Well-Architected.",
+   done:0, total:null, unit:"topics"},
+  {name:"Python", path:null, accent:"var(--blue)", icon:"code",
+   blurb:"How Python works underneath: data model, iterators and generators, async, memory and the GIL.",
+   done:0, total:null, unit:"topics"},
+  {name:"AI", path:null, accent:"var(--violet)", icon:"spark",
+   blurb:"Embeddings, transformers and attention, RAG pipelines, agents and evaluation.",
+   done:0, total:null, unit:"topics"}
+];
+const RECENT = [
+  {subject:"System Design", title:"Load Balancing Algorithms", note:"Day 13", href:"system-design-explainers/load-balancing-algorithms.html"}
+];
+
+/* ===== Render ===== */
+const ICONS={
+  net:'<circle cx="5" cy="12" r="2.5"/><circle cx="19" cy="5" r="2.5"/><circle cx="19" cy="12" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M7.5 12h9M7 11l9.5-5M7 13l9.5 5"/>',
+  cloud:'<path d="M7 18h10a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.2 9.5 4.3 4.3 0 0 0 7 18z"/>',
+  code:'<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16"/>',
+  spark:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"/><circle cx="12" cy="12" r="2.2"/>'
+};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=id=>document.getElementById(id);
+const totalExplainers=SUBJECTS.reduce((n,s)=>n+s.done,0);
+const activeSubjects=SUBJECTS.filter(s=>s.path).length;
+$('totals').innerHTML=`<span><b>${totalExplainers}</b> explainer${totalExplainers===1?'':'s'}</span><span><b>${activeSubjects}</b> of ${SUBJECTS.length} subjects started</span>`;
+
+$('subjects').innerHTML=SUBJECTS.map(s=>{
+  const pct=s.total?Math.round(s.done*100/s.total):0;
+  const progress=s.total?`<div class="track" aria-hidden="true"><i style="width:${Math.max(pct,s.done?2:0)}%"></i></div>`:'';
+  const count=s.path?`<span><b>${s.done}</b>${s.total?` / ${s.total} ${s.unit}`:` explainer${s.done===1?'':'s'}`}</span><span class="go">Open →</span>`:`<span>Planned</span><span>Coming soon</span>`;
+  const inner=`<div class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[s.icon]}</svg></div>
+    <h2>${esc(s.name)}</h2><p>${esc(s.blurb)}</p>${progress}<div class="meta">${count}</div>`;
+  return s.path
+    ? `<a class="subj" style="--acc:${s.accent}" href="${esc(s.path)}">${inner}</a>`
+    : `<div class="subj soon" style="--acc:${s.accent}">${inner}</div>`;
+}).join('');
+
+const accentOf=name=>(SUBJECTS.find(s=>s.name===name)||{}).accent||'var(--muted)';
+$('recent').innerHTML=RECENT.map(r=>`<li><a href="${esc(r.href)}"><span class="tag" style="color:${accentOf(r.subject)}">${esc(r.subject)}</span><span class="t">${esc(r.title)}</span><span class="tag" style="color:var(--muted)">${esc(r.note||'')}</span></a></li>`).join('');
+</script>
+</body>
+</html>
