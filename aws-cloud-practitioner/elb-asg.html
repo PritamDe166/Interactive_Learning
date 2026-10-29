@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Elastic Load Balancing &amp; Auto Scaling</title>
+<meta name="description" content="AWS Cloud Practitioner: run a day of traffic through an Auto Scaling group behind a load balancer, pick ALB, NLB or GWLB, and separate scalability, elasticity, agility and high availability.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .slot { fill: var(--panel-2); stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 4 4; }
+  .inst { transition: fill .25s, opacity .25s; }
+  .inst.ok { fill: var(--teal); }
+  .inst.pending { fill: var(--yellow); opacity: .65; }
+  .inst.bad { fill: var(--red); }
+  .inst.off { opacity: 0; }
+  .inst-l { fill: var(--ink); font-family: var(--mono); font-size: 10px; text-anchor: middle; pointer-events: none; }
+  .dot { fill: var(--cyan); }
+  .dot.drop { fill: var(--red); }
+  .chart-bg { fill: var(--panel); stroke: var(--line); }
+  .ln-d { fill: none; stroke: var(--accent-text); stroke-width: 2.5; }
+  .ln-c { fill: none; stroke: var(--teal); stroke-width: 2.5; }
+  .now { stroke: var(--muted); stroke-dasharray: 3 4; }
+  .legend { font-family: var(--mono); font-size: 11px; }
+  .legend .d { fill: var(--accent-text); }
+  .legend .c { fill: var(--teal); }
+  .zone.down { stroke: var(--red); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lbbox.legacy text { fill: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · Section 7 · Domains 1 &amp; 3 (Tasks 1.1, 3.2, 3.3)</div>
+    <h1>Elastic Load Balancing &amp; Auto Scaling</h1>
+    <ul class="lede">
+      <li><b>Load balancer (ELB)</b>: one entry point that spreads traffic and skips unhealthy targets.</li>
+      <li><b>Auto Scaling group (ASG)</b>: decides <b>how many</b> instances run, between a min and a max, and replaces failed ones.</li>
+      <li>Together, across <b>two or more AZs</b>, they give <b>high availability</b> and <b>elasticity</b>.</li>
+      <li>The ideas behind them are in System Design: <a href="../system-design-explainers/scaling.html">scaling</a>, <a href="../system-design-explainers/proxy-lb-gateway.html">proxies and load balancers</a>, <a href="../system-design-explainers/load-balancing-algorithms.html">algorithms</a>.</li>
+    </ul>
+  </header>
+
+  <section aria-labelledby="simH">
+    <h2 class="stage-title" id="simH">A day in an Auto Scaling group</h2>
+    <div class="stage-kind">Clinic booking traffic · pick a scaling policy, then break things</div>
+    <div class="controls">
+      <div class="seg" id="polSeg" role="group" aria-label="Scaling policy">
+        <button type="button" data-v="fixed" aria-pressed="false">Fixed size</button>
+        <button type="button" data-v="target" aria-pressed="true">Target tracking (CPU 50%)</button>
+        <button type="button" data-v="sched" aria-pressed="false">Scheduled (08–22 h)</button>
+        <button type="button" data-v="pred" aria-pressed="false">Predictive</button>
+      </div>
+    </div>
+    <div class="ranges">
+      <div class="range"><label for="minR">Minimum <output id="minO"></output></label><input type="range" id="minR" min="1" max="4" value="2"></div>
+      <div class="range"><label for="desR">Desired (fixed policy) <output id="desO"></output></label><input type="range" id="desR" min="1" max="10" value="4"></div>
+      <div class="range"><label for="maxR">Maximum <output id="maxO"></output></label><input type="range" id="maxR" min="4" max="10" value="10"></div>
+    </div>
+    <div class="controls" style="margin-top:12px">
+      <button class="btn" type="button" id="spikeB">Traffic spike (TV advert)</button>
+      <button class="btn" type="button" id="failB">An instance fails</button>
+      <label class="toggle" for="azOut"><input type="checkbox" id="azOut"> AZ b outage</label>
+      <button class="btn" type="button" id="resetB">Restart the day</button>
+    </div>
+    <div class="scroll">
+      <svg class="diagram" id="sim" viewBox="0 0 1000 440" aria-label="Load balancer in front of instances in two Availability Zones, with a 24-hour chart of demand and capacity"></svg>
+    </div>
+    <div class="kpis" id="simK"></div>
+    <p class="status-line" id="simStatus"></p>
+  </section>
+
+  <section aria-labelledby="lbH">
+    <h2 class="stage-title" id="lbH">Which load balancer?</h2>
+    <div class="stage-kind">Pick a requirement · it lands on the right type</div>
+    <div class="chips" id="lbChips"></div>
+    <div class="scroll">
+      <svg class="diagram narrow" id="lb" viewBox="0 0 1000 250" aria-label="Four load balancer types: ALB, NLB, GWLB and Classic"></svg>
+    </div>
+    <p class="status-line" id="lbStatus">Pick a requirement.</p>
+  </section>
+
+  <section aria-labelledby="termH">
+    <h2 class="stage-title" id="termH">Four words the exam mixes up</h2>
+    <div class="stage-kind">Sort each statement</div>
+    <div class="chips" id="tChips"></div>
+    <div class="scroll">
+      <svg class="diagram narrow" id="terms" viewBox="0 0 1000 200" aria-label="Four boxes: scalability, elasticity, agility, high availability"></svg>
+    </div>
+    <p class="status-line" id="tStatus">Pick a statement.</p>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Scaling method</th><th>How it decides</th><th>Exam trigger words</th></tr></thead>
+        <tbody>
+          <tr><td><b>Fixed</b> (no policy)</td><td>Holds desired capacity; still replaces unhealthy instances</td><td>"maintain N instances"</td></tr>
+          <tr><td><b>Manual</b></td><td>You change desired capacity</td><td>"administrator changes"</td></tr>
+          <tr><td><b>Target tracking</b></td><td>Keep a metric near a target, like a thermostat (AWS's recommended default)</td><td>"keep average CPU at 40%"</td></tr>
+          <tr><td><b>Step / Simple</b></td><td>CloudWatch alarm → add/remove a set amount (step: size depends on the breach; simple: one adjustment, then cooldown)</td><td>"if CPU &gt; 70% add 2"</td></tr>
+          <tr><td><b>Scheduled</b></td><td>Change capacity at known dates and times</td><td>"every Friday at 5 pm"</td></tr>
+          <tr><td><b>Predictive</b></td><td>Machine learning forecasts recurring load from history and scales ahead</td><td>"forecast", "ML", "daily pattern"</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cards" style="margin-top:14px">
+      <div class="card"><h3>How ELB and ASG connect</h3><p>The ALB sends traffic to a <b>target group</b>. The ASG registers new instances in that group and deregisters ones it removes. ELB health checks can tell the ASG to <b>replace</b> an instance that the ALB found unhealthy.</p></div>
+      <div class="card"><h3>What ELB adds</h3><p>One DNS name, health checks, TLS termination with <b>ACM</b> certificates, <b>AWS WAF</b> on ALB, Route 53 alias records, and it scales itself. AWS runs it; you configure listeners, target groups and security groups.</p></div>
+      <div class="card"><h3>What it costs</h3><p><b>ELB</b>: per hour plus capacity units (LCU / NLCU / GLCU). <b>EC2 Auto Scaling</b>: no extra charge; you pay for the instances, EBS and CloudWatch it uses. Mix Spot and On-Demand in one group.</p></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>The Classic Load Balancer isn't retired.</b> It's the <b>previous generation</b>, still documented and billed; AWS recommends migrating to ALB or NLB.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>ELB + ASG don't deliver "agility".</b> They deliver high availability and elasticity. Agility is the general cloud benefit of getting resources in minutes instead of weeks.</p></div>
+      <div class="note"><span class="flag">Updated</span><p><b>Use launch templates.</b> Launch configurations are deprecated; accounts created since 1 October 2024 can't create them. The hands-on's Amazon Linux 2 reached end of support on 30 June 2026 (use AL2023).</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>HA vs DR:</b> multi-<b>AZ</b> (ASG + ELB) survives a data-centre failure; multi-<b>Region</b> is disaster recovery and lower latency for distant users, covered in Global Infrastructure. A single-AZ ASG is not highly available.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>min 2, desired 4, max 6. Traffic triples. How many instances at most?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>6.</b> The ASG never goes above max, even if CPU stays high.</p></div></details>
+      <details><summary>Which load balancer gives you a static IP?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Network Load Balancer</b> (one static or Elastic IP per AZ). ALB gives a DNS name only.</p></div></details>
+      <details><summary>Traffic peaks every weekday at 9 am. Which two methods scale ahead of it?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Scheduled</b> (you set the time) and <b>predictive</b> (ML learns the pattern).</p></div></details>
+      <details><summary>Which service replaces a failed EC2 instance automatically: ELB or ASG?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Auto Scaling group.</b> ELB only stops sending traffic to it.</p></div></details>
+      <details><summary>You must route traffic through third-party firewall appliances. Which load balancer?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Gateway Load Balancer</b> (layer 3, GENEVE on port 6081).</p></div></details>
+      <details><summary>"Automatically add and remove capacity as demand changes": which cloud term?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Elasticity.</b> Scalability is the ability to grow; agility is speed of provisioning.</p></div></details>
+    </div>
+  </section>
+
+  <footer>The simulation is illustrative: one instance handles 1 load unit at 100% CPU, new instances take 15 simulated minutes to pass health checks, and prices are a flat $0.10 per instance-hour. Sources: ELB and ASG notes (High Availability, Scalability and Elasticity; ELB Overview; ALB Hands-On; ASG Overview; ASG Hands-On; ASG Scaling Strategies; Section Summary) and "ELB and ASG: CLF-C02 Exam Summary".</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  /* ========== 1. ASG simulation ========== */
+  const sv = $('sim');
+  const HRS_PER_SEC = 0.6;           // one simulated day ≈ 40 s at 1×
+  const WARM = 0.25, FAILREPLACE = 0.3, TARGET = 0.5;
+  const g = (x, m, s) => Math.exp(-((x - m) ** 2) / (2 * s * s));
+  const base = h => 0.9 + 3.8 * g(h, 10.5, 1.8) + 2.6 * g(h, 19, 1.5) + 0.6 * g(h, 14.5, 1.2);
+
+  K.el('rect', { x: 30, y: 105, width: 460, height: 150, rx: 14, class: 'zone', id: 'zA' }, sv);
+  K.text(sv, 44, 125, 'AZ ap-south-1a', 'zone-label');
+  const zB = K.el('rect', { x: 510, y: 105, width: 460, height: 150, rx: 14, class: 'zone' }, sv);
+  const zBl = K.text(sv, 524, 125, 'AZ ap-south-1b', 'zone-label');
+  const alb = K.node(sv, 500, 45, 230, 56, 'Application Load Balancer', 'one DNS name · health checks');
+  alb.g.classList.add('solid');
+  const users = K.node(sv, 110, 45, 150, 46, 'Patients', 'booking app');
+  K.el('line', { x1: 185, y1: 45, x2: 385, y2: 45, class: 'msg solid' }, sv);
+  const SLOTS = [];
+  ['a', 'b'].forEach((az, zi) => {
+    for (let i = 0; i < 5; i++) {
+      const x = 30 + zi * 480 + 40 + i * 84, y = 160;
+      K.el('rect', { x, y, width: 66, height: 52, rx: 8, class: 'slot' }, sv);
+      const r = K.el('rect', { x, y, width: 66, height: 52, rx: 8, class: 'inst off' }, sv);
+      const l = K.text(sv, x + 33, y + 31, '', 'inst-l');
+      SLOTS.push({ az, x: x + 33, y: y + 26, r, l, inst: null });
+    }
+  });
+  const dotsG = K.el('g', {}, sv);
+  // chart
+  const CX = 60, CW = 880, CY = 290, CH = 120;
+  K.el('rect', { x: CX - 10, y: CY - 10, width: CW + 20, height: CH + 30, rx: 10, class: 'chart-bg' }, sv);
+  for (const h of [6, 12, 18, 24, 30]) { const t = K.text(sv, CX + CW * (h - 6) / 24, CY + CH + 14, String(h % 24).padStart(2, '0') + ':00', 'mlabel muted'); t.style.textAnchor = 'middle'; }
+  const lnD = K.el('polyline', { class: 'ln-d', points: '' }, sv);
+  const lnC = K.el('polyline', { class: 'ln-c', points: '' }, sv);
+  const nowL = K.el('line', { x1: CX, y1: CY, x2: CX, y2: CY + CH, class: 'now' }, sv);
+  const lg = K.el('g', { class: 'legend' }, sv);
+  K.text(lg, CX + 500, CY + 6, '— needed at 50% CPU', 'd');
+  K.text(lg, CX + 690, CY + 6, '— in service', 'c');
+  const yOf = v => CY + CH - Math.min(10.5, v) / 10.5 * (CH - 12);
+
+  let S, policy = 'target', nextId = 1;
+  function reset() {
+    S = { t: 6, inst: [], desired: 2, spikeUntil: -1, hist: [], served: 0, demanded: 0, ih: 0, evalAt: 0, histAt: 0, msg: '' };
+    nextId = 1;
+    for (let i = 0; i < 2; i++) launch(true);
+    dotsG.textContent = '';
+  }
+  const demand = t => base(t % 24) + (t < S.spikeUntil ? 3.2 : 0);
+  const mm = () => ({ min: +$('minR').value, max: Math.max(+$('maxR').value, +$('minR').value) });
+  function healthyAZs() { return $('azOut').checked ? ['a'] : ['a', 'b']; }
+  function launch(instant) {
+    const azs = healthyAZs();
+    const live = S.inst.filter(i => i.state !== 'bad');
+    const az = azs.reduce((best, z) => live.filter(i => i.az === z).length < live.filter(i => i.az === best).length ? z : best, azs[0]);
+    if (S.inst.filter(i => i.az === az).length >= 5) { const other = azs.find(z => S.inst.filter(i => i.az === z).length < 5); if (!other) return false; return launchIn(other, instant); }
+    return launchIn(az, instant);
+  }
+  function launchIn(az, instant) { S.inst.push({ id: nextId++, az, state: instant ? 'ok' : 'pending', t0: S.t }); return true; }
+  function wantDesired() {
+    const { min, max } = mm();
+    const ok = S.inst.filter(i => i.state === 'ok').length;
+    const d = demand(S.t);
+    let want = S.desired;
+    if (policy === 'fixed') want = +$('desR').value;
+    else if (policy === 'sched') { const h = S.t % 24; want = (h >= 8 && h < 22) ? 8 : 2; }
+    else if (policy === 'pred') { want = Math.ceil(Math.max(base(S.t % 24), base((S.t + 0.75) % 24)) / TARGET); }
+    else if (policy === 'target') {
+      const cpu = ok ? d / ok : 9;
+      if (cpu > TARGET + 0.05) want = Math.ceil(d / TARGET);
+      else if (cpu < TARGET - 0.12) want = Math.max(Math.ceil(d / TARGET), S.desired - 1);
+    }
+    return Math.max(min, Math.min(max, want));
+  }
+  function step(dt) {
+    const h = dt * HRS_PER_SEC;
+    if (!h) return;
+    if (S.t >= 30) { S.done = true; return; }
+    S.t = Math.min(30, S.t + h);
+    // AZ outage
+    if ($('azOut').checked) S.inst.forEach(i => { if (i.az === 'b' && i.state !== 'bad') { i.state = 'bad'; i.bt = S.t; } });
+    // warm-up and replacement
+    S.inst.forEach(i => { if (i.state === 'pending' && S.t - i.t0 >= WARM) i.state = 'ok'; });
+    S.inst = S.inst.filter(i => !(i.state === 'bad' && S.t - i.bt >= FAILREPLACE));
+    // policy evaluation every 5 simulated minutes
+    if (S.t >= S.evalAt) { S.desired = wantDesired(); S.evalAt = S.t + 1 / 12; }
+    const live = S.inst.filter(i => i.state !== 'bad');
+    if (live.length < S.desired) launch(false);
+    else if (live.length > S.desired) {
+      const victim = live.slice().sort((a, b) => (a.state === 'pending' ? -1 : 0) - (b.state === 'pending' ? -1 : 0) || b.t0 - a.t0)[0];
+      S.inst = S.inst.filter(i => i !== victim);
+    }
+    // traffic
+    const ok = S.inst.filter(i => i.state === 'ok').length;
+    const d = demand(S.t);
+    S.demanded += d * h; S.served += Math.min(d, ok) * h;
+    S.ih += S.inst.filter(i => i.state !== 'bad').length * h;
+    if (S.t >= S.histAt) { S.hist.push([S.t, d / TARGET, ok]); S.histAt = S.t + 0.1; }
+  }
+  let dotAcc = 0; const dots = [];
+  function spawnDots(dt) {
+    if (K.reduce) return;
+    const ok = S.inst.filter(i => i.state === 'ok');
+    const d = demand(S.t);
+    dotAcc += dt * d * 2.2;
+    while (dotAcc >= 1) {
+      dotAcc -= 1;
+      const over = ok.length ? Math.max(0, 1 - ok.length / d) : 1;
+      const drop = Math.random() < over;
+      const okSlots = SLOTS.filter(s => s.inst && s.inst.state === 'ok');
+      if (!drop && !okSlots.length) continue;
+      const slot = drop ? null : okSlots[Math.floor(Math.random() * okSlots.length)];
+      const c = K.el('circle', { r: 4, class: 'dot' + (drop ? ' drop' : ''), cx: 500, cy: 73 }, dotsG);
+      dots.push({ c, a: [500, 73], b: drop ? [500 + (Math.random() * 60 - 30), 98] : [slot.x, slot.y - 20], t: 0, dur: drop ? 0.35 : 0.6 });
+    }
+    for (let i = dots.length - 1; i >= 0; i--) {
+      const o = dots[i]; o.t += dt / o.dur;
+      if (o.t >= 1) { o.c.remove(); dots.splice(i, 1); continue; }
+      o.c.setAttribute('cx', o.a[0] + (o.b[0] - o.a[0]) * o.t); o.c.setAttribute('cy', o.a[1] + (o.b[1] - o.a[1]) * o.t);
+    }
+  }
+  function render() {
+    SLOTS.forEach(s => s.inst = null);
+    ['a', 'b'].forEach(az => {
+      const mine = S.inst.filter(i => i.az === az);
+      const free = SLOTS.filter(s => s.az === az);
+      mine.forEach((inst, k) => { if (free[k]) free[k].inst = inst; });
+    });
+    SLOTS.forEach(s => {
+      const i = s.inst;
+      s.r.setAttribute('class', 'inst ' + (i ? i.state : 'off'));
+      s.l.textContent = i ? (i.state === 'pending' ? 'warming' : i.state === 'bad' ? 'unhealthy' : 'i-' + String(i.id).padStart(2, '0')) : '';
+    });
+    zB.classList.toggle('down', $('azOut').checked); zBl.textContent = $('azOut').checked ? 'AZ ap-south-1b · OUTAGE' : 'AZ ap-south-1b';
+    const xs = r => CX + CW * ((r[0] - 6) / 24);
+    lnD.setAttribute('points', S.hist.map(r => `${xs(r)},${yOf(r[1])}`).join(' '));
+    lnC.setAttribute('points', S.hist.map(r => `${xs(r)},${yOf(r[2])}`).join(' '));
+    const nx = CX + CW * ((S.t - 6) / 24); nowL.setAttribute('x1', nx); nowL.setAttribute('x2', nx);
+    const ok = S.inst.filter(i => i.state === 'ok').length;
+    const d = demand(S.t), cpu = ok ? Math.min(1, d / ok) : 1;
+    const hh = Math.floor(S.t % 24), mi = Math.floor((S.t % 1) * 60);
+    const dropped = S.demanded ? (1 - S.served / S.demanded) * 100 : 0;
+    $('simK').innerHTML = [
+      ['Time', `${String(hh).padStart(2, '0')}:${String(mi).padStart(2, '0')}`, ''],
+      ['In service / desired', `${ok} / ${S.desired}`, ''],
+      ['Average CPU', Math.round(cpu * 100) + '%', cpu >= 0.95 ? 'bad' : cpu <= 0.6 ? 'good' : 'accent'],
+      ['Requests failed today', dropped.toFixed(1) + '%', dropped > 2 ? 'bad' : 'good'],
+      ['Instance-hours cost', '$' + (S.ih * 0.10).toFixed(2), '']
+    ].map(([l, v, c]) => `<div class="kpi ${c}"><b>${v}</b><span>${l}</span></div>`).join('');
+    const h = S.t % 24;
+    let st;
+    if (S.done) st = 'Day complete. Compare failed requests and cost across policies, then press Restart the day.';
+    else if ($('azOut').checked) st = 'AZ b is down: its instances fail health checks, the ALB stops using them, and the ASG relaunches capacity in AZ a. That only works because the group spans two AZs.';
+    else if (S.t < S.spikeUntil) st = policy === 'pred' ? 'A spike predictive scaling never saw in the history: it can\'t forecast this, so pair it with target tracking in real life.' : policy === 'sched' || policy === 'fixed' ? 'The spike hits a fixed plan: no policy reacts, so CPU pegs and requests fail.' : 'Target tracking sees CPU above 50% and launches instances; they need ~15 minutes to warm up.';
+    else if (S.lastFail !== undefined && S.t - S.lastFail < 1.2) st = 'Health check failed: the ALB stops sending traffic to it immediately, and the ASG terminates and replaces it (self-healing).';
+    else st = { fixed: 'Fixed size: the ASG holds desired capacity all day. Over-provisioned at night, overloaded at the peaks.', target: 'Target tracking: like a thermostat, it adds instances when CPU passes 50% and removes them as load falls. Elasticity.', sched: 'Scheduled: 8 instances from 08:00 to 22:00, 2 overnight. Great for known patterns, blind to surprises.', pred: 'Predictive: ML forecasts the daily pattern from history and launches capacity before each peak.' }[policy];
+    $('simStatus').textContent = st;
+  }
+  let lastT = null, visible = true;
+  new IntersectionObserver(es => { visible = es[0].isIntersecting; }).observe(sv);
+  function frame(now) {
+    const dt = K.tick(lastT === null ? 0 : Math.min(0.1, (now - lastT) / 1000)); lastT = now;
+    if (visible) { step(dt); spawnDots(dt); render(); }
+    requestAnimationFrame(frame);
+  }
+  K.seg($('polSeg'), v => { policy = v; S.evalAt = 0; });
+  const outs = () => { $('minO').textContent = $('minR').value; $('desO').textContent = $('desR').value; $('maxO').textContent = $('maxR').value; S.evalAt = 0; };
+  ['minR', 'desR', 'maxR'].forEach(id => $(id).addEventListener('input', outs));
+  $('spikeB').addEventListener('click', () => { S.spikeUntil = S.t + 2.5; });
+  $('failB').addEventListener('click', () => { const ok = S.inst.filter(i => i.state === 'ok'); if (ok.length) { const v = ok[Math.floor(Math.random() * ok.length)]; v.state = 'bad'; v.bt = S.t; S.lastFail = S.t; } });
+  $('resetB').addEventListener('click', () => { reset(); });
+  reset(); outs(); render(); requestAnimationFrame(frame);
+
+  /* ========== 2. Load balancer picker ========== */
+  const lb = $('lb');
+  const TYPES = {
+    alb: { t: 'Application LB', s: 'Layer 7 · HTTP/HTTPS/gRPC', x: 140 },
+    nlb: { t: 'Network LB', s: 'Layer 4 · TCP/UDP/TLS', x: 380 },
+    gwlb: { t: 'Gateway LB', s: 'Layer 3 · GENEVE 6081', x: 620 },
+    clb: { t: 'Classic LB', s: 'previous generation', x: 860 }
+  };
+  const lbE = {};
+  for (const k in TYPES) {
+    const o = TYPES[k], gg = K.el('g', { class: 'lbbox' + (k === 'clb' ? ' legacy' : '') }, lb);
+    K.el('rect', { x: o.x - 108, y: 140, width: 216, height: 70, rx: 12 }, gg);
+    K.text(gg, o.x, 170, o.t, ''); K.text(gg, o.x, 192, o.s, 'sm'); lbE[k] = gg;
+  }
+  const lbP = K.el('g', {}, lb);
+  const REQ = [
+    { n: 'Route /api and /images to different services', k: 'alb', why: 'Path-based routing needs to read HTTP: ALB (layer 7). It can also route by host name or header.' },
+    { n: 'Invoke a Lambda function over HTTPS', k: 'alb', why: 'ALB can use Lambda functions as targets.' },
+    { n: 'Partners must allow-list a fixed IP', k: 'nlb', why: 'Only NLB has a static IP (or your Elastic IP) per AZ. ALB gives you a DNS name.' },
+    { n: 'Multiplayer game over UDP, millions of req/s', k: 'nlb', why: 'Non-HTTP, extreme performance, ultra-low latency: NLB (layer 4).' },
+    { n: 'Send all traffic through a 3rd-party firewall', k: 'gwlb', why: 'GWLB deploys and scales inspection appliances (firewalls, IDS/IPS) transparently.' },
+    { n: 'Legacy app still on the old load balancer', k: 'clb', why: 'Classic LB: previous generation, still supported but not for new designs. Migrate to ALB or NLB.' }
+  ];
+  $('lbChips').innerHTML = REQ.map((r, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${r.n}</button>`).join('');
+  async function pickLB(r) {
+    const run = K.newRun('lb');
+    lbP.textContent = ''; Object.values(lbE).forEach(e => e.classList.remove('hit'));
+    const p = K.pill(lbP, r.n.length > 30 ? r.n.slice(0, 29) + '…' : r.n);
+    try {
+      await K.move(p, [500, 30], [500, 80], 350, run);
+      await K.move(p, [500, 80], [TYPES[r.k].x, 115], 550, run);
+      p.remove(); lbE[r.k].classList.add('hit');
+      $('lbStatus').innerHTML = `<b>${TYPES[r.k].t}</b>. ${r.why}`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('lbChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('lbChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    pickLB(REQ[+b.dataset.i]);
+  }));
+
+  /* ========== 3. Terms ========== */
+  const tm = $('terms');
+  const TERMS = { sca: { t: 'Scalability', s: 'can handle more load', x: 140 }, ela: { t: 'Elasticity', s: 'grows and shrinks automatically', x: 380 }, agi: { t: 'Agility', s: 'resources in minutes', x: 620 }, ha: { t: 'High availability', s: 'survives an AZ failure', x: 860 } };
+  const tE = {};
+  for (const k in TERMS) {
+    const o = TERMS[k], gg = K.el('g', { class: 'lbbox' }, tm);
+    K.el('rect', { x: o.x - 110, y: 110, width: 220, height: 70, rx: 12 }, gg);
+    K.text(gg, o.x, 140, o.t, ''); K.text(gg, o.x, 162, o.s, 'sm'); tE[k] = gg;
+  }
+  const tP = K.el('g', {}, tm);
+  const ST = [
+    { n: 'Resize t3.large → t3.2xlarge', k: 'sca', why: 'Vertical scaling (scale up). It has a hardware ceiling and usually means downtime.' },
+    { n: 'Add 5 web servers behind the ALB', k: 'sca', why: 'Horizontal scaling (scale out). Needs a stateless, distributed design.' },
+    { n: 'ASG adds servers at 9 am, removes them at night', k: 'ela', why: 'Automatic scale out and in with demand, so you pay only for what you use.' },
+    { n: 'Test environment in 10 minutes, not 6 weeks', k: 'agi', why: 'Agility: speed of provisioning and experimenting. Not the same as elasticity.' },
+    { n: 'App keeps running when one AZ goes down', k: 'ha', why: 'High availability: run in at least two AZs behind a load balancer.' }
+  ];
+  $('tChips').innerHTML = ST.map((r, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${r.n}</button>`).join('');
+  async function sortT(r) {
+    const run = K.newRun('terms');
+    tP.textContent = ''; Object.values(tE).forEach(e => e.classList.remove('hit'));
+    const p = K.pill(tP, r.n.length > 30 ? r.n.slice(0, 29) + '…' : r.n);
+    try {
+      await K.move(p, [500, 25], [TERMS[r.k].x, 85], 650, run);
+      p.remove(); tE[r.k].classList.add('hit');
+      $('tStatus').innerHTML = `<b>${TERMS[r.k].t}</b>. ${r.why}`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('tChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('tChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    sortT(ST[+b.dataset.i]);
+  }));
+})();
+</script>
+</body>
+</html>

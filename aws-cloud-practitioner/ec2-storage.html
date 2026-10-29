@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EC2 Instance Storage</title>
+<meta name="description" content="AWS Cloud Practitioner: what survives a reboot, stop or terminate; how snapshots and AMIs move data across AZs and Regions; and how to choose between EBS, instance store, EFS and FSx.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .q rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .q text { fill: var(--fg); font-size: 13.5px; font-weight: 600; text-anchor: middle; }
+  .q.on rect { stroke: var(--cyan); fill: var(--teal-wash); }
+  .q.no rect { opacity: .55; }
+  .out rect { fill: var(--panel-2); stroke: var(--line); stroke-width: 2; stroke-dasharray: 5 4; transition: all .2s; }
+  .out text { fill: var(--muted); font-size: 13px; font-weight: 600; text-anchor: middle; }
+  .out .sm { font-family: var(--mono); font-size: 10.5px; font-weight: 400; }
+  .out.hit rect { stroke: var(--accent-text); stroke-dasharray: none; fill: var(--panel); }
+  .out.hit text { fill: var(--fg); }
+  .yn { fill: var(--muted); font-family: var(--mono); font-size: 11px; }
+  .verdict { font-family: var(--mono); font-size: 12px; font-weight: 700; text-anchor: middle; }
+  .verdict.ok { fill: var(--good-text); }
+  .verdict.bad { fill: var(--bad-text); }
+  .verdict.mid { fill: var(--accent-text); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · Section 6 · Domain 3 Technology &amp; Services (Task 3.6)</div>
+    <h1>EC2 Instance Storage</h1>
+    <ul class="lede">
+      <li><b>EBS</b>: a network drive for <b>one instance</b>, locked to <b>one AZ</b>, survives the instance.</li>
+      <li><b>Instance store</b>: a fast disk inside the host. <b>Lost</b> when the instance stops or terminates.</li>
+      <li><b>EFS</b> (Linux) and <b>FSx</b> (Windows, Lustre…): shared file systems for many instances across AZs.</li>
+      <li><b>Snapshots</b> back up EBS and move it across AZs and Regions. An <b>AMI</b> = snapshots + launch recipe.</li>
+    </ul>
+  </header>
+
+  <section aria-labelledby="survH">
+    <h2 class="stage-title" id="survH">What survives?</h2>
+    <div class="stage-kind">Do something to the instance · watch each disk</div>
+    <div class="controls">
+      <div class="chips" id="evChips" style="margin:0"></div>
+      <label class="toggle" for="dot"><input type="checkbox" id="dot" checked> Root volume: Delete on termination</label>
+    </div>
+    <div class="scroll">
+      <svg class="diagram" id="surv" viewBox="0 0 1000 340" aria-label="An instance on a physical host with an instance store, two EBS volumes and an EFS file system"></svg>
+    </div>
+    <p class="status-line" id="survStatus">Pick an event.</p>
+  </section>
+
+  <section aria-labelledby="moveH">
+    <h2 class="stage-title" id="moveH">Move EBS data to another AZ or Region</h2>
+    <div class="stage-kind">Try the wrong way first</div>
+    <div class="chips" id="mvChips"></div>
+    <div class="scroll">
+      <svg class="diagram" id="mv" viewBox="0 0 1000 360" aria-label="Two Availability Zones in Mumbai, a Region-level snapshot, and a second Region"></svg>
+    </div>
+    <p class="status-line" id="mvStatus">An EBS volume lives in one AZ. A snapshot lives at Region level, so it's the bridge.</p>
+  </section>
+
+  <section aria-labelledby="pickH">
+    <h2 class="stage-title" id="pickH">Pick the storage</h2>
+    <div class="stage-kind">Choose a scenario · it walks the questions</div>
+    <div class="chips" id="scChips"></div>
+    <div class="scroll">
+      <svg class="diagram" id="pick" viewBox="0 0 1000 330" aria-label="Decision path: shared or not, performance, Windows, HPC"></svg>
+    </div>
+    <p class="status-line" id="pickStatus">Pick a scenario.</p>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Side by side</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>Type</th><th>Scope</th><th>Attach to</th><th>Survives stop?</th><th>Pay for</th></tr></thead>
+        <tbody>
+          <tr><td><b>EBS</b></td><td>Block (network)</td><td>One AZ</td><td>One instance (io1/io2 Multi-Attach: a few, same AZ)</td><td>Yes</td><td>Provisioned GB (+ IOPS/throughput)</td></tr>
+          <tr><td><b>Instance store</b></td><td>Block (local NVMe)</td><td>One host</td><td>That instance only</td><td><span class="bad-text">No</span> (survives reboot only)</td><td>Included in instance price</td></tr>
+          <tr><td><b>EFS</b></td><td>File (NFS)</td><td>Region (multi-AZ)</td><td>Hundreds of <b>Linux</b> instances</td><td>Yes</td><td>GB actually stored (~3× gp2 per GB)</td></tr>
+          <tr><td><b>FSx for Windows</b></td><td>File (SMB, NTFS)</td><td>Single- or Multi-AZ</td><td>Windows instances + on-prem, Active Directory</td><td>Yes</td><td>Provisioned capacity</td></tr>
+          <tr><td><b>FSx for Lustre</b></td><td>File (HPC)</td><td>One AZ</td><td>Linux compute clusters; links to S3</td><td>Yes</td><td>Provisioned capacity</td></tr>
+          <tr><td><b>Snapshot / AMI</b></td><td>Backup / image</td><td>Region (copy to others)</td><td>Restore to a volume / launch instances</td><td>n/a</td><td>Changed blocks stored (incremental)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cards" style="margin-top:14px">
+      <div class="card"><h3>Snapshot vs AMI</h3><p>A <b>snapshot</b> is one volume's data. An <b>AMI</b> is snapshots plus a recipe: architecture, boot settings, volume mapping, launch permissions. You launch instances from an AMI, never from a snapshot.</p></div>
+      <div class="card"><h3>Snapshot features</h3><p><b>Archive tier</b>: up to 75% cheaper, 24–72 h to restore. <b>Recycle Bin</b>: rules keep deleted snapshots and AMIs recoverable for a retention period. Copy to another Region for DR.</p></div>
+      <div class="card"><h3>AMIs and Image Builder</h3><p>AMIs come from AWS (Amazon Linux, Windows), the Marketplace, or you ("golden image" for faster boot). <b>EC2 Image Builder</b> automates build → test → distribute on a schedule; you pay only for the resources it uses.</p></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>Why a snapshot can cross AZs but a volume can't:</b> the volume's blocks sit in one AZ; a snapshot is stored in S3-backed storage at Region level. Restoring makes an <b>independent copy</b>, not a synced replica.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>More storage classes and options than the course lists:</b> EFS has <b>Standard, Infrequent Access and Archive</b>, moved automatically by lifecycle policy. FSx also offers <b>NetApp ONTAP</b> and <b>OpenZFS</b>. For the exam, map "Windows/SMB/AD" → FSx for Windows. FSx for Lustre ("HPC") is on the CLF-C02 <b>out-of-scope</b> list, so expect it only as a distractor.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>FSx for Lustre isn't "Region-wide"</b> as the summary table says: a Lustre file system runs in a single AZ (it's built for speed, not HA); durability comes from linking it to S3. FSx for Windows can be Multi-AZ.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Shared responsibility for storage:</b> AWS replicates EBS within the AZ and runs the hardware; you take snapshots, choose encryption, set Delete on termination, and accept that instance-store data can vanish. See <a href="shared-responsibility.html">Shared Responsibility</a>.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Can an EBS volume in AZ a be attached to an instance in AZ b?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>No.</b> Snapshot it, then create a new volume from the snapshot in AZ b.</p></div></details>
+      <details><summary>You stop an instance. What happens to instance-store data?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>It's lost.</b> Instance store survives a reboot, but not stop, terminate or host failure.</p></div></details>
+      <details><summary>By default, what happens to the root EBS volume on termination? An extra data volume?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Root: <b>deleted</b> (Delete on termination = on). Extra volume: <b>kept</b> (off by default).</p></div></details>
+      <details><summary>100 Linux instances across 3 AZs need the same files. Which service?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>EFS.</b> (If they were Windows with SMB and Active Directory: FSx for Windows File Server.)</p></div></details>
+      <details><summary>"Storage for high performance computing" in the course means…?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>FSx for Lustre</b> (Linux + cluster). It's out of scope for CLF-C02 itself, but the course uses it.</p></div></details>
+      <details><summary>Which service automates building, testing and distributing AMIs?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>EC2 Image Builder.</b></p></div></details>
+    </div>
+  </section>
+
+  <footer>Region and AZ names are examples; behaviour is simplified for the exam. Sources: EC2 Instance Storage notes (EBS Overview and Hands-on, EBS Snapshots and Hands-on, AMIs, AMI vs EBS Snapshot, AMI Overview and Hands-on, EC2 Image Builder, Instance Store, EFS Overview, EC2 Storage Types, Shared responsibility for EC2 Storage, FSx Overview, Section Summary).</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  /* ========== 1. What survives ========== */
+  const sv = $('surv');
+  K.el('rect', { x: 250, y: 18, width: 500, height: 150, rx: 14, class: 'zone' }, sv);
+  K.text(sv, 262, 38, 'PHYSICAL HOST', 'zone-label');
+  const inst = K.node(sv, 400, 100, 210, 64, 'EC2 instance', 'running');
+  inst.g.classList.add('solid');
+  const ist = K.node(sv, 625, 100, 190, 64, 'Instance store', 'scratch files · cache');
+  const DISKS = {
+    ist: { n: ist, x: 625, y: 100 },
+    root: { n: K.node(sv, 170, 270, 220, 64, 'Root EBS (gp3)', 'OS + app'), x: 170, y: 270 },
+    data: { n: K.node(sv, 460, 270, 220, 64, 'Data EBS volume', 'patient uploads'), x: 460, y: 270 },
+    efs: { n: K.node(sv, 790, 270, 220, 64, 'EFS file system', 'shared reports'), x: 790, y: 270 }
+  };
+  ['root', 'data', 'efs'].forEach(k => K.el('line', { x1: 400, y1: 132, x2: DISKS[k].x, y2: 238, class: 'msg dash' }, sv));
+  K.text(sv, 520, 200, 'network', 'mlabel muted');
+  const verd = {};
+  for (const k in DISKS) { verd[k] = K.text(sv, DISKS[k].x, DISKS[k].y + 52, '', 'verdict'); }
+  verd.ist.setAttribute('y', 150);
+  const svP = K.el('g', {}, sv);
+  const EV = [
+    { k: 'reboot', n: 'Reboot', st: 'running', r: { ist: 'ok', root: 'ok', data: 'ok', efs: 'ok' }, msg: 'Reboot keeps everything, even the instance store: same host, same disk.' },
+    { k: 'stop', n: 'Stop → Start', st: 'running (new host)', r: { ist: 'bad', root: 'ok', data: 'ok', efs: 'ok' }, msg: 'Stop releases the host. The instance store is wiped; every EBS volume and EFS keep their data.' },
+    { k: 'term', n: 'Terminate', st: 'terminated', r: { ist: 'bad', root: 'dot', data: 'kept', efs: 'ok' }, msg: '' },
+    { k: 'fail', n: 'Host hardware fails', st: 'recovered on a new host', r: { ist: 'bad', root: 'ok', data: 'ok', efs: 'ok' }, msg: 'Hardware failure takes the local disk with it. Network storage reattaches to the recovered instance.' }
+  ];
+  $('evChips').innerHTML = EV.map(e => `<button class="chip-btn" type="button" data-k="${e.k}" aria-pressed="false">${e.n}</button>`).join('');
+  function reset() {
+    svP.textContent = '';
+    inst.g.classList.remove('bad', 'ok', 'dim'); inst.sub.textContent = 'running';
+    for (const k in DISKS) { DISKS[k].n.g.classList.remove('ok', 'bad', 'dim'); verd[k].textContent = ''; verd[k].setAttribute('class', 'verdict'); }
+  }
+  async function fire(e) {
+    const run = K.newRun('surv'); reset();
+    const st = $('survStatus');
+    try {
+      const p = K.pill(svP, e.n, 'alt');
+      await K.move(p, [400, -10], [400, 52], 450, run); p.remove();
+      inst.g.classList.add(e.k === 'reboot' ? 'ok' : 'bad');
+      inst.sub.textContent = e.k === 'reboot' ? 'rebooting…' : e.k === 'term' ? 'shutting down…' : e.k === 'fail' ? 'host failed' : 'stopping…';
+      await K.sleep(600, run);
+      for (const k of ['ist', 'root', 'data', 'efs']) {
+        let r = e.r[k];
+        if (r === 'dot') r = $('dot').checked ? 'del' : 'kept';
+        const n = DISKS[k].n.g;
+        if (r === 'ok') { n.classList.add('ok'); verd[k].textContent = 'data kept'; verd[k].classList.add('ok'); }
+        else if (r === 'bad') { n.classList.add('bad'); verd[k].textContent = 'data lost'; verd[k].classList.add('bad'); }
+        else if (r === 'del') { n.classList.add('bad'); verd[k].textContent = 'volume deleted'; verd[k].classList.add('bad'); }
+        else if (r === 'kept') { n.classList.add('dim'); verd[k].textContent = 'kept · unattached · still billed'; verd[k].classList.add('mid'); }
+        await K.sleep(450, run);
+      }
+      inst.g.classList.remove('bad', 'ok');
+      inst.sub.textContent = e.st;
+      if (e.k === 'term') { inst.g.classList.add('dim'); }
+      st.innerHTML = e.k === 'term'
+        ? `Terminated. Instance store gone; root volume ${$('dot').checked ? '<b>deleted</b> (Delete on termination is on, the default)' : '<b>kept</b> because you turned Delete on termination off'}; the extra data volume is <b>kept</b> (off by default) and still costs money until you delete it.`
+        : e.msg;
+    } catch (er) { if (!(er instanceof K.Stop)) throw er; }
+  }
+  $('evChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('evChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    fire(EV.find(e => e.k === b.dataset.k));
+  }));
+
+  /* ========== 2. Move across AZ / Region ========== */
+  const mv = $('mv');
+  K.el('rect', { x: 20, y: 20, width: 640, height: 330, rx: 14, class: 'zone' }, mv);
+  K.text(mv, 32, 40, 'REGION ap-south-1 (MUMBAI)', 'zone-label');
+  K.el('rect', { x: 40, y: 55, width: 270, height: 200, rx: 12, class: 'zone' }, mv);
+  K.text(mv, 52, 75, 'AZ ap-south-1a', 'zone-label');
+  K.el('rect', { x: 370, y: 55, width: 270, height: 200, rx: 12, class: 'zone' }, mv);
+  K.text(mv, 382, 75, 'AZ ap-south-1b', 'zone-label');
+  K.el('rect', { x: 690, y: 20, width: 290, height: 330, rx: 14, class: 'zone' }, mv);
+  K.text(mv, 702, 40, 'REGION ap-south-2 (HYDERABAD)', 'zone-label');
+  const M = {
+    ec2a: K.node(mv, 175, 120, 190, 54, 'EC2 · AZ a', 'running'),
+    vola: K.node(mv, 175, 210, 190, 54, 'vol-a (EBS)', '100 GiB · data'),
+    ec2b: K.node(mv, 505, 120, 190, 54, 'EC2 · AZ b', 'needs the data'),
+    volb: K.node(mv, 505, 210, 190, 54, 'vol-b', 'not created yet'),
+    snap: K.node(mv, 340, 305, 230, 54, 'Snapshot', 'Region-level, incremental'),
+    snap2: K.node(mv, 835, 210, 220, 54, 'Snapshot copy', 'disaster recovery'),
+    ami: K.node(mv, 835, 110, 220, 54, 'AMI → new instances', 'golden image')
+  };
+  M.ec2a.g.classList.add('solid'); M.vola.g.classList.add('teal');
+  ['volb', 'snap', 'snap2', 'ami'].forEach(k => M[k].g.classList.add('dim'));
+  K.el('line', { x1: 175, y1: 147, x2: 175, y2: 183, class: 'msg solid' }, mv);
+  const mvP = K.el('g', {}, mv);
+  let snapDone = false;
+  function mvReset() {
+    mvP.textContent = ''; snapDone = false;
+    ['volb', 'snap', 'snap2', 'ami'].forEach(k => { M[k].g.setAttribute('class', 'node dim'); });
+    M.ec2b.g.setAttribute('class', 'node'); M.ec2b.sub.textContent = 'needs the data';
+    M.volb.title.textContent = 'vol-b'; M.volb.sub.textContent = 'not created yet';
+  }
+  const MV = [
+    { k: 'attach', n: 'Attach vol-a to the AZ b instance' },
+    { k: 'snap', n: 'Snapshot → new volume in AZ b' },
+    { k: 'copy', n: 'Copy the snapshot to Hyderabad' },
+    { k: 'ami', n: 'Create AMI → launch in Hyderabad' }
+  ];
+  $('mvChips').innerHTML = MV.map(m => `<button class="chip-btn" type="button" data-k="${m.k}" aria-pressed="false">${m.n}</button>`).join('');
+  async function ensureSnap(run) {
+    if (snapDone) return;
+    const p = K.pill(mvP, 'create snapshot', 'alt');
+    await K.move(p, [175, 240], [340, 280], 600, run); p.remove();
+    M.snap.g.setAttribute('class', 'node ok'); snapDone = true;
+    await K.sleep(300, run);
+  }
+  async function doMove(k) {
+    const run = K.newRun('mv');
+    const st = $('mvStatus');
+    try {
+      if (k === 'attach') {
+        mvReset();
+        const p = K.pill(mvP, 'attach vol-a', 'bad');
+        await K.move(p, [270, 210], [355, 160], 600, run);
+        p.remove(); K.text(mvP, 340, 166, '✕', 'xmark');
+        M.ec2b.g.classList.add('bad');
+        st.innerHTML = '<span class="bad-text">Not possible.</span> An EBS volume can only attach to instances in its own AZ.';
+        return;
+      }
+      if (k === 'snap') {
+        mvReset();
+        await ensureSnap(run);
+        const p = K.pill(mvP, 'create volume in AZ b', 'ok');
+        await K.move(p, [340, 280], [505, 240], 600, run); p.remove();
+        M.volb.g.setAttribute('class', 'node teal'); M.volb.title.textContent = 'vol-b (copy)'; M.volb.sub.textContent = 'restored from snapshot';
+        await K.sleep(300, run);
+        const a = K.pill(mvP, 'attach', 'ok');
+        await K.move(a, [505, 183], [505, 150], 350, run); a.remove();
+        M.ec2b.g.setAttribute('class', 'node ok'); M.ec2b.sub.textContent = 'has the data';
+        st.innerHTML = '<span class="ok-text">Done.</span> vol-b is an independent copy as of the snapshot time: later writes to vol-a don\'t follow.';
+        return;
+      }
+      if (k === 'copy') {
+        await ensureSnap(run);
+        const p = K.pill(mvP, 'copy snapshot', 'alt');
+        await K.move(p, [455, 305], [725, 210], 800, run); p.remove();
+        M.snap2.g.setAttribute('class', 'node ok');
+        st.innerHTML = '<span class="ok-text">Copied across Regions.</span> If Mumbai has a Region-wide outage, you can rebuild volumes in Hyderabad.';
+        return;
+      }
+      if (k === 'ami') {
+        const p = K.pill(mvP, 'create image', 'alt');
+        await K.move(p, [270, 120], [340, 280], 500, run); p.remove();
+        M.snap.g.setAttribute('class', 'node ok'); snapDone = true;
+        const q = K.pill(mvP, 'copy AMI', 'alt');
+        await K.move(q, [455, 305], [725, 110], 800, run); q.remove();
+        M.ami.g.setAttribute('class', 'node ok'); M.ami.sub.textContent = 'launched 3 identical servers';
+        st.innerHTML = '<span class="ok-text">AMI copied and launched.</span> Behind the scenes the AMI is snapshots of every volume plus launch settings.';
+      }
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('mvChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('mvChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    doMove(b.dataset.k);
+  }));
+
+  /* ========== 3. Chooser ========== */
+  const pk = $('pick');
+  const QS = [
+    { k: 'shared', t: 'Shared by many instances at once?', y: 45 },
+    { k: 'win', t: 'Windows clients, SMB, Active Directory?', y: 125 },
+    { k: 'hpc', t: 'HPC: huge throughput, sub-ms latency?', y: 205 }
+  ];
+  const Q2 = { k: 'temp', t: 'Max speed and OK to lose it on stop?', y: 285 };
+  const OUT = {
+    fsxw: { t: 'FSx for Windows File Server', s: 'SMB · NTFS · AD', x: 790, y: 125 },
+    lus: { t: 'FSx for Lustre', s: 'Linux + cluster · S3-linked', x: 790, y: 205 },
+    efs: { t: 'EFS', s: 'managed NFS · Linux', x: 790, y: 45 },
+    ist: { t: 'Instance store', s: 'ephemeral NVMe', x: 790, y: 285 },
+    ebs: { t: 'EBS', s: 'durable · one AZ', x: 330, y: 330 - 18 }
+  };
+  const qE = {}, oE = {};
+  function qbox(q) { const g = K.el('g', { class: 'q' }, pk); K.el('rect', { x: 110, y: q.y - 22, width: 440, height: 44, rx: 12 }, g); K.text(g, 330, q.y + 5, q.t, ''); qE[q.k] = g; }
+  // layout: "shared?" yes goes down the windows/hpc chain on the left; no jumps to temp
+  QS.forEach(qbox); qbox(Q2);
+  K.el('line', { x1: 330, y1: 67, x2: 330, y2: 103, class: 'msg solid' }, pk); K.text(pk, 340, 90, 'yes', 'yn');
+  K.el('line', { x1: 330, y1: 147, x2: 330, y2: 183, class: 'msg solid' }, pk); K.text(pk, 340, 170, 'no', 'yn');
+  K.el('path', { d: 'M110 45 C 60 45, 60 285, 110 285', class: 'msg dash', fill: 'none' }, pk); K.text(pk, 30, 170, 'no', 'yn');
+  const yes = (y1, y2, lab) => { K.el('path', { d: `M550 ${y1} C 590 ${y1}, 600 ${y2}, 640 ${y2}`, class: 'msg solid', fill: 'none' }, pk); K.text(pk, 560, y1 - 6, lab, 'yn'); };
+  yes(125, 125, 'yes'); yes(205, 205, 'yes'); yes(205, 45, ''); K.text(pk, 632, 150, 'no', 'yn'); yes(285, 285, 'yes');
+  for (const k in OUT) {
+    const o = OUT[k]; if (k === 'ebs') continue;
+    const g = K.el('g', { class: 'out' }, pk);
+    K.el('rect', { x: o.x - 150, y: o.y - 22, width: 300, height: 44, rx: 10 }, g);
+    K.text(g, o.x, o.y - 2, o.t, ''); K.text(g, o.x, o.y + 14, o.s, 'sm'); oE[k] = g;
+  }
+  pk.setAttribute('viewBox', '0 0 1000 380');
+  K.el('line', { x1: 330, y1: 307, x2: 330, y2: 330, class: 'msg solid' }, pk); K.text(pk, 340, 324, 'no', 'yn');
+  { const g = K.el('g', { class: 'out' }, pk); K.el('rect', { x: 180, y: 332, width: 300, height: 44, rx: 10 }, g); K.text(g, 330, 352, 'EBS', ''); K.text(g, 330, 368, 'durable · one AZ', 'sm'); oE.ebs = g; OUT.ebs = { t: 'EBS', x: 330, y: 354 }; }
+  const pkP = K.el('g', {}, pk);
+  const SC = [
+    { n: 'Patient-portal DB on one server', path: [['shared', 0], ['temp', 0]], out: 'ebs', why: 'One instance, must be durable: an EBS volume (snapshot it for backups).' },
+    { n: 'Video-render scratch space', path: [['shared', 0], ['temp', 1]], out: 'ist', why: 'Single machine, needs top IOPS, data is disposable: instance store.' },
+    { n: 'Web farm sharing uploads (Linux)', path: [['shared', 1], ['win', 0], ['hpc', 0]], out: 'efs', why: 'Many Linux instances across AZs read and write the same files: EFS.' },
+    { n: 'Windows team shares with AD logins', path: [['shared', 1], ['win', 1]], out: 'fsxw', why: 'SMB, NTFS permissions and Active Directory: FSx for Windows File Server.' },
+    { n: 'Genomics cluster, data in S3', path: [['shared', 1], ['win', 0], ['hpc', 1]], out: 'lus', why: 'High performance computing over S3 data: FSx for Lustre.' }
+  ];
+  $('scChips').innerHTML = SC.map((s, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${s.n}</button>`).join('');
+  const QY = { shared: 45, win: 125, hpc: 205, temp: 285 };
+  async function choose(s) {
+    const run = K.newRun('pick');
+    pkP.textContent = '';
+    Object.values(qE).forEach(g => g.setAttribute('class', 'q'));
+    Object.values(oE).forEach(g => g.setAttribute('class', 'out'));
+    const p = K.pill(pkP, s.n.length > 24 ? s.n.slice(0, 23) + '…' : s.n);
+    let at = [330, 0];
+    try {
+      for (const [k, ans] of s.path) {
+        const to = [330, QY[k] - 30];
+        await K.move(p, at, to, 420, run); at = to;
+        qE[k].classList.add('on'); await K.sleep(450, run); qE[k].classList.remove('on');
+        if (!ans) qE[k].classList.add('no');
+      }
+      const o = OUT[s.out];
+      await K.move(p, at, [o.x, o.y - 32], 550, run); p.remove();
+      oE[s.out].classList.add('hit');
+      $('pickStatus').innerHTML = `<b>${o.t}</b>. ${s.why}`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('scChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('scChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    choose(SC[+b.dataset.i]);
+  }));
+})();
+</script>
+</body>
+</html>

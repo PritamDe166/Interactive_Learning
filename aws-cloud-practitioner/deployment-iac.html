@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Deployment &amp; Infrastructure as Code</title>
+<meta name="description" content="AWS Cloud Practitioner: CloudFormation stacks and drift, a CodePipeline from commit to deploy, and reaching EC2 with SSH, Instance Connect or Session Manager.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .stage rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .stage text { fill: var(--fg); font-size: 13.5px; font-weight: 700; text-anchor: middle; }
+  .stage .sm { fill: var(--muted); font-family: var(--mono); font-size: 10.5px; font-weight: 400; }
+  .stage.on rect { stroke: var(--cyan); fill: var(--teal-wash); }
+  .stage.ok rect { stroke: var(--teal); }
+  .stage.bad rect { stroke: var(--red); }
+  .stage.dim { opacity: .45; }
+  .wall { fill: var(--teal-wash); stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 6 5; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · Section 11 · Domains 1–3 (Tasks 1.3, 2.4, 3.1)</div>
+    <h1>Deployment &amp; Infrastructure as Code</h1>
+    <ul class="lede">
+      <li><b>Infrastructure as Code</b>: describe resources in a file, and let AWS create, change and delete them in order. <b>CloudFormation</b> (templates) or <b>CDK</b> (real code that becomes templates).</li>
+      <li><b>Elastic Beanstalk</b>: PaaS. Upload code; it builds the EC2, load balancer and Auto Scaling for you.</li>
+      <li><b>CodePipeline</b> orchestrates <b>CodeCommit → CodeBuild → CodeDeploy</b>. <b>CodeArtifact</b> stores packages.</li>
+      <li><b>Systems Manager</b> runs fleets (patching, commands, <b>Session Manager</b> shells, <b>Parameter Store</b>), on AWS and on-premises.</li>
+    </ul>
+  </header>
+
+  <section aria-labelledby="cfnH">
+    <h2 class="stage-title" id="cfnH">CloudFormation: one template, one stack</h2>
+    <div class="stage-kind">Create the stack, then cause drift, update or delete</div>
+    <div class="controls">
+      <div class="seg" id="langSeg" role="group" aria-label="Authoring">
+        <button type="button" data-v="cfn" aria-pressed="true">YAML template</button>
+        <button type="button" data-v="cdk" aria-pressed="false">CDK (TypeScript)</button>
+      </div>
+      <button class="btn primary" type="button" id="cCreate">Create stack</button>
+      <button class="btn" type="button" id="cDrift">Someone edits the SG in the console</button>
+      <button class="btn" type="button" id="cDetect">Detect drift</button>
+      <button class="btn" type="button" id="cRegion">Deploy same template to Hyderabad</button>
+      <button class="btn" type="button" id="cDelete">Delete stack</button>
+    </div>
+    <div class="pair">
+      <div><pre class="codeblock" id="tpl"></pre></div>
+      <div class="scroll"><svg class="diagram" id="cfn" style="min-width:0" viewBox="0 0 520 330" aria-label="Stack resources created in dependency order"></svg></div>
+    </div>
+    <p class="status-line" id="cfnStatus">A stack is the set of resources one template created. Create it first.</p>
+  </section>
+
+  <section aria-labelledby="pipeH">
+    <h2 class="stage-title" id="pipeH">CI/CD: commit to production</h2>
+    <div class="stage-kind">Push a commit · CodePipeline moves it stage by stage</div>
+    <div class="controls">
+      <button class="btn primary" type="button" id="pGood">Push a good commit</button>
+      <button class="btn" type="button" id="pBad">Push a commit with a failing test</button>
+    </div>
+    <div class="scroll">
+      <svg class="diagram" id="pipe" viewBox="0 0 1000 260" aria-label="Pipeline stages: source, build, deploy to EC2 and on-premises servers"></svg>
+    </div>
+    <p class="status-line" id="pipeStatus">CodePipeline doesn't build or deploy itself; it calls the right service at each stage.</p>
+  </section>
+
+  <section aria-labelledby="sshH">
+    <h2 class="stage-title" id="sshH">Getting a shell on EC2</h2>
+    <div class="stage-kind">Close port 22, then try each method</div>
+    <div class="controls">
+      <label class="toggle" for="p22"><input type="checkbox" id="p22" checked> Security group allows inbound port 22</label>
+      <label class="toggle" for="ssmRole"><input type="checkbox" id="ssmRole" checked> Instance role has AmazonSSMManagedInstanceCore</label>
+    </div>
+    <div class="chips" id="shChips"></div>
+    <div class="scroll">
+      <svg class="diagram narrow" id="sh" viewBox="0 0 1000 230" aria-label="Admin laptop, security group, EC2 instance with SSM agent, and the Systems Manager service"></svg>
+    </div>
+    <p class="status-line" id="shStatus">Pick a method.</p>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Service</th><th>Job</th><th>Exam trigger</th></tr></thead>
+        <tbody>
+          <tr><td><b>CloudFormation</b></td><td>Declarative templates (YAML/JSON) → stacks; drift detection</td><td>"infrastructure as code", "repeatable across Regions/accounts"</td></tr>
+          <tr><td><b>CDK</b></td><td>Infrastructure in TypeScript, Python, Java, .NET…; synthesizes CloudFormation</td><td>"use a programming language"</td></tr>
+          <tr><td><b>Elastic Beanstalk</b></td><td>PaaS: upload code, it runs EC2 + ELB + ASG + monitoring (no extra charge)</td><td>"developer just uploads code", "least effort web app"</td></tr>
+          <tr><td><b>CodeCommit</b></td><td>Private Git repositories</td><td>"store code in AWS"</td></tr>
+          <tr><td><b>CodeBuild</b></td><td>Serverless build and test, pay per build minute</td><td>"compile and run tests"</td></tr>
+          <tr><td><b>CodeDeploy</b></td><td>Deploy to EC2, on-premises, Lambda, ECS (agent on servers)</td><td>"hybrid deployment", "upgrade servers"</td></tr>
+          <tr><td><b>CodePipeline</b></td><td>Orchestrates the stages</td><td>"CI/CD", "orchestrate"</td></tr>
+          <tr><td><b>CodeArtifact</b></td><td>Package/dependency repository (npm, pip, Maven, NuGet…)</td><td>"store dependencies"</td></tr>
+          <tr><td><b>Systems Manager</b></td><td>Patch, run commands, inventory across EC2 + on-premises (SSM agent)</td><td>"patch a fleet", "hybrid operations"</td></tr>
+          <tr><td><b>Parameter Store</b></td><td>Config and secrets; SecureString encrypted with KMS; versioned; standard tier free</td><td>"store configuration centrally"</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Updated</span><p><b>CodeCommit is open to new customers again.</b> AWS stopped onboarding new customers in July 2024, then returned CodeCommit to general availability in November 2025. Your notes and older courses may say it's closed.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>CodeBuild doesn't watch your repository on its own.</b> It runs when something triggers it: a webhook, a CodePipeline stage, or a manual start. And CloudFormation uploads a template to S3 only in some cases (for example large templates), not always.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Secrets Manager vs Parameter Store:</b> both hold secrets; <b>Secrets Manager</b> adds automatic <b>rotation</b> (for example RDS passwords) and costs per secret. Parameter Store is cheaper and good for configuration. Exam: "rotate database credentials automatically" → Secrets Manager.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Drift isn't auto-repaired.</b> Drift detection only reports differences. You fix it by updating the template or reverting the change. Beanstalk itself uses CloudFormation behind the scenes.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Developers want to define infrastructure in Python, deployed by AWS. Which tool?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>AWS CDK</b>; it synthesizes CloudFormation templates that CloudFormation deploys.</p></div></details>
+      <details><summary>Fastest way to run a standard web app without managing infrastructure?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Elastic Beanstalk</b> (PaaS).</p></div></details>
+      <details><summary>Which service orchestrates source → build → deploy?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>CodePipeline.</b> CodeBuild builds, CodeDeploy deploys.</p></div></details>
+      <details><summary>Shell access to EC2 with port 22 closed and no keys?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Systems Manager Session Manager</b> (SSM agent + IAM role; sessions can be logged).</p></div></details>
+      <details><summary>Deploy app updates to EC2 and on-premises servers?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>CodeDeploy</b> (hybrid; agent installed on each server).</p></div></details>
+      <details><summary>Someone changed a stack resource by hand. What finds it?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>CloudFormation drift detection.</b></p></div></details>
+    </div>
+  </section>
+
+  <footer>Templates and timings are simplified for illustration. Sources: Deployment notes (CloudFormation; CDK; CDK vs Terraform; Elastic Beanstalk; CloudFormation vs CDK vs Beanstalk; CodeDeploy; CodeCommit; CodeBuild; CodePipeline; CodeArtifact; Systems Manager; Session Manager; Parameter Store; Summary) and "Deployment and Managing Infrastructure at Scale: CLF-C02 Exam Summary". CodeCommit status checked October 2026.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  /* ========== 1. CloudFormation ========== */
+  const YAML = [
+    '<span class="k">Resources:</span>',
+    '  WebSG:  <span class="c"># AWS::EC2::SecurityGroup</span>',
+    '    Ingress: [ tcp 443 from 0.0.0.0/0 ]',
+    '  WebServer:  <span class="c"># AWS::EC2::Instance</span>',
+    '    SecurityGroups: [ !Ref WebSG ]',
+    '  ScansBucket:  <span class="c"># AWS::S3::Bucket</span>',
+    '    Versioning: Enabled'
+  ];
+  const CDK = [
+    '<span class="k">const</span> sg = <span class="k">new</span> ec2.SecurityGroup(this, <span class="s">"WebSG"</span>, { vpc });',
+    'sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(443));',
+    '<span class="k">new</span> ec2.Instance(this, <span class="s">"WebServer"</span>, {',
+    '  vpc, securityGroup: sg, instanceType, machineImage });',
+    '<span class="k">new</span> s3.Bucket(this, <span class="s">"ScansBucket"</span>, {',
+    '  versioned: <span class="k">true</span> });',
+    '<span class="c">// cdk synth → CloudFormation template → deploy</span>'
+  ];
+  let lang = 'cfn';
+  const tpl = $('tpl');
+  function drawTpl() { tpl.innerHTML = (lang === 'cfn' ? YAML : CDK).map(l => `<span class="ln">${l}</span>`).join(''); }
+  drawTpl();
+  const cf = $('cfn');
+  K.el('rect', { x: 10, y: 10, width: 500, height: 310, rx: 14, class: 'zone' }, cf);
+  const stackL = K.text(cf, 22, 30, 'STACK web-prod · ap-south-1', 'zone-label');
+  const R = {
+    sg: K.node(cf, 140, 100, 200, 54, 'WebSG', 'security group'),
+    ec2: K.node(cf, 380, 100, 200, 54, 'WebServer', 'EC2 instance'),
+    s3: K.node(cf, 140, 210, 200, 54, 'ScansBucket', 'S3 bucket')
+  };
+  const dep = K.el('line', { x1: 240, y1: 100, x2: 280, y2: 100, class: 'msg dash' }, cf);
+  const st2 = K.node(cf, 380, 210, 200, 54, 'web-prod (Hyderabad)', 'same template');
+  const cP = K.el('g', {}, cf);
+  let S = { created: false, drift: false };
+  function cReset() { Object.values(R).forEach(n => n.g.setAttribute('class', 'node dim')); st2.g.setAttribute('class', 'node dim'); R.sg.sub.textContent = 'security group'; }
+  cReset();
+  const cst = $('cfnStatus');
+  const lines = () => [...tpl.querySelectorAll('.ln')];
+  async function create() {
+    const run = K.newRun('cfn'); cP.textContent = ''; cReset(); S = { created: false, drift: false };
+    try {
+      if (lang === 'cdk') {
+        const ls = lines(); for (const l of ls) { l.classList.add('on'); await K.sleep(160, run); l.classList.remove('on'); }
+        cst.innerHTML = '<b>cdk synth</b> turned the TypeScript into a CloudFormation template…';
+        await K.sleep(700, run);
+      }
+      const order = [['sg', 1], ['ec2', 3], ['s3', 5]];
+      for (const [k, li] of order) {
+        const l = lines()[lang === 'cfn' ? li : (k === 'sg' ? 0 : k === 'ec2' ? 2 : 4)]; l.classList.add('on');
+        R[k].g.setAttribute('class', 'node');
+        R[k].sub.textContent = 'CREATE_IN_PROGRESS';
+        await K.sleep(600, run);
+        R[k].g.setAttribute('class', 'node ok'); R[k].sub.textContent = 'CREATE_COMPLETE';
+        l.classList.remove('on'); l.classList.add('done');
+        if (k === 'sg') cst.innerHTML = 'The security group goes first because WebServer <b>references</b> it: CloudFormation works out the order.';
+      }
+      S.created = true;
+      cst.innerHTML = '<span class="ok-text">Stack CREATE_COMPLETE.</span> Three resources, one unit: update or delete them together. Resources are tagged with the stack name, so costs are easy to track.';
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  async function drift() {
+    if (!S.created) { cst.textContent = 'Create the stack first.'; return; }
+    const run = K.newRun('cfn');
+    try {
+      const p = K.pill(cP, 'console: open port 22 to all', 'bad');
+      await K.move(p, [140, 300], [140, 140], 600, run); p.remove();
+      S.drift = true; R.sg.sub.textContent = 'port 22 added by hand';
+      cst.innerHTML = 'The running resource no longer matches the template. Nothing warns you yet…';
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  async function detect() {
+    if (!S.created) { cst.textContent = 'Create the stack first.'; return; }
+    const run = K.newRun('cfn');
+    try {
+      for (const k of ['sg', 'ec2', 's3']) { R[k].g.classList.add('on'); await K.sleep(350, run); R[k].g.classList.remove('on'); }
+      if (S.drift) { R.sg.g.setAttribute('class', 'node bad'); R.sg.sub.textContent = 'DRIFTED'; cst.innerHTML = '<span class="bad-text">WebSG has DRIFTED</span> (port 22 isn\'t in the template). Fix it by reverting the change or updating the template; CloudFormation won\'t auto-repair.'; }
+      else cst.innerHTML = '<span class="ok-text">IN_SYNC.</span> Every resource matches the template.';
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  async function region() {
+    const run = K.newRun('cfn');
+    try {
+      const p = K.pill(cP, 'same template', 'alt');
+      await K.move(p, [260, 300], [380, 250], 600, run); p.remove();
+      st2.g.setAttribute('class', 'node ok'); st2.sub.textContent = 'CREATE_COMPLETE';
+      cst.innerHTML = 'Same template, another Region (or account): <b>identical, repeatable</b> environments. That\'s the main IaC win for DR and dev/test/prod.';
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  async function del() {
+    if (!S.created) { cst.textContent = 'Nothing to delete.'; return; }
+    const run = K.newRun('cfn');
+    try {
+      for (const k of ['s3', 'ec2', 'sg']) { R[k].sub.textContent = 'DELETE_IN_PROGRESS'; await K.sleep(450, run); R[k].g.setAttribute('class', 'node dim'); R[k].sub.textContent = 'deleted'; }
+      S = { created: false, drift: false };
+      cst.innerHTML = 'Stack deleted: every resource it created is removed, in reverse dependency order. Nothing left behind to bill you.';
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  K.seg($('langSeg'), v => { lang = v; K.cancel('cfn'); drawTpl(); });
+  $('cCreate').addEventListener('click', create); $('cDrift').addEventListener('click', drift);
+  $('cDetect').addEventListener('click', detect); $('cRegion').addEventListener('click', region); $('cDelete').addEventListener('click', del);
+
+  /* ========== 2. Pipeline ========== */
+  const pp = $('pipe');
+  K.el('rect', { x: 150, y: 20, width: 560, height: 120, rx: 14, class: 'zone' }, pp);
+  K.text(pp, 162, 40, 'CODEPIPELINE', 'zone-label');
+  const ST = {
+    dev: { t: 'Developer', s: 'git push', x: 70, y: 85 },
+    src: { t: 'Source', s: 'CodeCommit / GitHub', x: 250, y: 85 },
+    bld: { t: 'Build + test', s: 'CodeBuild', x: 430, y: 85 },
+    dep: { t: 'Deploy', s: 'CodeDeploy', x: 610, y: 85 },
+    art: { t: 'CodeArtifact', s: 'npm / NuGet packages', x: 430, y: 200 },
+    ec2: { t: 'EC2 fleet', s: 'v41', x: 860, y: 50 },
+    onp: { t: 'On-prem servers', s: 'v41', x: 860, y: 140 }
+  };
+  const sE = {};
+  for (const k in ST) { const o = ST[k], g = K.el('g', { class: 'stage' }, pp); K.el('rect', { x: o.x - 75, y: o.y - 28, width: 150, height: 56, rx: 12 }, g); K.text(g, o.x, o.y - 3, o.t, ''); const s = K.text(g, o.x, o.y + 15, o.s, 'sm'); sE[k] = { g, s }; }
+  [['dev', 'src'], ['src', 'bld'], ['bld', 'dep']].forEach(([a, b]) => K.el('line', { x1: ST[a].x + 75, y1: 85, x2: ST[b].x - 75, y2: 85, class: 'msg solid' }, pp));
+  K.el('line', { x1: 430, y1: 172, x2: 430, y2: 113, class: 'msg dash' }, pp);
+  K.el('line', { x1: 685, y1: 85, x2: 785, y2: 50, class: 'msg solid' }, pp);
+  K.el('line', { x1: 685, y1: 85, x2: 785, y2: 140, class: 'msg solid' }, pp);
+  const pP = K.el('g', {}, pp);
+  let ver = 41;
+  async function push(good) {
+    const run = K.newRun('pipe'); pP.textContent = '';
+    for (const k in sE) sE[k].g.setAttribute('class', 'stage');
+    const pst = $('pipeStatus');
+    try {
+      const c = K.pill(pP, 'commit ' + (good ? 'a1f9' : 'b7c2'), good ? 'alt' : 'bad');
+      await K.move(c, [70, 45], [250, 45], 500, run);
+      sE.src.g.classList.add('on'); await K.sleep(500, run); sE.src.g.setAttribute('class', 'stage ok');
+      pst.innerHTML = 'Source stage picked up the new commit.';
+      await K.move(c, [250, 45], [430, 45], 500, run);
+      sE.bld.g.classList.add('on');
+      const d = K.pill(pP, 'packages', 'ok'); await K.move(d, [430, 170], [430, 120], 450, run); d.remove();
+      pst.innerHTML = 'CodeBuild pulls dependencies from CodeArtifact, compiles, runs the tests (billed per build minute)…';
+      await K.sleep(900, run);
+      if (!good) { sE.bld.g.setAttribute('class', 'stage bad'); c.remove(); sE.dep.g.classList.add('dim'); pst.innerHTML = '<span class="bad-text">Build failed: 1 test red.</span> The pipeline stops here, so nothing broken reaches the servers.'; return; }
+      sE.bld.g.setAttribute('class', 'stage ok');
+      c.remove();
+      const a = K.pill(pP, 'artifact.zip', 'ok');
+      await K.move(a, [430, 45], [610, 45], 500, run);
+      sE.dep.g.classList.add('on');
+      ver++;
+      const a2 = K.pill(pP, 'v' + ver, 'ok');
+      await Promise.all([K.move(a, [610, 45], [860, 12], 600, run), K.move(a2, [610, 125], [860, 105], 600, run)]);
+      a.remove(); a2.remove();
+      sE.dep.g.setAttribute('class', 'stage ok');
+      sE.ec2.s.textContent = 'v' + ver; sE.onp.s.textContent = 'v' + ver;
+      sE.ec2.g.setAttribute('class', 'stage ok'); sE.onp.g.setAttribute('class', 'stage ok');
+      pst.innerHTML = `<span class="ok-text">Deployed v${ver}</span> to EC2 <b>and</b> on-premises servers: CodeDeploy is hybrid (its agent runs on each server).`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('pGood').addEventListener('click', () => push(true)); $('pBad').addEventListener('click', () => push(false));
+
+  /* ========== 3. Shell access ========== */
+  const sh = $('sh');
+  const admin = K.node(sh, 110, 100, 170, 56, 'Admin laptop', '203.0.113.10');
+  K.el('rect', { x: 400, y: 30, width: 36, height: 150, rx: 8, class: 'wall' }, sh);
+  const wl = K.text(sh, 418, 22, 'SG', 'mlabel accent'); wl.style.textAnchor = 'middle';
+  const inst = K.node(sh, 640, 100, 200, 70, 'EC2 instance', 'sshd · SSM agent');
+  inst.g.classList.add('solid');
+  const ssm = K.node(sh, 880, 190, 190, 52, 'Systems Manager', 'Session Manager');
+  const consoleN = K.node(sh, 880, 45, 190, 52, 'AWS console', 'Instance Connect');
+  K.el('line', { x1: 740, y1: 120, x2: 785, y2: 180, class: 'msg dash' }, sh);
+  const shP = K.el('g', {}, sh);
+  const M = [{ k: 'ssh', n: 'SSH with a .pem key' }, { k: 'ic', n: 'EC2 Instance Connect' }, { k: 'sm', n: 'Session Manager' }];
+  $('shChips').innerHTML = M.map(m => `<button class="chip-btn" type="button" data-k="${m.k}" aria-pressed="false">${m.n}</button>`).join('');
+  async function shell(k) {
+    const run = K.newRun('sh'); shP.textContent = '';
+    inst.g.setAttribute('class', 'node solid'); ssm.g.setAttribute('class', 'node'); consoleN.g.setAttribute('class', 'node');
+    const s = $('shStatus'); const open = $('p22').checked;
+    try {
+      if (k === 'ssh' || k === 'ic') {
+        const from = k === 'ssh' ? [195, 100] : [785, 45];
+        if (k === 'ic') { consoleN.g.classList.add('ok'); const t = K.pill(shP, 'push temp key', 'alt'); await K.move(t, [880, 75], [700, 70], 500, run); t.remove(); }
+        const p = K.pill(shP, 'TCP 22');
+        const target = k === 'ssh' ? [395, 100] : [440, 60];
+        await K.move(p, k === 'ssh' ? from : [785, 45], k === 'ssh' ? target : [460, 60], 550, run);
+        if (!open) { p.remove(); K.text(shP, 418, (k === 'ssh' ? 106 : 66), '✕', 'xmark'); s.innerHTML = `<span class="bad-text">Timeout.</span> ${k === 'ic' ? 'Instance Connect is still SSH, so it' : 'SSH'} needs port 22 open in the security group.`; return; }
+        await K.move(p, k === 'ssh' ? [440, 100] : [460, 60], [540, 100], 400, run); p.remove();
+        inst.g.setAttribute('class', 'node ok');
+        s.innerHTML = k === 'ssh' ? '<span class="ok-text">Connected.</span> Works, but you manage key files and keep port 22 open (ideally to your IP only).' : '<span class="ok-text">Connected in the browser</span> with a temporary key pushed by AWS: no key file to manage, but port 22 must still be open.';
+      } else {
+        if (!$('ssmRole').checked) { s.innerHTML = '<span class="bad-text">Instance not listed in Session Manager.</span> The SSM agent needs an IAM role (AmazonSSMManagedInstanceCore) to register with the service.'; return; }
+        const r = K.pill(shP, 'agent → HTTPS out', 'alt');
+        await K.move(r, [700, 135], [800, 190], 500, run); r.remove();
+        ssm.g.classList.add('ok');
+        const p = K.pill(shP, 'start-session');
+        await K.move(p, [195, 130], [785, 205], 800, run); p.remove();
+        const q = K.pill(shP, 'shell', 'ok');
+        await K.move(q, [800, 190], [700, 135], 450, run); q.remove();
+        inst.g.setAttribute('class', 'node ok');
+        s.innerHTML = `<span class="ok-text">Connected${open ? '' : ' with port 22 closed'}.</span> No inbound port, no SSH keys, no bastion: the agent connects <b>outbound</b>, IAM controls who may start sessions, and sessions can be logged to S3 or CloudWatch.`;
+      }
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('shChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('shChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    shell(b.dataset.k);
+  }));
+})();
+</script>
+</body>
+</html>

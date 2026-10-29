@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EC2 Basics</title>
+<meta name="description" content="AWS Cloud Practitioner: decode EC2 instance type names, test security group rules against real requests, and follow an instance through launch, stop, start and terminate.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .slot rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; }
+  .slot.on rect { stroke: var(--cyan); fill: var(--teal-wash); }
+  .slot .cap { fill: var(--muted); font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-anchor: middle; }
+  .slot .val { fill: var(--fg); font-size: 15px; font-weight: 600; text-anchor: middle; }
+  .bigname { fill: var(--fg); font-family: var(--mono); font-size: 40px; font-weight: 700; }
+  .bigname tspan.f { fill: var(--accent-text); }
+  .bigname tspan.g { fill: var(--cyan); }
+  .bigname tspan.a { fill: var(--good-text); }
+  .bigname tspan.s { fill: var(--fg); }
+  .fam.on { border-color: var(--cyan); box-shadow: 0 0 0 1px var(--cyan) inset; }
+  .fam .letters { font-family: var(--mono); color: var(--accent-text); font-weight: 700; }
+  .wall { fill: var(--teal-wash); stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 6 5; }
+  .wall-label { fill: var(--cyan); font-family: var(--mono); font-size: 12px; text-anchor: middle; }
+  .src rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; }
+  .src text { fill: var(--fg); font-size: 13px; font-weight: 600; text-anchor: middle; }
+  .src .sm { fill: var(--muted); font-family: var(--mono); font-size: 10.5px; font-weight: 400; }
+  .src.on rect { stroke: var(--cyan); }
+  .rules { display: grid; gap: 8px; }
+  .rules .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .rules code { font-size: 11.5px; }
+  .life-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · Section 4 · Domain 3 Technology &amp; Services (Task 3.3)</div>
+    <h1>EC2 Basics</h1>
+    <ul class="lede"><li><b>EC2</b> (Elastic Compute Cloud) rents you virtual servers called <b>instances</b>. It's IaaS.</li><li>You pick the <b>AMI</b> (OS image), <b>instance type</b> (CPU, memory), <b>storage</b> and <b>security group</b> (firewall).</li><li>An optional <b>user data</b> script sets the machine up on first boot.</li><li>Around it sit EBS volumes, load balancers and Auto Scaling groups.</li></ul>
+  </header>
+
+  <section aria-labelledby="decH">
+    <h2 class="stage-title" id="decH">Read an instance type name</h2>
+    <div class="stage-kind">Pick a name · the parts fly into place</div>
+    <div class="chips" id="typeChips"></div>
+    <div class="scroll">
+      <svg class="diagram narrow" id="dec" viewBox="0 0 1000 250" aria-label="An instance type name split into family, generation, attributes and size"></svg>
+    </div>
+    <p class="status-line" id="decStatus"></p>
+    <div class="label" style="margin-top:18px">Which family fits the workload?</div>
+    <div class="chips" id="workChips"></div>
+    <div class="cards" id="famCards" style="margin-top:12px"></div>
+  </section>
+
+  <section aria-labelledby="sgH">
+    <h2 class="stage-title" id="sgH">Security group: who gets through?</h2>
+    <div class="stage-kind">Change the rules, then send traffic</div>
+    <div class="two">
+      <div class="card">
+        <div class="label">Web-SG rules (allow rules only)</div>
+        <div class="rules">
+          <label class="toggle" for="r1"><input type="checkbox" id="r1" checked> In: SSH <code>22</code> from <code>203.0.113.10/32</code> (your IP)</label>
+          <label class="toggle" for="r2"><input type="checkbox" id="r2"> In: SSH <code>22</code> from <code>0.0.0.0/0</code> (anywhere)</label>
+          <label class="toggle" for="r3"><input type="checkbox" id="r3" checked> In: HTTP <code>80</code> from <code>0.0.0.0/0</code></label>
+          <label class="toggle" for="r4"><input type="checkbox" id="r4"> In: HTTPS <code>443</code> from <code>0.0.0.0/0</code></label>
+          <label class="toggle" for="r5"><input type="checkbox" id="r5" checked> In: TCP <code>8080</code> from <code>App-SG</code> (another security group)</label>
+          <label class="toggle" for="r6"><input type="checkbox" id="r6" checked> Out: all traffic to <code>0.0.0.0/0</code> (default)</label>
+          <label class="toggle" for="httpd"><input type="checkbox" id="httpd" checked> Web server (httpd) running on the instance</label>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">Send traffic</div>
+        <div class="chips" id="sgChips"></div>
+        <p class="status-line" id="sgStatus" style="text-align:left;margin-top:12px">Pick a request.</p>
+      </div>
+    </div>
+    <div class="scroll">
+      <svg class="diagram" id="sg" viewBox="0 0 1000 380" aria-label="Sources on the left, a security group wall in the middle, the EC2 instance on the right"></svg>
+    </div>
+    <div class="note"><span class="flag add">Read the error</span><p><b>Timeout</b> = the packet never arrived: check the security group (or the IP, Region, VPC). <b>Connection refused</b> = it arrived, but nothing listens on that port: check the application.</p></div>
+  </section>
+
+  <section aria-labelledby="lifeH">
+    <h2 class="stage-title" id="lifeH">Launch, stop, start, terminate</h2>
+    <div class="stage-kind">Watch user data, the public IP and the bill</div>
+    <div class="controls">
+      <div class="life-btns">
+        <button class="btn primary" type="button" id="bLaunch">Launch</button>
+        <button class="btn" type="button" id="bStop">Stop</button>
+        <button class="btn" type="button" id="bStart">Start</button>
+        <button class="btn" type="button" id="bTerm">Terminate</button>
+      </div>
+      <label class="toggle" for="eip"><input type="checkbox" id="eip"> Attach an Elastic IP</label>
+    </div>
+    <div class="pair">
+      <div><div class="label">User data (runs as root, first boot only)</div>
+<pre class="codeblock" id="ud"><span class="ln"><span class="c">#!/bin/bash</span></span><span class="ln">dnf update -y</span><span class="ln">dnf install -y httpd</span><span class="ln">systemctl enable --now httpd</span><span class="ln">echo <span class="s">"Hello from $(hostname -f)"</span> &gt; /var/www/html/index.html</span></pre>
+      </div>
+      <div class="kpis" id="lifeKpis" style="margin-top:0;align-content:start"></div>
+    </div>
+    <div class="card" style="margin-top:14px"><div class="label">Event log</div><ul class="log" id="lifeLog" aria-live="polite"><li>Press Launch.</li></ul></div>
+  </section>
+
+  <section aria-labelledby="moreH">
+    <h2 id="moreH">Connecting and the ports to know</h2>
+    <div class="cards">
+      <div class="card"><h3>SSH / PuTTY</h3><p>Your terminal (macOS, Linux, Windows 10+) or PuTTY on Windows, with the key pair's private key (<span class="mono">.pem</span> for OpenSSH, <span class="mono">.ppk</span> for PuTTY). Needs inbound port <b>22</b>. Windows instances use <b>RDP, port 3389</b>.</p></div>
+      <div class="card"><h3>EC2 Instance Connect</h3><p>SSH in the browser. AWS pushes a <b>temporary key</b>, so you don't handle one. It's still SSH, so port 22 must be open (from AWS's Instance Connect range, or through an Instance Connect Endpoint for private instances).</p></div>
+      <div class="card"><h3>Session Manager</h3><p>Shell through the SSM agent and an IAM role: <b>no port 22, no keys, no bastion</b>, every session logged. Covered in <a href="deployment-iac.html">Deployment &amp; IaC</a>.</p></div>
+    </div>
+    <div class="scroll card table-card" style="margin-top:14px">
+      <table>
+        <thead><tr><th>Port</th><th>Protocol</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td>22</td><td>SSH (and SFTP)</td><td>Log in to a Linux instance; secure file transfer</td></tr>
+          <tr><td>21</td><td>FTP</td><td>File transfer (unencrypted)</td></tr>
+          <tr><td>80</td><td>HTTP</td><td>Plain web traffic</td></tr>
+          <tr><td>443</td><td>HTTPS</td><td>Encrypted web traffic (also needs a certificate on the server)</td></tr>
+          <tr><td>3389</td><td>RDP</td><td>Remote Desktop to a Windows instance</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>Security groups are stateful.</b> If a request is allowed in, the reply goes out automatically (and vice versa), whatever the other direction's rules say. Network ACLs, at the subnet level, are stateless and can deny; they come in the VPC section.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b><span class="mono">r5.16xlarge</span> has 64 vCPUs and 512 GiB</b>, not 16 vCPUs. Each size step doubles the resources: <span class="mono">4xlarge</span> = 16 vCPUs, <span class="mono">8xlarge</span> = 32, <span class="mono">16xlarge</span> = 64. <span class="mono">c5.4xlarge</span> (16 vCPU, 32 GiB) and <span class="mono">t2.micro</span> (1 vCPU, 1 GiB) are right.</p></div>
+      <div class="note"><span class="flag">Updated</span><p><b>The lab's choices have aged.</b> Amazon Linux 2 reached end of support on 30 June 2026: use <b>Amazon Linux 2023</b> (which uses <span class="mono">dnf</span>, hence the script above). New root volumes default to <b>gp3</b>, not gp2. Accounts created since 15 July 2025 get a <b>credit-based free plan</b> (up to $200, 6 months) and micro types such as <span class="mono">t3.micro</span> / <span class="mono">t4g.micro</span>, not <span class="mono">t2.micro</span>. Always check the console.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Accelerated computing</b> is the fifth family your notes didn't list: GPUs or custom chips (<span class="mono">P</span>, <span class="mono">G</span>, <span class="mono">Inf</span>, <span class="mono">Trn</span>) for ML training, inference and graphics. Apps on EC2 that call AWS APIs should use an <a href="iam.html">IAM role</a>, never stored access keys.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>In <span class="mono">c7g.4xlarge</span>, what do c, 7, g and 4xlarge mean?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Compute optimized</b> family, <b>7th</b> generation, <b>Graviton</b> (Arm) processor, size <b>4xlarge</b> (16 vCPUs).</p></div></details>
+      <details><summary>Your browser shows a timeout on port 80. First thing to check?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>The security group's inbound rule</b> for port 80. A timeout means traffic didn't arrive.</p></div></details>
+      <details><summary>Can a security group contain a deny rule?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>No.</b> Allow rules only; anything not allowed is blocked. (Network ACLs can deny.)</p></div></details>
+      <details><summary>You stop and start an instance. Does user data run again, and is the public IP the same?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>No and usually no.</b> User data runs only on first boot; the public IPv4 changes unless you attach an <b>Elastic IP</b>.</p></div></details>
+      <details><summary>Which family for an in-memory cache with a huge working set?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Memory optimized</b> (R, X families).</p></div></details>
+      <details><summary>Which port do you open to manage a Windows instance remotely?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>3389 (RDP).</b> Port 22 is SSH for Linux.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Instance specs from the AWS instance-type pages; IP addresses use documentation ranges and timings are illustrative. Sources: EC2 notes (Amazon EC2 Basics, Create an EC2 Web Server with User Data, Instance Types Basics, Security Groups and Classic Ports, SSH Overview, EC2 Instance Connect, IAM Roles for EC2 Instances). Free-tier details checked October 2026.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  /* ========== 1. Decoder ========== */
+  const FAM = {
+    gp: { t: 'General purpose', l: 'T · M', d: 'Balanced CPU and memory. Web servers, dev environments, small apps. T = burstable (CPU credits).', w: ['Company website', 'Dev / test box'] },
+    co: { t: 'Compute optimized', l: 'C', d: 'High CPU per GiB. Batch jobs, media transcoding, high-traffic web servers, HPC, game servers.', w: ['Video transcoding', 'Game server'] },
+    mo: { t: 'Memory optimized', l: 'R · X · z', d: 'Lots of RAM. In-memory databases and caches, large relational DBs, real-time analytics.', w: ['In-memory cache', 'Large SQL database'] },
+    so: { t: 'Storage optimized', l: 'I · D · H', d: 'Fast local NVMe or dense HDD. High-rate OLTP, NoSQL, data warehouses, distributed file systems.', w: ['High-IOPS NoSQL on local disk'] },
+    ac: { t: 'Accelerated computing', l: 'P · G · Inf · Trn', d: 'GPUs or AWS ML chips. Model training and inference, graphics rendering.', w: ['ML model training'] }
+  };
+  const TYPES = [
+    { n: 't3.micro', f: 't', g: '3', a: '', s: 'micro', fam: 'gp', spec: '2 vCPU · 1 GiB', note: 'Burstable general purpose; a typical free-plan type.' },
+    { n: 'm7i.2xlarge', f: 'm', g: '7', a: 'i', s: '2xlarge', fam: 'gp', spec: '8 vCPU · 32 GiB', note: '"i" = Intel processor.' },
+    { n: 'c7g.4xlarge', f: 'c', g: '7', a: 'g', s: '4xlarge', fam: 'co', spec: '16 vCPU · 32 GiB', note: '"g" = AWS Graviton (Arm) processor: cheaper per vCPU.' },
+    { n: 'r5.16xlarge', f: 'r', g: '5', a: '', s: '16xlarge', fam: 'mo', spec: '64 vCPU · 512 GiB', note: '8 GiB of RAM per vCPU: the memory-optimized ratio.' },
+    { n: 'i4i.xlarge', f: 'i', g: '4', a: 'i', s: 'xlarge', fam: 'so', spec: '4 vCPU · 32 GiB · 937 GB NVMe', note: 'Local NVMe instance store for very high IOPS.' },
+    { n: 'g5.xlarge', f: 'g', g: '5', a: '', s: 'xlarge', fam: 'ac', spec: '4 vCPU · 16 GiB · 1 GPU', note: 'NVIDIA GPU for inference and graphics.' }
+  ];
+  $('typeChips').innerHTML = TYPES.map((t, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${t.n}</button>`).join('');
+  $('famCards').innerHTML = Object.entries(FAM).map(([k, f]) => `<div class="card fam" data-f="${k}"><h3>${f.t}</h3><div class="letters">${f.l}</div><p>${f.d}</p></div>`).join('');
+  const WORK = Object.entries(FAM).flatMap(([k, f]) => f.w.map(w => ({ w, k })));
+  $('workChips').innerHTML = WORK.map((x, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${x.w}</button>`).join('');
+  function lightFam(k) { document.querySelectorAll('#famCards .fam').forEach(c => c.classList.toggle('on', c.dataset.f === k)); }
+  $('workChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('workChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    const x = WORK[+b.dataset.i]; lightFam(x.k);
+    $('decStatus').innerHTML = `<b>${x.w}</b> → ${FAM[x.k].t} (${FAM[x.k].l}).`;
+  }));
+
+  const dec = $('dec');
+  const nameT = K.el('text', { x: 500, y: 60, class: 'bigname' }, dec); nameT.style.textAnchor = 'middle';
+  const SLOTS = [['f', 'FAMILY', 155], ['g', 'GENERATION', 385], ['a', 'ATTRIBUTES', 615], ['s', 'SIZE', 845]];
+  const slotEls = {};
+  SLOTS.forEach(([k, cap, x]) => {
+    const g = K.el('g', { class: 'slot' }, dec);
+    K.el('rect', { x: x - 105, y: 150, width: 210, height: 80, rx: 12 }, g);
+    K.text(g, x, 172, cap, 'cap');
+    slotEls[k] = { g, x, v: K.text(g, x, 210, '', 'val') };
+  });
+  const decP = K.el('g', {}, dec);
+  const ATTR = { i: 'Intel CPU', g: 'Graviton (Arm)', a: 'AMD CPU', '': 'none (default CPU)' };
+  async function decode(t) {
+    const run = K.newRun('dec');
+    decP.textContent = '';
+    nameT.innerHTML = `<tspan class="f">${t.f}</tspan><tspan class="g">${t.g}</tspan><tspan class="a">${t.a}</tspan><tspan class="s">.${t.s}</tspan>`;
+    for (const k in slotEls) { slotEls[k].v.textContent = ''; slotEls[k].g.classList.remove('on'); }
+    lightFam(t.fam);
+    const vals = { f: `${t.f.toUpperCase()} · ${FAM[t.fam].t.split(' ')[0]}`, g: `${t.g}th gen`.replace('3th', '3rd').replace('4th', '4th'), a: ATTR[t.a], s: t.s };
+    try {
+      for (const [k] of SLOTS) {
+        const label = k === 'f' ? t.f : k === 'g' ? t.g : k === 'a' ? (t.a || '–') : t.s;
+        const p = K.pill(decP, label, k === 's' ? '' : 'alt');
+        await K.move(p, [500, 95], [slotEls[k].x, 130], 500, run);
+        p.remove();
+        slotEls[k].g.classList.add('on'); slotEls[k].v.textContent = vals[k];
+        await K.sleep(250, run);
+      }
+      $('decStatus').innerHTML = `<b>${t.n}</b>: ${t.spec}. ${t.note}`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('typeChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('typeChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    decode(TYPES[+b.dataset.i]);
+  }));
+  nameT.innerHTML = '<tspan class="f">m</tspan><tspan class="g">5</tspan><tspan class="s">.2xlarge</tspan>';
+  $('decStatus').textContent = 'Family letter, generation number, optional attribute letters, then the size after the dot.';
+
+  /* ========== 2. Security group ========== */
+  const sg = $('sg');
+  const SRC = [
+    { k: 'you', t: 'You', s: '203.0.113.10', y: 55 },
+    { k: 'other', t: 'Other laptop', s: '198.51.100.7', y: 125 },
+    { k: 'web', t: 'Website visitor', s: 'any IP', y: 195 },
+    { k: 'app', t: 'App server', s: 'has App-SG', y: 265 },
+    { k: 'repo', t: 'Package repo', s: 'internet', y: 335 }
+  ];
+  const srcEls = {};
+  SRC.forEach(s => {
+    const g = K.el('g', { class: 'src' }, sg);
+    K.el('rect', { x: 30, y: s.y - 27, width: 170, height: 54, rx: 10 }, g);
+    K.text(g, 115, s.y - 4, s.t, '');
+    K.text(g, 115, s.y + 14, s.s, 'sm');
+    srcEls[s.k] = g;
+  });
+  K.el('rect', { x: 500, y: 20, width: 40, height: 345, rx: 8, class: 'wall' }, sg);
+  const wl = K.text(sg, 520, 14, 'Web-SG', 'wall-label');
+  const inst = K.node(sg, 820, 195, 230, 150, 'EC2 web server', '172.31.20.5');
+  inst.g.classList.add('solid');
+  const portsT = K.text(sg, 820, 245, '', 'mlabel muted'); portsT.style.textAnchor = 'middle';
+  const sgP = K.el('g', {}, sg);
+  function listening() { return { 22: true, 80: $('httpd').checked, 443: false, 8080: true }; }
+  function paintPorts() { const L = listening(); portsT.textContent = 'listening: ' + Object.keys(L).filter(p => L[p]).join(', '); }
+  paintPorts(); $('httpd').addEventListener('change', paintPorts);
+  const REQ = [
+    { k: 'you22', src: 'you', port: 22, lbl: 'You → SSH 22' },
+    { k: 'oth22', src: 'other', port: 22, lbl: 'Other laptop → SSH 22' },
+    { k: 'web80', src: 'web', port: 80, lbl: 'Visitor → HTTP 80' },
+    { k: 'web443', src: 'web', port: 443, lbl: 'Visitor → HTTPS 443' },
+    { k: 'app8080', src: 'app', port: 8080, lbl: 'App server → 8080' },
+    { k: 'out', src: 'repo', port: 443, lbl: 'Instance → dnf update (outbound)', out: true }
+  ];
+  $('sgChips').innerHTML = REQ.map(r => `<button class="chip-btn" type="button" data-k="${r.k}" aria-pressed="false">${r.lbl}</button>`).join('');
+  function allowedIn(r) {
+    if (r.port === 22) return (r.src === 'you' && $('r1').checked) || $('r2').checked;
+    if (r.port === 80) return $('r3').checked;
+    if (r.port === 443) return $('r4').checked;
+    if (r.port === 8080) return r.src === 'app' && $('r5').checked;
+    return false;
+  }
+  async function send(r) {
+    const run = K.newRun('sg');
+    sgP.textContent = '';
+    Object.values(srcEls).forEach(g => g.classList.remove('on'));
+    inst.g.classList.remove('ok', 'bad');
+    srcEls[r.src].classList.add('on');
+    const st = $('sgStatus');
+    const y = SRC.find(s => s.k === r.src).y;
+    try {
+      if (r.out) {
+        const ok = $('r6').checked;
+        const p = K.pill(sgP, 'GET packages :443');
+        await K.move(p, [705, 195], [560, y], 500, run);
+        if (!ok) { p.remove(); K.text(sgP, 520, y + 6, '✕', 'xmark'); st.innerHTML = '<span class="bad-text">Timeout.</span> Outbound rule removed, so the instance can\'t reach the internet (no updates).'; return; }
+        await K.move(p, [560, y], [200, y], 500, run); p.remove();
+        const back = K.pill(sgP, 'reply: packages', 'ok');
+        await K.move(back, [200, y], [705, 195], 800, run); back.remove();
+        inst.g.classList.add('ok');
+        st.innerHTML = '<span class="ok-text">Allowed out, reply allowed back in</span> with no inbound rule for it: security groups are <b>stateful</b>.';
+        return;
+      }
+      const p = K.pill(sgP, `TCP :${r.port}`);
+      await K.move(p, [200, y], [495, y], 550, run);
+      if (!allowedIn(r)) {
+        p.remove(); K.text(sgP, 520, y + 6, '✕', 'xmark');
+        await K.sleep(600, run);
+        st.innerHTML = `<span class="bad-text">Timeout.</span> No inbound rule allows port ${r.port} from ${SRC.find(s => s.k === r.src).s}; the packet is silently dropped.`;
+        return;
+      }
+      await K.move(p, [545, y], [705, 195], 500, run); p.remove();
+      if (!listening()[r.port]) {
+        inst.g.classList.add('bad');
+        const rp = K.pill(sgP, 'RST · refused', 'bad'); await K.move(rp, [705, 195], [200, y], 700, run); rp.remove();
+        st.innerHTML = r.port === 443
+          ? '<span class="bad-text">Connection refused.</span> The rule let it in, but nothing serves HTTPS: opening 443 isn\'t enough, you also need TLS and a certificate.'
+          : '<span class="bad-text">Connection refused.</span> The security group allowed it, but the web server is stopped. Check the app, not the firewall.';
+        return;
+      }
+      inst.g.classList.add('ok');
+      const reply = { 22: 'SSH session', 80: '200 OK', 8080: '200 OK (API)' }[r.port];
+      const rp = K.pill(sgP, reply, 'ok'); await K.move(rp, [705, 195], [200, y], 700, run); rp.remove();
+      st.innerHTML = `<span class="ok-text">Allowed.</span> ${r.port === 8080 ? 'The rule trusts App-SG itself, so it keeps working when the app server\'s IP changes.' : r.port === 22 && $('r2').checked && r.src === 'other' ? 'Port 22 is open to the whole internet: fine for a lab, risky in production.' : 'An inbound rule matches, and the reply flows back automatically.'}`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('sgChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('sgChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    send(REQ.find(r => r.k === b.dataset.k));
+  }));
+
+  /* ========== 3. Lifecycle ========== */
+  const S = { state: 'not launched', pub: '–', priv: '–', runs: 0, bill: 'nothing', ebs: '–' };
+  const lines = [...document.querySelectorAll('#ud .ln')];
+  const log = $('lifeLog');
+  let pubN = 40;
+  function nextPub() { pubN = pubN === 40 ? 77 : pubN === 77 ? 129 : 40; return '203.0.113.' + pubN; }
+  function paint() {
+    const k = [['State', S.state, S.state === 'running' ? 'good' : S.state === 'terminated' ? 'bad' : ''], ['Public IPv4', S.pub, $('eip').checked && S.pub !== '–' ? 'accent' : ''], ['Private IPv4', S.priv, ''], ['User data runs', String(S.runs), ''], ['Billed for', S.bill, ''], ['Root EBS (8 GiB gp3)', S.ebs, S.ebs === 'deleted' ? 'bad' : '']];
+    $('lifeKpis').innerHTML = k.map(([l, v, c]) => `<div class="kpi ${c}"><b style="font-size:17px">${v}</b><span>${l}</span></div>`).join('');
+    $('bLaunch').disabled = S.state !== 'not launched' && S.state !== 'terminated';
+    $('bStop').disabled = S.state !== 'running';
+    $('bStart').disabled = S.state !== 'stopped';
+    $('bTerm').disabled = !(S.state === 'running' || S.state === 'stopped');
+  }
+  function busy() { ['bLaunch', 'bStop', 'bStart', 'bTerm'].forEach(id => $(id).disabled = true); }
+  async function launch() {
+    const run = K.newRun('life'); busy(); K.resetLog(log, 'Launching from the Amazon Linux 2023 AMI…');
+    Object.assign(S, { state: 'pending', pub: '…', priv: '172.31.20.5', bill: 'compute + EBS', ebs: 'attached', runs: 0 });
+    lines.forEach(l => l.classList.remove('on', 'done')); paint();
+    try {
+      await K.sleep(600, run);
+      S.pub = $('eip').checked ? '198.51.100.20 (EIP)' : nextPub(); S.state = 'running'; paint();
+      K.log(log, 'Instance running. First boot, so <b>user data starts</b> (as root).');
+      for (const l of lines) { l.classList.add('on'); await K.sleep(650, run); l.classList.remove('on'); l.classList.add('done'); }
+      S.runs = 1; paint();
+      K.log(log, `Website up at <span class="mono">http://${S.pub.split(' ')[0]}</span>. Note: the instance showed "running" before the script finished.`);
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+    paint();
+  }
+  async function stop() {
+    const run = K.newRun('life'); busy();
+    S.state = 'stopping'; paint();
+    try {
+      await K.sleep(600, run);
+      Object.assign(S, { state: 'stopped', pub: $('eip').checked ? S.pub : '–', bill: 'EBS only' + ($('eip').checked ? ' + Elastic IP' : '') });
+      K.log(log, $('eip').checked ? 'Stopped. The Elastic IP stays yours (billed hourly, like every public IPv4). EBS data kept.' : 'Stopped. Public IP released; root EBS volume and its data kept; no compute charge.');
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+    paint();
+  }
+  async function start() {
+    const run = K.newRun('life'); busy();
+    S.state = 'pending'; paint();
+    try {
+      await K.sleep(600, run);
+      Object.assign(S, { state: 'running', pub: $('eip').checked ? '198.51.100.20 (EIP)' : nextPub(), bill: 'compute + EBS' });
+      K.log(log, $('eip').checked ? 'Running again on the <b>same Elastic IP</b>. User data did <b>not</b> run again.' : `Running again with a <b>new public IP</b> (${S.pub}); old bookmarks break. Private IP unchanged. User data did <b>not</b> run again.`);
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+    paint();
+  }
+  async function term() {
+    const run = K.newRun('life'); busy();
+    S.state = 'shutting-down'; paint();
+    try {
+      await K.sleep(700, run);
+      Object.assign(S, { state: 'terminated', pub: '–', priv: '–', bill: 'nothing', ebs: 'deleted' });
+      K.log(log, 'Terminated: permanent. "Delete on termination" removed the root volume. Extra volumes and Elastic IPs would remain (and bill).');
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+    paint();
+  }
+  $('bLaunch').addEventListener('click', launch);
+  $('bStop').addEventListener('click', stop);
+  $('bStart').addEventListener('click', start);
+  $('bTerm').addEventListener('click', term);
+  $('eip').addEventListener('change', () => { if (S.state === 'running' || S.state === 'stopped') { S.pub = $('eip').checked ? '198.51.100.20 (EIP)' : (S.state === 'running' ? nextPub() : '–'); K.log(log, $('eip').checked ? 'Elastic IP associated: a static public IPv4 that survives stop/start.' : 'Elastic IP released.'); paint(); } });
+  paint();
+})();
+</script>
+</body>
+</html>

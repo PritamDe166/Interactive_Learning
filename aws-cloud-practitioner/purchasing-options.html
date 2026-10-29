@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EC2 Purchasing Options</title>
+<meta name="description" content="AWS Cloud Practitioner: pick the right EC2 pricing model for a workload, compare costs, and see why Spot jobs need checkpoints.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .q rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .q text { fill: var(--fg); font-size: 13.5px; font-weight: 600; text-anchor: middle; }
+  .q.on rect { stroke: var(--cyan); fill: var(--teal-wash); }
+  .q.no rect { opacity: .55; }
+  .out rect { fill: var(--panel-2); stroke: var(--line); stroke-width: 2; stroke-dasharray: 5 4; transition: all .2s; }
+  .out text { fill: var(--muted); font-size: 13px; font-weight: 600; text-anchor: middle; }
+  .out .sm { font-family: var(--mono); font-size: 10.5px; font-weight: 400; }
+  .out.hit rect { stroke: var(--accent-text); stroke-dasharray: none; fill: var(--panel); }
+  .out.hit text { fill: var(--fg); }
+  .yn { fill: var(--muted); font-family: var(--mono); font-size: 11px; }
+  .bars { display: grid; gap: 10px; margin-top: 14px; }
+  .bar { display: grid; grid-template-columns: minmax(0, 190px) 1fr minmax(0, 90px); gap: 10px; align-items: center; font-size: 14px; }
+  .bar .track { height: 22px; background: var(--panel-2); border-radius: 6px; overflow: hidden; }
+  .bar .fill { height: 100%; background: var(--cyan); border-radius: 6px; transition: width .35s; width: 0; }
+  .bar.best .fill { background: var(--teal); }
+  .bar.warn .fill { background: var(--yellow); }
+  .bar .amt { font-family: var(--mono); font-size: 13px; text-align: right; font-variant-numeric: tabular-nums; }
+  .bar .nm small { display: block; color: var(--muted); font-size: 11.5px; }
+  @media (max-width: 560px) { .bar { grid-template-columns: 1fr 70px; } .bar .track { grid-column: 1 / -1; grid-row: 2; } }
+  .prog-bg { fill: var(--panel-2); }
+  .prog { fill: var(--teal); }
+  .ckpt { stroke: var(--accent-text); stroke-width: 2; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · Section 5 · Domains 3 &amp; 4 (Tasks 3.3, 4.1)</div>
+    <h1>EC2 Purchasing Options</h1>
+    <ul class="lede">
+      <li>Same instance, different <b>price models</b>: you trade flexibility for discount.</li>
+      <li><b>On-Demand</b>: no commitment, full price.</li>
+      <li><b>Reserved Instances / Savings Plans</b>: commit for 1 or 3 years, save up to ~72%.</li>
+      <li><b>Spot</b>: spare capacity, up to ~90% off, but AWS can take it back.</li>
+      <li><b>Dedicated</b> and <b>Capacity Reservations</b> solve isolation and capacity, not price.</li>
+    </ul>
+  </header>
+
+  <section aria-labelledby="treeH">
+    <h2 class="stage-title" id="treeH">Which option fits this workload?</h2>
+    <div class="stage-kind">Pick a workload · it walks the decision path</div>
+    <div class="chips" id="wlChips"></div>
+    <div class="scroll">
+      <svg class="diagram" id="tree" viewBox="0 0 1000 456" aria-label="Decision path of five questions leading to a purchasing option"></svg>
+    </div>
+    <p class="status-line" id="treeStatus">Pick a workload.</p>
+  </section>
+
+  <section aria-labelledby="costH">
+    <h2 class="stage-title" id="costH">What does a year cost?</h2>
+    <div class="stage-kind">One m7i.large-sized server · illustrative prices</div>
+    <div class="ranges">
+      <div class="range"><label for="hrs">Hours used per day <output id="hrsO"></output></label><input type="range" id="hrs" min="1" max="24" value="24"></div>
+      <div class="range"><label for="mon">Months you actually need it <output id="monO"></output></label><input type="range" id="mon" min="1" max="12" value="12"></div>
+    </div>
+    <div class="bars" id="bars"></div>
+    <p class="status-line" id="costStatus"></p>
+  </section>
+
+  <section aria-labelledby="spotH">
+    <h2 class="stage-title" id="spotH">A Spot job gets interrupted</h2>
+    <div class="stage-kind">Start the job, then reclaim the instance mid-way</div>
+    <div class="controls">
+      <button class="btn primary" type="button" id="spotRun">Start 4-hour video transcode</button>
+      <button class="btn" type="button" id="spotKill" disabled>AWS reclaims the capacity</button>
+      <label class="toggle" for="ckpt"><input type="checkbox" id="ckpt" checked> Save a checkpoint to S3 every 25%</label>
+    </div>
+    <div class="scroll">
+      <svg class="diagram narrow" id="spot" viewBox="0 0 1000 220" aria-label="A Spot worker processing a job, with a progress bar and checkpoints"></svg>
+    </div>
+    <p class="status-line" id="spotStatus">Spot is cheap because it is interruptible. The design question is how much work you lose.</p>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">All eight at a glance</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Option</th><th>Commitment</th><th>Discount vs On-Demand</th><th>Use when</th></tr></thead>
+        <tbody>
+          <tr><td><b>On-Demand</b></td><td>None; per-second billing (Linux/Windows, 60 s minimum)</td><td>–</td><td>Short, spiky, unpredictable, can't be interrupted</td></tr>
+          <tr><td><b>Reserved Instance</b> (Standard)</td><td>1 or 3 years; No / Partial / All Upfront</td><td>Up to ~72%</td><td>Steady 24/7 workloads, e.g. a database</td></tr>
+          <tr><td><b>Convertible RI</b></td><td>1 or 3 years; can exchange type, family, OS</td><td>Up to ~66%</td><td>Long-term, but the instance type may change</td></tr>
+          <tr><td><b>Savings Plan</b></td><td>$ per hour for 1 or 3 years; extra usage at On-Demand</td><td>Up to ~72% (EC2 Instance) / ~66% (Compute)</td><td>Steady spend; Compute SP also covers Fargate and Lambda</td></tr>
+          <tr><td><b>Spot</b></td><td>None; can be reclaimed with a 2-minute warning</td><td>Up to ~90%</td><td>Batch, CI, image/video processing, stateless workers</td></tr>
+          <tr><td><b>Dedicated Host</b></td><td>On-Demand or 1/3-year reservation</td><td>– (most expensive)</td><td>BYOL per socket/core, compliance, host placement control</td></tr>
+          <tr><td><b>Dedicated Instance</b></td><td>None</td><td>–</td><td>Hardware not shared with other customers, no host management</td></tr>
+          <tr><td><b>Capacity Reservation</b></td><td>Any duration, one AZ, cancel anytime</td><td>None: billed even if unused</td><td>Must be able to launch in a specific AZ (e.g. a sale weekend)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cards" style="margin-top:14px">
+      <div class="card"><h3>Resort analogy</h3><p><b>On-Demand</b> = walk in, full price. <b>Reserved</b> = book a specific room for a year. <b>Savings Plan</b> = commit to spend $X/night, any room. <b>Spot</b> = last-minute deal, can be bumped. <b>Dedicated Host</b> = rent the whole building. <b>Capacity Reservation</b> = pay to hold a room even if you don't come.</p></div>
+      <div class="card"><h3>Host vs Instance</h3><p>Both keep other customers off your hardware. Only a <b>Dedicated Host</b> gives you the whole physical server, visibility of sockets and cores, and control over placement: that's what per-core licences (Oracle, Windows Server) need.</p></div>
+      <div class="card"><h3>Who patches what?</h3><p>Pricing doesn't change the split: AWS runs the hosts, you run the OS, software, security groups and data. See <a href="shared-responsibility.html">Shared Responsibility</a>.</p></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>Spot gives a 2-minute interruption notice</b> (via instance metadata and EventBridge). Use it to checkpoint and drain. Spread Spot across many instance types and AZs (EC2 Fleet / Auto Scaling mixed instances) to lower the chance of losing everything at once.</p></div>
+      <div class="note"><span class="flag">Updated</span><p><b>You don't "bid" for Spot any more.</b> You pay the current Spot price, which moves slowly; interruptions happen mainly when AWS needs the capacity back. A maximum price is optional and defaults to the On-Demand price.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Only Standard RIs can be sold</b> on the Reserved Instance Marketplace; Convertible RIs can't. AWS now generally recommends <b>Savings Plans</b> over RIs for EC2 because they apply automatically across sizes, OSs and (Compute SP) services.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Discount percentages are AWS's "up to" figures</b> and vary by instance type, Region, term and upfront payment. The exam tests the ranking (Spot &gt; RI ≈ Savings Plans &gt; On-Demand), not exact numbers.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>A database must run 24/7 for the next 3 years. Cheapest suitable option?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>3-year Reserved Instance</b> (All Upfront for the deepest discount), or an EC2 Instance Savings Plan.</p></div></details>
+      <details><summary>Nightly batch jobs that can restart. Which option?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Spot Instances.</b> Up to ~90% cheaper; design the job to checkpoint and retry.</p></div></details>
+      <details><summary>Your licence is billed per physical CPU core. What do you need?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Dedicated Host</b>: it exposes sockets and cores and lets you control placement (BYOL).</p></div></details>
+      <details><summary>Does a Capacity Reservation give a discount?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>No.</b> It guarantees capacity in one AZ at On-Demand price, charged even if you launch nothing.</p></div></details>
+      <details><summary>You'll move part of your EC2 workload to Fargate and Lambda next year. Which commitment still applies?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Compute Savings Plan</b>: it covers EC2 (any family, Region, OS), Fargate and Lambda.</p></div></details>
+      <details><summary>Standard vs Convertible RI: what do you trade?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Convertible lets you <b>exchange</b> to a different family, OS or tenancy, for a <b>smaller discount</b>.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Prices in the cost stage are illustrative ratios, not a quote: real rates vary by Region, instance and payment option. "Up to" discounts from AWS pricing pages, checked October 2026. Sources: EC2 notes (EC2 Instance Purchasing Options, Shared Responsibility model for EC2).</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  /* ========== 1. Decision path ========== */
+  const QS = [
+    { k: 'ded', t: 'Need isolated hardware or per-core licensing?', y: 50 },
+    { k: 'cap', t: 'Must guarantee capacity in one AZ, short term?', y: 130 },
+    { k: 'int', t: 'Can the job be interrupted and resumed?', y: 210 },
+    { k: 'var', t: 'Short-term or unpredictable usage?', y: 290 },
+    { k: 'fix', t: 'Can you fix instance family + Region for 1–3 yrs?', y: 370 }
+  ];
+  const OUTS = {
+    host: { t: 'Dedicated Host', s: 'whole server · BYOL', x: 790, y: 32 },
+    dinst: { t: 'Dedicated Instance', s: 'isolation only', x: 790, y: 72 },
+    cap: { t: 'Capacity Reservation', s: 'no discount', x: 790, y: 130 },
+    spot: { t: 'Spot Instances', s: 'up to ~90% off', x: 790, y: 210 },
+    od: { t: 'On-Demand', s: 'no commitment', x: 790, y: 290 },
+    ri: { t: 'Reserved Instance / EC2 Instance SP', s: 'up to ~72% off', x: 790, y: 370 },
+    csp: { t: 'Compute Savings Plan', s: 'any family · Fargate · Lambda', x: 330, y: 428 }
+  };
+  const tree = $('tree');
+  const qEl = {}, oEl = {};
+  QS.forEach((q, i) => {
+    if (i < QS.length - 1) { K.el('line', { x1: 330, y1: q.y + 24, x2: 330, y2: QS[i + 1].y - 24, class: 'msg solid' }, tree); K.text(tree, 340, q.y + 45, 'no', 'yn'); }
+    const g = K.el('g', { class: 'q' }, tree);
+    K.el('rect', { x: 110, y: q.y - 24, width: 440, height: 48, rx: 12 }, g);
+    K.text(g, 330, q.y + 5, q.t, '');
+    qEl[q.k] = g;
+  });
+  K.el('line', { x1: 330, y1: 394, x2: 330, y2: 403, class: 'msg solid' }, tree);
+  const yesLine = (y1, y2) => { K.el('path', { d: `M550 ${y1} C 590 ${y1}, 600 ${y2}, 640 ${y2}`, class: 'msg solid', fill: 'none' }, tree); };
+  yesLine(50, 32); yesLine(50, 72); yesLine(130, 130); yesLine(210, 210); yesLine(290, 290); yesLine(370, 370);
+  K.text(tree, 560, 44, 'yes', 'yn'); [130, 210, 290, 370].forEach(y => K.text(tree, 564, y - 6, 'yes', 'yn'));
+  for (const k in OUTS) {
+    const o = OUTS[k], w = k === 'ri' ? 340 : k === 'csp' ? 300 : 300;
+    const g = K.el('g', { class: 'out' }, tree);
+    const h = (k === 'host' || k === 'dinst') ? 34 : 44;
+    K.el('rect', { x: o.x - w / 2, y: o.y - h / 2, width: w, height: h, rx: 10 }, g);
+    if (h === 34) { K.text(g, o.x, o.y + 5, `${o.t} · ${o.s}`, ''); }
+    else { K.text(g, o.x, o.y - 2, o.t, ''); K.text(g, o.x, o.y + 14, o.s, 'sm'); }
+    oEl[k] = g;
+  }
+  const tP = K.el('g', {}, tree);
+  const WL = [
+    { n: 'Patient DB, 24/7 for 3 years', a: { ded: 0, cap: 0, int: 0, var: 0, fix: 1 }, out: 'ri', why: 'Steady and predictable on a fixed instance family: commit for the deepest discount.' },
+    { n: 'Nightly scan-image resizing', a: { ded: 0, cap: 0, int: 1 }, out: 'spot', why: 'The batch can restart, so cheap interruptible capacity wins.' },
+    { n: '2-week vaccination drive spike', a: { ded: 0, cap: 0, int: 0, var: 1 }, out: 'od', why: 'Short and unpredictable: no commitment to pay off.' },
+    { n: 'Oracle licensed per core, audited', a: { ded: 1 }, out: 'host', why: 'Per-core BYOL and compliance need the whole server and its core count.' },
+    { n: 'Isolation from other tenants only', a: { ded: 1 }, out: 'dinst', why: 'Hardware not shared with other customers, without managing a host.' },
+    { n: 'Diwali sale weekend in ap-south-1a', a: { ded: 0, cap: 1 }, out: 'cap', why: 'Capacity must be there in that AZ; you pay On-Demand even if unused.' },
+    { n: 'Steady spend, moving to Fargate', a: { ded: 0, cap: 0, int: 0, var: 0, fix: 0 }, out: 'csp', why: 'Commit to $/hour; it follows you across families, Regions, Fargate and Lambda.' }
+  ];
+  $('wlChips').innerHTML = WL.map((w, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${w.n}</button>`).join('');
+  async function walk(w) {
+    const run = K.newRun('tree');
+    tP.textContent = '';
+    Object.values(qEl).forEach(g => g.setAttribute('class', 'q'));
+    Object.values(oEl).forEach(g => g.setAttribute('class', 'out'));
+    $('treeStatus').textContent = 'Walking the questions…';
+    const p = K.pill(tP, w.n.length > 22 ? w.n.slice(0, 21) + '…' : w.n);
+    let y = 10;
+    try {
+      for (const q of QS) {
+        if (!(q.k in w.a)) break;
+        await K.move(p, [330, y], [330, q.y - 34], 380, run);
+        y = q.y - 34;
+        qEl[q.k].classList.add('on');
+        await K.sleep(450, run);
+        qEl[q.k].classList.remove('on');
+        if (w.a[q.k]) break;
+        qEl[q.k].classList.add('no');
+      }
+      const o = OUTS[w.out];
+      await K.move(p, [330, y], [o.x, o.y - 34], 550, run);
+      p.remove();
+      oEl[w.out].classList.add('hit');
+      $('treeStatus').innerHTML = `<b>${o.t}</b>. ${w.why}`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('wlChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('wlChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    walk(WL[+b.dataset.i]);
+  }));
+
+  /* ========== 2. Cost bars ========== */
+  const OD = 0.10; // $/hour, illustrative
+  const OPTS = [
+    { k: 'od', n: 'On-Demand', s: 'pay per second used', f: (h, m) => OD * h * 30 * m },
+    { k: 'sp', n: '1-yr Savings Plan', s: 'commit $/h for 12 months', f: (h, m) => OD * 0.62 * 24 * 365 },
+    { k: 'ri1', n: '1-yr RI, All Upfront', s: 'pay 24×365 regardless', f: (h, m) => OD * 0.58 * 24 * 365 },
+    { k: 'spot', n: 'Spot', s: 'if interruptions are OK', f: (h, m) => OD * 0.30 * h * 30 * m },
+    { k: 'cap', n: 'Capacity Reservation', s: '24/7 at On-Demand rate', f: (h, m) => OD * 24 * 30 * m }
+  ];
+  $('bars').innerHTML = OPTS.map(o => `<div class="bar" data-k="${o.k}"><div class="nm">${o.n}<small>${o.s}</small></div><div class="track"><div class="fill"></div></div><div class="amt"></div></div>`).join('');
+  function costs() {
+    const h = +$('hrs').value, m = +$('mon').value;
+    $('hrsO').textContent = h + ' h'; $('monO').textContent = m;
+    const vals = OPTS.map(o => ({ o, v: o.f(h, m) }));
+    const max = Math.max(...vals.map(x => x.v));
+    const noSpot = vals.filter(x => x.o.k !== 'spot' && x.o.k !== 'cap');
+    const best = noSpot.reduce((a, b) => b.v < a.v ? b : a);
+    vals.forEach(({ o, v }) => {
+      const row = $('bars').querySelector(`[data-k="${o.k}"]`);
+      row.querySelector('.fill').style.width = Math.max(2, v / max * 100) + '%';
+      row.querySelector('.amt').textContent = '$' + Math.round(v).toLocaleString('en-US');
+      row.classList.toggle('best', o === best.o);
+      row.classList.toggle('warn', o.k === 'spot' || o.k === 'cap');
+    });
+    $('costStatus').innerHTML = best.o.k === 'od'
+      ? `At ${h} h/day for ${m} month${m > 1 ? 's' : ''}, <b>On-Demand is cheapest</b> among the safe options: a 1-year commitment would be paid for idle time.`
+      : `At ${h} h/day for ${m} months, the <b>${best.o.n}</b> wins: steady usage pays the commitment back. Spot is lower still, if the work can be interrupted.`;
+  }
+  $('hrs').addEventListener('input', costs); $('mon').addEventListener('input', costs); costs();
+
+  /* ========== 3. Spot interruption ========== */
+  const sp = $('spot');
+  const X0 = 140, W = 720;
+  K.el('rect', { x: X0, y: 150, width: W, height: 22, rx: 6, class: 'prog-bg' }, sp);
+  const bar = K.el('rect', { x: X0, y: 150, width: 0, height: 22, rx: 6, class: 'prog' }, sp);
+  const ck = K.el('g', {}, sp);
+  [25, 50, 75].forEach(p => K.el('line', { x1: X0 + W * p / 100, y1: 144, x2: X0 + W * p / 100, y2: 178, class: 'ckpt' }, ck));
+  const pctT = K.text(sp, X0 + W + 20, 166, '0%', 'mlabel');
+  const worker = K.node(sp, 250, 70, 210, 60, 'Spot worker #1', 'c7g.xlarge · AZ a');
+  const s3 = K.node(sp, 760, 70, 190, 60, 'S3', 'checkpoints');
+  const spP = K.el('g', {}, sp);
+  let kill = false, wid = 1;
+  $('spotKill').addEventListener('click', () => { kill = true; $('spotKill').disabled = true; });
+  $('spotRun').addEventListener('click', async () => {
+    const run = K.newRun('spot');
+    kill = false; wid = 1; spP.textContent = '';
+    $('spotRun').disabled = true; $('spotKill').disabled = false;
+    worker.title.textContent = 'Spot worker #1'; worker.g.classList.remove('bad'); worker.g.classList.add('ok');
+    let p = 0, saved = 0, lost = 0;
+    const draw = () => { bar.setAttribute('width', W * p / 100); pctT.textContent = Math.round(p) + '%'; };
+    draw();
+    $('spotStatus').textContent = 'Transcoding…';
+    try {
+      while (p < 100) {
+        await K.sleep(140, run);
+        p = Math.min(100, p + 2); draw();
+        if ($('ckpt').checked && p % 25 === 0 && p < 100) {
+          saved = p;
+          const c = K.pill(spP, `checkpoint ${p}%`, 'alt');
+          await K.move(c, [355, 70], [665, 70], 450, run); c.remove();
+        }
+        if (kill) {
+          kill = false;
+          const n = K.pill(spP, '2-minute notice', 'bad');
+          await K.move(n, [500, 10], [250, 25], 500, run);
+          await K.sleep(700, run); n.remove();
+          worker.g.classList.remove('ok'); worker.g.classList.add('bad');
+          worker.sub.textContent = 'reclaimed by AWS';
+          await K.sleep(600, run);
+          const back = $('ckpt').checked ? saved : 0;
+          lost += p - back;
+          p = back; draw();
+          wid++;
+          worker.g.classList.remove('bad'); worker.g.classList.add('ok');
+          worker.title.textContent = `Spot worker #${wid}`; worker.sub.textContent = 'c7i.xlarge · AZ b (another pool)';
+          if ($('ckpt').checked && back > 0) {
+            const r = K.pill(spP, `resume from ${back}%`, 'ok');
+            await K.move(r, [665, 70], [355, 70], 500, run); r.remove();
+          }
+          $('spotStatus').innerHTML = back ? `Interrupted. The replacement resumes from the <b>${back}% checkpoint</b>.` : '<span class="bad-text">Interrupted with no checkpoint:</span> the replacement starts again from 0%.';
+          $('spotKill').disabled = false;
+        }
+      }
+      $('spotStatus').innerHTML = `Done on worker #${wid}. Work redone: <b>${lost}%</b> of the job. ${lost > 40 ? 'Checkpoints would have saved most of that.' : 'Still far cheaper than On-Demand.'}`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+    $('spotRun').disabled = false; $('spotKill').disabled = true;
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IAM: Users, Groups, Policies & Roles</title>
+<meta name="description" content="AWS Cloud Practitioner: how IAM users inherit permissions from groups, how AWS decides allow or deny, and why EC2 should use a role instead of access keys.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .grp rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .grp.on rect { stroke: var(--cyan); fill: var(--teal-wash); }
+  .grp text { fill: var(--fg); font-weight: 600; font-size: 14px; text-anchor: middle; }
+  .usr { cursor: pointer; }
+  .usr rect { fill: var(--pill); transition: opacity .2s; }
+  .usr text { fill: var(--ink); font-weight: 700; font-size: 13px; text-anchor: middle; }
+  .usr.dim rect { opacity: .35; }
+  .usr:focus-visible rect { stroke: var(--fg); stroke-width: 3; }
+  .member { stroke: var(--faint); stroke-width: 1.5; transition: stroke .2s, stroke-width .2s; }
+  .member.on { stroke: var(--cyan); stroke-width: 3; }
+  .policy-list { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 6px; font-family: var(--mono); font-size: 12.5px; }
+  .policy-list li { padding: 6px 10px; border-radius: 8px; background: var(--panel-2); }
+  .gate rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .gate text { fill: var(--fg); font-size: 13px; font-weight: 600; text-anchor: middle; }
+  .gate .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .gate.on rect { stroke: var(--cyan); fill: var(--teal-wash); }
+  .gate.pass rect { stroke: var(--teal); }
+  .gate.stop rect { stroke: var(--red); }
+  .gate.off { opacity: .4; }
+  .ptoggles { display: grid; gap: 8px; }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .ptoggles code { font-size: 11.5px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · Section 3 · Domain 2 Security &amp; Compliance (Task 2.3)</div>
+    <h1>IAM: Users, Groups, Policies &amp; Roles</h1>
+    <ul class="lede"><li><b>IAM decides who can do what</b> in your account. Global and free.</li><li><b>Users</b>: people or apps with long-term credentials. <b>Groups</b>: hand permissions to many users at once.</li><li><b>Policies</b>: JSON documents that allow or deny API actions.</li><li><b>Roles</b>: temporary credentials for whoever assumes them, such as an EC2 instance.</li><li>Everything starts at <b>deny</b>.</li></ul>
+  </header>
+
+  <section aria-labelledby="grpTitle">
+    <h2 class="stage-title" id="grpTitle">Users inherit from groups</h2>
+    <div class="stage-kind">Click a user · their groups light up</div>
+    <div class="scroll">
+      <svg class="diagram narrow" id="grp" viewBox="0 0 1000 260" aria-label="Five users and three groups; users can belong to several groups"></svg>
+    </div>
+    <div class="info-grid">
+      <div class="card"><div class="label">Effective permissions for <span id="uName">Charles</span></div><ul class="policy-list" id="uPerms"></ul></div>
+      <div class="card facts">
+        <div><div class="label">Rules</div><p>A user can be in <b>several groups</b> and gets the union of their policies. Groups contain <b>users only</b>, never other groups. Prefer attaching policies to groups rather than to individual users.</p></div>
+        <div><div class="label">Root user</div><p>Created with the account, has full access, and can't be restricted by IAM policies. Use it only for root-only tasks, protect it with MFA, and never create root access keys.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="evalTitle">
+    <h2 class="stage-title" id="evalTitle">Allow or deny? How AWS decides</h2>
+    <div class="stage-kind">User Charles · pick policies, then send an API call</div>
+    <div class="two">
+      <div class="card">
+        <div class="label">Policies in play</div>
+        <div class="ptoggles">
+          <label class="toggle" for="pDev"><input type="checkbox" id="pDev" checked> Developers group: <code>Allow s3:* on patient-images/*</code></label>
+          <label class="toggle" for="pAudit"><input type="checkbox" id="pAudit" checked> Audit group: <code>Allow s3:Get*, s3:List* on *</code></label>
+          <label class="toggle" for="pDeny"><input type="checkbox" id="pDeny"> Guard policy: <code>Deny s3:DeleteObject</code></label>
+          <label class="toggle" for="pMfa"><input type="checkbox" id="pMfa"> Condition: deletes need <code>aws:MultiFactorAuthPresent</code></label>
+          <label class="toggle" for="pScp"><input type="checkbox" id="pScp"> Organizations SCP: allow only <code>s3:*</code> and <code>ec2:Describe*</code></label>
+          <label class="toggle" for="hasMfa"><input type="checkbox" id="hasMfa"> Charles signed in with MFA</label>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">Send a request</div>
+        <div class="chips" id="reqChips"></div>
+        <p class="status-line" id="evalResult" style="text-align:left;margin-top:12px">Pick a request.</p>
+      </div>
+    </div>
+    <div class="scroll">
+      <svg class="diagram" id="eval" viewBox="0 0 1000 230" aria-label="Request passes through evaluation gates: explicit deny, SCP guardrail, allow, default deny"></svg>
+    </div>
+    <div class="note"><span class="flag add">Rule of thumb</span><p><b>Explicit Deny always wins. An SCP or permissions boundary only <i>limits</i>; it never grants. Without any Allow, the answer is the default (implicit) deny.</b></p></div>
+  </section>
+
+  <section aria-labelledby="roleTitle">
+    <h2 class="stage-title" id="roleTitle">EC2 needs S3: access keys or a role?</h2>
+    <div class="stage-kind">Then leak the credentials and try again a week later</div>
+    <div class="controls">
+      <div class="seg" id="credSeg" role="group" aria-label="Credential type">
+        <button type="button" data-v="keys" aria-pressed="true">Access keys stored on the server</button>
+        <button type="button" data-v="role" aria-pressed="false">IAM role (instance profile)</button>
+      </div>
+      <button class="btn primary" id="roleRun" type="button">App reads from S3</button>
+      <button class="btn" id="leakRun" type="button">Attacker reuses leaked credentials a week later</button>
+    </div>
+    <div class="scroll">
+      <svg class="diagram" id="role" viewBox="0 0 1000 250" aria-label="EC2 instance obtains credentials and calls S3; an attacker tries reusing leaked credentials"></svg>
+    </div>
+    <p class="status-line" id="roleStatus"></p>
+  </section>
+
+  <section aria-labelledby="secH">
+    <h2 id="secH">Securing IAM</h2>
+    <div class="cards">
+      <div class="card"><h3>MFA</h3><p>Password + something you have. Options: <b>passkeys and security keys</b> (phishing-resistant, preferred), <b>virtual authenticator apps</b>, <b>hardware TOTP tokens</b>. Up to 8 devices per user.</p></div>
+      <div class="card"><h3>Password policy</h3><p>Minimum length (6–128), character types, expiry (1–1,095 days), prevent reuse (up to 24). Doesn't apply to root or to access keys; there is no lockout policy.</p></div>
+      <div class="card"><h3>Access keys</h3><p>Access key ID + secret, for the CLI and SDKs. Max two per user (for rotation). Never put them in code or Git; prefer roles and temporary credentials.</p></div>
+    </div>
+    <div class="scroll card table-card" style="margin-top:14px">
+      <table>
+        <thead><tr><th>Tool</th><th>Scope</th><th>Answers</th><th>Output</th></tr></thead>
+        <tbody>
+          <tr><td>Credential report</td><td>Whole account</td><td>Who lacks MFA? Whose keys or passwords are old?</td><td>CSV, regenerated at most every 4 hours</td></tr>
+          <tr><td>Access Advisor (last accessed)</td><td>A user, group, role or policy</td><td>Which services were used, and when? Which permissions can go?</td><td>Console / API, 400+ days of history</td></tr>
+          <tr><td>IAM Access Analyzer</td><td>Account or organisation</td><td>What is shared publicly or with other accounts?</td><td>Findings</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="scroll card table-card" style="margin-top:14px">
+      <table>
+        <thead><tr><th>Only the root user can…</th></tr></thead>
+        <tbody>
+          <tr><td>Change the account's root email, root password or root access keys; close the account</td></tr>
+          <tr><td>Restore IAM permissions when the only admin locked themselves out</td></tr>
+          <tr><td>Activate IAM access to Billing; view certain tax invoices</td></tr>
+          <tr><td>Register as a seller in the Reserved Instance Marketplace; configure S3 MFA Delete</td></tr>
+          <tr><td>Edit or delete an S3 bucket policy that denies all principals; sign up for AWS GovCloud (US)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>SMS text messages are no longer an MFA option</b>: AWS ended support for enabling them. Older course material still lists SMS.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>Access Advisor isn't user-only.</b> It shows last-accessed data for users, groups, roles and policies, and covers identity-based policies only (not SCPs or resource policies).</p></div>
+      <div class="note"><span class="flag">Updated</span><p><b>"One IAM user per person" is no longer AWS's first choice for people.</b> Current best practice: humans sign in through <b>IAM Identity Center</b> (single sign-on, temporary credentials); workloads use <b>roles</b>; IAM users only where neither fits. For the exam, if Identity Center is an option for workforce access, it's usually right.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Three ways to call AWS</b>, all checked by the same IAM permissions: the <b>Management Console</b> (browser), the <b>AWS CLI</b> (terminal) and the <b>SDKs</b> (code). Store secrets in <b>Secrets Manager</b> or <b>Parameter Store</b>, not in code. <b>CloudShell</b> is handy for labs but out of exam scope.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>A policy allows <span class="mono">s3:*</span> and another denies <span class="mono">s3:DeleteObject</span>. Can the user delete?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>No.</b> An explicit Deny overrides any Allow.</p></div></details>
+      <details><summary>An app on EC2 must read a bucket. Most secure way to give it access?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Attach an IAM role</b> to the instance. It gets temporary credentials that rotate automatically; no keys on disk.</p></div></details>
+      <details><summary>Can an IAM group contain another group?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>No.</b> Groups contain users only. A user can belong to several groups.</p></div></details>
+      <details><summary>Which tool shows which users have no MFA and old access keys?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>IAM credential report</b> (account-wide CSV). Access Advisor is about services used.</p></div></details>
+      <details><summary>An SCP allows S3 but no IAM policy allows it for the user. Result?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Denied.</b> SCPs only set the maximum; something must still grant the action.</p></div></details>
+      <details><summary>Which policy element names <i>who</i> the policy applies to, and where do you see it?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Principal</b>, in resource-based policies such as S3 bucket policies. Identity-based policies leave it out because the identity is implied.</p></div></details>
+    </div>
+  </section>
+
+  <footer>The evaluation flow is simplified for the exam (it omits session policies and permission boundaries). Sources: IAM notes (Introduction, Users and Groups, Policy Structure, Policies Hands-On, Access Keys/CLI/SDK, Roles, Security Tools, Best Practices, Section Summary) and "IAM: CLF-C02 Exam Summary". Two pages containing credentials were deliberately not read.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  /* ========== Groups ========== */
+  const GROUPS = { dev: { name: 'Developers', x: 200, perms: ['Allow s3:* on patient-images/*', 'Allow ec2:Describe*'] }, ops: { name: 'Operations', x: 500, perms: ['Allow ec2:* (start, stop, terminate)', 'Allow cloudwatch:*'] }, audit: { name: 'Audit', x: 800, perms: ['Allow s3:Get*, s3:List* on *', 'Allow cloudtrail:LookupEvents'] } };
+  const USERS = [
+    { n: 'Alice', g: ['dev'], x: 100 }, { n: 'Bob', g: ['dev'], x: 280 }, { n: 'Charles', g: ['dev', 'audit'], x: 460 },
+    { n: 'David', g: ['ops', 'audit'], x: 640 }, { n: 'Edward', g: ['ops'], x: 820 }
+  ];
+  const gsvg = $('grp');
+  const lines = [];
+  USERS.forEach(u => u.g.forEach(g => lines.push({ u: u.n, g, el: K.el('line', { x1: u.x + 40, y1: 190, x2: GROUPS[g].x, y2: 82, class: 'member' }, gsvg) })));
+  const gEls = {};
+  for (const k in GROUPS) {
+    const g = K.el('g', { class: 'grp' }, gsvg);
+    K.el('rect', { x: GROUPS[k].x - 110, y: 30, width: 220, height: 52, rx: 12 }, g);
+    K.text(g, GROUPS[k].x, 61, `${GROUPS[k].name} group`, '');
+    gEls[k] = g;
+  }
+  const uEls = USERS.map(u => {
+    const g = K.el('g', { class: 'usr', tabindex: '0', role: 'button', 'aria-label': u.n }, gsvg);
+    K.el('rect', { x: u.x, y: 190, width: 80, height: 40, rx: 10 }, g);
+    K.text(g, u.x + 40, 215, u.n, '');
+    g.addEventListener('click', () => pickUser(u));
+    g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pickUser(u); } });
+    return { u, g };
+  });
+  function pickUser(u) {
+    uEls.forEach(x => x.g.classList.toggle('dim', x.u !== u));
+    for (const k in gEls) gEls[k].classList.toggle('on', u.g.includes(k));
+    lines.forEach(l => l.el.classList.toggle('on', l.u === u.n));
+    $('uName').textContent = u.n;
+    $('uPerms').innerHTML = u.g.flatMap(g => GROUPS[g].perms.map(p => `<li>${p} <span class="mlabel muted" style="color:var(--muted)">· from ${GROUPS[g].name}</span></li>`)).join('');
+  }
+  pickUser(USERS[2]);
+
+  /* ========== Evaluation ========== */
+  const REQS = [
+    { k: 'get', a: 's3:GetObject', r: 'patient-images/scan-17.png' },
+    { k: 'put', a: 's3:PutObject', r: 'patient-images/scan-18.png' },
+    { k: 'del', a: 's3:DeleteObject', r: 'patient-images/scan-17.png' },
+    { k: 'list', a: 's3:ListBucket', r: 'billing-reports' },
+    { k: 'term', a: 'ec2:TerminateInstances', r: 'i-0abc123' },
+    { k: 'iam', a: 'iam:CreateUser', r: 'new-user' }
+  ];
+  $('reqChips').innerHTML = REQS.map(r => `<button class="chip-btn" type="button" data-k="${r.k}" aria-pressed="false">${r.a}</button>`).join('');
+  const ev = $('eval');
+  const GATES = [
+    { k: 'deny', x: 190, t: 'Explicit Deny?', s: 'any policy says Deny' },
+    { k: 'scp', x: 420, t: 'Inside SCP guardrail?', s: 'Organizations limit' },
+    { k: 'allow', x: 650, t: 'Any Allow?', s: 'identity or resource policy' },
+    { k: 'def', x: 870, t: 'Default deny', s: 'nothing allowed it' }
+  ];
+  const gateEls = {};
+  GATES.forEach((g, i) => {
+    const el = K.el('g', { class: 'gate' }, ev);
+    K.el('rect', { x: g.x - 95, y: 60, width: 190, height: 70, rx: 12 }, el);
+    K.text(el, g.x, 90, g.t, '');
+    K.text(el, g.x, 112, g.s, 'sm');
+    gateEls[g.k] = el;
+    if (i < GATES.length - 1) K.el('line', { x1: g.x + 95, y1: 95, x2: GATES[i + 1].x - 95, y2: 95, class: 'msg solid' }, ev);
+  });
+  K.text(ev, 40, 99, 'request', 'mlabel muted');
+  const evP = K.el('g', {}, ev);
+  function matches(policy, a, r) {
+    if (policy === 'dev') return a.startsWith('s3:') && r.startsWith('patient-images');
+    if (policy === 'audit') return /^s3:(Get|List)/.test(a);
+    return false;
+  }
+  async function evaluate(req) {
+    const run = K.newRun('eval');
+    evP.textContent = '';
+    Object.values(gateEls).forEach(g => g.setAttribute('class', 'gate'));
+    const scpOn = $('pScp').checked;
+    if (!scpOn) gateEls.scp.classList.add('off');
+    const a = req.a, r = req.r;
+    const explicitDeny = ($('pDeny').checked && a === 's3:DeleteObject') || ($('pMfa').checked && a === 's3:DeleteObject' && !$('hasMfa').checked);
+    const inScp = !scpOn || a.startsWith('s3:') || a.startsWith('ec2:Describe');
+    const allows = [];
+    if ($('pDev').checked && matches('dev', a, r)) allows.push('Developers group');
+    if ($('pAudit').checked && matches('audit', a, r)) allows.push('Audit group');
+    const res = $('evalResult');
+    res.textContent = 'Evaluating…';
+    const p = K.pill(evP, a);
+    try {
+      await K.move(p, [40, 60], [190, 60], 400, run);
+      gateEls.deny.classList.add('on'); await K.sleep(500, run); gateEls.deny.classList.remove('on');
+      if (explicitDeny) {
+        gateEls.deny.classList.add('stop'); p.remove();
+        const why = $('pDeny').checked ? 'the guard policy explicitly denies s3:DeleteObject' : 'the MFA condition denies deletes without MFA';
+        res.innerHTML = `<span class="bad-text">DENIED</span>: ${why}. An explicit Deny beats every Allow.`;
+        return;
+      }
+      gateEls.deny.classList.add('pass');
+      if (scpOn) {
+        await K.move(p, [190, 60], [420, 60], 450, run);
+        gateEls.scp.classList.add('on'); await K.sleep(500, run); gateEls.scp.classList.remove('on');
+        if (!inScp) { gateEls.scp.classList.add('stop'); p.remove(); res.innerHTML = `<span class="bad-text">DENIED</span> by the SCP: ${a} is outside the organisation's guardrail, whatever IAM says.`; return; }
+        gateEls.scp.classList.add('pass');
+      }
+      await K.move(p, [scpOn ? 420 : 190, 60], [650, 60], 450, run);
+      gateEls.allow.classList.add('on'); await K.sleep(500, run); gateEls.allow.classList.remove('on');
+      if (allows.length) { gateEls.allow.classList.add('pass'); p.remove(); const ok = K.pill(evP, 'ALLOWED', 'ok'); await K.move(ok, [650, 60], [650, 175], 350, run); res.innerHTML = `<span class="ok-text">ALLOWED</span> by the ${allows.join(' and ')} polic${allows.length > 1 ? 'ies' : 'y'}.`; return; }
+      gateEls.allow.classList.add('stop');
+      await K.move(p, [650, 60], [870, 60], 400, run);
+      gateEls.def.classList.add('stop'); p.remove();
+      res.innerHTML = `<span class="bad-text">DENIED</span> by default: no policy allows ${a}${scpOn && inScp ? ' (the SCP permits it, but SCPs never grant)' : ''}.`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('reqChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('reqChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    evaluate(REQS.find(r => r.k === b.dataset.k));
+  }));
+
+  /* ========== Role vs keys ========== */
+  const rs = $('role');
+  let mode = 'keys';
+  let N = {};
+  function drawRole() {
+    rs.textContent = '';
+    N.ec2 = K.node(rs, 140, 90, 200, 64, 'EC2 app server', mode === 'keys' ? '~/.aws/credentials on disk' : 'instance profile: S3ReadRole');
+    N.ec2.g.classList.add('solid');
+    N.sts = K.node(rs, 500, 90, 190, 64, 'AWS STS', mode === 'keys' ? 'not used' : 'issues temporary creds');
+    if (mode === 'keys') N.sts.g.classList.add('dim'); else N.sts.g.classList.add('teal');
+    N.s3 = K.node(rs, 860, 90, 190, 64, 'S3 bucket', 'patient-images');
+    N.atk = K.node(rs, 500, 205, 230, 56, 'Attacker, 7 days later', 'has a copy of the creds');
+    N.atk.g.classList.add('dim');
+    K.el('line', { x1: 240, y1: 90, x2: 405, y2: 90, class: 'msg ' + (mode === 'keys' ? 'dash' : 'solid') }, rs);
+    K.el('line', { x1: 595, y1: 90, x2: 765, y2: 90, class: 'msg solid' }, rs);
+    K.el('line', { x1: 615, y1: 200, x2: 790, y2: 122, class: 'msg dash' }, rs);
+    N.p = K.el('g', {}, rs);
+    $('roleStatus').innerHTML = mode === 'keys' ? 'Long-term keys sit on the disk. They never expire on their own.' : 'The instance asks STS for short-lived credentials via its role. Nothing secret is stored.';
+  }
+  async function appRead() {
+    const run = K.newRun('role'); drawRole();
+    try {
+      if (mode === 'keys') {
+        const p = K.pill(N.p, 'GetObject + AKIA… key'); await K.move(p, [240, 70], [765, 70], 900, run); p.remove();
+      } else {
+        let p = K.pill(N.p, 'AssumeRole'); await K.move(p, [240, 70], [405, 70], 450, run); p.remove();
+        p = K.pill(N.p, 'temp creds · expire in 6 h', 'alt'); await K.move(p, [405, 112], [240, 112], 500, run); p.remove();
+        p = K.pill(N.p, 'GetObject + session token'); await K.move(p, [240, 70], [765, 70], 700, run); p.remove();
+      }
+      N.s3.g.classList.add('ok');
+      const ok = K.pill(N.p, '200 OK', 'ok'); await K.move(ok, [765, 112], [240, 112], 600, run); ok.remove();
+      $('roleStatus').innerHTML = 'Both work for the app. The difference shows when credentials leak →';
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  async function leak() {
+    const run = K.newRun('role'); drawRole();
+    N.atk.g.classList.remove('dim'); N.atk.g.classList.add('bad');
+    try {
+      const p = K.pill(N.p, mode === 'keys' ? 'GetObject + AKIA… key' : 'GetObject + expired token', 'bad');
+      await K.move(p, [615, 200], [790, 122], 700, run); p.remove();
+      if (mode === 'keys') {
+        N.s3.g.classList.add('bad');
+        const r = K.pill(N.p, '200 OK · data stolen', 'bad'); await K.move(r, [790, 122], [615, 200], 600, run); r.remove();
+        $('roleStatus').innerHTML = '<span class="bad-text">The leaked keys still work.</span> They stay valid until someone notices, deactivates and rotates them.';
+      } else {
+        N.s3.g.classList.add('ok');
+        const r = K.pill(N.p, '403 · ExpiredToken', 'ok'); await K.move(r, [790, 122], [615, 200], 600, run); r.remove();
+        $('roleStatus').innerHTML = '<span class="ok-text">Rejected.</span> Role credentials expired hours ago; the instance had already fetched fresh ones automatically.';
+      }
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  K.seg($('credSeg'), v => { mode = v; K.cancel('role'); drawRole(); });
+  $('roleRun').addEventListener('click', appRead);
+  $('leakRun').addEventListener('click', leak);
+  drawRole();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Containers &amp; Serverless</title>
+<meta name="description" content="AWS Cloud Practitioner: who manages what on EC2, ECS, Fargate and Lambda; how Lambda scales with events and what it costs; and how to pick a compute service.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .layer rect { stroke-width: 2; transition: fill .35s, stroke .35s; }
+  .layer.aws rect { fill: var(--teal-wash); stroke: var(--teal); }
+  .layer.you rect { fill: var(--panel); stroke: var(--accent-text); }
+  .layer text { fill: var(--fg); font-size: 14px; font-weight: 600; }
+  .layer .who { font-family: var(--mono); font-size: 11px; font-weight: 400; text-anchor: end; }
+  .layer.aws .who { fill: var(--good-text); }
+  .layer.you .who { fill: var(--accent-text); }
+  .env rect { fill: var(--panel-2); stroke: var(--line); stroke-width: 2; transition: fill .25s, stroke .25s, opacity .3s; }
+  .env.busy rect { fill: var(--teal-wash); stroke: var(--cyan); }
+  .env.cold rect { stroke: var(--yellow); }
+  .env text { fill: var(--fg); font-family: var(--mono); font-size: 10.5px; text-anchor: middle; }
+  .svc rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .svc text { fill: var(--fg); font-size: 13px; font-weight: 700; text-anchor: middle; }
+  .svc .sm { fill: var(--muted); font-family: var(--mono); font-size: 10.5px; font-weight: 400; }
+  .svc.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .svc.fade text { opacity: .45; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · Section 10 · Domains 1, 3 &amp; 4 (Tasks 3.3, 4.1)</div>
+    <h1>Containers &amp; Serverless</h1>
+    <ul class="lede">
+      <li><b>Containers</b> package an app with its dependencies. <b>ECR</b> stores the images; <b>ECS</b> (AWS's own) or <b>EKS</b> (Kubernetes) runs them.</li>
+      <li><b>Fargate</b> runs those containers with <b>no servers to manage</b>.</li>
+      <li><b>Lambda</b> runs short functions on events, scales automatically, and costs nothing when idle.</li>
+      <li><b>API Gateway</b> turns Lambda into an HTTP API. <b>Batch</b> runs long jobs; <b>Lightsail</b> is the simple fixed-price option.</li>
+    </ul>
+  </header>
+
+  <section aria-labelledby="stackH">
+    <h2 class="stage-title" id="stackH">Who manages what?</h2>
+    <div class="stage-kind">Move from EC2 to Lambda · the line slides up</div>
+    <div class="seg" id="stackSeg" role="group" aria-label="Compute option">
+      <button type="button" data-v="ec2" aria-pressed="false">EC2</button>
+      <button type="button" data-v="ecs" aria-pressed="true">ECS on EC2</button>
+      <button type="button" data-v="far" aria-pressed="false">ECS/EKS on Fargate</button>
+      <button type="button" data-v="lam" aria-pressed="false">Lambda</button>
+    </div>
+    <div class="scroll">
+      <svg class="diagram narrow" id="stack" viewBox="0 0 1000 380" aria-label="Seven layers from hardware to your code, coloured by who manages them"></svg>
+    </div>
+    <p class="status-line" id="stackStatus"></p>
+  </section>
+
+  <section aria-labelledby="lamH">
+    <h2 class="stage-title" id="lamH">Lambda: events in, functions out</h2>
+    <div class="stage-kind">Fire one event, or a burst · watch environments appear and vanish</div>
+    <div class="chips" id="evChips"></div>
+    <div class="scroll">
+      <svg class="diagram" id="lam" viewBox="0 0 1000 330" aria-label="Event sources on the left, Lambda execution environments in the middle, targets on the right"></svg>
+    </div>
+    <p class="status-line" id="lamStatus">Each event runs in an execution environment. A new one starts cold; warm ones are reused.</p>
+    <div class="ranges">
+      <div class="range"><label for="inv">Invocations per month <output id="invO"></output></label><input type="range" id="inv" min="0" max="40" value="6"></div>
+      <div class="range"><label for="mem">Memory <output id="memO"></output></label><input type="range" id="mem" min="0" max="6" value="2"></div>
+      <div class="range"><label for="dur">Average duration <output id="durO"></output></label><input type="range" id="dur" min="1" max="60" value="4"></div>
+    </div>
+    <div class="kpis" id="costK"></div>
+  </section>
+
+  <section aria-labelledby="pickH">
+    <h2 class="stage-title" id="pickH">Pick the compute service</h2>
+    <div class="stage-kind">Pick a scenario</div>
+    <div class="chips" id="scChips"></div>
+    <div class="scroll">
+      <svg class="diagram" id="pick" viewBox="0 0 1000 250" aria-label="Compute services from most control to least management"></svg>
+    </div>
+    <p class="status-line" id="pickStatus">Pick a scenario.</p>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>Lambda</th><th>Fargate</th><th>Batch</th><th>EC2</th></tr></thead>
+        <tbody>
+          <tr><td>Unit</td><td>Function</td><td>Container (task / pod)</td><td>Job (Docker image) in a queue</td><td>Virtual server</td></tr>
+          <tr><td>Time limit</td><td><b>15 min</b></td><td>None</td><td>None</td><td>None</td></tr>
+          <tr><td>Size</td><td>128 MB – 10 GB memory; /tmp 512 MB – 10 GB</td><td>vCPU + memory per task</td><td>Any instance type</td><td>Any instance type</td></tr>
+          <tr><td>Serverless?</td><td>Yes</td><td>Yes</td><td>No (managed; runs on EC2/Spot or Fargate)</td><td>No</td></tr>
+          <tr><td>You pay for</td><td>Requests + GB-seconds</td><td>vCPU + GB per second</td><td>The EC2/Spot/Fargate it uses</td><td>Instance time, idle or not</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cards" style="margin-top:14px">
+      <div class="card"><h3>API Gateway</h3><p>Managed, serverless front door for APIs: REST and WebSocket, authentication, <b>throttling</b>, <b>API keys</b>, monitoring. "Serverless API" = API Gateway + Lambda (+ DynamoDB).</p></div>
+      <div class="card"><h3>Lambda essentials</h3><p>Languages: Node.js, Python, Java, .NET, Ruby, plus custom runtimes. Permissions come from its <b>execution role</b>; logs go to <b>CloudWatch</b>. EventBridge schedule + Lambda = serverless cron.</p></div>
+      <div class="card"><h3>Lightsail</h3><p>Bundled server, storage, database and networking at a <b>fixed monthly price</b> for people new to cloud: WordPress, simple web apps, dev/test. No auto scaling. Usually the distractor.</p></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>$1 buys about 60,000 GB-seconds</b> of Lambda, not 600,000 ($0.0000166667 per GB-s on x86). Requests cost $0.20 per million. Free tier each month: 1M requests + 400,000 GB-seconds.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>Lightsail starts at $5/month with a public IPv4 address.</b> The $3.50 bundle is IPv6-only. Managed databases start at $15/month.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>"Serverless" ≠ "managed".</b> Batch and ECS on EC2 are managed but run on instances you pay for while they're up. Serverless (Lambda, Fargate, API Gateway, S3, DynamoDB) means no servers to see, automatic scaling, pay for use.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Newer options beyond exam scope:</b> ECS Managed Instances (AWS manages the EC2 for you), ECS Anywhere (on-premises), Lambda function URLs and Lambda Managed Instances. For the exam: Lambda max <b>15 minutes</b>, Kubernetes → <b>EKS</b>, "no servers for containers" → <b>Fargate</b>. Elastic Beanstalk is in <a href="deployment-iac.html">Deployment &amp; IaC</a>.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Run Docker containers without managing EC2 instances?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>AWS Fargate</b> (with ECS or EKS).</p></div></details>
+      <details><summary>The team already uses Kubernetes on-premises. Which AWS service?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Amazon EKS.</b> ECS is AWS's own orchestrator, not Kubernetes.</p></div></details>
+      <details><summary>Which two things make up Lambda's price?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Number of requests</b> and <b>duration × memory</b> (GB-seconds).</p></div></details>
+      <details><summary>A 3-hour nightly job in a Docker image. Lambda or Batch?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>AWS Batch</b>: Lambda stops at 15 minutes. Use Spot to make it cheap.</p></div></details>
+      <details><summary>Where do you store private container images?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Amazon ECR.</b></p></div></details>
+      <details><summary>How does a Lambda function get permission to write to DynamoDB?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Add the permission to its <b>IAM execution role</b>; never embed access keys.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Lambda prices are us-east-1 x86 list prices (checked October 2026) and exclude data transfer and other services. Animation timings are illustrative. Sources: Other Compute Services notes (Docker Fundamentals; ECS, Fargate and ECR; EKS; Introduction to Serverless; Lambda; API Gateway; Batch; Lightsail; Section Summary) and "Other Compute Services: CLF-C02 Exam Summary".</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  /* ========== 1. Stack ========== */
+  const LAYERS = ['Your code / function', 'Scaling & capacity', 'Container runtime & orchestration', 'Operating system & patches', 'Server instances (EC2)', 'Virtualisation', 'Physical hardware & data centre'];
+  const YOU = { ec2: 5, ecs: 4, far: 1, lam: 1 }; // how many top layers you manage (ECS: AWS runs the orchestrator, you run instances)
+  const MSG = {
+    ec2: 'EC2: you manage everything from the OS up, including installing a container runtime if you want one, and set up Auto Scaling yourself.',
+    ecs: 'ECS on EC2: AWS runs the orchestrator (placing, starting, stopping containers), but you still provision, patch and scale the EC2 instances.',
+    far: 'Fargate: you define the container image, CPU and memory. AWS runs the servers, OS and capacity. Serverless containers.',
+    lam: 'Lambda: you write the function and set memory. AWS handles everything else, including scaling each request and scaling to zero.'
+  };
+  const st = $('stack');
+  const lEls = LAYERS.map((n, i) => {
+    const y = 20 + i * 50;
+    const g = K.el('g', { class: 'layer aws' }, st);
+    K.el('rect', { x: 150, y, width: 700, height: 42, rx: 10 }, g);
+    K.text(g, 170, y + 27, n, '');
+    const who = K.text(g, 830, y + 27, '', 'who');
+    return { g, who };
+  });
+  function paintStack(v) {
+    const you = YOU[v];
+    lEls.forEach((l, i) => {
+      let mine;
+      if (v === 'ecs') mine = i === 0 || i === 1 || i === 3 || i === 4; // code, scaling, OS, instances; orchestration by AWS
+      else mine = i < you;
+      if (v === 'ec2') mine = i <= 4;
+      if (v === 'far' || v === 'lam') mine = i === 0;
+      l.g.setAttribute('class', 'layer ' + (mine ? 'you' : 'aws'));
+      l.who.textContent = mine ? 'YOU' : 'AWS';
+    });
+    if (v === 'far') lEls[1].who.textContent = 'AWS (you set CPU/RAM)';
+    if (v === 'lam') { lEls[1].who.textContent = 'AWS (you set memory)'; lEls[2].who.textContent = 'AWS (no containers to see)'; }
+    if (v === 'ec2') lEls[2].who.textContent = 'YOU (if any)';
+    $('stackStatus').textContent = MSG[v];
+  }
+  K.seg($('stackSeg'), paintStack); paintStack('ecs');
+
+  /* ========== 2. Lambda ========== */
+  const lm = $('lam');
+  K.el('rect', { x: 330, y: 20, width: 340, height: 290, rx: 14, class: 'zone' }, lm);
+  K.text(lm, 342, 40, 'LAMBDA · execution environments', 'zone-label');
+  const SRC = { s3: K.node(lm, 140, 70, 200, 52, 'S3 upload', 'scans/*.png'), api: K.node(lm, 140, 165, 200, 52, 'API Gateway', 'GET /appointments'), cron: K.node(lm, 140, 260, 200, 52, 'EventBridge', 'every day 02:00') };
+  const DST = { s3: K.node(lm, 860, 70, 200, 52, 'S3 thumbnails', '+ metadata'), ddb: K.node(lm, 860, 165, 200, 52, 'DynamoDB', 'appointments'), cw: K.node(lm, 860, 260, 200, 52, 'CloudWatch Logs', 'every run') };
+  const SLOTS = [];
+  for (let i = 0; i < 8; i++) {
+    const x = 375 + (i % 4) * 75, y = 80 + Math.floor(i / 4) * 95;
+    const g = K.el('g', { class: 'env' }, lm); g.style.opacity = 0;
+    K.el('rect', { x: x - 30, y: y - 26, width: 60, height: 52, rx: 8 }, g);
+    const t = K.text(g, x, y + 4, '', '');
+    SLOTS.push({ g, t, x, y, state: 'none' });
+  }
+  const conc = K.text(lm, 500, 292, 'concurrency: 0', 'mlabel'); conc.style.textAnchor = 'middle';
+  const lP = K.el('g', {}, lm);
+  let invocations = 0, reapTimer = 0;
+  const setConc = () => { conc.textContent = `concurrency: ${SLOTS.filter(s => s.state === 'busy').length} · environments: ${SLOTS.filter(s => s.state !== 'none').length}`; };
+  async function invoke(src, dst, run, label) {
+    let s = SLOTS.find(x => x.state === 'idle'), cold = false;
+    if (!s) { s = SLOTS.find(x => x.state === 'none'); cold = true; }
+    if (!s) return 'throttled';
+    s.state = 'busy'; s.g.style.opacity = 1; s.g.setAttribute('class', 'env busy' + (cold ? ' cold' : '')); s.t.textContent = cold ? 'cold' : 'warm';
+    setConc();
+    const p = K.pill(lP, label, 'alt');
+    await K.move(p, [240, SRC[src].g.querySelector('rect').y.baseVal.value + 26], [s.x, s.y - 34], 450, run); p.remove();
+    if (cold) await K.sleep(500, run);
+    s.t.textContent = 'running';
+    await K.sleep(350, run);
+    const q = K.pill(lP, 'result', 'ok');
+    await K.move(q, [s.x, s.y + 34], [760, DST[dst].g.querySelector('rect').y.baseVal.value + 26], 450, run); q.remove();
+    s.state = 'idle'; s.g.setAttribute('class', 'env'); s.t.textContent = 'idle';
+    invocations++; setConc();
+    return cold ? 'cold' : 'warm';
+  }
+  function scheduleReap() {
+    clearTimeout(reapTimer);
+    reapTimer = setTimeout(() => { SLOTS.forEach(s => { if (s.state === 'idle') { s.state = 'none'; s.g.style.opacity = 0; } }); setConc(); $('lamStatus').innerHTML = 'Idle environments were reclaimed: <b>scaled to zero</b>. Nothing runs, nothing is billed.'; }, 6000 / K.speed);
+  }
+  const EVS = [
+    { k: 'one', n: 'Upload one scan' },
+    { k: 'api', n: 'API call: GET /appointments' },
+    { k: 'burst', n: 'Burst: 6 scans at once' },
+    { k: 'cron', n: 'Nightly schedule fires' }
+  ];
+  $('evChips').innerHTML = EVS.map(e => `<button class="chip-btn" type="button" data-k="${e.k}" aria-pressed="false">${e.n}</button>`).join('');
+  async function fire(k) {
+    const run = K.newRun('lam'); clearTimeout(reapTimer);
+    try {
+      if (k === 'one') { const r = await invoke('s3', 's3', run, 'PutObject event'); $('lamStatus').innerHTML = r === 'cold' ? 'A <b>cold start</b>: Lambda created an environment first. Fire again quickly and it reuses the warm one.' : 'Reused a <b>warm</b> environment: faster start.'; }
+      if (k === 'api') { const r = await invoke('api', 'ddb', run, 'HTTPS request'); $('lamStatus').innerHTML = `API Gateway turned the HTTP request into an event; Lambda queried DynamoDB and returned JSON (${r} start). Lambda isn't an HTTP endpoint on its own.`; }
+      if (k === 'cron') { await invoke('cron', 'cw', run, 'scheduled event'); $('lamStatus').innerHTML = 'EventBridge on a schedule + Lambda = a <b>serverless cron job</b>. Logs land in CloudWatch.'; }
+      if (k === 'burst') {
+        const rs = await Promise.all([0, 1, 2, 3, 4, 5].map(i => K.sleep(i * 90, run).then(() => invoke('s3', 's3', run, 'event ' + (i + 1)))));
+        $('lamStatus').innerHTML = `Six events ran <b>in parallel</b>: ${rs.filter(r => r === 'cold').length} new environments were created automatically. No Auto Scaling group to configure.`;
+      }
+      scheduleReap();
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('evChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('evChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    fire(b.dataset.k);
+  }));
+  setConc();
+
+  // cost
+  const MEMS = [128, 256, 512, 1024, 2048, 4096, 10240];
+  const fmtN = n => n >= 1e6 ? (n / 1e6).toLocaleString('en-US', { maximumFractionDigits: 1 }) + 'M' : n.toLocaleString('en-US');
+  function cost() {
+    const inv = +$('inv').value * 500000, mem = MEMS[+$('mem').value], dur = +$('dur').value * 50;
+    $('invO').textContent = fmtN(inv); $('memO').textContent = mem >= 1024 ? mem / 1024 + ' GB' : mem + ' MB'; $('durO').textContent = dur + ' ms';
+    const gbs = inv * dur / 1000 * mem / 1024;
+    const req = Math.max(0, inv - 1e6) * 0.20 / 1e6;
+    const comp = Math.max(0, gbs - 400000) * 0.0000166667;
+    const tot = req + comp;
+    $('costK').innerHTML = [
+      ['GB-seconds used', Math.round(gbs).toLocaleString('en-US'), ''],
+      ['Request charge', '$' + req.toFixed(2), ''],
+      ['Compute charge', '$' + comp.toFixed(2), ''],
+      ['Monthly total', '$' + tot.toFixed(2), tot === 0 ? 'good' : 'accent']
+    ].map(([l, v, c]) => `<div class="kpi ${c}"><b>${v}</b><span>${l}</span></div>`).join('');
+  }
+  ['inv', 'mem', 'dur'].forEach(id => $(id).addEventListener('input', cost)); cost();
+
+  /* ========== 3. Chooser ========== */
+  const pk = $('pick');
+  const SV = {
+    ls: { t: 'Lightsail', s: 'fixed monthly bundle', x: 110, y: 70 },
+    ec2: { t: 'EC2', s: 'full control', x: 330, y: 70 },
+    ecs: { t: 'ECS', s: 'Docker on AWS', x: 550, y: 70 },
+    eks: { t: 'EKS', s: 'Kubernetes', x: 770, y: 70 },
+    bat: { t: 'Batch', s: 'job queue, Spot', x: 110, y: 180 },
+    far: { t: 'Fargate', s: 'serverless containers', x: 330, y: 180 },
+    lam: { t: 'Lambda', s: 'event-driven functions', x: 550, y: 180 },
+    apl: { t: 'API Gateway + Lambda', s: 'serverless API', x: 800, y: 180 }
+  };
+  const sE = {};
+  for (const k in SV) { const o = SV[k], g = K.el('g', { class: 'svc' }, pk); K.el('rect', { x: o.x - 95, y: o.y - 28, width: k === 'apl' ? 220 : 190, height: 56, rx: 12 }, g); if (k === 'apl') g.querySelector('rect').setAttribute('x', o.x - 110); K.text(g, o.x, o.y - 3, o.t, ''); K.text(g, o.x, o.y + 15, o.s, 'sm'); sE[k] = g; }
+  const pP = K.el('g', {}, pk);
+  const SC = [
+    ['WordPress site, no cloud experience, fixed price', 'ls', 'Lightsail: simple bundles at a predictable monthly price.'],
+    ['Legacy app needs a custom kernel module', 'ec2', 'Full OS control means EC2.'],
+    ['Containers, AWS-native, team manages instances', 'ecs', 'ECS on EC2: AWS orchestrates, you run the instances.'],
+    ['Existing Kubernetes manifests', 'eks', 'Kubernetes → EKS (nodes on EC2 or Fargate).'],
+    ['Thousands of 3-hour genome jobs, cheapest', 'bat', 'Batch queues the jobs and launches Spot capacity; no 15-minute limit.'],
+    ['Containers, least operational overhead', 'far', 'Fargate: no servers, pay per vCPU and GB per second.'],
+    ['Make a thumbnail when a scan is uploaded', 'lam', 'S3 event → Lambda: runs only when needed.'],
+    ['Serverless REST backend for a mobile app', 'apl', 'API Gateway handles HTTP, auth and throttling; Lambda runs the logic.']
+  ];
+  $('scChips').innerHTML = SC.map((s, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${s[0]}</button>`).join('');
+  $('scChips').querySelectorAll('button').forEach(b => b.addEventListener('click', async () => {
+    $('scChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    const [n, k, why] = SC[+b.dataset.i];
+    const run = K.newRun('pick'); pP.textContent = '';
+    Object.values(sE).forEach(g => g.setAttribute('class', 'svc'));
+    const p = K.pill(pP, n.length > 28 ? n.slice(0, 27) + '…' : n);
+    try {
+      await K.move(p, [500, 250], [SV[k].x, SV[k].y - 38], 650, run); p.remove();
+      for (const o in sE) sE[o].classList.add(o === k ? 'hit' : 'fade');
+      $('pickStatus').innerHTML = `<b>${SV[k].t}</b>. ${why}`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }));
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AWS Cloud Practitioner Explainers</title>
+<meta name="description" content="Interactive, animated explainers for the AWS Certified Cloud Practitioner (CLF-C02) exam, following the course section by section.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/hub.css">
+<script src="../assets/js/theme.js"></script>
+<style>
+  .y-aws { color: var(--orange); }
+  .dom { display: inline-block; font-family: var(--mono); font-size: 10.5px; letter-spacing: .05em; padding: 2px 7px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+  .dom.d1 { border-color: var(--blue); color: var(--blue); }
+  .dom.d2 { border-color: var(--red); color: var(--red); }
+  .dom.d3 { border-color: var(--teal-text); color: var(--teal-text); }
+  .dom.d4 { border-color: var(--accent-text); color: var(--accent-text); }
+  .day-card .doms { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+  .domains { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 10px; margin-top: 18px; }
+  .domains .stat b { font-size: 26px; }
+  .flow .aws { fill: var(--orange); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <a class="back" href="../index.html">← All subjects</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header class="hero">
+    <div>
+      <div class="eyebrow">CLF-C02 · 65 questions · 90 minutes · pass at 700 / 1000</div>
+      <h1>AWS Cloud <span class="y-aws">Practitioner</span></h1>
+      <p class="lede">One explainer per course section: the ideas behind each service, animated, with the exam traps called out. Built from my notes on Stephane Maarek's course and checked against current AWS documentation.</p>
+      <svg class="flow" viewBox="0 0 560 90" aria-hidden="true">
+        <path class="w" d="M70 45 H200"/><path class="w" d="M300 45 C340 45 350 18 400 18"/><path class="w" d="M300 45 C340 45 350 72 400 72"/>
+        <circle class="pkt" r="5"><animateMotion dur="2.6s" begin="0s" repeatCount="indefinite" path="M70 45 H300 C340 45 350 18 400 18"/></circle>
+        <circle class="pkt" r="5"><animateMotion dur="2.6s" begin="-1.3s" repeatCount="indefinite" path="M70 45 H300 C340 45 350 72 400 72"/></circle>
+        <rect class="n" x="10" y="28" width="60" height="34" rx="9"/><text class="t-fg" x="40" y="50">User</text>
+        <rect class="lb" x="200" y="26" width="100" height="38" rx="11"/><text class="t-on" x="250" y="50">Region</text>
+        <rect class="sv" x="400" y="4" width="84" height="28" rx="8"/><text class="t-ink" x="442" y="22">AZ a</text>
+        <rect class="sv" x="400" y="58" width="84" height="28" rx="8"/><text class="t-ink" x="442" y="76">AZ b</text>
+      </svg>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="sLive">0</b><span>Explainers</span></div>
+      <div class="stat"><b id="sTopics">0</b><span>Course sections</span></div>
+      <div class="stat"><b id="sNext">–</b><span>Next up</span></div>
+      <div class="meter">
+        <div class="row"><span>Sections covered</span><span id="sPct">0%</span></div>
+        <div class="track"><i id="bar" style="width:0"></i></div>
+      </div>
+    </div>
+  </header>
+
+  <section aria-label="Exam domains">
+    <div class="domains">
+      <div class="stat"><b>24%</b><span><span class="dom d1">D1</span> Cloud Concepts</span></div>
+      <div class="stat"><b>30%</b><span><span class="dom d2">D2</span> Security &amp; Compliance</span></div>
+      <div class="stat"><b>34%</b><span><span class="dom d3">D3</span> Technology &amp; Services</span></div>
+      <div class="stat"><b>12%</b><span><span class="dom d4">D4</span> Billing, Pricing &amp; Support</span></div>
+    </div>
+  </section>
+
+  <div class="toolbar">
+    <input class="search" id="q" type="search" placeholder="Search services, e.g. S3, Lambda, IAM role" aria-label="Search topics">
+    <div class="seg" role="group" aria-label="Filter">
+      <button type="button" data-f="all" aria-pressed="true">All sections</button>
+      <button type="button" data-f="live" aria-pressed="false">Explainers only</button>
+    </div>
+  </div>
+
+  <main id="phases"></main>
+
+  <section class="howto" aria-label="How to use">
+    <div class="box"><h4>Study loop</h4><p>Play with the explainer, then answer the "Check yourself" cards out loud. Tie every service to the exam trigger words.</p></div>
+    <div class="box"><h4>Adding an explainer</h4><p>Drop the file in this folder, then set <code>file:"name.html"</code> on its section below in <code>index.html</code>.</p></div>
+    <div class="box"><h4>Scope</h4><p>Domain tags follow the official CLF-C02 exam guide. Facts that change (prices, limits, counts) are dated on each page.</p></div>
+  </section>
+
+  <footer>Sections follow the course order. Greyed sections are not studied yet.</footer>
+</div>
+
+<script>
+/* ===== Course sections. To publish an explainer, add  file:"name.html"  to its topic. ===== */
+const PARTS = [
+ {part:"Part 1", name:"Foundations", sections:[
+  {t:"Cloud Computing Basics", tags:["d1","d3"], k:"traditional IT, IaaS PaaS SaaS, regions, availability zones, edge locations, pricing", file:"cloud-basics.html"},
+  {t:"Shared Responsibility Model", tags:["d2"], k:"security of the cloud, security in the cloud, EC2 RDS Lambda S3", file:"shared-responsibility.html"},
+  {t:"IAM: Users, Groups, Policies & Roles", tags:["d2"], k:"root user, MFA, policy, explicit deny, role, access keys, credential report, access advisor", file:"iam.html"}
+ ]},
+ {part:"Part 2", name:"Compute & Storage", sections:[
+  {t:"EC2 Basics", tags:["d3"], k:"instance types, security groups, ports, SSH, user data, instance connect", file:"ec2-basics.html"},
+  {t:"EC2 Purchasing Options", tags:["d3","d4"], k:"on-demand, reserved, savings plans, spot, dedicated host, capacity reservation", file:"purchasing-options.html"},
+  {t:"EC2 Instance Storage", tags:["d3"], k:"EBS, snapshot, AMI, image builder, instance store, EFS, FSx", file:"ec2-storage.html"},
+  {t:"Elastic Load Balancing & Auto Scaling", tags:["d1","d3"], k:"ALB NLB GWLB, ASG, scalability elasticity agility high availability", file:"elb-asg.html"},
+  {t:"Amazon S3", tags:["d2","d3"], k:"bucket, object, bucket policy, block public access, versioning, replication, storage classes, glacier, encryption, storage gateway", file:"s3.html"}
+ ]},
+ {part:"Part 3", name:"Databases, Compute & Deployment", sections:[
+  {t:"Databases & Analytics", tags:["d3"], k:"RDS Aurora Multi-AZ read replica ElastiCache DynamoDB DAX Redshift EMR Athena QuickSight DocumentDB Neptune Glue DMS Kinesis OpenSearch", file:"databases-analytics.html"},
+  {t:"Containers & Serverless", tags:["d3","d4"], k:"Docker ECS Fargate ECR EKS Lambda API Gateway Batch Lightsail", file:"containers-serverless.html"},
+  {t:"Deployment & Infrastructure as Code", tags:["d3"], k:"CloudFormation CDK Elastic Beanstalk CodeDeploy CodeBuild CodePipeline CodeArtifact Systems Manager Session Manager Parameter Store", file:"deployment-iac.html"},
+  {t:"Global Infrastructure", tags:["d3"], k:"Route 53 routing policies CloudFront S3 Transfer Acceleration Global Accelerator", file:"global-infrastructure.html"}
+ ]},
+ {part:"Part 4", name:"Not studied yet", sections:[
+  {t:"Cloud Integrations", tags:["d3"], k:"SQS SNS Kinesis Amazon MQ", todo:true},
+  {t:"Monitoring", tags:["d3"], k:"CloudWatch CloudTrail X-Ray Health Dashboard", todo:true},
+  {t:"VPC & Networking", tags:["d3"], k:"VPC subnets NACL security group NAT VPN Direct Connect", todo:true},
+  {t:"Security & Compliance", tags:["d2"], k:"KMS Shield WAF GuardDuty Inspector Macie Artifact Config Secrets Manager", todo:true},
+  {t:"Machine Learning", tags:["d3"], k:"Rekognition Comprehend SageMaker Bedrock", todo:true},
+  {t:"Billing, Pricing & Support", tags:["d4"], k:"Organizations, Cost Explorer, Budgets, Pricing Calculator, support plans", todo:true},
+  {t:"Architecting & Well-Architected", tags:["d1"], k:"six pillars, Cloud Adoption Framework", todo:true}
+ ]}
+];
+
+const $=id=>document.getElementById(id);
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const all=PARTS.flatMap(p=>p.sections);
+const live=all.filter(s=>s.file);
+$('sLive').textContent=live.length;
+$('sTopics').textContent=all.length;
+const next=all.find(s=>!s.file);
+$('sNext').textContent=next?`Section ${all.indexOf(next)+1}`:'Done';
+const pct=Math.round(live.length*100/all.length);
+$('sPct').textContent=`${live.length} / ${all.length} · ${pct}%`;
+$('bar').style.width=Math.max(pct,live.length?2:0)+'%';
+const DOM={d1:'D1 Concepts',d2:'D2 Security',d3:'D3 Services',d4:'D4 Billing'};
+
+let filter='all',query='';
+function card(s,n){
+  const cls=['day-card'];
+  const doms=`<span class="doms">${s.tags.map(t=>`<span class="dom ${t}">${DOM[t]}</span>`).join('')}</span>`;
+  if(s.file){cls.push('live');return `<a class="${cls.join(' ')}" href="${esc(s.file)}"><span class="day">Section ${n}</span><span class="topic">${esc(s.t)}</span>${doms}<span class="status">Open explainer</span></a>`;}
+  if(s.todo)cls.push('review');
+  return `<div class="${cls.join(' ')}"><span class="day">Section ${n}</span><span class="topic">${esc(s.t)}</span>${doms}<span class="status">${s.todo?'Notes not written yet':'Coming soon'}</span></div>`;
+}
+function render(){
+  const q=query.trim().toLowerCase();let html='',n=0;
+  PARTS.forEach((p,i)=>{
+    const items=p.sections.map(s=>({s,n:++n})).filter(({s})=>(filter==='all'||s.file)&&(!q||s.t.toLowerCase().includes(q)||s.k.toLowerCase().includes(q)));
+    if(!items.length)return;
+    html+=`<section class="phase" id="p${i+1}"><div class="phase-head"><span class="num">${p.part}</span><h2>${esc(p.name)}</h2></div><div class="week"><div class="day-grid">${items.map(({s,n})=>card(s,n)).join('')}</div></div></section>`;
+  });
+  $('phases').innerHTML=html||`<p class="empty">No sections match “${esc(query)}”.</p>`;
+}
+$('q').addEventListener('input',e=>{query=e.target.value;render();});
+document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.f;document.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-pressed',x===b));render();}));
+render();
+</script>
+</body>
+</html>

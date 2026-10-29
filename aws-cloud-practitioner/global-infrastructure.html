@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Global Infrastructure</title>
+<meta name="description" content="AWS Cloud Practitioner: Route 53 routing policies with users around the world, CloudFront vs Global Accelerator vs S3 Transfer Acceleration, and picking the right global service.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .usr circle { fill: var(--accent-text); }
+  .usr text, .rg text { fill: var(--fg); font-size: 12.5px; font-weight: 600; text-anchor: middle; }
+  .rg rect { fill: var(--panel); stroke: var(--teal); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .rg .sm { fill: var(--muted); font-family: var(--mono); font-size: 10.5px; font-weight: 400; }
+  .rg.down rect { stroke: var(--red); fill: var(--panel-2); }
+  .rg.hit rect { fill: var(--teal-wash); }
+  .route { fill: none; stroke-width: 2.5; stroke: var(--cyan); opacity: .8; }
+  .route.alt { stroke: var(--accent-text); }
+  .route.bad { stroke: var(--red); stroke-dasharray: 5 4; }
+  .net-pub { fill: none; stroke: var(--muted); stroke-width: 2; stroke-dasharray: 3 5; }
+  .net-aws { fill: none; stroke: var(--teal); stroke-width: 4; opacity: .7; }
+  .svc rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .svc text { fill: var(--fg); font-size: 13px; font-weight: 700; text-anchor: middle; }
+  .svc .sm { fill: var(--muted); font-family: var(--mono); font-size: 10.5px; font-weight: 400; }
+  .svc.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .svc.fade text { opacity: .45; }
+  .ms { fill: var(--accent-text); font-family: var(--mono); font-size: 12px; font-weight: 700; text-anchor: middle; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · Section 12 · Domain 3 Technology &amp; Services (Tasks 3.2, 3.5)</div>
+    <h1>Global Infrastructure</h1>
+    <ul class="lede">
+      <li>Going global gives <b>lower latency</b>, <b>disaster recovery</b> and <b>resilience</b> against attacks.</li>
+      <li><b>Route 53</b> (DNS) decides <b>which Region</b> a user is sent to.</li>
+      <li><b>CloudFront</b> caches content at edge locations. <b>Global Accelerator</b> carries traffic over AWS's network, no caching, two static IPs.</li>
+      <li><b>S3 Transfer Acceleration</b> speeds up long-distance uploads to one bucket via the nearest edge.</li>
+      <li>Regions, AZs and edge locations themselves are on <a href="cloud-basics.html">Cloud Computing Basics</a>; DNS basics on <a href="../system-design-explainers/client-server-dns.html">Client-Server &amp; DNS</a>.</li>
+    </ul>
+  </header>
+
+  <section aria-labelledby="r53H">
+    <h2 class="stage-title" id="r53H">Route 53: where does each user go?</h2>
+    <div class="stage-kind">Pick a routing policy, then resolve www.clinic-app.com for everyone</div>
+    <div class="controls">
+      <div class="seg" id="polSeg" role="group" aria-label="Routing policy">
+        <button type="button" data-v="simple" aria-pressed="false">Simple</button>
+        <button type="button" data-v="weighted" aria-pressed="false">Weighted 70/30</button>
+        <button type="button" data-v="latency" aria-pressed="true">Latency</button>
+        <button type="button" data-v="failover" aria-pressed="false">Failover</button>
+        <button type="button" data-v="geo" aria-pressed="false">Geolocation</button>
+      </div>
+    </div>
+    <div class="controls" style="margin-top:10px">
+      <button class="btn primary" type="button" id="resolve">Resolve for all users</button>
+      <label class="toggle" for="down"><input type="checkbox" id="down"> Mumbai fails its health check</label>
+    </div>
+    <div class="scroll">
+      <svg class="diagram" id="map" viewBox="0 0 1000 380" aria-label="Users in four cities and application Regions in Virginia, Frankfurt and Mumbai"></svg>
+    </div>
+    <p class="status-line" id="r53Status"></p>
+  </section>
+
+  <section aria-labelledby="edgeH">
+    <h2 class="stage-title" id="edgeH">A user in Sydney, an app in Mumbai</h2>
+    <div class="stage-kind">Pick how the traffic travels, then send two requests</div>
+    <div class="seg" id="modeSeg" role="group" aria-label="Delivery">
+      <button type="button" data-v="direct" aria-pressed="true">Public internet only</button>
+      <button type="button" data-v="cf" aria-pressed="false">CloudFront</button>
+      <button type="button" data-v="ga" aria-pressed="false">Global Accelerator</button>
+      <button type="button" data-v="ta" aria-pressed="false">S3 Transfer Acceleration</button>
+    </div>
+    <div class="controls" style="margin-top:10px"><button class="btn primary" type="button" id="send">Send request 1, then request 2</button></div>
+    <div class="scroll">
+      <svg class="diagram" id="edge" viewBox="0 0 1000 260" aria-label="Sydney user, Sydney edge location, and Mumbai origin"></svg>
+    </div>
+    <p class="status-line" id="edgeStatus">Times are illustrative; the pattern is what matters.</p>
+  </section>
+
+  <section aria-labelledby="pickH">
+    <h2 class="stage-title" id="pickH">Pick the global service</h2>
+    <div class="stage-kind">Pick a requirement</div>
+    <div class="chips" id="gChips"></div>
+    <div class="scroll">
+      <svg class="diagram" id="gpick" viewBox="0 0 1000 220" aria-label="Global services"></svg>
+    </div>
+    <p class="status-line" id="gStatus">Pick a requirement.</p>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Route 53 policy</th><th>Sends users…</th><th>Use it for</th></tr></thead>
+        <tbody>
+          <tr><td><b>Simple</b></td><td>To the one value in the record (no health checks)</td><td>A single resource</td></tr>
+          <tr><td><b>Weighted</b></td><td>By percentage across records</td><td>Canary / blue-green releases, simple load spreading</td></tr>
+          <tr><td><b>Latency</b></td><td>To the Region with the lowest latency for them</td><td>Global performance</td></tr>
+          <tr><td><b>Failover</b></td><td>To primary while healthy, else secondary</td><td>Disaster recovery (active-passive)</td></tr>
+          <tr><td><b>Geolocation</b></td><td>By the user's country or continent</td><td>Localised content, data-residency rules</td></tr>
+          <tr><td>Geoproximity · IP-based · Multivalue</td><td>By distance with bias · by client IP range · several healthy answers</td><td>Rarely asked at this level</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cards" style="margin-top:14px">
+      <div class="card"><h3>Records</h3><p><b>A</b> → IPv4, <b>AAAA</b> → IPv6, <b>CNAME</b> → another name (not at the zone apex), <b>Alias</b> → an AWS resource (ELB, CloudFront, S3 website), free and allowed at the apex.</p></div>
+      <div class="card"><h3>CloudFront origins</h3><p>S3 bucket kept private with <b>Origin Access Control</b> (CloudFront adds the bucket policy), a load balancer or EC2 (also private via VPC origins), or any HTTP server. Works with <b>Shield</b> and <b>WAF</b>.</p></div>
+      <div class="card"><h3>CloudFront vs S3 replication</h3><p><b>CloudFront</b>: cache read-heavy static content at hundreds of edges, served until the TTL expires (default 24 h). <b>S3 CRR</b>: a full, near-real-time copy of a bucket in a few chosen Regions.</p></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Updated</span><p><b>CloudFront now has 750+ points of presence</b> (plus regional edge caches), not the ~216 quoted in the course. AWS runs 39 Regions with 124 AZs (October 2026); counts change, so the exam won't test them.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Route 53 has more than four routing policies.</b> The course covers Simple, Weighted, Latency and Failover; Geolocation is the next most common on exams. Health checks are optional for Weighted and Latency and required for Failover's primary.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Edge location ≠ Region.</b> You can't run your app on an edge location; CloudFront, Route 53, Global Accelerator and Transfer Acceleration use them. To run compute closer to users, AWS has <b>Local Zones</b>, <b>Wavelength</b> (5G networks) and <b>Outposts</b> (in your data centre).</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Costs:</b> a hosted zone is about $0.50/month plus queries; domains bill yearly and auto-renew. CloudFront has a free tier and flat-rate plans; Global Accelerator charges hourly plus premium data transfer; Transfer Acceleration charges per GB only when it actually speeds things up.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Send each user to the Region that responds fastest for them?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Route 53 latency-based routing.</b></p></div></details>
+      <details><summary>Send 10% of traffic to a new version?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Weighted routing</b> (for example 90/10).</p></div></details>
+      <details><summary>Which Route 53 policy has no health checks?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Simple.</b></p></div></details>
+      <details><summary>A game uses UDP and needs static IPs and fast regional failover. CloudFront or Global Accelerator?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Global Accelerator</b>: TCP/UDP, two static anycast IPs, no caching.</p></div></details>
+      <details><summary>"CDN" on the exam means…?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Amazon CloudFront.</b></p></div></details>
+      <details><summary>Users worldwide upload large files to one bucket in Mumbai. What speeds it up?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>S3 Transfer Acceleration</b> (upload to the nearest edge, then AWS's network).</p></div></details>
+    </div>
+  </section>
+
+  <footer>Map positions are schematic and latency figures illustrative. Sources: Leveraging AWS Global Infrastructure notes (Why Build a Global Application; Route 53 and its Hands-On; CloudFront and its Hands-On; S3 Transfer Acceleration; Global Accelerator). Infrastructure counts checked October 2026.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  /* ========== 1. Route 53 ========== */
+  const mp = $('map');
+  const RG = {
+    use1: { t: 'N. Virginia', s: 'us-east-1', x: 230, y: 130 },
+    fra: { t: 'Frankfurt', s: 'eu-central-1', x: 520, y: 110 },
+    mum: { t: 'Mumbai', s: 'ap-south-1', x: 720, y: 200 }
+  };
+  const US = {
+    sao: { t: 'São Paulo', x: 300, y: 330, geo: 'other' },
+    lon: { t: 'London', x: 460, y: 220, geo: 'eu' },
+    che: { t: 'Chennai', x: 740, y: 320, geo: 'in' },
+    syd: { t: 'Sydney', x: 920, y: 340, geo: 'other' }
+  };
+  // rough latency ranking per user
+  const NEAR = { sao: ['use1', 'fra', 'mum'], lon: ['fra', 'use1', 'mum'], che: ['mum', 'fra', 'use1'], syd: ['mum', 'use1', 'fra'] };
+  const r53 = K.node(mp, 500, 30, 220, 44, 'Route 53', 'www.clinic-app.com');
+  r53.g.classList.add('solid');
+  const routesG = K.el('g', {}, mp);
+  const rE = {};
+  for (const k in RG) {
+    const o = RG[k], g = K.el('g', { class: 'rg' }, mp);
+    K.el('rect', { x: o.x - 70, y: o.y - 26, width: 140, height: 52, rx: 12 }, g);
+    K.text(g, o.x, o.y - 3, o.t, ''); K.text(g, o.x, o.y + 15, o.s, 'sm'); rE[k] = g;
+  }
+  for (const k in US) { const o = US[k], g = K.el('g', { class: 'usr' }, mp); K.el('circle', { cx: o.x, cy: o.y, r: 8 }, g); K.text(g, o.x, o.y + 24, o.t, ''); }
+  const mP = K.el('g', {}, mp);
+  let pol = 'latency';
+  function pick(u) {
+    const down = $('down').checked;
+    const healthy = r => !(down && r === 'mum');
+    if (pol === 'simple') return { r: 'mum', note: '' };
+    if (pol === 'weighted') { const r = Math.random() < 0.7 ? 'mum' : 'fra'; return healthy(r) ? { r } : { r: 'fra' }; }
+    if (pol === 'latency') { const r = NEAR[u].find(healthy); return { r }; }
+    if (pol === 'failover') return { r: healthy('mum') ? 'mum' : 'fra' };
+    if (pol === 'geo') { const r = US[u].geo === 'in' ? 'mum' : US[u].geo === 'eu' ? 'fra' : 'use1'; return { r: healthy(r) ? r : 'use1' }; }
+  }
+  const MSG = {
+    simple: 'Simple: one record, one answer for everyone. No health checks, so if Mumbai is down, users are still sent there.',
+    weighted: 'Weighted 70/30: each DNS answer is picked by weight, so traffic splits roughly 70% Mumbai, 30% Frankfurt. Handy for canary releases.',
+    latency: 'Latency: each user gets the Region with the lowest measured latency from where they are. With a health check, an unhealthy Region is skipped.',
+    failover: 'Failover: everyone goes to the primary (Mumbai) while its health check passes; if it fails, Route 53 answers with the secondary (Frankfurt).',
+    geo: 'Geolocation: by the user\'s location: India → Mumbai, Europe → Frankfurt, everyone else → the default record (Virginia). Good for language or data-residency rules.'
+  };
+  async function resolve() {
+    const run = K.newRun('map');
+    mP.textContent = ''; routesG.textContent = '';
+    for (const k in rE) rE[k].setAttribute('class', 'rg' + ($('down').checked && k === 'mum' ? ' down' : ''));
+    const counts = { use1: 0, fra: 0, mum: 0 };
+    try {
+      await Promise.all(Object.keys(US).map(async (u, i) => {
+        const o = US[u];
+        await K.sleep(i * 120, run);
+        const q = K.pill(mP, 'DNS?', 'ghost');
+        await K.move(q, [o.x, o.y - 14], [500, 62], 550, run); q.remove();
+        const { r } = pick(u);
+        const dest = RG[r];
+        const bad = $('down').checked && r === 'mum';
+        K.el('path', { d: `M${o.x} ${o.y - 10} Q ${(o.x + dest.x) / 2} ${Math.min(o.y, dest.y) - 40} ${dest.x} ${dest.y + 26}`, class: 'route' + (bad ? ' bad' : r === 'fra' ? ' alt' : '') }, routesG);
+        const a = K.pill(mP, bad ? 'timeout' : dest.t, bad ? 'bad' : 'ok');
+        await K.move(a, [o.x, o.y - 14], [dest.x, dest.y + 40], 600, run); a.remove();
+        rE[r].classList.add('hit'); counts[r]++;
+      }));
+      const bad = $('down').checked && pol === 'simple';
+      $('r53Status').innerHTML = (bad ? '<span class="bad-text">All users sent to a dead Region.</span> ' : '') + MSG[pol] + ` <span class="mono">(Virginia ${counts.use1} · Frankfurt ${counts.fra} · Mumbai ${counts.mum})</span>`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  K.seg($('polSeg'), v => { pol = v; $('r53Status').textContent = MSG[v]; mP.textContent = ''; routesG.textContent = ''; Object.values(rE).forEach(g => g.setAttribute('class', 'rg')); });
+  $('resolve').addEventListener('click', resolve);
+  $('down').addEventListener('change', () => { rE.mum.classList.toggle('down', $('down').checked); });
+  $('r53Status').textContent = MSG.latency;
+
+  /* ========== 2. Edge ========== */
+  const ed = $('edge');
+  const user = K.node(ed, 90, 130, 140, 54, 'Sydney user', 'browser');
+  const edge = K.node(ed, 330, 130, 170, 54, 'Edge location', 'Sydney');
+  const origin = K.node(ed, 880, 130, 170, 54, 'Origin', 'Mumbai · ALB / S3');
+  const netG = K.el('g', {}, ed);
+  const eP = K.el('g', {}, ed);
+  const msT = K.text(ed, 500, 235, '', 'ms');
+  let mode = 'direct';
+  const PUB = 'M160 130 L 250 70 L 360 210 L 470 60 L 580 205 L 690 70 L 795 130';
+  function drawNet() {
+    netG.textContent = '';
+    edge.g.setAttribute('class', 'node' + (mode === 'direct' ? ' dim' : ' teal'));
+    if (mode === 'direct') K.el('path', { d: PUB, class: 'net-pub' }, netG);
+    else { K.el('line', { x1: 160, y1: 130, x2: 245, y2: 130, class: 'net-pub' }, netG); K.el('line', { x1: 415, y1: 130, x2: 795, y2: 130, class: 'net-aws' }, netG); K.text(netG, 600, 118, 'AWS private global network', 'mlabel ok').style.textAnchor = 'middle'; }
+    if (mode === 'direct') K.text(netG, 480, 30, 'many public internet hops', 'mlabel muted').style.textAnchor = 'middle';
+    origin.sub.textContent = mode === 'ta' ? 'Mumbai · S3 bucket' : 'Mumbai · ALB / S3';
+    user.sub.textContent = mode === 'ga' ? 'connects to 2 static anycast IPs' : mode === 'ta' ? 'uploading 2 GB of scans' : 'browser';
+    msT.textContent = '';
+  }
+  const INFO = {
+    direct: 'Every request crosses the public internet the whole way: many hops, variable latency, nothing cached.',
+    cf: 'CloudFront: first request misses and fetches from the origin over AWS\'s network; the edge keeps a copy, so request 2 is served from Sydney.',
+    ga: 'Global Accelerator: no cache, so both requests reach Mumbai, but they ride AWS\'s network from the nearest edge. Works for any TCP/UDP app, with static IPs and fast failover.',
+    ta: 'Transfer Acceleration: the upload goes to the nearest edge, then over AWS\'s network into the bucket. Only for S3, and it helps most over long distances.'
+  };
+  async function sendReq() {
+    const run = K.newRun('edge');
+    eP.textContent = ''; edge.g.classList.remove('ok'); msT.textContent = '';
+    const times = [];
+    try {
+      for (let i = 1; i <= 2; i++) {
+        const label = mode === 'ta' ? `upload ${i}` : `GET /scan.png #${i}`;
+        const p = K.pill(eP, label);
+        let t;
+        if (mode === 'direct') {
+          await K.move(p, [160, 100], [795, 100], 1300, run); p.remove();
+          t = 320 + Math.round(Math.random() * 90);
+        } else {
+          await K.move(p, [160, 100], [330, 100], 350, run);
+          if (mode === 'cf' && i === 2) { p.remove(); edge.g.classList.add('ok'); t = 18 + Math.round(Math.random() * 8); }
+          else { await K.move(p, [330, 100], [795, 100], 650, run); p.remove(); t = mode === 'cf' ? 210 : mode === 'ga' ? 205 + Math.round(Math.random() * 20) : 215; if (mode === 'cf') { edge.sub.textContent = 'Sydney · cached'; } }
+        }
+        const back = K.pill(eP, mode === 'ta' ? 'stored ✓' : mode === 'cf' && i === 2 ? 'HIT' : '200 OK', 'ok');
+        const from = mode === 'cf' && i === 2 ? 330 : 795;
+        await K.move(back, [from, 160], [160, 160], mode === 'direct' ? 1100 : from === 330 ? 300 : 800, run); back.remove();
+        times.push(t);
+        msT.textContent = mode === 'ta' ? times.map((x, j) => `upload ${j + 1}: ${Math.round(x / 5)} s (≈ ${Math.round(x / 5 * 1.5)} s without acceleration)`).join('   ·   ') : times.map((x, j) => `request ${j + 1}: ${x} ms`).join('   ·   ');
+      }
+      $('edgeStatus').textContent = INFO[mode];
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  K.seg($('modeSeg'), v => { mode = v; K.cancel('edge'); eP.textContent = ''; edge.sub.textContent = 'Sydney'; drawNet(); $('edgeStatus').textContent = INFO[v]; });
+  $('send').addEventListener('click', sendReq);
+  drawNet();
+
+  /* ========== 3. Chooser ========== */
+  const gp = $('gpick');
+  const SV = {
+    r53: { t: 'Route 53', s: 'DNS + routing policies', x: 130, y: 60 },
+    cf: { t: 'CloudFront', s: 'CDN, edge caching', x: 370, y: 60 },
+    ga: { t: 'Global Accelerator', s: 'AWS network, static IPs', x: 620, y: 60 },
+    ta: { t: 'S3 Transfer Acceleration', s: 'faster S3 uploads', x: 870, y: 60 },
+    crr: { t: 'S3 Cross-Region Replication', s: 'copy a bucket', x: 130, y: 160 },
+    lz: { t: 'Local Zones', s: 'compute near a city', x: 370, y: 160 },
+    wl: { t: 'Wavelength', s: 'inside 5G networks', x: 620, y: 160 },
+    op: { t: 'Outposts', s: 'AWS racks on-premises', x: 870, y: 160 }
+  };
+  const gE = {};
+  for (const k in SV) { const o = SV[k], g = K.el('g', { class: 'svc' }, gp); K.el('rect', { x: o.x - 115, y: o.y - 28, width: 230, height: 56, rx: 12 }, g); K.text(g, o.x, o.y - 3, o.t, ''); K.text(g, o.x, o.y + 15, o.s, 'sm'); gE[k] = g; }
+  const gP = K.el('g', {}, gp);
+  const REQ = [
+    ['Point clinic-app.com at a load balancer', 'r53', 'DNS with an Alias record to the ALB.'],
+    ['Serve images and videos fast worldwide', 'cf', 'CDN: cache at edge locations close to users.'],
+    ['UDP game needs static IPs and instant failover', 'ga', 'Anycast static IPs, AWS backbone, any TCP/UDP, no caching.'],
+    ['Labs worldwide upload big files to one bucket', 'ta', 'Upload to the nearest edge, then AWS\'s network to the bucket.'],
+    ['Keep a live copy of a bucket in another Region', 'crr', 'Asynchronous replication of new objects (versioning required).'],
+    ['Single-digit ms for users in a specific metro', 'lz', 'Run EC2 and other services in a Local Zone near that city.'],
+    ['Ultra-low latency for 5G mobile devices', 'wl', 'Compute inside telecom 5G networks.'],
+    ['Must run AWS services in our own data centre', 'op', 'AWS-managed racks on-premises; same APIs.']
+  ];
+  $('gChips').innerHTML = REQ.map((r, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${r[0]}</button>`).join('');
+  $('gChips').querySelectorAll('button').forEach(b => b.addEventListener('click', async () => {
+    $('gChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    const [n, k, why] = REQ[+b.dataset.i];
+    const run = K.newRun('gp'); gP.textContent = ''; Object.values(gE).forEach(g => g.setAttribute('class', 'svc'));
+    const p = K.pill(gP, n.length > 28 ? n.slice(0, 27) + '…' : n);
+    try {
+      await K.move(p, [500, 220], [SV[k].x, SV[k].y - 36], 650, run); p.remove();
+      for (const o in gE) gE[o].classList.add(o === k ? 'hit' : 'fade');
+      $('gStatus').innerHTML = `<b>${SV[k].t}</b>. ${why}`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }));
+})();
+</script>
+</body>
+</html>

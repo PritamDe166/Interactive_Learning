@@ -40,9 +40,9 @@ const SUBJECTS = [
   {name:"System Design", path:"system-design-explainers/index.html", accent:"var(--teal)", icon:"net",
    blurb:"119-day roadmap: networking, scaling, caching, databases, distributed systems and reliability.",
    done:13, total:119, unit:"days", pages:11},
-  {name:"AWS", path:null, accent:"var(--orange)", icon:"cloud",
+  {name:"AWS", path:"aws-cloud-practitioner/index.html", accent:"var(--orange)", icon:"cloud",
    blurb:"Cloud Practitioner (CLF-C02): core services, pricing models, shared responsibility, Well-Architected.",
-   done:0, total:null, unit:"topics"},
+   done:12, total:19, unit:"sections", pages:12},
   {name:"Python", path:null, accent:"var(--blue)", icon:"code",
    blurb:"How Python works underneath: data model, iterators and generators, async, memory and the GIL.",
    done:0, total:null, unit:"topics"},
@@ -51,11 +51,12 @@ const SUBJECTS = [
    done:0, total:null, unit:"topics"}
 ];
 const RECENT = [
-  {subject:"System Design", title:"Reverse Proxy, Load Balancer & API Gateway", note:"Days 10–12", href:"system-design-explainers/proxy-lb-gateway.html"},
-  {subject:"System Design", title:"Stateless Applications", note:"Day 9", href:"system-design-explainers/stateless.html"},
-  {subject:"System Design", title:"Vertical vs Horizontal Scaling", note:"Day 8", href:"system-design-explainers/scaling.html"},
-  {subject:"System Design", title:"Week 1 Review: Journey of a Request", note:"Day 7", href:"system-design-explainers/week-1-review.html"},
-  {subject:"System Design", title:"Load Balancing Algorithms", note:"Day 13", href:"system-design-explainers/load-balancing-algorithms.html"}
+  {subject:"AWS", title:"Global Infrastructure", note:"Section 12", href:"aws-cloud-practitioner/global-infrastructure.html"},
+  {subject:"AWS", title:"Deployment & Infrastructure as Code", note:"Section 11", href:"aws-cloud-practitioner/deployment-iac.html"},
+  {subject:"AWS", title:"Containers & Serverless", note:"Section 10", href:"aws-cloud-practitioner/containers-serverless.html"},
+  {subject:"AWS", title:"Databases & Analytics", note:"Section 9", href:"aws-cloud-practitioner/databases-analytics.html"},
+  {subject:"AWS", title:"Amazon S3", note:"Section 8", href:"aws-cloud-practitioner/s3.html"},
+  {subject:"AWS", title:"Elastic Load Balancing & Auto Scaling", note:"Section 7", href:"aws-cloud-practitioner/elb-asg.html"}
 ];
 
 /* ===== Render ===== */

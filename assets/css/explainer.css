@@ -12,6 +12,9 @@ h2 { font-weight: 600; font-size: 26px; margin: 0 0 6px; }
 .sub { color: var(--muted); margin: 0 0 18px; max-width: 66ch; }
 .lede b { color: var(--fg); }
 .lede .d { color: var(--red); }
+ul.lede { list-style: none; padding: 0; display: grid; gap: 7px; max-width: 68ch; }
+ul.lede li { position: relative; padding-left: 20px; }
+ul.lede li::before { content: ""; position: absolute; left: 3px; top: .62em; width: 7px; height: 7px; border-radius: 50%; background: var(--cyan); }
 svg text { font-family: var(--display); }
 
 /* ---- taxonomy tree ---- */
@@ -235,6 +238,9 @@ details p { margin: 0; }
 .codeblock .c { color: var(--muted); }
 .codeblock .s { color: var(--good-text); }
 .codeblock .e { color: var(--bad-text); }
+.codeblock .ln { display: block; margin: 0 -16px; padding: 0 16px; border-left: 3px solid transparent; transition: background .2s, border-color .2s; }
+.codeblock .ln.on { background: var(--teal-wash); border-left-color: var(--cyan); }
+.codeblock .ln.done { color: var(--muted); }
 .pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; margin-top: 16px; }
 .pair > div { min-width: 0; }
 /* chip buttons (pick one of many) */

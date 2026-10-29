@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shared Responsibility Model</title>
+<meta name="description" content="AWS Cloud Practitioner: pick EC2, RDS, Lambda, S3 or IAM and watch each security duty slide between AWS and you; then judge real incidents.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .col-head { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-anchor: middle; }
+  .col-bg { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; }
+  .duty { transition: transform .55s cubic-bezier(.4,.1,.2,1), opacity .3s; }
+  .duty rect { stroke-width: 0; }
+  .duty.aws rect { fill: var(--yellow); }
+  .duty.you rect { fill: var(--pill); }
+  .duty.shared rect { fill: var(--teal); }
+  .duty.na rect { fill: var(--track); }
+  .duty text { fill: var(--ink); font-size: 13px; font-weight: 600; text-anchor: middle; }
+  .duty.shared text { fill: var(--on-accent); }
+  .duty.na text { fill: var(--faint); }
+  .verdict-zone { fill: none; stroke: var(--line); stroke-width: 2; stroke-dasharray: 6 5; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · Section 2 · Domain 2 Security &amp; Compliance (Task 2.1)</div>
+    <h1>Shared Responsibility Model</h1>
+    <ul class="lede"><li><b>AWS: security <i>of</i> the cloud</b>. Data centres, hardware, network, and the software running its services.</li><li><b>You: security <i>in</i> the cloud</b>. Your data, who can access it, and how you configure each service.</li><li>The line <b>moves with the service</b>: the more AWS manages, the less you do.</li></ul>
+  </header>
+
+  <section aria-labelledby="slideTitle">
+    <h2 class="stage-title" id="slideTitle">Pick a service, watch the duties move</h2>
+    <div class="stage-kind">Same ten duties · different owner per service</div>
+    <div class="controls">
+      <div class="seg" id="svcSeg" role="group" aria-label="AWS service">
+        <button type="button" data-v="ec2" aria-pressed="true">EC2</button>
+        <button type="button" data-v="rds" aria-pressed="false">RDS</button>
+        <button type="button" data-v="lambda" aria-pressed="false">Lambda</button>
+        <button type="button" data-v="s3" aria-pressed="false">S3</button>
+        <button type="button" data-v="iam" aria-pressed="false">IAM</button>
+      </div>
+    </div>
+    <div class="scroll">
+      <svg class="diagram" id="slide" viewBox="0 0 1000 480" aria-label="Ten security duties arranged in three columns: AWS, shared, you"></svg>
+    </div>
+    <div class="kpis">
+      <div class="kpi accent"><b id="kAws">–</b><span>Duties AWS owns</span></div>
+      <div class="kpi"><b id="kShared">–</b><span>Shared</span></div>
+      <div class="kpi" style="--x:0"><b id="kYou">–</b><span>Duties you own</span></div>
+    </div>
+    <div class="card" style="margin-top:12px"><div class="label">Why it lands this way</div><p id="svcWhy" style="margin:0"></p></div>
+  </section>
+
+  <section aria-labelledby="blameTitle">
+    <h2 class="stage-title" id="blameTitle">Whose responsibility was it?</h2>
+    <div class="stage-kind">Pick an incident · the verdict flies to AWS or to you</div>
+    <div class="chip-group"><div class="chips" id="incChips"></div></div>
+    <div class="scroll">
+      <svg class="diagram narrow" id="blame" viewBox="0 0 1000 200" aria-label="An incident card moves to the AWS side or the customer side"></svg>
+    </div>
+    <p class="status-line" id="blameWhy">Pick an incident above.</p>
+  </section>
+
+  <section aria-labelledby="ctrlH">
+    <h2 id="ctrlH">Three kinds of controls</h2>
+    <div class="cards">
+      <div class="card"><h3>Inherited</h3><p>You get them fully from AWS: <b>physical and environmental</b> controls of the data centres. Your auditors can rely on AWS's reports (in AWS Artifact).</p></div>
+      <div class="card"><h3>Shared</h3><p>Both sides do their own layer: <b>patch management</b> (AWS patches infrastructure, you patch your guest OS and apps), <b>configuration management</b>, and <b>awareness &amp; training</b>.</p></div>
+      <div class="card"><h3>Customer-specific</h3><p>Only you can do them: for example <b>service and communications protection</b> or zone security, routing data within your own security environments.</p></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Merged</span><p>Your notes had a separate shared-responsibility page in six sections (Overview, IAM, EC2, EC2 storage, S3, Databases). They're combined here, with one consistent set of duties.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Storage specifics:</b> AWS replicates EBS volumes inside their AZ and EFS data across AZs, replaces faulty hardware, and ensures its staff can't read your data. You set up snapshots and backups, choose encryption, and accept that <b>EC2 Instance Store</b> data is lost when the instance stops.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Exam guide wording (Task 2.1):</b> "how the responsibilities shift depending on the service". The classic contrast: on <b>EC2</b> you patch the OS; on <b>RDS</b> and <b>Lambda</b> AWS does.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Who patches the guest operating system on an EC2 instance?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>You.</b> AWS patches the host and hypervisor underneath.</p></div></details>
+      <details><summary>Who patches the database engine on Amazon RDS?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>AWS</b>, in your chosen maintenance window. You still own the schema, data, users and security groups.</p></div></details>
+      <details><summary>An S3 bucket was made public by mistake and data leaked. Whose responsibility?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>The customer's.</b> Bucket policies and Block Public Access settings are configuration in the cloud.</p></div></details>
+      <details><summary>Name one inherited control.<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Physical and environmental controls</b> of AWS data centres.</p></div></details>
+      <details><summary>Is IAM configuration (users, MFA, least privilege) shared?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>No, it's yours.</b> AWS runs the IAM service and enforces your policies, but you decide who gets what and turn on MFA.</p></div></details>
+      <details><summary>Why does Lambda leave you fewer duties than EC2?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>It's more abstracted:</b> AWS runs the servers, OS and language runtime. You own the code, its execution role, and the data it touches.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Duty assignments simplify AWS's published model for exam use; exact details vary by feature. Sources: "Shared Responsibility Model diagram", "Shared Responsibility Model for IAM", "Shared Responsibility model for EC2", "Shared responsibility model – EC2 Storage", "Shared Responsibility Model – S3", and the IAM and Databases CLF-C02 exam summaries.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const DUTIES = [
+    'Data centres & physical security',
+    'Hardware, host & hypervisor',
+    'Global network infrastructure',
+    'Operating system patching',
+    'Engine / runtime patching',
+    'Your application code',
+    'Network access rules',
+    'Identity & permissions (IAM, MFA)',
+    'Your data: backups, versions, retention',
+    'Encryption choices'
+  ];
+  // a = AWS, s = shared, y = you, n = not applicable
+  const MAP = {
+    ec2:    { m: 'aaayyyyyyy', why: 'EC2 is IaaS. AWS stops at the hypervisor; from the guest OS upward everything is yours: patches, software, security group rules, the IAM role on the instance, snapshots and encryption.' },
+    rds:    { m: 'aaaaayyyss', why: 'RDS is managed: AWS patches the OS and the database engine and automates backups. You still own the schema and queries, security groups, database users, and you choose backup retention, Multi-AZ and encryption.' },
+    lambda: { m: 'aaaaayyyys', why: 'Lambda is serverless: AWS runs the servers, OS and language runtime. You own the function code, its execution role, any network settings, and the data it reads and writes.' },
+    s3:     { m: 'aaaaanyyys', why: 'S3 is fully managed storage: AWS guarantees durability, separates customers\' data and encrypts new objects by default (SSE-S3). You own bucket policies, Block Public Access, versioning, replication, lifecycle and the choice of stronger encryption such as SSE-KMS.' },
+    iam:    { m: 'aaaaannynn', why: 'AWS provides and runs IAM, and enforces every policy decision. Everything about who can do what (users, groups, roles, policies, MFA, key rotation, reviews) is your job.' }
+  };
+  const COLS = { a: 170, s: 500, y: 830, n: 500 };
+  const svg = $('slide');
+  [['a', 'AWS · security OF the cloud', 'var(--accent-text)'], ['s', 'SHARED', 'var(--teal-text)'], ['y', 'YOU · security IN the cloud', 'var(--cyan)']].forEach(([k, label, col]) => {
+    K.el('rect', { x: COLS[k] - 160, y: 40, width: 320, height: 430, rx: 14, class: 'col-bg' }, svg);
+    const t = K.text(svg, COLS[k], 26, label, 'col-head'); t.style.fill = col;
+  });
+  const rows = DUTIES.map((d, i) => {
+    const g = K.el('g', { class: 'duty aws' }, svg);
+    const y = 54 + i * 41;
+    K.el('rect', { x: -145, y, width: 290, height: 34, rx: 8 }, g);
+    K.text(g, 0, y + 22, d, '');
+    g.style.transform = `translateX(${COLS.a}px)`;
+    return g;
+  });
+  function show(v) {
+    const m = MAP[v].m; let c = { a: 0, s: 0, y: 0 };
+    rows.forEach((g, i) => {
+      const k = m[i];
+      g.setAttribute('class', 'duty ' + ({ a: 'aws', s: 'shared', y: 'you', n: 'na' })[k]);
+      g.style.transform = `translateX(${COLS[k]}px)`;
+      g.style.opacity = k === 'n' ? .45 : 1;
+      if (c[k] !== undefined) c[k]++;
+    });
+    $('kAws').textContent = c.a; $('kShared').textContent = c.s; $('kYou').textContent = c.y;
+    $('svcWhy').textContent = MAP[v].why;
+    const nn = m.split('').filter(x => x === 'n').length;
+    if (nn) $('svcWhy').textContent += ` (${nn} dut${nn > 1 ? 'ies don\'t' : 'y doesn\'t'} apply here and ${nn > 1 ? 'are' : 'is'} greyed out.)`;
+  }
+  K.seg($('svcSeg'), show);
+  show('ec2');
+
+  /* ===== whose fault ===== */
+  const INC = [
+    { k: 'flood', label: 'Data centre flooded, hardware destroyed', who: 'aws', why: 'Physical facilities and hardware are AWS\'s, an inherited control. Multi-AZ designs (yours) keep you running meanwhile.' },
+    { k: 'ospatch', label: 'Unpatched Linux on EC2 was hacked', who: 'you', why: 'On EC2 you own the guest OS. Patch it yourself or with AWS Systems Manager Patch Manager.' },
+    { k: 'public', label: 'S3 bucket set public, records leaked', who: 'you', why: 'Bucket policies and Block Public Access are your configuration. AWS keeps Block Public Access on by default for new buckets.' },
+    { k: 'engine', label: 'Known flaw in the RDS MySQL engine', who: 'aws', why: 'AWS patches the managed database engine and OS on RDS, during your maintenance window.' },
+    { k: 'mfa', label: 'Admin account without MFA was taken over', who: 'you', why: 'Enabling MFA and least privilege are customer duties in IAM.' },
+    { k: 'hyper', label: 'Hypervisor bug lets one customer see another\'s VM', who: 'aws', why: 'Host isolation and the hypervisor are AWS\'s responsibility.' },
+    { k: 'secret', label: 'Lambda code logged a database password', who: 'you', why: 'Function code and secret handling are yours. Store secrets in Secrets Manager or Parameter Store.' },
+    { k: 'sg', label: 'Port 22 open to the whole internet', who: 'you', why: 'Security group rules are customer configuration. Use Session Manager to avoid opening SSH at all.' }
+  ];
+  $('incChips').innerHTML = INC.map(i => `<button class="chip-btn" type="button" data-k="${i.k}" aria-pressed="false">${i.label}</button>`).join('');
+  const b = $('blame');
+  K.el('rect', { x: 20, y: 40, width: 280, height: 130, rx: 16, class: 'verdict-zone' }, b);
+  K.el('rect', { x: 700, y: 40, width: 280, height: 130, rx: 16, class: 'verdict-zone' }, b);
+  const t1 = K.text(b, 160, 30, 'AWS', 'col-head'); t1.style.fill = 'var(--accent-text)';
+  const t2 = K.text(b, 840, 30, 'YOU (the customer)', 'col-head'); t2.style.fill = 'var(--cyan)';
+  const pg = K.el('g', {}, b);
+  async function judge(i) {
+    const run = K.newRun('blame'); pg.textContent = '';
+    $('blameWhy').textContent = 'Deciding…';
+    try {
+      const p = K.pill(pg, i.label.length > 34 ? i.label.slice(0, 32) + '…' : i.label, 'ghost');
+      await K.move(p, [500, 105], [500, 105], 10, run);
+      await K.sleep(600, run);
+      p.remove();
+      const v = K.pill(pg, i.who === 'aws' ? 'AWS: security OF the cloud' : 'You: security IN the cloud', i.who === 'aws' ? 'alt' : 'ok');
+      await K.move(v, [500, 105], i.who === 'aws' ? [160, 105] : [840, 105], 650, run);
+      $('blameWhy').innerHTML = `<b>${i.who === 'aws' ? 'AWS' : 'Customer'}.</b> ${i.why}`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('incChips').querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
+    $('incChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === btn)));
+    judge(INC.find(i => i.k === btn.dataset.k));
+  }));
+})();
+</script>
+</body>
+</html>

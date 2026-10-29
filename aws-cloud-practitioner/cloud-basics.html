@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cloud Computing Basics</title>
+<meta name="description" content="AWS Cloud Practitioner: who manages what in IaaS, PaaS and SaaS; why cloud capacity beats buying servers; and how Regions, Availability Zones and edge locations fit together.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .lyr rect { transition: fill .45s ease; stroke: var(--bg); stroke-width: 2; }
+  .lyr.cust rect { fill: var(--pill); }
+  .lyr.prov rect { fill: var(--yellow); }
+  .lyr.shared rect { fill: var(--teal); }
+  .lyr text { fill: var(--ink); font-size: 14px; font-weight: 600; text-anchor: middle; }
+  .lyr.shared text { fill: var(--on-accent); }
+  .lyr .who { font-family: var(--mono); font-size: 11px; font-weight: 500; }
+  .resp-line { stroke: var(--red); stroke-width: 3; stroke-dasharray: 8 6; transition: transform .5s ease; }
+  .resp-tag { transition: transform .5s ease; }
+  .resp-tag rect { fill: var(--red); }
+  .resp-tag text { fill: var(--on-accent); font-family: var(--mono); font-size: 11px; font-weight: 600; text-anchor: middle; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-top: 8px; font-size: 13px; color: var(--muted); }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+  .area-waste { fill: color-mix(in srgb, var(--yellow) 30%, transparent); }
+  .area-short { fill: color-mix(in srgb, var(--red) 40%, transparent); }
+  .line-demand { fill: none; stroke: var(--fg); stroke-width: 2.5; }
+  .line-cap { fill: none; stroke: var(--teal); stroke-width: 3; }
+  .playhead { stroke: var(--cyan); stroke-width: 2; }
+  .az rect.box { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, opacity .2s; }
+  .az.down rect.box { stroke: var(--red); stroke-dasharray: 6 4; }
+  .az.down { opacity: .55; }
+  .dc { fill: var(--panel-2); stroke: var(--faint); stroke-width: 1.5; }
+  .region-box { fill: none; stroke: var(--accent-text); stroke-width: 2; stroke-dasharray: 8 6; }
+  .inst rect { fill: var(--yellow); }
+  .inst text { fill: var(--ink); font-size: 12px; font-weight: 700; text-anchor: middle; }
+  .inst.dead rect { fill: var(--track); }
+  .inst.dead text { fill: var(--faint); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · Section 1 · Domain 1 Cloud Concepts</div>
+    <h1>Cloud Computing Basics</h1>
+    <ul class="lede"><li><b>Cloud computing</b> = on-demand IT (compute, storage, databases, networking) over the internet.</li><li><b>Pay as you go</b>: rent instead of buy, scale in minutes instead of months.</li><li>You choose <b>how much of the stack you manage</b>: IaaS, PaaS or SaaS.</li><li>AWS runs in <b>Regions</b>, each made of isolated <b>Availability Zones</b>, plus <b>edge locations</b> near users.</li></ul>
+  </header>
+
+  <section aria-labelledby="stackTitle">
+    <h2 class="stage-title" id="stackTitle">Who manages what?</h2>
+    <div class="stage-kind">Pick a model · the red line moves</div>
+    <div class="controls">
+      <div class="seg" id="modelSeg" role="group" aria-label="Service model">
+        <button type="button" data-v="onprem" aria-pressed="false">On-premises</button>
+        <button type="button" data-v="iaas" aria-pressed="true">IaaS</button>
+        <button type="button" data-v="paas" aria-pressed="false">PaaS</button>
+        <button type="button" data-v="saas" aria-pressed="false">SaaS</button>
+      </div>
+    </div>
+    <div class="scroll">
+      <svg class="diagram narrow" id="stack" viewBox="0 0 1000 400" aria-label="Nine technology layers coloured by who manages them"></svg>
+    </div>
+    <div class="legend"><span><i style="background:var(--pill)"></i>You manage</span><span><i style="background:var(--teal)"></i>Shared (you configure)</span><span><i style="background:var(--yellow)"></i>Provider manages</span></div>
+    <div class="info-grid">
+      <div class="card facts">
+        <div><div class="label">This model</div><p id="mWhat"></p></div>
+        <div><div class="label">AWS example</div><p id="mAws"></p></div>
+        <div><div class="label">Other examples</div><p id="mOther"></p></div>
+      </div>
+      <div class="card facts">
+        <div><div class="label k-strength">You gain</div><p id="mGain"></p></div>
+        <div><div class="label k-weak">You give up</div><p id="mLose"></p></div>
+        <div><div class="label">Exam trigger</div><p id="mTrig"></p></div>
+      </div>
+    </div>
+    <div class="note"><span class="flag">Corrected</span><p><b>Even with SaaS, your data and access are still yours to manage.</b> The notes' diagram colours SaaS "Data" as provider-managed, while their own table says "shared". The table is right: the provider runs the app, but you decide who gets access, what you store and how it's configured.</p></div>
+  </section>
+
+  <section aria-labelledby="capTitle">
+    <h2 class="stage-title" id="capTitle">Buy servers or rent capacity?</h2>
+    <div class="stage-kind">Two years of growing, spiky demand · illustrative units</div>
+    <div class="controls">
+      <div class="seg" id="capSeg" role="group" aria-label="Capacity approach">
+        <button type="button" data-v="onprem" aria-pressed="true">Traditional IT (buy ahead)</button>
+        <button type="button" data-v="cloud" aria-pressed="false">Cloud (elastic)</button>
+      </div>
+      <button class="btn primary" id="capPlay" type="button">Play two years</button>
+    </div>
+    <div class="scroll">
+      <svg class="diagram" id="cap" viewBox="0 0 1000 300" aria-label="Demand line against capacity; shaded areas show wasted capacity and unmet demand"></svg>
+    </div>
+    <div class="legend"><span><i style="background:var(--fg)"></i>Demand</span><span><i style="background:var(--teal)"></i>Capacity you pay for</span><span><i style="background:color-mix(in srgb,var(--yellow) 30%,transparent)"></i>Paid for, unused</span><span><i style="background:color-mix(in srgb,var(--red) 40%,transparent)"></i>Users turned away</span></div>
+    <div class="kpis">
+      <div class="kpi accent"><b id="kWaste">–</b><span>Capacity paid for but idle</span></div>
+      <div class="kpi bad"><b id="kShort">–</b><span>Demand you couldn't serve</span></div>
+      <div class="kpi"><b id="kCapex">–</b><span>How you pay</span></div>
+    </div>
+    <p class="hint" id="capHint"></p>
+  </section>
+
+  <section aria-labelledby="advH">
+    <h2 id="advH">Six advantages AWS lists (exam favourite)</h2>
+    <div class="cards" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))">
+      <div class="card"><h3>CAPEX → OPEX</h3><p>Trade upfront hardware purchases for a variable bill. You pay only for what you use.</p></div>
+      <div class="card"><h3>Economies of scale</h3><p>AWS buys at huge scale, so the usage price is lower than you'd pay on your own.</p></div>
+      <div class="card"><h3>Stop guessing capacity</h3><p>Scale up or down with demand instead of forecasting years ahead (the chart above).</p></div>
+      <div class="card"><h3>Speed and agility</h3><p>New resources in minutes, not weeks, so it's cheap to experiment.</p></div>
+      <div class="card"><h3>No data centres to run</h3><p>Spend effort on customers and apps, not racking servers and cooling.</p></div>
+      <div class="card"><h3>Go global in minutes</h3><p>Deploy in Regions around the world for lower latency.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="geoTitle">
+    <h2 class="stage-title" id="geoTitle">Regions, Availability Zones and edge locations</h2>
+    <div class="stage-kind">Region → 3+ AZs → data centres · edge locations sit near users</div>
+    <div class="controls">
+      <div class="seg" id="geoSeg" role="group" aria-label="View">
+        <button type="button" data-v="az" aria-pressed="true">Inside a Region</button>
+        <button type="button" data-v="edge" aria-pressed="false">Edge locations</button>
+      </div>
+    </div>
+    <div class="controls" id="azControls">
+      <label class="toggle" for="multiAz"><input type="checkbox" id="multiAz" checked> Deploy across two AZs</label>
+      <label class="toggle" for="azDown"><input type="checkbox" id="azDown"> AZ a has an outage</label>
+      <button class="btn primary" id="azSend" type="button">Send 4 requests</button>
+    </div>
+    <div class="controls" id="edgeControls" hidden>
+      <button class="btn primary" id="edgeSend" type="button">London user requests logo.png</button>
+      <button class="btn" id="edgeReset" type="button">Empty the edge cache</button>
+    </div>
+    <div class="scroll">
+      <svg class="diagram" id="geo" viewBox="0 0 1000 360" aria-label="AWS Region with three Availability Zones, or a London user reaching an edge location"></svg>
+    </div>
+    <p class="status-line" id="geoStatus"></p>
+    <div class="kpis">
+      <div class="kpi"><b>39</b><span>Regions</span></div>
+      <div class="kpi"><b>124</b><span>Availability Zones</span></div>
+      <div class="kpi"><b>750+</b><span>CloudFront points of presence</span></div>
+      <div class="kpi"><b>≥ 3</b><span>AZs per Region</span></div>
+    </div>
+    <p class="sub" style="margin-top:8px">Counts from AWS's global infrastructure page, October 2026. They grow every year, so the exam tests the structure, not the numbers.</p>
+  </section>
+
+  <section aria-labelledby="pickH">
+    <h2 id="pickH">How to choose a Region</h2>
+    <div class="cards">
+      <div class="card"><h3>1 · Compliance</h3><p>Data residency laws come first. Indian patient records that must stay in India → <span class="mono">ap-south-1</span> (Mumbai) or <span class="mono">ap-south-2</span> (Hyderabad).</p></div>
+      <div class="card"><h3>2 · Latency</h3><p>Be close to your users. US customers get a US Region (or CloudFront in front).</p></div>
+      <div class="card"><h3>3 · Service availability</h3><p>New services and features don't launch everywhere at once. Check the Region list.</p></div>
+      <div class="card"><h3>4 · Pricing</h3><p>Prices differ by Region, and so does data transfer between them.</p></div>
+    </div>
+    <div class="scroll card table-card" style="margin-top:14px">
+      <table>
+        <thead><tr><th>Scope</th><th>Examples</th><th>What it means</th></tr></thead>
+        <tbody>
+          <tr><td>Global</td><td>IAM, Route 53, CloudFront, WAF (for CloudFront)</td><td>Configured once, applies everywhere</td></tr>
+          <tr><td>Regional</td><td>EC2, Lambda, Elastic Beanstalk, S3 buckets, RDS, Rekognition</td><td>Pick a Region; resources don't appear in other Regions unless you copy or replicate them</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>An edge location is not an Availability Zone.</b> You don't run EC2 there; CloudFront caches and serves content there. Your origin stays in a Region.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Other places AWS can run your workload</b> (Task 3.2 of the exam guide): <b>Local Zones</b> (a Region extension in a big city for single-digit-millisecond latency), <b>Wavelength Zones</b> (inside 5G telecom networks) and <b>Outposts</b> (AWS hardware in your own data centre).</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Deployment models:</b> <b>public</b> cloud (AWS, Azure, GCP), <b>private</b> cloud (one organisation, more control) and <b>hybrid</b> (keep some servers on-premises, extend into the cloud). The five characteristics: on-demand self-service, broad network access, resource pooling (multi-tenancy), rapid elasticity, and measured service (pay per use).</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Pricing fundamentals:</b> you pay for <b>compute</b> (time or capacity used), <b>storage</b> (data stored, plus requests), and <b>data transfer out</b>. Data transfer <i>into</i> AWS is generally free; data going out to the internet or across Regions is charged.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>A team uploads code and never touches the OS or runtime. IaaS, PaaS or SaaS? Name the AWS service.<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>PaaS: AWS Elastic Beanstalk.</b> EC2 would be IaaS (you patch the OS); Gmail-style finished apps are SaaS.</p></div></details>
+      <details><summary>"Pay only for what you use instead of buying hardware upfront." Which advantage?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Trade capital expense for variable (operational) expense</b>, CAPEX → OPEX.</p></div></details>
+      <details><summary>How do you survive the loss of one data centre in AWS?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Deploy across multiple Availability Zones</b> (with a load balancer). AZs are isolated so one failure doesn't take the others down.</p></div></details>
+      <details><summary>Patient data must legally stay in India. Which Region factor decides first?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Compliance / data residency.</b> Latency, services and price only matter among Regions that are legally allowed.</p></div></details>
+      <details><summary>Is an edge location where you run EC2 instances close to users?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>No.</b> Edge locations serve CloudFront (and some other edge services). For compute near users, look at Local Zones or Wavelength.</p></div></details>
+      <details><summary>Name two global services and two Regional ones.<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Global:</b> IAM, Route 53, CloudFront. <b>Regional:</b> EC2, Lambda, RDS, S3 buckets.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Capacity chart and latencies are illustrative. Infrastructure counts from aws.amazon.com/about-aws/global-infrastructure (checked 29 Oct 2026). Sources: Overview notes "Traditional IT overview", "What is cloud computing", "Types of cloud computing", "AWS Cloud Overview", "AWS Edge Locations & Points of Presence", "Shared Responsibility Model diagram".</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  /* ================= Who manages what ================= */
+  const LAYERS = ['Applications', 'Data', 'Runtime', 'Middleware', 'Operating system', 'Virtualisation', 'Servers', 'Storage', 'Networking'];
+  // c = customer, p = provider, s = shared
+  const MODELS = {
+    onprem: { split: 9, map: 'ccccccccc', what: 'You own and run everything: building, hardware, OS, apps.', aws: 'None: this is your own data centre.', other: 'Company server room, colocation.', gain: 'Total control of every layer.', lose: 'Big upfront cost, long lead times, you patch and replace everything.', trig: '"Own data centre", "upfront hardware purchase".' },
+    iaas: { split: 5, map: 'cccccpppp', what: 'Rent raw building blocks: virtual machines, storage, networks. You manage the OS and up.', aws: 'Amazon EC2 (with EBS and VPC).', other: 'Azure VMs, Google Compute Engine, DigitalOcean.', gain: 'Flexibility close to on-prem, no hardware to buy.', lose: 'You still patch the OS and manage runtimes.', trig: '"Most control", "choose the OS", "lift-and-shift".' },
+    paas: { split: 2, map: 'ccppppppp', what: 'Deploy your code on a managed platform. The provider runs the OS and runtime.', aws: 'AWS Elastic Beanstalk.', other: 'Heroku, Google App Engine.', gain: 'Focus on code; no servers or patching.', lose: 'Less control and some platform lock-in.', trig: '"Just upload code", "don\'t manage infrastructure".' },
+    saas: { split: 0, map: 'psppppppp', what: 'Use a finished application. You manage users, settings and how you use your data.', aws: '', other: 'Gmail, Dropbox, Zoom.', gain: 'Nothing to build or run.', lose: 'Least control: you get the features the vendor ships.', trig: '"Complete product", "end users just log in".' }
+  };
+  const st = $('stack'), X0 = 230, W = 540, H = 36, Y0 = 20;
+  const rows = LAYERS.map((name, i) => {
+    const g = K.el('g', { class: 'lyr cust' }, st);
+    K.el('rect', { x: X0, y: Y0 + i * (H + 4), width: W, height: H, rx: 8 }, g);
+    K.text(g, X0 + W / 2 - 60, Y0 + i * (H + 4) + 23, name, '');
+    const who = K.text(g, X0 + W - 70, Y0 + i * (H + 4) + 23, 'YOU', 'who');
+    return { g, who };
+  });
+  const lineG = K.el('g', {}, st);
+  K.el('line', { x1: X0 - 40, y1: 0, x2: X0 + W + 40, y2: 0, class: 'resp-line' }, lineG);
+  const tag = K.el('g', { class: 'resp-tag' }, lineG);
+  K.el('rect', { x: X0 + W + 46, y: -12, width: 150, height: 24, rx: 6 }, tag);
+  K.text(tag, X0 + W + 121, 4, 'you ↑ · provider ↓', '');
+  function model(v) {
+    const m = MODELS[v];
+    rows.forEach((r, i) => {
+      const c = v === 'saas' ? (i === 1 ? 's' : 'p') : m.map[i];
+      r.g.setAttribute('class', 'lyr ' + (c === 'c' ? 'cust' : c === 's' ? 'shared' : 'prov'));
+      r.who.textContent = c === 'c' ? 'YOU' : c === 's' ? 'SHARED' : 'PROVIDER';
+    });
+    const y = Y0 + m.split * (H + 4) - 2;
+    lineG.style.transition = 'transform .5s ease';
+    lineG.style.transform = `translateY(${y}px)`;
+    lineG.style.opacity = (v === 'onprem') ? 0 : 1;
+    $('mWhat').textContent = m.what; $('mAws').textContent = m.aws; $('mOther').textContent = m.other;
+    $('mGain').textContent = m.gain; $('mLose').textContent = m.lose; $('mTrig').textContent = m.trig;
+  }
+  MODELS.saas.aws = 'Amazon Connect (a ready-to-use cloud contact centre). Most AWS services are managed building blocks, not SaaS.';
+  K.seg($('modelSeg'), model);
+  model('iaas');
+
+  /* ================= Capacity chart ================= */
+  const cap = $('cap');
+  const MONTHS = 24, CX0 = 60, CX1 = 970, CY0 = 260, CY1 = 20, VMAX = 140;
+  const xm = m => CX0 + m / MONTHS * (CX1 - CX0), yv = v => CY0 - v / VMAX * (CY0 - CY1);
+  // demand: growth + seasonal + two spikes (deterministic)
+  const demand = [];
+  for (let i = 0; i <= MONTHS * 4; i++) {
+    const m = i / 4;
+    let d = 30 + m * 2.6 + 8 * Math.sin(m / 1.9);
+    if (m > 9.5 && m < 11) d += 42;           // festival sale
+    if (m > 19.5 && m < 20.75) d += 50;       // viral campaign
+    demand.push([m, d]);
+  }
+  function capacityAt(mode, m) {
+    if (mode === 'cloud') {
+      // auto scaling: follows demand with ~10% headroom and a short lag
+      const lag = demand[Math.max(0, Math.round(m * 4) - 1)][1];
+      return lag * 1.1;
+    }
+    // buy servers every 6 months sized to a forecast of linear growth (+15% buffer), 2-month lead time
+    const step = Math.floor(m / 6) * 6;
+    return (30 + (step + 6) * 2.6) * 1.15 + 6;
+  }
+  let capMode = 'onprem';
+  function drawCap(upto = MONTHS) {
+    cap.textContent = '';
+    K.el('line', { x1: CX0, y1: CY0, x2: CX1, y2: CY0, class: 'axis' }, cap);
+    K.el('line', { x1: CX0, y1: CY0, x2: CX0, y2: CY1, class: 'axis' }, cap);
+    for (let m = 0; m <= MONTHS; m += 6) { K.text(cap, xm(m), CY0 + 18, m === 0 ? 'start' : `month ${m}`, 'mlabel muted'); K.el('line', { x1: xm(m), y1: CY1, x2: xm(m), y2: CY0, class: 'grid-line' }, cap); }
+    const yl = K.text(cap, CX0 - 8, CY1 + 10, 'servers', 'mlabel muted'); yl.style.textAnchor = 'end';
+    K.text(cap, xm(10.25), CY1 + 6, 'festival sale', 'mlabel accent');
+    K.text(cap, xm(20.1), CY1 + 6, 'viral campaign', 'mlabel accent');
+    let waste = 0, short = 0, dPath = '', cPath = '';
+    const pts = demand.filter(([m]) => m <= upto);
+    pts.forEach(([m, d], i) => {
+      const c = capacityAt(capMode, m);
+      dPath += (i ? 'L' : 'M') + xm(m).toFixed(1) + ' ' + yv(d).toFixed(1);
+      cPath += (i ? 'L' : 'M') + xm(m).toFixed(1) + ' ' + yv(c).toFixed(1);
+      if (i) {
+        const w = (CX1 - CX0) / (MONTHS * 4);
+        const x = xm(m) - w;
+        if (c > d) { K.el('rect', { x, y: yv(c), width: w + .5, height: yv(d) - yv(c), class: 'area-waste' }, cap); waste += c - d; }
+        else { K.el('rect', { x, y: yv(d), width: w + .5, height: yv(c) - yv(d), class: 'area-short' }, cap); short += d - c; }
+      }
+    });
+    K.el('path', { d: cPath, class: 'line-cap' }, cap);
+    K.el('path', { d: dPath, class: 'line-demand' }, cap);
+    const total = pts.reduce((s, [, d]) => s + d, 0) || 1;
+    $('kWaste').textContent = Math.round(waste / total * 100) + '% extra';
+    $('kShort').textContent = short > 0.5 ? Math.round(short / total * 1000) / 10 + '% of demand' : 'none';
+    $('kCapex').textContent = capMode === 'cloud' ? 'Monthly, per use (OPEX)' : 'Upfront every 6 months (CAPEX)';
+    $('capHint').innerHTML = capMode === 'cloud'
+      ? 'Capacity follows demand, a little ahead of it. Spikes are absorbed and quiet months cost less. That is <b>elasticity</b>, and you stop guessing capacity.'
+      : 'Servers are bought in big steps from a forecast. Most months you pay for idle machines, yet the <b>sale and the viral campaign still overflow</b>, because nobody forecast them.';
+    return { pts };
+  }
+  async function playCap() {
+    const run = K.newRun('cap');
+    try { for (let m = 0; m <= MONTHS; m += 0.25) { drawCap(m); K.el('line', { x1: xm(m), y1: CY1, x2: xm(m), y2: CY0, class: 'playhead' }, cap); await K.sleep(55, run); } drawCap(); }
+    catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  K.seg($('capSeg'), v => { capMode = v; K.cancel('cap'); drawCap(); });
+  $('capPlay').addEventListener('click', playCap);
+  drawCap();
+
+  /* ================= Regions / AZs / edge ================= */
+  const geo = $('geo'), status = $('geoStatus');
+  let geoView = 'az';
+  const AZX = [330, 590, 850], AZY = 205;
+  let azNodes = [], inst = [], lbN = null, userN = null, pillsG = null;
+  function drawAz() {
+    geo.textContent = '';
+    K.el('rect', { x: 200, y: 40, width: 785, height: 305, rx: 18, class: 'region-box' }, geo);
+    const t = K.text(geo, 220, 64, 'REGION ap-south-1 (Mumbai)', 'zone-label'); t.style.fill = 'var(--accent-text)';
+    userN = K.node(geo, 100, 105, 140, 56, 'Users', 'India');
+    lbN = K.node(geo, 590, 105, 220, 50, 'Load balancer', 'spans the AZs');
+    lbN.g.classList.add('teal');
+    K.el('line', { x1: 170, y1: 105, x2: 480, y2: 105, class: 'msg solid' }, geo);
+    azNodes = []; inst = [];
+    const multi = $('multiAz').checked, down = $('azDown').checked;
+    AZX.forEach((x, i) => {
+      const g = K.el('g', { class: 'az' + (down && i === 0 ? ' down' : '') }, geo);
+      K.el('rect', { x: x - 115, y: 150, width: 230, height: 180, rx: 14, class: 'box' }, g);
+      K.text(g, x, 172, `AZ ap-south-1${'abc'[i]}`, 'mlabel');
+      [0, 1].forEach(k => K.el('rect', { x: x - 95 + k * 105, y: 270, width: 85, height: 46, rx: 6, class: 'dc' }, g));
+      K.text(g, x - 52, 297, 'data centre', 'svg-muted').style.textAnchor = 'middle';
+      K.text(g, x + 52, 297, 'data centre', 'svg-muted').style.textAnchor = 'middle';
+      azNodes.push(g);
+      const hasInst = i === 0 || (multi && i === 1);
+      if (hasInst) {
+        const ig = K.el('g', { class: 'inst' + (down && i === 0 ? ' dead' : '') }, geo);
+        K.el('rect', { x: x - 60, y: 200, width: 120, height: 40, rx: 8 }, ig);
+        K.text(ig, x, 225, down && i === 0 ? 'EC2 · down' : 'EC2 app', '');
+        inst.push({ x, alive: !(down && i === 0) });
+        K.el('line', { x1: 590, y1: 130, x2: x, y2: 200, class: 'msg ' + (down && i === 0 ? 'bad dash' : 'solid') }, geo);
+      }
+    });
+    pillsG = K.el('g', {}, geo);
+    status.innerHTML = !multi && down ? '<span class="bad-text">Single-AZ app and that AZ is down: the whole app is offline.</span>'
+      : multi && down ? 'AZ a is down; the load balancer sends everything to AZ b. Users notice nothing.'
+      : multi ? 'Two copies in separate AZs. Press "AZ a has an outage" to test it.' : 'Only one copy, in AZ a. One power or network failure there takes the app down.';
+  }
+  async function sendAz() {
+    if (geoView !== 'az') return;
+    const run = K.newRun('geo');
+    drawAz();
+    const alive = inst.filter(i => i.alive);
+    let ok = 0, fail = 0;
+    try {
+      for (let r = 0; r < 4; r++) {
+        const p = K.pill(pillsG, `req ${r + 1}`);
+        await K.move(p, [170, 105], [480, 105], 450, run);
+        if (!alive.length) { p.remove(); const f = K.pill(pillsG, '503 · no healthy target', 'bad'); await K.move(f, [480, 105], [170, 105], 450, run); f.remove(); fail++; continue; }
+        const target = alive[r % alive.length];
+        await K.move(p, [590, 130], [target.x, 200], 400, run); p.remove();
+        const back = K.pill(pillsG, '200 OK', 'ok'); await K.move(back, [target.x, 200], [590, 130], 300, run); back.remove(); ok++;
+      }
+      status.innerHTML += `<br>Result: <span class="ok-text">${ok} served</span>${fail ? `, <span class="bad-text">${fail} failed</span>` : ''}.`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  let edgeCached = false;
+  function drawEdge() {
+    geo.textContent = '';
+    K.node(geo, 100, 180, 140, 60, 'User', 'London');
+    const edge = K.node(geo, 400, 180, 200, 70, 'Edge location', edgeCached ? 'cache: logo.png' : 'cache: empty');
+    edge.g.classList.add('teal');
+    K.el('rect', { x: 690, y: 90, width: 280, height: 180, rx: 18, class: 'region-box' }, geo);
+    const t = K.text(geo, 710, 114, 'REGION ap-south-1 (Mumbai)', 'zone-label'); t.style.fill = 'var(--accent-text)';
+    const o = K.node(geo, 830, 190, 200, 60, 'Origin', 'S3 bucket / ALB'); o.g.classList.add('solid');
+    K.el('line', { x1: 170, y1: 180, x2: 300, y2: 180, class: 'msg solid' }, geo);
+    K.el('line', { x1: 500, y1: 185, x2: 730, y2: 190, class: 'msg dash' }, geo);
+    K.text(geo, 235, 165, '~10 ms', 'mlabel muted');
+    K.text(geo, 615, 175, '~120 ms each way', 'mlabel muted');
+    pillsG = K.el('g', {}, geo);
+    status.innerHTML = edgeCached ? 'The edge holds a copy now: the next request never leaves London.' : 'First request: the edge has nothing yet (cache miss).';
+  }
+  async function sendEdge() {
+    const run = K.newRun('geo');
+    drawEdge();
+    try {
+      let p = K.pill(pillsG, 'GET /logo.png');
+      await K.move(p, [170, 180], [300, 180], 450, run); p.remove();
+      if (edgeCached) {
+        p = K.pill(pillsG, 'HIT · ~20 ms total', 'ok'); await K.move(p, [300, 180], [170, 180], 450, run); p.remove();
+        status.innerHTML = '<span class="ok-text">Cache hit</span>: served from the London edge in about 20 ms. Mumbai never saw the request.';
+        return;
+      }
+      p = K.pill(pillsG, 'MISS → origin', 'alt'); await K.move(p, [500, 185], [730, 190], 700, run); p.remove();
+      p = K.pill(pillsG, 'logo.png'); await K.move(p, [730, 190], [500, 185], 700, run); p.remove();
+      edgeCached = true; drawEdge();
+      p = K.pill(pillsG, '200 · ~260 ms total', 'ok'); await K.move(p, [300, 180], [170, 180], 450, run); p.remove();
+      status.innerHTML = '<span class="accent">Cache miss</span>: the edge fetched from Mumbai (~260 ms) and kept a copy. Send it again.';
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  K.seg($('geoSeg'), v => {
+    geoView = v; K.cancel('geo');
+    $('azControls').hidden = v !== 'az'; $('edgeControls').hidden = v !== 'edge';
+    v === 'az' ? drawAz() : drawEdge();
+  });
+  ['multiAz', 'azDown'].forEach(id => $(id).addEventListener('change', () => { K.cancel('geo'); drawAz(); }));
+  $('azSend').addEventListener('click', sendAz);
+  $('edgeSend').addEventListener('click', sendEdge);
+  $('edgeReset').addEventListener('click', () => { K.cancel('geo'); edgeCached = false; drawEdge(); });
+  drawAz();
+})();
+</script>
+</body>
+</html>
