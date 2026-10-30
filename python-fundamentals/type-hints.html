@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Type hints</title>
+<meta name="description" content="Python fundamentals: annotating variables, parameters and return values, built-in generics like list[int], X | None, and what a type checker such as mypy catches that Python itself doesn&#x27;t.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<script src="traces/type-hints.js"></script>
+<style>
+  .static-code { margin: 0; }
+  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
+  .ck-out { margin: 4px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px; min-height: 48px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Python Fundamentals</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Python · Topic 19 · Going further</div>
+    <h1>Type hints</h1>
+    <ul class="lede"><li>Type hints describe what a value <b>should</b> be: <span class="mono">def with_tax(amount: float) -&gt; float:</span>.</li><li>Python <b>does not check them at run time</b>. They're read by your editor and by type checkers such as <b>mypy</b> or <b>pyright</b> before the code runs.</li><li>Modern syntax: <span class="mono">list[int]</span>, <span class="mono">dict[str, float]</span>, <span class="mono">str | None</span> (3.10+). No <span class="mono">typing</span> import needed for these.</li><li>Hints document intent, power autocomplete, and catch whole classes of bugs (None, wrong types, typos) early: the closest Python gets to C#'s compiler checks.</li></ul>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: annotations are stored, not enforced</h2>
+    <div class="stage-kind">Real trace of real code · Next ▶ moves one idea at a time</div>
+    <div class="story wide" id="pageStory">
+      <div id="pageTrace"></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Run and change the code, predict before you peek, and try to break things.</p>
+
+  <section aria-labelledby="runH">
+    <h2 class="stage-title" id="runH">Edit and run</h2>
+    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div id="runner"></div>
+  </section>
+
+  <section aria-labelledby="predH">
+    <h2 class="stage-title" id="predH">Predict the output</h2>
+    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="chips" id="pzChips"></div>
+    <div class="puzzle-area" id="pzArea"></div>
+  </section>
+
+  <section aria-labelledby="chkH">
+    <h2 class="stage-title" id="chkH">Run time vs type checker</h2>
+    <div class="stage-kind">Same code, two verdicts · from real runs of Python and mypy</div>
+    <div class="chips" id="ckBtns"></div>
+    <pre class="codeblock" id="ckCode" style="min-height:0;margin-top:10px"></pre>
+    <div class="two">
+      <div class="card"><div class="label">python check.py</div><pre class="mono ck-out" id="ckRun"></pre></div>
+      <div class="card"><div class="label">mypy check.py <span class="muted" id="ckVer"></span></div><pre class="mono ck-out" id="ckMy"></pre></div>
+    </div>
+    <p class="status-line" id="ckStatus"></p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Function signature</span><span class="arrow">→</span><span class="then"><span class="mono">def f(x: int, name: str = "") -&gt; bool:</span></span></li>
+      <li><span class="if">Collections</span><span class="arrow">→</span><span class="then"><span class="mono">list[int]</span>, <span class="mono">dict[str, float]</span>, <span class="mono">tuple[int, str]</span>, <span class="mono">set[str]</span></span></li>
+      <li><span class="if">Might be missing</span><span class="arrow">→</span><span class="then"><span class="mono">str | None</span>, then check <span class="mono">if x is not None</span></span></li>
+      <li><span class="if">Either type</span><span class="arrow">→</span><span class="then"><span class="mono">int | str</span> + <span class="mono">isinstance</span> to narrow</span></li>
+      <li><span class="if">Dict with fixed keys (JSON rows)</span><span class="arrow">→</span><span class="then"><span class="mono">TypedDict</span>, or a dataclass / Pydantic model</span></li>
+      <li><span class="if">Any object with a .send() method</span><span class="arrow">→</span><span class="then"><span class="mono">typing.Protocol</span> (structural typing)</span></li>
+      <li><span class="if">Check the whole project</span><span class="arrow">→</span><span class="then"><span class="mono">pip install mypy</span> → <span class="mono">mypy .</span>; or pyright / your editor's checker</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: old vs modern spellings</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Older (typing module)</th><th>Modern</th><th>Since</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">List[int], Dict[str, int]</td><td class="mono">list[int], dict[str, int]</td><td>3.9</td></tr>
+          <tr><td class="mono">Optional[str]</td><td class="mono">str | None</td><td>3.10</td></tr>
+          <tr><td class="mono">Union[int, str]</td><td class="mono">int | str</td><td>3.10</td></tr>
+          <tr><td class="mono">TypeVar("T") + Generic[T]</td><td class="mono">def first[T](xs: list[T]) -&gt; T:</td><td>3.12</td></tr>
+          <tr><td class="mono">Alias = list[int]</td><td class="mono">type Alias = list[int]</td><td>3.12</td></tr>
+          <tr><td class="mono">"Patient" (quoted forward ref)</td><td class="mono">Patient (annotations evaluated lazily)</td><td>3.14</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>Function_basics.py</b> uses <span class="mono">Union[str, None]</span> imported from typing; since Python 3.10 write <span class="mono">str | None</span>. Its <span class="mono">calculator_func(...) -&gt; int</span> actually returns a tuple of four numbers; mypy would report that line.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>From your Notion plan:</b> "type hints" (8-week plan, Week 5). Hints also matter for the AI-agent goal in your Roadmap: tool-calling libraries and FastAPI/Pydantic build JSON schemas from them.</p></div>
+      <div class="note"><span class="flag add">Updated</span><p><b>Python 3.14</b> evaluates annotations lazily (PEP 649/749), so a class can refer to itself or to classes defined later without quotes or <span class="mono">from __future__ import annotations</span>.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Say the answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Does Python raise an error for <span class="mono">x: int = "hello"</span>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>No</b>, it prints <span class="mono">hello</span>. Only a type checker would complain.</p></div></details>
+      <details><summary>What does <span class="mono">-&gt; None</span> on a function mean?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>It returns nothing useful (implicitly None). A checker will flag callers that try to use the result, a common bug with methods like <span class="mono">list.sort()</span>.</p></div></details>
+      <details><summary><span class="mono">def f(a: int, b: int = 2) -&gt; int: return a + b\nprint(f.__annotations__["return"].__name__)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">int</b>. The return hint is stored under the key "return".</p></div></details>
+    </div>
+  </section>
+
+  <footer>Every trace and output on this page was produced by running the code (Python 3.13; the same results on Python 3.15). The edit-and-run box runs real Python 3.14 in your browser with Pyodide. From the Notion plan (Planning for python learning, Week 5: type hints). mypy results generated with mypy 2.4.1. Python docs: typing, PEP 604, PEP 695, PEP 649.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const T = window.TRACES['type-hints'];
+
+  /* ========== Walkthrough ========== */
+  const tr = K.trace($('pageTrace'), T.walk, {});
+  const MAP = [1, 2, 6, 8, 10, 19, 20];
+  const STEPS = [{"title": "Annotations on a function", "text": "<span class=\"mono\">amount: float</span> says the parameter should be a float; <span class=\"mono\">-&gt; float</span> describes the return value. Defaults still come after the annotation: <span class=\"mono\">rate: float = 0.18</span>."}, {"title": "Generics and Optional", "text": "<span class=\"mono\">list[str]</span> means \"a list of strings\". <span class=\"mono\">int | None</span> says the function may return an int <b>or</b> None, a warning to every caller to handle both."}, {"title": "Variables can be annotated too", "text": "<span class=\"mono\">fee: float = …</span> works like a normal assignment plus a hint for tools."}, {"title": "Python doesn't stop a wrong type", "text": "<span class=\"mono\">with_tax(\"ab\", 2)</span> passes a str where a float was promised. Python runs it anyway: inside, <span class=\"mono\">amount * (1 + rate)</span> is <span class=\"mono\">\"ab\" * 3</span>…", "tip": "mypy would flag this line before you ever ran it: Argument 1 has incompatible type \"str\"; expected \"float\"."}, {"title": "…and gets a nonsense result", "text": "<span class=\"mono\">oops</span> is <span class=\"mono\">'ababab'</span>: no error, just a wrong value that surfaces later. That's the class of bug a type checker removes."}, {"title": "Optional results", "text": "<span class=\"mono\">find</span> returned 1 here, but callers must still allow for None (not found) before using the result as a number."}, {"title": "Hints live in __annotations__", "text": "Python stores the hints on the function as plain data. Frameworks such as FastAPI and Pydantic read them to validate requests at run time; Python itself never does."}];
+  STEPS.forEach((st, i) => {
+    if (i === 0) return;
+    st.play = async run => { for (let k = MAP[i - 1] + 1; k <= MAP[i]; k++) { tr.show(k); if (k < MAP[i]) await K.sleep(Math.max(150, Math.min(600, 4800 / (MAP[i] - MAP[i - 1]))), run); } };
+  });
+  K.story({ root: $('pageStory'), steps: STEPS, show: i => tr.show(MAP[i]), tipLabel: 'Tip' });
+
+  /* ========== Edit and run ========== */
+  K.pyRunner($('runner'), { starters: [{"label": "Walkthrough code", "code": "def with_tax(amount: float, rate: float = 0.18) -> float:\n    return amount * (1 + rate)\n\ndef find(names: list[str], wanted: str) -> int | None:\n    for i, name in enumerate(names):\n        if name == wanted:\n            return i\n    return None\n\nfee: float = with_tax(1000)\noops = with_tax(\"ab\", 2)\nwhere = find([\"Asha\", \"Ravi\"], \"Ravi\")\nprint(fee, oops, where)\nprint(with_tax.__annotations__)", "inputs": []}, {"label": "Puzzle 1: does this raise?", "code": "def double(n: int) -> int:\n    return n * 2\n\nprint(double(\"7\"))", "inputs": []}, {"label": "Puzzle 2: the return hint", "code": "def avg(xs: list[int]) -> int:\n    return sum(xs) / len(xs)\n\nr = avg([1, 2])\nprint(r, type(r).__name__)", "inputs": []}, {"label": "Puzzle 3: annotation without a value", "code": "count: int\nprint(count)", "inputs": []}, {"label": "Puzzle 4: isinstance with |", "code": "def label(x: int | str) -> str:\n    if isinstance(x, int):\n        return f\"#{x:03d}\"\n    return x.upper()\n\nprint(label(7), label(\"vip\"))", "inputs": []}, {"label": "Your turn: annotate and use TypedDict", "code": "from typing import TypedDict\n\nclass PatientRow(TypedDict):\n    name: str\n    fee: int\n\ndef total(rows: list[PatientRow]) -> int:\n    return sum(r[\"fee\"] for r in rows)\n\nrows: list[PatientRow] = [{\"name\": \"Asha\", \"fee\": 450}, {\"name\": \"Ravi\", \"fee\": 800}]\nprint(total(rows))\nprint(total.__annotations__)"}] });
+
+  /* ========== Predict the output ========== */
+  const PZ = [{"id": "p1", "name": "1 · does this raise?", "q": "What happens when you run it?", "opts": ["TypeError: expected int", "77", "14"], "a": 1, "why": "Hints aren't enforced. <span class=\"mono\">\"7\" * 2</span> is <span class=\"mono\">\"77\"</span>. A type checker would report the call."}, {"id": "p2", "name": "2 · the return hint", "q": "What's printed?", "opts": ["1 int", "1.5 float", "TypeError"], "a": 1, "why": "<span class=\"mono\">/</span> always returns a float, whatever the hint says. The hint should be <span class=\"mono\">-&gt; float</span>, or use <span class=\"mono\">//</span> if you really want an int."}, {"id": "p3", "name": "3 · annotation without a value", "q": "What happens?", "opts": ["0", "None", "NameError: name 'count' is not defined"], "a": 2, "why": "A bare annotation records the type but doesn't create the variable."}, {"id": "p4", "name": "4 · isinstance with |", "q": "What's printed?", "opts": ["#007 VIP", "7 vip", "#7 VIP"], "a": 0, "why": "Checking with isinstance <b>narrows</b> the type: a checker knows x is an int inside the if, and a str after it."}];
+  $('pzChips').innerHTML = PZ.map((p, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${p.name}</button>`).join('');
+  function puzzle(i) {
+    const p = PZ[i], area = $('pzArea');
+    area.innerHTML = `<div class="two">
+        <div><pre class="codeblock static-code">${T[p.id].code.split('\n').map(l => `<span class="ln">${K.pyHighlight(l) || ' '}</span>`).join('')}</pre></div>
+        <div class="card predict"><div class="q">${p.q}</div><div class="opts">${p.opts.map((o, j) => `<button class="chip-btn" type="button" data-j="${j}">${o.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</button>`).join('')}</div><p class="status-line" style="text-align:left;margin:0" id="pzVerdict">Choose an answer to unlock the step-through.</p></div>
+      </div><div id="pzTrace"></div>`;
+    area.querySelectorAll('.predict .chip-btn').forEach(b => b.addEventListener('click', () => {
+      const j = +b.dataset.j, ok = j === p.a;
+      area.querySelectorAll('.predict .chip-btn').forEach((x, xj) => { x.disabled = true; x.classList.toggle('right', xj === p.a); x.classList.toggle('wrong', xj === j && !ok); });
+      $('pzVerdict').innerHTML = `<span class="${ok ? 'ok-text' : 'bad-text'}">${ok ? 'Correct.' : 'Not quite.'}</span> ${p.why} <b>Step through below to watch it happen.</b>`;
+      K.trace($('pzTrace'), T[p.id], { controls: true });
+    }));
+  }
+  $('pzChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('pzChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    puzzle(+b.dataset.i);
+  }));
+  $('pzChips').querySelector('button').click();
+
+  /* ===== Run time vs type checker ===== */
+  (function () {
+    const TH = [{"title": "Wrong argument type", "code": "def with_tax(amount: float) -> float:\n    return amount * 1.18\n\nprint(with_tax(\"100\"))", "mypy": ["line 4: error: Argument 1 to \"with_tax\" has incompatible type \"str\"; expected \"float\"  [arg-type]"], "run": "TypeError: can't multiply sequence by non-int of type 'float'"}, {"title": "Correct call", "code": "def with_tax(amount: float) -> float:\n    return amount * 1.18\n\nprint(with_tax(100))", "mypy": ["Success: no issues found"], "run": "118.0"}, {"title": "Possibly None", "code": "def find(name: str) -> str | None:\n    return None if name == \"x\" else name.upper()\n\nprint(find(\"asha\").lower())", "mypy": ["line 4: error: Item \"None\" of \"str | None\" has no attribute \"lower\"  [union-attr]"], "run": "asha"}, {"title": "None handled", "code": "def find(name: str) -> str | None:\n    return None if name == \"x\" else name.upper()\n\nresult = find(\"asha\")\nif result is not None:\n    print(result.lower())", "mypy": ["Success: no issues found"], "run": "asha"}, {"title": "Wrong return type", "code": "def total(fees: list[int]) -> int:\n    return sum(fees) / len(fees)\n\nprint(total([450, 800]))", "mypy": ["line 2: error: Incompatible return value type (got \"float\", expected \"int\")  [return-value]"], "run": "625.0"}, {"title": "Dict value type", "code": "fees: dict[str, int] = {\"Asha\": 450}\nfees[\"Ravi\"] = \"800\"\nprint(fees)", "mypy": ["line 2: error: Incompatible types in assignment (expression has type \"str\", target has type \"int\")  [assignment]"], "run": "{'Asha': 450, 'Ravi': '800'}"}, {"title": "Typo in attribute", "code": "from dataclasses import dataclass\n\n@dataclass\nclass Patient:\n    name: str\n    age: int\n\np = Patient(\"Asha\", 35)\nprint(p.agee)", "mypy": ["line 9: error: \"Patient\" has no attribute \"agee\"; maybe \"age\"?  [attr-defined]"], "run": "AttributeError: 'Patient' object has no attribute 'agee'"}];
+    $('ckVer').textContent = '(mypy 2.4.1)';
+    $('ckBtns').innerHTML = TH.map((t, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="${!i}">${t.title}</button>`).join('');
+    function show(i) {
+      const t = TH[i];
+      $('ckCode').innerHTML = t.code.split('\n').map(l => `<span class="ln">${K.pyHighlight(l)}</span>`).join('');
+      const runErr = /Error:/.test(t.run), myErr = !/^Success/.test(t.mypy[0]);
+      $('ckRun').innerHTML = `<span class="${runErr ? 'bad-text' : ''}">${t.run.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span>`;
+      $('ckMy').innerHTML = t.mypy.map(l => `<span class="${/error/.test(l) ? 'bad-text' : /note/.test(l) ? 'muted' : 'ok-text'}">${l.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</span>`).join('\n');
+      $('ckStatus').innerHTML = myErr && !runErr ? '<b>Runs without an error this time</b>, yet mypy found a bug waiting to happen: a wrong type stored or returned, or a None that will crash on other input.' : myErr && runErr ? 'Both fail, but mypy tells you <b>before</b> running, with the exact line.' : 'Clean for both.';
+    }
+    $('ckBtns').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { $('ckBtns').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); show(+b.dataset.i); }));
+    show(0);
+  })();
+})();
+</script>
+</body>
+</html>

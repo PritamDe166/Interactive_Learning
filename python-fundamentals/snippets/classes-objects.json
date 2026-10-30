@@ -1,0 +1,33 @@
+{
+ "page": "classes-objects",
+ "snippets": {
+  "walk": {
+   "code": "class Patient:\n    clinic = \"Pune\"\n    def __init__(self, name, age):\n        self.name = name\n        self.age = age\n        self.visits = []\n    def book(self, slot):\n        self.visits.append(slot)\n        return len(self.visits)\n\nclass VIPPatient(Patient):\n    def __init__(self, name, age, tier):\n        super().__init__(name, age)\n        self.tier = tier\n    def book(self, slot):\n        n = super().book(slot)\n        return f\"{self.tier} #{n}\"\n\nasha = Patient(\"Asha\", 35)\nravi = VIPPatient(\"Ravi\", 41, \"gold\")\nprint(asha.book(\"9:00\"), ravi.book(\"9:30\"))\nprint(asha.clinic, isinstance(ravi, Patient))",
+   "inputs": []
+  },
+  "p1": {
+   "code": "class Counter:\n    def __init__(self):\n        count = 0\n\nc = Counter()\nprint(c.count)",
+   "inputs": []
+  },
+  "p2": {
+   "code": "class Ward:\n    beds = []\n    def add(self, name):\n        self.beds.append(name)\n\na = Ward(); b = Ward()\na.add(\"Asha\")\nprint(b.beds)",
+   "inputs": []
+  },
+  "p3": {
+   "code": "class Patient:\n    clinic = \"Pune\"\n\na = Patient(); b = Patient()\na.clinic = \"Delhi\"\nprint(a.clinic, b.clinic, Patient.clinic)",
+   "inputs": []
+  },
+  "p4": {
+   "code": "class Patient:\n    def __init__(self, name):\n        self.name = name\n\nprint(Patient(\"Asha\"))",
+   "inputs": []
+  },
+  "p5": {
+   "code": "class Base:\n    def __init__(self):\n        self.id = 1\n\nclass Child(Base):\n    def __init__(self):\n        self.name = \"c\"\n\nprint(vars(Child()))",
+   "inputs": []
+  },
+  "p6": {
+   "code": "class Account:\n    def __init__(self, balance):\n        self.balance = balance\n    def deposit(self, amount):\n        self.balance += amount\n\nacc = Account(100)\nAccount.deposit(acc, 50)\nacc.deposit(25)\nprint(acc.balance)",
+   "inputs": []
+  }
+ }
+}

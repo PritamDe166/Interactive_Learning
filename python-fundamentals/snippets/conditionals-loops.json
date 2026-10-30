@@ -1,0 +1,33 @@
+{
+ "page": "conditionals-loops",
+ "snippets": {
+  "walk": {
+   "code": "scores = [72, 45, 91, 60]\npassed = 0\nfor i, score in enumerate(scores):\n    if score < 50:\n        print(i, \"fail\")\n        continue\n    if score >= 90:\n        print(i, \"top\")\n    passed += 1\nprint(\"passed:\", passed)\nn = 2\nwhile n > 0:\n    print(\"T-minus\", n)\n    n -= 1",
+   "inputs": []
+  },
+  "p1": {
+   "code": "for n in range(2, 10, 3):\n    print(n, end=\" \")",
+   "inputs": []
+  },
+  "p2": {
+   "code": "score = 95\nif score >= 60:\n    print(\"D\")\nelif score >= 90:\n    print(\"A\")",
+   "inputs": []
+  },
+  "p3": {
+   "code": "for slot in [\"9:00\", \"9:30\", \"10:00\"]:\n    if slot == \"9:30\":\n        print(\"booked\", slot)\n        break\nelse:\n    print(\"no slot\")",
+   "inputs": []
+  },
+  "p4": {
+   "code": "for i in range(3):\n    print(i, end=\" \")\n    i = 10",
+   "inputs": []
+  },
+  "p5": {
+   "code": "name = \"\"\nvisits = [0]\nif name:\n    print(\"has name\")\nif visits:\n    print(\"has visits\")",
+   "inputs": []
+  },
+  "p6": {
+   "code": "age = 15\nprint(10 < age < 18, 10 < age > 18)",
+   "inputs": []
+  }
+ }
+}

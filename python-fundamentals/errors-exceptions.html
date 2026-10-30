@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Errors &amp; exceptions</title>
+<meta name="description" content="Python fundamentals: reading a traceback, try/except/else/finally, catching specific exceptions, raising your own, and how an exception travels up the call stack.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<script src="traces/errors-exceptions.js"></script>
+<style>
+  .static-code { margin: 0; }
+  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
+  .fl-out { margin: 4px 0 0; min-height: 70px; white-space: pre-wrap; font-size: 14px; }
+  .fl-esc { margin-top: 10px; padding: 10px 12px; border-radius: 10px; border: 1.5px dashed var(--line); font-family: var(--mono); font-size: 13px; color: var(--muted); min-height: 20px; }
+  .fl-esc.on { border-style: solid; border-color: var(--red); color: var(--bad-text); animation: up .5s ease-out; }
+  @keyframes up { from { transform: translateY(10px); opacity: 0; } to { transform: none; opacity: 1; } }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Python Fundamentals</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Python · Topic 10 · Real programs</div>
+    <h1>Errors &amp; exceptions</h1>
+    <ul class="lede"><li>An <b>exception</b> is an object Python raises when something goes wrong. It stops the current line and travels <b>up the call stack</b> until something catches it.</li><li><span class="mono">try</span> runs risky code; <span class="mono">except SomeError</span> handles that error; <span class="mono">else</span> runs only if nothing went wrong; <span class="mono">finally</span> <b>always</b> runs.</li><li>Catch <b>specific</b> exceptions (<span class="mono">ValueError</span>, <span class="mono">KeyError</span>), not everything, so real bugs still show up.</li><li>Use <span class="mono">raise</span> to signal a problem yourself. Read a <b>traceback</b> from the bottom: the last line says what went wrong.</li></ul>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: validating ages from a form</h2>
+    <div class="stage-kind">Real trace of real code · Next ▶ moves one idea at a time</div>
+    <div class="story wide" id="pageStory">
+      <div id="pageTrace"></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Run and change the code, predict before you peek, and try to break things.</p>
+
+  <section aria-labelledby="runH">
+    <h2 class="stage-title" id="runH">Edit and run</h2>
+    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div id="runner"></div>
+  </section>
+
+  <section aria-labelledby="predH">
+    <h2 class="stage-title" id="predH">Predict the output</h2>
+    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="chips" id="pzChips"></div>
+    <div class="puzzle-area" id="pzArea"></div>
+  </section>
+
+  <section aria-labelledby="flowH">
+    <h2 class="stage-title" id="flowH">try / except / else / finally flow</h2>
+    <div class="stage-kind">Pick the arguments · the highlighted lines are the ones Python really ran</div>
+    <div class="chips" id="flBtns"></div>
+    <div class="two" style="margin-top:10px">
+      <pre class="codeblock" id="flCode" style="min-height:0;margin:0"></pre>
+      <div><div class="card"><div class="label">Output</div><pre class="mono fl-out" id="flOut"></pre></div><div class="fl-esc" id="flEsc"></div></div>
+    </div>
+    <p class="status-line" id="flStatus">Pick a call.</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Input might be bad</span><span class="arrow">→</span><span class="then"><span class="mono">try: int(x)</span> <span class="mono">except ValueError:</span></span></li>
+      <li><span class="if">Code that must run no matter what</span><span class="arrow">→</span><span class="then"><span class="mono">finally:</span> (or a <span class="mono">with</span> block for files and locks)</span></li>
+      <li><span class="if">Code that should run only on success</span><span class="arrow">→</span><span class="then"><span class="mono">else:</span>, keeping the try block small</span></li>
+      <li><span class="if">Your function can't do its job</span><span class="arrow">→</span><span class="then"><span class="mono">raise ValueError("why")</span></span></li>
+      <li><span class="if">Need the error details</span><span class="arrow">→</span><span class="then"><span class="mono">except KeyError as e:</span> then <span class="mono">print(e)</span></span></li>
+      <li><span class="if">Tempted to write bare <span class="mono">except:</span></span><span class="arrow">→</span><span class="then">Catch the specific exception; a bare except hides bugs and even Ctrl+C</span></li>
+      <li><span class="if">Reading a traceback</span><span class="arrow">→</span><span class="then">Start at the <b>last line</b> (type and message), then the line above it (where)</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: exceptions you'll meet first</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Exception</th><th>Typical cause</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">ValueError</td><td>right type, bad value</td><td class="mono">int("abc")</td></tr>
+          <tr><td class="mono">TypeError</td><td>wrong type for the operation</td><td class="mono">"a" + 1</td></tr>
+          <tr><td class="mono">KeyError</td><td>missing dict key</td><td class="mono">d["phone"]</td></tr>
+          <tr><td class="mono">IndexError</td><td>list index out of range</td><td class="mono">[1, 2][5]</td></tr>
+          <tr><td class="mono">AttributeError</td><td>object has no such attribute</td><td class="mono">None.upper()</td></tr>
+          <tr><td class="mono">NameError</td><td>name not defined (typo?)</td><td class="mono">pritn("x")</td></tr>
+          <tr><td class="mono">ZeroDivisionError</td><td>division by zero</td><td class="mono">1 / 0</td></tr>
+          <tr><td class="mono">FileNotFoundError</td><td>wrong path or working folder</td><td class="mono">open("nope.txt")</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card" style="margin-top:12px"><div class="label">A traceback, read bottom-up</div>
+      <pre class="codeblock" style="min-height:0;margin:6px 0 0"><span class="ln">Traceback (most recent call last):</span><span class="ln">  File "app.py", line 8, in &lt;module&gt;      <span class="c"># 3. started here</span></span><span class="ln">    outer()</span><span class="ln">  File "app.py", line 5, in outer         <span class="c"># 2. passed through</span></span><span class="ln">    return inner() + 1</span><span class="ln">  File "app.py", line 2, in inner         <span class="c"># 1. happened here</span></span><span class="ln">    return int("x")</span><span class="ln"><b>ValueError: invalid literal for int() with base 10: 'x'</b></span></pre></div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>Gap topic:</b> the repo uses <span class="mono">int(input(...))</span> in many exercises but never handles a non-number, so any typo crashes the program. Wrapping those calls is the first real use of try/except.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Custom exceptions:</b> <span class="mono">class SlotTakenError(Exception): pass</span> then <span class="mono">raise SlotTakenError("9:00")</span>. Callers can catch exactly that.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Re-raising:</b> inside except, a bare <span class="mono">raise</span> re-raises the same error after logging it; <span class="mono">raise NewError(...) from e</span> wraps it while keeping the original cause.</p></div>
+      <div class="note"><span class="flag add">Updated</span><p><b>Recent versions:</b> Python 3.11 added <span class="mono">except*</span> and ExceptionGroup for errors from several tasks at once, plus <span class="mono">e.add_note()</span>. Python 3.14 lets you drop the brackets when catching several types: <span class="mono">except ValueError, TypeError:</span> (PEP 758).</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Say the answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary><span class="mono">try:\n    print("a")\nexcept Exception:\n    print("b")\nfinally:\n    print("c")</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">a</b> then <b class="mono">c</b>. No error, so no except.</p></div></details>
+      <details><summary><span class="mono">try:\n    [1][3]\nexcept (KeyError, IndexError) as e:\n    print(type(e).__name__)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">IndexError</b>. A tuple of types catches any of them.</p></div></details>
+      <details><summary><span class="mono">try:\n    x = 1\nexcept:\n    x = 2\nelse:\n    x = 3\nprint(x)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">3</b>. try succeeded, then else ran.</p></div></details>
+      <details><summary><span class="mono">print(issubclass(ZeroDivisionError, ArithmeticError))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">True</b>. Exceptions form a class hierarchy; catching a parent catches its children.</p></div></details>
+      <details><summary><span class="mono">try:\n    raise ValueError("bad slot")\nexcept ValueError as e:\n    print(e.args)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">('bad slot',)</b>. The arguments you raise with are stored on the exception.</p></div></details>
+      <details><summary><span class="mono">d = {}\nprint(d.get("k", "none"))</span>: why no try needed?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">none</b>. Many APIs offer a no-exception form (get, find, getattr with a default). Use them when "missing" is normal.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Every trace and output on this page was produced by running the code (Python 3.13; the same results on Python 3.15). The edit-and-run box runs real Python 3.14 in your browser with Pyodide. Gap topic: not in the Python_Fundamentals repo; listed in both Notion plans (exceptions / try-except). Python 3.14 change from What's New in Python 3.14 (PEP 758).</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const T = window.TRACES['errors-exceptions'];
+
+  /* ========== Walkthrough ========== */
+  const tr = K.trace($('pageTrace'), T.walk, {});
+  const MAP = [2, 8, 13, 16, 18, 26, 28, 32];
+  const STEPS = [{"title": "A function with all four blocks", "text": "<span class=\"mono\">parse_age(\"42\")</span> starts. The <span class=\"mono\">try</span> block holds the line that might fail: converting text to int."}, {"title": "Happy path: try → else → finally", "text": "<span class=\"mono\">int(\"42\")</span> worked, so <span class=\"mono\">except</span> was skipped and <span class=\"mono\">else</span> ran. Before the function hands back 42, <span class=\"mono\">finally</span> prints <span class=\"mono\">checked 42</span>. finally runs even on <span class=\"mono\">return</span>."}, {"title": "int(\"abc\") raises ValueError", "text": "Second call. The conversion fails: Python creates a <b>ValueError</b> object and abandons the rest of the <span class=\"mono\">try</span> block. <span class=\"mono\">age</span> is never assigned."}, {"title": "A matching except handles it", "text": "Python checks the except clauses in order. <span class=\"mono\">except ValueError</span> matches, so its block runs. The error is <b>handled</b>: the program carries on normally."}, {"title": "finally runs here too", "text": "The except block returns None, and on the way out <span class=\"mono\">finally</span> still prints. That's what finally is for: closing files, releasing locks, logging."}, {"title": "raise your own exception", "text": "For \"-5\" the conversion works, so <span class=\"mono\">else</span> runs and finds a negative age. <span class=\"mono\">raise ValueError(...)</span> signals a problem the caller must deal with.", "tip": "Raise when the function can't do its job. Returning a special value like -1 is easy for callers to ignore."}, {"title": "The exception leaves the function", "text": "Nothing inside <span class=\"mono\">parse_age</span> catches this one (the <span class=\"mono\">except</span> only covers the <span class=\"mono\">try</span> block), so after finally runs the frame ends <b>without a return value</b> and the exception moves up to the caller."}, {"title": "Caught by the caller", "text": "The caller's <span class=\"mono\">try/except ValueError as e</span> catches it. <span class=\"mono\">e</span> is the exception object; printing it shows the message. If no one had caught it, Python would print a traceback and stop."}];
+  STEPS.forEach((st, i) => {
+    if (i === 0) return;
+    st.play = async run => { for (let k = MAP[i - 1] + 1; k <= MAP[i]; k++) { tr.show(k); if (k < MAP[i]) await K.sleep(Math.max(150, Math.min(600, 4800 / (MAP[i] - MAP[i - 1]))), run); } };
+  });
+  K.story({ root: $('pageStory'), steps: STEPS, show: i => tr.show(MAP[i]), tipLabel: 'Tip' });
+
+  /* ========== Edit and run ========== */
+  K.pyRunner($('runner'), { starters: [{"label": "Walkthrough code", "code": "def parse_age(text):\n    try:\n        age = int(text)\n    except ValueError:\n        print(\"not a number:\", text)\n        return None\n    else:\n        if age < 0:\n            raise ValueError(f\"negative age {age}\")\n        return age\n    finally:\n        print(\"checked\", text)\n\nprint(parse_age(\"42\"))\nprint(parse_age(\"abc\"))\ntry:\n    parse_age(\"-5\")\nexcept ValueError as e:\n    print(\"caught:\", e)", "inputs": []}, {"label": "Puzzle 1: which block runs?", "code": "try:\n    x = int(\"7\")\nexcept ValueError:\n    print(\"bad\")\nelse:\n    print(\"ok\", x)\nfinally:\n    print(\"end\")", "inputs": []}, {"label": "Puzzle 2: the wrong except", "code": "try:\n    print({\"a\": 1}[\"b\"])\nexcept ValueError:\n    print(\"handled\")", "inputs": []}, {"label": "Puzzle 3: order of except", "code": "try:\n    1 / 0\nexcept Exception:\n    print(\"general\")\nexcept ZeroDivisionError:\n    print(\"zero\")", "inputs": []}, {"label": "Puzzle 4: finally vs return", "code": "def f():\n    try:\n        return \"try\"\n    finally:\n        print(\"cleanup\")\n\nprint(f())", "inputs": []}, {"label": "Puzzle 5: exception travels up", "code": "def inner():\n    return int(\"x\")\n\ndef outer():\n    return inner() + 1\n\ntry:\n    outer()\nexcept ValueError as e:\n    print(\"caught:\", e)", "inputs": []}, {"label": "Puzzle 6: raise with a message", "code": "def book(slot):\n    if not slot:\n        raise ValueError(\"slot is required\")\n    return \"booked \" + slot\n\nprint(book(\"9:00\"))\nprint(book(\"\"))", "inputs": []}, {"label": "Your turn: ask until valid", "inputs": ["abc", "-3", "35"], "code": "while True:\n    text = input(\"Age: \")\n    try:\n        age = int(text)\n        if age < 0:\n            raise ValueError(\"must be positive\")\n    except ValueError as e:\n        print(\"Try again:\", e)\n    else:\n        break\nprint(\"Saved age\", age)"}] });
+
+  /* ========== Predict the output ========== */
+  const PZ = [{"id": "p1", "name": "1 · which block runs?", "q": "What's printed?", "opts": ["ok 7 / end", "bad / end", "ok 7"], "a": 0, "why": "No error, so except is skipped, else runs, and finally always runs."}, {"id": "p2", "name": "2 · the wrong except", "q": "What happens?", "opts": ["handled", "KeyError: 'b'", "None"], "a": 1, "why": "A missing dict key raises <b>KeyError</b>, which <span class=\"mono\">except ValueError</span> doesn't match, so it isn't caught."}, {"id": "p3", "name": "3 · order of except", "q": "What's printed?", "opts": ["zero", "general", "general / zero"], "a": 1, "why": "The first matching clause wins, and ZeroDivisionError <b>is an</b> Exception. Put specific clauses before general ones."}, {"id": "p4", "name": "4 · finally vs return", "q": "What's printed?", "opts": ["try", "cleanup / try", "try / cleanup"], "a": 1, "why": "The return value is ready, but finally runs <b>before</b> the function actually returns, so \"cleanup\" prints first."}, {"id": "p5", "name": "5 · exception travels up", "q": "What's printed?", "opts": ["caught: invalid literal for int() with base 10: 'x'", "ValueError (uncaught)", "caught: x"], "a": 0, "why": "The error starts in inner, passes through outer (which doesn't catch it) and is caught two levels up."}, {"id": "p6", "name": "6 · raise with a message", "q": "What happens?", "opts": ["booked 9:00 / booked ", "booked 9:00 / ValueError: slot is required", "ValueError: slot is required"], "a": 1, "why": "The first call succeeds; the second raises and, uncaught, stops the program."}];
+  $('pzChips').innerHTML = PZ.map((p, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${p.name}</button>`).join('');
+  function puzzle(i) {
+    const p = PZ[i], area = $('pzArea');
+    area.innerHTML = `<div class="two">
+        <div><pre class="codeblock static-code">${T[p.id].code.split('\n').map(l => `<span class="ln">${K.pyHighlight(l) || ' '}</span>`).join('')}</pre></div>
+        <div class="card predict"><div class="q">${p.q}</div><div class="opts">${p.opts.map((o, j) => `<button class="chip-btn" type="button" data-j="${j}">${o.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</button>`).join('')}</div><p class="status-line" style="text-align:left;margin:0" id="pzVerdict">Choose an answer to unlock the step-through.</p></div>
+      </div><div id="pzTrace"></div>`;
+    area.querySelectorAll('.predict .chip-btn').forEach(b => b.addEventListener('click', () => {
+      const j = +b.dataset.j, ok = j === p.a;
+      area.querySelectorAll('.predict .chip-btn').forEach((x, xj) => { x.disabled = true; x.classList.toggle('right', xj === p.a); x.classList.toggle('wrong', xj === j && !ok); });
+      $('pzVerdict').innerHTML = `<span class="${ok ? 'ok-text' : 'bad-text'}">${ok ? 'Correct.' : 'Not quite.'}</span> ${p.why} <b>Step through below to watch it happen.</b>`;
+      K.trace($('pzTrace'), T[p.id], { controls: true });
+    }));
+  }
+  $('pzChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('pzChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    puzzle(+b.dataset.i);
+  }));
+  $('pzChips').querySelector('button').click();
+
+  /* ===== try / except / else / finally flow ===== */
+  (function () {
+    const SC = [{"label": "divide(\"10\", \"4\")", "lines": [2, 3, 9, 11], "out": ["result 2.5", "done"], "err": null}, {"label": "divide(\"ten\", \"4\")", "lines": [2, 3, 4, 5, 11], "out": ["bad number", "done"], "err": null}, {"label": "divide(\"10\", \"0\")", "lines": [2, 3, 4, 6, 7, 11], "out": ["can't divide by zero", "done"], "err": null}, {"label": "divide(\"10\", None)", "lines": [2, 3, 4, 6, 11], "out": ["done"], "err": "TypeError: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'"}], SRC = "def divide(a, b):\n    try:\n        r = int(a) / int(b)\n    except ValueError:\n        print(\"bad number\")\n    except ZeroDivisionError:\n        print(\"can't divide by zero\")\n    else:\n        print(\"result\", r)\n    finally:\n        print(\"done\")".split('\n');
+    $('flBtns').innerHTML = SC.map((s, i) => `<button class="chip-btn mono" type="button" data-i="${i}" aria-pressed="false">${s.label}</button>`).join('');
+    const draw = () => { $('flCode').innerHTML = SRC.map((l, i) => `<span class="ln" data-l="${i + 1}">${K.pyHighlight(l)}</span>`).join(''); };
+    async function go(s) {
+      const run = K.newRun('fl'); draw(); $('flOut').textContent = ''; $('flEsc').className = 'fl-esc'; $('flEsc').textContent = '';
+      let o = 0; const lines = [...$('flCode').children];
+      try {
+        for (const ln of s.lines) {
+          lines.forEach(x => x.classList.remove('on'));
+          const el = lines[ln - 1]; el.classList.add('on', 'done');
+          if (/print\(/.test(SRC[ln - 1]) && o < s.out.length) { $('flOut').textContent += s.out[o++] + '\n'; }
+          await K.sleep(520, run);
+        }
+        lines.forEach(x => x.classList.remove('on'));
+        if (s.err) { $('flEsc').className = 'fl-esc on'; $('flEsc').textContent = '↑ ' + s.err + ' escapes to the caller'; }
+        const ran = b => s.lines.some(l => SRC[l - 1].trim().startsWith(b)) ;
+        const hasExcept = s.lines.some(l => /print\("(bad|can)/.test(SRC[l - 1]));
+        const hasElse = s.lines.some(l => /result/.test(SRC[l - 1]));
+        $('flStatus').innerHTML = s.err ? 'No except clause matched, so after <b>finally</b> the exception keeps going up to whoever called divide().' : hasExcept ? 'An exception was raised in <b>try</b>; the matching <b>except</b> handled it, <b>else</b> was skipped, <b>finally</b> ran.' : 'No exception: <b>try</b> → <b>else</b> → <b>finally</b>.';
+      } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+    }
+    $('flBtns').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      $('flBtns').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); go(SC[+b.dataset.i]);
+    }));
+    draw();
+  })();
+})();
+</script>
+</body>
+</html>

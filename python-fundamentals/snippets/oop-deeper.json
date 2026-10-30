@@ -1,0 +1,29 @@
+{
+ "page": "oop-deeper",
+ "snippets": {
+  "walk": {
+   "code": "from dataclasses import dataclass, field\n\nclass Money:\n    def __init__(self, paise):\n        self.paise = paise\n    @classmethod\n    def from_rupees(cls, rupees):\n        return cls(round(rupees * 100))\n    def __repr__(self):\n        return f\"Money({self.paise})\"\n    def __str__(self):\n        return f\"Rs {self.paise / 100:,.2f}\"\n    def __add__(self, other):\n        return Money(self.paise + other.paise)\n\nfee = Money.from_rupees(450.5) + Money(100000)\nprint(fee, repr(fee))\n\n@dataclass\nclass Patient:\n    name: str\n    age: int\n    visits: list = field(default_factory=list)\n    @property\n    def is_senior(self):\n        return self.age >= 60\n\nravi = Patient(\"Ravi\", 64)\nprint(ravi, ravi.is_senior, ravi == Patient(\"Ravi\", 64))",
+   "inputs": []
+  },
+  "p1": {
+   "code": "class P:\n    def __init__(self, n): self.n = n\n    def __str__(self): return f\"P {self.n}\"\n    def __repr__(self): return f\"P({self.n!r})\"\n\nprint(P(\"a\"), [P(\"a\")])",
+   "inputs": []
+  },
+  "p2": {
+   "code": "class P:\n    def __init__(self, n): self.n = n\n\nprint(P(1) == P(1))",
+   "inputs": []
+  },
+  "p3": {
+   "code": "class Patient:\n    def __init__(self, age):\n        self.age = age\n    @property\n    def age(self):\n        return self._age\n    @age.setter\n    def age(self, value):\n        if value < 0:\n            raise ValueError(\"age must be >= 0\")\n        self._age = value\n\np = Patient(30)\np.age = -1",
+   "inputs": []
+  },
+  "p4": {
+   "code": "class Email:\n    def send(self, msg): return f\"email: {msg}\"\nclass SMS:\n    def send(self, msg): return f\"sms: {msg[:10]}\"\n\nfor channel in [Email(), SMS()]:\n    print(channel.send(\"Your appointment is at 9:00\"))",
+   "inputs": []
+  },
+  "p5": {
+   "code": "class Fees:\n    @staticmethod\n    def with_tax(amount):\n        return amount * 1.18\n\nprint(Fees.with_tax(100), Fees().with_tax(100))",
+   "inputs": []
+  }
+ }
+}

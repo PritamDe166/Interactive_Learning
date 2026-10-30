@@ -1,0 +1,33 @@
+{
+ "page": "functions-arguments",
+ "snippets": {
+  "walk": {
+   "code": "def with_tax(amount, rate=0.18):\n    tax = amount * rate\n    return amount + tax\n\ndef summary(name, *fees, **info):\n    total = sum(fees)\n    return name, total, info\n\ndef add_visit(name, log=[]):\n    log.append(name)\n    return log\n\nbill = with_tax(1000)\nlow = with_tax(1000, rate=0.05)\nwho, total, extra = summary(\"Asha\", 400, 600, city=\"Pune\")\nprint(bill, low, who, total, extra)\nprint(add_visit(\"x\"), add_visit(\"y\"))",
+   "inputs": []
+  },
+  "p1": {
+   "code": "def grades(num):\n    if num > 80:\n        return \"Grade A\"\n    elif num < 80 and num > 60:\n        return \"Grade B\"\n    else:\n        return \"Grade C\"\n\nprint(grades(80), grades(60))",
+   "inputs": []
+  },
+  "p2": {
+   "code": "def pet_details2(pet_type, **pet_details):\n    for key, value in pet_details.items():\n        return f\"{pet_type}: {key} is {value}\"\n\nprint(pet_details2(\"Dog\", name=\"Tommy\", age=3))",
+   "inputs": []
+  },
+  "p3": {
+   "code": "def greet(name):\n    print(\"Hello\", name)\n\nresult = greet(\"Asha\")\nprint(result)",
+   "inputs": []
+  },
+  "p4": {
+   "code": "def show(*args, **kwargs):\n    print(type(args).__name__, args, kwargs)\n\nshow(1, 2, x=3)",
+   "inputs": []
+  },
+  "p5": {
+   "code": "def slot(day, time, room):\n    return f\"{day} {time} in {room}\"\n\nparts = [\"Mon\", \"9:00\"]\nprint(slot(*parts, room=\"B2\"))",
+   "inputs": []
+  },
+  "p6": {
+   "code": "def calculator_func(a: int, b: int) -> int:\n    return a + b, a - b\n\nr = calculator_func(4, 2)\nprint(r, type(r).__name__)",
+   "inputs": []
+  }
+ }
+}

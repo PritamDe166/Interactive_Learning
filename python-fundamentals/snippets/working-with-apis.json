@@ -1,0 +1,25 @@
+{
+ "page": "working-with-apis",
+ "snippets": {
+  "walk": {
+   "code": "import json\nfrom urllib.parse import urlencode\n\ndef fake_get(url):\n    pages = {\n        \"/patients?city=Pune&page=1\": (200, '{\"items\": [{\"name\": \"Asha\"}], \"next\": 2}'),\n        \"/patients?city=Pune&page=2\": (200, '{\"items\": [{\"name\": \"Meera\"}], \"next\": null}'),\n    }\n    return pages.get(url, (404, '{\"error\": \"not found\"}'))\n\npage, everyone = 1, []\nwhile page:\n    url = \"/patients?\" + urlencode({\"city\": \"Pune\", \"page\": page})\n    status, body = fake_get(url)\n    if status != 200:\n        raise RuntimeError(f\"HTTP {status}\")\n    data = json.loads(body)\n    everyone += [p[\"name\"] for p in data[\"items\"]]\n    page = data[\"next\"]\nprint(everyone)\nstatus, body = fake_get(\"/doctors\")\nprint(status, json.loads(body)[\"error\"])",
+   "inputs": []
+  },
+  "p1": {
+   "code": "import json\nbody = '{\"name\": \"Asha\", \"vip\": false}'\nprint(type(body).__name__, json.loads(body)[\"vip\"])",
+   "inputs": []
+  },
+  "p2": {
+   "code": "from urllib.parse import urlencode\nprint(urlencode({\"name\": \"Asha Rao\", \"city\": \"Pune & Co\"}))",
+   "inputs": []
+  },
+  "p3": {
+   "code": "import json\ndata = json.loads('{\"items\": []}')\nprint(data.get(\"next\"), len(data[\"items\"]))\nprint(data[\"next\"])",
+   "inputs": []
+  },
+  "p4": {
+   "code": "for code in [200, 201, 204, 301, 404, 500]:\n    print(code, 200 <= code < 300, end=\" | \")",
+   "inputs": []
+  }
+ }
+}

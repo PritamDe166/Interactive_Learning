@@ -1,0 +1,33 @@
+{
+ "page": "scope",
+ "snippets": {
+  "walk": {
+   "code": "clinic = \"Pune\"\ncount = 0\ndef outer():\n    doctor = \"Rao\"\n    def inner():\n        patient = \"Asha\"\n        print(patient, doctor, clinic, len(\"ab\"))\n    inner()\ndef bump():\n    global count\n    count += 1\ndef make_counter():\n    n = 0\n    def step():\n        nonlocal n\n        n += 1\n        return n\n    return step\nouter()\nbump()\ntick = make_counter()\nprint(count, tick(), tick())",
+   "inputs": []
+  },
+  "p1": {
+   "code": "var1 = 10\ndef change():\n    var1 = 20\nchange()\nprint(var1)",
+   "inputs": []
+  },
+  "p2": {
+   "code": "count = 0\ndef bump():\n    count += 1\nbump()",
+   "inputs": []
+  },
+  "p3": {
+   "code": "list = [1, 2]\nprint(list)\nprint(list(\"ab\"))",
+   "inputs": []
+  },
+  "p4": {
+   "code": "def f():\n    for i in range(3):\n        pass\n    return i\nprint(f())",
+   "inputs": []
+  },
+  "p5": {
+   "code": "funcs = []\nfor i in range(3):\n    funcs.append(lambda: i)\nprint([f() for f in funcs])",
+   "inputs": []
+  },
+  "p6": {
+   "code": "def outer():\n    msg = \"old\"\n    def inner():\n        nonlocal msg\n        msg = \"new\"\n    inner()\n    return msg\nprint(outer())",
+   "inputs": []
+  }
+ }
+}

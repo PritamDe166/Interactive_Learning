@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Variables, Objects &amp; Types</title>
+<meta name="description" content="Python fundamentals: names are labels that point to objects. Step through real code to see objects, references, mutability, aliasing and type conversion.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<script src="traces/variables-objects.js"></script>
+<style>
+  .mach .box rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .mach .box text { fill: var(--fg); font-family: var(--mono); font-size: 15px; font-weight: 700; text-anchor: middle; }
+  .mach .box .sm { fill: var(--muted); font-size: 11px; font-weight: 400; }
+  .mach .box.on rect { stroke: var(--cyan); fill: var(--teal-wash); }
+  .mach .box.ok rect { stroke: var(--teal); }
+  .mach .box.bad rect { stroke: var(--red); }
+  .mach .belt { stroke: var(--line); stroke-width: 3; stroke-dasharray: 8 6; }
+  .static-code { margin: 0; }
+  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
+  .types td:first-child { font-family: var(--mono); font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Python Fundamentals</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Python · Topic 1 · Values and text</div>
+    <h1>Variables, Objects &amp; Types</h1>
+    <ul class="lede">
+      <li>A variable is a <b>name</b> that points to an <b>object</b>. It is not a box that holds the value.</li>
+      <li>Every value is an object with a <b>type</b> and an identity (<span class="mono">id()</span>). Names have no type.</li>
+      <li><b>Assignment copies the arrow, never the object.</b> Two names can point to one object.</li>
+      <li><b>Immutable</b> objects (int, float, str, bool, tuple) never change; <b>mutable</b> ones (list, dict, set) change in place.</li>
+    </ul>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: what Python builds as your code runs</h2>
+    <div class="stage-kind">Real trace of real code · Next ▶ moves one idea at a time</div>
+    <div class="story wide" id="voStory">
+      <div id="voTrace"></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Predict first, then step through to see why. Guessing wrong and finding out why is how this sticks.</p>
+
+  <section aria-labelledby="runH">
+    <h2 class="stage-title" id="runH">Edit and run</h2>
+    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch names and objects</div>
+    <div id="runner"></div>
+  </section>
+
+  <section aria-labelledby="predH">
+    <h2 class="stage-title" id="predH">Predict the output</h2>
+    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="chips" id="pzChips"></div>
+    <div class="puzzle-area" id="pzArea"></div>
+  </section>
+
+  <section aria-labelledby="convH">
+    <h2 class="stage-title" id="convH">The conversion machine</h2>
+    <div class="stage-kind">Feed a value into int(), float(), str() or bool()</div>
+    <div class="chip-group"><div class="label">Value</div><div class="chips" id="cvVal" style="margin:0"></div></div>
+    <div class="chip-group"><div class="label">Function</div><div class="chips" id="cvFn" style="margin:0"></div></div>
+    <div class="scroll">
+      <svg class="diagram narrow mach" id="cv" viewBox="0 0 1000 170" aria-label="A value moves into a conversion function and a result or an error comes out"></svg>
+    </div>
+    <p class="status-line" id="cvStatus">Pick a value and a function.</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if"><span class="mono">b = a</span></span><span class="arrow">→</span><span class="then">Second name, same object (no copy)</span></li>
+      <li><span class="if">Change a list through one name</span><span class="arrow">→</span><span class="then">Every name pointing to it sees the change</span></li>
+      <li><span class="if">Need an independent list</span><span class="arrow">→</span><span class="then"><span class="mono">b = a.copy()</span> or <span class="mono">list(a)</span></span></li>
+      <li><span class="if">"Changing" an int, str or tuple</span><span class="arrow">→</span><span class="then">Creates a new object; the name moves</span></li>
+      <li><span class="if">Compare values / check identity</span><span class="arrow">→</span><span class="then"><span class="mono">==</span> / <span class="mono">is</span> (use <span class="mono">is</span> only for <span class="mono">None</span>)</span></li>
+      <li><span class="if">Empty, zero or None in an <span class="mono">if</span></span><span class="arrow">→</span><span class="then">False; everything else is True (even "False")</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: the built-in types</h2>
+    <div class="scroll card table-card">
+      <table class="types">
+        <thead><tr><th>Type</th><th>Example</th><th>Mutable?</th><th>Falsy value</th></tr></thead>
+        <tbody>
+          <tr><td>int</td><td class="mono">35, -4, 10_000</td><td>No</td><td class="mono">0</td></tr>
+          <tr><td>float</td><td class="mono">1.62, 3e8</td><td>No</td><td class="mono">0.0</td></tr>
+          <tr><td>str</td><td class="mono">"Asha", 'Asha'</td><td>No</td><td class="mono">""</td></tr>
+          <tr><td>bool</td><td class="mono">True, False</td><td>No</td><td class="mono">False</td></tr>
+          <tr><td>NoneType</td><td class="mono">None</td><td>No</td><td class="mono">None</td></tr>
+          <tr><td>list</td><td class="mono">["Mon", "Wed"]</td><td><b>Yes</b></td><td class="mono">[]</td></tr>
+          <tr><td>tuple</td><td class="mono">(10.3, 13.5)</td><td>No</td><td class="mono">()</td></tr>
+          <tr><td>set</td><td class="mono">{"10.0.0.5"}</td><td><b>Yes</b></td><td class="mono">set()</td></tr>
+          <tr><td>dict</td><td class="mono">{"S101": "Asha"}</td><td><b>Yes</b></td><td class="mono">{}</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>Triple-quoted text isn't a comment.</b> <span class="mono">VariablesAndDataTypes.py</span> calls <span class="mono">'''…'''</span> a multi-line comment, but it's a string literal that Python creates and throws away (at the top of a function it becomes the docstring). Real comments start with <span class="mono">#</span>.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>It's <span class="mono">isinstance</span>, not <span class="mono">isInstance</span></b> (the comment in <span class="mono">Type_Conversion.py</span>). Python names are case-sensitive. And <span class="mono">int(4.5)</span> doesn't round: it <b>truncates toward zero</b>, so <span class="mono">int(-4.5)</span> is <span class="mono">-4</span>.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Your <span class="mono">id(list1) == id(list2)</span> example is aliasing.</b> In <span class="mono">UtilityBuiltInFunctions.py</span> both ids print the same number because <span class="mono">list2 = list1</span> creates a second name, not a second list. <span class="mono">id()</span> is an object's identity while it lives (its memory address in CPython).</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Never use <span class="mono">is</span> to compare numbers or strings.</b> CPython reuses some small ints and short strings, so <span class="mono">is</span> may look like it works and then fail with other values. Use <span class="mono">==</span> for values; <span class="mono">is</span> for <span class="mono">None</span> (<span class="mono">if x is None</span>).</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Python has no constants.</b> By convention, UPPER_CASE names (<span class="mono">MAX_VISITS = 5</span>) mean "don't reassign". Type hints (<span class="mono">age: int = 34</span>) are documentation for tools like mypy; Python doesn't enforce them at runtime.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself: what prints?</h2>
+    <p class="sub">Say the output out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary><span class="mono">a = [1]; b = a; b += [2]; print(a)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b><span class="mono">[1, 2]</span>.</b> On a list, <span class="mono">+=</span> extends the same list in place, and <span class="mono">a</span> points to it too.</p></div></details>
+      <details><summary><span class="mono">x = 10; y = x; x += 1; print(y)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b><span class="mono">10</span>.</b> Ints are immutable: <span class="mono">x += 1</span> makes a new int 11 and moves only <span class="mono">x</span>.</p></div></details>
+      <details><summary><span class="mono">print(bool("False"))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b><span class="mono">True</span>.</b> Any non-empty string is truthy. Only <span class="mono">""</span> is falsy.</p></div></details>
+      <details><summary><span class="mono">print("7" * 3)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b><span class="mono">777</span>.</b> <span class="mono">*</span> repeats a string. You'd need <span class="mono">int("7") * 3</span> to get 21.</p></div></details>
+      <details><summary><span class="mono">print(type(3 / 2), 3 // 2)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b><span class="mono">&lt;class 'float'&gt; 1</span>.</b> <span class="mono">/</span> always returns a float; <span class="mono">//</span> is floor division.</p></div></details>
+      <details><summary><span class="mono">t = (1, 2); t[0] = 5</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b><span class="mono">TypeError: 'tuple' object does not support item assignment</span>.</b> Tuples are immutable.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Every trace and output on this page was produced by running the code (Python 3.13.18; identical results on Python 3.15). The edit-and-run box runs real Python 3.14 in your browser with Pyodide. Object positions and arrows are a teaching view of CPython's real objects. Sources: Python_Fundamentals repo (Basics/VariablesAndDataTypes.py, Basics/BuiltinFunctions_Type_Conversion.py, Basics/UtilityBuiltInFunctions.py, PractiseArea/VariablesAndDataTypes_Examples.py).</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const T = window.TRACES['variables-objects'];
+
+  /* ========== Walkthrough ========== */
+  const tr = K.trace($('voTrace'), T.walk, {});
+  const MAP = [0, 1, 4, 5, 6, 7, 8, 9, 10];
+  const STEPS = [
+    { title: 'Before anything runs',
+      text: 'Python hasn\'t run line 1 yet. On the left, the <b>next line to run</b> is highlighted. On the right, two lists start empty: <b>names</b> (grouped by frame; at the top level it\'s the "Global frame") and <b>objects</b>.' },
+    { title: 'A name points to an object',
+      text: '<span class="mono">patient = "Asha"</span> does two things: Python <b>creates a str object</b> holding <span class="mono">\'Asha\'</span>, then <b>binds the name</b> <span class="mono">patient</span> to it. The arrow is the binding. The name itself stores no text.' },
+    { title: 'Every object has a type; names don\'t',
+      text: 'Three more lines create an <b>int</b>, a <b>float</b> and a <b>bool</b>. Each object carries its type label. You never declared one: Python works it out from the value. That\'s <b>dynamic typing</b>.',
+      tip: 'The same name could later point to an object of a different type: <span class="mono">age = "thirty-five"</span> is legal.' },
+    { title: 'Ints never change: "+ 1" makes a new object',
+      text: '<span class="mono">age = age + 1</span> doesn\'t edit 34. Python builds a <b>new int 35</b> and moves the arrow. The old 34 has no names left, so it\'s freed. Ints, floats, strings, bools and tuples are all <b>immutable</b>.' },
+    { title: 'A list is a mutable object',
+      text: '<span class="mono">visits</span> points to a <b>list</b> object. A list holds references to other objects, drawn here inline for readability (index 0 and 1).' },
+    { title: 'Assignment copies the arrow, not the list',
+      text: '<span class="mono">backup = visits</span> creates <b>no new list</b>. It adds a second arrow to the <b>same</b> object. Two names, one list: this is called <b>aliasing</b>.',
+      tip: 'Your repo\'s <span class="mono">id(list1) == id(list2)</span> proves it: same identity.' },
+    { title: 'Change through one name, see it through both',
+      text: '<span class="mono">backup.append("Fri")</span> changes the list <b>in place</b>. Because <span class="mono">visits</span> points to that same list, it "changes" too. Nothing was copied, so nothing was protected.' },
+    { title: 'print shows the object, wherever the name points',
+      text: '<span class="mono">print(visits)</span> follows the arrow and prints <span class="mono">[\'Mon\', \'Wed\', \'Fri\']</span>, including the value added through <span class="mono">backup</span>. To keep a separate list, use <span class="mono">visits.copy()</span>.' },
+    { title: 'type() asks the object',
+      text: '<span class="mono">type(age)</span> follows the arrow and reports the <b>object\'s</b> type: <span class="mono">&lt;class \'int\'&gt;</span>. Same for the list. Ask the object, not the name.',
+      tip: 'Trap: <span class="mono">is</span> checks "same object", <span class="mono">==</span> checks "same value". Try puzzle 4 below.' }
+  ];
+  STEPS.forEach((st, i) => {
+    st.play = async run => { for (let k = MAP[i - 1] + 1; k <= MAP[i]; k++) { tr.show(k); if (k < MAP[i]) await K.sleep(650, run); } };
+  });
+  STEPS[0].play = undefined;
+  K.story({ root: $('voStory'), steps: STEPS, show: i => tr.show(MAP[i]), tipLabel: 'Tip' });
+
+
+  /* ========== Edit and run ========== */
+  K.pyRunner($('runner'), { starters: [
+    { label: 'Walkthrough code', code: T.walk.code },
+    { label: 'Puzzle 1: copying a number', code: T.p1.code },
+    { label: 'Puzzle 2: copying a list', code: T.p2.code },
+    { label: 'Puzzle 3: a real copy', code: T.p3.code },
+    { label: 'Puzzle 4: is vs ==', code: T.p4.code },
+    { label: 'Puzzle 5: changing a string', code: T.p5.code },
+    { label: 'Puzzle 6: list inside a tuple', code: T.p6.code },
+    { label: 'Your turn: types and conversion', code: 'value = input("Enter a number: ")\nprint(type(value))\nnumber = int(value)\nprint(type(number), number * 2)\nprint(bool(""), bool("False"), bool(0), bool([0]))', inputs: ['21'] }
+  ] });
+
+  /* ========== Predict the output ========== */
+  const PZ = [
+    { k: 'p1', n: '1 · Copying a number', q: 'What does the last line print?', opts: ['6 6', '6 5', '5 5'], a: 1,
+      why: '<span class="mono">b = a</span> points <span class="mono">b</span> at the same int 5. Then <span class="mono">a = a + 1</span> builds a <b>new</b> int 6 and moves only <span class="mono">a</span>. Ints are immutable, so <span class="mono">b</span> still sees 5.' },
+    { k: 'p2', n: '2 · Copying a list', q: 'What does print(morning) show?', opts: ["['Asha', 'Ravi']", "['Asha', 'Ravi', 'Meera']", 'An error'], a: 1,
+      why: '<span class="mono">evening = morning</span> copies the arrow, not the list. <span class="mono">append</span> changes the one shared list, so both names see Meera.' },
+    { k: 'p3', n: '3 · A real copy', q: 'What does print(morning) show this time?', opts: ["['Asha', 'Ravi']", "['Asha', 'Ravi', 'Meera']"], a: 0,
+      why: '<span class="mono">.copy()</span> creates a <b>new</b> list object (a shallow copy). Now there are two lists, and the append only touches <span class="mono">evening</span>\'s.' },
+    { k: 'p4', n: '4 · is vs ==', q: 'What are the three printed lines?', opts: ['True / False / True', 'True / True / True', 'False / False / True'], a: 0,
+      why: '<span class="mono">x</span> and <span class="mono">y</span> are two different lists with equal contents: <span class="mono">==</span> is True, <span class="mono">is</span> is False. <span class="mono">z = x</span> is the same object, so <span class="mono">x is z</span> is True.' },
+    { k: 'p5', n: '5 · Changing a string', q: 'What does print(name) show?', opts: ['asha', 'ASHA'], a: 0,
+      why: 'Strings are immutable. <span class="mono">upper()</span> returns a <b>new</b> string; <span class="mono">name</span> still points to the original.' },
+    { k: 'p6', n: '6 · A list inside a tuple', q: 'What happens?', opts: ["('Mon', ['Asha', 'Ravi'])", "TypeError: tuples can't change", "('Mon', ['Asha'])"], a: 0,
+      why: 'The tuple can\'t change <b>which</b> objects it holds, but the list it points to is still mutable. Immutability is shallow.' }
+  ];
+  $('pzChips').innerHTML = PZ.map((p, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${p.n}</button>`).join('');
+  function puzzle(i) {
+    const p = PZ[i], area = $('pzArea');
+    area.innerHTML = `<div class="two">
+        <div><pre class="codeblock static-code">${T[p.k].code.split('\n').map(l => `<span class="ln">${K.pyHighlight(l) || ' '}</span>`).join('')}</pre></div>
+        <div class="card predict"><div class="q">${p.q}</div><div class="opts">${p.opts.map((o, j) => `<button class="chip-btn" type="button" data-j="${j}">${o.replace(/</g, '&lt;')}</button>`).join('')}</div><p class="status-line" style="text-align:left;margin:0" id="pzVerdict">Choose an answer to unlock the step-through.</p></div>
+      </div><div id="pzTrace"></div>`;
+    area.querySelectorAll('.predict .chip-btn').forEach(b => b.addEventListener('click', () => {
+      const j = +b.dataset.j, ok = j === p.a;
+      area.querySelectorAll('.predict .chip-btn').forEach((x, xj) => { x.disabled = true; x.classList.toggle('right', xj === p.a); x.classList.toggle('wrong', xj === j && !ok); });
+      $('pzVerdict').innerHTML = `<span class="${ok ? 'ok-text' : 'bad-text'}">${ok ? 'Correct.' : 'Not quite.'}</span> ${p.why} <b>Step through below to watch it happen.</b>`;
+      K.trace($('pzTrace'), T[p.k], { controls: true });
+    }));
+  }
+  $('pzChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('pzChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    puzzle(+b.dataset.i);
+  }));
+  $('pzChips').querySelector('button').click();
+
+  /* ========== Conversion machine ========== */
+  const CONV = [{"label": "\"42\"", "type": "str", "res": {"int": {"ok": true, "v": "42", "t": "int"}, "float": {"ok": true, "v": "42.0", "t": "float"}, "str": {"ok": true, "v": "'42'", "t": "str"}, "bool": {"ok": true, "v": "True", "t": "bool"}}}, {"label": "\"4.5\"", "type": "str", "res": {"int": {"ok": false, "v": "ValueError: invalid literal for int() with base 10: '4.5'"}, "float": {"ok": true, "v": "4.5", "t": "float"}, "str": {"ok": true, "v": "'4.5'", "t": "str"}, "bool": {"ok": true, "v": "True", "t": "bool"}}}, {"label": "4.9", "type": "float", "res": {"int": {"ok": true, "v": "4", "t": "int"}, "float": {"ok": true, "v": "4.9", "t": "float"}, "str": {"ok": true, "v": "'4.9'", "t": "str"}, "bool": {"ok": true, "v": "True", "t": "bool"}}}, {"label": "-4.5", "type": "float", "res": {"int": {"ok": true, "v": "-4", "t": "int"}, "float": {"ok": true, "v": "-4.5", "t": "float"}, "str": {"ok": true, "v": "'-4.5'", "t": "str"}, "bool": {"ok": true, "v": "True", "t": "bool"}}}, {"label": "0", "type": "int", "res": {"int": {"ok": true, "v": "0", "t": "int"}, "float": {"ok": true, "v": "0.0", "t": "float"}, "str": {"ok": true, "v": "'0'", "t": "str"}, "bool": {"ok": true, "v": "False", "t": "bool"}}}, {"label": "\"\"", "type": "str", "res": {"int": {"ok": false, "v": "ValueError: invalid literal for int() with base 10: ''"}, "float": {"ok": false, "v": "ValueError: could not convert string to float: ''"}, "str": {"ok": true, "v": "''", "t": "str"}, "bool": {"ok": true, "v": "False", "t": "bool"}}}, {"label": "\"False\"", "type": "str", "res": {"int": {"ok": false, "v": "ValueError: invalid literal for int() with base 10: 'False'"}, "float": {"ok": false, "v": "ValueError: could not convert string to float: 'False'"}, "str": {"ok": true, "v": "'False'", "t": "str"}, "bool": {"ok": true, "v": "True", "t": "bool"}}}, {"label": "[]", "type": "list", "res": {"int": {"ok": false, "v": "TypeError: int() argument must be a string, a bytes-like object or a real number, not 'list'"}, "float": {"ok": false, "v": "TypeError: float() argument must be a string or a real number, not 'list'"}, "str": {"ok": true, "v": "'[]'", "t": "str"}, "bool": {"ok": true, "v": "False", "t": "bool"}}}, {"label": "True", "type": "bool", "res": {"int": {"ok": true, "v": "1", "t": "int"}, "float": {"ok": true, "v": "1.0", "t": "float"}, "str": {"ok": true, "v": "'True'", "t": "str"}, "bool": {"ok": true, "v": "True", "t": "bool"}}}];
+  const FNS = ['int', 'float', 'str', 'bool'];
+  let vi = 0, fi = 0;
+  $('cvVal').innerHTML = CONV.map((c, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="${i === 0}">${c.label.replace(/</g, '&lt;')}</button>`).join('');
+  $('cvFn').innerHTML = FNS.map((f, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="${i === 0}">${f}()</button>`).join('');
+  const cv = $('cv');
+  K.el('line', { x1: 110, y1: 85, x2: 890, y2: 85, class: 'belt' }, cv);
+  const box = (x, w, t, s) => { const g = K.el('g', { class: 'box' }, cv); K.el('rect', { x: x - w / 2, y: 40, width: w, height: 90, rx: 14 }, g); const a = K.text(g, x, 86, t, ''); const b = K.text(g, x, 110, s, 'sm'); return { g, a, b }; };
+  const inB = box(150, 200, '', ''), fnB = box(500, 200, '', 'converter'), outB = box(850, 220, '', '');
+  const cvP = K.el('g', {}, cv);
+  function setIdle() {
+    const c = CONV[vi];
+    inB.a.textContent = c.label; inB.b.textContent = 'a ' + c.type;
+    fnB.a.textContent = FNS[fi] + '( )'; outB.a.textContent = '?'; outB.b.textContent = 'result';
+    [inB, fnB, outB].forEach(b => b.g.setAttribute('class', 'box'));
+  }
+  async function convert() {
+    const run = K.newRun('cv'); cvP.textContent = ''; setIdle();
+    const c = CONV[vi], f = FNS[fi], r = c.res[f];
+    try {
+      inB.g.classList.add('on');
+      const p = K.pill(cvP, c.label, 'alt');
+      await K.move(p, [150, 25], [500, 25], 650, run);
+      fnB.g.classList.add('on'); await K.sleep(450, run); p.remove();
+      const q = K.pill(cvP, r.ok ? r.v : 'error', r.ok ? 'ok' : 'bad');
+      await K.move(q, [500, 25], [850, 25], 600, run); q.remove();
+      outB.g.setAttribute('class', 'box ' + (r.ok ? 'ok' : 'bad'));
+      outB.a.textContent = r.ok ? (r.v.length > 14 ? r.v.slice(0, 13) + '…' : r.v) : r.v.split(':')[0];
+      outB.b.textContent = r.ok ? 'a ' + r.t : 'raised';
+      $('cvStatus').innerHTML = (r.ok ? `<span class="mono">${f}(${c.label.replace(/</g, '&lt;')})</span> → <b class="mono">${r.v}</b>. ` : `<span class="bad-text mono">${r.v}</span>. `) + explain(c, f, r);
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  function explain(c, f, r) {
+    if (!r.ok && c.type === 'str') return 'int() and float() only accept text that looks exactly like a number of that kind. To turn "4.5" into an int, go through float first: <span class="mono">int(float("4.5"))</span> → 4.';
+    if (!r.ok) return 'A list can\'t become a number. Conversions only work when the meaning is clear.';
+    if (f === 'int' && c.type === 'float') return 'int() <b>truncates toward zero</b>, it does not round. Use round() to round.';
+    if (f === 'bool' && c.label === '"False"') return 'Trap: any <b>non-empty</b> string is truthy, including "False". Compare the text instead: <span class="mono">s == "True"</span>.';
+    if (f === 'bool') return r.v === 'False' ? 'Empty or zero values are <b>falsy</b>: 0, 0.0, "", [], {}, set(), None.' : 'Anything not empty and not zero is <b>truthy</b>.';
+    if (f === 'str') return 'str() works on anything: it gives the text form of the object.';
+    if (c.label === 'True') return 'bool is a subclass of int: True is 1, False is 0.';
+    return 'A new object of the target type; the original is unchanged.';
+  }
+  $('cvVal').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { $('cvVal').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); vi = +b.dataset.i; convert(); }));
+  $('cvFn').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { $('cvFn').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); fi = +b.dataset.i; convert(); }));
+  setIdle();
+})();
+</script>
+</body>
+</html>

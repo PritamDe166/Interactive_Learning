@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Built-in functions toolbox</title>
+<meta name="description" content="Python fundamentals: len, sum, min, max, sorted, reversed, enumerate, zip, any, all, round, abs, pow, divmod, help and dir, with real outputs.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<script src="traces/builtins.js"></script>
+<style>
+  .static-code { margin: 0; }
+  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
+  .mf-row { display: grid; grid-template-columns: minmax(0, 1.3fr) auto minmax(0, 1.4fr); gap: 14px; align-items: center; margin-top: 14px; }
+  @media (max-width: 640px) { .mf-row { grid-template-columns: 1fr; } }
+  .mf-lbl { font-family: var(--mono); font-size: 11px; color: var(--muted); margin: 4px 0; }
+  .mf-items { display: flex; flex-wrap: wrap; gap: 6px; }
+  .mf-it { font-family: var(--mono); font-size: 14px; padding: 4px 8px; border-radius: 6px; background: var(--panel-2); border: 1px solid var(--line); transition: all .2s; }
+  .mf-it.fed { border-color: var(--cyan); background: var(--teal-wash); }
+  .mf-box { font-family: var(--mono); font-weight: 700; font-size: 18px; padding: 18px 22px; border-radius: 14px; border: 2px dashed var(--accent-text); color: var(--accent-text); text-align: center; min-width: 110px; }
+  .mf-box.done { border-style: solid; box-shadow: 0 0 0 4px var(--teal-wash); }
+  .mf-out { font-size: 15px; min-height: 40px; padding: 10px 12px; border-radius: 10px; background: var(--code-bg); border: 1px solid var(--line); overflow-wrap: anywhere; }
+  .rg-axis { stroke: var(--muted); stroke-width: 1.5; }
+  .rg-num { font-family: var(--mono); font-size: 13px; fill: var(--muted); }
+  .rd-src { fill: var(--accent-text); }
+  .rd-l { font-family: var(--mono); font-size: 12px; fill: var(--fg); }
+  .rd-ar { stroke: var(--fg-soft); stroke-width: 1.5; fill: none; }
+  .rd-ar.even { stroke: var(--teal); }
+  .rd-mk { fill: var(--fg-soft); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Python Fundamentals</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Python · Topic 7 · Control flow and data</div>
+    <h1>Built-in functions toolbox</h1>
+    <ul class="lede"><li>Built-ins are always available, no import needed. Most take <b>any iterable</b>: list, tuple, string, set, dict, range, generator.</li><li>Some return a value straight away (<span class="mono">len</span>, <span class="mono">sum</span>, <span class="mono">sorted</span>); others return a <b>lazy iterator</b> (<span class="mono">reversed</span>, <span class="mono">enumerate</span>, <span class="mono">zip</span>, <span class="mono">map</span>) you loop over or wrap in <span class="mono">list()</span>.</li><li><span class="mono">sorted()</span> returns a <b>new</b> list; <span class="mono">list.sort()</span> changes the list and returns None.</li><li><span class="mono">round()</span> rounds halves to the <b>even</b> neighbour: <span class="mono">round(2.5)</span> is 2.</li></ul>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: summarising a day's fees</h2>
+    <div class="stage-kind">Real trace of real code · Next ▶ moves one idea at a time</div>
+    <div class="story wide" id="pageStory">
+      <div id="pageTrace"></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Run and change the code, predict before you peek, and try to break things.</p>
+
+  <section aria-labelledby="runH">
+    <h2 class="stage-title" id="runH">Edit and run</h2>
+    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div id="runner"></div>
+  </section>
+
+  <section aria-labelledby="predH">
+    <h2 class="stage-title" id="predH">Predict the output</h2>
+    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="chips" id="pzChips"></div>
+    <div class="puzzle-area" id="pzArea"></div>
+  </section>
+
+  <section aria-labelledby="machH">
+    <h2 class="stage-title" id="machH">Function machines</h2>
+    <div class="stage-kind">Pick a built-in · watch the inputs go in and the real result come out</div>
+    <div class="chips" id="mfBtns"></div>
+    <div class="mf-row">
+      <div class="mf-in" id="mfIn"></div>
+      <div class="mf-box" id="mfBox">?</div>
+      <div class="mf-out mono" id="mfOut"></div>
+    </div>
+    <p class="status-line" id="mfStatus">Pick a function.</p>
+  </section>
+
+  <section aria-labelledby="rndH">
+    <h2 class="stage-title" id="rndH">Where does round() go?</h2>
+    <div class="stage-kind">Halves go to the even neighbour · everything else to the nearest</div>
+    <div class="scroll"><svg class="diagram narrow" id="rdSvg" viewBox="0 0 700 250" style="min-width:520px;max-width:720px;margin:0 auto;display:block" role="img" aria-label="Number line showing round() results"></svg></div>
+    <p class="status-line">Arrows show <span class="mono">round(x)</span> from real Python. Green arrows land on an even number.</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Count / total / extremes</span><span class="arrow">→</span><span class="then"><span class="mono">len sum min max</span></span></li>
+      <li><span class="if">Sorted copy vs sort in place</span><span class="arrow">→</span><span class="then"><span class="mono">sorted(xs)</span> vs <span class="mono">xs.sort()</span> (returns None)</span></li>
+      <li><span class="if">Loop with a counter</span><span class="arrow">→</span><span class="then"><span class="mono">enumerate(xs, start=1)</span></span></li>
+      <li><span class="if">Walk two lists together</span><span class="arrow">→</span><span class="then"><span class="mono">zip(a, b)</span>; add <span class="mono">strict=True</span> if lengths must match</span></li>
+      <li><span class="if">Any / every item passes a test</span><span class="arrow">→</span><span class="then"><span class="mono">any(...)</span> / <span class="mono">all(...)</span> with a generator expression</span></li>
+      <li><span class="if">Money rounding must be exact</span><span class="arrow">→</span><span class="then"><span class="mono">decimal.Decimal</span> with <span class="mono">ROUND_HALF_UP</span>, not float + round()</span></li>
+      <li><span class="if">What can this object do?</span><span class="arrow">→</span><span class="then"><span class="mono">dir(obj)</span>, <span class="mono">help(obj)</span></span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: built-ins by job</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Job</th><th>Built-ins</th><th>Returns</th></tr></thead>
+        <tbody>
+          <tr><td>Summarise</td><td class="mono">len sum min max any all</td><td>a single value</td></tr>
+          <tr><td>Reorder</td><td class="mono">sorted reversed</td><td>new list / lazy iterator</td></tr>
+          <tr><td>Combine &amp; count</td><td class="mono">zip enumerate</td><td>lazy iterator of tuples</td></tr>
+          <tr><td>Transform &amp; filter</td><td class="mono">map filter</td><td>lazy iterator (a comprehension is often clearer)</td></tr>
+          <tr><td>Numbers</td><td class="mono">abs round pow divmod</td><td>number / tuple</td></tr>
+          <tr><td>Convert</td><td class="mono">int float str bool list tuple set dict</td><td>new object (see Variables &amp; objects)</td></tr>
+          <tr><td>Inspect</td><td class="mono">type isinstance id dir help</td><td>info about an object</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>round() in BuiltinFunctions_Math_Numbers.py:</b> the examples (4.56756, 8.542, -13.349) never hit a half, so they hide the surprise: <span class="mono">round(2.5)</span> is 2, <span class="mono">round(0.5)</span> is 0. Also <span class="mono">round(2.675, 2)</span> gives 2.67, because 2.675 can't be stored exactly as a float.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Lazy results print oddly:</b> <span class="mono">print(reversed(nums2))</span> in the repo shows <span class="mono">&lt;list_reverseiterator object at 0x…&gt;</span>, not the items. Wrap it in <span class="mono">list()</span> or loop over it, as the next line does.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>zip() hides length mismatches:</b> the repo zips 3 fruits with 4 numbers and the 4th number vanishes silently. Use <span class="mono">zip(..., strict=True)</span> when they must match.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>help() and dir()</b> are for the interactive prompt. In scripts they print pages of text; in an editor, hover or go-to-definition is quicker.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Say the answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary><span class="mono">print(sorted("cab"))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">['a', 'b', 'c']</b>. sorted() always returns a list, whatever it was given.</p></div></details>
+      <details><summary><span class="mono">print(sum([0.1] * 3) == 0.3)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">False</b>. Floats are approximate; compare with <span class="mono">math.isclose()</span>.</p></div></details>
+      <details><summary><span class="mono">print(all([]), any([]))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">True False</b>. "Every item passes" is true when there are none; "at least one passes" is false.</p></div></details>
+      <details><summary><span class="mono">print(divmod(125, 60))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">(2, 5)</b>. 125 minutes is 2 hours 5 minutes.</p></div></details>
+      <details><summary><span class="mono">print(max([3, 10, 7], key=lambda n: -n))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">3</b>. key= changes what is compared; the original item is returned.</p></div></details>
+      <details><summary><span class="mono">print(list(enumerate("ab")))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">[(0, 'a'), (1, 'b')]</b>. Counting starts at 0 unless you pass start=.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Every trace and output on this page was produced by running the code (Python 3.13; the same results on Python 3.15). The edit-and-run box runs real Python 3.14 in your browser with Pyodide. Sources: Python_Fundamentals repo (Basics/BuiltinFunctions_Iterables.py, BuiltinFunctions_Math_Numbers.py, UtilityBuiltInFunctions.py).</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const T = window.TRACES['builtins'];
+
+  /* ========== Walkthrough ========== */
+  const tr = K.trace($('pageTrace'), T.walk, {});
+  const MAP = [2, 3, 5, 6, 8, 10, 18, 40, 41];
+  const STEPS = [{"title": "Two parallel lists", "text": "Fees and the patient names, matched by position. Built-ins will summarise them without writing loops."}, {"title": "The four summary functions", "text": "<span class=\"mono\">len</span> counts, <span class=\"mono\">sum</span> adds, <span class=\"mono\">min</span>/<span class=\"mono\">max</span> find the extremes. Each takes the whole list and returns one number."}, {"title": "sorted() makes a new list", "text": "<span class=\"mono\">ranked</span> is a <b>second</b> list object, largest first. <span class=\"mono\">fees</span> is unchanged. <span class=\"mono\">fees.sort()</span> would reorder fees itself and return None."}, {"title": "zip() pairs items up", "text": "<span class=\"mono\">zip(names, fees)</span> walks both lists together and yields tuples. It's lazy, so <span class=\"mono\">list()</span> collects the pairs."}, {"title": "max() on tuples", "text": "Tuples compare item by item, so <span class=\"mono\">max(zip(fees, names))</span> finds the highest fee and brings its name along: <span class=\"mono\">(1200, 'Meera')</span>.", "tip": "Another way: <span class=\"mono\">max(pairs, key=lambda p: p[1])</span>. The <span class=\"mono\">key=</span> argument is covered in Functional tools."}, {"title": "enumerate() adds a counter", "text": "Each round gives <span class=\"mono\">(number, item)</span>. <span class=\"mono\">start=1</span> makes the count human-friendly. No <span class=\"mono\">range(len(...))</span> needed."}, {"title": "any() and all()", "text": "<span class=\"mono\">any</span>: is at least one fee over 1000? Yes. <span class=\"mono\">all</span>: are all over 500? No (450). Both stop as soon as the answer is known."}, {"title": "round() goes to the even neighbour", "text": "<span class=\"mono\">round(2.5)</span> is <b>2</b> and <span class=\"mono\">round(3.5)</span> is <b>4</b>. This \"banker's rounding\" avoids always pushing totals upward. With a second argument it rounds to that many decimals."}, {"title": "Number helpers", "text": "<span class=\"mono\">abs</span> drops the sign, <span class=\"mono\">pow(2, 10)</span> is <span class=\"mono\">2 ** 10</span>, and <span class=\"mono\">divmod(17, 5)</span> returns the quotient and remainder together: <span class=\"mono\">(3, 2)</span>."}];
+  STEPS.forEach((st, i) => {
+    if (i === 0) return;
+    st.play = async run => { for (let k = MAP[i - 1] + 1; k <= MAP[i]; k++) { tr.show(k); if (k < MAP[i]) await K.sleep(Math.max(150, Math.min(600, 4800 / (MAP[i] - MAP[i - 1]))), run); } };
+  });
+  K.story({ root: $('pageStory'), steps: STEPS, show: i => tr.show(MAP[i]), tipLabel: 'Tip' });
+
+  /* ========== Edit and run ========== */
+  K.pyRunner($('runner'), { starters: [{"label": "Walkthrough code", "code": "fees = [800, 450, 1200, 450]\nnames = [\"Asha\", \"Ravi\", \"Meera\", \"John\"]\nprint(len(fees), sum(fees), min(fees), max(fees))\nranked = sorted(fees, reverse=True)\nprint(ranked, fees)\npairs = list(zip(names, fees))\ntop = max(zip(fees, names))\nprint(pairs[0], top)\nfor i, name in enumerate(names, start=1):\n    print(i, name)\nprint(any(f > 1000 for f in fees), all(f > 500 for f in fees))\nprint(round(2.5), round(3.5), round(4.567, 2))\nprint(abs(-7), pow(2, 10), divmod(17, 5))", "inputs": []}, {"label": "Puzzle 1: sort vs sorted", "code": "nums = [3, 1, 2]\nresult = nums.sort()\nprint(result, nums)", "inputs": []}, {"label": "Puzzle 2: zip lengths", "code": "print(list(zip([\"a\", \"b\", \"c\"], [1, 2])))", "inputs": []}, {"label": "Puzzle 3: rounding halves", "code": "print(round(0.5), round(1.5), round(2.5))", "inputs": []}, {"label": "Puzzle 4: a used-up iterator", "code": "r = reversed([1, 2, 3])\nprint(list(r))\nprint(list(r))", "inputs": []}, {"label": "Puzzle 5: max of strings", "code": "print(max([\"Ravi\", \"asha\", \"Meera\"]))", "inputs": []}, {"label": "Puzzle 6: sum of an empty list", "code": "print(sum([]), max([], default=0))\nprint(max([]))", "inputs": []}, {"label": "Your turn: a fee report", "code": "fees = {\"Asha\": 800, \"Ravi\": 450, \"Meera\": 1200}\nprint(\"patients:\", len(fees))\nprint(\"total:\", sum(fees.values()))\nprint(\"average:\", round(sum(fees.values()) / len(fees), 2))\nfor rank, (name, fee) in enumerate(sorted(fees.items(), key=lambda kv: kv[1], reverse=True), start=1):\n    print(rank, name, fee)"}] });
+
+  /* ========== Predict the output ========== */
+  const PZ = [{"id": "p1", "name": "1 · sort vs sorted", "q": "What's printed?", "opts": ["[1, 2, 3] [1, 2, 3]", "None [1, 2, 3]", "None [3, 1, 2]"], "a": 1, "why": "<span class=\"mono\">sort()</span> works in place and returns None. Use <span class=\"mono\">sorted(nums)</span> when you want a value back."}, {"id": "p2", "name": "2 · zip lengths", "q": "What's printed?", "opts": ["[('a', 1), ('b', 2), ('c', None)]", "[('a', 1), ('b', 2)]", "ValueError"], "a": 1, "why": "zip stops at the shortest input, silently. Add <span class=\"mono\">strict=True</span> (3.10+) to get an error instead."}, {"id": "p3", "name": "3 · rounding halves", "q": "What's printed?", "opts": ["1 2 3", "0 2 2", "0 1 2"], "a": 1, "why": "Halves round to the nearest <b>even</b> integer: 0, 2, 2."}, {"id": "p4", "name": "4 · a used-up iterator", "q": "What's printed?", "opts": ["[3, 2, 1] / [3, 2, 1]", "[3, 2, 1] / []", "[3, 2, 1] / [1, 2, 3]"], "a": 1, "why": "Iterators are one-pass. The first list() consumed it."}, {"id": "p5", "name": "5 · max of strings", "q": "What's printed?", "opts": ["Ravi", "asha", "Meera"], "a": 1, "why": "Strings compare by character code, and lowercase letters come after uppercase ones. Use <span class=\"mono\">max(names, key=str.lower)</span> for alphabetical."}, {"id": "p6", "name": "6 · sum of an empty list", "q": "What's printed?", "opts": ["0 0 / 0", "0 0 / ValueError: max() iterable argument is empty", "ValueError"], "a": 1, "why": "sum() of nothing is 0, but max() of nothing is an error unless you give <span class=\"mono\">default=</span>."}];
+  $('pzChips').innerHTML = PZ.map((p, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${p.name}</button>`).join('');
+  function puzzle(i) {
+    const p = PZ[i], area = $('pzArea');
+    area.innerHTML = `<div class="two">
+        <div><pre class="codeblock static-code">${T[p.id].code.split('\n').map(l => `<span class="ln">${K.pyHighlight(l) || ' '}</span>`).join('')}</pre></div>
+        <div class="card predict"><div class="q">${p.q}</div><div class="opts">${p.opts.map((o, j) => `<button class="chip-btn" type="button" data-j="${j}">${o.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</button>`).join('')}</div><p class="status-line" style="text-align:left;margin:0" id="pzVerdict">Choose an answer to unlock the step-through.</p></div>
+      </div><div id="pzTrace"></div>`;
+    area.querySelectorAll('.predict .chip-btn').forEach(b => b.addEventListener('click', () => {
+      const j = +b.dataset.j, ok = j === p.a;
+      area.querySelectorAll('.predict .chip-btn').forEach((x, xj) => { x.disabled = true; x.classList.toggle('right', xj === p.a); x.classList.toggle('wrong', xj === j && !ok); });
+      $('pzVerdict').innerHTML = `<span class="${ok ? 'ok-text' : 'bad-text'}">${ok ? 'Correct.' : 'Not quite.'}</span> ${p.why} <b>Step through below to watch it happen.</b>`;
+      K.trace($('pzTrace'), T[p.id], { controls: true });
+    }));
+  }
+  $('pzChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('pzChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    puzzle(+b.dataset.i);
+  }));
+  $('pzChips').querySelector('button').click();
+
+  /* ===== Function machines ===== */
+  (function () {
+    const MT = [{"code": "len(fees)", "fn": "len", "what": "counts items", "r": "4"}, {"code": "sum(fees)", "fn": "sum", "what": "adds them up", "r": "2900"}, {"code": "min(fees), max(fees)", "fn": "min/max", "what": "smallest / largest", "r": "(450, 1200)"}, {"code": "sorted(fees)", "fn": "sorted", "what": "new sorted list; fees unchanged", "r": "[450, 450, 800, 1200]"}, {"code": "sorted(fees, reverse=True)", "fn": "sorted", "what": "largest first", "r": "[1200, 800, 450, 450]"}, {"code": "list(reversed(fees))", "fn": "reversed", "what": "lazy iterator, wrapped in list() to see it", "r": "[450, 1200, 450, 800]"}, {"code": "list(enumerate(fees))", "fn": "enumerate", "what": "(index, item) pairs", "r": "[(0, 800), (1, 450), (2, 1200), (3, 450)]"}, {"code": "list(zip(names, fees))", "fn": "zip", "what": "pairs items; stops at the shorter one", "r": "[('Asha', 800), ('Ravi', 450), ('Meera', 1200)]"}, {"code": "any(f > 1000 for f in fees)", "fn": "any", "what": "True if at least one is true", "r": "True"}, {"code": "all(f > 400 for f in fees)", "fn": "all", "what": "True only if every one is true", "r": "True"}, {"code": "list(map(str, fees))", "fn": "map", "what": "apply a function to each item (lazy)", "r": "['800', '450', '1200', '450']"}, {"code": "list(filter(lambda f: f < 500, fees))", "fn": "filter", "what": "keep items where the function is true (lazy)", "r": "[450, 450]"}];
+    $('mfBtns').innerHTML = MT.map((m, i) => `<button class="chip-btn mono" type="button" data-i="${i}" aria-pressed="false">${m.code.replace(/</g, '&lt;')}</button>`).join('');
+    async function go(m) {
+      const run = K.newRun('mf');
+      const usesNames = /names/.test(m.code);
+      $('mfIn').innerHTML = (usesNames ? '<div class="mf-lbl">names</div><div class="mf-items">' + ['Asha', 'Ravi', 'Meera'].map(n => `<span class="mf-it">'${n}'</span>`).join('') + '</div>' : '') + '<div class="mf-lbl">fees</div><div class="mf-items">' + [800, 450, 1200, 450].map(n => `<span class="mf-it">${n}</span>`).join('') + '</div>';
+      $('mfBox').textContent = m.fn; $('mfBox').classList.remove('done'); $('mfOut').textContent = '';
+      try {
+        for (const it of $('mfIn').querySelectorAll('.mf-it')) { it.classList.add('fed'); await K.sleep(160, run); }
+        $('mfBox').classList.add('done'); await K.sleep(250, run);
+        $('mfOut').textContent = m.r;
+        $('mfStatus').innerHTML = `<span class="mono">${m.code.replace(/</g, '&lt;')}</span> · ${m.what}.`;
+      } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+    }
+    $('mfBtns').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      $('mfBtns').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); go(MT[+b.dataset.i]);
+    }));
+  })();
+  /* ===== Where does round() go? ===== */
+  (function () {
+    const R = [[0.5, 0], [1.5, 2], [2.5, 2], [3.5, 4], [4.5, 4], [2.4, 2], [2.6, 3], [-2.5, -2]]; const svg = $('rdSvg'), ns = 'http://www.w3.org/2000/svg', X = v => 170 + (v + 3) * 64;
+    function mk(tag, at, txt) { const e = document.createElementNS(ns, tag); for (const k in at) e.setAttribute(k, at[k]); if (txt != null) e.textContent = txt; svg.appendChild(e); return e; }
+    mk('line', { x1: X(-3), y1: 200, x2: X(5), y2: 200, class: 'rg-axis' });
+    for (let v = -3; v <= 5; v++) { mk('line', { x1: X(v), y1: 194, x2: X(v), y2: 206, class: 'rg-axis' }); const t = mk('text', { x: X(v), y: 228, class: 'rg-num' }, v); t.style.textAnchor = 'middle'; }
+    R.filter(([v]) => v >= -3).forEach(([v, r], k) => {
+      const y = 18 + k * 20;
+      const c = mk('circle', { cx: X(v), cy: y, r: 4, class: 'rd-src' });
+      const l = mk('text', { x: X(v) - 9, y: y + 4, class: 'rd-l' }, 'round(' + v + ') → ' + r); l.style.textAnchor = 'end';
+      mk('path', { d: `M${X(v)} ${y + 4} L${X(r)} 190`, class: 'rd-ar' + (r % 2 === 0 ? ' even' : ''), 'marker-end': 'url(#rdm)' });
+    });
+    const defs = mk('defs', {}); defs.innerHTML = '<marker id="rdm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="rd-mk"></path></marker>';
+  })();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>print, input &amp; f-strings</title>
+<meta name="description" content="Python fundamentals: how print() assembles output with sep and end, why input() always returns text, and how f-strings and format specs build strings.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<script src="traces/print-input-fstrings.js"></script>
+<style>
+  .static-code { margin: 0; }
+  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
+  .asm-console { margin-top: 12px; background: var(--code-bg); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; min-height: 76px; font-family: var(--mono); font-size: 15px; display: grid; gap: 6px; }
+  .asm-line { display: flex; flex-wrap: wrap; align-items: center; min-height: 26px; }
+  .asm-tok { padding: 2px 6px; border-radius: 6px; margin-right: 1px; animation: pop .25s ease-out; }
+  .asm-tok.arg { background: var(--teal-wash); color: var(--fg); }
+  .asm-tok.sep { background: var(--panel-2); color: var(--accent-text); }
+  .asm-tok.end { background: var(--panel-2); color: var(--cyan); }
+  .asm-tok.nl { color: var(--cyan); }
+  @keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+  #sepSeg button, #endSeg button { white-space: pre; }
+  .fv-out { font-size: 20px; padding: 10px 0; overflow-wrap: anywhere; }
+  .fv-out .sp { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Python Fundamentals</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Python · Topic 2 · Values and text</div>
+    <h1>print, input &amp; f-strings</h1>
+    <ul class="lede"><li><b>print()</b> turns each argument into text, joins them with <b>sep</b> (a space) and finishes with <b>end</b> (a newline).</li><li><b>input()</b> shows a prompt and always returns a <b>str</b>, even when the user types a number.</li><li><b>f-strings</b> (<span class="mono">f"Hi {name}"</span>) evaluate the code inside <span class="mono">{}</span> and drop the result into the text.</li><li>After a colon, a <b>format spec</b> controls the look: <span class="mono">{fee:,.2f}</span> → <span class="mono">1,234.50</span>.</li></ul>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: printing a clinic receipt</h2>
+    <div class="stage-kind">Real trace of real code · Next ▶ moves one idea at a time</div>
+    <div class="story wide" id="pageStory">
+      <div id="pageTrace"></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Run and change the code, predict before you peek, and try to break things.</p>
+
+  <section aria-labelledby="runH">
+    <h2 class="stage-title" id="runH">Edit and run</h2>
+    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div id="runner"></div>
+  </section>
+
+  <section aria-labelledby="predH">
+    <h2 class="stage-title" id="predH">Predict the output</h2>
+    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="chips" id="pzChips"></div>
+    <div class="puzzle-area" id="pzArea"></div>
+  </section>
+
+  <section aria-labelledby="asmH">
+    <h2 class="stage-title" id="asmH">The print() assembly line</h2>
+    <div class="stage-kind">Choose sep and end · watch two print() calls build the output</div>
+    <div class="controls" style="flex-wrap:wrap;gap:16px">
+      <div class="chip-group" style="margin:0"><div class="label">sep</div><div class="seg" id="sepSeg" role="group" aria-label="sep"><button type="button" data-v=" " aria-pressed="true">" " (default)</button><button type="button" data-v=", " aria-pressed="false">", "</button><button type="button" data-v=" | " aria-pressed="false">" | "</button><button type="button" data-v="" aria-pressed="false">""</button></div></div>
+      <div class="chip-group" style="margin:0"><div class="label">end</div><div class="seg" id="endSeg" role="group" aria-label="end"><button type="button" data-v="\n" aria-pressed="true">"\n" (default)</button><button type="button" data-v=" " aria-pressed="false">" "</button><button type="button" data-v="... " aria-pressed="false">"... "</button><button type="button" data-v="" aria-pressed="false">""</button></div></div>
+    </div>
+    <pre class="codeblock" id="asmCode" style="min-height:0;margin-top:12px"></pre>
+    <div class="asm-console" id="asmOut" aria-live="polite"></div>
+    <div class="controls" style="margin-top:10px"><button class="btn primary" type="button" id="asmRun">Run both prints</button></div>
+    <p class="status-line" id="asmStatus">Dots are spaces, ↵ is a newline.</p>
+  </section>
+
+  <section aria-labelledby="fmtH">
+    <h2 class="stage-title" id="fmtH">Format spec explorer</h2>
+    <div class="stage-kind">Pick a value and a spec · the result is what Python really prints</div>
+    <div class="chip-group"><div class="label">Value</div><div class="chips" id="fvVal" style="margin:0"></div></div>
+    <div class="chip-group"><div class="label">Spec</div><div class="chips" id="fvSpec" style="margin:0"></div></div>
+    <div class="two" style="margin-top:12px">
+      <div class="card"><div class="label">Code</div><pre class="codeblock" id="fvCode" style="min-height:0;margin:0"></pre></div>
+      <div class="card"><div class="label">Result (· = space)</div><div class="fv-out" id="fvOut"></div></div>
+    </div>
+    <p class="status-line" id="fvStatus"></p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Several values on one line</span><span class="arrow">→</span><span class="then"><span class="mono">print(a, b, c)</span> (spaces added for you)</span></li>
+      <li><span class="if">Different separator / no newline</span><span class="arrow">→</span><span class="then"><span class="mono">sep=", "</span> / <span class="mono">end=""</span></span></li>
+      <li><span class="if">Building text with variables</span><span class="arrow">→</span><span class="then">f-string: <span class="mono">f"{name} is {age}"</span></span></li>
+      <li><span class="if">Number from the user</span><span class="arrow">→</span><span class="then"><span class="mono">int(input(...))</span> or <span class="mono">float(input(...))</span></span></li>
+      <li><span class="if">Money / decimals</span><span class="arrow">→</span><span class="then"><span class="mono">{x:,.2f}</span> → 1,234.50</span></li>
+      <li><span class="if">Backslashes in paths</span><span class="arrow">→</span><span class="then">Raw string <span class="mono">r"C:\new"</span> or use <span class="mono">/</span></span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: format specs and escapes</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Write</th><th>Means</th><th>Example → result</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">{x:.2f}</td><td>2 decimals</td><td class="mono">3.14159 → 3.14</td></tr>
+          <tr><td class="mono">{x:,}</td><td>thousands separator</td><td class="mono">1234567 → 1,234,567</td></tr>
+          <tr><td class="mono">{x:&gt;8} {x:&lt;8} {x:^8}</td><td>right / left / centre in 8 characters</td><td class="mono">'Asha' → '····Asha'</td></tr>
+          <tr><td class="mono">{x:08.2f}</td><td>zero-pad to width 8</td><td class="mono">450.5 → 00450.50</td></tr>
+          <tr><td class="mono">{x:.1%}</td><td>percentage</td><td class="mono">0.4567 → 45.7%</td></tr>
+          <tr><td class="mono">{x!r}</td><td>repr() form</td><td class="mono">'Asha' → 'Asha' (with quotes)</td></tr>
+          <tr><td class="mono">{x=}</td><td>expression and value (3.8+)</td><td class="mono">x='Asha'</td></tr>
+          <tr><td class="mono">\n \t \\ \"</td><td>newline, tab, backslash, quote</td><td class="mono">r"..." turns escapes off</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>The comma adds its own space.</b> In <span class="mono">Print_statements.py</span>, <span class="mono">print("Colors are "+": "+"Oranges"," Apples")</span> prints <span class="mono">Colors are : Oranges··Apples</span> with two spaces: one from <span class="mono">sep</span>, one inside <span class="mono">" Apples"</span>.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Prefer f-strings.</b> <span class="mono">"{} {}".format(a, b)</span> (your InputOutput examples) and <span class="mono">"%s" % a</span> still work and appear in older code, but f-strings are shorter, faster and read left to right.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>input() + int() can fail.</b> If the user types <span class="mono">abc</span>, <span class="mono">int()</span> raises <span class="mono">ValueError</span>. Wrapping it in <span class="mono">try/except</span> is covered in Errors &amp; exceptions.</p></div>
+      <div class="note"><span class="flag add">Updated</span><p><b>Newer f-string features:</b> since Python 3.12 you can reuse the same quote type inside the braces (<span class="mono">f"{d["key"]}"</span>) and split long expressions across lines. Python 3.14 adds <b>t-strings</b> (<span class="mono">t"..."</span>), template strings that keep the parts separate for safe HTML or SQL building.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Say the answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary><span class="mono">print(1, 2, 3, sep="-")</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">1-2-3</b>. sep goes between the arguments only.</p></div></details>
+      <details><summary><span class="mono">print("a", end=""); print("b")</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">ab</b>. The first print ends with nothing, so the second continues on the same line.</p></div></details>
+      <details><summary>The user types <span class="mono">42</span>. What does <span class="mono">print(type(input()))</span> show?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">&lt;class 'str'&gt;</b>. input() always returns text.</p></div></details>
+      <details><summary><span class="mono">print(f"{3/4:.0%}")</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">75%</b>. % multiplies by 100; .0 means no decimals.</p></div></details>
+      <details><summary><span class="mono">print("{} + {} = {}".format(2, 3, 2 + 3))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">2 + 3 = 5</b>. Each <span class="mono">{}</span> takes the next argument.</p></div></details>
+      <details><summary><span class="mono">print(f"[{'Asha':>6}]")</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">[··Asha]</b>. Right-aligned in a field 6 wide, padded with spaces on the left.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Every trace and output on this page was produced by running the code (Python 3.13; the same results on Python 3.15). The edit-and-run box runs real Python 3.14 in your browser with Pyodide. Sources: Python_Fundamentals repo (Basics/Print_statements.py, Basics/InputOutputFunctions.py, PractiseArea/PrintStatement_exercises.py).</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const T = window.TRACES['print-input-fstrings'];
+
+  /* ========== Walkthrough ========== */
+  const tr = K.trace($('pageTrace'), T.walk, {});
+  const MAP = [0, 4, 5, 7, 8, 9, 10, 11, 12];
+  const STEPS = [{"title": "Three names, three objects", "text": "The first three lines just create a str, an int and a float. Nothing has been printed yet: watch the <b>Output</b> box as the following lines run."}, {"title": "print() with several arguments", "text": "<span class=\"mono\">print(\"Patient:\", patient)</span> converts each argument to text and puts <b>one space</b> between them. That space is the default <span class=\"mono\">sep</span>. Then it adds a newline, the default <span class=\"mono\">end</span>."}, {"title": "sep: what goes between arguments", "text": "<span class=\"mono\">sep=\" | \"</span> replaces the space between arguments. Nothing goes before the first or after the last."}, {"title": "end: what goes after the last one", "text": "<span class=\"mono\">end=\"... \"</span> replaces the newline, so the next print continues <b>on the same line</b>: <span class=\"mono\">Saving... done</span>.", "tip": "Your repo's <span class=\"mono\">print(1,2,3, end=\" \")</span> then <span class=\"mono\">print(4,5,6)</span> works the same way."}, {"title": "+ only joins str with str", "text": "<span class=\"mono\">\"Fee: \" + fee</span> would raise a <b>TypeError</b> because <span class=\"mono\">fee</span> is a float. You must convert with <span class=\"mono\">str(fee)</span> first. Commas in print() don't need that: print converts for you."}, {"title": "f-strings: code inside the braces", "text": "An <b>f-string</b> runs whatever is inside <span class=\"mono\">{}</span> and inserts the result. No conversions, no plus signs. This is the modern way to build text (Python 3.6+)."}, {"title": "Format specs after the colon", "text": "<span class=\"mono\">{fee:,.2f}</span> means: thousands separator, 2 decimals, fixed-point → <span class=\"mono\">1,450.50</span>. Braces can hold any expression: <span class=\"mono\">{age + 1}</span> → 36."}, {"title": "input() always returns text", "text": "The user typed <span class=\"mono\">ravi</span>. input() echoed the prompt and returned a <b>str</b> object. If they had typed 42, it would still be the string <span class=\"mono\">'42'</span>: convert with <span class=\"mono\">int()</span> before doing maths."}, {"title": "Methods inside an f-string", "text": "<span class=\"mono\">{name.title()}</span> calls a string method right inside the braces: <span class=\"mono\">Hello Ravi!</span>. The original <span class=\"mono\">name</span> is unchanged (strings are immutable)."}];
+  STEPS.forEach((st, i) => {
+    if (i === 0) return;
+    st.play = async run => { for (let k = MAP[i - 1] + 1; k <= MAP[i]; k++) { tr.show(k); if (k < MAP[i]) await K.sleep(Math.max(150, Math.min(600, 4800 / (MAP[i] - MAP[i - 1]))), run); } };
+  });
+  K.story({ root: $('pageStory'), steps: STEPS, show: i => tr.show(MAP[i]), tipLabel: 'Tip' });
+
+  /* ========== Edit and run ========== */
+  K.pyRunner($('runner'), { starters: [{"label": "Walkthrough code", "code": "patient = \"Asha\"\nage = 35\nfee = 1450.5\nprint(\"Patient:\", patient)\nprint(\"Mon\", \"Wed\", \"Fri\", sep=\" | \")\nprint(\"Saving\", end=\"... \")\nprint(\"done\")\nprint(\"Fee: \" + str(fee))\nprint(f\"{patient} is {age} years old\")\nprint(f\"Fee: {fee:,.2f}, next year {age + 1}\")\nname = input(\"Your name: \")\nprint(f\"Hello {name.title()}!\")", "inputs": ["ravi"]}, {"label": "Puzzle 1: sep and end", "code": "print(\"Mon\", \"Wed\", sep=\", \", end=\"!\")\nprint(\"Fri\")", "inputs": []}, {"label": "Puzzle 2: + with a number", "code": "age = 35\nprint(\"Age: \" + age)", "inputs": []}, {"label": "Puzzle 3: input and maths", "code": "qty = input(\"Qty: \")\nprint(qty * 2)", "inputs": ["3"]}, {"label": "Puzzle 4: format spec", "code": "fee = 1234.5\nprint(f\"Rs {fee:,.2f}\")", "inputs": []}, {"label": "Puzzle 5: the = specifier", "code": "name = \"asha\"\nvisits = 3\nprint(f\"{name=}, {visits=}\")", "inputs": []}, {"label": "Puzzle 6: a Windows path", "code": "print(\"C:\\new folder\")", "inputs": []}, {"label": "Your turn: a receipt line", "inputs": ["Meera", "2", "450"], "code": "name = input(\"Patient: \")\nvisits = int(input(\"Visits: \"))\nfee = float(input(\"Fee per visit: \"))\ntotal = visits * fee\nprint(f\"{name:<10}|{visits:>3} x {fee:>7.2f} = {total:>9,.2f}\")"}] });
+
+  /* ========== Predict the output ========== */
+  const PZ = [{"id": "p1", "name": "1 · sep and end", "q": "What appears in the output?", "opts": ["Mon, Wed! / Fri", "Mon, Wed!Fri", "Mon,Wed!Fri"], "a": 1, "why": "<span class=\"mono\">sep=\", \"</span> goes between the two arguments; <span class=\"mono\">end=\"!\"</span> replaces the newline, so the next print continues right after the <span class=\"mono\">!</span>."}, {"id": "p2", "name": "2 · + with a number", "q": "What happens?", "opts": ["Age: 35", "TypeError: can only concatenate str (not \"int\") to str", "Age:35"], "a": 1, "why": "<span class=\"mono\">+</span> between a str and an int is an error: Python never converts silently. Use <span class=\"mono\">\"Age: \" + str(age)</span>, a comma, or an f-string."}, {"id": "p3", "name": "3 · input and maths", "q": "The user types 3. What's printed after the prompt?", "opts": ["Qty: 3 / 6", "Qty: 3 / 33", "Qty: 3 / TypeError"], "a": 1, "why": "input() returned the <b>string</b> <span class=\"mono\">'3'</span>, and <span class=\"mono\">str * 2</span> repeats it: <span class=\"mono\">'33'</span>. Use <span class=\"mono\">int(input(...))</span>."}, {"id": "p4", "name": "4 · format spec", "q": "What's printed?", "opts": ["Rs 1,234.50", "Rs 1234.5", "Rs 1,234.5"], "a": 0, "why": "<span class=\"mono\">,</span> adds thousands separators and <span class=\"mono\">.2f</span> fixes two decimals."}, {"id": "p5", "name": "5 · the = specifier", "q": "What's printed?", "opts": ["asha, 3", "name='asha', visits=3", "name=asha, visits=3"], "a": 1, "why": "<span class=\"mono\">{x=}</span> (Python 3.8+) prints the expression, an equals sign and the value's <span class=\"mono\">repr</span>: handy for quick debugging."}, {"id": "p6", "name": "6 · a Windows path", "q": "What's printed?", "opts": ["C:\\new folder", "C: / ew folder", "C:new folder"], "a": 1, "why": "<span class=\"mono\">\\n</span> inside a normal string is a <b>newline</b>. Use a raw string <span class=\"mono\">r\"C:\\new folder\"</span> or forward slashes."}];
+  $('pzChips').innerHTML = PZ.map((p, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${p.name}</button>`).join('');
+  function puzzle(i) {
+    const p = PZ[i], area = $('pzArea');
+    area.innerHTML = `<div class="two">
+        <div><pre class="codeblock static-code">${T[p.id].code.split('\n').map(l => `<span class="ln">${K.pyHighlight(l) || ' '}</span>`).join('')}</pre></div>
+        <div class="card predict"><div class="q">${p.q}</div><div class="opts">${p.opts.map((o, j) => `<button class="chip-btn" type="button" data-j="${j}">${o.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</button>`).join('')}</div><p class="status-line" style="text-align:left;margin:0" id="pzVerdict">Choose an answer to unlock the step-through.</p></div>
+      </div><div id="pzTrace"></div>`;
+    area.querySelectorAll('.predict .chip-btn').forEach(b => b.addEventListener('click', () => {
+      const j = +b.dataset.j, ok = j === p.a;
+      area.querySelectorAll('.predict .chip-btn').forEach((x, xj) => { x.disabled = true; x.classList.toggle('right', xj === p.a); x.classList.toggle('wrong', xj === j && !ok); });
+      $('pzVerdict').innerHTML = `<span class="${ok ? 'ok-text' : 'bad-text'}">${ok ? 'Correct.' : 'Not quite.'}</span> ${p.why} <b>Step through below to watch it happen.</b>`;
+      K.trace($('pzTrace'), T[p.id], { controls: true });
+    }));
+  }
+  $('pzChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('pzChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    puzzle(+b.dataset.i);
+  }));
+  $('pzChips').querySelector('button').click();
+
+  /* ===== The print() assembly line ===== */
+  (function () {
+    let sep = ' ', end = '\n';
+    const show = s => s.replace(/ /g, '·').replace(/\n/g, '↵');
+    const lit = s => JSON.stringify(s);
+    function code() {
+      $('asmCode').innerHTML = [`print("Mon", "Wed", "Fri", sep=${lit(sep)}, end=${lit(end)})`, 'print("done")'].map(l => `<span class="ln">${K.pyHighlight(l)}</span>`).join('');
+    }
+    async function go() {
+      const run = K.newRun('asm');
+      const out = $('asmOut'); out.innerHTML = '<span class="asm-line"></span>';
+      const add = (txt, cls) => { const line = out.lastElementChild; const s = document.createElement('span'); s.className = 'asm-tok ' + cls; s.textContent = txt; line.appendChild(s); };
+      const newline = () => { add('↵', 'nl'); const l = document.createElement('span'); l.className = 'asm-line'; out.appendChild(l); };
+      try {
+        const args = ['Mon', 'Wed', 'Fri'];
+        for (let i = 0; i < args.length; i++) {
+          if (i) { if (sep) add(show(sep), 'sep'); await K.sleep(320, run); }
+          add(args[i], 'arg'); await K.sleep(320, run);
+        }
+        if (end.includes('\n')) { const before = end.split('\n')[0]; if (before) add(show(before), 'end'); newline(); } else if (end) add(show(end), 'end');
+        await K.sleep(500, run);
+        add('done', 'arg'); await K.sleep(250, run); newline();
+        const text = args.join(sep) + end + 'done\n';
+        $('asmStatus').innerHTML = `Real output: <span class="mono">${text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\n/g, '↵')}</span> · ${end === '\n' ? 'end is a newline, so "done" starts a new line.' : 'end is not a newline, so "done" continues on the same line.'}`;
+      } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+    }
+    K.seg($('sepSeg'), v => { sep = v; code(); go(); });
+    K.seg($('endSeg'), v => { end = v.replace('\\n', '\n'); code(); go(); });
+    $('asmRun').addEventListener('click', go);
+    code();
+  })();
+  /* ===== Format spec explorer ===== */
+  (function () {
+    const TABLE = {"450.5|:.2f": {"ok": true, "v": "450.50"}, "450.5|:,": {"ok": true, "v": "450.5"}, "450.5|:,.2f": {"ok": true, "v": "450.50"}, "450.5|:>10": {"ok": true, "v": "     450.5"}, "450.5|:<10": {"ok": true, "v": "450.5     "}, "450.5|:^10": {"ok": true, "v": "  450.5   "}, "450.5|:08.2f": {"ok": true, "v": "00450.50"}, "450.5|:.1%": {"ok": true, "v": "45050.0%"}, "450.5|!r": {"ok": true, "v": "450.5"}, "450.5|=": {"ok": true, "v": "value=450.5"}, "1234567|:.2f": {"ok": true, "v": "1234567.00"}, "1234567|:,": {"ok": true, "v": "1,234,567"}, "1234567|:,.2f": {"ok": true, "v": "1,234,567.00"}, "1234567|:>10": {"ok": true, "v": "   1234567"}, "1234567|:<10": {"ok": true, "v": "1234567   "}, "1234567|:^10": {"ok": true, "v": " 1234567  "}, "1234567|:08.2f": {"ok": true, "v": "1234567.00"}, "1234567|:.1%": {"ok": true, "v": "123456700.0%"}, "1234567|!r": {"ok": true, "v": "1234567"}, "1234567|=": {"ok": true, "v": "value=1234567"}, "0.4567|:.2f": {"ok": true, "v": "0.46"}, "0.4567|:,": {"ok": true, "v": "0.4567"}, "0.4567|:,.2f": {"ok": true, "v": "0.46"}, "0.4567|:>10": {"ok": true, "v": "    0.4567"}, "0.4567|:<10": {"ok": true, "v": "0.4567    "}, "0.4567|:^10": {"ok": true, "v": "  0.4567  "}, "0.4567|:08.2f": {"ok": true, "v": "00000.46"}, "0.4567|:.1%": {"ok": true, "v": "45.7%"}, "0.4567|!r": {"ok": true, "v": "0.4567"}, "0.4567|=": {"ok": true, "v": "value=0.4567"}, "\"Asha\"|:.2f": {"ok": false, "v": "ValueError: Unknown format code 'f' for object of type 'str'"}, "\"Asha\"|:,": {"ok": false, "v": "ValueError: Cannot specify ',' with 's'."}, "\"Asha\"|:,.2f": {"ok": false, "v": "ValueError: Unknown format code 'f' for object of type 'str'"}, "\"Asha\"|:>10": {"ok": true, "v": "      Asha"}, "\"Asha\"|:<10": {"ok": true, "v": "Asha      "}, "\"Asha\"|:^10": {"ok": true, "v": "   Asha   "}, "\"Asha\"|:08.2f": {"ok": false, "v": "ValueError: Unknown format code 'f' for object of type 'str'"}, "\"Asha\"|:.1%": {"ok": false, "v": "ValueError: Unknown format code '%' for object of type 'str'"}, "\"Asha\"|!r": {"ok": true, "v": "'Asha'"}, "\"Asha\"|=": {"ok": true, "v": "value='Asha'"}};
+    const VALS = ["450.5", "1234567", "0.4567", "\"Asha\""], SPECS = [":.2f", ":,", ":,.2f", ":>10", ":<10", ":^10", ":08.2f", ":.1%", "!r", "="];
+    const MEAN = { ':.2f': 'fixed point, 2 decimals', ':,': 'thousands separator', ':,.2f': 'separator + 2 decimals', ':>10': 'right-align in 10 characters', ':<10': 'left-align in 10', ':^10': 'centre in 10', ':08.2f': 'width 8, pad with zeros, 2 decimals', ':.1%': 'multiply by 100, add %, 1 decimal', '!r': 'use repr() instead of str(): strings get quotes', '=': 'show the expression too (3.8+)' };
+    let vi = 0, si = 0;
+    $('fvVal').innerHTML = VALS.map((v, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="${!i}">${v.replace(/</g, '&lt;')}</button>`).join('');
+    $('fvSpec').innerHTML = SPECS.map((s, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="${!i}">${s}</button>`).join('');
+    function show() {
+      const r = TABLE[VALS[vi] + '|' + SPECS[si]];
+      const spec = SPECS[si];
+      $('fvCode').innerHTML = `<span class="ln">${K.pyHighlight('value = ' + VALS[vi])}</span><span class="ln">${K.pyHighlight('print(f"{value' + spec + '}")')}</span>`;
+      $('fvOut').innerHTML = r.ok ? `<span class="mono">${r.v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/ /g, '<span class="sp">·</span>')}</span>` : `<span class="bad-text mono">${r.v.replace(/</g, '&lt;')}</span>`;
+      $('fvStatus').innerHTML = r.ok ? `<b class="mono">${spec}</b>: ${MEAN[spec]}.` : 'A format spec has to suit the type: <span class="mono">f</span> and <span class="mono">%</span> need a number, not a str.';
+    }
+    ['fvVal', 'fvSpec'].forEach(id => $(id).querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      $(id).querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+      if (id === 'fvVal') vi = +b.dataset.i; else si = +b.dataset.i; show();
+    })));
+    show();
+  })();
+})();
+</script>
+</body>
+</html>

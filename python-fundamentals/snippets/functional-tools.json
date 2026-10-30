@@ -1,0 +1,29 @@
+{
+ "page": "functional-tools",
+ "snippets": {
+  "walk": {
+   "code": "from functools import reduce\nfrom itertools import chain, groupby, islice\npatients = [(\"Ravi\", 41, 800), (\"Asha\", 35, 450),\n            (\"Meera\", 29, 1200), (\"John\", 41, 450)]\nby_age = sorted(patients, key=lambda p: p[1])\ntop = sorted(patients, key=lambda p: (-p[2], p[0]))\nnames = list(map(lambda p: p[0].upper(), patients))\ncheap = list(filter(lambda p: p[2] < 500, patients))\ntotal = reduce(lambda acc, p: acc + p[2], patients, 0)\nprint(by_age[0][0], top[0][0], names, len(cheap), total)\nfor age, group in groupby(by_age, key=lambda p: p[1]):\n    print(age, [p[0] for p in group])\nprint(list(chain([\"9:00\"], [\"9:30\", \"10:00\"])), list(islice(names, 2)))",
+   "inputs": []
+  },
+  "p1": {
+   "code": "print(sorted([\"bob\", \"Asha\", \"carl\"]))",
+   "inputs": []
+  },
+  "p2": {
+   "code": "print(sorted([\"Meera\", \"Jo\", \"Asha\"], key=len))",
+   "inputs": []
+  },
+  "p3": {
+   "code": "from itertools import groupby\ncities = [\"Pune\", \"Delhi\", \"Pune\"]\nprint([(k, len(list(g))) for k, g in groupby(cities)])",
+   "inputs": []
+  },
+  "p4": {
+   "code": "fees = {\"Asha\": 450, \"Ravi\": 800, \"Meera\": 600}\nprint(max(fees), max(fees, key=fees.get))",
+   "inputs": []
+  },
+  "p5": {
+   "code": "m = map(str.upper, [\"a\", \"b\"])\nprint(list(m), list(m))",
+   "inputs": []
+  }
+ }
+}

@@ -1,0 +1,33 @@
+{
+ "page": "builtins",
+ "snippets": {
+  "walk": {
+   "code": "fees = [800, 450, 1200, 450]\nnames = [\"Asha\", \"Ravi\", \"Meera\", \"John\"]\nprint(len(fees), sum(fees), min(fees), max(fees))\nranked = sorted(fees, reverse=True)\nprint(ranked, fees)\npairs = list(zip(names, fees))\ntop = max(zip(fees, names))\nprint(pairs[0], top)\nfor i, name in enumerate(names, start=1):\n    print(i, name)\nprint(any(f > 1000 for f in fees), all(f > 500 for f in fees))\nprint(round(2.5), round(3.5), round(4.567, 2))\nprint(abs(-7), pow(2, 10), divmod(17, 5))",
+   "inputs": []
+  },
+  "p1": {
+   "code": "nums = [3, 1, 2]\nresult = nums.sort()\nprint(result, nums)",
+   "inputs": []
+  },
+  "p2": {
+   "code": "print(list(zip([\"a\", \"b\", \"c\"], [1, 2])))",
+   "inputs": []
+  },
+  "p3": {
+   "code": "print(round(0.5), round(1.5), round(2.5))",
+   "inputs": []
+  },
+  "p4": {
+   "code": "r = reversed([1, 2, 3])\nprint(list(r))\nprint(list(r))",
+   "inputs": []
+  },
+  "p5": {
+   "code": "print(max([\"Ravi\", \"asha\", \"Meera\"]))",
+   "inputs": []
+  },
+  "p6": {
+   "code": "print(sum([]), max([], default=0))\nprint(max([]))",
+   "inputs": []
+  }
+ }
+}

@@ -1,0 +1,29 @@
+{
+ "page": "iterators-generators",
+ "snippets": {
+  "walk": {
+   "code": "def slots(start, end, step=30):\n    t = start\n    while t < end:\n        yield t\n        t += step\n\ngen = slots(540, 630)\nprint(next(gen))\nprint(next(gen))\nfor t in gen:\n    print(\"loop got\", t)\nnums = iter([10, 20])\nprint(next(nums), next(nums), next(nums, \"done\"))\nsquares = (n * n for n in range(4))\nprint(sum(squares), list(squares))",
+   "inputs": []
+  },
+  "p1": {
+   "code": "def gen():\n    print(\"start\")\n    yield 1\n    print(\"end\")\n\ng = gen()\nprint(\"made\")\nprint(next(g))",
+   "inputs": []
+  },
+  "p2": {
+   "code": "def countdown(n):\n    while n > 0:\n        yield n\n        n -= 1\n\nc = countdown(3)\nprint(list(c), list(c))",
+   "inputs": []
+  },
+  "p3": {
+   "code": "it = iter(\"ab\")\nprint(next(it), next(it))\nprint(next(it))",
+   "inputs": []
+  },
+  "p4": {
+   "code": "def morning():\n    yield \"9:00\"\n    yield \"9:30\"\n\ndef day():\n    yield from morning()\n    yield \"14:00\"\n\nprint(list(day()))",
+   "inputs": []
+  },
+  "p5": {
+   "code": "from itertools import count, islice\nids = count(1001)\nprint(list(islice(ids, 3)), next(ids))",
+   "inputs": []
+  }
+ }
+}

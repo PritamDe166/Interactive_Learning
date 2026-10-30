@@ -37,6 +37,21 @@
     <ul class="lede"><li>Three to five short bullets: the one idea this page makes obvious.</li><li>One idea per bullet, in plain words. <b>Bold</b> the key term.</li></ul>
   </header>
 
+  <!-- 3. Optional comparison table (.card.analogy) only when the subject maps closely onto something familiar -->
+
+  <!-- 4. Guided walkthrough: 6-9 steps building ONE visual of the right form for the subject (see Kit.story in explainer-kit.js) -->
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: the idea in steps</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story" id="story">
+      <div class="scroll"><svg class="diagram" id="storySvg" style="min-width:0" viewBox="0 0 700 420" aria-label="Describe the walkthrough diagram"></svg></div>
+    </div>
+  </section>
+
+  <!-- 5. Playgrounds: the learner predicts, changes inputs, breaks things -->
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Now break things and watch what changes.</p>
+
   <section aria-labelledby="stageTitle">
     <h2 class="stage-title" id="stageTitle">1. The flow</h2>
     <div class="stage-kind">Replace with a one-line label</div>
@@ -84,6 +99,14 @@
     </div>
   </section>
 
+  <!-- 6. Cheat-sheet: if you see X -> think Y -->
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">If the question says…</span><span class="arrow">→</span><span class="then">think this</span></li>
+    </ul>
+  </section>
+
   <section aria-labelledby="quizH">
     <h2 id="quizH">Check yourself</h2>
     <p class="sub">Answer out loud before you open each card.</p>
@@ -97,6 +120,24 @@
 </div>
 
 <script>
+
+  /* ===== Guided walkthrough (replace with the subject's own visual) ===== */
+  (function () {
+    const sv = Kit.$('storySvg');
+    const a = Kit.node(sv, 200, 210, 200, 60, 'Part A', 'what it is');
+    const b = Kit.node(sv, 500, 210, 200, 60, 'Part B', 'what it does');
+    b.g.classList.add('sx');
+    const P = Kit.el('g', {}, sv);
+    Kit.story({
+      root: Kit.$('story'),
+      show(i) { P.textContent = ''; b.g.classList.toggle('gone', i < 1); a.g.classList.toggle('on', i === 0); b.g.classList.toggle('on', i >= 1); },
+      steps: [
+        { title: 'Step one', text: 'Two to four plain sentences. <b>Bold</b> the key term.' },
+        { title: 'Step two', text: 'Each step adds one thing.', tip: 'Optional exam or interview tip.',
+          play: async run => { b.g.classList.remove('gone'); const p = Kit.pill(P, 'request'); await Kit.move(p, [300, 210], [400, 210], 600, run); p.remove(); } }
+      ]
+    });
+  })();
 /* Page-specific code. Keep colours out of JS: style through CSS classes. */
 (function () {
   const $ = id => document.getElementById(id);

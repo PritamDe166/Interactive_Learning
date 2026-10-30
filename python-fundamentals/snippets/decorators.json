@@ -1,0 +1,29 @@
+{
+ "page": "decorators",
+ "snippets": {
+  "walk": {
+   "code": "import functools\n\ndef log_calls(func):\n    @functools.wraps(func)\n    def wrapper(*args, **kwargs):\n        print(\"calling\", func.__name__, args)\n        result = func(*args, **kwargs)\n        print(\"returned\", result)\n        return result\n    return wrapper\n\n@log_calls\ndef with_tax(amount, rate=0.18):\n    return amount * (1 + rate)\n\ntotal = with_tax(1000)\nprint(total, with_tax.__name__)",
+   "inputs": []
+  },
+  "p1": {
+   "code": "def shout(func):\n    print(\"decorating\", func.__name__)\n    return func\n\n@shout\ndef hello():\n    print(\"hello\")\n\nprint(\"ready\")\nhello()\nhello()",
+   "inputs": []
+  },
+  "p2": {
+   "code": "def twice(func):\n    def wrapper(*args):\n        func(*args)\n        func(*args)\n    return wrapper\n\n@twice\ndef add(a, b):\n    return a + b\n\nprint(add(2, 3))",
+   "inputs": []
+  },
+  "p3": {
+   "code": "def deco(func):\n    def wrapper():\n        return func()\n    return wrapper\n\n@deco\ndef report():\n    \"\"\"Daily report.\"\"\"\n\nprint(report.__name__, report.__doc__)",
+   "inputs": []
+  },
+  "p4": {
+   "code": "def a(f):\n    def w():\n        return \"a(\" + f() + \")\"\n    return w\n\ndef b(f):\n    def w():\n        return \"b(\" + f() + \")\"\n    return w\n\n@a\n@b\ndef x():\n    return \"x\"\n\nprint(x())",
+   "inputs": []
+  },
+  "p5": {
+   "code": "from functools import lru_cache\n\n@lru_cache\ndef fee(code):\n    print(\"looking up\", code)\n    return len(code) * 100\n\nprint(fee(\"ECG\"), fee(\"ECG\"), fee(\"XRAY\"))",
+   "inputs": []
+  }
+ }
+}

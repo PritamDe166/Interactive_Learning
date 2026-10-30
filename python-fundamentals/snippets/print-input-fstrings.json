@@ -1,0 +1,37 @@
+{
+ "page": "print-input-fstrings",
+ "snippets": {
+  "walk": {
+   "code": "patient = \"Asha\"\nage = 35\nfee = 1450.5\nprint(\"Patient:\", patient)\nprint(\"Mon\", \"Wed\", \"Fri\", sep=\" | \")\nprint(\"Saving\", end=\"... \")\nprint(\"done\")\nprint(\"Fee: \" + str(fee))\nprint(f\"{patient} is {age} years old\")\nprint(f\"Fee: {fee:,.2f}, next year {age + 1}\")\nname = input(\"Your name: \")\nprint(f\"Hello {name.title()}!\")",
+   "inputs": [
+    "ravi"
+   ]
+  },
+  "p1": {
+   "code": "print(\"Mon\", \"Wed\", sep=\", \", end=\"!\")\nprint(\"Fri\")",
+   "inputs": []
+  },
+  "p2": {
+   "code": "age = 35\nprint(\"Age: \" + age)",
+   "inputs": []
+  },
+  "p3": {
+   "code": "qty = input(\"Qty: \")\nprint(qty * 2)",
+   "inputs": [
+    "3"
+   ]
+  },
+  "p4": {
+   "code": "fee = 1234.5\nprint(f\"Rs {fee:,.2f}\")",
+   "inputs": []
+  },
+  "p5": {
+   "code": "name = \"asha\"\nvisits = 3\nprint(f\"{name=}, {visits=}\")",
+   "inputs": []
+  },
+  "p6": {
+   "code": "print(\"C:\\new folder\")",
+   "inputs": []
+  }
+ }
+}

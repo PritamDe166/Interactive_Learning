@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Conditionals &amp; loops</title>
+<meta name="description" content="Python fundamentals: if/elif/else, for loops over sequences and range(), while loops, break, continue and the loop else clause, stepped line by line.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<script src="traces/conditionals-loops.js"></script>
+<style>
+  .static-code { margin: 0; }
+  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
+  .rg-axis { stroke: var(--muted); stroke-width: 1.5; }
+  .rg-num { font-family: var(--mono); font-size: 12px; fill: var(--muted); }
+  .rg-dot { fill: var(--cyan); animation: pop .3s ease-out both; transform-box: fill-box; transform-origin: center; }
+  .rg-stop { stroke: var(--red); stroke-width: 2; stroke-dasharray: 4 4; }
+  .rg-stopl { font-size: 11px; fill: var(--bad-text); font-family: var(--mono); }
+  @keyframes pop { from { transform: scale(0); } to { transform: none; } }
+  .lc-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 8px; margin-top: 12px; }
+  .lc-p { border: 1.5px solid var(--line); border-radius: 10px; padding: 8px 10px; background: var(--panel-2); display: grid; gap: 2px; transition: all .25s; }
+  .lc-p span { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+  .lc-p i { font-style: normal; font-size: 12px; min-height: 16px; color: var(--fg-soft); }
+  .lc-p.urgent span { color: var(--bad-text); }
+  .lc-p.cur { border-color: var(--cyan); box-shadow: 0 0 0 3px var(--teal-wash); }
+  .lc-p.done { border-color: var(--teal); }
+  .lc-p.done i { color: var(--good-text); }
+  .lc-p.skip { border-style: dashed; opacity: .75; }
+  .lc-p.skip i, .lc-p.stop i { color: var(--bad-text); }
+  .lc-p.stop { border-color: var(--red); }
+  .lc-p.never { opacity: .35; }
+  .lc-else { margin-top: 10px; font-family: var(--mono); font-size: 14px; padding: 8px 12px; border-radius: 10px; border: 1.5px dashed var(--line); color: var(--muted); }
+  .lc-else.on { border-style: solid; border-color: var(--teal); color: var(--good-text); }
+  .lc-else.off { text-decoration: line-through; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Python Fundamentals</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Python · Topic 4 · Control flow and data</div>
+    <h1>Conditionals &amp; loops</h1>
+    <ul class="lede"><li><b>if / elif / else</b> checks conditions top to bottom and runs <b>only the first</b> branch that is true.</li><li>A <b>for</b> loop takes items one at a time from any sequence (list, string, <span class="mono">range()</span>); a <b>while</b> loop repeats as long as a condition stays true.</li><li><b>continue</b> skips to the next item; <b>break</b> leaves the loop completely.</li><li>Indentation is the syntax: the indented lines under a colon <b>are</b> the block.</li></ul>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: grading a list of scores</h2>
+    <div class="stage-kind">Real trace of real code · Next ▶ moves one idea at a time</div>
+    <div class="story wide" id="pageStory">
+      <div id="pageTrace"></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Run and change the code, predict before you peek, and try to break things.</p>
+
+  <section aria-labelledby="runH">
+    <h2 class="stage-title" id="runH">Edit and run</h2>
+    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div id="runner"></div>
+  </section>
+
+  <section aria-labelledby="predH">
+    <h2 class="stage-title" id="predH">Predict the output</h2>
+    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="chips" id="pzChips"></div>
+    <div class="puzzle-area" id="pzArea"></div>
+  </section>
+
+  <section aria-labelledby="rangeH">
+    <h2 class="stage-title" id="rangeH">range() on a number line</h2>
+    <div class="stage-kind">Drag start, stop and step · the dots are the values the loop gets</div>
+    <div class="scroll"><svg class="diagram narrow" id="rgSvg" viewBox="0 0 660 120" style="min-width:520px" role="img" aria-label="Number line from -5 to 15"></svg></div>
+    <div class="grid3" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:8px">
+      <div class="card"><label class="label" for="rgA">start <span class="mono" id="rgAv"></span></label><input type="range" id="rgA" min="-5" max="15" value="0" style="width:100%"></div>
+      <div class="card"><label class="label" for="rgB">stop <span class="mono" id="rgBv"></span></label><input type="range" id="rgB" min="-5" max="15" value="5" style="width:100%"></div>
+      <div class="card"><label class="label" for="rgC">step <span class="mono" id="rgCv"></span></label><input type="range" id="rgC" min="-4" max="4" value="1" style="width:100%"></div>
+    </div>
+    <p class="status-line" id="rgStatus" style="font-size:16px"></p>
+  </section>
+
+  <section aria-labelledby="lcH">
+    <h2 class="stage-title" id="lcH">break vs continue vs neither</h2>
+    <div class="stage-kind">Same loop, three endings · watch which patients get processed</div>
+    <pre class="codeblock" id="lcCode" style="min-height:0"></pre>
+    <div class="seg" id="lcSeg" role="group" aria-label="Loop control"><button type="button" data-v="none" aria-pressed="true">no control</button><button type="button" data-v="continue" aria-pressed="false">continue</button><button type="button" data-v="break" aria-pressed="false">break</button></div>
+    <div class="lc-row" id="lcRow"></div>
+    <div class="lc-else" id="lcElse">else: print("all checked")</div>
+    <p class="status-line" id="lcStatus">Press a button to run the loop.</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Several mutually exclusive cases</span><span class="arrow">→</span><span class="then"><span class="mono">if / elif / else</span>, strictest condition first</span></li>
+      <li><span class="if">Need the position too</span><span class="arrow">→</span><span class="then"><span class="mono">for i, x in enumerate(items):</span> (not <span class="mono">range(len(...))</span>)</span></li>
+      <li><span class="if">Count 1 to n</span><span class="arrow">→</span><span class="then"><span class="mono">range(1, n + 1)</span>: stop is excluded</span></li>
+      <li><span class="if">Skip this item</span><span class="arrow">→</span><span class="then"><span class="mono">continue</span></span></li>
+      <li><span class="if">Found it, stop looking</span><span class="arrow">→</span><span class="then"><span class="mono">break</span>; add a loop <span class="mono">else:</span> for "not found"</span></li>
+      <li><span class="if">Repeat until something happens</span><span class="arrow">→</span><span class="then"><span class="mono">while True:</span> … <span class="mono">if done: break</span></span></li>
+      <li><span class="if">Range check</span><span class="arrow">→</span><span class="then"><span class="mono">60 &lt;= score &lt; 70</span> (chained comparison)</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: truthiness and match</h2>
+    <div class="two">
+      <div class="card"><div class="label">Falsy values (everything else is truthy)</div><p class="mono" style="margin:6px 0 0">False · None · 0 · 0.0 · "" · [] · () · {} · set() · range(0)</p><p class="muted" style="margin:8px 0 0">So <span class="mono">if items:</span> means "if the list isn't empty".</p></div>
+      <div class="card"><div class="label">match / case (Python 3.10+)</div><pre class="codeblock" style="min-height:0;margin:6px 0 0"><span class="ln"><span class="k">match</span> status:</span><span class="ln">    <span class="k">case</span> <span class="s">"urgent"</span>: ...</span><span class="ln">    <span class="k">case</span> <span class="s">"ok"</span> | <span class="s">"done"</span>: ...</span><span class="ln">    <span class="k">case</span> _: ...</span></pre><p class="muted" style="margin:8px 0 0">Like a switch, but it can also match shapes (tuples, dicts, classes). No fall-through.</p></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>Grade exercise in Conditionals.py:</b> after <span class="mono">if num &lt; 60</span> fails, the next <span class="mono">elif</span> already knows num ≥ 60, so <span class="mono">num &gt;= 60 and</span> is redundant. Write <span class="mono">elif num &lt; 70:</span>, or <span class="mono">elif 60 &lt;= num &lt; 70:</span> if you want it explicit. There's also a typo: "Ypur Grade".</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Validate the input range:</b> the same exercise prints "Grade A" for 150 and "Failed" for -5. Check <span class="mono">0 &lt;= num &lt;= 100</span> first.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Topics the repo doesn't cover yet:</b> <span class="mono">break</span>, <span class="mono">continue</span>, the loop <span class="mono">else</span>, <span class="mono">enumerate()</span> and <span class="mono">match</span>. All are on this page.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Sum loops:</b> <span class="mono">current_sum = current_sum + i</span> works, but Python has <span class="mono">sum(list_of_numbers)</span> and <span class="mono">sum(range(1, n + 1))</span>. Write the loop to learn, use the built-in in real code.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Say the answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary><span class="mono">print(list(range(5, 0, -2)))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">[5, 3, 1]</b>. Counts down by 2 and stops before 0.</p></div></details>
+      <details><summary><span class="mono">for c in "hi": print(c * 2, end="")</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">hhii</b>. A string is iterated character by character.</p></div></details>
+      <details><summary><span class="mono">x = 0\nwhile x &lt; 10: x += 3\nprint(x)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">12</b>. 0 → 3 → 6 → 9 → 12; then 12 &lt; 10 is false.</p></div></details>
+      <details><summary><span class="mono">for i in range(3):\n    if i == 1: break\nelse: print("done")\nprint(i)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">1</b> only. break skipped the else, and i keeps its last value.</p></div></details>
+      <details><summary><span class="mono">print("yes" if [] else "no")</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">no</b>. An empty list is falsy. This one-line form is the conditional expression.</p></div></details>
+      <details><summary><span class="mono">for i, ch in enumerate("ab", start=1): print(i, ch)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">1 a</b> then <b class="mono">2 b</b>. <span class="mono">start=</span> changes the first number.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Every trace and output on this page was produced by running the code (Python 3.13; the same results on Python 3.15). The edit-and-run box runs real Python 3.14 in your browser with Pyodide. Sources: Python_Fundamentals repo (Basics/Conditionals.py, Basics/Loops.py); break/continue/else/enumerate/match added from the Python tutorial.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const T = window.TRACES['conditionals-loops'];
+
+  /* ========== Walkthrough ========== */
+  const tr = K.trace($('pageTrace'), T.walk, {});
+  const MAP = [2, 3, 6, 9, 10, 14, 21, 24, 29];
+  const STEPS = [{"title": "Set up before the loop", "text": "A list of four scores and a counter starting at 0. Watch <b>i</b> and <b>score</b> appear once the loop starts."}, {"title": "for takes the first item", "text": "<span class=\"mono\">enumerate(scores)</span> hands out pairs (position, value). The loop <b>unpacks</b> the first pair into <span class=\"mono\">i = 0</span> and <span class=\"mono\">score = 72</span>."}, {"title": "Conditions checked, counter updated", "text": "72 is not &lt; 50 and not ≥ 90, so both <span class=\"mono\">if</span> bodies are skipped. Only <span class=\"mono\">passed += 1</span> runs. Then the loop goes back to the top for the next item."}, {"title": "45: the fail branch", "text": "Second item: <span class=\"mono\">score = 45</span>. The condition is true, so the indented block runs and prints <span class=\"mono\">1 fail</span>."}, {"title": "continue skips the rest", "text": "<span class=\"mono\">continue</span> jumps straight back to the <span class=\"mono\">for</span> line. <span class=\"mono\">passed += 1</span> does <b>not</b> run for 45.", "tip": "Use <span class=\"mono\">break</span> instead and the loop would stop completely: 91 and 60 would never be looked at."}, {"title": "91: a second if", "text": "These are two separate <span class=\"mono\">if</span> statements, not if/elif, so after the first check fails Python still checks <span class=\"mono\">score &gt;= 90</span>, which is true: <span class=\"mono\">2 top</span>."}, {"title": "The loop ends by itself", "text": "After the last item (60) the sequence is used up and execution continues after the loop. Three scores passed. <b>i</b> and <b>score</b> still exist: Python has no block scope."}, {"title": "while checks before every round", "text": "<span class=\"mono\">while n &gt; 0</span> is tested, it's true, the body prints <span class=\"mono\">T-minus 2</span>…"}, {"title": "…until the condition turns false", "text": "<span class=\"mono\">n -= 1</span> moves toward the exit. When <span class=\"mono\">n</span> becomes 0 the test fails and the loop stops. Forget that line and the loop never ends."}];
+  STEPS.forEach((st, i) => {
+    if (i === 0) return;
+    st.play = async run => { for (let k = MAP[i - 1] + 1; k <= MAP[i]; k++) { tr.show(k); if (k < MAP[i]) await K.sleep(Math.max(150, Math.min(600, 4800 / (MAP[i] - MAP[i - 1]))), run); } };
+  });
+  K.story({ root: $('pageStory'), steps: STEPS, show: i => tr.show(MAP[i]), tipLabel: 'Tip' });
+
+  /* ========== Edit and run ========== */
+  K.pyRunner($('runner'), { starters: [{"label": "Walkthrough code", "code": "scores = [72, 45, 91, 60]\npassed = 0\nfor i, score in enumerate(scores):\n    if score < 50:\n        print(i, \"fail\")\n        continue\n    if score >= 90:\n        print(i, \"top\")\n    passed += 1\nprint(\"passed:\", passed)\nn = 2\nwhile n > 0:\n    print(\"T-minus\", n)\n    n -= 1", "inputs": []}, {"label": "Puzzle 1: range with a step", "code": "for n in range(2, 10, 3):\n    print(n, end=\" \")", "inputs": []}, {"label": "Puzzle 2: order of elif", "code": "score = 95\nif score >= 60:\n    print(\"D\")\nelif score >= 90:\n    print(\"A\")", "inputs": []}, {"label": "Puzzle 3: for … else", "code": "for slot in [\"9:00\", \"9:30\", \"10:00\"]:\n    if slot == \"9:30\":\n        print(\"booked\", slot)\n        break\nelse:\n    print(\"no slot\")", "inputs": []}, {"label": "Puzzle 4: changing the loop variable", "code": "for i in range(3):\n    print(i, end=\" \")\n    i = 10", "inputs": []}, {"label": "Puzzle 5: truthiness", "code": "name = \"\"\nvisits = [0]\nif name:\n    print(\"has name\")\nif visits:\n    print(\"has visits\")", "inputs": []}, {"label": "Puzzle 6: chained comparison", "code": "age = 15\nprint(10 < age < 18, 10 < age > 18)", "inputs": []}, {"label": "Your turn: password with 3 tries", "inputs": ["abc", "System@123"], "code": "correct = \"System@123\"\nfor attempt in range(1, 4):\n    pw = input(\"Password: \")\n    if pw == correct:\n        print(\"Welcome! attempt\", attempt)\n        break\n    print(\"Wrong,\", 3 - attempt, \"left\")\nelse:\n    print(\"Locked out\")"}] });
+
+  /* ========== Predict the output ========== */
+  const PZ = [{"id": "p1", "name": "1 · range with a step", "q": "What's printed?", "opts": ["2 5 8", "2 5 8 11", "3 6 9"], "a": 0, "why": "Start at 2, add 3 each time, stop <b>before</b> 10: 2, 5, 8."}, {"id": "p2", "name": "2 · order of elif", "q": "What's printed?", "opts": ["A", "D", "D / A"], "a": 1, "why": "Only the <b>first</b> true branch runs. 95 ≥ 60 is true, so the A branch is never reached. Put the strictest condition first."}, {"id": "p3", "name": "3 · for … else", "q": "What's printed?", "opts": ["booked 9:30", "booked 9:30 / no slot", "no slot"], "a": 0, "why": "A loop's <span class=\"mono\">else</span> runs only if the loop finished <b>without</b> break. Here break happened, so <span class=\"mono\">no slot</span> is skipped."}, {"id": "p4", "name": "4 · changing the loop variable", "q": "What's printed?", "opts": ["0", "0 1 2", "0 10"], "a": 1, "why": "Each round, <span class=\"mono\">for</span> rebinds <span class=\"mono\">i</span> to the next value from <span class=\"mono\">range</span>. Assigning 10 inside the body doesn't affect what comes next."}, {"id": "p5", "name": "5 · truthiness", "q": "What's printed?", "opts": ["has visits", "has name / has visits", "(nothing)"], "a": 0, "why": "Empty string is falsy. A list with one item is truthy, even if that item is 0."}, {"id": "p6", "name": "6 · chained comparison", "q": "What's printed?", "opts": ["True False", "True True", "SyntaxError"], "a": 0, "why": "<span class=\"mono\">a &lt; b &lt; c</span> means <span class=\"mono\">a &lt; b and b &lt; c</span>. The second is <span class=\"mono\">10 &lt; 15 and 15 &gt; 18</span> → False."}];
+  $('pzChips').innerHTML = PZ.map((p, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${p.name}</button>`).join('');
+  function puzzle(i) {
+    const p = PZ[i], area = $('pzArea');
+    area.innerHTML = `<div class="two">
+        <div><pre class="codeblock static-code">${T[p.id].code.split('\n').map(l => `<span class="ln">${K.pyHighlight(l) || ' '}</span>`).join('')}</pre></div>
+        <div class="card predict"><div class="q">${p.q}</div><div class="opts">${p.opts.map((o, j) => `<button class="chip-btn" type="button" data-j="${j}">${o.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</button>`).join('')}</div><p class="status-line" style="text-align:left;margin:0" id="pzVerdict">Choose an answer to unlock the step-through.</p></div>
+      </div><div id="pzTrace"></div>`;
+    area.querySelectorAll('.predict .chip-btn').forEach(b => b.addEventListener('click', () => {
+      const j = +b.dataset.j, ok = j === p.a;
+      area.querySelectorAll('.predict .chip-btn').forEach((x, xj) => { x.disabled = true; x.classList.toggle('right', xj === p.a); x.classList.toggle('wrong', xj === j && !ok); });
+      $('pzVerdict').innerHTML = `<span class="${ok ? 'ok-text' : 'bad-text'}">${ok ? 'Correct.' : 'Not quite.'}</span> ${p.why} <b>Step through below to watch it happen.</b>`;
+      K.trace($('pzTrace'), T[p.id], { controls: true });
+    }));
+  }
+  $('pzChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('pzChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    puzzle(+b.dataset.i);
+  }));
+  $('pzChips').querySelector('button').click();
+
+  /* ===== range() on a number line ===== */
+  (function () {
+    const svg = $('rgSvg'), ns = 'http://www.w3.org/2000/svg', X = v => 30 + (v + 5) * 30;
+    function mk(tag, at, txt) { const e = document.createElementNS(ns, tag); for (const k in at) e.setAttribute(k, at[k]); if (txt != null) e.textContent = txt; svg.appendChild(e); return e; }
+    function draw() {
+      const a = +$('rgA').value, b = +$('rgB').value, c = +$('rgC').value;
+      $('rgAv').textContent = a; $('rgBv').textContent = b; $('rgCv').textContent = c;
+      svg.innerHTML = '';
+      mk('line', { x1: X(-5), y1: 60, x2: X(15), y2: 60, class: 'rg-axis' });
+      for (let v = -5; v <= 15; v++) { mk('line', { x1: X(v), y1: 55, x2: X(v), y2: 65, class: 'rg-axis' }); const t = mk('text', { x: X(v), y: 92, class: 'rg-num' }, v); t.style.textAnchor = 'middle'; }
+      if (c === 0) { $('rgStatus').innerHTML = '<span class="mono">range(' + a + ', ' + b + ', 0)</span> → <b class="bad-text">ValueError: range() arg 3 must not be zero</b>'; return; }
+      const vals = []; for (let v = a; c > 0 ? v < b : v > b; v += c) vals.push(v);
+      const sx = mk('path', { d: `M${X(b)} 32 v56`, class: 'rg-stop' });
+      const st = mk('text', { x: X(b), y: 24, class: 'rg-stopl' }, 'stop (excluded)'); st.style.textAnchor = 'middle';
+      vals.forEach((v, k) => { mk('circle', { cx: X(v), cy: 60, r: 9, class: 'rg-dot', style: `animation-delay:${k * 70}ms` }); });
+      $('rgStatus').innerHTML = `<span class="mono">list(range(${a}, ${b}, ${c}))</span> → <b class="mono">[${vals.join(', ')}]</b>` + (vals.length ? ` · ${vals.length} value${vals.length > 1 ? 's' : ''}` : (c > 0 ? ' · empty: a positive step needs start &lt; stop' : ' · empty: a negative step needs start &gt; stop'));
+    }
+    ['rgA', 'rgB', 'rgC'].forEach(id => $(id).addEventListener('input', draw));
+    draw();
+  })();
+  /* ===== break vs continue vs neither ===== */
+  (function () {
+    const P = [['Asha', 'ok'], ['Ravi', 'ok'], ['Meera', 'urgent'], ['John', 'ok'], ['Lina', 'ok']];
+    let mode = 'none';
+    function code() {
+      const lines = ['for name, status in patients:', '    if status == "urgent":'];
+      lines.push(mode === 'none' ? '        print("flag", name)' : mode === 'continue' ? '        continue' : '        break');
+      lines.push('    print("process", name)', 'else:', '    print("all checked")');
+      $('lcCode').innerHTML = lines.map(l => `<span class="ln">${K.pyHighlight(l)}</span>`).join('');
+    }
+    async function go() {
+      const run = K.newRun('lc'); code();
+      $('lcRow').innerHTML = P.map(([n, s]) => `<div class="lc-p${s === 'urgent' ? ' urgent' : ''}"><b>${n}</b><span>${s}</span><i></i></div>`).join('');
+      $('lcElse').className = 'lc-else';
+      const cells = [...$('lcRow').children]; const out = [];
+      try {
+        let broke = false;
+        for (let k = 0; k < P.length; k++) {
+          const c = cells[k], [n, s] = P[k]; c.classList.add('cur'); await K.sleep(450, run);
+          if (s === 'urgent') {
+            if (mode === 'none') { out.push('flag ' + n); c.querySelector('i').textContent = 'flagged'; }
+            if (mode === 'continue') { c.classList.remove('cur'); c.classList.add('skip'); c.querySelector('i').textContent = 'skipped'; out.push('(skip)'); await K.sleep(400, run); continue; }
+            if (mode === 'break') { c.classList.remove('cur'); c.classList.add('stop'); c.querySelector('i').textContent = 'break!'; broke = true; break; }
+          }
+          out.push('process ' + n); c.classList.remove('cur'); c.classList.add('done'); c.querySelector('i').textContent = (c.querySelector('i').textContent ? c.querySelector('i').textContent + ' + ' : '') + 'processed';
+          await K.sleep(300, run);
+        }
+        if (broke) cells.slice(3).forEach(c => { c.classList.add('never'); c.querySelector('i').textContent = 'never seen'; });
+        $('lcElse').className = 'lc-else ' + (broke ? 'off' : 'on');
+        $('lcStatus').innerHTML = mode === 'none' ? 'Every patient processed; Meera also flagged. The loop finished normally, so <b>else ran</b>.' : mode === 'continue' ? '<b>continue</b> skipped the rest of the body for Meera only. The loop still finished normally, so <b>else ran</b>.' : '<b>break</b> left the loop at Meera: John and Lina were never looked at, and <b>else was skipped</b>.';
+      } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+    }
+    K.seg($('lcSeg'), v => { mode = v; go(); });
+    code();
+    $('lcRow').innerHTML = P.map(([n, s]) => `<div class="lc-p${s === 'urgent' ? ' urgent' : ''}"><b>${n}</b><span>${s}</span><i></i></div>`).join('');
+  })();
+})();
+</script>
+</body>
+</html>

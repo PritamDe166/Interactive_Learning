@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Modules, packages, pip &amp; venv</title>
+<meta name="description" content="Python fundamentals: what import does, module caching, from-imports and aliases, if __name__ == &#x27;__main__&#x27;, packages, pip and virtual environments.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<script src="traces/modules-packages.js"></script>
+<style>
+  .static-code { margin: 0; }
+  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
+  .nm-term { margin: 4px 0 0; min-height: 120px; padding: 10px 12px; border-radius: 10px; background: var(--code-bg); border: 1px solid var(--line); font-size: 13.5px; white-space: pre-wrap; }
+  .nm-cache { margin-top: 8px; font-family: var(--mono); font-size: 12.5px; color: var(--accent-text); padding: 6px 10px; border: 1px dashed var(--line); border-radius: 8px; overflow-wrap: anywhere; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Python Fundamentals</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Python · Topic 13 · Going further</div>
+    <h1>Modules, packages, pip &amp; venv</h1>
+    <ul class="lede"><li>Every <b>.py file is a module</b>. <span class="mono">import billing</span> runs billing.py <b>once</b>, caches it in <span class="mono">sys.modules</span>, and binds the name <span class="mono">billing</span>.</li><li><span class="mono">from billing import tax</span> copies just that name into your file; <span class="mono">import numpy as np</span> picks a shorter alias.</li><li><span class="mono">__name__</span> is <span class="mono">"__main__"</span> when a file is run directly and the module's name when it's imported, hence <span class="mono">if __name__ == "__main__":</span>.</li><li>A <b>package</b> is a folder of modules. <b>pip</b> installs third-party packages; a <b>virtual environment</b> (venv) keeps each project's packages separate.</li></ul>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: writing and importing our own module</h2>
+    <div class="stage-kind">Real trace of real code · Next ▶ moves one idea at a time</div>
+    <div class="story wide" id="pageStory">
+      <div id="pageTrace"></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Run and change the code, predict before you peek, and try to break things.</p>
+
+  <section aria-labelledby="runH">
+    <h2 class="stage-title" id="runH">Edit and run</h2>
+    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div id="runner"></div>
+  </section>
+
+  <section aria-labelledby="predH">
+    <h2 class="stage-title" id="predH">Predict the output</h2>
+    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="chips" id="pzChips"></div>
+    <div class="puzzle-area" id="pzArea"></div>
+  </section>
+
+  <section aria-labelledby="nmH">
+    <h2 class="stage-title" id="nmH">Run it, or import it?</h2>
+    <div class="stage-kind">Same file, two ways to start it · watch which lines run</div>
+    <div class="seg" id="nmSeg" role="group" aria-label="How billing.py starts"><button type="button" data-v="run" aria-pressed="false">python billing.py</button><button type="button" data-v="imp" aria-pressed="false">python app.py (imports billing)</button><button type="button" data-v="imp2" aria-pressed="false">app.py imports it twice</button></div>
+    <div class="two" style="margin-top:12px">
+      <div><div class="label mono">billing.py</div><pre class="codeblock" id="nmCode" style="min-height:0;margin:4px 0 0"></pre></div>
+      <div><div class="label">Terminal</div><pre class="mono nm-term" id="nmOut"></pre><div class="nm-cache" id="nmCache">sys.modules: { … }</div></div>
+    </div>
+    <p class="status-line" id="nmStatus">Pick how the program starts.</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Use code from another file</span><span class="arrow">→</span><span class="then"><span class="mono">import module</span>, then <span class="mono">module.name</span></span></li>
+      <li><span class="if">A few names, used a lot</span><span class="arrow">→</span><span class="then"><span class="mono">from module import name</span></span></li>
+      <li><span class="if">Long module name</span><span class="arrow">→</span><span class="then"><span class="mono">import pandas as pd</span> (follow the community's alias)</span></li>
+      <li><span class="if">Code that should only run when the file is started</span><span class="arrow">→</span><span class="then"><span class="mono">if __name__ == "__main__":</span> + <span class="mono">main()</span></span></li>
+      <li><span class="if">Group several modules</span><span class="arrow">→</span><span class="then">A folder = a package; import with <span class="mono">from clinic.billing import tax</span></span></li>
+      <li><span class="if">New project</span><span class="arrow">→</span><span class="then"><span class="mono">python3 -m venv .venv</span>, activate, then <span class="mono">pip install …</span></span></li>
+      <li><span class="if">Share exact dependencies</span><span class="arrow">→</span><span class="then"><span class="mono">pip freeze &gt; requirements.txt</span> / <span class="mono">pip install -r requirements.txt</span></span></li>
+      <li><span class="if">Avoid</span><span class="arrow">→</span><span class="then"><span class="mono">from x import *</span> and naming your file like a library (<span class="mono">random.py</span>, <span class="mono">json.py</span>)</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: project layout, venv and pip (macOS / Linux)</h2>
+    <div class="two">
+      <div class="card"><div class="label">A small package</div><pre class="codeblock" style="min-height:0;margin:6px 0 0"><span class="ln">clinic_app/</span><span class="ln">├── .venv/              <span class="c"># virtual env (don't commit)</span></span><span class="ln">├── requirements.txt</span><span class="ln">├── main.py             <span class="c"># from clinic.billing import tax</span></span><span class="ln">└── clinic/</span><span class="ln">    ├── __init__.py     <span class="c"># marks a regular package</span></span><span class="ln">    ├── billing.py</span><span class="ln">    └── booking.py</span></pre></div>
+      <div class="card"><div class="label">Terminal</div><pre class="codeblock" style="min-height:0;margin:6px 0 0"><span class="ln">python3 -m venv .venv          <span class="c"># create</span></span><span class="ln">source .venv/bin/activate      <span class="c"># activate (Windows: .venv\Scripts\activate)</span></span><span class="ln">python -m pip install requests <span class="c"># install into this venv</span></span><span class="ln">pip list                       <span class="c"># what's installed</span></span><span class="ln">pip freeze &gt; requirements.txt  <span class="c"># pin versions</span></span><span class="ln">deactivate                     <span class="c"># leave the venv</span></span></pre></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>From your Notion plans:</b> "Modules &amp; packages (math/os/json, own modules, pip)" and "Virtual environments &amp; pip" (Roadmap for Python), and "Modules &amp; imports, venv" (Week 2 of the 8-week plan).</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Why a venv:</b> without one, <span class="mono">pip install</span> puts packages into the system or user Python shared by every project, and versions clash. A venv is a folder with its own interpreter link and site-packages, like a per-project <span class="mono">node_modules</span> or NuGet packages folder.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Running a package module:</b> <span class="mono">python -m clinic.billing</span> runs it with the right import paths; running <span class="mono">python clinic/billing.py</span> directly often breaks its imports of sibling modules.</p></div>
+      <div class="note"><span class="flag add">Updated</span><p><b>Newer tools:</b> <span class="mono">uv</span> (Astral) creates venvs and installs packages much faster and is widely used now (<span class="mono">uv venv</span>, <span class="mono">uv pip install</span>, <span class="mono">uv add</span>). Project metadata lives in <span class="mono">pyproject.toml</span>. Plain venv + pip still works everywhere and is what the docs teach.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Say the answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>You run <span class="mono">python app.py</span>, and app.py does <span class="mono">import billing</span>. What is <span class="mono">__name__</span> inside billing.py?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">"billing"</b>. Only the started file is <span class="mono">"__main__"</span>.</p></div></details>
+      <details><summary><span class="mono">import math\nprint(math.floor(2.7), math.ceil(2.1))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">2 3</b>. floor rounds down, ceil rounds up.</p></div></details>
+      <details><summary>Where does <span class="mono">pip install requests</span> put the package when a venv is active?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Into that venv's <span class="mono">site-packages</span> folder only. Other projects (and the system Python) don't see it. Check with <span class="mono">which python</span> / <span class="mono">python -m pip --version</span>.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Every trace and output on this page was produced by running the code (Python 3.13; the same results on Python 3.15). The edit-and-run box runs real Python 3.14 in your browser with Pyodide. From the Notion plans (Roadmap for Python; Planning for python learning, Week 2). Python docs: Modules tutorial, venv, pip user guide.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const T = window.TRACES['modules-packages'];
+
+  /* ========== Walkthrough ========== */
+  const tr = K.trace($('pageTrace'), T.walk, {});
+  const MAP = [3, 5, 6, 7, 8, 10, 11];
+  const STEPS = [{"title": "A module is just a .py file", "text": "To keep everything in one runnable box, this snippet writes <span class=\"mono\">billing.py</span> next to itself. It has a print, a constant, a function and a <span class=\"mono\">__main__</span> check."}, {"title": "import runs the file once", "text": "<span class=\"mono\">import billing</span> found billing.py, <b>ran it top to bottom</b> (so \"loading billing\" printed) and bound the name <span class=\"mono\">billing</span> to the resulting <b>module object</b>. The <span class=\"mono\">__main__</span> block didn't run: inside billing, <span class=\"mono\">__name__</span> is <span class=\"mono\">\"billing\"</span>."}, {"title": "A second import is free", "text": "Nothing printed. Python found <span class=\"mono\">billing</span> in its cache, <span class=\"mono\">sys.modules</span>, and reused the same module object. Module code runs once per program.", "tip": "This is why modules are a natural place for configuration and shared constants."}, {"title": "from … import copies names", "text": "<span class=\"mono\">tax</span> and <span class=\"mono\">RATE</span> now exist directly in this file, pointing at the same objects as <span class=\"mono\">billing.tax</span> and <span class=\"mono\">billing.RATE</span>. Handy, but you lose the reminder of where they came from."}, {"title": "Standard library + alias", "text": "<span class=\"mono\">statistics</span> ships with Python (the \"batteries included\" standard library). <span class=\"mono\">as st</span> binds a shorter name."}, {"title": "Using what you imported", "text": "<span class=\"mono\">billing.tax(1000)</span> and the copied <span class=\"mono\">tax(500)</span> call the same function. <span class=\"mono\">st.mean</span> averages the fees."}, {"title": "__name__ tells you how you were started", "text": "The imported module's <span class=\"mono\">__name__</span> is <span class=\"mono\">'billing'</span>; this file, run directly, is <span class=\"mono\">'__main__'</span>. Put demo or start-up code under <span class=\"mono\">if __name__ == \"__main__\":</span> so importing the file stays side-effect free."}];
+  STEPS.forEach((st, i) => {
+    if (i === 0) return;
+    st.play = async run => { for (let k = MAP[i - 1] + 1; k <= MAP[i]; k++) { tr.show(k); if (k < MAP[i]) await K.sleep(Math.max(150, Math.min(600, 4800 / (MAP[i] - MAP[i - 1]))), run); } };
+  });
+  K.story({ root: $('pageStory'), steps: STEPS, show: i => tr.show(MAP[i]), tipLabel: 'Tip' });
+
+  /* ========== Edit and run ========== */
+  K.pyRunner($('runner'), { starters: [{"label": "Walkthrough code", "code": "src = \"\"\"print(\"loading billing\")\nRATE = 0.18\ndef tax(amount):\n    return amount * RATE\nif __name__ == \"__main__\":\n    print(\"billing run directly\")\n\"\"\"\nwith open(\"billing.py\", \"w\") as f:\n    f.write(src)\nimport billing\nimport billing\nfrom billing import tax, RATE\nimport statistics as st\nprint(billing.tax(1000), tax(500), RATE)\nprint(st.mean([450, 800, 1200]))\nprint(billing.__name__, __name__)", "inputs": []}, {"label": "Puzzle 1: importing twice", "code": "with open(\"greet.py\", \"w\") as f:\n    f.write('print(\"hello from greet\")\\n')\nimport greet\nimport greet\nimport greet as g\nprint(g is greet)", "inputs": []}, {"label": "Puzzle 2: from-import is a copy of the name", "code": "with open(\"counter.py\", \"w\") as f:\n    f.write(\"count = 0\\ndef bump():\\n    global count\\n    count += 1\\n\")\nfrom counter import count, bump\nimport counter\nbump()\nprint(count, counter.count)", "inputs": []}, {"label": "Puzzle 3: alias only", "code": "import statistics as st\nprint(st.median([3, 1, 2]))\nprint(statistics.median([3, 1, 2]))", "inputs": []}, {"label": "Puzzle 4: __name__ inside a module", "code": "with open(\"tool.py\", \"w\") as f:\n    f.write('print(\"tool:\", __name__)\\nif __name__ == \"__main__\":\\n    print(\"demo\")\\n')\nimport tool\nprint(\"me:\", __name__)", "inputs": []}, {"label": "Your turn: a module with a main()", "code": "src = \"\"\"def greet(name):\n    return f\"Hello {name}\"\n\ndef main():\n    print(greet(\"from main\"))\n\nif __name__ == \"__main__\":\n    main()\n\"\"\"\nwith open(\"hello.py\", \"w\") as f:\n    f.write(src)\nimport hello\nprint(hello.greet(\"Asha\"))\n# Nothing from main() printed: it only runs when hello.py is the started file"}] });
+
+  /* ========== Predict the output ========== */
+  const PZ = [{"id": "p1", "name": "1 · importing twice", "q": "What's printed?", "opts": ["hello from greet / hello from greet / hello from greet / True", "hello from greet / True", "hello from greet / False"], "a": 1, "why": "The module runs once and is cached; every import (with or without an alias) gives back the same module object."}, {"id": "p2", "name": "2 · from-import is a copy of the name", "q": "What's printed?", "opts": ["1 1", "0 1", "0 0"], "a": 1, "why": "<span class=\"mono\">from counter import count</span> bound <i>your</i> name to the int 0 at import time. bump() rebinds the module's <span class=\"mono\">count</span>, which you only see through <span class=\"mono\">counter.count</span>."}, {"id": "p3", "name": "3 · alias only", "q": "What happens?", "opts": ["2 / 2", "2 / NameError: name 'statistics' is not defined", "NameError"], "a": 1, "why": "<span class=\"mono\">import x as y</span> binds only <span class=\"mono\">y</span>."}, {"id": "p4", "name": "4 · __name__ inside a module", "q": "What's printed?", "opts": ["tool: tool / me: __main__", "tool: __main__ / demo / me: __main__", "tool: tool / demo / me: __main__"], "a": 0, "why": "Imported, the module's <span class=\"mono\">__name__</span> is its own name, so the demo block is skipped."}];
+  $('pzChips').innerHTML = PZ.map((p, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${p.name}</button>`).join('');
+  function puzzle(i) {
+    const p = PZ[i], area = $('pzArea');
+    area.innerHTML = `<div class="two">
+        <div><pre class="codeblock static-code">${T[p.id].code.split('\n').map(l => `<span class="ln">${K.pyHighlight(l) || ' '}</span>`).join('')}</pre></div>
+        <div class="card predict"><div class="q">${p.q}</div><div class="opts">${p.opts.map((o, j) => `<button class="chip-btn" type="button" data-j="${j}">${o.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</button>`).join('')}</div><p class="status-line" style="text-align:left;margin:0" id="pzVerdict">Choose an answer to unlock the step-through.</p></div>
+      </div><div id="pzTrace"></div>`;
+    area.querySelectorAll('.predict .chip-btn').forEach(b => b.addEventListener('click', () => {
+      const j = +b.dataset.j, ok = j === p.a;
+      area.querySelectorAll('.predict .chip-btn').forEach((x, xj) => { x.disabled = true; x.classList.toggle('right', xj === p.a); x.classList.toggle('wrong', xj === j && !ok); });
+      $('pzVerdict').innerHTML = `<span class="${ok ? 'ok-text' : 'bad-text'}">${ok ? 'Correct.' : 'Not quite.'}</span> ${p.why} <b>Step through below to watch it happen.</b>`;
+      K.trace($('pzTrace'), T[p.id], { controls: true });
+    }));
+  }
+  $('pzChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('pzChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    puzzle(+b.dataset.i);
+  }));
+  $('pzChips').querySelector('button').click();
+
+  /* ===== Run it, or import it? ===== */
+  (function () {
+    const SRC = ['print("loading billing")', 'RATE = 0.18', 'def tax(amount):', '    return amount * RATE', 'if __name__ == "__main__":', '    print("demo:", tax(100))'];
+    const draw = () => { $('nmCode').innerHTML = SRC.map(l => `<span class="ln">${K.pyHighlight(l)}</span>`).join(''); };
+    async function go(v) {
+      const run = K.newRun('nm'); draw(); $('nmOut').textContent = (v === 'run' ? '$ python billing.py' : '$ python app.py') + '\n'; $('nmCache').textContent = 'sys.modules: { … }';
+      const L = [...$('nmCode').children]; const say = t => { $('nmOut').textContent += t + '\n'; };
+      const pass = async (main) => {
+        const lines = main ? [0, 1, 2, 4, 5] : [0, 1, 2, 4];
+        for (const i of lines) {
+          L.forEach(x => x.classList.remove('on')); L[i].classList.add('on', 'done');
+          if (i === 0) say('loading billing');
+          if (i === 4) { $('nmStatus').innerHTML = `<span class="mono">__name__</span> is <b class="mono">${main ? '"__main__"' : '"billing"'}</b> here, so the check is ${main ? 'True' : 'False'}.`; }
+          if (i === 5) say('demo: 18.0');
+          await K.sleep(600, run);
+        }
+        L.forEach(x => x.classList.remove('on'));
+      };
+      try {
+        if (v === 'run') { await pass(true); $('nmStatus').innerHTML += ' Run directly, the demo runs.'; return; }
+        say('>>> import billing'); await K.sleep(300, run);
+        await pass(false); $('nmCache').textContent = "sys.modules: { 'billing': <module 'billing'>, … }";
+        if (v === 'imp2') {
+          say('>>> import billing'); await K.sleep(500, run);
+          $('nmStatus').innerHTML = 'Second import: found in <span class="mono">sys.modules</span>, so <b>no line of billing.py runs again</b>.';
+        } else $('nmStatus').innerHTML += ' Imported, the demo is skipped.';
+      } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+    }
+    K.seg($('nmSeg'), go); draw();
+  })();
+})();
+</script>
+</body>
+</html>

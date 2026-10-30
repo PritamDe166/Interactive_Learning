@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Classes &amp; objects</title>
+<meta name="description" content="Python fundamentals: classes as blueprints, __init__ and self, instance vs class attributes, methods, inheritance with super(), and how attribute lookup works.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<script src="traces/classes-objects.js"></script>
+<style>
+  .static-code { margin: 0; }
+  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
+  .mo-row { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; margin-top: 12px; }
+  .mo-box { flex: 1 1 150px; border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--panel-2); transition: all .3s; }
+  .mo-h { font-size: 13px; color: var(--fg-soft); margin-bottom: 4px; }
+  .mo-h .mono { color: var(--accent-text); font-weight: 700; }
+  .mo-a { font-size: 13px; color: var(--muted); }
+  .mo-arr { align-self: center; color: var(--muted); font-size: 20px; }
+  .mo-box.look { border-color: var(--cyan); box-shadow: 0 0 0 3px var(--teal-wash); }
+  .mo-box.hit { border-color: var(--teal); background: var(--teal-wash); }
+  .mo-box.miss { opacity: .5; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Python Fundamentals</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Python · Topic 12 · Real programs</div>
+    <h1>Classes &amp; objects</h1>
+    <ul class="lede"><li>A <b>class</b> is a blueprint; calling it (<span class="mono">Patient("Asha", 35)</span>) creates an <b>instance</b>, a new object with its own attributes.</li><li><span class="mono">__init__</span> runs right after the object is created to fill in its attributes. <span class="mono">self</span> is that new object.</li><li><b>Methods</b> are functions defined in the class. <span class="mono">asha.book("9:00")</span> is really <span class="mono">Patient.book(asha, "9:00")</span>.</li><li>A <b>subclass</b> inherits everything from its parent, can <b>override</b> methods, and calls the parent's version with <span class="mono">super()</span>.</li><li>Looking up <span class="mono">obj.x</span> checks the <b>instance</b>, then its <b>class</b>, then the <b>parent classes</b>.</li></ul>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: patients and VIP patients</h2>
+    <div class="stage-kind">Real trace of real code · Next ▶ moves one idea at a time</div>
+    <div class="story wide" id="pageStory">
+      <div id="pageTrace"></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Run and change the code, predict before you peek, and try to break things.</p>
+
+  <section aria-labelledby="runH">
+    <h2 class="stage-title" id="runH">Edit and run</h2>
+    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div id="runner"></div>
+  </section>
+
+  <section aria-labelledby="predH">
+    <h2 class="stage-title" id="predH">Predict the output</h2>
+    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="chips" id="pzChips"></div>
+    <div class="puzzle-area" id="pzArea"></div>
+  </section>
+
+  <section aria-labelledby="mroH">
+    <h2 class="stage-title" id="mroH">Attribute lookup chain</h2>
+    <div class="stage-kind">Look up an attribute on ravi · Python walks instance → class → parents</div>
+    <div class="chips" id="moBtns"><button class="chip-btn mono" type="button" data-a="name">ravi.name</button><button class="chip-btn mono" type="button" data-a="tier">ravi.tier</button><button class="chip-btn mono" type="button" data-a="book">ravi.book</button><button class="chip-btn mono" type="button" data-a="clinic">ravi.clinic</button><button class="chip-btn mono" type="button" data-a="__eq__">ravi.__eq__</button><button class="chip-btn mono" type="button" data-a="phone">ravi.phone</button></div>
+    <div class="mo-row" id="moRow">
+      <div class="mo-box" data-k="inst"><div class="mo-h">instance <span class="mono">ravi</span></div><div class="mono mo-a">name · age · visits · tier</div></div>
+      <div class="mo-arr">→</div>
+      <div class="mo-box" data-k="vip"><div class="mo-h">class <span class="mono">VIPPatient</span></div><div class="mono mo-a">__init__ · book</div></div>
+      <div class="mo-arr">→</div>
+      <div class="mo-box" data-k="pat"><div class="mo-h">class <span class="mono">Patient</span></div><div class="mono mo-a">clinic · __init__ · book</div></div>
+      <div class="mo-arr">→</div>
+      <div class="mo-box" data-k="obj"><div class="mo-h">class <span class="mono">object</span></div><div class="mono mo-a">__eq__ · __repr__ · __str__ · …</div></div>
+    </div>
+    <p class="status-line" id="moStatus">Pick an attribute. <span class="mono">VIPPatient.__mro__</span> is exactly this order.</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Data + behaviour that belong together</span><span class="arrow">→</span><span class="then">A class (or <span class="mono">@dataclass</span> for mostly-data)</span></li>
+      <li><span class="if">Per-object values</span><span class="arrow">→</span><span class="then">Set on <span class="mono">self</span> in <span class="mono">__init__</span></span></li>
+      <li><span class="if">Value shared by all instances</span><span class="arrow">→</span><span class="then">Class attribute, but never a mutable one like []</span></li>
+      <li><span class="if">Reuse and extend a class</span><span class="arrow">→</span><span class="then"><span class="mono">class Child(Parent):</span> + <span class="mono">super().__init__(...)</span></span></li>
+      <li><span class="if">Change one method in a subclass</span><span class="arrow">→</span><span class="then">Override it; call <span class="mono">super().method()</span> to keep the parent's part</span></li>
+      <li><span class="if">Is it this kind of thing?</span><span class="arrow">→</span><span class="then"><span class="mono">isinstance(obj, Cls)</span> (works with subclasses)</span></li>
+      <li><span class="if">Something went wrong in a method</span><span class="arrow">→</span><span class="then"><span class="mono">raise</span>, don't just print</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: vocabulary</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Term</th><th>Meaning</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td>class</td><td>blueprint; itself an object</td><td class="mono">class Patient:</td></tr>
+          <tr><td>instance</td><td>one object made from the class</td><td class="mono">asha = Patient("Asha", 35)</td></tr>
+          <tr><td>instance attribute</td><td>stored on one object</td><td class="mono">self.name</td></tr>
+          <tr><td>class attribute</td><td>stored on the class, shared</td><td class="mono">clinic = "Pune"</td></tr>
+          <tr><td>method</td><td>function in the class; first parameter is self</td><td class="mono">def book(self, slot):</td></tr>
+          <tr><td>constructor</td><td><span class="mono">__init__</span> initialises a new instance</td><td class="mono">def __init__(self, name):</td></tr>
+          <tr><td>inheritance</td><td>subclass gets the parent's attributes</td><td class="mono">class VIPPatient(Patient):</td></tr>
+          <tr><td>MRO</td><td>method resolution order: lookup path</td><td class="mono">VIPPatient.__mro__</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>BankAccount.withdraw</b> in class_objects_practise.py prints "Insufficient funds." and carries on, so the caller can't tell it failed. Raise an exception instead (see the Your turn starter). Money is also stored as float; real systems use <span class="mono">decimal.Decimal</span> or integer paise/cents.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Attribute names:</b> <span class="mono">self.car_make</span>, <span class="mono">self.account_balance</span>, <span class="mono">self.employee_name</span> repeat the class name. Inside a Car, <span class="mono">self.make</span> is clear enough, and callers write <span class="mono">car.make</span>.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>display_car_info / show_balance</b> print directly. Defining <span class="mono">__str__</span> or <span class="mono">__repr__</span> lets <span class="mono">print(car)</span> and f-strings work, and keeps formatting separate from logic (OOP deeper page).</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>main() runs on import.</b> The file ends with a bare <span class="mono">main()</span>. Use <span class="mono">if __name__ == "__main__": main()</span> so importing the classes from another file doesn't run the demo (Modules page).</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Say the answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary><span class="mono">class A:\n    x = 1\na = A(); A.x = 2\nprint(a.x)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">2</b>. a has no own x, so it reads the class attribute's current value.</p></div></details>
+      <details><summary><span class="mono">class A: pass\nclass B(A): pass\nprint(isinstance(B(), A), issubclass(A, B))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">True False</b>. Inheritance goes one way.</p></div></details>
+      <details><summary><span class="mono">class P:\n    def hi(self): return "P"\nclass C(P):\n    def hi(self): return "C" + super().hi()\nprint(C().hi())</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">CP</b>. The override runs, then super() runs the parent's.</p></div></details>
+      <details><summary><span class="mono">class A:\n    def __init__(self, v): self.v = v\nprint(A(3).v + A(4).v)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">7</b>. Two independent instances, each with its own v.</p></div></details>
+      <details><summary><span class="mono">class A: pass\nprint([c.__name__ for c in A.__mro__])</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">['A', 'object']</b>. Every class ultimately inherits from object.</p></div></details>
+      <details><summary><span class="mono">class A:\n    def f(self): return self\na = A(); print(a.f() is a)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">True</b>. self is the very object the method was called on.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Every trace and output on this page was produced by running the code (Python 3.13; the same results on Python 3.15). The edit-and-run box runs real Python 3.14 in your browser with Pyodide. Sources: Python_Fundamentals repo (classes_and_objects/class_objects_practise.py).</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const T = window.TRACES['classes-objects'];
+
+  /* ========== Walkthrough ========== */
+  const tr = K.trace($('pageTrace'), T.walk, {});
+  const MAP = [13, 14, 18, 22, 29, 30, 36, 43];
+  const STEPS = [{"title": "class statements build class objects", "text": "Running a <span class=\"mono\">class</span> block creates a <b>class object</b> holding its attributes: <span class=\"mono\">clinic</span> and the functions <span class=\"mono\">__init__</span> and <span class=\"mono\">book</span>. No patient exists yet."}, {"title": "Calling the class: __init__ gets a blank object", "text": "<span class=\"mono\">Patient(\"Asha\", 35)</span> makes a new, empty instance and passes it to <span class=\"mono\">__init__</span> as <b>self</b>, followed by your arguments."}, {"title": "self.x = … stores on the instance", "text": "Each <span class=\"mono\">self.attr = value</span> puts an attribute on <b>this</b> object. <span class=\"mono\">__init__</span> returns None; the call to <span class=\"mono\">Patient(...)</span> evaluates to the new instance, now bound to <span class=\"mono\">asha</span>."}, {"title": "Subclass __init__ calls super()", "text": "<span class=\"mono\">VIPPatient</span> has its own <span class=\"mono\">__init__</span>. Its first line, <span class=\"mono\">super().__init__(name, age)</span>, runs the parent's version on the <b>same</b> self. Two frames for one object."}, {"title": "The VIP instance", "text": "<span class=\"mono\">ravi</span> got name, age and visits from Patient's <span class=\"mono\">__init__</span>, plus <span class=\"mono\">tier</span> from its own. It is a VIPPatient <b>and</b> a Patient."}, {"title": "asha.book(\"9:00\")", "text": "Python finds <span class=\"mono\">book</span> on the Patient class and calls it with <span class=\"mono\">self = asha</span>. The method changes asha's own <span class=\"mono\">visits</span> list."}, {"title": "Override + super()", "text": "For <span class=\"mono\">ravi.book</span>, Python finds VIPPatient's <span class=\"mono\">book</span> first (it <b>overrides</b> the parent's). That method calls <span class=\"mono\">super().book(slot)</span> to reuse the parent logic, then adds the tier."}, {"title": "Class attributes are shared", "text": "<span class=\"mono\">asha.clinic</span> isn't on the instance, so Python looks in the class: <span class=\"mono\">'Pune'</span>, shared by every patient. <span class=\"mono\">isinstance(ravi, Patient)</span> is True because a subclass instance counts as its parent type."}];
+  STEPS.forEach((st, i) => {
+    if (i === 0) return;
+    st.play = async run => { for (let k = MAP[i - 1] + 1; k <= MAP[i]; k++) { tr.show(k); if (k < MAP[i]) await K.sleep(Math.max(150, Math.min(600, 4800 / (MAP[i] - MAP[i - 1]))), run); } };
+  });
+  K.story({ root: $('pageStory'), steps: STEPS, show: i => tr.show(MAP[i]), tipLabel: 'Tip' });
+
+  /* ========== Edit and run ========== */
+  K.pyRunner($('runner'), { starters: [{"label": "Walkthrough code", "code": "class Patient:\n    clinic = \"Pune\"\n    def __init__(self, name, age):\n        self.name = name\n        self.age = age\n        self.visits = []\n    def book(self, slot):\n        self.visits.append(slot)\n        return len(self.visits)\n\nclass VIPPatient(Patient):\n    def __init__(self, name, age, tier):\n        super().__init__(name, age)\n        self.tier = tier\n    def book(self, slot):\n        n = super().book(slot)\n        return f\"{self.tier} #{n}\"\n\nasha = Patient(\"Asha\", 35)\nravi = VIPPatient(\"Ravi\", 41, \"gold\")\nprint(asha.book(\"9:00\"), ravi.book(\"9:30\"))\nprint(asha.clinic, isinstance(ravi, Patient))", "inputs": []}, {"label": "Puzzle 1: forgetting self", "code": "class Counter:\n    def __init__(self):\n        count = 0\n\nc = Counter()\nprint(c.count)", "inputs": []}, {"label": "Puzzle 2: shared class list", "code": "class Ward:\n    beds = []\n    def add(self, name):\n        self.beds.append(name)\n\na = Ward(); b = Ward()\na.add(\"Asha\")\nprint(b.beds)", "inputs": []}, {"label": "Puzzle 3: shadowing a class attribute", "code": "class Patient:\n    clinic = \"Pune\"\n\na = Patient(); b = Patient()\na.clinic = \"Delhi\"\nprint(a.clinic, b.clinic, Patient.clinic)", "inputs": []}, {"label": "Puzzle 4: printing an object", "code": "class Patient:\n    def __init__(self, name):\n        self.name = name\n\nprint(Patient(\"Asha\"))", "inputs": []}, {"label": "Puzzle 5: override without super", "code": "class Base:\n    def __init__(self):\n        self.id = 1\n\nclass Child(Base):\n    def __init__(self):\n        self.name = \"c\"\n\nprint(vars(Child()))", "inputs": []}, {"label": "Puzzle 6: method call = function call", "code": "class Account:\n    def __init__(self, balance):\n        self.balance = balance\n    def deposit(self, amount):\n        self.balance += amount\n\nacc = Account(100)\nAccount.deposit(acc, 50)\nacc.deposit(25)\nprint(acc.balance)", "inputs": []}, {"label": "Your turn: a safer bank account", "code": "class BankAccount:\n    def __init__(self, owner, balance=0):\n        self.owner = owner\n        self.balance = balance\n    def withdraw(self, amount):\n        if amount > self.balance:\n            raise ValueError(\"insufficient funds\")\n        self.balance -= amount\n    def __repr__(self):\n        return f\"BankAccount({self.owner!r}, {self.balance})\"\n\nacc = BankAccount(\"John\", 1000)\nacc.withdraw(200)\nprint(acc)\n# Try: acc.withdraw(5000) inside try/except"}] });
+
+  /* ========== Predict the output ========== */
+  const PZ = [{"id": "p1", "name": "1 · forgetting self", "q": "What happens?", "opts": ["0", "AttributeError: 'Counter' object has no attribute 'count'", "None"], "a": 1, "why": "<span class=\"mono\">count = 0</span> without <span class=\"mono\">self.</span> is just a local variable of __init__, gone when it returns. Write <span class=\"mono\">self.count = 0</span>."}, {"id": "p2", "name": "2 · shared class list", "q": "What's printed?", "opts": ["[]", "['Asha']", "AttributeError"], "a": 1, "why": "<span class=\"mono\">beds</span> is a <b>class</b> attribute: one list shared by all instances. Create per-instance lists in __init__: <span class=\"mono\">self.beds = []</span>."}, {"id": "p3", "name": "3 · shadowing a class attribute", "q": "What's printed?", "opts": ["Delhi Delhi Delhi", "Delhi Pune Pune", "Delhi Pune Delhi"], "a": 1, "why": "Assigning <span class=\"mono\">a.clinic</span> creates an <b>instance</b> attribute on a only, which hides the class one for a. b still finds the class value."}, {"id": "p4", "name": "4 · printing an object", "q": "What's printed?", "opts": ["Asha", "<__main__.Patient object at 0x…>", "Patient(name='Asha')"], "a": 1, "why": "Without <span class=\"mono\">__str__</span> or <span class=\"mono\">__repr__</span>, Python prints the class and a memory address. Adding <span class=\"mono\">__repr__</span> is covered in OOP deeper; <span class=\"mono\">@dataclass</span> writes it for you."}, {"id": "p5", "name": "5 · override without super", "q": "What's printed?", "opts": ["{'id': 1, 'name': 'c'}", "{'name': 'c'}", "{'id': 1}"], "a": 1, "why": "Child's __init__ replaces Base's completely. Base's code never ran because <span class=\"mono\">super().__init__()</span> wasn't called."}, {"id": "p6", "name": "6 · method call = function call", "q": "What's printed?", "opts": ["175", "125", "TypeError"], "a": 0, "why": "<span class=\"mono\">acc.deposit(25)</span> is shorthand for <span class=\"mono\">Account.deposit(acc, 25)</span>: both work, both add."}];
+  $('pzChips').innerHTML = PZ.map((p, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${p.name}</button>`).join('');
+  function puzzle(i) {
+    const p = PZ[i], area = $('pzArea');
+    area.innerHTML = `<div class="two">
+        <div><pre class="codeblock static-code">${T[p.id].code.split('\n').map(l => `<span class="ln">${K.pyHighlight(l) || ' '}</span>`).join('')}</pre></div>
+        <div class="card predict"><div class="q">${p.q}</div><div class="opts">${p.opts.map((o, j) => `<button class="chip-btn" type="button" data-j="${j}">${o.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</button>`).join('')}</div><p class="status-line" style="text-align:left;margin:0" id="pzVerdict">Choose an answer to unlock the step-through.</p></div>
+      </div><div id="pzTrace"></div>`;
+    area.querySelectorAll('.predict .chip-btn').forEach(b => b.addEventListener('click', () => {
+      const j = +b.dataset.j, ok = j === p.a;
+      area.querySelectorAll('.predict .chip-btn').forEach((x, xj) => { x.disabled = true; x.classList.toggle('right', xj === p.a); x.classList.toggle('wrong', xj === j && !ok); });
+      $('pzVerdict').innerHTML = `<span class="${ok ? 'ok-text' : 'bad-text'}">${ok ? 'Correct.' : 'Not quite.'}</span> ${p.why} <b>Step through below to watch it happen.</b>`;
+      K.trace($('pzTrace'), T[p.id], { controls: true });
+    }));
+  }
+  $('pzChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('pzChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    puzzle(+b.dataset.i);
+  }));
+  $('pzChips').querySelector('button').click();
+
+  /* ===== Attribute lookup chain ===== */
+  (function () {
+    const WHERE = { name: 'inst', tier: 'inst', book: 'vip', clinic: 'pat', __eq__: 'obj' };
+    const NOTE = { name: "'Ravi', set by Patient.__init__ via super()", tier: "'gold', set by VIPPatient.__init__", book: "VIPPatient.book: the override wins; Patient.book is never reached", clinic: "'Pune', a class attribute shared by all patients", __eq__: "inherited from object, the root of every class" };
+    const order = ['inst', 'vip', 'pat', 'obj'];
+    async function go(a) {
+      const run = K.newRun('mo'); const boxes = [...document.querySelectorAll('#moRow .mo-box')];
+      boxes.forEach(b => b.classList.remove('look', 'hit', 'miss'));
+      try {
+        for (const k of order) {
+          const b = boxes.find(x => x.dataset.k === k); b.classList.add('look'); await K.sleep(500, run); b.classList.remove('look');
+          if (WHERE[a] === k) { b.classList.add('hit'); $('moStatus').innerHTML = `Found <span class="mono">${a}</span> here → ${NOTE[a]}.`; return; }
+          b.classList.add('miss');
+        }
+        $('moStatus').innerHTML = `<b class="bad-text mono">AttributeError: 'VIPPatient' object has no attribute '${a}'</b>`;
+      } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+    }
+    $('moBtns').querySelectorAll('button').forEach(b => b.addEventListener('click', () => go(b.dataset.a)));
+  })();
+})();
+</script>
+</body>
+</html>

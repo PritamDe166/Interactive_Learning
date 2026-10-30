@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Functional tools &amp; itertools</title>
+<meta name="description" content="Python fundamentals: lambda, sorted with key=, map, filter, functools.reduce, and itertools helpers like chain, groupby and islice.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<script src="traces/functional-tools.js"></script>
+<style>
+  .static-code { margin: 0; }
+  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
+  .sk-table { position: relative; margin-top: 12px; }
+  .sk-head, .sk-row { display: grid; grid-template-columns: 1.2fr .6fr .7fr 1.6fr; gap: 8px; align-items: center; padding: 0 12px; }
+  .sk-head { height: 30px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .sk-row { position: absolute; left: 0; right: 0; top: 0; height: 36px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel-2); transition: transform .5s ease; }
+  .sk-k { color: var(--accent-text); overflow-wrap: anywhere; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Python Fundamentals</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Python · Topic 15 · Going further</div>
+    <h1>Functional tools &amp; itertools</h1>
+    <ul class="lede"><li>Functions are objects: you can pass them to other functions. <b>lambda</b> writes a small one inline: <span class="mono">lambda p: p[1]</span>.</li><li><span class="mono">sorted(items, key=f)</span> sorts by <b>f(item)</b>, not by the item itself. Same <span class="mono">key=</span> works for min, max and groupby.</li><li><span class="mono">map(f, xs)</span> transforms, <span class="mono">filter(f, xs)</span> keeps items where f is true, <span class="mono">reduce(f, xs, start)</span> folds them into one value. A comprehension is often clearer for the first two.</li><li><b>itertools</b> has lazy building blocks: <span class="mono">chain</span>, <span class="mono">islice</span>, <span class="mono">groupby</span>, <span class="mono">count</span>…</li></ul>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: sorting and summarising patients</h2>
+    <div class="stage-kind">Real trace of real code · Next ▶ moves one idea at a time</div>
+    <div class="story wide" id="pageStory">
+      <div id="pageTrace"></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Run and change the code, predict before you peek, and try to break things.</p>
+
+  <section aria-labelledby="runH">
+    <h2 class="stage-title" id="runH">Edit and run</h2>
+    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div id="runner"></div>
+  </section>
+
+  <section aria-labelledby="predH">
+    <h2 class="stage-title" id="predH">Predict the output</h2>
+    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="chips" id="pzChips"></div>
+    <div class="puzzle-area" id="pzArea"></div>
+  </section>
+
+  <section aria-labelledby="srtH">
+    <h2 class="stage-title" id="srtH">Sort by key</h2>
+    <div class="stage-kind">Patients as (name, age, fee) · pick a key and watch the rows move</div>
+    <div class="chips" id="skBtns"></div>
+    <div class="sk-table" id="skTable"></div>
+    <p class="status-line" id="skStatus"></p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Sort records by a field</span><span class="arrow">→</span><span class="then"><span class="mono">sorted(rows, key=lambda r: r["fee"])</span></span></li>
+      <li><span class="if">Descending / two levels</span><span class="arrow">→</span><span class="then"><span class="mono">reverse=True</span> / tuple key <span class="mono">(-fee, name)</span></span></li>
+      <li><span class="if">Same, faster and named</span><span class="arrow">→</span><span class="then"><span class="mono">from operator import itemgetter, attrgetter</span></span></li>
+      <li><span class="if">Transform or filter a list</span><span class="arrow">→</span><span class="then">A comprehension; map/filter when you already have a named function</span></li>
+      <li><span class="if">Combine everything into one value</span><span class="arrow">→</span><span class="then">sum / max / any / all first; <span class="mono">reduce</span> for anything else</span></li>
+      <li><span class="if">Group records</span><span class="arrow">→</span><span class="then">Sort by the key, then <span class="mono">groupby</span>; or build a dict of lists</span></li>
+      <li><span class="if">Join several iterables</span><span class="arrow">→</span><span class="then"><span class="mono">chain(a, b, c)</span></span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: itertools picks</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Function</th><th>Does</th><th>Example → result</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">chain(a, b)</td><td>one after another</td><td class="mono">chain([1], [2, 3]) → 1 2 3</td></tr>
+          <tr><td class="mono">islice(it, n)</td><td>first n of any iterator</td><td class="mono">islice(count(), 3) → 0 1 2</td></tr>
+          <tr><td class="mono">groupby(it, key)</td><td>runs of equal keys</td><td class="mono">"aabc" → a:aa b:b c:c</td></tr>
+          <tr><td class="mono">count(start)</td><td>endless counter</td><td class="mono">count(1001) → 1001 1002 …</td></tr>
+          <tr><td class="mono">product(a, b)</td><td>every pair (nested loops)</td><td class="mono">product("AB", [1, 2]) → A1 A2 B1 B2</td></tr>
+          <tr><td class="mono">combinations(it, r)</td><td>unordered picks</td><td class="mono">combinations("ABC", 2) → AB AC BC</td></tr>
+          <tr><td class="mono">accumulate(it)</td><td>running totals</td><td class="mono">accumulate([1, 2, 3]) → 1 3 6</td></tr>
+          <tr><td class="mono">batched(it, n)</td><td>chunks of n (3.12+)</td><td class="mono">batched("ABCDE", 2) → AB CD E</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>From your Notion plans:</b> "sorting / filter / map" (Roadmap) and "map/filter/reduce/lambda, itertools" (Week 5 of the 8-week plan).</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>lambda limits:</b> one expression, no statements. If it needs a name or several lines, write a normal <span class="mono">def</span>; it also gives clearer tracebacks.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>sort() vs sorted():</b> both accept <span class="mono">key=</span> and <span class="mono">reverse=</span>; <span class="mono">list.sort()</span> sorts in place and returns None (see Built-in functions).</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Say the answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary><span class="mono">print(sorted([3, -5, 2], key=abs))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">[2, 3, -5]</b>. Sorted by absolute value; the original numbers are returned.</p></div></details>
+      <details><summary><span class="mono">from functools import reduce\nprint(reduce(lambda a, b: a * b, [1, 2, 3, 4]))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">24</b>. Without a start value, the first item is the start.</p></div></details>
+      <details><summary><span class="mono">print(list(filter(None, [0, 1, "", "a", None])))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">[1, 'a']</b>. With None as the function, filter keeps truthy items.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Every trace and output on this page was produced by running the code (Python 3.13; the same results on Python 3.15). The edit-and-run box runs real Python 3.14 in your browser with Pyodide. From the Notion plans (Roadmap for Python; Planning for python learning, Week 5). Python docs: Sorting HOW TO, functools, itertools.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const T = window.TRACES['functional-tools'];
+
+  /* ========== Walkthrough ========== */
+  const tr = K.trace($('pageTrace'), T.walk, {});
+  const MAP = [3, 4, 16, 29, 42, 55, 68, 78, 93];
+  const STEPS = [{"title": "Records as tuples", "text": "Each patient is a tuple (name, age, fee). Sorting them by \"age\" or \"fee\" needs a way to say <b>which part</b> to compare."}, {"title": "key= calls your function per item", "text": "<span class=\"mono\">sorted(..., key=lambda p: p[1])</span> calls the lambda once for each patient to get a <b>sort key</b> (the age), then sorts by those keys. Here's the first call, with <span class=\"mono\">p</span> = Ravi's tuple."}, {"title": "Sorted by age", "text": "<span class=\"mono\">by_age</span> is a new list, youngest first. Ravi and John are both 41 and keep their original order: Python's sort is <b>stable</b>."}, {"title": "Two-level sort with a tuple key", "text": "Key <span class=\"mono\">(-fee, name)</span>: highest fee first (negating flips the order), ties broken alphabetically. Tuples compare item by item."}, {"title": "map: transform each item", "text": "<span class=\"mono\">map</span> applies the lambda to every patient and returns a lazy iterator; <span class=\"mono\">list()</span> collects the uppercased names. Equivalent: <span class=\"mono\">[p[0].upper() for p in patients]</span>."}, {"title": "filter: keep what passes", "text": "Only patients with fee &lt; 500 survive: Asha and John. Equivalent: <span class=\"mono\">[p for p in patients if p[2] &lt; 500]</span>."}, {"title": "reduce: fold into one value", "text": "<span class=\"mono\">reduce</span> carries an accumulator: start 0, then 0+800, +450, +1200, +450 = 2900. For sums, <span class=\"mono\">sum(p[2] for p in patients)</span> is simpler; reduce shines for custom combining.", "tip": "reduce lives in functools because Python prefers explicit loops or sum/any/all for common cases."}, {"title": "groupby groups neighbours", "text": "<span class=\"mono\">groupby</span> walks the <b>sorted</b> list and bundles consecutive items with the same key. It only groups neighbours, which is why we sorted by age first."}, {"title": "chain and islice", "text": "<span class=\"mono\">chain</span> joins iterables end to end without copying; <span class=\"mono\">islice</span> slices any iterator (even an infinite one) lazily."}];
+  STEPS.forEach((st, i) => {
+    if (i === 0) return;
+    st.play = async run => { for (let k = MAP[i - 1] + 1; k <= MAP[i]; k++) { tr.show(k); if (k < MAP[i]) await K.sleep(Math.max(150, Math.min(600, 4800 / (MAP[i] - MAP[i - 1]))), run); } };
+  });
+  K.story({ root: $('pageStory'), steps: STEPS, show: i => tr.show(MAP[i]), tipLabel: 'Tip' });
+
+  /* ========== Edit and run ========== */
+  K.pyRunner($('runner'), { starters: [{"label": "Walkthrough code", "code": "from functools import reduce\nfrom itertools import chain, groupby, islice\npatients = [(\"Ravi\", 41, 800), (\"Asha\", 35, 450),\n            (\"Meera\", 29, 1200), (\"John\", 41, 450)]\nby_age = sorted(patients, key=lambda p: p[1])\ntop = sorted(patients, key=lambda p: (-p[2], p[0]))\nnames = list(map(lambda p: p[0].upper(), patients))\ncheap = list(filter(lambda p: p[2] < 500, patients))\ntotal = reduce(lambda acc, p: acc + p[2], patients, 0)\nprint(by_age[0][0], top[0][0], names, len(cheap), total)\nfor age, group in groupby(by_age, key=lambda p: p[1]):\n    print(age, [p[0] for p in group])\nprint(list(chain([\"9:00\"], [\"9:30\", \"10:00\"])), list(islice(names, 2)))", "inputs": []}, {"label": "Puzzle 1: default string sort", "code": "print(sorted([\"bob\", \"Asha\", \"carl\"]))", "inputs": []}, {"label": "Puzzle 2: key=len", "code": "print(sorted([\"Meera\", \"Jo\", \"Asha\"], key=len))", "inputs": []}, {"label": "Puzzle 3: groupby without sorting", "code": "from itertools import groupby\ncities = [\"Pune\", \"Delhi\", \"Pune\"]\nprint([(k, len(list(g))) for k, g in groupby(cities)])", "inputs": []}, {"label": "Puzzle 4: max with key", "code": "fees = {\"Asha\": 450, \"Ravi\": 800, \"Meera\": 600}\nprint(max(fees), max(fees, key=fees.get))", "inputs": []}, {"label": "Puzzle 5: map is lazy", "code": "m = map(str.upper, [\"a\", \"b\"])\nprint(list(m), list(m))", "inputs": []}, {"label": "Your turn: top two fees per city", "code": "from itertools import groupby\nvisits = [(\"Pune\", \"Asha\", 450), (\"Delhi\", \"Ravi\", 800), (\"Pune\", \"Meera\", 1200), (\"Pune\", \"John\", 300)]\nvisits.sort(key=lambda v: v[0])\nfor city, rows in groupby(visits, key=lambda v: v[0]):\n    best = sorted(rows, key=lambda v: v[2], reverse=True)[:2]\n    print(city, [name for _, name, _ in best])"}] });
+
+  /* ========== Predict the output ========== */
+  const PZ = [{"id": "p1", "name": "1 · default string sort", "q": "What's printed?", "opts": ["['Asha', 'bob', 'carl']", "['bob', 'carl', 'Asha']", "['Asha', 'carl', 'bob']"], "a": 0, "why": "Uppercase letters sort before lowercase (by character code), and 'A' &lt; 'b' anyway here. For case-insensitive order use <span class=\"mono\">key=str.lower</span>."}, {"id": "p2", "name": "2 · key=len", "q": "What's printed?", "opts": ["['Asha', 'Jo', 'Meera']", "['Jo', 'Asha', 'Meera']", "[2, 4, 5]"], "a": 1, "why": "Any one-argument function works as a key, including built-ins like len. The items themselves are returned, not the keys."}, {"id": "p3", "name": "3 · groupby without sorting", "q": "What's printed?", "opts": ["[('Delhi', 1), ('Pune', 2)]", "[('Pune', 1), ('Delhi', 1), ('Pune', 1)]", "[('Pune', 2), ('Delhi', 1)]"], "a": 1, "why": "groupby only merges <b>adjacent</b> equal keys. Sort first, or use <span class=\"mono\">collections.Counter</span> for counting."}, {"id": "p4", "name": "4 · max with key", "q": "What's printed?", "opts": ["Ravi Ravi", "Ravi 800", "Meera Ravi"], "a": 0, "why": "<span class=\"mono\">max(fees)</span> compares keys alphabetically: 'Ravi' is the largest string. <span class=\"mono\">key=fees.get</span> compares by fee: Ravi again (800). Same answer here, for different reasons!"}, {"id": "p5", "name": "5 · map is lazy", "q": "What's printed?", "opts": ["['A', 'B'] ['A', 'B']", "['A', 'B'] []", "<map object> []"], "a": 1, "why": "map returns a one-pass iterator, like a generator."}];
+  $('pzChips').innerHTML = PZ.map((p, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${p.name}</button>`).join('');
+  function puzzle(i) {
+    const p = PZ[i], area = $('pzArea');
+    area.innerHTML = `<div class="two">
+        <div><pre class="codeblock static-code">${T[p.id].code.split('\n').map(l => `<span class="ln">${K.pyHighlight(l) || ' '}</span>`).join('')}</pre></div>
+        <div class="card predict"><div class="q">${p.q}</div><div class="opts">${p.opts.map((o, j) => `<button class="chip-btn" type="button" data-j="${j}">${o.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</button>`).join('')}</div><p class="status-line" style="text-align:left;margin:0" id="pzVerdict">Choose an answer to unlock the step-through.</p></div>
+      </div><div id="pzTrace"></div>`;
+    area.querySelectorAll('.predict .chip-btn').forEach(b => b.addEventListener('click', () => {
+      const j = +b.dataset.j, ok = j === p.a;
+      area.querySelectorAll('.predict .chip-btn').forEach((x, xj) => { x.disabled = true; x.classList.toggle('right', xj === p.a); x.classList.toggle('wrong', xj === j && !ok); });
+      $('pzVerdict').innerHTML = `<span class="${ok ? 'ok-text' : 'bad-text'}">${ok ? 'Correct.' : 'Not quite.'}</span> ${p.why} <b>Step through below to watch it happen.</b>`;
+      K.trace($('pzTrace'), T[p.id], { controls: true });
+    }));
+  }
+  $('pzChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('pzChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    puzzle(+b.dataset.i);
+  }));
+  $('pzChips').querySelector('button').click();
+
+  /* ===== Sort by key ===== */
+  (function () {
+    const P = [["Ravi", 41, 800], ["Asha", 35, 450], ["meera", 29, 1200], ["John", 41, 450]], S = [{"label": "(no key)", "order": [1, 3, 0, 2], "keys": ["('Ravi', 41, 800)", "('Asha', 35, 450)", "('meera', 29, 1200)", "('John', 41, 450)"]}, {"label": "key=lambda p: p[1]", "order": [2, 1, 0, 3], "keys": ["41", "35", "29", "41"]}, {"label": "key=lambda p: p[2], reverse=True", "order": [2, 0, 1, 3], "keys": ["800", "450", "1200", "450"]}, {"label": "key=lambda p: (-p[2], p[0])", "order": [2, 0, 1, 3], "keys": ["(-800, 'Ravi')", "(-450, 'Asha')", "(-1200, 'meera')", "(-450, 'John')"]}, {"label": "key=lambda p: p[0]", "order": [1, 3, 0, 2], "keys": ["'Ravi'", "'Asha'", "'meera'", "'John'"]}, {"label": "key=lambda p: p[0].lower()", "order": [1, 3, 2, 0], "keys": ["'ravi'", "'asha'", "'meera'", "'john'"]}, {"label": "key=lambda p: len(p[0])", "order": [0, 1, 3, 2], "keys": ["4", "4", "5", "4"]}], H = 42;
+    $('skBtns').innerHTML = S.map((s, i) => `<button class="chip-btn mono" type="button" data-i="${i}" aria-pressed="${!i}">${s.label}</button>`).join('');
+    $('skTable').style.height = (P.length * H + 34) + 'px';
+    $('skTable').innerHTML = '<div class="sk-head"><span>name</span><span>age</span><span>fee</span><span>sort key</span></div>' + P.map((p, i) => `<div class="sk-row" data-i="${i}"><span class="mono">${p[0]}</span><span class="mono">${p[1]}</span><span class="mono">${p[2]}</span><span class="mono sk-k"></span></div>`).join('');
+    const rows = [...$('skTable').querySelectorAll('.sk-row')];
+    function show(i) {
+      const s = S[i];
+      rows.forEach((r, k) => { r.style.transform = `translateY(${s.order.indexOf(k) * H + 34}px)`; r.querySelector('.sk-k').textContent = s.keys[k]; });
+      $('skStatus').innerHTML = `<span class="mono">sorted(patients${i ? ', ' + s.label : ''})</span> · ` + (i === 0 ? 'no key: whole tuples compare, name first (uppercase before lowercase).' : 'rows are ordered by the key column; equal keys keep their original order (stable sort).');
+    }
+    $('skBtns').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { $('skBtns').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); show(+b.dataset.i); }));
+    show(0);
+  })();
+})();
+</script>
+</body>
+</html>

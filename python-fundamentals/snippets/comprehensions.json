@@ -1,0 +1,33 @@
+{
+ "page": "comprehensions",
+ "snippets": {
+  "walk": {
+   "code": "fees = [450, 1200, 300, 800]\ndoubled = []\nfor f in fees:\n    doubled.append(f * 2)\ndoubled2 = [f * 2 for f in fees]\nbig = [f for f in fees if f >= 500]\nlabels = [\"high\" if f >= 500 else \"low\" for f in fees]\nlengths = {n: len(n) for n in [\"Asha\", \"Ravi\"]}\nunits = {f % 3 for f in fees}\ntotal = sum(f for f in fees if f >= 500)\nprint(doubled == doubled2, big)\nprint(labels)\nprint(lengths, units, total)",
+   "inputs": []
+  },
+  "p1": {
+   "code": "nums = [1, 2, 3, 4, 5, 6]\nprint([n * n for n in nums if n % 2 == 0])",
+   "inputs": []
+  },
+  "p2": {
+   "code": "nums = [1, 2, 3]\nprint([n for n in nums if n > 1 else 0])",
+   "inputs": []
+  },
+  "p3": {
+   "code": "pairs = [(d, t) for d in [\"Mon\", \"Tue\"] for t in [9, 10]]\nprint(pairs)",
+   "inputs": []
+  },
+  "p4": {
+   "code": "a = {x % 2 for x in range(5)}\nb = {x: x % 2 for x in range(3)}\nprint(a, b)",
+   "inputs": []
+  },
+  "p5": {
+   "code": "g = (n * 10 for n in range(3))\nprint(sum(g))\nprint(sum(g))",
+   "inputs": []
+  },
+  "p6": {
+   "code": "rows = [[1, 2], [3], [4, 5]]\nprint([x for row in rows for x in row])",
+   "inputs": []
+  }
+ }
+}

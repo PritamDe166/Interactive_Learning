@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Context managers</title>
+<meta name="description" content="Python fundamentals: the with statement, __enter__ and __exit__, guaranteed cleanup when errors happen, and writing your own with contextlib.contextmanager.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<script src="traces/context-managers.js"></script>
+<style>
+  .static-code { margin: 0; }
+  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
+  .tl-lanes { margin-top: 12px; display: grid; gap: 8px; }
+  .tl-lane { display: grid; grid-template-columns: 90px 1fr; gap: 10px; align-items: center; font-family: var(--mono); font-size: 13px; color: var(--fg-soft); }
+  .tl-track { height: 22px; border-radius: 11px; background: var(--panel-2); border: 1px solid var(--line); overflow: hidden; }
+  .tl-track i { display: block; height: 100%; width: 0; background: var(--cyan); transition: width .5s ease; }
+  .tl-track i.on { width: 100%; }
+  .tl-track i.bad { width: 55%; background: var(--red); }
+  .tl-track i.skip { width: 100%; background: repeating-linear-gradient(45deg, var(--line) 0 6px, transparent 6px 12px); }
+  .fl-out { margin: 4px 0 0; min-height: 60px; white-space: pre-wrap; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Python Fundamentals</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Python · Topic 17 · Going further</div>
+    <h1>Context managers</h1>
+    <ul class="lede"><li><span class="mono">with X as v:</span> calls <span class="mono">X.__enter__()</span> before the block (its return value becomes <span class="mono">v</span>) and <span class="mono">X.__exit__()</span> after it, <b>no matter how</b> the block ends.</li><li>That makes <span class="mono">with</span> the standard way to <b>acquire and release</b>: files, locks, database transactions, network connections, temporary settings.</li><li><span class="mono">__exit__</span> receives the exception (if any). Returning a true value <b>swallows</b> it; usually you return False and let it propagate.</li><li><span class="mono">@contextmanager</span> lets you write one as a generator: code before <span class="mono">yield</span> is enter, code after (in <span class="mono">finally</span>) is exit.</li></ul>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: a lock and a booking</h2>
+    <div class="stage-kind">Real trace of real code · Next ▶ moves one idea at a time</div>
+    <div class="story wide" id="pageStory">
+      <div id="pageTrace"></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Run and change the code, predict before you peek, and try to break things.</p>
+
+  <section aria-labelledby="runH">
+    <h2 class="stage-title" id="runH">Edit and run</h2>
+    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div id="runner"></div>
+  </section>
+
+  <section aria-labelledby="predH">
+    <h2 class="stage-title" id="predH">Predict the output</h2>
+    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="chips" id="pzChips"></div>
+    <div class="puzzle-area" id="pzArea"></div>
+  </section>
+
+  <section aria-labelledby="tlH">
+    <h2 class="stage-title" id="tlH">Enter, body, exit: three endings</h2>
+    <div class="stage-kind">A Lock context manager · results captured from real runs</div>
+    <details class="rn-inputs" style="margin-bottom:10px"><summary>Show the Lock class</summary><pre class="codeblock" id="tlCode" style="min-height:0"></pre></details>
+    <div class="seg" id="tlSeg" role="group" aria-label="Scenario"></div>
+    <div class="tl-lanes">
+      <div class="tl-lane"><span>__enter__</span><div class="tl-track"><i id="tlE"></i></div></div>
+      <div class="tl-lane"><span>body</span><div class="tl-track"><i id="tlB"></i></div></div>
+      <div class="tl-lane"><span>__exit__</span><div class="tl-track"><i id="tlX"></i></div></div>
+      <div class="tl-lane"><span>after</span><div class="tl-track"><i id="tlA"></i></div></div>
+    </div>
+    <div class="card" style="margin-top:10px"><div class="label">Output</div><pre class="mono fl-out" id="tlOut"></pre></div>
+    <p class="status-line" id="tlStatus">Pick a scenario.</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Anything opened must be closed</span><span class="arrow">→</span><span class="then"><span class="mono">with open(...) as f:</span> (files, sockets, DB sessions)</span></li>
+      <li><span class="if">Several resources</span><span class="arrow">→</span><span class="then"><span class="mono">with open(a) as fa, open(b) as fb:</span> (bracketed over lines since 3.10)</span></li>
+      <li><span class="if">Write your own quickly</span><span class="arrow">→</span><span class="then"><span class="mono">@contextmanager</span> + <span class="mono">try: yield … finally: cleanup</span></span></li>
+      <li><span class="if">Write your own as a class</span><span class="arrow">→</span><span class="then"><span class="mono">__enter__</span> returns the value for <span class="mono">as</span>; <span class="mono">__exit__</span> cleans up</span></li>
+      <li><span class="if">Ignore one specific error</span><span class="arrow">→</span><span class="then"><span class="mono">with contextlib.suppress(FileNotFoundError):</span></span></li>
+      <li><span class="if">Don't swallow errors by accident</span><span class="arrow">→</span><span class="then"><span class="mono">__exit__</span> should return False/None unless you really mean it</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: what with does</h2>
+    <div class="two">
+      <div class="card"><div class="label">You write</div><pre class="codeblock" style="min-height:0;margin:6px 0 0"><span class="ln"><span class="k">with</span> Lock() <span class="k">as</span> v:</span><span class="ln">    body()</span></pre></div>
+      <div class="card"><div class="label">Python does (roughly)</div><pre class="codeblock" style="min-height:0;margin:6px 0 0"><span class="ln">mgr = Lock()</span><span class="ln">v = mgr.__enter__()</span><span class="ln"><span class="k">try</span>:</span><span class="ln">    body()</span><span class="ln"><span class="k">except</span> BaseException <span class="k">as</span> e:</span><span class="ln">    <span class="k">if not</span> mgr.__exit__(type(e), e, e.__traceback__):</span><span class="ln">        <span class="k">raise</span></span><span class="ln"><span class="k">else</span>:</span><span class="ln">    mgr.__exit__(<span class="b">None</span>, <span class="b">None</span>, <span class="b">None</span>)</span></pre></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>From your Notion plan:</b> "context managers" (8-week plan, Week 5) and "with open" (Week 2). Your file scripts already use <span class="mono">with open(...)</span>; this page shows the mechanism behind it.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Coming from C#:</b> <span class="mono">with</span> plays the role of <span class="mono">using</span> / <span class="mono">IDisposable</span>, with the extra ability to see and even suppress the exception in <span class="mono">__exit__</span>.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Async code</b> uses <span class="mono">async with</span> and <span class="mono">__aenter__</span>/<span class="mono">__aexit__</span> (e.g. HTTP client sessions); same idea.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Say the answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary><span class="mono">from contextlib import contextmanager\n@contextmanager\ndef tag(n):\n    print(f"&lt;{n}&gt;", end="")\n    yield\n    print(f"&lt;/{n}&gt;")\nwith tag("b"):\n    print("hi", end="")</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">&lt;b&gt;hi&lt;/b&gt;</b>. Before yield, the body, after yield.</p></div></details>
+      <details><summary>Why put the code after <span class="mono">yield</span> inside <span class="mono">finally</span>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>If the with-block raises, the exception is thrown into the generator at the <span class="mono">yield</span>. Without try/finally the cleanup lines after yield would be <b>skipped</b>.</p></div></details>
+      <details><summary>What does <span class="mono">with open(p) as f:</span> guarantee that <span class="mono">f = open(p)</span> doesn't?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">f.close()</span> is called when the block ends, even on an exception or return. With plain open() you must close it yourself in a finally.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Every trace and output on this page was produced by running the code (Python 3.13; the same results on Python 3.15). The edit-and-run box runs real Python 3.14 in your browser with Pyodide. From the Notion plan (Planning for python learning, Weeks 2 and 5). Python docs: The with statement, contextlib.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const T = window.TRACES['context-managers'];
+
+  /* ========== Walkthrough ========== */
+  const tr = K.trace($('pageTrace'), T.walk, {});
+  const MAP = [8, 13, 14, 24, 30, 31, 36, 39];
+  const STEPS = [{"title": "with calls __enter__", "text": "<span class=\"mono\">with Timer() as t</span> creates the object, then calls its <span class=\"mono\">__enter__</span>. Whatever it returns (here <span class=\"mono\">self</span>) is bound to <span class=\"mono\">t</span>."}, {"title": "The body runs", "text": "Ordinary code inside the block: <span class=\"mono\">working</span>."}, {"title": "Leaving the block calls __exit__", "text": "As soon as the block ends, Python calls <span class=\"mono\">__exit__(exc_type, exc, tb)</span>. No error happened, so all three are <span class=\"mono\">None</span>."}, {"title": "A generator-based manager", "text": "<span class=\"mono\">@contextmanager</span> wraps the <span class=\"mono\">booking</span> generator. Entering the with block runs it up to <span class=\"mono\">yield</span>."}, {"title": "yield's value goes to as", "text": "The yielded string became <span class=\"mono\">b</span>. The generator is paused inside <span class=\"mono\">try</span>, holding the \"lock\"."}, {"title": "An error inside the block", "text": "<span class=\"mono\">raise ValueError</span> interrupts the block. Python doesn't jump straight to <span class=\"mono\">except</span>: first it gives the context manager a chance to clean up."}, {"title": "finally releases the lock", "text": "The exception is thrown <b>into</b> the paused generator at the <span class=\"mono\">yield</span>, so its <span class=\"mono\">finally</span> runs: <span class=\"mono\">unlock 9:00</span>. Cleanup happened even though the block failed.", "tip": "Without try/finally around the yield, an exception would skip your cleanup code."}, {"title": "Then the exception continues", "text": "The manager didn't suppress the error, so it reaches the outer <span class=\"mono\">except</span>. Order: lock → body → unlock → caught."}];
+  STEPS.forEach((st, i) => {
+    if (i === 0) return;
+    st.play = async run => { for (let k = MAP[i - 1] + 1; k <= MAP[i]; k++) { tr.show(k); if (k < MAP[i]) await K.sleep(Math.max(150, Math.min(600, 4800 / (MAP[i] - MAP[i - 1]))), run); } };
+  });
+  K.story({ root: $('pageStory'), steps: STEPS, show: i => tr.show(MAP[i]), tipLabel: 'Tip' });
+
+  /* ========== Edit and run ========== */
+  K.pyRunner($('runner'), { starters: [{"label": "Walkthrough code", "code": "from contextlib import contextmanager\n\nclass Timer:\n    def __enter__(self):\n        print(\"enter\")\n        return self\n    def __exit__(self, exc_type, exc, tb):\n        print(\"exit, error:\", exc_type)\n        return False\n\nwith Timer() as t:\n    print(\"working\")\n\n@contextmanager\ndef booking(slot):\n    print(\"lock\", slot)\n    try:\n        yield f\"booked {slot}\"\n    finally:\n        print(\"unlock\", slot)\n\ntry:\n    with booking(\"9:00\") as b:\n        print(b)\n        raise ValueError(\"double booking\")\nexcept ValueError as e:\n    print(\"caught:\", e)", "inputs": []}, {"label": "Puzzle 1: return in the block", "code": "class CM:\n    def __enter__(self):\n        print(\"in\")\n    def __exit__(self, *exc):\n        print(\"out\")\n\ndef f():\n    with CM():\n        return \"result\"\n\nprint(f())", "inputs": []}, {"label": "Puzzle 2: as gets __enter__'s value", "code": "class CM:\n    def __enter__(self):\n        return 42\n    def __exit__(self, *exc):\n        pass\n\nwith CM() as x:\n    print(x)", "inputs": []}, {"label": "Puzzle 3: suppressing", "code": "from contextlib import suppress\nwith suppress(KeyError):\n    print({}[\"x\"])\n    print(\"never\")\nprint(\"after\")", "inputs": []}, {"label": "Puzzle 4: file closed after with", "code": "with open(\"cm.txt\", \"w\") as f:\n    f.write(\"hi\")\nprint(f.closed)\nf.write(\"more\")", "inputs": []}, {"label": "Your turn: a temporary setting", "code": "from contextlib import contextmanager\n\nsettings = {\"currency\": \"INR\"}\n\n@contextmanager\ndef temp_setting(key, value):\n    old = settings[key]\n    settings[key] = value\n    try:\n        yield\n    finally:\n        settings[key] = old\n\nwith temp_setting(\"currency\", \"USD\"):\n    print(\"inside:\", settings)\nprint(\"after:\", settings)"}] });
+
+  /* ========== Predict the output ========== */
+  const PZ = [{"id": "p1", "name": "1 · return in the block", "q": "What's printed?", "opts": ["in / result", "in / out / result", "in / result / out"], "a": 1, "why": "Returning from inside a with block still triggers __exit__ before the function actually returns."}, {"id": "p2", "name": "2 · as gets __enter__'s value", "q": "What's printed?", "opts": ["<__main__.CM object>", "42", "None"], "a": 1, "why": "<span class=\"mono\">as</span> binds the return value of __enter__, not the manager itself (open() just happens to return itself)."}, {"id": "p3", "name": "3 · suppressing", "q": "What's printed?", "opts": ["after", "never / after", "KeyError"], "a": 0, "why": "<span class=\"mono\">suppress</span>'s __exit__ returns True for KeyError: the rest of the block is skipped and the program continues after it."}, {"id": "p4", "name": "4 · file closed after with", "q": "What happens?", "opts": ["True / ValueError: I/O operation on closed file.", "False / (writes more)", "True / (writes more)"], "a": 0, "why": "The name f still exists after the block, but the file object is closed."}];
+  $('pzChips').innerHTML = PZ.map((p, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${p.name}</button>`).join('');
+  function puzzle(i) {
+    const p = PZ[i], area = $('pzArea');
+    area.innerHTML = `<div class="two">
+        <div><pre class="codeblock static-code">${T[p.id].code.split('\n').map(l => `<span class="ln">${K.pyHighlight(l) || ' '}</span>`).join('')}</pre></div>
+        <div class="card predict"><div class="q">${p.q}</div><div class="opts">${p.opts.map((o, j) => `<button class="chip-btn" type="button" data-j="${j}">${o.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</button>`).join('')}</div><p class="status-line" style="text-align:left;margin:0" id="pzVerdict">Choose an answer to unlock the step-through.</p></div>
+      </div><div id="pzTrace"></div>`;
+    area.querySelectorAll('.predict .chip-btn').forEach(b => b.addEventListener('click', () => {
+      const j = +b.dataset.j, ok = j === p.a;
+      area.querySelectorAll('.predict .chip-btn').forEach((x, xj) => { x.disabled = true; x.classList.toggle('right', xj === p.a); x.classList.toggle('wrong', xj === j && !ok); });
+      $('pzVerdict').innerHTML = `<span class="${ok ? 'ok-text' : 'bad-text'}">${ok ? 'Correct.' : 'Not quite.'}</span> ${p.why} <b>Step through below to watch it happen.</b>`;
+      K.trace($('pzTrace'), T[p.id], { controls: true });
+    }));
+  }
+  $('pzChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('pzChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    puzzle(+b.dataset.i);
+  }));
+  $('pzChips').querySelector('button').click();
+
+  /* ===== Enter, body, exit: three endings ===== */
+  (function () {
+    const SC = [{"label": "body succeeds", "sup": false, "fail": false, "out": ["enter: lock taken", "body: start", "body: end", "exit: lock released, error = None", "after the with block"], "err": null}, {"label": "body raises", "sup": false, "fail": true, "out": ["enter: lock taken", "body: start", "exit: lock released, error = ValueError"], "err": "ValueError: slot taken"}, {"label": "body raises, __exit__ returns True", "sup": true, "fail": true, "out": ["enter: lock taken", "body: start", "exit: lock released, error = ValueError", "after the with block"], "err": null}];
+    $('tlCode').innerHTML = "class Lock:\n    def __init__(self, suppress=False):\n        self.suppress = suppress\n    def __enter__(self):\n        print(\"enter: lock taken\")\n        return self\n    def __exit__(self, exc_type, exc, tb):\n        print(\"exit: lock released, error =\", exc_type.__name__ if exc_type else None)\n        return self.suppress\n".trimEnd().split('\n').map(l => `<span class="ln">${K.pyHighlight(l)}</span>`).join('');
+    $('tlSeg').innerHTML = SC.map((s, i) => `<button type="button" data-v="${i}" aria-pressed="false">${s.label}</button>`).join('');
+    async function go(i) {
+      const run = K.newRun('tl'), s = SC[i];
+      ['tlE', 'tlB', 'tlX', 'tlA'].forEach(id => { $(id).className = ''; });
+      $('tlOut').textContent = '';
+      const out = t => { $('tlOut').textContent += t + '\n'; };
+      try {
+        $('tlE').className = 'on'; out(s.out[0]); await K.sleep(600, run);
+        $('tlB').className = s.fail ? 'on bad' : 'on'; out(s.out[1]); await K.sleep(600, run);
+        if (!s.fail) { out(s.out[2]); await K.sleep(300, run); }
+        $('tlX').className = 'on'; out(s.out[s.fail ? 2 : 3]); await K.sleep(600, run);
+        if (!s.fail || s.sup) { $('tlA').className = 'on'; out(s.out[s.out.length - 1]); }
+        else { $('tlA').className = 'skip'; out('→ ' + s.err + ' propagates to the caller'); }
+        $('tlStatus').innerHTML = !s.fail ? 'Normal run: enter → whole body → exit (error = None) → code after the block.' : s.sup ? '<b>__exit__ returned True</b>: the error is swallowed, the rest of the body is skipped, and execution continues after the block. Use sparingly.' : 'The body stopped at the raise, <b>__exit__ still ran</b> and saw the ValueError, then the error continued outward. The code after the block never ran.';
+      } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+    }
+    K.seg($('tlSeg'), v => go(+v));
+  })();
+})();
+</script>
+</body>
+</html>

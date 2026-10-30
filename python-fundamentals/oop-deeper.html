@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OOP deeper: dunders, properties, dataclasses</title>
+<meta name="description" content="Python fundamentals: special (dunder) methods like __repr__, __str__, __eq__ and __add__, @property, @classmethod and @staticmethod, polymorphism, and @dataclass.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<script src="traces/oop-deeper.js"></script>
+<style>
+  .static-code { margin: 0; }
+  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
+  .dn-flow { display: grid; grid-template-columns: 1fr auto 1.2fr auto 1.4fr; gap: 10px; align-items: center; margin-top: 14px; }
+  @media (max-width: 640px) { .dn-flow { grid-template-columns: 1fr; } .dn-arr { transform: rotate(90deg); justify-self: center; } }
+  .dn-box { border: 1.5px solid var(--line); border-radius: 12px; padding: 12px; background: var(--panel-2); min-height: 48px; overflow-wrap: anywhere; font-size: 14px; }
+  .dn-arr { color: var(--muted); font-size: 20px; }
+  .dn-c { display: inline-block; padding: 2px 8px; margin: 2px; border-radius: 6px; background: var(--teal-wash); color: var(--fg); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Python Fundamentals</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Python · Topic 18 · Going further</div>
+    <h1>OOP deeper: dunders, properties, dataclasses</h1>
+    <ul class="lede"><li>Python's operators and built-ins call <b>dunder methods</b> (double underscore): <span class="mono">a + b</span> → <span class="mono">a.__add__(b)</span>, <span class="mono">len(x)</span> → <span class="mono">x.__len__()</span>, <span class="mono">print(x)</span> → <span class="mono">x.__str__()</span>.</li><li>Define <span class="mono">__repr__</span> (for developers) and optionally <span class="mono">__str__</span> (for users) so objects print usefully.</li><li><b>@property</b> makes a method read like an attribute; <b>@classmethod</b> gets the class (alternative constructors); <b>@staticmethod</b> gets neither.</li><li><b>@dataclass</b> writes <span class="mono">__init__</span>, <span class="mono">__repr__</span> and <span class="mono">__eq__</span> from type-annotated fields: the quickest way to a clean data class.</li></ul>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: money and patients done properly</h2>
+    <div class="stage-kind">Real trace of real code · Next ▶ moves one idea at a time</div>
+    <div class="story wide" id="pageStory">
+      <div id="pageTrace"></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Run and change the code, predict before you peek, and try to break things.</p>
+
+  <section aria-labelledby="runH">
+    <h2 class="stage-title" id="runH">Edit and run</h2>
+    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div id="runner"></div>
+  </section>
+
+  <section aria-labelledby="predH">
+    <h2 class="stage-title" id="predH">Predict the output</h2>
+    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="chips" id="pzChips"></div>
+    <div class="puzzle-area" id="pzArea"></div>
+  </section>
+
+  <section aria-labelledby="dunH">
+    <h2 class="stage-title" id="dunH">Which dunder runs?</h2>
+    <div class="stage-kind">a = Money(45050), b = Money(100000), cart holds two tests · pick an expression</div>
+    <details class="rn-inputs" style="margin-bottom:10px"><summary>Which dunders do Money and Cart define?</summary><p class="mono" style="margin:8px 0 0">Money: __init__ __repr__ __str__ __add__ __eq__ __lt__ __bool__ (and __hash__ = None)<br>Cart: __init__ __len__ __iter__ __getitem__ __contains__</p></details>
+    <div class="chips" id="dnBtns"></div>
+    <div class="dn-flow"><div class="dn-box mono" id="dnExpr">expression</div><div class="dn-arr">→</div><div class="dn-box mono dn-calls" id="dnCalls">dunder calls</div><div class="dn-arr">→</div><div class="dn-box mono" id="dnRes">result</div></div>
+    <p class="status-line" id="dnStatus">Every result here was produced by running the expression and logging each dunder call.</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Objects print as &lt;… at 0x…&gt;</span><span class="arrow">→</span><span class="then">Add <span class="mono">__repr__</span> (or use @dataclass)</span></li>
+      <li><span class="if">Mostly-data class</span><span class="arrow">→</span><span class="then"><span class="mono">@dataclass</span>; <span class="mono">frozen=True</span> for immutable, <span class="mono">order=True</span> for sorting</span></li>
+      <li><span class="if">Validate on assignment / computed value</span><span class="arrow">→</span><span class="then"><span class="mono">@property</span> (+ <span class="mono">@x.setter</span>)</span></li>
+      <li><span class="if">Build an object from another format</span><span class="arrow">→</span><span class="then"><span class="mono">@classmethod def from_json(cls, data):</span></span></li>
+      <li><span class="if">Helper that needs no self or cls</span><span class="arrow">→</span><span class="then"><span class="mono">@staticmethod</span>, or just a module-level function</span></li>
+      <li><span class="if">Make == work</span><span class="arrow">→</span><span class="then"><span class="mono">__eq__</span> (and <span class="mono">__hash__</span> if used in sets/dict keys)</span></li>
+      <li><span class="if">Different classes, same method name</span><span class="arrow">→</span><span class="then">Polymorphism: call it without checking the type</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: common dunders</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>You write</th><th>Python calls</th><th>Default without it</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">print(x), str(x)</td><td class="mono">__str__</td><td>falls back to __repr__</td></tr>
+          <tr><td class="mono">repr(x), x in a list</td><td class="mono">__repr__</td><td class="mono">&lt;Cls object at 0x…&gt;</td></tr>
+          <tr><td class="mono">x == y</td><td class="mono">__eq__</td><td>identity (<span class="mono">is</span>)</td></tr>
+          <tr><td class="mono">x &lt; y, sorted()</td><td class="mono">__lt__</td><td>TypeError</td></tr>
+          <tr><td class="mono">x + y</td><td class="mono">__add__ / __radd__</td><td>TypeError</td></tr>
+          <tr><td class="mono">len(x), bool(x)</td><td class="mono">__len__, __bool__</td><td>len: TypeError; bool: True</td></tr>
+          <tr><td class="mono">for i in x, x[i], k in x</td><td class="mono">__iter__, __getitem__, __contains__</td><td>TypeError</td></tr>
+          <tr><td class="mono">with x:</td><td class="mono">__enter__, __exit__</td><td>TypeError</td></tr>
+          <tr><td class="mono">x()</td><td class="mono">__call__</td><td>TypeError: not callable</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>From your Notion plan:</b> "classes (__init__/__str__/__repr__), inheritance &amp; polymorphism, @staticmethod/@classmethod" (8-week plan, Week 5).</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Fixing the repo's classes:</b> <span class="mono">Car</span> and <span class="mono">Employee</span> are mostly data, so <span class="mono">@dataclass</span> would remove their __init__ boilerplate and give printable objects; <span class="mono">display_car_info()</span> becomes <span class="mono">__str__</span>.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Coming from C#:</b> @property ≈ a C# property with get/set; dunders ≈ operator overloads and ToString()/Equals()/GetHashCode() overrides; @dataclass ≈ a <span class="mono">record</span>. Python has no interfaces by default: duck typing, or <span class="mono">typing.Protocol</span> / <span class="mono">abc.ABC</span> when you want them.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Say the answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary><span class="mono">from dataclasses import dataclass\n@dataclass(frozen=True)\nclass P:\n    x: int\np = P(1); p.x = 2</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">FrozenInstanceError</b>. Frozen dataclasses are immutable (and hashable).</p></div></details>
+      <details><summary><span class="mono">class A:\n    def __len__(self): return 0\nprint(bool(A()))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">False</b>. Without __bool__, truthiness falls back to __len__ != 0.</p></div></details>
+      <details><summary><span class="mono">class C:\n    count = 0\n    @classmethod\n    def make(cls):\n        cls.count += 1\n        return cls()\nC.make(); C.make(); print(C.count)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">2</b>. A classmethod can update class-level state.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Every trace and output on this page was produced by running the code (Python 3.13; the same results on Python 3.15). The edit-and-run box runs real Python 3.14 in your browser with Pyodide. From the Notion plan (Planning for python learning, Week 5). Python docs: Data model, dataclasses, property.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const T = window.TRACES['oop-deeper'];
+
+  /* ========== Walkthrough ========== */
+  const tr = K.trace($('pageTrace'), T.walk, {});
+  const MAP = [14, 23, 36, 50, 51, 52, 55];
+  const STEPS = [{"title": "A classmethod gets the class", "text": "<span class=\"mono\">Money.from_rupees(450.5)</span> receives <span class=\"mono\">cls</span> (the Money class itself) instead of an instance. It's an <b>alternative constructor</b>: it converts rupees and calls <span class=\"mono\">cls(...)</span>."}, {"title": "+ calls __add__", "text": "<span class=\"mono\">left + right</span> becomes <span class=\"mono\">left.__add__(right)</span>. Our method returns a <b>new</b> Money with the summed paise."}, {"title": "print uses __str__, repr uses __repr__", "text": "<span class=\"mono\">print(fee)</span> called <span class=\"mono\">__str__</span>: <span class=\"mono\">Rs 1,450.50</span> for people. <span class=\"mono\">repr(fee)</span> called <span class=\"mono\">__repr__</span>: <span class=\"mono\">Money(145050)</span>, unambiguous, for logs and debugging. Storing paise as an int avoids float rounding errors."}, {"title": "@dataclass writes the boilerplate", "text": "From the annotated fields <span class=\"mono\">name: str</span>, <span class=\"mono\">age: int</span>, <span class=\"mono\">visits: list</span>, the decorator generated <span class=\"mono\">__init__</span>, <span class=\"mono\">__repr__</span> and <span class=\"mono\">__eq__</span>.", "tip": "<span class=\"mono\">field(default_factory=list)</span> gives each patient its own new list: the dataclass way around the mutable-default trap."}, {"title": "The generated __init__", "text": "<span class=\"mono\">Patient(\"Ravi\", 64)</span> set name, age and a fresh empty visits list. We didn't write a single <span class=\"mono\">self.x = x</span>."}, {"title": "@property: a computed attribute", "text": "<span class=\"mono\">ravi.is_senior</span> has no brackets, yet it runs the method. Callers read it like data; you can later change how it's computed without breaking them."}, {"title": "Free repr and equality", "text": "<span class=\"mono\">print(ravi)</span> shows <span class=\"mono\">Patient(name='Ravi', age=64, visits=[])</span>, and two patients with equal fields compare equal. A plain class would print an address and compare by identity."}];
+  STEPS.forEach((st, i) => {
+    if (i === 0) return;
+    st.play = async run => { for (let k = MAP[i - 1] + 1; k <= MAP[i]; k++) { tr.show(k); if (k < MAP[i]) await K.sleep(Math.max(150, Math.min(600, 4800 / (MAP[i] - MAP[i - 1]))), run); } };
+  });
+  K.story({ root: $('pageStory'), steps: STEPS, show: i => tr.show(MAP[i]), tipLabel: 'Tip' });
+
+  /* ========== Edit and run ========== */
+  K.pyRunner($('runner'), { starters: [{"label": "Walkthrough code", "code": "from dataclasses import dataclass, field\n\nclass Money:\n    def __init__(self, paise):\n        self.paise = paise\n    @classmethod\n    def from_rupees(cls, rupees):\n        return cls(round(rupees * 100))\n    def __repr__(self):\n        return f\"Money({self.paise})\"\n    def __str__(self):\n        return f\"Rs {self.paise / 100:,.2f}\"\n    def __add__(self, other):\n        return Money(self.paise + other.paise)\n\nfee = Money.from_rupees(450.5) + Money(100000)\nprint(fee, repr(fee))\n\n@dataclass\nclass Patient:\n    name: str\n    age: int\n    visits: list = field(default_factory=list)\n    @property\n    def is_senior(self):\n        return self.age >= 60\n\nravi = Patient(\"Ravi\", 64)\nprint(ravi, ravi.is_senior, ravi == Patient(\"Ravi\", 64))", "inputs": []}, {"label": "Puzzle 1: repr inside a list", "code": "class P:\n    def __init__(self, n): self.n = n\n    def __str__(self): return f\"P {self.n}\"\n    def __repr__(self): return f\"P({self.n!r})\"\n\nprint(P(\"a\"), [P(\"a\")])", "inputs": []}, {"label": "Puzzle 2: == without __eq__", "code": "class P:\n    def __init__(self, n): self.n = n\n\nprint(P(1) == P(1))", "inputs": []}, {"label": "Puzzle 3: property setter", "code": "class Patient:\n    def __init__(self, age):\n        self.age = age\n    @property\n    def age(self):\n        return self._age\n    @age.setter\n    def age(self, value):\n        if value < 0:\n            raise ValueError(\"age must be >= 0\")\n        self._age = value\n\np = Patient(30)\np.age = -1", "inputs": []}, {"label": "Puzzle 4: polymorphism", "code": "class Email:\n    def send(self, msg): return f\"email: {msg}\"\nclass SMS:\n    def send(self, msg): return f\"sms: {msg[:10]}\"\n\nfor channel in [Email(), SMS()]:\n    print(channel.send(\"Your appointment is at 9:00\"))", "inputs": []}, {"label": "Puzzle 5: staticmethod", "code": "class Fees:\n    @staticmethod\n    def with_tax(amount):\n        return amount * 1.18\n\nprint(Fees.with_tax(100), Fees().with_tax(100))", "inputs": []}, {"label": "Your turn: a dataclass with ordering", "code": "from dataclasses import dataclass\n\n@dataclass(order=True)\nclass Slot:\n    hour: int\n    minute: int = 0\n    def __str__(self):\n        return f\"{self.hour}:{self.minute:02d}\"\n\nslots = [Slot(10, 30), Slot(9), Slot(9, 30)]\nprint([str(s) for s in sorted(slots)])\nprint(slots[1])"}] });
+
+  /* ========== Predict the output ========== */
+  const PZ = [{"id": "p1", "name": "1 · repr inside a list", "q": "What's printed?", "opts": ["P a [P a]", "P a [P('a')]", "P('a') [P('a')]"], "a": 1, "why": "print uses __str__ for the object itself, but a list shows its items with __repr__."}, {"id": "p2", "name": "2 · == without __eq__", "q": "What's printed?", "opts": ["True", "False", "TypeError"], "a": 1, "why": "The default __eq__ compares identity: two different objects are never equal. Define __eq__ or use @dataclass."}, {"id": "p3", "name": "3 · property setter", "q": "What happens?", "opts": ["p.age becomes -1", "ValueError: age must be >= 0", "AttributeError"], "a": 1, "why": "Assigning to a property calls its setter, so validation runs on every assignment, including the one in __init__."}, {"id": "p4", "name": "4 · polymorphism", "q": "What's printed?", "opts": ["email: Your appointment is at 9:00 / sms: Your appoi", "email: Your appointment is at 9:00 / email: Your appointment is at 9:00", "TypeError: no common base class"], "a": 0, "why": "Python only cares that the object has a <span class=\"mono\">send</span> method (\"duck typing\"). No shared base class or interface is required."}, {"id": "p5", "name": "5 · staticmethod", "q": "What's printed?", "opts": ["118.0 118.0", "118.0 TypeError", "TypeError"], "a": 0, "why": "A staticmethod gets no self or cls; call it on the class or an instance. It's just a function grouped in the class's namespace."}];
+  $('pzChips').innerHTML = PZ.map((p, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${p.name}</button>`).join('');
+  function puzzle(i) {
+    const p = PZ[i], area = $('pzArea');
+    area.innerHTML = `<div class="two">
+        <div><pre class="codeblock static-code">${T[p.id].code.split('\n').map(l => `<span class="ln">${K.pyHighlight(l) || ' '}</span>`).join('')}</pre></div>
+        <div class="card predict"><div class="q">${p.q}</div><div class="opts">${p.opts.map((o, j) => `<button class="chip-btn" type="button" data-j="${j}">${o.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</button>`).join('')}</div><p class="status-line" style="text-align:left;margin:0" id="pzVerdict">Choose an answer to unlock the step-through.</p></div>
+      </div><div id="pzTrace"></div>`;
+    area.querySelectorAll('.predict .chip-btn').forEach(b => b.addEventListener('click', () => {
+      const j = +b.dataset.j, ok = j === p.a;
+      area.querySelectorAll('.predict .chip-btn').forEach((x, xj) => { x.disabled = true; x.classList.toggle('right', xj === p.a); x.classList.toggle('wrong', xj === j && !ok); });
+      $('pzVerdict').innerHTML = `<span class="${ok ? 'ok-text' : 'bad-text'}">${ok ? 'Correct.' : 'Not quite.'}</span> ${p.why} <b>Step through below to watch it happen.</b>`;
+      K.trace($('pzTrace'), T[p.id], { controls: true });
+    }));
+  }
+  $('pzChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('pzChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    puzzle(+b.dataset.i);
+  }));
+  $('pzChips').querySelector('button').click();
+
+  /* ===== Which dunder runs? ===== */
+  (function () {
+    const DUN = [{"e": "print(a)", "calls": ["__str__"], "r": "prints Rs 450.50"}, {"e": "str(a)", "calls": ["__str__"], "r": "'Rs 450.50'"}, {"e": "repr(a)", "calls": ["__repr__"], "r": "'Money(45050)'"}, {"e": "print([a, b])", "calls": ["__repr__"], "r": "prints [Money(45050), Money(100000)]"}, {"e": "a + b", "calls": ["__add__"], "r": "Money(145050)"}, {"e": "a == Money(45050)", "calls": ["__eq__"], "r": "True"}, {"e": "a < b", "calls": ["__lt__"], "r": "True"}, {"e": "sorted([b, a])", "calls": ["__lt__"], "r": "[Money(45050), Money(100000)]"}, {"e": "bool(Money(0))", "calls": ["__bool__"], "r": "False"}, {"e": "len(cart)", "calls": ["__len__"], "r": "2"}, {"e": "cart[0]", "calls": ["__getitem__"], "r": "'ECG'"}, {"e": "'ECG' in cart", "calls": ["__contains__"], "r": "True"}, {"e": "list(cart)", "calls": ["__iter__", "__len__"], "r": "['ECG', 'X-ray']"}, {"e": "f'{a}'", "calls": ["__str__"], "r": "'Rs 450.50'"}, {"e": "a > b", "calls": ["__lt__"], "r": "False"}, {"e": "{a}", "calls": [], "r": "TypeError: unhashable type: 'Money'"}];
+    $('dnBtns').innerHTML = DUN.map((d, i) => `<button class="chip-btn mono" type="button" data-i="${i}" aria-pressed="false">${d.e.replace(/</g, '&lt;')}</button>`).join('');
+    const NOTE = { 'a > b': 'There is no __gt__, so Python tried the reflected b.__lt__(a).', '{a}': 'A set needs __hash__; defining __eq__ without __hash__ makes objects unhashable (we set it to None explicitly).', 'print([a, b])': 'Containers show their items with __repr__.', "f'{a}'": 'f-strings call format(), which falls back to __str__.', 'sorted([b, a])': 'sorted() only needs __lt__.', 'list(cart)': 'list() iterates with __iter__, and also asks __len__ for a size hint to pre-allocate.' };
+    $('dnBtns').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      $('dnBtns').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+      const d = DUN[+b.dataset.i];
+      $('dnExpr').textContent = d.e;
+      $('dnCalls').innerHTML = d.calls.length ? d.calls.map(c => `<span class="dn-c">${c}</span>`).join(' ') : '<span class="muted">(none)</span>';
+      $('dnRes').innerHTML = /Error/.test(d.r) ? `<span class="bad-text">${d.r.replace(/</g, '&lt;')}</span>` : d.r.replace(/</g, '&lt;');
+      $('dnStatus').textContent = NOTE[d.e] || 'Python translated the syntax into the dunder call shown.';
+    }));
+  })();
+})();
+</script>
+</body>
+</html>

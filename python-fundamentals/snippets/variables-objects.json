@@ -1,0 +1,9 @@
+{"page": "variables-objects", "snippets": {
+ "walk": {"code": "patient = \"Asha\"\nage = 34\nheight = 1.62\nis_insured = True\nage = age + 1\nvisits = [\"Mon\", \"Wed\"]\nbackup = visits\nbackup.append(\"Fri\")\nprint(visits)\nprint(type(age), type(visits))"},
+ "p1": {"code": "a = 5\nb = a\na = a + 1\nprint(a, b)"},
+ "p2": {"code": "morning = [\"Asha\", \"Ravi\"]\nevening = morning\nevening.append(\"Meera\")\nprint(morning)"},
+ "p3": {"code": "morning = [\"Asha\", \"Ravi\"]\nevening = morning.copy()\nevening.append(\"Meera\")\nprint(morning)\nprint(evening)"},
+ "p4": {"code": "x = [1, 2]\ny = [1, 2]\nz = x\nprint(x == y)\nprint(x is y)\nprint(x is z)"},
+ "p5": {"code": "name = \"asha\"\nupper = name.upper()\nprint(name)\nprint(upper)"},
+ "p6": {"code": "slot = (\"Mon\", [\"Asha\"])\nslot[1].append(\"Ravi\")\nprint(slot)"}
+}}

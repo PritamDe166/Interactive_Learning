@@ -1,0 +1,33 @@
+{
+ "page": "errors-exceptions",
+ "snippets": {
+  "walk": {
+   "code": "def parse_age(text):\n    try:\n        age = int(text)\n    except ValueError:\n        print(\"not a number:\", text)\n        return None\n    else:\n        if age < 0:\n            raise ValueError(f\"negative age {age}\")\n        return age\n    finally:\n        print(\"checked\", text)\n\nprint(parse_age(\"42\"))\nprint(parse_age(\"abc\"))\ntry:\n    parse_age(\"-5\")\nexcept ValueError as e:\n    print(\"caught:\", e)",
+   "inputs": []
+  },
+  "p1": {
+   "code": "try:\n    x = int(\"7\")\nexcept ValueError:\n    print(\"bad\")\nelse:\n    print(\"ok\", x)\nfinally:\n    print(\"end\")",
+   "inputs": []
+  },
+  "p2": {
+   "code": "try:\n    print({\"a\": 1}[\"b\"])\nexcept ValueError:\n    print(\"handled\")",
+   "inputs": []
+  },
+  "p3": {
+   "code": "try:\n    1 / 0\nexcept Exception:\n    print(\"general\")\nexcept ZeroDivisionError:\n    print(\"zero\")",
+   "inputs": []
+  },
+  "p4": {
+   "code": "def f():\n    try:\n        return \"try\"\n    finally:\n        print(\"cleanup\")\n\nprint(f())",
+   "inputs": []
+  },
+  "p5": {
+   "code": "def inner():\n    return int(\"x\")\n\ndef outer():\n    return inner() + 1\n\ntry:\n    outer()\nexcept ValueError as e:\n    print(\"caught:\", e)",
+   "inputs": []
+  },
+  "p6": {
+   "code": "def book(slot):\n    if not slot:\n        raise ValueError(\"slot is required\")\n    return \"booked \" + slot\n\nprint(book(\"9:00\"))\nprint(book(\"\"))",
+   "inputs": []
+  }
+ }
+}

@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Decorators</title>
+<meta name="description" content="Python fundamentals: functions as objects, wrapper functions, the @ syntax, functools.wraps, decorators with arguments, and stacking decorators.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<script src="traces/decorators.js"></script>
+<style>
+  .static-code { margin: 0; }
+  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
+  .on-wrap { margin-top: 12px; }
+  .on-l { border: 2px solid var(--line); border-radius: 14px; padding: 10px 12px 12px; margin-top: 8px; transition: all .3s; }
+  .on-h { font-family: var(--mono); font-size: 13px; color: var(--fg-soft); }
+  .on-l.in { border-color: var(--cyan); box-shadow: 0 0 0 3px var(--teal-wash); }
+  .on-l.out { border-color: var(--teal); box-shadow: none; }
+  .on-l.stop { border-color: var(--red); }
+  .on-fn { min-height: 44px; }
+  .fl-out { margin: 4px 0 0; min-height: 60px; white-space: pre-wrap; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Python Fundamentals</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Python · Topic 16 · Going further</div>
+    <h1>Decorators</h1>
+    <ul class="lede"><li>A <b>decorator</b> is a function that takes a function and returns a <b>replacement</b>, usually a wrapper that adds behaviour before and after the original.</li><li><span class="mono">@log_calls</span> above <span class="mono">def f</span> is shorthand for <span class="mono">f = log_calls(f)</span>, run <b>once</b>, when the def runs.</li><li>The wrapper uses <span class="mono">*args, **kwargs</span> to accept any arguments and a <b>closure</b> to remember the original function.</li><li>Always add <span class="mono">@functools.wraps(func)</span> so the wrapper keeps the original's name and docstring. Used everywhere: logging, timing, caching, permissions, web routes.</li></ul>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: logging every call</h2>
+    <div class="stage-kind">Real trace of real code · Next ▶ moves one idea at a time</div>
+    <div class="story wide" id="pageStory">
+      <div id="pageTrace"></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Run and change the code, predict before you peek, and try to break things.</p>
+
+  <section aria-labelledby="runH">
+    <h2 class="stage-title" id="runH">Edit and run</h2>
+    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div id="runner"></div>
+  </section>
+
+  <section aria-labelledby="predH">
+    <h2 class="stage-title" id="predH">Predict the output</h2>
+    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="chips" id="pzChips"></div>
+    <div class="puzzle-area" id="pzArea"></div>
+  </section>
+
+  <section aria-labelledby="onionH">
+    <h2 class="stage-title" id="onionH">Layers of wrappers</h2>
+    <div class="stage-kind">Two decorators stacked on delete_patient · choose who calls it</div>
+    <details class="rn-inputs" style="margin-bottom:10px"><summary>Show the decorator code</summary><pre class="codeblock" id="onCode" style="min-height:0"></pre></details>
+    <div class="seg" id="onSeg" role="group" aria-label="Caller"><button type="button" data-v="0" aria-pressed="false">Asha (admin)</button><button type="button" data-v="1" aria-pressed="false">Ravi (nurse)</button></div>
+    <div class="on-wrap"><div class="on-l on-log" id="onLog"><div class="on-h">@log_calls → wrapper</div>
+      <div class="on-l on-role" id="onRole"><div class="on-h">@require_role("admin") → wrapper</div>
+        <div class="on-l on-fn" id="onFn"><div class="on-h">delete_patient (original)</div></div>
+      </div></div></div>
+    <div class="two" style="margin-top:12px"><div class="card"><div class="label">Output</div><pre class="mono fl-out" id="onOut"></pre></div><div class="card"><div class="label">Caller gets</div><div class="mono" id="onRes" style="font-size:15px;overflow-wrap:anywhere">—</div></div></div>
+    <p class="status-line" id="onStatus">Pick a caller.</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Add behaviour around many functions</span><span class="arrow">→</span><span class="then">Write a decorator once, put <span class="mono">@it</span> on each</span></li>
+      <li><span class="if">Writing the wrapper</span><span class="arrow">→</span><span class="then"><span class="mono">def wrapper(*args, **kwargs): … return func(*args, **kwargs)</span></span></li>
+      <li><span class="if">Keep the name and docstring</span><span class="arrow">→</span><span class="then"><span class="mono">@functools.wraps(func)</span></span></li>
+      <li><span class="if">Decorator that takes settings</span><span class="arrow">→</span><span class="then">Three levels: <span class="mono">def require_role(role): def decorator(func): def wrapper(...)</span></span></li>
+      <li><span class="if">Cache pure function results</span><span class="arrow">→</span><span class="then"><span class="mono">@functools.cache</span> / <span class="mono">@lru_cache(maxsize=…)</span></span></li>
+      <li><span class="if">Several decorators</span><span class="arrow">→</span><span class="then">Bottom one wraps first; top one runs first</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: decorators you'll meet</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Decorator</th><th>Where</th><th>Does</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">@property</td><td>built-in</td><td>method read like an attribute (OOP deeper)</td></tr>
+          <tr><td class="mono">@classmethod / @staticmethod</td><td>built-in</td><td>method gets the class / nothing instead of self</td></tr>
+          <tr><td class="mono">@dataclass</td><td>dataclasses</td><td>writes __init__, __repr__, __eq__ for you</td></tr>
+          <tr><td class="mono">@functools.cache / lru_cache</td><td>functools</td><td>memoise results</td></tr>
+          <tr><td class="mono">@contextlib.contextmanager</td><td>contextlib</td><td>turns a generator into a with-block helper</td></tr>
+          <tr><td class="mono">@app.get("/patients")</td><td>FastAPI / Flask</td><td>registers a function as a web route</td></tr>
+          <tr><td class="mono">@pytest.fixture</td><td>pytest</td><td>marks reusable test setup</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>From your Notion plan:</b> "basic decorators" (8-week plan, Week 2). They build directly on closures from the Scope page.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Coming from .NET:</b> the effect resembles an ASP.NET action filter or middleware, but a Python decorator is just a function call at definition time. There is no attribute metadata involved.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Keep wrappers thin:</b> they run on every call. Put heavy setup outside the wrapper, in the decorator body, which runs only once.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Say the answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary><span class="mono">def d(f): return lambda: f() * 2\n@d\ndef five(): return 5\nprint(five())</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">10</b>. Any callable can be the replacement, even a lambda.</p></div></details>
+      <details><summary><span class="mono">@d</span> above <span class="mono">def g</span> is the same as…?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">def g(...): ...</span> followed by <b class="mono">g = d(g)</b>.</p></div></details>
+      <details><summary><span class="mono">def count(f):\n    def w(*a):\n        w.calls += 1\n        return f(*a)\n    w.calls = 0\n    return w\n@count\ndef hi(): pass\nhi(); hi()\nprint(hi.calls)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">2</b>. Functions are objects and can carry attributes; the wrapper keeps state between calls.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Every trace and output on this page was produced by running the code (Python 3.13; the same results on Python 3.15). The edit-and-run box runs real Python 3.14 in your browser with Pyodide. From the Notion plan (Planning for python learning, Week 2: basic decorators). Python docs: functools.wraps, PEP 318.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const T = window.TRACES['decorators'];
+
+  /* ========== Walkthrough ========== */
+  const tr = K.trace($('pageTrace'), T.walk, {});
+  const MAP = [2, 5, 11, 13, 14, 17, 21, 24];
+  const STEPS = [{"title": "A function that takes a function", "text": "<span class=\"mono\">log_calls</span> is an ordinary function. Its parameter <span class=\"mono\">func</span> will receive another function object."}, {"title": "@ runs the decorator at def time", "text": "When Python reaches <span class=\"mono\">@log_calls def with_tax…</span>, it first creates the with_tax function, then calls <span class=\"mono\">log_calls(with_tax)</span>. Nothing has been taxed yet."}, {"title": "It returns a wrapper", "text": "Inside, <span class=\"mono\">def wrapper</span> builds a new function that remembers <span class=\"mono\">func</span> (a closure), and <span class=\"mono\">functools.wraps</span> copies the name and docstring onto it. The wrapper is returned…"}, {"title": "…and takes over the name", "text": "The name <span class=\"mono\">with_tax</span> now points to the <b>wrapper</b>. The original function still exists, but only the wrapper can reach it, through <span class=\"mono\">func</span>.", "tip": "Equivalent without @: <span class=\"mono\">with_tax = log_calls(with_tax)</span>."}, {"title": "Calling with_tax calls the wrapper", "text": "<span class=\"mono\">with_tax(1000)</span> actually runs <span class=\"mono\">wrapper(1000)</span>: <span class=\"mono\">args</span> is <span class=\"mono\">(1000,)</span>. It prints the \"calling\" line first."}, {"title": "The wrapper calls the original", "text": "<span class=\"mono\">func(*args, **kwargs)</span> passes the same arguments on to the real with_tax. Now there are two frames: wrapper and the original."}, {"title": "After-work, then return", "text": "The original returned 1180.0; the wrapper logs it and returns it to the caller unchanged. Callers don't know a wrapper exists."}, {"title": "wraps kept the name", "text": "<span class=\"mono\">with_tax.__name__</span> is still <span class=\"mono\">'with_tax'</span>. Without <span class=\"mono\">@functools.wraps</span> it would say <span class=\"mono\">'wrapper'</span>, confusing logs, debuggers and frameworks."}];
+  STEPS.forEach((st, i) => {
+    if (i === 0) return;
+    st.play = async run => { for (let k = MAP[i - 1] + 1; k <= MAP[i]; k++) { tr.show(k); if (k < MAP[i]) await K.sleep(Math.max(150, Math.min(600, 4800 / (MAP[i] - MAP[i - 1]))), run); } };
+  });
+  K.story({ root: $('pageStory'), steps: STEPS, show: i => tr.show(MAP[i]), tipLabel: 'Tip' });
+
+  /* ========== Edit and run ========== */
+  K.pyRunner($('runner'), { starters: [{"label": "Walkthrough code", "code": "import functools\n\ndef log_calls(func):\n    @functools.wraps(func)\n    def wrapper(*args, **kwargs):\n        print(\"calling\", func.__name__, args)\n        result = func(*args, **kwargs)\n        print(\"returned\", result)\n        return result\n    return wrapper\n\n@log_calls\ndef with_tax(amount, rate=0.18):\n    return amount * (1 + rate)\n\ntotal = with_tax(1000)\nprint(total, with_tax.__name__)", "inputs": []}, {"label": "Puzzle 1: when does the decorator run?", "code": "def shout(func):\n    print(\"decorating\", func.__name__)\n    return func\n\n@shout\ndef hello():\n    print(\"hello\")\n\nprint(\"ready\")\nhello()\nhello()", "inputs": []}, {"label": "Puzzle 2: forgetting return", "code": "def twice(func):\n    def wrapper(*args):\n        func(*args)\n        func(*args)\n    return wrapper\n\n@twice\ndef add(a, b):\n    return a + b\n\nprint(add(2, 3))", "inputs": []}, {"label": "Puzzle 3: without wraps", "code": "def deco(func):\n    def wrapper():\n        return func()\n    return wrapper\n\n@deco\ndef report():\n    \"\"\"Daily report.\"\"\"\n\nprint(report.__name__, report.__doc__)", "inputs": []}, {"label": "Puzzle 4: stacking order", "code": "def a(f):\n    def w():\n        return \"a(\" + f() + \")\"\n    return w\n\ndef b(f):\n    def w():\n        return \"b(\" + f() + \")\"\n    return w\n\n@a\n@b\ndef x():\n    return \"x\"\n\nprint(x())", "inputs": []}, {"label": "Puzzle 5: a cache decorator", "code": "from functools import lru_cache\n\n@lru_cache\ndef fee(code):\n    print(\"looking up\", code)\n    return len(code) * 100\n\nprint(fee(\"ECG\"), fee(\"ECG\"), fee(\"XRAY\"))", "inputs": []}, {"label": "Your turn: a timing decorator", "code": "import functools, time\n\ndef timed(func):\n    @functools.wraps(func)\n    def wrapper(*args, **kwargs):\n        start = time.perf_counter()\n        result = func(*args, **kwargs)\n        ms = (time.perf_counter() - start) * 1000\n        print(f\"{func.__name__} took {ms:.2f} ms\")\n        return result\n    return wrapper\n\n@timed\ndef total(n):\n    return sum(range(n))\n\nprint(total(100_000))"}] });
+
+  /* ========== Predict the output ========== */
+  const PZ = [{"id": "p1", "name": "1 · when does the decorator run?", "q": "What's printed?", "opts": ["ready / decorating hello / hello / hello", "decorating hello / ready / hello / hello", "ready / decorating hello / hello / decorating hello / hello"], "a": 1, "why": "The decorator runs once, when the def is executed. Calls afterwards just call whatever it returned."}, {"id": "p2", "name": "2 · forgetting return", "q": "What's printed?", "opts": ["5", "10", "None"], "a": 2, "why": "The wrapper calls add twice but never returns anything, so the caller gets None. A wrapper must <span class=\"mono\">return func(*args, **kwargs)</span>."}, {"id": "p3", "name": "3 · without wraps", "q": "What's printed?", "opts": ["report Daily report.", "wrapper None", "deco None"], "a": 1, "why": "The name now points at <span class=\"mono\">wrapper</span>, with its own name and no docstring. <span class=\"mono\">@functools.wraps(func)</span> fixes both."}, {"id": "p4", "name": "4 · stacking order", "q": "What's printed?", "opts": ["a(b(x))", "b(a(x))", "x"], "a": 0, "why": "Decorators apply bottom-up: <span class=\"mono\">x = a(b(x))</span>. So a's wrapper is outermost and runs first."}, {"id": "p5", "name": "5 · a cache decorator", "q": "What's printed?", "opts": ["looking up ECG / looking up ECG / looking up XRAY / 300 300 400", "looking up ECG / looking up XRAY / 300 300 400", "300 300 400"], "a": 1, "why": "<span class=\"mono\">lru_cache</span> remembers results by argument, so the second fee(\"ECG\") never runs the body. Only use it for functions without side effects."}];
+  $('pzChips').innerHTML = PZ.map((p, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${p.name}</button>`).join('');
+  function puzzle(i) {
+    const p = PZ[i], area = $('pzArea');
+    area.innerHTML = `<div class="two">
+        <div><pre class="codeblock static-code">${T[p.id].code.split('\n').map(l => `<span class="ln">${K.pyHighlight(l) || ' '}</span>`).join('')}</pre></div>
+        <div class="card predict"><div class="q">${p.q}</div><div class="opts">${p.opts.map((o, j) => `<button class="chip-btn" type="button" data-j="${j}">${o.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</button>`).join('')}</div><p class="status-line" style="text-align:left;margin:0" id="pzVerdict">Choose an answer to unlock the step-through.</p></div>
+      </div><div id="pzTrace"></div>`;
+    area.querySelectorAll('.predict .chip-btn').forEach(b => b.addEventListener('click', () => {
+      const j = +b.dataset.j, ok = j === p.a;
+      area.querySelectorAll('.predict .chip-btn').forEach((x, xj) => { x.disabled = true; x.classList.toggle('right', xj === p.a); x.classList.toggle('wrong', xj === j && !ok); });
+      $('pzVerdict').innerHTML = `<span class="${ok ? 'ok-text' : 'bad-text'}">${ok ? 'Correct.' : 'Not quite.'}</span> ${p.why} <b>Step through below to watch it happen.</b>`;
+      K.trace($('pzTrace'), T[p.id], { controls: true });
+    }));
+  }
+  $('pzChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('pzChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    puzzle(+b.dataset.i);
+  }));
+  $('pzChips').querySelector('button').click();
+
+  /* ===== Layers of wrappers ===== */
+  (function () {
+    const RUNS = [{"who": {"name": "Asha", "role": "admin"}, "out": ["log: calling delete_patient", "deleting 42", "log: returned deleted"], "err": null}, {"who": {"name": "Ravi", "role": "nurse"}, "out": ["log: calling delete_patient"], "err": "PermissionError: Ravi is not admin"}], SRC = "import functools\n\ndef log_calls(func):\n    @functools.wraps(func)\n    def wrapper(*args, **kwargs):\n        print(\"log: calling\", func.__name__)\n        result = func(*args, **kwargs)\n        print(\"log: returned\", result)\n        return result\n    return wrapper\n\ndef require_role(role):\n    def decorator(func):\n        @functools.wraps(func)\n        def wrapper(user, *args, **kwargs):\n            if user[\"role\"] != role:\n                raise PermissionError(f\"{user['name']} is not {role}\")\n            return func(user, *args, **kwargs)\n        return wrapper\n    return decorator\n\n@log_calls\n@require_role(\"admin\")\ndef delete_patient(user, patient_id):\n    print(\"deleting\", patient_id)\n    return \"deleted\"\n";
+    $('onCode').innerHTML = SRC.trimEnd().split('\n').map(l => `<span class="ln">${K.pyHighlight(l)}</span>`).join('');
+    async function go(i) {
+      const run = K.newRun('on'), R = RUNS[i];
+      ['onLog', 'onRole', 'onFn'].forEach(id => $(id).classList.remove('in', 'stop', 'out'));
+      $('onOut').textContent = ''; $('onRes').textContent = '…';
+      const out = t => { $('onOut').textContent += t + '\n'; };
+      try {
+        $('onLog').classList.add('in'); out(R.out[0]); await K.sleep(700, run);
+        $('onRole').classList.add('in'); await K.sleep(700, run);
+        if (R.err) {
+          $('onRole').classList.add('stop'); await K.sleep(500, run);
+          $('onRes').innerHTML = `<span class="bad-text">${R.err}</span>`;
+          $('onStatus').innerHTML = 'The role wrapper <b>raised before calling the original</b>. The exception passes back out through the log wrapper (which never prints "returned") to the caller.';
+          return;
+        }
+        $('onFn').classList.add('in'); out(R.out[1]); await K.sleep(700, run);
+        $('onFn').classList.add('out'); await K.sleep(400, run); $('onRole').classList.add('out'); await K.sleep(400, run);
+        out(R.out[2]); $('onLog').classList.add('out');
+        $('onRes').textContent = "'deleted'";
+        $('onStatus').innerHTML = 'In through each wrapper, the original runs, then the result travels back out. The outer decorator (listed first) runs first.';
+      } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+    }
+    K.seg($('onSeg'), v => go(+v));
+  })();
+})();
+</script>
+</body>
+</html>

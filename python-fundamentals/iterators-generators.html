@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Iterators &amp; generators</title>
+<meta name="description" content="Python fundamentals: the iterator protocol (iter and next), StopIteration, generator functions with yield, generator expressions, and why lazy evaluation saves memory.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<script src="traces/iterators-generators.js"></script>
+<style>
+  .static-code { margin: 0; }
+  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
+  .ln.pl-pause { box-shadow: inset 3px 0 0 var(--accent-text); }
+  .mm-row { display: grid; grid-template-columns: 90px 1fr 80px; gap: 10px; align-items: center; margin-top: 10px; }
+  .mm-bar { height: 18px; border-radius: 9px; background: var(--panel-2); border: 1px solid var(--line); overflow: hidden; }
+  .mm-bar i { display: block; height: 100%; background: var(--cyan); transition: width .3s; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Python Fundamentals</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Python · Topic 14 · Going further</div>
+    <h1>Iterators &amp; generators</h1>
+    <ul class="lede"><li>A <b>for</b> loop calls <span class="mono">iter()</span> on the object to get an <b>iterator</b>, then <span class="mono">next()</span> until it raises <b>StopIteration</b>.</li><li>A function containing <span class="mono">yield</span> is a <b>generator function</b>: calling it runs <b>nothing</b> yet and returns a generator object.</li><li>Each <span class="mono">next()</span> runs the body up to the next <span class="mono">yield</span>, hands out that value and <b>pauses</b>, keeping its local variables.</li><li>Generators are <b>lazy</b>: values are made one at a time, so a stream of a million rows needs memory for one. They can be used <b>once</b>.</li></ul>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: generating appointment slots</h2>
+    <div class="stage-kind">Real trace of real code · Next ▶ moves one idea at a time</div>
+    <div class="story wide" id="pageStory">
+      <div id="pageTrace"></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Run and change the code, predict before you peek, and try to break things.</p>
+
+  <section aria-labelledby="runH">
+    <h2 class="stage-title" id="runH">Edit and run</h2>
+    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div id="runner"></div>
+  </section>
+
+  <section aria-labelledby="predH">
+    <h2 class="stage-title" id="predH">Predict the output</h2>
+    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="chips" id="pzChips"></div>
+    <div class="puzzle-area" id="pzArea"></div>
+  </section>
+
+  <section aria-labelledby="pullH">
+    <h2 class="stage-title" id="pullH">Pull values with next()</h2>
+    <div class="stage-kind">Press next() · see where the generator pauses and what it remembers</div>
+    <div class="two">
+      <pre class="codeblock" id="plCode" style="min-height:0;margin:0"></pre>
+      <div>
+        <div class="card"><div class="label">Generator state</div><div class="mono" id="plState" style="font-size:15px">not started</div><div class="mono muted" id="plVars" style="margin-top:6px"></div></div>
+        <div class="card" style="margin-top:10px"><div class="label">Caller received</div><div class="mono" id="plGot" style="font-size:15px;overflow-wrap:anywhere">—</div></div>
+      </div>
+    </div>
+    <div class="controls" style="margin-top:12px"><button class="btn primary" type="button" id="plNext">next(gen)</button><button class="btn" type="button" id="plReset">gen = slots(540, 660)</button></div>
+    <p class="status-line" id="plStatus">The generator is created but hasn't run a single line.</p>
+  </section>
+
+  <section aria-labelledby="memH">
+    <h2 class="stage-title" id="memH">List or generator: memory</h2>
+    <div class="stage-kind">sys.getsizeof() of a list comprehension vs a generator expression</div>
+    <label class="label" for="mmN">n = <span class="mono" id="mmNv"></span></label><input type="range" id="mmN" min="0" max="5" value="3" style="width:100%">
+    <div class="mm-row"><span class="mono">list</span><div class="mm-bar"><i id="mmL"></i></div><span class="mono" id="mmLv"></span></div>
+    <div class="mm-row"><span class="mono">generator</span><div class="mm-bar"><i id="mmG"></i></div><span class="mono" id="mmGv"></span></div>
+    <p class="status-line" id="mmStatus"></p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Produce a sequence step by step</span><span class="arrow">→</span><span class="then">A generator function with <span class="mono">yield</span></span></li>
+      <li><span class="if">One-off lazy transform</span><span class="arrow">→</span><span class="then">Generator expression <span class="mono">(f(x) for x in xs)</span></span></li>
+      <li><span class="if">Huge file or API pages</span><span class="arrow">→</span><span class="then">Yield one record at a time instead of building a list</span></li>
+      <li><span class="if">Need to loop twice</span><span class="arrow">→</span><span class="then">Make a list, or call the generator function again</span></li>
+      <li><span class="if">Get one item / safe default</span><span class="arrow">→</span><span class="then"><span class="mono">next(it)</span> / <span class="mono">next(it, None)</span></span></li>
+      <li><span class="if">Delegate to another generator</span><span class="arrow">→</span><span class="then"><span class="mono">yield from other()</span></span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: iterable vs iterator vs generator</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>What it is</th><th>Examples</th><th>Reusable?</th></tr></thead>
+        <tbody>
+          <tr><td>Iterable</td><td>anything with <span class="mono">__iter__</span>: you can loop over it</td><td class="mono">list, str, dict, range, file</td><td>yes (each loop gets a fresh iterator)</td></tr>
+          <tr><td>Iterator</td><td>has <span class="mono">__next__</span>; remembers its position</td><td class="mono">iter(list), zip(), map(), file lines</td><td>no, one pass</td></tr>
+          <tr><td>Generator</td><td>an iterator written as a function with yield, or as <span class="mono">( … for … )</span></td><td class="mono">slots(540, 660)</td><td>no, one pass</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>From your Notion plan:</b> "Iterators &amp; generators (yield)" (8-week plan, Week 2). The repo meets lazy objects (reversed, zip, map) but never writes its own.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>range() is not a generator:</b> it's a lazy <i>sequence</i>. You can index it, take its len() and loop over it many times.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Real use:</b> reading a large CSV with <span class="mono">csv.DictReader</span> is already lazy; wrapping it in a generator that cleans each row keeps memory flat however big the file is.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Say the answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary><span class="mono">def g():\n    yield 1\n    yield 2\nprint(sum(g()), len(list(g())))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">3 2</b>. Each call to g() makes a new generator.</p></div></details>
+      <details><summary><span class="mono">r = range(3)\nprint(list(r), list(r), r[1])</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">[0, 1, 2] [0, 1, 2] 1</b>. range is reusable and indexable.</p></div></details>
+      <details><summary><span class="mono">it = iter([1, 2, 3])\nfor x in it:\n    print(x, next(it))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">1 2</b> then <b>StopIteration</b>. The loop and your next() share one iterator: x=1, next→2, x=3, next→nothing left.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Every trace and output on this page was produced by running the code (Python 3.13; the same results on Python 3.15). The edit-and-run box runs real Python 3.14 in your browser with Pyodide. From the Notion plan (Planning for python learning, Week 2: iterators &amp; generators). Python docs: Iterators, Generators, itertools.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const T = window.TRACES['iterators-generators'];
+
+  /* ========== Walkthrough ========== */
+  const tr = K.trace($('pageTrace'), T.walk, {});
+  const MAP = [2, 3, 7, 9, 21, 27, 28, 45];
+  const STEPS = [{"title": "Calling it runs nothing", "text": "Because <span class=\"mono\">slots</span> contains <span class=\"mono\">yield</span>, calling it just creates a <b>generator object</b>, marked <i>not started</i>. Not even <span class=\"mono\">t = start</span> has run. (540 minutes = 9:00.)"}, {"title": "next() starts the body", "text": "<span class=\"mono\">next(gen)</span> resumes the generator. Its frame appears on top of the stack and runs from the first line."}, {"title": "yield hands out a value and pauses", "text": "At <span class=\"mono\">yield t</span> the generator gives 540 to the caller and <b>freezes</b> right there. Its frame leaves the stack, but the generator object keeps <span class=\"mono\">t</span>, <span class=\"mono\">start</span>, <span class=\"mono\">end</span>…"}, {"title": "The next next() resumes after yield", "text": "Execution continues from the line <b>after</b> <span class=\"mono\">yield</span>: <span class=\"mono\">t += step</span>, then the loop test, then the next yield (570)."}, {"title": "for calls next() for you", "text": "The <span class=\"mono\">for</span> loop picks up where we left off: 600. It doesn't restart the generator, which only goes forward."}, {"title": "StopIteration ends the loop", "text": "After 600, <span class=\"mono\">t</span> becomes 630, the while test fails and the function returns. A finished generator raises <b>StopIteration</b> on the next <span class=\"mono\">next()</span>, which <span class=\"mono\">for</span> treats as \"done\". Its state is now <i>finished</i>."}, {"title": "Every for loop works this way", "text": "<span class=\"mono\">iter([10, 20])</span> gives a list iterator. Two <span class=\"mono\">next()</span> calls return the items; the third would raise StopIteration, but <span class=\"mono\">next(it, default)</span> returns the default instead.", "tip": "Lists, strings, dicts and files are <b>iterables</b> (you can call iter() on them as often as you like). Iterators are one-pass cursors over them."}, {"title": "Generator expressions are one-pass too", "text": "<span class=\"mono\">sum(squares)</span> consumed every value (0+1+4+9 = 14). Asking again gives nothing: <span class=\"mono\">list(squares)</span> is empty."}];
+  STEPS.forEach((st, i) => {
+    if (i === 0) return;
+    st.play = async run => { for (let k = MAP[i - 1] + 1; k <= MAP[i]; k++) { tr.show(k); if (k < MAP[i]) await K.sleep(Math.max(150, Math.min(600, 4800 / (MAP[i] - MAP[i - 1]))), run); } };
+  });
+  K.story({ root: $('pageStory'), steps: STEPS, show: i => tr.show(MAP[i]), tipLabel: 'Tip' });
+
+  /* ========== Edit and run ========== */
+  K.pyRunner($('runner'), { starters: [{"label": "Walkthrough code", "code": "def slots(start, end, step=30):\n    t = start\n    while t < end:\n        yield t\n        t += step\n\ngen = slots(540, 630)\nprint(next(gen))\nprint(next(gen))\nfor t in gen:\n    print(\"loop got\", t)\nnums = iter([10, 20])\nprint(next(nums), next(nums), next(nums, \"done\"))\nsquares = (n * n for n in range(4))\nprint(sum(squares), list(squares))", "inputs": []}, {"label": "Puzzle 1: when does the body run?", "code": "def gen():\n    print(\"start\")\n    yield 1\n    print(\"end\")\n\ng = gen()\nprint(\"made\")\nprint(next(g))", "inputs": []}, {"label": "Puzzle 2: list() twice", "code": "def countdown(n):\n    while n > 0:\n        yield n\n        n -= 1\n\nc = countdown(3)\nprint(list(c), list(c))", "inputs": []}, {"label": "Puzzle 3: next past the end", "code": "it = iter(\"ab\")\nprint(next(it), next(it))\nprint(next(it))", "inputs": []}, {"label": "Puzzle 4: yield from", "code": "def morning():\n    yield \"9:00\"\n    yield \"9:30\"\n\ndef day():\n    yield from morning()\n    yield \"14:00\"\n\nprint(list(day()))", "inputs": []}, {"label": "Puzzle 5: infinite but lazy", "code": "from itertools import count, islice\nids = count(1001)\nprint(list(islice(ids, 3)), next(ids))", "inputs": []}, {"label": "Your turn: read records lazily", "code": "def read_rows(lines):\n    for line in lines:\n        name, fee = line.split(\",\")\n        yield {\"name\": name, \"fee\": int(fee)}\n\ndata = [\"Asha,450\", \"Ravi,800\", \"Meera,1200\"]\nrows = read_rows(data)\nprint(next(rows))\nprint(sum(r[\"fee\"] for r in rows))\n# Which rows did the sum see? Why not Asha?"}] });
+
+  /* ========== Predict the output ========== */
+  const PZ = [{"id": "p1", "name": "1 · when does the body run?", "q": "What's printed?", "opts": ["start / made / 1", "made / start / 1", "made / start / 1 / end"], "a": 1, "why": "Calling gen() runs nothing. The body starts at the first next() and stops at yield, so \"end\" never prints here."}, {"id": "p2", "name": "2 · list() twice", "q": "What's printed?", "opts": ["[3, 2, 1] [3, 2, 1]", "[3, 2, 1] []", "[3, 2, 1] [0]"], "a": 1, "why": "A generator can be consumed once. Call <span class=\"mono\">countdown(3)</span> again for a fresh one."}, {"id": "p3", "name": "3 · next past the end", "q": "What happens?", "opts": ["a b / (empty line)", "a b / StopIteration", "a b / a"], "a": 1, "why": "An exhausted iterator raises StopIteration. for loops catch it for you; a bare next() doesn't."}, {"id": "p4", "name": "4 · yield from", "q": "What's printed?", "opts": ["['9:00', '9:30', '14:00']", "[<generator object morning>, '14:00']", "['14:00']"], "a": 0, "why": "<span class=\"mono\">yield from</span> passes on every value of another iterable, one by one."}, {"id": "p5", "name": "5 · infinite but lazy", "q": "What's printed?", "opts": ["[1001, 1002, 1003] 1004", "[1001, 1002, 1003] 1001", "it never finishes"], "a": 0, "why": "<span class=\"mono\">count()</span> never ends, but values are only made when asked. islice took three; the iterator continues from 1004."}];
+  $('pzChips').innerHTML = PZ.map((p, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${p.name}</button>`).join('');
+  function puzzle(i) {
+    const p = PZ[i], area = $('pzArea');
+    area.innerHTML = `<div class="two">
+        <div><pre class="codeblock static-code">${T[p.id].code.split('\n').map(l => `<span class="ln">${K.pyHighlight(l) || ' '}</span>`).join('')}</pre></div>
+        <div class="card predict"><div class="q">${p.q}</div><div class="opts">${p.opts.map((o, j) => `<button class="chip-btn" type="button" data-j="${j}">${o.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</button>`).join('')}</div><p class="status-line" style="text-align:left;margin:0" id="pzVerdict">Choose an answer to unlock the step-through.</p></div>
+      </div><div id="pzTrace"></div>`;
+    area.querySelectorAll('.predict .chip-btn').forEach(b => b.addEventListener('click', () => {
+      const j = +b.dataset.j, ok = j === p.a;
+      area.querySelectorAll('.predict .chip-btn').forEach((x, xj) => { x.disabled = true; x.classList.toggle('right', xj === p.a); x.classList.toggle('wrong', xj === j && !ok); });
+      $('pzVerdict').innerHTML = `<span class="${ok ? 'ok-text' : 'bad-text'}">${ok ? 'Correct.' : 'Not quite.'}</span> ${p.why} <b>Step through below to watch it happen.</b>`;
+      K.trace($('pzTrace'), T[p.id], { controls: true });
+    }));
+  }
+  $('pzChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('pzChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    puzzle(+b.dataset.i);
+  }));
+  $('pzChips').querySelector('button').click();
+
+  /* ===== Pull values with next() ===== */
+  (function () {
+    const SRC = ['def slots(start, end, step=30):', '    t = start', '    while t < end:', '        yield t', '        t += step'];
+    let t = null, phase = 'new', got = [];
+    const hm = m => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
+    function draw(hl) {
+      $('plCode').innerHTML = SRC.map((l, i) => `<span class="ln${hl.includes(i) ? ' on' : ''}${i === 3 && phase === 'paused' ? ' pl-pause' : ''}">${K.pyHighlight(l)}</span>`).join('');
+      $('plState').innerHTML = phase === 'new' ? 'not started' : phase === 'paused' ? 'paused at line 4 (yield)' : '<span class="bad-text">finished</span>';
+      $('plVars').textContent = phase === 'paused' ? `start=540  end=660  step=30  t=${t}` : '';
+      $('plGot').textContent = got.length ? got.map(hm).join(', ') : '—';
+    }
+    $('plNext').addEventListener('click', () => {
+      if (phase === 'done') { $('plStatus').innerHTML = '<b class="bad-text">StopIteration</b> · a finished generator stays finished. Create a new one to start over.'; return; }
+      let ran;
+      if (phase === 'new') { t = 540; ran = [1, 2, 3]; }
+      else { t += 30; ran = [4, 2]; if (t < 660) ran.push(3); }
+      if (t < 660) { phase = 'paused'; got.push(t); $('plStatus').innerHTML = `Ran lines ${ran.map(i => i + 1).join(', ')} and yielded <b class="mono">${t}</b> (${hm(t)}). Paused, keeping t.`; }
+      else { phase = 'done'; $('plStatus').innerHTML = `Ran <span class="mono">t += step</span> (t = ${t}), the while test failed, the function ended → <b>StopIteration</b>. A for loop would stop here.`; }
+      draw(ran);
+    });
+    $('plReset').addEventListener('click', () => { t = null; phase = 'new'; got = []; draw([]); $('plStatus').textContent = 'A fresh generator: nothing has run yet.'; });
+    draw([]);
+  })();
+  /* ===== List or generator: memory ===== */
+  (function () {
+    const MEM = [{"n": 10, "list": 184, "gen": 200}, {"n": 100, "list": 920, "gen": 200}, {"n": 1000, "list": 8856, "gen": 200}, {"n": 10000, "list": 85176, "gen": 200}, {"n": 100000, "list": 800984, "gen": 200}, {"n": 1000000, "list": 8448728, "gen": 200}];
+    const fmt = b => b >= 1e6 ? (b / 1e6).toFixed(1) + ' MB' : b >= 1e3 ? (b / 1e3).toFixed(1) + ' KB' : b + ' B';
+    function draw() {
+      const m = MEM[+$('mmN').value]; const mx = MEM[MEM.length - 1].list;
+      $('mmNv').textContent = m.n.toLocaleString('en');
+      $('mmL').style.width = Math.max(1, Math.log10(m.list) / Math.log10(mx) * 100) + '%';
+      $('mmG').style.width = Math.max(1, Math.log10(m.gen) / Math.log10(mx) * 100) + '%';
+      $('mmLv').textContent = fmt(m.list); $('mmGv').textContent = fmt(m.gen);
+      $('mmStatus').innerHTML = `The list holds all ${m.n.toLocaleString('en')} results at once; the generator stays at ${m.gen} bytes whatever n is. (Log scale; the list figure counts only its slots, not the int objects themselves.)`;
+    }
+    $('mmN').addEventListener('input', draw); draw();
+  })();
+})();
+</script>
+</body>
+</html>

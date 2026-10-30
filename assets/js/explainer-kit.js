@@ -21,14 +21,28 @@
      Kit.story({ root, steps, show })
        root  : an element with class "story"; Kit fills the caption + nav
        steps : [{ title, text, tip?, play?: async run => {} }]
+       tipLabel: label before each step's tip (default 'Exam tip')
        show(i): draw the finished state of step i instantly (used for Back,
                 dot jumps and after each play). Keep it declarative.
      Forward moves call steps[i].play(run) (Kit.move / Kit.sleep), then show(i).
+
+   Code stepper (Python Tutor style), fed by traces from tools/pytrace.py:
+     const tr = Kit.trace(el, trace, { controls: true, onStep: (i, step) => {} })
+       tr.show(i)  render step i (line markers, frames, objects, arrows, output)
+       tr.n        number of steps; tr.steps the raw trace steps
+     Scalars inside containers are drawn inline; names in frames point to objects.
+   Kit.pyHighlight(line) returns HTML with .k/.s/.n/.c/.b token spans.
+
+   Edit-and-run box (real Python via Pyodide, loaded on first Run):
+     Kit.pyRunner(el, { starters: [{ label, code, inputs? }] })
+       Run shows output; Step through renders Kit.trace from the same tracer
+       (assets/js/pytrace-src.js, generated from tools/pytrace.py).
    ========================================================================= */
 (function () {
   const NS = 'http://www.w3.org/2000/svg';
   const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   const gens = {};
+  const scriptBase = (document.currentScript && document.currentScript.src) ? document.currentScript.src.replace(/[^/]*$/, '') : '';
   const store = {
     get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage blocked */ } }
@@ -44,6 +58,7 @@
     reduce,
     Stop,
     $: id => document.getElementById(id),
+    assetBase: scriptBase,
 
     /** create an SVG element */
     el(tag, attrs = {}, parent) {
@@ -159,8 +174,217 @@
 
     fmt: n => n.toLocaleString('en-US'),
 
+    /** Python syntax highlighting (small, good enough for teaching snippets) */
+    pyHighlight(src) {
+      const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const KW = new Set('False None True and as assert async await break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield'.split(' '));
+      const BI = new Set('print len range type int float str bool list dict set tuple input isinstance id sorted sum min max abs round enumerate zip open super any all reversed map filter next iter repr'.split(' '));
+      const re = /(#.*$)|([rbfRBF]{0,2}(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'))|(\b\d+(?:\.\d+)?\b)|([A-Za-z_]\w*)|([^\w#'"]+|['"])/g;
+      let out = '', m;
+      while ((m = re.exec(src))) {
+        if (m[1]) out += `<span class="c">${esc(m[1])}</span>`;
+        else if (m[2]) out += `<span class="s">${esc(m[2])}</span>`;
+        else if (m[3]) out += `<span class="n">${esc(m[3])}</span>`;
+        else if (m[4]) out += KW.has(m[4]) ? `<span class="k">${m[4]}</span>` : (BI.has(m[4]) && src[re.lastIndex] === '(' ? `<span class="b">${m[4]}</span>` : esc(m[4]));
+        else out += esc(m[0]);
+      }
+      return out;
+    },
+
+    /** code stepper; see header */
+    trace(root, data, opts = {}) {
+      const esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const lines = data.code.split('\n');
+      const uid = (root.id || 'tr') + '-ah';
+      root.classList.add('tr');
+      root.innerHTML = `
+        <div class="tr-left">
+          <div class="tr-legend"><span class="lg next">▶ next line to run</span><span class="lg ran">■ line that just ran</span></div>
+          <div class="tr-code">${lines.map((l, i) => `<div class="tr-ln" data-n="${i + 1}"><span class="tr-gut">${i + 1}</span><code>${K.pyHighlight(l) || ' '}</code></div>`).join('')}</div>
+          <div class="tr-out"><div class="tr-h">Output</div><pre></pre></div>
+        </div>
+        <div class="tr-mem">
+          <div class="tr-col tr-frames"><div class="tr-h">Names (frames)</div><div class="tr-fbody"></div></div>
+          <div class="tr-col tr-heap"><div class="tr-h">Objects</div><div class="tr-hbody"></div></div>
+          <svg class="tr-arrows" aria-hidden="true"><defs><marker id="${uid}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" class="tr-ah"/></marker></defs><g></g></svg>
+        </div>
+        ${opts.controls ? `<div class="tr-ctl"><button class="btn" type="button" data-t="prev">◀ Back</button><input type="range" min="0" value="0" aria-label="Step"><button class="btn primary" type="button" data-t="next">Next ▶</button><span class="tr-count"></span></div>` : ''}`;
+      const q = sel => root.querySelector(sel);
+      const fbody = q('.tr-fbody'), hbody = q('.tr-hbody'), outPre = q('.tr-out pre'), svgG = q('.tr-arrows g'), mem = q('.tr-mem');
+      const steps = data.steps;
+      let cur = 0;
+      const isScalar = o => o && o.v !== undefined && !['function', 'class', 'generator'].includes(o.t);
+      const scalarText = o => o.v;
+      function cell(v, heap) {
+        if (!v) return '';
+        if (v.p !== undefined) return `<span class="tr-prim">${esc(v.p)}</span>`;
+        const o = heap[v.ref];
+        if (o && isScalar(o)) return `<span class="tr-prim">${esc(scalarText(o))}</span>`;
+        return `<span class="tr-ptr" data-ref="${v.ref}"></span>`;
+      }
+      function objHtml(id, o, heap, cls) {
+        let body = '';
+        if (isScalar(o)) body = `<div class="tr-val">${esc(o.v)}</div>`;
+        else if (['list', 'tuple', 'set', 'frozenset'].includes(o.t)) body = o.items.length ? `<div class="tr-seq">${o.items.map((it, i) => `<div class="tr-cell"><div class="tr-cv">${cell(it, heap)}</div>${o.t === 'set' || o.t === 'frozenset' ? '' : `<div class="tr-ix">${i}</div>`}</div>`).join('')}</div>` : '<div class="tr-val muted">empty</div>';
+        else if (o.t === 'dict') body = o.items.length ? `<div class="tr-kv">${o.items.map(([k, v]) => `<div class="tr-k">${cell(k, heap)}</div><div class="tr-v">${cell(v, heap)}</div>`).join('')}</div>` : '<div class="tr-val muted">empty</div>';
+        else if (o.t === 'instance' || o.t === 'class' || o.t === 'generator') body = `${o.t !== 'instance' ? `<div class="tr-val">${esc(o.v)}</div>` : ''}${(o.attrs || []).length ? `<div class="tr-kv">${o.attrs.map(([k, v]) => `<div class="tr-k">${esc(k)}</div><div class="tr-v">${cell(v, heap)}</div>`).join('')}</div>` : ''}`;
+        else body = `<div class="tr-val">${esc(o.v)}</div>`;
+        const tag = o.t === 'instance' ? `${o.cls} object` : o.t;
+        return `<div class="tr-obj ${cls}" data-id="${id}"><div class="tr-tag">${esc(tag)}</div>${body}</div>`;
+      }
+      function visibleIds(st) {
+        const seen = new Set(), order = [];
+        const visit = (v, fromContainer) => {
+          if (!v || v.ref === undefined) return;
+          const o = st.heap[v.ref]; if (!o) return;
+          if (fromContainer && isScalar(o)) return;
+          if (seen.has(v.ref)) return; seen.add(v.ref); order.push(v.ref);
+          (o.items || []).forEach(it => Array.isArray(it) ? it.forEach(x => visit(x, true)) : visit(it, true));
+          (o.attrs || []).forEach(([, x]) => visit(x, true));
+        };
+        st.frames.forEach(f => { f.vars.forEach(([, v]) => visit(v, false)); if (f.ret) visit(f.ret, false); if (f.yield) visit(f.yield, false); });
+        return order.sort((a, b) => a - b);
+      }
+      function draw() {
+        svgG.textContent = '';
+        const box = mem.getBoundingClientRect();
+        const svg = q('.tr-arrows'); svg.setAttribute('width', box.width); svg.setAttribute('height', box.height);
+        mem.querySelectorAll('.tr-ptr').forEach(p => {
+          const t = hbody.querySelector(`.tr-obj[data-id="${p.dataset.ref}"]`);
+          if (!t) return;
+          const a = p.getBoundingClientRect(), b = t.getBoundingClientRect();
+          const x1 = a.left + a.width / 2 - box.left, y1 = a.top + a.height / 2 - box.top;
+          const yT = Math.min(b.top + 15, b.bottom - 6) - box.top;
+          let d;
+          if (b.left - box.left > x1 + 12) { const x2 = b.left - box.left - 1; const mx = (x1 + x2) / 2; d = `M${x1} ${y1} C ${mx} ${y1}, ${mx} ${yT}, ${x2} ${yT}`; }
+          else { const x2 = b.right - box.left + 1; const bend = Math.max(x2, x1) + 30; d = `M${x1} ${y1} C ${bend} ${y1}, ${bend} ${yT}, ${x2} ${yT}`; }
+          K.el('path', { d, class: 'tr-arrow' + (p.classList.contains('chg') ? ' chg' : ''), 'marker-end': `url(#${uid})` }, svgG);
+        });
+      }
+      function show(i) {
+        cur = Math.max(0, Math.min(steps.length - 1, i));
+        const st = steps[cur], prev = steps[cur - 1];
+        root.querySelectorAll('.tr-ln').forEach(el => {
+          const n = +el.dataset.n;
+          el.classList.toggle('next', st.line === n);
+          el.classList.toggle('ran', st.ran === n && st.line !== n);
+        });
+        const nextEl = root.querySelector('.tr-ln.next');
+        const codeBox = q('.tr-code');
+        if (nextEl && (nextEl.offsetTop < codeBox.scrollTop || nextEl.offsetTop > codeBox.scrollTop + codeBox.clientHeight - 30)) codeBox.scrollTop = nextEl.offsetTop - 40;
+        const prevVar = {};
+        if (prev) prev.frames.forEach((f, fi) => f.vars.forEach(([k, v]) => { prevVar[f.name + fi + ':' + k] = JSON.stringify(v); }));
+        fbody.innerHTML = st.frames.map((f, fi) => `<div class="tr-frame${fi === st.frames.length - 1 ? ' active' : ''}"><div class="tr-fname">${esc(f.name)}</div>${f.vars.length || f.ret || f.yield || f.raising ? '' : '<div class="tr-empty">no names yet</div>'}${f.vars.map(([k, v]) => {
+          const chg = !!prev && prevVar[f.name + fi + ':' + k] !== JSON.stringify(v);
+          const c = v.p !== undefined ? `<span class="tr-prim">${esc(v.p)}</span>` : `<span class="tr-ptr${chg ? ' chg' : ''}" data-ref="${v.ref}"></span>`;
+          return `<div class="tr-var${chg ? ' chg' : ''}"><span class="tr-name">${esc(k)}</span>${c}</div>`;
+        }).join('')}${[['ret', 'return value'], ['yield', 'yielded value']].map(([key, label]) => f[key] ? `<div class="tr-var ret"><span class="tr-name">${label}</span>${f[key].p !== undefined ? `<span class="tr-prim">${esc(f[key].p)}</span>` : `<span class="tr-ptr chg" data-ref="${f[key].ref}"></span>`}</div>` : '').join('')}${f.raising ? '<div class="tr-var ret raising"><span class="tr-name">no return value: exception passing up ↑</span></div>' : ''}</div>`).join('');
+        const ids = visibleIds(st);
+        const prevIds = prev ? visibleIds(prev) : [];
+        const ghosts = prevIds.filter(id => !ids.includes(id) && prev.heap[id]);
+        hbody.innerHTML = ids.map(id => objHtml(id, st.heap[id], st.heap, prev && !prevIds.includes(id) ? 'new' : (prev && JSON.stringify(prev.heap[id]) !== JSON.stringify(st.heap[id]) ? 'chg' : ''))).join('')
+          + ghosts.map(id => objHtml('g' + id, prev.heap[id], prev.heap, 'ghost')).join('')
+          + (ids.length || ghosts.length ? '' : '<div class="tr-empty">no objects yet</div>');
+        hbody.querySelectorAll('.tr-obj.ghost .tr-ptr').forEach(p => p.remove());
+        hbody.querySelectorAll('.tr-obj.ghost').forEach(g => g.insertAdjacentHTML('beforeend', '<div class="tr-gnote">no names point here → freed</div>'));
+        let out = esc(st.out || '');
+        if (st.exc) out = st.event === 'end' ? out.replace(esc(st.exc), `<span class="tr-exc">${esc(st.exc)}</span>`) : out + `<span class="tr-exc">${esc(st.exc)} raised here</span>`;
+        outPre.innerHTML = out;
+        outPre.parentElement.classList.toggle('empty', !st.out && !st.exc);
+        if (opts.controls) {
+          const r = q('.tr-ctl input'); r.max = steps.length - 1; r.value = cur;
+          q('.tr-count').textContent = `Step ${cur + 1} / ${steps.length}`;
+          q('[data-t=prev]').disabled = cur === 0; q('[data-t=next]').disabled = cur === steps.length - 1;
+        }
+        requestAnimationFrame(draw);
+        if (opts.onStep) opts.onStep(cur, st);
+      }
+      if (opts.controls) {
+        q('[data-t=prev]').addEventListener('click', () => show(cur - 1));
+        q('[data-t=next]').addEventListener('click', () => show(cur + 1));
+        q('.tr-ctl input').addEventListener('input', e => show(+e.target.value));
+      }
+      if (window.ResizeObserver) new ResizeObserver(() => requestAnimationFrame(draw)).observe(root);
+      show(0);
+      return { show, steps, get n() { return steps.length; }, get cur() { return cur; } };
+    },
+
+    /** load Pyodide + the tracer once (on demand); resolves to the pyodide instance */
+    loadPython(onStatus) {
+      if (K._py) return K._py;
+      const PYODIDE = 'https://cdn.jsdelivr.net/pyodide/v314.0.7/full/';
+      const add = src => new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('Could not load ' + src)); document.head.appendChild(s); });
+      K._py = (async () => {
+        onStatus && onStatus('Loading Python in your browser (about 10 MB, first time only)…');
+        if (!window.PYTRACE_SRC) await add(K.assetBase + 'pytrace-src.js');
+        if (!window.loadPyodide) await add(PYODIDE + 'pyodide.js');
+        const py = await window.loadPyodide({ indexURL: PYODIDE });
+        py.runPython(window.PYTRACE_SRC.replace(/\nif __name__ == "__main__":[\s\S]*$/, '\n'));
+        return py;
+      })();
+      K._py.catch(() => { K._py = null; });
+      return K._py;
+    },
+
+    /** "Edit and run" box: textarea + Run / Step through, executed with Pyodide */
+    pyRunner(root, opts = {}) {
+      const esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const starters = opts.starters || [{ label: 'Example', code: opts.code || 'print("Hello")' }];
+      root.classList.add('runner');
+      root.innerHTML = `
+        <div class="rn-bar">
+          <label class="rn-pick">Start from <select>${starters.map((s, i) => `<option value="${i}">${esc(s.label)}</option>`).join('')}</select></label>
+          <div class="rn-btns"><button class="btn primary" type="button" data-r="run">Run ▶</button><button class="btn" type="button" data-r="step">Step through</button><button class="btn" type="button" data-r="reset">Reset</button></div>
+        </div>
+        <textarea class="rn-code" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Python code"></textarea>
+        <details class="rn-inputs"><summary>Values for input() (one per line)</summary><textarea class="rn-in" rows="3" spellcheck="false" aria-label="Input values"></textarea></details>
+        <div class="rn-status" aria-live="polite">Edit the code, then Run. Python runs in your browser; nothing is sent anywhere.</div>
+        <pre class="rn-out" hidden></pre>
+        <div class="rn-trace"></div>`;
+      const q = s => root.querySelector(s);
+      const ta = q('.rn-code'), sel = q('select'), status = q('.rn-status'), out = q('.rn-out'), trBox = q('.rn-trace');
+      const load = i => { ta.value = starters[i].code; q('.rn-in').value = (starters[i].inputs || []).join('\n'); out.hidden = true; trBox.innerHTML = ''; fit(); };
+      const fit = () => { ta.style.height = 'auto'; ta.style.height = Math.min(520, ta.scrollHeight + 4) + 'px'; };
+      ta.addEventListener('input', fit);
+      ta.addEventListener('keydown', e => {
+        if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); const s = ta.selectionStart; ta.setRangeText('    ', s, ta.selectionEnd, 'end'); fit(); }
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); go(false); }
+      });
+      sel.addEventListener('change', () => load(+sel.value));
+      async function go(step) {
+        root.querySelectorAll('.rn-btns button').forEach(b => b.disabled = true);
+        try {
+          const py = await K.loadPython(m => { status.textContent = m; });
+          status.textContent = 'Running…';
+          await new Promise(r => setTimeout(r, 20));
+          py.globals.set('RN_CODE', ta.value.replace(/\t/g, '    '));
+          py.globals.set('RN_IN', q('.rn-in').value);
+          const json = py.runPython('import json\njson.dumps(Recorder(RN_CODE, [x for x in RN_IN.split("\\n")] if RN_IN else [], max_steps=2000).run())');
+          const tr = JSON.parse(json);
+          const last = tr.steps[tr.steps.length - 1];
+          out.hidden = false;
+          out.innerHTML = last.out ? esc(last.out).replace(last.exc ? esc(last.exc) : '\u0000', m => `<span class="tr-exc">${m}</span>`) : '<span class="muted">(no output)</span>';
+          status.innerHTML = (last.exc ? `<span class="bad-text">Stopped with an error.</span> ` : `<span class="ok-text">Done.</span> `) + `Python ${esc(tr.python)} · ${tr.steps.length} steps` + (step ? '' : ' · press <b>Step through</b> to watch it run line by line');
+          trBox.innerHTML = '';
+          if (step) { const d = document.createElement('div'); trBox.appendChild(d); K.trace(d, tr, { controls: true }); }
+        } catch (e) {
+          status.innerHTML = `<span class="bad-text">Couldn't start Python.</span> ${esc(e.message || e)}. Check your internet connection; the rest of the page works without it.`;
+        } finally {
+          root.querySelectorAll('.rn-btns button').forEach(b => b.disabled = false);
+        }
+      }
+      root.addEventListener('click', e => {
+        const b = e.target.closest('[data-r]'); if (!b) return;
+        if (b.dataset.r === 'run') go(false);
+        if (b.dataset.r === 'step') go(true);
+        if (b.dataset.r === 'reset') load(+sel.value);
+      });
+      load(0);
+      return { load, run: () => go(false), step: () => go(true) };
+    },
+
     /** narrated walkthrough; see header */
-    story({ root, steps, show }) {
+    story({ root, steps, show, tipLabel = 'Exam tip' }) {
       const ch = 'story-' + (root.id || Math.random().toString(36).slice(2));
       const cap = document.createElement('div');
       cap.className = 'story-cap';
@@ -177,7 +401,7 @@
         $c('.count').textContent = `Step ${cur + 1} of ${steps.length}`;
         $c('h3').innerHTML = st.title;
         $c('.txt').innerHTML = st.text;
-        const tip = $c('.tip'); tip.hidden = !st.tip; tip.innerHTML = st.tip ? '<b>Exam tip:</b> ' + st.tip : '';
+        const tip = $c('.tip'); tip.hidden = !st.tip; tip.innerHTML = st.tip ? `<b>${tipLabel}:</b> ` + st.tip : '';
         $c('[data-a=back]').disabled = cur === 0;
         $c('[data-a=next]').textContent = cur === steps.length - 1 ? 'Start again ↺' : 'Next ▶';
         $c('[data-a=auto]').textContent = auto ? 'Stop' : 'Play all';

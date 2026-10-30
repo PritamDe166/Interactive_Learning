@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Files, CSV &amp; JSON</title>
+<meta name="description" content="Python fundamentals: open() modes, the with statement, reading line by line, csv.reader and DictReader, csv.writer, and converting between Python objects and JSON.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<script src="traces/files-csv-json.js"></script>
+<style>
+  .static-code { margin: 0; }
+  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
+  .tp-file { margin-top: 12px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--code-bg); padding: 10px 12px; }
+  .tp-name { font-size: 13px; color: var(--accent-text); margin-bottom: 8px; }
+  .tp-tape { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; min-height: 36px; font-size: 16px; }
+  .tp-ch { padding: 3px 5px; border-radius: 4px; background: var(--panel-2); }
+  .tp-ch.nl { color: var(--cyan); font-size: 12px; }
+  .tp-cur { width: 3px; height: 26px; background: var(--accent-text); border-radius: 2px; animation: blink 1s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: .2; } }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Python Fundamentals</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Python · Topic 11 · Real programs</div>
+    <h1>Files, CSV &amp; JSON</h1>
+    <ul class="lede"><li><span class="mono">open(path, mode)</span> returns a <b>file object</b>. Mode <b>"r"</b> reads, <b>"w"</b> <b>erases</b> then writes, <b>"a"</b> appends to the end.</li><li>Always use <span class="mono">with open(...) as f:</span>. The file is <b>closed automatically</b> when the block ends, even after an error.</li><li>Pass <span class="mono">encoding="utf-8"</span>, and <span class="mono">newline=""</span> for CSV files.</li><li><b>csv.DictReader</b> turns each row into a dict keyed by the header. Values are always <b>strings</b>.</li><li><b>json</b>: <span class="mono">dump/load</span> work with files, <span class="mono">dumps/loads</span> with strings (the s is for string).</li></ul>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: a day's appointments on disk</h2>
+    <div class="stage-kind">Real trace of real code · Next ▶ moves one idea at a time</div>
+    <div class="story wide" id="pageStory">
+      <div id="pageTrace"></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Run and change the code, predict before you peek, and try to break things.</p>
+
+  <section aria-labelledby="runH">
+    <h2 class="stage-title" id="runH">Edit and run</h2>
+    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div id="runner"></div>
+  </section>
+
+  <section aria-labelledby="predH">
+    <h2 class="stage-title" id="predH">Predict the output</h2>
+    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="chips" id="pzChips"></div>
+    <div class="puzzle-area" id="pzArea"></div>
+  </section>
+
+  <section aria-labelledby="tapeH">
+    <h2 class="stage-title" id="tapeH">The file and its cursor</h2>
+    <div class="stage-kind">Open in a mode, then write or read · watch the contents and the cursor</div>
+    <div class="chips" id="tpBtns">
+      <button class="chip-btn mono" type="button" data-a="w">open("notes.txt", "w")</button>
+      <button class="chip-btn mono" type="button" data-a="a">open("notes.txt", "a")</button>
+      <button class="chip-btn mono" type="button" data-a="r">open("notes.txt", "r")</button>
+      <button class="chip-btn mono" type="button" data-a="write">f.write("Ravi\n")</button>
+      <button class="chip-btn mono" type="button" data-a="readline">f.readline()</button>
+      <button class="chip-btn mono" type="button" data-a="read">f.read()</button>
+      <button class="chip-btn mono" type="button" data-a="close">end of with (close)</button>
+    </div>
+    <div class="tp-file"><div class="tp-name mono">notes.txt <span id="tpState" class="muted">closed</span></div><div class="tp-tape mono" id="tpTape"></div></div>
+    <p class="status-line" id="tpStatus">The file starts with two lines. Open it first.</p>
+  </section>
+
+  <section aria-labelledby="pjH">
+    <h2 class="stage-title" id="pjH">Python ⇄ JSON</h2>
+    <div class="stage-kind">json.dumps then json.loads · results from real Python</div>
+    <div class="scroll card table-card"><table><thead><tr><th>Python object</th><th>json.dumps(obj)</th><th>json.loads(...) back</th></tr></thead><tbody id="pjBody"></tbody></table></div>
+    <p class="status-line">Round trips aren't always exact: tuples come back as lists and int keys as strings.</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Read a text file</span><span class="arrow">→</span><span class="then"><span class="mono">with open(p, encoding="utf-8") as f: for line in f:</span></span></li>
+      <li><span class="if">Add to a file without losing it</span><span class="arrow">→</span><span class="then">Mode <span class="mono">"a"</span>; <span class="mono">"w"</span> erases</span></li>
+      <li><span class="if">CSV with a header row</span><span class="arrow">→</span><span class="then"><span class="mono">csv.DictReader</span> / <span class="mono">csv.DictWriter</span>, and <span class="mono">newline=""</span></span></li>
+      <li><span class="if">Numbers from CSV</span><span class="arrow">→</span><span class="then">Convert: <span class="mono">int(row["fee"])</span></span></li>
+      <li><span class="if">Save / load settings or API data</span><span class="arrow">→</span><span class="then"><span class="mono">json.dump(obj, f, indent=2)</span> / <span class="mono">json.load(f)</span></span></li>
+      <li><span class="if">JSON in a string (e.g. an HTTP body)</span><span class="arrow">→</span><span class="then"><span class="mono">json.loads(text)</span> / <span class="mono">json.dumps(obj)</span></span></li>
+      <li><span class="if">Paths that work from any folder</span><span class="arrow">→</span><span class="then"><span class="mono">Path(__file__).parent / "data" / "notes.txt"</span> (pathlib)</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: open() modes</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Mode</th><th>If the file exists</th><th>If it doesn't</th><th>Cursor starts</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">"r"</td><td>read it</td><td>FileNotFoundError</td><td>start</td></tr>
+          <tr><td class="mono">"w"</td><td><b>emptied</b>, then write</td><td>created</td><td>start</td></tr>
+          <tr><td class="mono">"a"</td><td>kept; writes go to the end</td><td>created</td><td>end</td></tr>
+          <tr><td class="mono">"x"</td><td>FileExistsError</td><td>created</td><td>start</td></tr>
+          <tr><td class="mono">"r+"</td><td>read and write</td><td>FileNotFoundError</td><td>start</td></tr>
+          <tr><td class="mono">add "b"</td><td colspan="3">binary (bytes), e.g. <span class="mono">"rb"</span> for images and PDFs; no encoding</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>file_read_write_using_Open.py</b> opens <span class="mono">notes.txt</span> with <span class="mono">"w"</span>, which <b>erases</b> the notes the other scripts wrote and replaces them with one line. Easy to lose data this way: use "a", or write to a new file.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>csv_read.py, ReadCsvHeaders:</b> <span class="mono">for row in header</span> loops over the <b>column names</b> of the header row, not rows. Name it <span class="mono">for column in header</span>.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>Paths:</b> every script uses <span class="mono">"File read and write/files repository/..."</span>, which only works when you run Python from the repo root. Build the path from the script's location with <span class="mono">pathlib.Path(__file__).parent</span>.</p></div>
+      <div class="note"><span class="flag add">Updated</span><p><b>Encoding:</b> none of the repo's open() calls pass <span class="mono">encoding=</span>. Before Python 3.15 the default depended on the OS (often cp1252 on Windows), so non-English names could break. Python 3.15 (Oct 2026) makes UTF-8 the default (PEP 686), but passing <span class="mono">encoding="utf-8"</span> keeps code correct on older versions too.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Naming:</b> functions like <span class="mono">ReadCsvAsDictionaries</span> use PascalCase; PEP 8 uses snake_case for functions (<span class="mono">read_csv_as_dicts</span>) and PascalCase for classes.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Say the answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>What does <span class="mono">with</span> guarantee?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>The file is <b>closed</b> when the block ends, whether it ends normally, with return, or with an exception. It's a <b>context manager</b> (its own page in Part 5).</p></div></details>
+      <details><summary><span class="mono">import json; print(json.loads('[1, "a", null]'))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">[1, 'a', None]</b>. JSON null becomes None.</p></div></details>
+      <details><summary><span class="mono">import csv, io\nprint(next(csv.reader(io.StringIO('a,"b,c",d'))))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">['a', 'b,c', 'd']</b>. The csv module handles quoted commas; <span class="mono">split(",")</span> wouldn't.</p></div></details>
+      <details><summary><span class="mono">import json; print(json.dumps({"b": 1, "a": 2}, sort_keys=True))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">{"a": 2, "b": 1}</b>. sort_keys gives stable output, handy for diffs and tests.</p></div></details>
+      <details><summary><span class="mono">open("missing.txt")</span> raises…?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">FileNotFoundError</b>. Catch it with try/except, or check <span class="mono">Path(p).exists()</span> first.</p></div></details>
+      <details><summary><span class="mono">import io; f = io.StringIO("a\nb\n"); print([l.strip() for l in f])</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">['a', 'b']</b>. Iterating a file-like object gives lines.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Every trace and output on this page was produced by running the code (Python 3.13; the same results on Python 3.15). The edit-and-run box runs real Python 3.14 in your browser with Pyodide. Sources: Python_Fundamentals repo (File read and write/*.py). Python 3.15 UTF-8 default from PEP 686 / What's New in Python 3.15.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const T = window.TRACES['files-csv-json'];
+
+  /* ========== Walkthrough ========== */
+  const tr = K.trace($('pageTrace'), T.walk, {});
+  const MAP = [2, 4, 7, 15, 20, 23, 25, 35, 37];
+  const STEPS = [{"title": "open in \"w\" mode", "text": "<span class=\"mono\">\"w\"</span> creates <span class=\"mono\">notes.txt</span>, or <b>empties it</b> if it already exists. <span class=\"mono\">f</span> is the file object; <span class=\"mono\">with</span> will close it for us."}, {"title": "write() doesn't add newlines", "text": "Each <span class=\"mono\">write</span> appends text at the cursor. You add <span class=\"mono\">\\n</span> yourself; print() adds it for you, write() never does."}, {"title": "The with block ended: file closed", "text": "Leaving the block closed the first file. Reopening with <span class=\"mono\">\"a\"</span> puts the cursor at the <b>end</b>, so Meera is added after the existing lines."}, {"title": "Read line by line", "text": "Looping over a file gives one line at a time, <b>including</b> its <span class=\"mono\">\\n</span>, so <span class=\"mono\">strip()</span> removes it. This uses little memory even for huge files.", "tip": "<span class=\"mono\">f.read()</span> gives the whole file as one string; <span class=\"mono\">f.readlines()</span> a list of lines."}, {"title": "csv.writer writes rows", "text": "<span class=\"mono\">writerows</span> takes a list of lists and handles commas and quoting for you. <span class=\"mono\">newline=\"\"</span> stops blank lines appearing between rows on Windows."}, {"title": "DictReader: rows become dicts", "text": "<span class=\"mono\">DictReader</span> uses the first row as keys. <span class=\"mono\">rows</span> is now a list of dicts, one per patient. Notice <span class=\"mono\">'450'</span> is a <b>string</b>: CSV has no types."}, {"title": "Convert before doing maths", "text": "<span class=\"mono\">int(r[\"fee\"])</span> converts each fee; the generator expression feeds sum(): 1250."}, {"title": "json.dumps: Python → JSON text", "text": "<span class=\"mono\">dumps</span> turns dicts and lists into one <b>string</b> of JSON, ready to save or send to an API. <span class=\"mono\">json.dump(obj, f)</span> writes it straight to a file."}, {"title": "json.loads: JSON text → Python", "text": "<span class=\"mono\">loads</span> parses the string back into new dicts and lists, so you can index into it: <span class=\"mono\">data[\"visits\"][1][\"name\"]</span> → Ravi."}];
+  STEPS.forEach((st, i) => {
+    if (i === 0) return;
+    st.play = async run => { for (let k = MAP[i - 1] + 1; k <= MAP[i]; k++) { tr.show(k); if (k < MAP[i]) await K.sleep(Math.max(150, Math.min(600, 4800 / (MAP[i] - MAP[i - 1]))), run); } };
+  });
+  K.story({ root: $('pageStory'), steps: STEPS, show: i => tr.show(MAP[i]), tipLabel: 'Tip' });
+
+  /* ========== Edit and run ========== */
+  K.pyRunner($('runner'), { starters: [{"label": "Walkthrough code", "code": "import csv, json\nwith open(\"notes.txt\", \"w\", encoding=\"utf-8\") as f:\n    f.write(\"Asha 9:00\\n\")\n    f.write(\"Ravi 9:30\\n\")\nwith open(\"notes.txt\", \"a\", encoding=\"utf-8\") as f:\n    f.write(\"Meera 10:00\\n\")\nwith open(\"notes.txt\", encoding=\"utf-8\") as f:\n    for line in f:\n        print(line.strip())\nwith open(\"visits.csv\", \"w\", newline=\"\", encoding=\"utf-8\") as f:\n    w = csv.writer(f)\n    w.writerows([[\"name\", \"fee\"], [\"Asha\", \"450\"], [\"Ravi\", \"800\"]])\nwith open(\"visits.csv\", newline=\"\", encoding=\"utf-8\") as f:\n    rows = list(csv.DictReader(f))\nprint(rows[0], sum(int(r[\"fee\"]) for r in rows))\ntext = json.dumps({\"clinic\": \"Pune\", \"visits\": rows})\ndata = json.loads(text)\nprint(data[\"visits\"][1][\"name\"], type(text).__name__)", "inputs": []}, {"label": "Puzzle 1: \"w\" twice", "code": "with open(\"log.txt\", \"w\") as f:\n    f.write(\"one\\n\")\nwith open(\"log.txt\", \"w\") as f:\n    f.write(\"two\\n\")\nwith open(\"log.txt\") as f:\n    print(f.read().strip())", "inputs": []}, {"label": "Puzzle 2: write without newline", "code": "with open(\"a.txt\", \"w\") as f:\n    f.write(\"Asha\")\n    f.write(\"Ravi\")\nwith open(\"a.txt\") as f:\n    print(f.readlines())", "inputs": []}, {"label": "Puzzle 3: CSV numbers", "code": "import csv, io\nf = io.StringIO(\"name,fee\\nAsha,450\\nRavi,800\\n\")\nrows = list(csv.DictReader(f))\nprint(rows[0][\"fee\"] + rows[1][\"fee\"])", "inputs": []}, {"label": "Puzzle 4: reading twice", "code": "with open(\"n.txt\", \"w\") as f:\n    f.write(\"x\\ny\\n\")\nwith open(\"n.txt\") as f:\n    print(len(f.read()), len(f.read()))", "inputs": []}, {"label": "Puzzle 5: JSON types", "code": "import json\nprint(json.dumps({\"ok\": True, \"phone\": None, \"slot\": (9, 30)}))", "inputs": []}, {"label": "Puzzle 6: int keys", "code": "import json\nd = json.loads(json.dumps({1: \"one\"}))\nprint(d, 1 in d)", "inputs": []}, {"label": "Your turn: average fee per patient", "code": "import csv, io\ndata = io.StringIO(\"name,fee\\nAsha,450\\nRavi,800\\nAsha,300\\n\")\ntotals = {}\nfor row in csv.DictReader(data):\n    totals[row[\"name\"]] = totals.get(row[\"name\"], 0) + int(row[\"fee\"])\nprint(totals)\n# Try: write totals to \"totals.json\" with json.dump, then read it back"}] });
+
+  /* ========== Predict the output ========== */
+  const PZ = [{"id": "p1", "name": "1 · \"w\" twice", "q": "What's printed?", "opts": ["one / two", "two", "one"], "a": 1, "why": "Each <span class=\"mono\">\"w\"</span> open empties the file first. Use <span class=\"mono\">\"a\"</span> to keep what's there."}, {"id": "p2", "name": "2 · write without newline", "q": "What's printed?", "opts": ["['Asha', 'Ravi']", "['AshaRavi']", "['Asha\\n', 'Ravi\\n']"], "a": 1, "why": "write() writes exactly what you give it. Without <span class=\"mono\">\\n</span> it's all one line."}, {"id": "p3", "name": "3 · CSV numbers", "q": "What's printed?", "opts": ["1250", "450800", "TypeError"], "a": 1, "why": "Everything from CSV is a string, so + joins text. Convert with int() first. (<span class=\"mono\">io.StringIO</span> is an in-memory file, handy for testing.)"}, {"id": "p4", "name": "4 · reading twice", "q": "What's printed?", "opts": ["4 4", "4 0", "2 0"], "a": 1, "why": "The first read() moves the cursor to the end; the second has nothing left. Use <span class=\"mono\">f.seek(0)</span> to rewind."}, {"id": "p5", "name": "5 · JSON types", "q": "What's printed?", "opts": ["{'ok': True, 'phone': None, 'slot': (9, 30)}", "{\"ok\": true, \"phone\": null, \"slot\": [9, 30]}", "TypeError: tuple is not JSON serializable"], "a": 1, "why": "JSON spells them <span class=\"mono\">true</span> and <span class=\"mono\">null</span>, uses double quotes, and has no tuples: they become arrays (lists)."}, {"id": "p6", "name": "6 · int keys", "q": "What's printed?", "opts": ["{1: 'one'} True", "{'1': 'one'} False", "TypeError"], "a": 1, "why": "JSON object keys are always strings, so int keys come back as <span class=\"mono\">'1'</span>."}];
+  $('pzChips').innerHTML = PZ.map((p, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${p.name}</button>`).join('');
+  function puzzle(i) {
+    const p = PZ[i], area = $('pzArea');
+    area.innerHTML = `<div class="two">
+        <div><pre class="codeblock static-code">${T[p.id].code.split('\n').map(l => `<span class="ln">${K.pyHighlight(l) || ' '}</span>`).join('')}</pre></div>
+        <div class="card predict"><div class="q">${p.q}</div><div class="opts">${p.opts.map((o, j) => `<button class="chip-btn" type="button" data-j="${j}">${o.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</button>`).join('')}</div><p class="status-line" style="text-align:left;margin:0" id="pzVerdict">Choose an answer to unlock the step-through.</p></div>
+      </div><div id="pzTrace"></div>`;
+    area.querySelectorAll('.predict .chip-btn').forEach(b => b.addEventListener('click', () => {
+      const j = +b.dataset.j, ok = j === p.a;
+      area.querySelectorAll('.predict .chip-btn').forEach((x, xj) => { x.disabled = true; x.classList.toggle('right', xj === p.a); x.classList.toggle('wrong', xj === j && !ok); });
+      $('pzVerdict').innerHTML = `<span class="${ok ? 'ok-text' : 'bad-text'}">${ok ? 'Correct.' : 'Not quite.'}</span> ${p.why} <b>Step through below to watch it happen.</b>`;
+      K.trace($('pzTrace'), T[p.id], { controls: true });
+    }));
+  }
+  $('pzChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('pzChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    puzzle(+b.dataset.i);
+  }));
+  $('pzChips').querySelector('button').click();
+
+  /* ===== The file and its cursor ===== */
+  (function () {
+    let content = 'Asha\nMeera\n', mode = null, pos = 0;
+    const show = () => {
+      const chars = [...content];
+      $('tpTape').innerHTML = chars.map((c, i) => `${i === pos && mode ? '<span class="tp-cur"></span>' : ''}<span class="tp-ch${c === '\n' ? ' nl' : ''}">${c === '\n' ? '\\n' : c}</span>`).join('') + (pos >= chars.length && mode ? '<span class="tp-cur"></span>' : '') + (chars.length ? '' : '<span class="muted">(empty file)</span>');
+      $('tpState').textContent = mode ? `open in "${mode}" mode · cursor at ${pos}` : 'closed';
+    };
+    const say = h => { $('tpStatus').innerHTML = h; };
+    const lit = s => JSON.stringify(s);
+    $('tpBtns').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      const a = b.dataset.a;
+      if (['w', 'a', 'r'].includes(a)) {
+        if (mode) { say('Close the file first (end the <span class="mono">with</span> block).'); return; }
+        mode = a;
+        if (a === 'w') { content = ''; pos = 0; say('<b>"w"</b> emptied the file straight away, before writing anything.'); }
+        if (a === 'a') { pos = content.length; say('<b>"a"</b> keeps the contents; every write goes to the end.'); }
+        if (a === 'r') { pos = 0; say('<b>"r"</b> starts reading at the beginning. Writing is not allowed.'); }
+      } else if (!mode) { say('<span class="bad-text">ValueError: I/O operation on closed file.</span> Open it first.'); return; }
+      else if (a === 'write') {
+        if (mode === 'r') { say('<span class="bad-text">io.UnsupportedOperation: not writable</span> · a file opened with "r" is read-only.'); return; }
+        if (mode === 'a') pos = content.length;
+        content = content.slice(0, pos) + 'Ravi\n' + content.slice(pos + 5); pos += 5; say('write() returned <b class="mono">5</b> (characters written). Cursor moved past them.');
+      } else if (a === 'readline' || a === 'read') {
+        if (mode !== 'r') { say('<span class="bad-text">io.UnsupportedOperation: not readable</span> · open with "r" to read.'); return; }
+        let end = a === 'read' ? content.length : (content.indexOf('\n', pos) < 0 ? content.length : content.indexOf('\n', pos) + 1);
+        const got = content.slice(pos, end); pos = end;
+        say(`returned <b class="mono">${lit(got)}</b>` + (got === '' ? ' · empty string: you are at the end of the file.' : a === 'readline' ? ' · one line, including its \\n.' : ' · everything from the cursor to the end.'));
+      } else if (a === 'close') { mode = null; pos = 0; say('Closed. <span class="mono">with</span> does this automatically, even if an exception happens inside the block.'); }
+      show();
+    }));
+    show();
+  })();
+  /* ===== Python ⇄ JSON ===== */
+  (function () {
+    const JS = [{"py": "{\"name\": \"Asha\", \"age\": 35}", "json": "{\"name\": \"Asha\", \"age\": 35}", "back": "{'name': 'Asha', 'age': 35}"}, {"py": "{\"active\": True, \"phone\": None}", "json": "{\"active\": true, \"phone\": null}", "back": "{'active': True, 'phone': None}"}, {"py": "{\"slot\": (9, 30)}", "json": "{\"slot\": [9, 30]}", "back": "{'slot': [9, 30]}"}, {"py": "{1: \"one\", 2: \"two\"}", "json": "{\"1\": \"one\", \"2\": \"two\"}", "back": "{'1': 'one', '2': 'two'}"}, {"py": "{\"fee\": 450.5, \"tags\": [\"new\", \"vip\"]}", "json": "{\"fee\": 450.5, \"tags\": [\"new\", \"vip\"]}", "back": "{'fee': 450.5, 'tags': ['new', 'vip']}"}, {"py": "{\"name\": \"Zoë\"}", "json": "{\"name\": \"Zo\\u00eb\"}", "back": "{'name': 'Zoë'}"}, {"py": "{\"ids\": {1, 2}}", "json": "TypeError: Object of type set is not JSON serializable", "back": ""}];
+    const e = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    $('pjBody').innerHTML = JS.map(r => `<tr><td class="mono">${e(r.py)}</td><td class="mono ${r.json.startsWith('TypeError') ? 'bad-text' : ''}">${e(r.json)}</td><td class="mono">${e(r.back) || '—'}</td></tr>`).join('');
+  })();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Collections: list, tuple, set, dict</title>
+<meta name="description" content="Python fundamentals: lists, tuples, sets and dictionaries drawn as objects in memory, with indexing, unpacking, set operations and dict lookups.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<script src="traces/collections.js"></script>
+<style>
+  .static-code { margin: 0; }
+  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
+  .lb-list { display: flex; flex-wrap: wrap; gap: 0; min-height: 64px; }
+  .lb-cell { border: 1.5px solid var(--line); margin-left: -1.5px; min-width: 56px; text-align: center; background: var(--panel-2); padding: 8px 6px 4px; display: grid; }
+  .lb-cell b { font-family: var(--mono); font-size: 20px; }
+  .lb-cell span { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .lb-cell.chg { animation: lbpop .35s ease-out; border-color: var(--cyan); }
+  @keyframes lbpop { from { transform: translateY(-6px); opacity: .3; } to { transform: none; opacity: 1; } }
+  .vn-c { fill: none; stroke: var(--fg-soft); stroke-width: 2; }
+  .vn-reg { fill: transparent; transition: fill .3s; }
+  .vn-reg.on { fill: var(--teal-wash); }
+  .vn-t { font-family: var(--mono); font-size: 15px; fill: var(--accent-text); }
+  .vn-n { font-family: var(--mono); font-size: 15px; fill: var(--fg); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Python Fundamentals</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Python · Topic 5 · Control flow and data</div>
+    <h1>Collections: list, tuple, set, dict</h1>
+    <ul class="lede"><li><b>list</b> <span class="mono">[ ]</span>: ordered, changeable, duplicates allowed. The everyday container.</li><li><b>tuple</b> <span class="mono">( )</span>: ordered but <b>fixed</b>. Good for records like (lat, lon) and for unpacking.</li><li><b>set</b> <span class="mono">{ }</span>: no order, <b>no duplicates</b>, very fast <span class="mono">in</span> checks, maths like union and intersection.</li><li><b>dict</b> <span class="mono">{key: value}</span>: look things up by key. Keys are unique; insertion order is kept.</li></ul>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: four containers for one clinic</h2>
+    <div class="stage-kind">Real trace of real code · Next ▶ moves one idea at a time</div>
+    <div class="story wide" id="pageStory">
+      <div id="pageTrace"></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Run and change the code, predict before you peek, and try to break things.</p>
+
+  <section aria-labelledby="runH">
+    <h2 class="stage-title" id="runH">Edit and run</h2>
+    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div id="runner"></div>
+  </section>
+
+  <section aria-labelledby="predH">
+    <h2 class="stage-title" id="predH">Predict the output</h2>
+    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="chips" id="pzChips"></div>
+    <div class="puzzle-area" id="pzArea"></div>
+  </section>
+
+  <section aria-labelledby="lbH">
+    <h2 class="stage-title" id="lbH">List operations bench</h2>
+    <div class="stage-kind">Click an operation · see the list change and what the call returns</div>
+    <div class="lb-list" id="lbList" aria-live="polite"></div>
+    <div class="chips" id="lbOps" style="margin-top:10px"></div>
+    <div class="card" style="margin-top:10px"><pre class="codeblock" id="lbCode" style="min-height:0;margin:0"></pre><p class="status-line" id="lbStatus" style="text-align:left;margin:8px 0 0">Pick an operation.</p></div>
+  </section>
+
+  <section aria-labelledby="vennH">
+    <h2 class="stage-title" id="vennH">Set operations</h2>
+    <div class="stage-kind">Two clinics' patient sets · pick an operator to light up the result</div>
+    <div class="scroll"><svg class="diagram narrow" id="vnSvg" viewBox="0 0 560 260" style="min-width:520px;max-width:600px;margin:0 auto;display:block" role="img" aria-label="Venn diagram of clinic A and clinic B patients">
+      <path id="vnL" class="vn-reg" d=""></path><path id="vnM" class="vn-reg" d=""></path><path id="vnR" class="vn-reg" d=""></path>
+      <circle cx="220" cy="135" r="105" class="vn-c"></circle><circle cx="340" cy="135" r="105" class="vn-c"></circle>
+      <text x="150" y="26" class="vn-t">clinic_a</text><text x="370" y="26" class="vn-t">clinic_b</text>
+      <text x="165" y="115" class="vn-n">Asha</text><text x="160" y="160" class="vn-n">Meera</text>
+      <text x="280" y="115" class="vn-n" style="text-anchor:middle">Ravi</text><text x="280" y="160" class="vn-n" style="text-anchor:middle">John</text>
+      <text x="370" y="140" class="vn-n">Lina</text>
+    </svg></div>
+    <div class="seg" id="vnSeg" role="group" aria-label="Set operator"><button type="button" data-v="&amp;" aria-pressed="false">a &amp; b</button><button type="button" data-v="|" aria-pressed="false">a | b</button><button type="button" data-v="-" aria-pressed="false">a - b</button><button type="button" data-v="^" aria-pressed="false">a ^ b</button></div>
+    <p class="status-line" id="vnStatus">clinic_a = {"Asha", "Ravi", "Meera", "John"} · clinic_b = {"Ravi", "John", "Lina"}</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Ordered items you'll add to or change</span><span class="arrow">→</span><span class="then"><b>list</b></span></li>
+      <li><span class="if">A fixed record / return several values</span><span class="arrow">→</span><span class="then"><b>tuple</b> and unpacking</span></li>
+      <li><span class="if">Remove duplicates or fast "is it in there?"</span><span class="arrow">→</span><span class="then"><b>set</b> (<span class="mono">x in s</span>)</span></li>
+      <li><span class="if">Look up by a name or id</span><span class="arrow">→</span><span class="then"><b>dict</b>; <span class="mono">d.get(k, default)</span> when the key may be missing</span></li>
+      <li><span class="if">Copy, don't alias</span><span class="arrow">→</span><span class="then"><span class="mono">b = a.copy()</span> or <span class="mono">a[:]</span> (shallow)</span></li>
+      <li><span class="if">Last item</span><span class="arrow">→</span><span class="then"><span class="mono">items[-1]</span></span></li>
+      <li><span class="if">Counting things</span><span class="arrow">→</span><span class="then"><span class="mono">d[k] = d.get(k, 0) + 1</span> or <span class="mono">collections.Counter</span></span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: the four at a glance</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>list</th><th>tuple</th><th>set</th><th>dict</th></tr></thead>
+        <tbody>
+          <tr><td>Literal</td><td class="mono">[1, 2]</td><td class="mono">(1, 2) or 1, 2</td><td class="mono">{1, 2}</td><td class="mono">{"a": 1}</td></tr>
+          <tr><td>Empty</td><td class="mono">[]</td><td class="mono">()</td><td class="mono">set()</td><td class="mono">{}</td></tr>
+          <tr><td>Ordered</td><td>yes</td><td>yes</td><td>no</td><td>insertion order</td></tr>
+          <tr><td>Changeable</td><td>yes</td><td>no</td><td>yes</td><td>yes</td></tr>
+          <tr><td>Duplicates</td><td>yes</td><td>yes</td><td>no</td><td>keys unique</td></tr>
+          <tr><td>Access</td><td class="mono">x[0]</td><td class="mono">x[0]</td><td class="mono">in</td><td class="mono">x["key"]</td></tr>
+          <tr><td>Add</td><td class="mono">append insert extend</td><td>—</td><td class="mono">add update</td><td class="mono">d[k] = v, update</td></tr>
+          <tr><td>Remove</td><td class="mono">pop remove del</td><td>—</td><td class="mono">remove discard</td><td class="mono">pop del</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>remove() comment in Collections.py:</b> <span class="mono">employee_ages.remove(12)  # Remove the age we just added</span>, but the line before appended <b>100</b>. <span class="mono">remove(12)</span> deletes the first 12 in the list.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>Tuple_exercises.py:</b> the comment says <span class="mono">(10.4)</span> without a comma "is just an integer". It's a <b>float</b>: parentheses don't change the type, they just group.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>Lists_exercises.py</b> imports <span class="mono">indexOf</span> from <span class="mono">operator</span> and an unused <span class="mono">math</span>. The normal way is <span class="mono">fruits.index("orange")</span>, or <span class="mono">enumerate()</span> while looping. The "5 favourite movies" list has 4 items.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Keys must be hashable:</b> str, int, tuple work as dict keys and set items; lists and dicts don't (<span class="mono">TypeError: unhashable type: 'list'</span>).</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Say the answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary><span class="mono">nums = [3, 1, 2]; print(sorted(nums), nums)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">[1, 2, 3] [3, 1, 2]</b>. sorted() returns a new list; nums is unchanged.</p></div></details>
+      <details><summary><span class="mono">print(len({1, 1, 2, 2, 3}))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">3</b>. Duplicates are dropped.</p></div></details>
+      <details><summary><span class="mono">a = [1, 2]; b = a; b.append(3); print(a)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">[1, 2, 3]</b>. a and b are two names for one list (see Variables &amp; objects).</p></div></details>
+      <details><summary><span class="mono">d = {"x": 1}; print("x" in d, 1 in d)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">True False</b>. <span class="mono">in</span> on a dict checks <b>keys</b>, not values.</p></div></details>
+      <details><summary><span class="mono">t = (1, [2]); t[1].append(3); print(t)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">(1, [2, 3])</b>. The tuple can't change which objects it holds, but the list inside is still mutable.</p></div></details>
+      <details><summary><span class="mono">print(list({"b": 1, "a": 2}))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">['b', 'a']</b>. Turning a dict into a list gives its keys, in insertion order.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Every trace and output on this page was produced by running the code (Python 3.13; the same results on Python 3.15). The edit-and-run box runs real Python 3.14 in your browser with Pyodide. Sources: Python_Fundamentals repo (Basics/Collections.py, PractiseArea/Lists_exercises.py, PractiseArea/Tuple_exercises.py).</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const T = window.TRACES['collections'];
+
+  /* ========== Walkthrough ========== */
+  const tr = K.trace($('pageTrace'), T.walk, {});
+  const MAP = [1, 2, 3, 5, 6, 7, 8, 10, 11, 18];
+  const STEPS = [{"title": "A list holds references", "text": "Each cell of the list points to a str object. The boxes underneath are <b>indexes</b> 0, 1, 2. \"Asha\" appears twice: lists allow duplicates."}, {"title": "append() changes the list in place", "text": "No new list is made: the same object grows by one cell. That's what <b>mutable</b> means. append() returns <span class=\"mono\">None</span>, so never write <span class=\"mono\">visits = visits.append(...)</span>."}, {"title": "pop(0) removes and returns", "text": "<span class=\"mono\">pop(0)</span> takes out the first item and hands it back, so <span class=\"mono\">first</span> now points to \"Asha\". The others shift left: indexes are renumbered.", "tip": "<span class=\"mono\">pop()</span> from the end is fast; <span class=\"mono\">pop(0)</span> has to shift everything. For a real queue use <span class=\"mono\">collections.deque</span>."}, {"title": "A tuple, then unpacking", "text": "<span class=\"mono\">point</span> is a tuple: it can't grow or change. <span class=\"mono\">lat, lon = point</span> <b>unpacks</b> it, one name per item. The count must match, or you get a ValueError."}, {"title": "set() drops duplicates", "text": "Building a set from the list keeps only one \"Asha\". Sets have <b>no index</b>: the order you see is not guaranteed, and <span class=\"mono\">unique[0]</span> is an error."}, {"title": "Sets are mutable too", "text": "<span class=\"mono\">add()</span> puts John in. Adding \"Ravi\" again would change nothing. Checking <span class=\"mono\">\"Ravi\" in unique</span> is very fast, even for millions of items."}, {"title": "A dict maps keys to values", "text": "Each row is a <b>key → value</b> pair. You look values up by key, not by position: <span class=\"mono\">patient[\"name\"]</span>."}, {"title": "Assign to update or add", "text": "<span class=\"mono\">patient[\"age\"] = 42</span> replaces an existing value; <span class=\"mono\">patient[\"city\"] = \"Pune\"</span> adds a new pair. Same syntax, Python checks whether the key exists."}, {"title": "get() for keys that may be missing", "text": "<span class=\"mono\">patient[\"phone\"]</span> would raise <b>KeyError</b>. <span class=\"mono\">get(\"phone\", \"n/a\")</span> returns the default instead."}, {"title": "Looping over items()", "text": "<span class=\"mono\">items()</span> gives (key, value) pairs, unpacked straight into two names. Order is the order keys were added (guaranteed since Python 3.7)."}];
+  STEPS.forEach((st, i) => {
+    if (i === 0) return;
+    st.play = async run => { for (let k = MAP[i - 1] + 1; k <= MAP[i]; k++) { tr.show(k); if (k < MAP[i]) await K.sleep(Math.max(150, Math.min(600, 4800 / (MAP[i] - MAP[i - 1]))), run); } };
+  });
+  K.story({ root: $('pageStory'), steps: STEPS, show: i => tr.show(MAP[i]), tipLabel: 'Tip' });
+
+  /* ========== Edit and run ========== */
+  K.pyRunner($('runner'), { starters: [{"label": "Walkthrough code", "code": "visits = [\"Asha\", \"Ravi\", \"Asha\"]\nvisits.append(\"Meera\")\nfirst = visits.pop(0)\npoint = (12.97, 77.59)\nlat, lon = point\nunique = set(visits)\nunique.add(\"John\")\npatient = {\"name\": \"Ravi\", \"age\": 41}\npatient[\"age\"] = 42\npatient[\"city\"] = \"Pune\"\nprint(patient.get(\"phone\", \"n/a\"))\nfor key, value in patient.items():\n    print(key, value)", "inputs": []}, {"label": "Puzzle 1: append returns None", "code": "names = [\"Asha\"]\nnames = names.append(\"Ravi\")\nprint(names)", "inputs": []}, {"label": "Puzzle 2: one-item tuple", "code": "a = (5)\nb = (5,)\nprint(type(a).__name__, type(b).__name__)", "inputs": []}, {"label": "Puzzle 3: remove()", "code": "ages = [12, 34, 12, 56]\nages.remove(12)\nprint(ages)", "inputs": []}, {"label": "Puzzle 4: dict keys are unique", "code": "d = {\"a\": 1, \"b\": 2, \"a\": 3}\nprint(d, len(d))", "inputs": []}, {"label": "Puzzle 5: empty braces", "code": "x = {}\ny = set()\nprint(type(x).__name__, type(y).__name__)", "inputs": []}, {"label": "Puzzle 6: star unpacking", "code": "first, *rest = [10, 20, 30, 40]\nprint(first, rest)", "inputs": []}, {"label": "Your turn: count visits per patient", "code": "visits = [\"Asha\", \"Ravi\", \"Asha\", \"Meera\", \"Asha\", \"Ravi\"]\ncounts = {}\nfor name in visits:\n    counts[name] = counts.get(name, 0) + 1\nprint(counts)\nprint(\"unique:\", len(set(visits)))\n# Try: find the patient with most visits using max(counts, key=counts.get)"}] });
+
+  /* ========== Predict the output ========== */
+  const PZ = [{"id": "p1", "name": "1 · append returns None", "q": "What's printed?", "opts": ["['Asha', 'Ravi']", "None", "['Ravi']"], "a": 1, "why": "List methods that change the list return <span class=\"mono\">None</span>. Rebinding <span class=\"mono\">names</span> to that result loses the list. Just write <span class=\"mono\">names.append(\"Ravi\")</span>."}, {"id": "p2", "name": "2 · one-item tuple", "q": "What's printed?", "opts": ["tuple tuple", "int tuple", "int int"], "a": 1, "why": "Parentheses alone are just grouping. The <b>comma</b> makes a tuple."}, {"id": "p3", "name": "3 · remove()", "q": "What's printed?", "opts": ["[34, 56]", "[34, 12, 56]", "[12, 34, 56]"], "a": 1, "why": "<span class=\"mono\">remove(x)</span> deletes only the <b>first</b> matching value. To remove all: <span class=\"mono\">[a for a in ages if a != 12]</span>."}, {"id": "p4", "name": "4 · dict keys are unique", "q": "What's printed?", "opts": ["{'a': 1, 'b': 2, 'a': 3} 3", "{'a': 3, 'b': 2} 2", "{'b': 2, 'a': 3} 2"], "a": 1, "why": "A repeated key overwrites the earlier value but keeps its original position."}, {"id": "p5", "name": "5 · empty braces", "q": "What's printed?", "opts": ["set set", "dict set", "dict dict"], "a": 1, "why": "<span class=\"mono\">{}</span> is an empty <b>dict</b>. An empty set must be written <span class=\"mono\">set()</span>."}, {"id": "p6", "name": "6 · star unpacking", "q": "What's printed?", "opts": ["10 [20, 30, 40]", "10 (20, 30, 40)", "ValueError: too many values to unpack"], "a": 0, "why": "<span class=\"mono\">*rest</span> collects everything left over into a <b>list</b>."}];
+  $('pzChips').innerHTML = PZ.map((p, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${p.name}</button>`).join('');
+  function puzzle(i) {
+    const p = PZ[i], area = $('pzArea');
+    area.innerHTML = `<div class="two">
+        <div><pre class="codeblock static-code">${T[p.id].code.split('\n').map(l => `<span class="ln">${K.pyHighlight(l) || ' '}</span>`).join('')}</pre></div>
+        <div class="card predict"><div class="q">${p.q}</div><div class="opts">${p.opts.map((o, j) => `<button class="chip-btn" type="button" data-j="${j}">${o.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</button>`).join('')}</div><p class="status-line" style="text-align:left;margin:0" id="pzVerdict">Choose an answer to unlock the step-through.</p></div>
+      </div><div id="pzTrace"></div>`;
+    area.querySelectorAll('.predict .chip-btn').forEach(b => b.addEventListener('click', () => {
+      const j = +b.dataset.j, ok = j === p.a;
+      area.querySelectorAll('.predict .chip-btn').forEach((x, xj) => { x.disabled = true; x.classList.toggle('right', xj === p.a); x.classList.toggle('wrong', xj === j && !ok); });
+      $('pzVerdict').innerHTML = `<span class="${ok ? 'ok-text' : 'bad-text'}">${ok ? 'Correct.' : 'Not quite.'}</span> ${p.why} <b>Step through below to watch it happen.</b>`;
+      K.trace($('pzTrace'), T[p.id], { controls: true });
+    }));
+  }
+  $('pzChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('pzChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    puzzle(+b.dataset.i);
+  }));
+  $('pzChips').querySelector('button').click();
+
+  /* ===== List operations bench ===== */
+  (function () {
+    const START = [34, 12, 56, 12];
+    let L = START.slice();
+    const OPS = [
+      ['append(90)', l => { l.push(90); return 'None'; }, 'adds one item at the end'],
+      ['insert(0, 7)', l => { l.unshift(7); return 'None'; }, 'puts 7 at index 0; everything else shifts right'],
+      ['pop()', l => l.length ? String(l.pop()) : 'IndexError: pop from empty list', 'removes the last item and returns it'],
+      ['pop(0)', l => l.length ? String(l.shift()) : 'IndexError: pop from empty list', 'removes the first item and returns it'],
+      ['remove(12)', l => { const i = l.indexOf(12); if (i < 0) return 'ValueError: list.remove(x): x not in list'; l.splice(i, 1); return 'None'; }, 'deletes the first 12 only'],
+      ['sort()', l => { l.sort((a, b) => a - b); return 'None'; }, 'sorts in place'],
+      ['reverse()', l => { l.reverse(); return 'None'; }, 'reverses in place'],
+      ['extend([1, 2])', l => { l.push(1, 2); return 'None'; }, 'adds each item of the other list'],
+      ['index(56)', l => { const i = l.indexOf(56); return i < 0 ? 'ValueError: 56 is not in list' : String(i); }, 'position of the first 56; the list is unchanged'],
+      ['count(12)', l => String(l.filter(x => x === 12).length), 'how many 12s; the list is unchanged'],
+    ];
+    function draw(changed) { $('lbList').innerHTML = L.length ? L.map((v, i) => `<div class="lb-cell${changed ? ' chg' : ''}"><b>${v}</b><span>${i}</span></div>`).join('') : '<span class="muted mono">[] (empty)</span>'; }
+    $('lbOps').innerHTML = OPS.map((o, i) => `<button class="chip-btn" type="button" data-i="${i}">.${o[0]}</button>`).join('') + '<button class="chip-btn" type="button" data-i="r">reset</button>';
+    $('lbOps').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      if (b.dataset.i === 'r') { L = START.slice(); draw(); $('lbCode').innerHTML = `<span class="ln">${K.pyHighlight('nums = [' + START.join(', ') + ']')}</span>`; $('lbStatus').textContent = 'Back to the start.'; return; }
+      const [label, fn, what] = OPS[+b.dataset.i];
+      const before = JSON.stringify(L); const r = fn(L); const changed = JSON.stringify(L) !== before;
+      draw(changed);
+      $('lbCode').innerHTML = `<span class="ln">${K.pyHighlight('result = nums.' + label)}</span>`;
+      const err = /Error/.test(r);
+      $('lbStatus').innerHTML = err ? `<b class="bad-text">${r}</b>` : `returns <b class="mono">${r}</b> · ${what}.` + (r === 'None' ? ' <span class="muted">(changed in place, nothing returned)</span>' : '');
+    }));
+    draw(); $('lbCode').innerHTML = `<span class="ln">${K.pyHighlight('nums = [' + START.join(', ') + ']')}</span>`;
+  })();
+  /* ===== Set operations ===== */
+  (function () {
+    const RES = {"&": ["John", "Ravi"], "|": ["Asha", "John", "Lina", "Meera", "Ravi"], "-": ["Asha", "Meera"], "^": ["Asha", "Lina", "Meera"]};
+    const NAME = { '&': 'intersection: in both', '|': 'union: in either', '-': 'difference: in a but not b', '^': 'symmetric difference: in exactly one' };
+    // left-only crescent, lens, right-only crescent (circles r=105 at x=220 and 340, y=135)
+    const yTop = 135 - Math.sqrt(105 * 105 - 60 * 60), yBot = 135 + Math.sqrt(105 * 105 - 60 * 60);
+    $('vnL').setAttribute('d', `M280 ${yTop} A105 105 0 1 0 280 ${yBot} A105 105 0 0 1 280 ${yTop}Z`);
+    $('vnM').setAttribute('d', `M280 ${yTop} A105 105 0 0 0 280 ${yBot} A105 105 0 0 0 280 ${yTop}Z`);
+    $('vnR').setAttribute('d', `M280 ${yTop} A105 105 0 1 1 280 ${yBot} A105 105 0 0 0 280 ${yTop}Z`);
+    const ON = { '&': ['vnM'], '|': ['vnL', 'vnM', 'vnR'], '-': ['vnL'], '^': ['vnL', 'vnR'] };
+    K.seg($('vnSeg'), v => {
+      ['vnL', 'vnM', 'vnR'].forEach(id => $(id).classList.toggle('on', ON[v].includes(id)));
+      $('vnStatus').innerHTML = `<span class="mono">sorted(clinic_a ${v.replace('&', '&amp;')} clinic_b)</span> → <b class="mono">${JSON.stringify(RES[v]).replace(/"/g, "'").replace(/,/g, ', ')}</b> · ${NAME[v]}`;
+    });
+  })();
+})();
+</script>
+</body>
+</html>

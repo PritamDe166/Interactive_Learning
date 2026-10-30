@@ -1,0 +1,33 @@
+{
+ "page": "strings",
+ "snippets": {
+  "walk": {
+   "code": "raw = \"  cardiology  \"\ndept = raw.strip().title()\nprint(dept[0], dept[-1])\nprint(dept[0:6], dept[6:])\nprint(dept[::-1])\nprint(len(dept), \"logy\" in dept)\nupper = dept.upper()\nprint(dept, upper)\nparts = \"Asha,35,Pune\".split(\",\")\nprint(parts)\nline = \" | \".join(parts)\nprint(line)\nprint(dept.find(\"x\"), dept.replace(\"Cardio\", \"Neuro\"))",
+   "inputs": []
+  },
+  "p1": {
+   "code": "s = \"Hyderabad\"\nprint(s[2:5], s[-3:])",
+   "inputs": []
+  },
+  "p2": {
+   "code": "name = \"asha\"\nname[0] = \"A\"\nprint(name)",
+   "inputs": []
+  },
+  "p3": {
+   "code": "city = \"pune\"\ncity.upper()\nprint(city)",
+   "inputs": []
+  },
+  "p4": {
+   "code": "s = \"Pune\"\nprint(s[1:99])\nprint(s[99])",
+   "inputs": []
+  },
+  "p5": {
+   "code": "msg = \"  book   2   slots \"\nprint(msg.split())\nprint(msg.split(\" \")[:3])",
+   "inputs": []
+  },
+  "p6": {
+   "code": "ids = [101, 102]\nprint(\", \".join(ids))",
+   "inputs": []
+  }
+ }
+}

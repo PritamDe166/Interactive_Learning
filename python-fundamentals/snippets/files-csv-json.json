@@ -1,0 +1,33 @@
+{
+ "page": "files-csv-json",
+ "snippets": {
+  "walk": {
+   "code": "import csv, json\nwith open(\"notes.txt\", \"w\", encoding=\"utf-8\") as f:\n    f.write(\"Asha 9:00\\n\")\n    f.write(\"Ravi 9:30\\n\")\nwith open(\"notes.txt\", \"a\", encoding=\"utf-8\") as f:\n    f.write(\"Meera 10:00\\n\")\nwith open(\"notes.txt\", encoding=\"utf-8\") as f:\n    for line in f:\n        print(line.strip())\nwith open(\"visits.csv\", \"w\", newline=\"\", encoding=\"utf-8\") as f:\n    w = csv.writer(f)\n    w.writerows([[\"name\", \"fee\"], [\"Asha\", \"450\"], [\"Ravi\", \"800\"]])\nwith open(\"visits.csv\", newline=\"\", encoding=\"utf-8\") as f:\n    rows = list(csv.DictReader(f))\nprint(rows[0], sum(int(r[\"fee\"]) for r in rows))\ntext = json.dumps({\"clinic\": \"Pune\", \"visits\": rows})\ndata = json.loads(text)\nprint(data[\"visits\"][1][\"name\"], type(text).__name__)",
+   "inputs": []
+  },
+  "p1": {
+   "code": "with open(\"log.txt\", \"w\") as f:\n    f.write(\"one\\n\")\nwith open(\"log.txt\", \"w\") as f:\n    f.write(\"two\\n\")\nwith open(\"log.txt\") as f:\n    print(f.read().strip())",
+   "inputs": []
+  },
+  "p2": {
+   "code": "with open(\"a.txt\", \"w\") as f:\n    f.write(\"Asha\")\n    f.write(\"Ravi\")\nwith open(\"a.txt\") as f:\n    print(f.readlines())",
+   "inputs": []
+  },
+  "p3": {
+   "code": "import csv, io\nf = io.StringIO(\"name,fee\\nAsha,450\\nRavi,800\\n\")\nrows = list(csv.DictReader(f))\nprint(rows[0][\"fee\"] + rows[1][\"fee\"])",
+   "inputs": []
+  },
+  "p4": {
+   "code": "with open(\"n.txt\", \"w\") as f:\n    f.write(\"x\\ny\\n\")\nwith open(\"n.txt\") as f:\n    print(len(f.read()), len(f.read()))",
+   "inputs": []
+  },
+  "p5": {
+   "code": "import json\nprint(json.dumps({\"ok\": True, \"phone\": None, \"slot\": (9, 30)}))",
+   "inputs": []
+  },
+  "p6": {
+   "code": "import json\nd = json.loads(json.dumps({1: \"one\"}))\nprint(d, 1 in d)",
+   "inputs": []
+  }
+ }
+}

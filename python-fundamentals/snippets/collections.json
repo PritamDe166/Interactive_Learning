@@ -1,0 +1,33 @@
+{
+ "page": "collections",
+ "snippets": {
+  "walk": {
+   "code": "visits = [\"Asha\", \"Ravi\", \"Asha\"]\nvisits.append(\"Meera\")\nfirst = visits.pop(0)\npoint = (12.97, 77.59)\nlat, lon = point\nunique = set(visits)\nunique.add(\"John\")\npatient = {\"name\": \"Ravi\", \"age\": 41}\npatient[\"age\"] = 42\npatient[\"city\"] = \"Pune\"\nprint(patient.get(\"phone\", \"n/a\"))\nfor key, value in patient.items():\n    print(key, value)",
+   "inputs": []
+  },
+  "p1": {
+   "code": "names = [\"Asha\"]\nnames = names.append(\"Ravi\")\nprint(names)",
+   "inputs": []
+  },
+  "p2": {
+   "code": "a = (5)\nb = (5,)\nprint(type(a).__name__, type(b).__name__)",
+   "inputs": []
+  },
+  "p3": {
+   "code": "ages = [12, 34, 12, 56]\nages.remove(12)\nprint(ages)",
+   "inputs": []
+  },
+  "p4": {
+   "code": "d = {\"a\": 1, \"b\": 2, \"a\": 3}\nprint(d, len(d))",
+   "inputs": []
+  },
+  "p5": {
+   "code": "x = {}\ny = set()\nprint(type(x).__name__, type(y).__name__)",
+   "inputs": []
+  },
+  "p6": {
+   "code": "first, *rest = [10, 20, 30, 40]\nprint(first, rest)",
+   "inputs": []
+  }
+ }
+}

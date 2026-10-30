@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Comprehensions</title>
+<meta name="description" content="Python fundamentals: list, dict and set comprehensions and generator expressions, shown side by side with the loop they replace.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<script src="traces/comprehensions.js"></script>
+<style>
+  .static-code { margin: 0; }
+  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
+  .cp-grid { display: grid; grid-template-columns: minmax(60px, 1fr) minmax(90px, 1.2fr) minmax(100px, 1.5fr); gap: 6px; margin-top: 12px; font-family: var(--mono); font-size: 14px; }
+  .cp-h { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .cp-in, .cp-f, .cp-o { padding: 6px 10px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--line); min-height: 32px; transition: all .2s; }
+  .cp-in.cur { border-color: var(--cyan); box-shadow: 0 0 0 3px var(--teal-wash); }
+  .cp-f.ok, .cp-o.ok { color: var(--good-text); border-color: var(--teal); }
+  .cp-f.bad { color: var(--bad-text); border-style: dashed; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Python Fundamentals</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Python · Topic 6 · Control flow and data</div>
+    <h1>Comprehensions</h1>
+    <ul class="lede"><li>A <b>comprehension</b> builds a new list from an existing sequence in one expression: <span class="mono">[f * 2 for f in fees]</span>.</li><li>Read it as <b>what to keep</b> · <b>for each item</b> · <b>optional filter</b>: <span class="mono">[expr for x in items if cond]</span>.</li><li>Same idea for <b>dicts</b> <span class="mono">{k: v for ...}</span> and <b>sets</b> <span class="mono">{x for ...}</span>; with round brackets it becomes a lazy <b>generator expression</b>.</li><li>Use one when the loop only builds a collection. If it needs several statements, keep the normal loop.</li></ul>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: the same list, two ways</h2>
+    <div class="stage-kind">Real trace of real code · Next ▶ moves one idea at a time</div>
+    <div class="story wide" id="pageStory">
+      <div id="pageTrace"></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Run and change the code, predict before you peek, and try to break things.</p>
+
+  <section aria-labelledby="runH">
+    <h2 class="stage-title" id="runH">Edit and run</h2>
+    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div id="runner"></div>
+  </section>
+
+  <section aria-labelledby="predH">
+    <h2 class="stage-title" id="predH">Predict the output</h2>
+    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="chips" id="pzChips"></div>
+    <div class="puzzle-area" id="pzArea"></div>
+  </section>
+
+  <section aria-labelledby="pipeH">
+    <h2 class="stage-title" id="pipeH">Comprehension pipeline</h2>
+    <div class="stage-kind">Pick an expression and a filter · watch each fee go through</div>
+    <div class="two">
+      <div class="chip-group" style="margin:0"><div class="label">Expression (what to keep)</div><div class="chips" id="cpE" style="margin:0"></div></div>
+      <div class="chip-group" style="margin:0"><div class="label">Filter (which items)</div><div class="chips" id="cpC" style="margin:0"></div></div>
+    </div>
+    <pre class="codeblock" id="cpCode" style="min-height:0;margin-top:12px"></pre>
+    <div class="cp-grid" id="cpGrid"></div>
+    <div class="card" style="margin-top:10px"><div class="label">Result</div><div class="mono" id="cpRes" style="font-size:16px;overflow-wrap:anywhere">[]</div></div>
+    <p class="status-line" id="cpStatus"></p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Transform every item</span><span class="arrow">→</span><span class="then"><span class="mono">[f(x) for x in xs]</span></span></li>
+      <li><span class="if">Keep only some items</span><span class="arrow">→</span><span class="then"><span class="mono">[x for x in xs if cond]</span></span></li>
+      <li><span class="if">Choose between two values per item</span><span class="arrow">→</span><span class="then"><span class="mono">[a if cond else b for x in xs]</span></span></li>
+      <li><span class="if">Build a lookup table</span><span class="arrow">→</span><span class="then"><span class="mono">{x.id: x for x in items}</span></span></li>
+      <li><span class="if">Distinct values</span><span class="arrow">→</span><span class="then"><span class="mono">{x.city for x in items}</span></span></li>
+      <li><span class="if">Feeding sum / max / any / all</span><span class="arrow">→</span><span class="then">Generator expression: <span class="mono">sum(x.fee for x in items)</span></span></li>
+      <li><span class="if">Loop body needs several statements or side effects</span><span class="arrow">→</span><span class="then">Keep the normal <span class="mono">for</span> loop</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: the four shapes</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Shape</th><th>Brackets</th><th>Result</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td>List comprehension</td><td class="mono">[ ]</td><td>list</td><td class="mono">[n * 2 for n in nums]</td></tr>
+          <tr><td>Dict comprehension</td><td class="mono">{k: v}</td><td>dict</td><td class="mono">{p["id"]: p for p in rows}</td></tr>
+          <tr><td>Set comprehension</td><td class="mono">{ }</td><td>set</td><td class="mono">{p["city"] for p in rows}</td></tr>
+          <tr><td>Generator expression</td><td class="mono">( )</td><td>generator (lazy)</td><td class="mono">sum(n * 2 for n in nums)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>Gap topic:</b> the repo builds lists with <span class="mono">append</span> in loops (Loops.py, Lists_exercises.py) but never uses comprehensions, which are everywhere in real Python code and in the Notion learning plan (Week 1).</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Own scope:</b> the loop variable of a comprehension does <b>not</b> leak out (unlike a for loop). Since Python 3.12 list/dict/set comprehensions are inlined for speed (PEP 709), but this rule hasn't changed.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Readability rule:</b> one <span class="mono">for</span> and one <span class="mono">if</span> is easy to read. Two nested <span class="mono">for</span>s is the usual limit; beyond that, write a loop or a helper function.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Say the answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary><span class="mono">print([c.upper() for c in "abc"])</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">['A', 'B', 'C']</b>. Any iterable works, including a string.</p></div></details>
+      <details><summary><span class="mono">print(len([x for x in range(10) if x % 3 == 0]))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">4</b>. 0, 3, 6 and 9.</p></div></details>
+      <details><summary><span class="mono">print({k: v for k, v in [("a", 1), ("a", 2)]})</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">{'a': 2}</b>. The later value for the same key wins.</p></div></details>
+      <details><summary><span class="mono">x = 5; y = [x for x in range(3)]; print(x)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">5</b>. The comprehension's x is separate and doesn't overwrite the outer one.</p></div></details>
+      <details><summary><span class="mono">print(any(n &gt; 3 for n in [1, 5, 2]))</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">True</b>. A generator expression straight into any().</p></div></details>
+      <details><summary><span class="mono">print(type((n for n in [1])).__name__)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">generator</b>. Round brackets don't make a "tuple comprehension".</p></div></details>
+    </div>
+  </section>
+
+  <footer>Every trace and output on this page was produced by running the code (Python 3.13; the same results on Python 3.15). The edit-and-run box runs real Python 3.14 in your browser with Pyodide. Gap topic: not in the Python_Fundamentals repo; listed in the Notion plans (Roadmap: data structures with comprehensions; 8-week plan, Week 1).</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const T = window.TRACES['comprehensions'];
+
+  /* ========== Walkthrough ========== */
+  const tr = K.trace($('pageTrace'), T.walk, {});
+  const MAP = [2, 10, 12, 17, 22, 27, 30, 35, 49];
+  const STEPS = [{"title": "The loop way: start empty", "text": "The classic pattern: make an empty list, then append to it inside a loop. Three lines for one idea."}, {"title": "…append on every round", "text": "After four rounds <span class=\"mono\">doubled</span> holds the four results. Note that the loop variable <span class=\"mono\">f</span> is still around afterwards."}, {"title": "The comprehension way", "text": "<span class=\"mono\">[f * 2 for f in fees]</span> says the same thing in one line and builds a <b>new list</b> object. Read it left to right: <i>f times 2, for each f in fees</i>."}, {"title": "Add a filter with if", "text": "An <span class=\"mono\">if</span> at the end <b>drops</b> items: only fees ≥ 500 are kept. The result can be shorter than the input."}, {"title": "if/else goes at the front", "text": "To <b>choose a value</b> for every item, put a conditional expression in the expression part: <span class=\"mono\">\"high\" if f &gt;= 500 else \"low\"</span>. Every item produces an output, so the length stays 4.", "tip": "Filter: <span class=\"mono\">[x for x in xs if c]</span>. Choose: <span class=\"mono\">[a if c else b for x in xs]</span>. Mixing them up is the most common syntax error here."}, {"title": "Dict comprehension", "text": "Curly braces with <span class=\"mono\">key: value</span> build a dict. Here each name maps to its length."}, {"title": "Set comprehension", "text": "Curly braces <b>without</b> a colon make a set, so duplicates collapse: four fees, but only the distinct remainders survive."}, {"title": "Generator expression", "text": "Inside <span class=\"mono\">sum(...)</span> the brackets disappear: this is a <b>generator expression</b>. It hands values to sum() one at a time without building a list first. Great for big data."}, {"title": "Same results", "text": "<span class=\"mono\">doubled == doubled2</span> is True: same contents, different objects. Comprehensions are usually a little faster and much easier to read once you know the shape."}];
+  STEPS.forEach((st, i) => {
+    if (i === 0) return;
+    st.play = async run => { for (let k = MAP[i - 1] + 1; k <= MAP[i]; k++) { tr.show(k); if (k < MAP[i]) await K.sleep(Math.max(150, Math.min(600, 4800 / (MAP[i] - MAP[i - 1]))), run); } };
+  });
+  K.story({ root: $('pageStory'), steps: STEPS, show: i => tr.show(MAP[i]), tipLabel: 'Tip' });
+
+  /* ========== Edit and run ========== */
+  K.pyRunner($('runner'), { starters: [{"label": "Walkthrough code", "code": "fees = [450, 1200, 300, 800]\ndoubled = []\nfor f in fees:\n    doubled.append(f * 2)\ndoubled2 = [f * 2 for f in fees]\nbig = [f for f in fees if f >= 500]\nlabels = [\"high\" if f >= 500 else \"low\" for f in fees]\nlengths = {n: len(n) for n in [\"Asha\", \"Ravi\"]}\nunits = {f % 3 for f in fees}\ntotal = sum(f for f in fees if f >= 500)\nprint(doubled == doubled2, big)\nprint(labels)\nprint(lengths, units, total)", "inputs": []}, {"label": "Puzzle 1: filter", "code": "nums = [1, 2, 3, 4, 5, 6]\nprint([n * n for n in nums if n % 2 == 0])", "inputs": []}, {"label": "Puzzle 2: else in the wrong place", "code": "nums = [1, 2, 3]\nprint([n for n in nums if n > 1 else 0])", "inputs": []}, {"label": "Puzzle 3: nested loops", "code": "pairs = [(d, t) for d in [\"Mon\", \"Tue\"] for t in [9, 10]]\nprint(pairs)", "inputs": []}, {"label": "Puzzle 4: set or dict?", "code": "a = {x % 2 for x in range(5)}\nb = {x: x % 2 for x in range(3)}\nprint(a, b)", "inputs": []}, {"label": "Puzzle 5: a generator is used once", "code": "g = (n * 10 for n in range(3))\nprint(sum(g))\nprint(sum(g))", "inputs": []}, {"label": "Puzzle 6: flatten", "code": "rows = [[1, 2], [3], [4, 5]]\nprint([x for row in rows for x in row])", "inputs": []}, {"label": "Your turn: clean a CSV line", "code": "line = \" asha , 35 , PUNE ,  \"\nparts = [p.strip() for p in line.split(\",\") if p.strip()]\nprint(parts)\nclean = [p.title() if not p.isdigit() else int(p) for p in parts]\nprint(clean)\n# Try: build {\"name\": ..., \"age\": ..., \"city\": ...} with zip and a dict comprehension"}] });
+
+  /* ========== Predict the output ========== */
+  const PZ = [{"id": "p1", "name": "1 · filter", "q": "What's printed?", "opts": ["[4, 16, 36]", "[1, 9, 25]", "[2, 4, 6]"], "a": 0, "why": "Keep the even numbers (2, 4, 6), then square them."}, {"id": "p2", "name": "2 · else in the wrong place", "q": "What happens?", "opts": ["[0, 2, 3]", "SyntaxError: invalid syntax", "[2, 3]"], "a": 1, "why": "A trailing <span class=\"mono\">if</span> is a filter and can't have an <span class=\"mono\">else</span>. Move it to the front: <span class=\"mono\">[n if n &gt; 1 else 0 for n in nums]</span> → <span class=\"mono\">[0, 2, 3]</span>."}, {"id": "p3", "name": "3 · nested loops", "q": "What's printed?", "opts": ["[('Mon', 9), ('Mon', 10), ('Tue', 9), ('Tue', 10)]", "[('Mon', 9), ('Tue', 10)]", "[('Mon', 9), ('Tue', 9), ('Mon', 10), ('Tue', 10)]"], "a": 0, "why": "Multiple <span class=\"mono\">for</span> clauses nest in the order written: the first is the outer loop."}, {"id": "p4", "name": "4 · set or dict?", "q": "What's printed?", "opts": ["{0, 1} {0: 0, 1: 1, 2: 0}", "{0, 1, 0, 1, 0} {0: 0, 1: 1, 2: 0}", "[0, 1] {0, 1, 2}"], "a": 0, "why": "No colon → set (duplicates collapse). Colon → dict."}, {"id": "p5", "name": "5 · a generator is used once", "q": "What's printed?", "opts": ["30 / 30", "30 / 0", "30 / TypeError"], "a": 1, "why": "A generator produces each value once. The first sum() used them all up; the second sees nothing and returns 0. More in Iterators &amp; generators."}, {"id": "p6", "name": "6 · flatten", "q": "What's printed?", "opts": ["[1, 2, 3, 4, 5]", "[[1, 2], [3], [4, 5]]", "[1, 3, 4]"], "a": 0, "why": "Outer loop over rows, inner loop over the items in each row: a flat list."}];
+  $('pzChips').innerHTML = PZ.map((p, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${p.name}</button>`).join('');
+  function puzzle(i) {
+    const p = PZ[i], area = $('pzArea');
+    area.innerHTML = `<div class="two">
+        <div><pre class="codeblock static-code">${T[p.id].code.split('\n').map(l => `<span class="ln">${K.pyHighlight(l) || ' '}</span>`).join('')}</pre></div>
+        <div class="card predict"><div class="q">${p.q}</div><div class="opts">${p.opts.map((o, j) => `<button class="chip-btn" type="button" data-j="${j}">${o.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</button>`).join('')}</div><p class="status-line" style="text-align:left;margin:0" id="pzVerdict">Choose an answer to unlock the step-through.</p></div>
+      </div><div id="pzTrace"></div>`;
+    area.querySelectorAll('.predict .chip-btn').forEach(b => b.addEventListener('click', () => {
+      const j = +b.dataset.j, ok = j === p.a;
+      area.querySelectorAll('.predict .chip-btn').forEach((x, xj) => { x.disabled = true; x.classList.toggle('right', xj === p.a); x.classList.toggle('wrong', xj === j && !ok); });
+      $('pzVerdict').innerHTML = `<span class="${ok ? 'ok-text' : 'bad-text'}">${ok ? 'Correct.' : 'Not quite.'}</span> ${p.why} <b>Step through below to watch it happen.</b>`;
+      K.trace($('pzTrace'), T[p.id], { controls: true });
+    }));
+  }
+  $('pzChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('pzChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    puzzle(+b.dataset.i);
+  }));
+  $('pzChips').querySelector('button').click();
+
+  /* ===== Comprehension pipeline ===== */
+  (function () {
+    const PIPE = {"0|0": {"code": "[f for f in fees]", "items": [{"in": 450, "pass": true, "out": "450"}, {"in": 1200, "pass": true, "out": "1200"}, {"in": 300, "pass": true, "out": "300"}, {"in": 800, "pass": true, "out": "800"}, {"in": 950, "pass": true, "out": "950"}], "res": "[450, 1200, 300, 800, 950]"}, "0|1": {"code": "[f for f in fees if f >= 500]", "items": [{"in": 450, "pass": false, "out": null}, {"in": 1200, "pass": true, "out": "1200"}, {"in": 300, "pass": false, "out": null}, {"in": 800, "pass": true, "out": "800"}, {"in": 950, "pass": true, "out": "950"}], "res": "[1200, 800, 950]"}, "0|2": {"code": "[f for f in fees if f % 100 == 0]", "items": [{"in": 450, "pass": false, "out": null}, {"in": 1200, "pass": true, "out": "1200"}, {"in": 300, "pass": true, "out": "300"}, {"in": 800, "pass": true, "out": "800"}, {"in": 950, "pass": false, "out": null}], "res": "[1200, 300, 800]"}, "0|3": {"code": "[f for f in fees if f < 400]", "items": [{"in": 450, "pass": false, "out": null}, {"in": 1200, "pass": false, "out": null}, {"in": 300, "pass": true, "out": "300"}, {"in": 800, "pass": false, "out": null}, {"in": 950, "pass": false, "out": null}], "res": "[300]"}, "1|0": {"code": "[f * 2 for f in fees]", "items": [{"in": 450, "pass": true, "out": "900"}, {"in": 1200, "pass": true, "out": "2400"}, {"in": 300, "pass": true, "out": "600"}, {"in": 800, "pass": true, "out": "1600"}, {"in": 950, "pass": true, "out": "1900"}], "res": "[900, 2400, 600, 1600, 1900]"}, "1|1": {"code": "[f * 2 for f in fees if f >= 500]", "items": [{"in": 450, "pass": false, "out": null}, {"in": 1200, "pass": true, "out": "2400"}, {"in": 300, "pass": false, "out": null}, {"in": 800, "pass": true, "out": "1600"}, {"in": 950, "pass": true, "out": "1900"}], "res": "[2400, 1600, 1900]"}, "1|2": {"code": "[f * 2 for f in fees if f % 100 == 0]", "items": [{"in": 450, "pass": false, "out": null}, {"in": 1200, "pass": true, "out": "2400"}, {"in": 300, "pass": true, "out": "600"}, {"in": 800, "pass": true, "out": "1600"}, {"in": 950, "pass": false, "out": null}], "res": "[2400, 600, 1600]"}, "1|3": {"code": "[f * 2 for f in fees if f < 400]", "items": [{"in": 450, "pass": false, "out": null}, {"in": 1200, "pass": false, "out": null}, {"in": 300, "pass": true, "out": "600"}, {"in": 800, "pass": false, "out": null}, {"in": 950, "pass": false, "out": null}], "res": "[600]"}, "2|0": {"code": "[f // 100 for f in fees]", "items": [{"in": 450, "pass": true, "out": "4"}, {"in": 1200, "pass": true, "out": "12"}, {"in": 300, "pass": true, "out": "3"}, {"in": 800, "pass": true, "out": "8"}, {"in": 950, "pass": true, "out": "9"}], "res": "[4, 12, 3, 8, 9]"}, "2|1": {"code": "[f // 100 for f in fees if f >= 500]", "items": [{"in": 450, "pass": false, "out": null}, {"in": 1200, "pass": true, "out": "12"}, {"in": 300, "pass": false, "out": null}, {"in": 800, "pass": true, "out": "8"}, {"in": 950, "pass": true, "out": "9"}], "res": "[12, 8, 9]"}, "2|2": {"code": "[f // 100 for f in fees if f % 100 == 0]", "items": [{"in": 450, "pass": false, "out": null}, {"in": 1200, "pass": true, "out": "12"}, {"in": 300, "pass": true, "out": "3"}, {"in": 800, "pass": true, "out": "8"}, {"in": 950, "pass": false, "out": null}], "res": "[12, 3, 8]"}, "2|3": {"code": "[f // 100 for f in fees if f < 400]", "items": [{"in": 450, "pass": false, "out": null}, {"in": 1200, "pass": false, "out": null}, {"in": 300, "pass": true, "out": "3"}, {"in": 800, "pass": false, "out": null}, {"in": 950, "pass": false, "out": null}], "res": "[3]"}, "3|0": {"code": "[f\"Rs {f}\" for f in fees]", "items": [{"in": 450, "pass": true, "out": "'Rs 450'"}, {"in": 1200, "pass": true, "out": "'Rs 1200'"}, {"in": 300, "pass": true, "out": "'Rs 300'"}, {"in": 800, "pass": true, "out": "'Rs 800'"}, {"in": 950, "pass": true, "out": "'Rs 950'"}], "res": "['Rs 450', 'Rs 1200', 'Rs 300', 'Rs 800', 'Rs 950']"}, "3|1": {"code": "[f\"Rs {f}\" for f in fees if f >= 500]", "items": [{"in": 450, "pass": false, "out": null}, {"in": 1200, "pass": true, "out": "'Rs 1200'"}, {"in": 300, "pass": false, "out": null}, {"in": 800, "pass": true, "out": "'Rs 800'"}, {"in": 950, "pass": true, "out": "'Rs 950'"}], "res": "['Rs 1200', 'Rs 800', 'Rs 950']"}, "3|2": {"code": "[f\"Rs {f}\" for f in fees if f % 100 == 0]", "items": [{"in": 450, "pass": false, "out": null}, {"in": 1200, "pass": true, "out": "'Rs 1200'"}, {"in": 300, "pass": true, "out": "'Rs 300'"}, {"in": 800, "pass": true, "out": "'Rs 800'"}, {"in": 950, "pass": false, "out": null}], "res": "['Rs 1200', 'Rs 300', 'Rs 800']"}, "3|3": {"code": "[f\"Rs {f}\" for f in fees if f < 400]", "items": [{"in": 450, "pass": false, "out": null}, {"in": 1200, "pass": false, "out": null}, {"in": 300, "pass": true, "out": "'Rs 300'"}, {"in": 800, "pass": false, "out": null}, {"in": 950, "pass": false, "out": null}], "res": "['Rs 300']"}}, E = ["f", "f * 2", "f // 100", "f\"Rs {f}\""], C = ["", "if f >= 500", "if f % 100 == 0", "if f < 400"];
+    let ei = 1, ci = 1;
+    $('cpE').innerHTML = E.map((e, i) => `<button class="chip-btn mono" type="button" data-i="${i}" aria-pressed="${i === ei}">${e.replace(/</g, '&lt;')}</button>`).join('');
+    $('cpC').innerHTML = C.map((c, i) => `<button class="chip-btn mono" type="button" data-i="${i}" aria-pressed="${i === ci}">${c ? c.replace(/</g, '&lt;') : '(none)'}</button>`).join('');
+    async function go() {
+      const run = K.newRun('cp'); const P = PIPE[ei + '|' + ci];
+      const code = P.code.replace('[', '').replace(/\]$/, '');
+      $('cpCode').innerHTML = `<span class="ln">${K.pyHighlight('result = ' + P.code)}</span>`;
+      $('cpGrid').innerHTML = '<div class="cp-h">fee</div><div class="cp-h">filter</div><div class="cp-h">expression</div>' + P.items.map(it => `<div class="cp-in">${it.in}</div><div class="cp-f"></div><div class="cp-o"></div>`).join('');
+      $('cpRes').textContent = '[]'; const got = [];
+      const cells = [...$('cpGrid').children].slice(3);
+      try {
+        for (let k = 0; k < P.items.length; k++) {
+          const it = P.items[k], [a, f, o] = cells.slice(k * 3, k * 3 + 3);
+          a.classList.add('cur'); await K.sleep(300, run);
+          f.textContent = C[ci] ? (it.pass ? 'pass ✓' : 'dropped ✗') : 'no filter'; f.classList.add(it.pass ? 'ok' : 'bad'); await K.sleep(300, run);
+          if (it.pass) { o.textContent = '→ ' + it.out; o.classList.add('ok'); got.push(it.out); $('cpRes').textContent = '[' + got.join(', ') + ']'; }
+          a.classList.remove('cur'); await K.sleep(250, run);
+        }
+        $('cpRes').textContent = P.res;
+        $('cpStatus').innerHTML = `${got.length} of ${P.items.length} items kept. Same as the loop: <span class="mono">for f in fees: ${C[ci] ? C[ci].replace(/</g, '&lt;') + ': ' : ''}result.append(${E[ei].replace(/</g, '&lt;')})</span>`;
+      } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+    }
+    ['cpE', 'cpC'].forEach(id => $(id).querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      $(id).querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+      if (id === 'cpE') ei = +b.dataset.i; else ci = +b.dataset.i; go();
+    })));
+    go();
+  })();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Working with APIs</title>
+<meta name="description" content="Python fundamentals: calling HTTP APIs with requests, query parameters, JSON bodies, status codes, raise_for_status, timeouts, and paging through results.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<script src="traces/working-with-apis.js"></script>
+<style>
+  .static-code { margin: 0; }
+  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
+  .ht-lane { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; margin: 14px 0 10px; }
+  .ht-end { font-family: var(--mono); font-size: 13px; padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--panel-2); }
+  .ht-wire { position: relative; height: 34px; border-bottom: 2px dashed var(--line); }
+  .ht-pill { position: absolute; left: 0; top: 2px; font-family: var(--mono); font-size: 12px; padding: 4px 10px; border-radius: 999px; background: var(--cyan); color: var(--bg, #000); white-space: nowrap; transition: left .8s ease, transform .8s ease; transform: translateX(0); }
+  .ht-pill.go { left: 100%; transform: translateX(-100%); }
+  .ht-pill.go.back { left: 0; transform: translateX(0); }
+  .ht-pill.ok { background: var(--teal); }
+  .ht-pill.bad { background: var(--red); }
+  .ht-pill.lost { opacity: .5; }
+  .ht-msg { margin: 4px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12.5px; min-height: 40px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Python Fundamentals</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Python · Topic 20 · Going further</div>
+    <h1>Working with APIs</h1>
+    <ul class="lede"><li>A web API is a URL that returns <b>data</b> (usually JSON) instead of a page. You send an HTTP <b>request</b> (method, URL, headers, body) and get a <b>response</b> (status code, headers, body).</li><li>The <b>requests</b> library: <span class="mono">requests.get(url, params=…, headers=…, timeout=…)</span>, <span class="mono">requests.post(url, json=…)</span>.</li><li>Check the outcome with <span class="mono">r.status_code</span> or <span class="mono">r.raise_for_status()</span>, then decode with <span class="mono">r.json()</span>, which gives plain dicts and lists.</li><li>Always set a <b>timeout</b>, keep secrets out of code, and expect lists to come in <b>pages</b>.</li></ul>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: paging through an API (simulated)</h2>
+    <div class="stage-kind">Real trace of real code · Next ▶ moves one idea at a time</div>
+    <div class="story wide" id="pageStory">
+      <div id="pageTrace"></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Run and change the code, predict before you peek, and try to break things.</p>
+
+  <section aria-labelledby="runH">
+    <h2 class="stage-title" id="runH">Edit and run</h2>
+    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div id="runner"></div>
+  </section>
+
+  <section aria-labelledby="predH">
+    <h2 class="stage-title" id="predH">Predict the output</h2>
+    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="chips" id="pzChips"></div>
+    <div class="puzzle-area" id="pzArea"></div>
+  </section>
+
+  <section aria-labelledby="httpH">
+    <h2 class="stage-title" id="httpH">An HTTP round trip</h2>
+    <div class="stage-kind">Pick a request · see what travels, what comes back, and what requests gives you</div>
+    <div class="chips" id="htBtns"></div>
+    <pre class="codeblock" id="htCode" style="min-height:0;margin-top:10px"></pre>
+    <div class="ht-lane"><div class="ht-end">Your Python</div><div class="ht-wire"><span class="ht-pill" id="htPill">request</span></div><div class="ht-end">api.example.com</div></div>
+    <div class="two">
+      <div class="card"><div class="label">Request</div><pre class="mono ht-msg" id="htReq"></pre></div>
+      <div class="card"><div class="label">Response <span id="htStatus" class="mono"></span></div><pre class="mono ht-msg" id="htBody"></pre></div>
+    </div>
+    <div class="card" style="margin-top:10px"><div class="label">In Python</div><pre class="mono ht-msg" id="htPy"></pre></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Read data</span><span class="arrow">→</span><span class="then"><span class="mono">r = requests.get(url, params={...}, timeout=10)</span></span></li>
+      <li><span class="if">Send data</span><span class="arrow">→</span><span class="then"><span class="mono">requests.post(url, json=payload, timeout=10)</span> (sets the JSON header for you)</span></li>
+      <li><span class="if">Did it work?</span><span class="arrow">→</span><span class="then"><span class="mono">r.raise_for_status()</span>, or check <span class="mono">r.ok</span> / <span class="mono">r.status_code</span></span></li>
+      <li><span class="if">Body as Python</span><span class="arrow">→</span><span class="then"><span class="mono">r.json()</span>; <span class="mono">r.text</span> for raw text</span></li>
+      <li><span class="if">API keys and tokens</span><span class="arrow">→</span><span class="then">From an environment variable: <span class="mono">os.environ["API_TOKEN"]</span>, never in the code</span></li>
+      <li><span class="if">Many calls to one host</span><span class="arrow">→</span><span class="then"><span class="mono">with requests.Session() as s:</span> reuses connections and headers</span></li>
+      <li><span class="if">Long lists</span><span class="arrow">→</span><span class="then">Loop on the API's next page / cursor until it's empty</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: requests in a real script</h2>
+    <div class="card"><pre class="codeblock" style="min-height:0;margin:0"><span class="ln"><span class="k">import</span> os</span><span class="ln"><span class="k">import</span> requests   <span class="c"># pip install requests (inside your venv)</span></span><span class="ln"></span><span class="ln">BASE = <span class="s">"https://api.example.com/v1"</span></span><span class="ln">AUTH = {<span class="s">"Authorization"</span>: <span class="s">f"Bearer {os.environ['API_TOKEN']}"</span>}</span><span class="ln"></span><span class="ln"><span class="k">try</span>:</span><span class="ln">    r = requests.get(<span class="s">f"{BASE}/patients"</span>, params={<span class="s">"city"</span>: <span class="s">"Pune"</span>}, headers=AUTH, timeout=<span class="n">10</span>)</span><span class="ln">    r.raise_for_status()</span><span class="ln"><span class="k">except</span> requests.Timeout:</span><span class="ln">    <span class="b">print</span>(<span class="s">"server too slow, try later"</span>)</span><span class="ln"><span class="k">except</span> requests.HTTPError <span class="k">as</span> e:</span><span class="ln">    <span class="b">print</span>(<span class="s">"API said no:"</span>, e.response.status_code, e.response.text)</span><span class="ln"><span class="k">else</span>:</span><span class="ln">    <span class="k">for</span> p <span class="k">in</span> r.json()[<span class="s">"items"</span>]:</span><span class="ln">        <span class="b">print</span>(p[<span class="s">"name"</span>])</span></pre></div>
+    <div class="scroll card table-card" style="margin-top:12px"><table><thead><tr><th>Status</th><th>Meaning</th><th>Typical reaction</th></tr></thead><tbody>
+      <tr><td class="mono">200 / 201 / 204</td><td>OK / created / no content</td><td>use the body (none for 204)</td></tr>
+      <tr><td class="mono">400 / 422</td><td>your request is invalid</td><td>fix the data; read the error body</td></tr>
+      <tr><td class="mono">401 / 403</td><td>not authenticated / not allowed</td><td>check the token or permissions</td></tr>
+      <tr><td class="mono">404</td><td>no such resource</td><td>handle "not found"</td></tr>
+      <tr><td class="mono">429</td><td>too many requests</td><td>wait (Retry-After header) and retry</td></tr>
+      <tr><td class="mono">500 / 502 / 503</td><td>server-side problem</td><td>retry later with backoff</td></tr>
+    </tbody></table></div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>From your Notion Roadmap:</b> "Working with APIs (requests, JSON)", the last step before AI agents, which are mostly API calls with JSON in and JSON out.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Why it's simulated here:</b> the edit-and-run box uses Pyodide in the browser, where <span class="mono">requests</span> can't open network connections and browsers block most cross-site calls (CORS). Run the reference script in your own venv against a real or test API.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Timeouts:</b> requests has <b>no default timeout</b>, so a hung server can freeze your script forever. Always pass <span class="mono">timeout=</span>.</p></div>
+      <div class="note"><span class="flag add">Updated</span><p><b>Alternatives:</b> <span class="mono">httpx</span> offers the same style plus async support (<span class="mono">async with httpx.AsyncClient()</span>), common in FastAPI and agent code. requests remains the most widely used synchronous client.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Say the answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>What's the difference between <span class="mono">params=</span> and <span class="mono">json=</span> in requests?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">params</span> go into the <b>URL query string</b> (<span class="mono">?city=Pune</span>); <span class="mono">json</span> is serialised into the <b>request body</b> with a <span class="mono">Content-Type: application/json</span> header (typical for POST/PUT).</p></div></details>
+      <details><summary><span class="mono">import json\nprint(json.loads('{"next": null}')["next"] is None)</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b class="mono">True</b>. JSON null → None.</p></div></details>
+      <details><summary>Does <span class="mono">requests.get()</span> raise an exception for a 404?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>No.</b> It returns a response with <span class="mono">status_code</span> 404. Only network problems (timeouts, DNS, refused connections) raise. Call <span class="mono">r.raise_for_status()</span> to turn 4xx/5xx into an <span class="mono">HTTPError</span>.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Every trace and output on this page was produced by running the code (Python 3.13; the same results on Python 3.15). The edit-and-run box runs real Python 3.14 in your browser with Pyodide. From the Notion Roadmap for Python (Working with APIs: requests, JSON). requests documentation (Quickstart, Timeouts). Example host api.example.com is a reserved example domain.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const T = window.TRACES['working-with-apis'];
+
+  /* ========== Walkthrough ========== */
+  const tr = K.trace($('pageTrace'), T.walk, {});
+  const MAP = [3, 6, 13, 14, 15, 18, 32, 42];
+  const STEPS = [{"title": "A stand-in for the network", "text": "The page runs in your browser, which can't call real APIs freely, so <span class=\"mono\">fake_get</span> plays the server: it returns a <b>status code</b> and a JSON <b>text body</b>, exactly what <span class=\"mono\">requests.get</span> gives you as <span class=\"mono\">r.status_code</span> and <span class=\"mono\">r.text</span>."}, {"title": "Build the query string safely", "text": "<span class=\"mono\">urlencode</span> turns a dict into <span class=\"mono\">city=Pune&amp;page=1</span>, escaping spaces and symbols. With requests you'd pass <span class=\"mono\">params={\"city\": \"Pune\", \"page\": 1}</span> and it does this for you."}, {"title": "Send the request, get status + body", "text": "The response body is still <b>text</b>. Nothing is a dict yet."}, {"title": "Check the status first", "text": "2xx means success. Anything else should stop or retry rather than be parsed as data. <span class=\"mono\">r.raise_for_status()</span> does this check in one call."}, {"title": "JSON text → Python objects", "text": "<span class=\"mono\">json.loads(body)</span> (or <span class=\"mono\">r.json()</span>) gives dicts and lists; JSON <span class=\"mono\">null</span> becomes <span class=\"mono\">None</span>."}, {"title": "Follow the next page", "text": "APIs return big lists in <b>pages</b>. This one says <span class=\"mono\">\"next\": 2</span>, so the loop asks again with page=2."}, {"title": "No next page: done", "text": "Page 2's <span class=\"mono\">next</span> is null → None, which is falsy, so <span class=\"mono\">while page</span> ends. We collected both patients."}, {"title": "Errors come back as data too", "text": "An unknown path returns <b>404</b> with an error message in the body. Read the body: good APIs explain what went wrong."}];
+  STEPS.forEach((st, i) => {
+    if (i === 0) return;
+    st.play = async run => { for (let k = MAP[i - 1] + 1; k <= MAP[i]; k++) { tr.show(k); if (k < MAP[i]) await K.sleep(Math.max(150, Math.min(600, 4800 / (MAP[i] - MAP[i - 1]))), run); } };
+  });
+  K.story({ root: $('pageStory'), steps: STEPS, show: i => tr.show(MAP[i]), tipLabel: 'Tip' });
+
+  /* ========== Edit and run ========== */
+  K.pyRunner($('runner'), { starters: [{"label": "Walkthrough code", "code": "import json\nfrom urllib.parse import urlencode\n\ndef fake_get(url):\n    pages = {\n        \"/patients?city=Pune&page=1\": (200, '{\"items\": [{\"name\": \"Asha\"}], \"next\": 2}'),\n        \"/patients?city=Pune&page=2\": (200, '{\"items\": [{\"name\": \"Meera\"}], \"next\": null}'),\n    }\n    return pages.get(url, (404, '{\"error\": \"not found\"}'))\n\npage, everyone = 1, []\nwhile page:\n    url = \"/patients?\" + urlencode({\"city\": \"Pune\", \"page\": page})\n    status, body = fake_get(url)\n    if status != 200:\n        raise RuntimeError(f\"HTTP {status}\")\n    data = json.loads(body)\n    everyone += [p[\"name\"] for p in data[\"items\"]]\n    page = data[\"next\"]\nprint(everyone)\nstatus, body = fake_get(\"/doctors\")\nprint(status, json.loads(body)[\"error\"])", "inputs": []}, {"label": "Puzzle 1: text or dict?", "code": "import json\nbody = '{\"name\": \"Asha\", \"vip\": false}'\nprint(type(body).__name__, json.loads(body)[\"vip\"])", "inputs": []}, {"label": "Puzzle 2: query strings", "code": "from urllib.parse import urlencode\nprint(urlencode({\"name\": \"Asha Rao\", \"city\": \"Pune & Co\"}))", "inputs": []}, {"label": "Puzzle 3: missing key", "code": "import json\ndata = json.loads('{\"items\": []}')\nprint(data.get(\"next\"), len(data[\"items\"]))\nprint(data[\"next\"])", "inputs": []}, {"label": "Puzzle 4: status ranges", "code": "for code in [200, 201, 204, 301, 404, 500]:\n    print(code, 200 <= code < 300, end=\" | \")", "inputs": []}, {"label": "Your turn: summarise an API response", "code": "import json\nbody = \"\"\"{\"items\": [\n  {\"name\": \"Asha\", \"city\": \"Pune\", \"fee\": 450},\n  {\"name\": \"Ravi\", \"city\": \"Delhi\", \"fee\": 800},\n  {\"name\": \"Meera\", \"city\": \"Pune\", \"fee\": 1200}\n]}\"\"\"\nrows = json.loads(body)[\"items\"]\nby_city = {}\nfor r in rows:\n    by_city.setdefault(r[\"city\"], []).append(r[\"name\"])\nprint(by_city)\nprint(\"total fees:\", sum(r[\"fee\"] for r in rows))"}] });
+
+  /* ========== Predict the output ========== */
+  const PZ = [{"id": "p1", "name": "1 · text or dict?", "q": "What's printed?", "opts": ["dict False", "str False", "str false"], "a": 1, "why": "A response body is text until you decode it. JSON <span class=\"mono\">false</span> becomes Python <span class=\"mono\">False</span>."}, {"id": "p2", "name": "2 · query strings", "q": "What's printed?", "opts": ["name=Asha Rao&city=Pune & Co", "name=Asha+Rao&city=Pune+%26+Co", "name=Asha%20Rao,city=Pune%26Co"], "a": 1, "why": "Spaces become + and & becomes %26, so values can't break the URL. Never build query strings with plain f-strings."}, {"id": "p3", "name": "3 · missing key", "q": "What's printed?", "opts": ["None 0 / None", "None 0 / KeyError: 'next'", "KeyError"], "a": 1, "why": "Optional fields may be absent. Use <span class=\"mono\">.get()</span> for those, and <span class=\"mono\">[ ]</span> only for fields the API guarantees."}, {"id": "p4", "name": "4 · status ranges", "q": "Which codes count as success?", "opts": ["200 only", "200, 201, 204", "200, 201, 204, 301"], "a": 1, "why": "Every 2xx is success: 201 Created and 204 No Content included. 3xx is a redirect (requests follows them for you), 4xx is your mistake, 5xx the server's."}];
+  $('pzChips').innerHTML = PZ.map((p, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${p.name}</button>`).join('');
+  function puzzle(i) {
+    const p = PZ[i], area = $('pzArea');
+    area.innerHTML = `<div class="two">
+        <div><pre class="codeblock static-code">${T[p.id].code.split('\n').map(l => `<span class="ln">${K.pyHighlight(l) || ' '}</span>`).join('')}</pre></div>
+        <div class="card predict"><div class="q">${p.q}</div><div class="opts">${p.opts.map((o, j) => `<button class="chip-btn" type="button" data-j="${j}">${o.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</button>`).join('')}</div><p class="status-line" style="text-align:left;margin:0" id="pzVerdict">Choose an answer to unlock the step-through.</p></div>
+      </div><div id="pzTrace"></div>`;
+    area.querySelectorAll('.predict .chip-btn').forEach(b => b.addEventListener('click', () => {
+      const j = +b.dataset.j, ok = j === p.a;
+      area.querySelectorAll('.predict .chip-btn').forEach((x, xj) => { x.disabled = true; x.classList.toggle('right', xj === p.a); x.classList.toggle('wrong', xj === j && !ok); });
+      $('pzVerdict').innerHTML = `<span class="${ok ? 'ok-text' : 'bad-text'}">${ok ? 'Correct.' : 'Not quite.'}</span> ${p.why} <b>Step through below to watch it happen.</b>`;
+      K.trace($('pzTrace'), T[p.id], { controls: true });
+    }));
+  }
+  $('pzChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('pzChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    puzzle(+b.dataset.i);
+  }));
+  $('pzChips').querySelector('button').click();
+
+  /* ===== An HTTP round trip ===== */
+  (function () {
+    const RQ = [{"label": "GET patients in Pune", "code": "r = requests.get(f\"{BASE}/patients\", params={\"city\": \"Pune\"}, headers=AUTH, timeout=10)", "req": "GET /v1/patients?city=Pune HTTP/1.1\nHost: api.example.com\nAuthorization: Bearer \u2022\u2022\u2022\u2022\nAccept: application/json", "status": "200 OK", "body": "{\n \"items\": [\n  {\n   \"id\": 7,\n   \"name\": \"Asha\",\n   \"age\": 35\n  },\n  {\n   \"id\": 9,\n   \"name\": \"Meera\",\n   \"age\": 29\n  }\n ],\n \"next\": null\n}", "py": "r.status_code \u2192 200\nr.raise_for_status() \u2192 (nothing, it's OK)\nr.json()[\"items\"][0][\"name\"] \u2192 'Asha'", "ok": true}, {"label": "POST a new appointment", "code": "r = requests.post(f\"{BASE}/appointments\", json={\"patient_id\": 7, \"slot\": \"2026-11-02T09:00\"}, headers=AUTH, timeout=10)", "req": "POST /v1/appointments HTTP/1.1\nHost: api.example.com\nAuthorization: Bearer \u2022\u2022\u2022\u2022\nContent-Type: application/json\n\n{\"patient_id\": 7, \"slot\": \"2026-11-02T09:00\"}", "status": "201 Created", "body": "{\n \"id\": 501,\n \"patient_id\": 7,\n \"slot\": \"2026-11-02T09:00\",\n \"status\": \"booked\"\n}", "py": "r.status_code \u2192 201\nr.json()[\"id\"] \u2192 501", "ok": true}, {"label": "GET a missing patient", "code": "r = requests.get(f\"{BASE}/patients/999\", headers=AUTH, timeout=10)", "req": "GET /v1/patients/999 HTTP/1.1\nHost: api.example.com\nAuthorization: Bearer \u2022\u2022\u2022\u2022", "status": "404 Not Found", "body": "{\n \"error\": \"patient 999 not found\"\n}", "py": "r.status_code \u2192 404\nr.ok \u2192 False\nr.raise_for_status() \u2192 raises requests.HTTPError: 404 Client Error", "ok": false}, {"label": "Forgot the token", "code": "r = requests.get(f\"{BASE}/patients\", timeout=10)", "req": "GET /v1/patients HTTP/1.1\nHost: api.example.com", "status": "401 Unauthorized", "body": "{\n \"error\": \"missing bearer token\"\n}", "py": "r.status_code \u2192 401\nr.raise_for_status() \u2192 raises requests.HTTPError: 401 Client Error", "ok": false}, {"label": "Server too slow", "code": "r = requests.get(f\"{BASE}/reports/yearly\", headers=AUTH, timeout=10)", "req": "GET /v1/reports/yearly HTTP/1.1\nHost: api.example.com\nAuthorization: Bearer \u2022\u2022\u2022\u2022", "status": "(no response within 10 s)", "body": "", "py": "requests.get(...) \u2192 raises requests.Timeout\n(no r object at all: wrap the call in try/except)", "ok": false}];
+    $('htBtns').innerHTML = RQ.map((r, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${r.label}</button>`).join('');
+    const e = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    async function go(i) {
+      const run = K.newRun('ht'), r = RQ[i], pill = $('htPill');
+      $('htCode').innerHTML = `<span class="ln">${K.pyHighlight(r.code)}</span>`;
+      $('htReq').textContent = ''; $('htBody').textContent = ''; $('htStatus').textContent = ''; $('htPy').textContent = '';
+      pill.className = 'ht-pill'; pill.textContent = r.req.split(' ')[0] + ' ' + r.req.split(' ')[1].split('?')[0];
+      try {
+        $('htReq').textContent = r.req; pill.classList.add('go'); await K.sleep(900, run);
+        if (!r.body) { pill.classList.add('lost'); pill.textContent = 'waiting…'; await K.sleep(900, run); $('htStatus').innerHTML = `<span class="bad-text">${r.status}</span>`; }
+        else {
+          pill.textContent = r.status; pill.classList.add('back', r.ok ? 'ok' : 'bad'); await K.sleep(900, run);
+          $('htStatus').innerHTML = `<span class="${r.ok ? 'ok-text' : 'bad-text'}">${r.status}</span>`; $('htBody').textContent = r.body;
+        }
+        $('htPy').innerHTML = e(r.py).replace(/raises ([\w.]+)/g, '<span class="bad-text">raises $1</span>');
+      } catch (er) { if (!(er instanceof K.Stop)) throw er; }
+    }
+    $('htBtns').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { $('htBtns').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); go(+b.dataset.i); }));
+  })();
+})();
+</script>
+</body>
+</html>

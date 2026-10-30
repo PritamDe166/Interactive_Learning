@@ -1,0 +1,25 @@
+{
+ "page": "context-managers",
+ "snippets": {
+  "walk": {
+   "code": "from contextlib import contextmanager\n\nclass Timer:\n    def __enter__(self):\n        print(\"enter\")\n        return self\n    def __exit__(self, exc_type, exc, tb):\n        print(\"exit, error:\", exc_type)\n        return False\n\nwith Timer() as t:\n    print(\"working\")\n\n@contextmanager\ndef booking(slot):\n    print(\"lock\", slot)\n    try:\n        yield f\"booked {slot}\"\n    finally:\n        print(\"unlock\", slot)\n\ntry:\n    with booking(\"9:00\") as b:\n        print(b)\n        raise ValueError(\"double booking\")\nexcept ValueError as e:\n    print(\"caught:\", e)",
+   "inputs": []
+  },
+  "p1": {
+   "code": "class CM:\n    def __enter__(self):\n        print(\"in\")\n    def __exit__(self, *exc):\n        print(\"out\")\n\ndef f():\n    with CM():\n        return \"result\"\n\nprint(f())",
+   "inputs": []
+  },
+  "p2": {
+   "code": "class CM:\n    def __enter__(self):\n        return 42\n    def __exit__(self, *exc):\n        pass\n\nwith CM() as x:\n    print(x)",
+   "inputs": []
+  },
+  "p3": {
+   "code": "from contextlib import suppress\nwith suppress(KeyError):\n    print({}[\"x\"])\n    print(\"never\")\nprint(\"after\")",
+   "inputs": []
+  },
+  "p4": {
+   "code": "with open(\"cm.txt\", \"w\") as f:\n    f.write(\"hi\")\nprint(f.closed)\nf.write(\"more\")",
+   "inputs": []
+  }
+ }
+}

@@ -1,0 +1,25 @@
+{
+ "page": "type-hints",
+ "snippets": {
+  "walk": {
+   "code": "def with_tax(amount: float, rate: float = 0.18) -> float:\n    return amount * (1 + rate)\n\ndef find(names: list[str], wanted: str) -> int | None:\n    for i, name in enumerate(names):\n        if name == wanted:\n            return i\n    return None\n\nfee: float = with_tax(1000)\noops = with_tax(\"ab\", 2)\nwhere = find([\"Asha\", \"Ravi\"], \"Ravi\")\nprint(fee, oops, where)\nprint(with_tax.__annotations__)",
+   "inputs": []
+  },
+  "p1": {
+   "code": "def double(n: int) -> int:\n    return n * 2\n\nprint(double(\"7\"))",
+   "inputs": []
+  },
+  "p2": {
+   "code": "def avg(xs: list[int]) -> int:\n    return sum(xs) / len(xs)\n\nr = avg([1, 2])\nprint(r, type(r).__name__)",
+   "inputs": []
+  },
+  "p3": {
+   "code": "count: int\nprint(count)",
+   "inputs": []
+  },
+  "p4": {
+   "code": "def label(x: int | str) -> str:\n    if isinstance(x, int):\n        return f\"#{x:03d}\"\n    return x.upper()\n\nprint(label(7), label(\"vip\"))",
+   "inputs": []
+  }
+ }
+}
