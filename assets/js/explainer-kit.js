@@ -31,7 +31,10 @@
        tr.show(i)  render step i (line markers, frames, objects, arrows, output)
        tr.n        number of steps; tr.steps the raw trace steps
      Scalars inside containers are drawn inline; names in frames point to objects.
-   Kit.pyHighlight(line) returns HTML with .k/.s/.n/.c/.b token spans.
+   UML class diagrams: Kit.umlDefs(svg); Kit.classBox(svg, x, y, w, {name, stereo, fields, methods});
+   Kit.umlLink(svg, fromPt, toPt, 'uses'|'implements'|'inherits'|'creates', bends, label).
+   Kit.pyHighlight(line) / Kit.csHighlight(line) return HTML with .k/.s/.n/.c/.b token spans
+   (C#: .b marks type names). Kit.codeBlock(pre, code, 'cs'|'py') fills a .codeblock.
 
    Edit-and-run box (real Python via Pyodide, loaded on first Run):
      Kit.pyRunner(el, { starters: [{ label, code, inputs? }] })
@@ -87,6 +90,50 @@
     /** arrow line between two points; returns the <line> */
     arrow(parent, a, b, cls, marker = 'arr') {
       return K.el('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], class: 'msg ' + (cls || ''), 'marker-end': `url(#${marker})` }, parent);
+    },
+
+    /** UML markers for class diagrams; call once per <svg> before umlLink */
+    umlDefs(svg) {
+      if (svg.querySelector('#uml-tri')) return;
+      const d = K.el('defs', {}, svg);
+      d.innerHTML = '<marker id="uml-tri" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path class="uml-tri" d="M1 1 L11 6 L1 11 z"/></marker>'
+        + '<marker id="uml-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path class="uml-open" d="M1 1 L11 6 L1 11"/></marker>';
+    },
+
+    /** UML class box. x,y = top-left. spec: { name, stereo?, fields?: [], methods?: [] }.
+        Returns { g, h, rows: [<g> per field/method], top, bottom, left, right, cx, cy } */
+    classBox(parent, x, y, w, spec, cls) {
+      const g = K.el('g', { class: 'uml ' + (cls || '') }, parent);
+      const RH = 19, head = spec.stereo ? 40 : 28;
+      const fields = spec.fields || [], methods = spec.methods || [];
+      const h = head + (fields.length ? fields.length * RH + 8 : 0) + (methods.length ? methods.length * RH + 8 : 0) + (fields.length || methods.length ? 0 : 0);
+      K.el('rect', { x, y, width: w, height: h, rx: 8, class: 'uml-box' }, g);
+      if (spec.stereo) K.text(g, x + w / 2, y + 15, '«' + spec.stereo + '»', 'uml-stereo');
+      K.text(g, x + w / 2, y + head - 9, spec.name, 'uml-name');
+      const rows = []; let yy = y + head;
+      [[fields, 'f'], [methods, 'm']].forEach(([list, kind]) => {
+        if (!list.length) return;
+        K.el('line', { x1: x, y1: yy, x2: x + w, y2: yy, class: 'uml-sep' }, g);
+        yy += 4;
+        list.forEach(t => {
+          const r = K.el('g', { class: 'uml-row uml-' + kind }, g);
+          K.el('rect', { x: x + 3, y: yy, width: w - 6, height: RH - 1, rx: 4, class: 'uml-hl' }, r);
+          const tx = K.text(r, x + 10, yy + 13, t, 'uml-txt'); tx.style.textAnchor = 'start';
+          rows.push(r); yy += RH;
+        });
+        yy += 4;
+      });
+      return { g, h, rows, top: [x + w / 2, y], bottom: [x + w / 2, y + h], left: [x, y + h / 2], right: [x + w, y + h / 2], cx: x + w / 2, cy: y + h / 2 };
+    },
+
+    /** UML relationship from point a to b. kind: 'uses' (dashed, open arrow), 'implements' (dashed, hollow triangle),
+        'inherits' (solid, hollow triangle), 'creates' (solid, open arrow). pts: optional bend points. */
+    umlLink(parent, a, b, kind = 'uses', pts = [], label) {
+      const all = [a, ...pts, b];
+      const g = K.el('g', { class: 'uml-link ' + kind }, parent);
+      K.el('path', { d: 'M' + all.map(p => p.join(' ')).join(' L'), 'marker-end': `url(#${kind === 'implements' || kind === 'inherits' ? 'uml-tri' : 'uml-open'})` }, g);
+      if (label) { const m = all[Math.floor((all.length - 1) / 2)], n = all[Math.floor((all.length - 1) / 2) + 1]; K.text(g, (m[0] + n[0]) / 2, (m[1] + n[1]) / 2 - 6, label, 'mlabel halo'); }
+      return g;
     },
 
     /** request "pill" that can be moved with Kit.move */
@@ -189,6 +236,29 @@
         else out += esc(m[0]);
       }
       return out;
+    },
+
+    /** C# line highlighter: same token classes as pyHighlight (.k keyword, .s string, .n number, .c comment, .b type name) */
+    csHighlight(src) {
+      const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const KW = new Set('abstract as base bool break case catch class const continue decimal default do double else enum false finally float for foreach get if in init int interface internal is long namespace new null object override private protected public readonly record return sealed set static string this throw true try using var virtual void while async await required'.split(' '));
+      const re = /(\/\/.*$)|(\$?@?"(?:\\.|[^"\\])*")|(\b\d+(?:\.\d+)?m?\b)|([A-Za-z_]\w*)|([^\w"/$@]+|[/"$@])/g;
+      let out = '', m;
+      while ((m = re.exec(src))) {
+        if (m[1]) out += `<span class="c">${esc(m[1])}</span>`;
+        else if (m[2]) out += `<span class="s">${esc(m[2])}</span>`;
+        else if (m[3]) out += `<span class="n">${esc(m[3])}</span>`;
+        else if (m[4]) out += KW.has(m[4]) ? `<span class="k">${m[4]}</span>` : (/^[A-Z]/.test(m[4]) ? `<span class="b">${m[4]}</span>` : esc(m[4]));
+        else out += esc(m[0]);
+      }
+      return out;
+    },
+
+    /** fill a <pre class="codeblock"> with highlighted lines; lang 'cs' or 'py'; returns the line elements */
+    codeBlock(pre, code, lang = 'py') {
+      const hl = lang === 'cs' ? K.csHighlight : K.pyHighlight;
+      pre.innerHTML = code.replace(/\n$/, '').split('\n').map(l => `<span class="ln">${hl(l) || ' '}</span>`).join('');
+      return [...pre.children];
     },
 
     /** code stepper; see header */

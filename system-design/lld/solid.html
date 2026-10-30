@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SOLID Principles</title>
+<meta name="description" content="SOLID overview: five object-oriented design guidelines shown in one appointment-booking class diagram, with a spot-the-violation game.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/theme.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/explainer.css">
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/explainer-kit.js"></script>
+<style>
+  .pcards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 10px; margin-top: 8px; }
+  .pcard { display: grid; gap: 6px; padding: 14px; border: 1.5px solid var(--line); border-radius: 14px; background: var(--panel); text-decoration: none; color: var(--fg); transition: border-color .15s, transform .15s; }
+  a.pcard:hover { border-color: var(--teal); transform: translateY(-2px); }
+  .pcard .ltr { font-family: var(--mono); font-size: 28px; font-weight: 700; color: var(--accent-text); line-height: 1; }
+  .pcard b { font-size: 15px; }
+  .pcard span { font-size: 13px; color: var(--fg-soft); }
+  .pcard em { font-style: normal; font-size: 12px; color: var(--cyan); font-family: var(--mono); }
+  .pcard.soon { border-style: dashed; }
+  .pcard.soon em { color: var(--muted); }
+  .spot-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .spot-btns button { width: 46px; height: 46px; font-family: var(--mono); font-size: 20px; font-weight: 700; border-radius: 12px; border: 1.5px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; }
+  .spot-btns button:hover { border-color: var(--cyan); }
+  .spot-btns button.right { background: var(--teal); color: var(--on-accent); border-color: var(--teal); }
+  .spot-btns button.wrong { border-color: var(--red); color: var(--bad-text); }
+  .spot-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .dial-out { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 12px; margin-top: 12px; }
+  .dial-out .codeblock { margin: 0; min-height: 0; font-size: 12.5px; overflow-x: auto; }
+  .verdict { font-size: 15px; }
+  .verdict b.ok { color: var(--good-text); } .verdict b.warn { color: var(--accent-text); } .verdict b.bad { color: var(--bad-text); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← LLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">System Design · LLD · SOLID · Overview</div>
+    <h1>SOLID Principles</h1>
+    <ul class="lede">
+      <li>Five guidelines for object-oriented code that is <b>easy to change, test and extend</b>.</li>
+      <li><b>S</b>ingle responsibility · <b>O</b>pen-closed · <b>L</b>iskov substitution · <b>I</b>nterface segregation · <b>D</b>ependency inversion.</li>
+      <li>They work together: small focused classes, talking through <b>interfaces</b>, with implementations <b>plugged in</b> from outside.</li>
+      <li>They are <b>guidelines, not rules</b>. Applied mechanically they produce over-engineered code; the goal is simple code that is safe to change.</li>
+    </ul>
+  </header>
+
+  <section aria-labelledby="pcH">
+    <h2 class="stage-title" id="pcH">The five, one page each</h2>
+    <div class="stage-kind">Open a principle for its own walkthrough and playground</div>
+    <div class="pcards" id="pcards"></div>
+  </section>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: all five in one design</h2>
+    <div class="stage-kind">An appointment-booking feature · each step lights up one principle</div>
+    <div class="story wide" id="solidStory">
+      <div class="scroll"><svg class="diagram" id="solidSvg" style="min-width:0" viewBox="0 0 760 400" role="img" aria-label="Class diagram of an appointment booking design showing the five SOLID principles"></svg></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Spot which principle a snippet breaks, then see what happens when you apply SOLID too hard.</p>
+
+  <section aria-labelledby="spotH">
+    <h2 class="stage-title" id="spotH">1. Spot the violation</h2>
+    <div class="stage-kind">Read the C#, pick the principle it breaks most clearly</div>
+    <div class="spot-head"><div class="label" id="spotCount"></div><div class="label" id="spotScore"></div></div>
+    <pre class="codeblock" id="spotCode" style="min-height:0;overflow-x:auto"></pre>
+    <div class="spot-btns" id="spotBtns"></div>
+    <p class="status-line" id="spotWhy" style="text-align:left">Which letter? S, O, L, I or D.</p>
+    <div class="controls"><button class="btn" type="button" id="spotNext">Next snippet ▶</button></div>
+  </section>
+
+  <section aria-labelledby="dialH">
+    <h2 class="stage-title" id="dialH">2. Guidelines, not rules</h2>
+    <div class="stage-kind">One small feature, "send a welcome email" · turn up how strictly SOLID is applied</div>
+    <label class="label" for="dial">Strictness: <span id="dialV" class="mono"></span></label>
+    <input type="range" id="dial" min="0" max="3" value="1" style="width:100%">
+    <div class="dial-out">
+      <pre class="codeblock" id="dialCode"></pre>
+      <div class="card"><div class="label">Verdict</div><p class="verdict" id="dialVerdict"></p><p class="muted" id="dialCount"></p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">One class changes for unrelated reasons (DB, email, rules)</span><span class="arrow">→</span><span class="then"><b>S</b>: split by reason to change</span></li>
+      <li><span class="if">Every new type means editing a switch or if-chain in tested code</span><span class="arrow">→</span><span class="then"><b>O</b>: extend with a new class (decorator, strategy, extension method)</span></li>
+      <li><span class="if">A subclass throws NotImplementedException or changes expected behaviour</span><span class="arrow">→</span><span class="then"><b>L</b>: fix the hierarchy</span></li>
+      <li><span class="if">Implementers write empty or throwing methods they never use</span><span class="arrow">→</span><span class="then"><b>I</b>: split the interface</span></li>
+      <li><span class="if"><span class="mono">new SqlRepository()</span> inside a service; can't test without a real DB</span><span class="arrow">→</span><span class="then"><b>D</b>: depend on an interface, inject it through the constructor</span></li>
+      <li><span class="if">More interfaces than real alternatives, one method each</span><span class="arrow">→</span><span class="then">you've overdone it: keep it simple</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: the five at a glance</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>Principle</th><th>One line</th><th>Typical C# tool</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">S</td><td>Single responsibility</td><td>one reason to change</td><td>small classes, services, repositories</td></tr>
+          <tr><td class="mono">O</td><td>Open-closed</td><td>extend, don't modify tested code</td><td>decorator, strategy, extension methods, inheritance</td></tr>
+          <tr><td class="mono">L</td><td>Liskov substitution</td><td>a child works wherever its parent does</td><td>correct base classes; no "not implemented" overrides</td></tr>
+          <tr><td class="mono">I</td><td>Interface segregation</td><td>small, focused interfaces</td><td><span class="mono">IReader</span> / <span class="mono">IWriter</span>, combined when needed</td></tr>
+          <tr><td class="mono">D</td><td>Dependency inversion</td><td>depend on abstractions</td><td>interfaces + constructor injection (ASP.NET Core DI)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>The cautions in your notes:</b> you can follow every principle and still write bad code; over-applied interface segregation ends in one method per interface; most projects have one implementation per interface, so the main practical win of interfaces is <b>mocking in tests</b>, not swapping databases.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Where the name comes from:</b> the principles were collected by Robert C. Martin around 2000; Michael Feathers coined the SOLID acronym. Liskov substitution is from Barbara Liskov (1987).</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Name the five principles and give each a one-line meaning.<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>S</b> one reason to change · <b>O</b> extend without modifying · <b>L</b> subclasses must be substitutable · <b>I</b> no client forced to depend on methods it doesn't use · <b>D</b> depend on abstractions, not concrete classes.</p></div></details>
+      <details><summary>Which two principles does constructor injection in ASP.NET Core support most directly?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>D</b> (the service depends on an interface) and <b>O</b> (you can register a different or decorated implementation without editing the service). It also makes S easier to keep.</p></div></details>
+      <details><summary>A subclass overrides a method with <span class="mono">throw new NotImplementedException()</span>. Which principles are in trouble?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>L</b>: the child can't stand in for the parent. Often <b>I</b> too: the base type or interface promises more than every implementer can do.</p></div></details>
+      <details><summary>Why did your notes call SOLID "guidelines, not rules"?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Followed to the letter they can still produce bad, over-abstracted code. The speaker's main advice: <b>keep it simple</b> and apply the principles where change is actually expected.</p></div></details>
+      <details><summary>What is the most common real benefit of depending on interfaces?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Testability</b>: you can inject a fake or mock. Swapping the real implementation (e.g. a different database) is rarer than people expect.</p></div></details>
+      <details><summary>In an interview, how would you show SOLID rather than recite it?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Take one small design (booking, payments, notifications), point at a concrete smell, and show the before/after: which class changes now, and what you can test in isolation.</p></div></details>
+    </div>
+  </section>
+
+  <nav class="solid-nav" aria-label="SOLID pages"><a href="index.html">← LLD roadmap</a><a href="solid-srp.html">S · Single responsibility →</a></nav>
+
+  <footer>Sources: your Notion notes "SOLID Principles: Five Guidelines for Object-Oriented Code" (LLD, Topic-Wise Explanation); Robert C. Martin's SOLID articles; the principle pages linked above list their own sources. The booking design, snippets and strictness levels are illustrative.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  /* ===== principle cards (built: true once the page exists) ===== */
+  const P = [
+    ['S', 'Single responsibility', 'One reason to change', 'solid-srp.html', true],
+    ['O', 'Open-closed', 'Extend, don\'t modify', 'solid-ocp.html', true],
+    ['L', 'Liskov substitution', 'A child works wherever its parent does', 'solid-lsp.html', true],
+    ['I', 'Interface segregation', 'Small, focused interfaces', 'solid-isp.html', true],
+    ['D', 'Dependency inversion', 'Depend on abstractions', 'solid-dip.html', true]
+  ];
+  $('pcards').innerHTML = P.map(([l, n, s, f, built]) => built
+    ? `<a class="pcard" href="${f}"><span class="ltr">${l}</span><b>${n}</b><span>${s}</span><em>Open →</em></a>`
+    : `<div class="pcard soon"><span class="ltr">${l}</span><b>${n}</b><span>${s}</span><em>coming next</em></div>`).join('');
+
+  /* ===== walkthrough: one design, five principles ===== */
+  const sv = $('solidSvg'); K.umlDefs(sv);
+  const L = K.el('g', {}, sv), C = K.el('g', {}, sv), FX = K.el('g', {}, sv);
+  const report = K.classBox(C, 20, 16, 200, { name: 'ReportService', methods: ['+ DailyList(day)'] });
+  const booking = K.classBox(C, 280, 16, 220, { name: 'BookingService', methods: ['+ Book(patient, slot)', '+ Cancel(id)'] });
+  const reader = K.classBox(C, 20, 160, 200, { name: 'IAppointmentReader', stereo: 'interface', methods: ['+ GetByDay(day)'] }, 'iface');
+  const writer = K.classBox(C, 250, 160, 200, { name: 'IAppointmentWriter', stereo: 'interface', methods: ['+ Save(appt)'] }, 'iface');
+  const notifier = K.classBox(C, 530, 160, 210, { name: 'INotifier', stereo: 'interface', methods: ['+ Send(to, message)'] }, 'iface');
+  const sql = K.classBox(C, 110, 300, 250, { name: 'SqlAppointmentRepository', methods: ['+ GetByDay(day)', '+ Save(appt)'] });
+  const email = K.classBox(C, 460, 310, 130, { name: 'EmailNotifier' });
+  const sms = K.classBox(C, 610, 310, 130, { name: 'SmsNotifier' }, 'sx');
+  const lk = {
+    rr: K.umlLink(L, report.bottom, reader.top, 'uses'),
+    bw: K.umlLink(L, [booking.cx - 40, booking.bottom[1]], [writer.cx, writer.top[1]], 'uses'),
+    bn: K.umlLink(L, [booking.right[0], booking.cy], [notifier.cx, notifier.top[1]], 'uses', [[notifier.cx, booking.cy]]),
+    sr: K.umlLink(L, [sql.cx - 60, sql.top[1]], [reader.cx, reader.bottom[1]], 'implements'),
+    sw: K.umlLink(L, [sql.cx + 60, sql.top[1]], [writer.cx, writer.bottom[1]], 'implements'),
+    en: K.umlLink(L, email.top, [notifier.cx - 40, notifier.bottom[1]], 'implements'),
+    sn: K.umlLink(L, sms.top, [notifier.cx + 40, notifier.bottom[1]], 'implements')
+  };
+  lk.sn.classList.add('sx');
+  const tag = K.text(FX, 0, 0, '', 'mlabel accent');
+  const boxes = { report, booking, reader, writer, notifier, sql, email, sms };
+  const STEP = [
+    { on: Object.keys(boxes), links: Object.keys(lk), t: [] },
+    { on: ['booking', 'report', 'sql'], links: [], t: [[booking.cx, 108, 'S: booking rules only'], [report.cx, 82, 'S: reporting only'], [sql.cx, 372, 'S: SQL only']] },
+    { on: ['sms', 'notifier'], links: ['sn'], t: [[sms.cx, 365, 'O: added, nothing edited']] },
+    { on: ['email', 'sms', 'notifier', 'booking'], links: ['en', 'sn', 'bn'], t: [[notifier.cx, 150, 'L: either one can stand in']] },
+    { on: ['reader', 'writer', 'report', 'sql'], links: ['rr', 'sr', 'sw', 'bw'], t: [[reader.cx, 252, 'I: reports only see reads']] },
+    { on: ['reader', 'writer', 'notifier', 'booking', 'report'], links: ['rr', 'bw', 'bn'], t: [[400, 128, 'D: services → interfaces']] },
+    { on: Object.keys(boxes), links: Object.keys(lk), t: [] }
+  ];
+  function show(i) {
+    FX.textContent = '';
+    const s = STEP[i];
+    Object.entries(boxes).forEach(([k, b]) => { b.g.classList.toggle('dim', i > 0 && i < 6 && !s.on.includes(k)); b.g.classList.toggle('on', i > 0 && i < 6 && s.on.includes(k)); });
+    Object.entries(lk).forEach(([k, l]) => { l.classList.toggle('dim', i > 0 && i < 6 && !s.links.includes(k)); l.classList.toggle('hot', i > 0 && i < 6 && s.links.includes(k)); });
+    sms.g.classList.toggle('gone', i < 2); lk.sn.classList.toggle('gone', i < 2);
+    s.t.forEach(([x, y, t]) => K.text(FX, x, y, t, 'mlabel accent halo'));
+  }
+  K.story({
+    root: $('solidStory'), show, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'One small booking design', text: 'Two services, three interfaces, three implementations. Dashed boxes are <b>interfaces</b>; dashed arrows mean "uses", arrows with a hollow triangle mean "implements". Each next step points out one principle.' },
+      { title: 'S · each class has one job', text: '<span class="mono">BookingService</span> holds booking rules, <span class="mono">ReportService</span> builds reports, <span class="mono">SqlAppointmentRepository</span> talks to the database. Each changes for one reason.' },
+      { title: 'O · add SMS without editing anything', text: 'Reminders by SMS? Add <span class="mono">SmsNotifier</span> and register it. <span class="mono">BookingService</span> and its tests are untouched: open for extension, closed for modification.', play: async run => { sms.g.classList.remove('gone'); lk.sn.classList.remove('gone'); await K.sleep(500, run); } },
+      { title: 'L · any notifier can stand in', text: 'BookingService calls <span class="mono">INotifier.Send</span>. Email or SMS must both honour that contract, so either can be substituted without surprises (no "not supported" exceptions).',
+        play: async run => { const p = K.pill(FX, 'Send()'); await K.move(p, [booking.right[0], booking.cy], [notifier.cx, notifier.top[1] - 4], 600, run); await K.move(p, [notifier.cx, notifier.bottom[1]], [sms.cx, sms.top[1]], 500, run); p.remove(); } },
+      { title: 'I · readers and writers split', text: 'The repository implements two small interfaces. <span class="mono">ReportService</span> depends only on <span class="mono">IAppointmentReader</span>, so it can\'t accidentally write, and a read-only fake for tests needs just one method.' },
+      { title: 'D · services point at interfaces', text: 'Every arrow from a service ends at an <b>interface</b>, never at <span class="mono">SqlAppointmentRepository</span> or <span class="mono">EmailNotifier</span>. The concrete classes are injected through constructors (ASP.NET Core DI).', tip: 'Draw this kind of diagram in LLD interviews: services on top, interfaces in the middle, implementations at the bottom. It shows D, I and O at a glance.' },
+      { title: 'And keep it simple', text: 'This design earns its interfaces: there really are two notifiers, and fakes make the services testable. If you only ever had one implementation and no tests, fewer abstractions would be better. That\'s the "guidelines, not rules" point.' }
+    ]
+  });
+
+  /* ===== spot the violation ===== */
+  const SPOT = [
+    { a: 'S', code: `public class InvoiceService
+{
+    public decimal CalculateTotal(Order o) { ... }
+    public void SaveToDatabase(Invoice i) { ... }
+    public void EmailPdf(Invoice i, string to) { ... }
+}`, why: 'Pricing, persistence and email change for different reasons and different teams: three responsibilities in one class.' },
+    { a: 'O', code: `public decimal Discount(Patient p)
+{
+    switch (p.Plan)
+    {
+        case "Basic":   return 0m;
+        case "Gold":    return 0.10m;
+        case "Platinum": return 0.20m;
+        // every new plan = edit this tested method
+    }
+}`, why: 'Each new plan means modifying existing, tested code. Give each plan its own discount strategy class and add new ones without editing this.' },
+    { a: 'L', code: `public class ReadOnlyFile : AppFile
+{
+    public override void Write(string text)
+        => throw new NotSupportedException();
+}`, why: 'Code that writes to an AppFile breaks when handed a ReadOnlyFile. The child can\'t stand in for its parent, so the hierarchy is wrong.' },
+    { a: 'I', code: `public interface IRepository<T>
+{
+    T Get(int id);  IEnumerable<T> GetAll();
+    void Add(T item);  void Update(T item);
+    void Delete(int id);  void BulkImport(Stream csv);
+}
+public class AuditLogReader : IRepository<AuditEntry> { /* 4 of 6 throw */ }`, why: 'A reader is forced to implement Add, Update, Delete and BulkImport. Split into IReadRepository and IWriteRepository. (The throwing methods also break L.)' },
+    { a: 'D', code: `public class OrderService
+{
+    private readonly SqlOrderRepository _repo = new SqlOrderRepository();
+    public void Place(Order o) => _repo.Save(o);
+}`, why: 'The high-level service creates a concrete low-level class. Depend on IOrderRepository and receive it through the constructor, then tests can pass a fake.' },
+    { a: 'L', code: `public class Square : Rectangle
+{
+    public override int Width
+    {
+        set { base.Width = value; base.Height = value; }
+    }
+}
+// caller: r.Width = 5; r.Height = 4; Assert(r.Area == 20); fails for Square`, why: 'The classic Liskov example: a Square changes Rectangle\'s behaviour, so code written for Rectangle gets wrong answers.' },
+    { a: 'O', code: `public string Export(Report r, string format)
+{
+    if (format == "pdf") return PdfExport(r);
+    else if (format == "csv") return CsvExport(r);
+    // adding "xlsx" means editing this method again
+    throw new ArgumentException(format);
+}`, why: 'A growing if-chain over types. Register IReportExporter implementations and pick one by format; new formats are new classes.' }
+  ];
+  let si = 0, answered = false, missed = false, score = 0;
+  $('spotBtns').innerHTML = 'SOLID'.split('').map(l => `<button type="button" data-l="${l}" aria-label="${l}">${l}</button>`).join('');
+  function load() {
+    answered = false; missed = false; const s = SPOT[si];
+    K.codeBlock($('spotCode'), s.code, 'cs');
+    $('spotCount').textContent = `Snippet ${si + 1} of ${SPOT.length}`;
+    $('spotBtns').querySelectorAll('button').forEach(b => b.className = '');
+    $('spotWhy').textContent = 'Which letter? S, O, L, I or D.';
+  }
+  $('spotBtns').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    if (answered) return; const s = SPOT[si];
+    if (b.dataset.l === s.a) { b.className = 'right'; answered = true; if (!missed) score++; $('spotWhy').innerHTML = `<b class="ok-text">${s.a}, right.</b> ${s.why}`; }
+    else { b.className = 'wrong'; missed = true; $('spotWhy').innerHTML = `<b class="bad-text">Not ${b.dataset.l}.</b> Look again: what would have to change, and who would it break?`; }
+    $('spotScore').textContent = `first-try score: ${score} / ${SPOT.length}`;
+  }));
+  $('spotNext').addEventListener('click', () => { si = (si + 1) % SPOT.length; load(); });
+  load();
+
+  /* ===== strictness dial ===== */
+  const D = [
+    { n: 'Script-level', code: `public class Student
+{
+    public void SendWelcomeEmail() { ... }   // SMTP inside the entity
+}`, v: '<b class="warn">Fine for a throwaway script.</b> In an app, Student now changes for email reasons and can\'t be tested without SMTP.', c: '1 class, 0 interfaces' },
+    { n: 'Right-sized', code: `public class WelcomeEmailSender
+{
+    public void Send(Student s) { ... }
+}`, v: '<b class="ok">Good default.</b> One clear responsibility (S), easy to find, nothing speculative.', c: '1 class, 0 interfaces' },
+    { n: 'Testable', code: `public interface IEmailSender { void Send(Email e); }
+public class SmtpEmailSender : IEmailSender { ... }
+
+public class WelcomeService(IEmailSender email)
+{
+    public void Welcome(Student s) => email.Send(...);
+}`, v: '<b class="ok">Good when you test it.</b> D lets tests inject a fake sender; DI registers SmtpEmailSender. The interface pays for itself.', c: '2 classes, 1 interface' },
+    { n: 'Over-engineered', code: `public interface IEmailSender { void Send(Email e); }
+public interface IEmailFactory { Email Create(Student s); }
+public interface ITemplateProvider { string Get(string key); }
+public interface IAddressFormatter { string Format(Student s); }
+public interface ISubjectLineBuilder { string Build(Student s); }
+public class WelcomeEmailFactory : IEmailFactory { ... }
+// ...five interfaces, one implementation each, for one email`, v: '<b class="bad">Too far.</b> Every rule obeyed, yet the code is harder to read and change. One method per interface is the ISP trap from your notes. Keep it simple.', c: '6+ classes, 5 interfaces' }
+  ];
+  function dial() {
+    const d = D[+$('dial').value];
+    $('dialV').textContent = d.n; K.codeBlock($('dialCode'), d.code, 'cs');
+    $('dialVerdict').innerHTML = d.v; $('dialCount').textContent = d.c;
+  }
+  $('dial').addEventListener('input', dial); dial();
+})();
+</script>
+</body>
+</html>

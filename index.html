@@ -37,9 +37,9 @@
 <script>
 /* ===== Edit these two lists as you add work. ===== */
 const SUBJECTS = [
-  {name:"System Design", path:"system-design-explainers/index.html", accent:"var(--teal)", icon:"net",
-   blurb:"119-day roadmap: networking, scaling, caching, databases, distributed systems and reliability.",
-   done:13, total:119, unit:"days", pages:11},
+  {name:"System Design", path:"system-design/index.html", accent:"var(--teal)", icon:"net",
+   blurb:"Two tracks. HLD: 119-day roadmap of networking, scaling, caching, databases, distributed systems and reliability. LLD: SOLID and object-oriented design, more as you learn.",
+   done:13, total:119, unit:"HLD days", pages:17},
   {name:"AWS", path:"aws-cloud-practitioner/index.html", accent:"var(--orange)", icon:"cloud",
    blurb:"Cloud Practitioner (CLF-C02): core services, pricing models, shared responsibility, Well-Architected.",
    done:12, total:19, unit:"sections", pages:12},
@@ -51,12 +51,12 @@ const SUBJECTS = [
    done:0, total:null, unit:"topics"}
 ];
 const RECENT = [
-  {subject:"Python", title:"Working with APIs", note:"Topic 20", href:"python-fundamentals/working-with-apis.html"},
-  {subject:"Python", title:"Type hints", note:"Topic 19", href:"python-fundamentals/type-hints.html"},
-  {subject:"Python", title:"OOP deeper", note:"Topic 18", href:"python-fundamentals/oop-deeper.html"},
-  {subject:"Python", title:"Context managers", note:"Topic 17", href:"python-fundamentals/context-managers.html"},
-  {subject:"Python", title:"Decorators", note:"Topic 16", href:"python-fundamentals/decorators.html"},
-  {subject:"Python", title:"Iterators & generators", note:"Topic 14", href:"python-fundamentals/iterators-generators.html"}
+  {subject:"System Design", title:"SOLID: Dependency inversion", note:"LLD", href:"system-design/lld/solid-dip.html"},
+  {subject:"System Design", title:"SOLID: Interface segregation", note:"LLD", href:"system-design/lld/solid-isp.html"},
+  {subject:"System Design", title:"SOLID: Liskov substitution", note:"LLD", href:"system-design/lld/solid-lsp.html"},
+  {subject:"System Design", title:"SOLID: Open-closed", note:"LLD", href:"system-design/lld/solid-ocp.html"},
+  {subject:"System Design", title:"SOLID: Single responsibility", note:"LLD", href:"system-design/lld/solid-srp.html"},
+  {subject:"System Design", title:"SOLID principles overview", note:"LLD", href:"system-design/lld/solid.html"}
 ];
 
 /* ===== Render ===== */

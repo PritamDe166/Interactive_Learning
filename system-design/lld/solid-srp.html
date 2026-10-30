@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Single Responsibility Principle</title>
+<meta name="description" content="SOLID, S: a class should have one reason to change. A god class splits into focused classes; change requests show why.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/theme.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/explainer.css">
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/explainer-kit.js"></script>
+<style>
+  .files { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-top: 12px; }
+  .file { border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--panel-2); min-height: 92px; transition: border-color .25s, box-shadow .25s; }
+  .file .fname { font-family: var(--mono); font-size: 13px; color: var(--fg); }
+  .file .ftests { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .file .devs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; min-height: 26px; }
+  .file .dev { font-size: 12px; padding: 3px 8px; border-radius: 999px; background: var(--teal-wash); color: var(--fg); animation: pop .25s ease-out; }
+  .file.touched { border-color: var(--cyan); }
+  .file.conflict { border-color: var(--red); box-shadow: 0 0 0 3px color-mix(in srgb, var(--red) 18%, transparent); }
+  @keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+  .sorter { display: grid; gap: 8px; margin-top: 10px; }
+  .sorter .row { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1.6fr); gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+  @media (max-width: 640px) { .sorter .row { grid-template-columns: 1fr; } }
+  .sorter select { font: inherit; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); }
+  .sorter .why { font-size: 13px; color: var(--fg-soft); }
+  .sorter .row.ok { border-color: var(--teal); }
+  .sorter .row.no { border-color: var(--red); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← LLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="solid-letters" aria-label="SOLID principles"><a href="solid.html" title="Overview">∗</a><b title="Single responsibility">S</b><a href="solid-ocp.html" title="Open-closed">O</a><a href="solid-lsp.html" title="Liskov substitution">L</a><a href="solid-isp.html" title="Interface segregation">I</a><a href="solid-dip.html" title="Dependency inversion">D</a></div>
+    <div class="eyebrow">System Design · LLD · SOLID · S</div>
+    <h1>Single Responsibility Principle</h1>
+    <ul class="lede">
+      <li>A class should have <b>one reason to change</b>.</li>
+      <li>A "reason to change" is usually a <b>person or team</b> who asks for changes: the DBA, marketing, the academic office.</li>
+      <li>When one class serves several of them, every request edits the <b>same file</b>: more bugs, more merge conflicts, harder tests.</li>
+      <li>The fix is to <b>split by reason to change</b>, not to give every method its own class. Closely related responsibilities stay together.</li>
+    </ul>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: one Student class, three teams</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="srpStory">
+      <div class="scroll"><svg class="diagram" id="srpSvg" style="min-width:0" viewBox="0 0 760 370" role="img" aria-label="Class diagram of a Student class being split into focused classes"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="codeH">
+    <h2 class="stage-title" id="codeH">The same thing in C#</h2>
+    <div class="stage-kind">Before and after, side by side</div>
+    <div class="cs-pair">
+      <div><div class="label bad-text">Before: one class, four jobs</div><pre class="codeblock" id="csBefore"></pre></div>
+      <div><div class="label ok-text">After: one reason to change each</div><pre class="codeblock" id="csAfter"></pre></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Send change requests to each design, then sort a real class's methods yourself.</p>
+
+  <section aria-labelledby="simH">
+    <h2 class="stage-title" id="simH">1. Change-request simulator</h2>
+    <div class="stage-kind">Four people pick up four tickets in the same sprint · which files do they touch?</div>
+    <div class="controls" style="flex-wrap:wrap;gap:14px">
+      <div class="chip-group" style="margin:0"><div class="label">Design</div><div class="seg" id="simDesign" role="group" aria-label="Design"><button type="button" data-v="before" aria-pressed="true">Before: Student does it all</button><button type="button" data-v="after" aria-pressed="false">After: split by reason</button></div></div>
+    </div>
+    <div class="chips" id="simTickets" style="margin-top:10px"></div>
+    <div class="files" id="simFiles"></div>
+    <div class="kpis">
+      <div class="kpi" id="kFiles"><b>0</b><span>files edited</span></div>
+      <div class="kpi" id="kConf"><b>0</b><span>merge conflicts (two people, one file)</span></div>
+      <div class="kpi" id="kTests"><b>0</b><span>test classes to re-run</span></div>
+    </div>
+    <div class="controls" style="margin-top:10px"><button class="btn" type="button" id="simAll">Send all four tickets</button><button class="btn" type="button" id="simReset">Reset</button></div>
+    <p class="status-line" id="simStatus">Pick tickets, then switch the design and send the same ones again.</p>
+  </section>
+
+  <section aria-labelledby="sortH">
+    <h2 class="stage-title" id="sortH">2. Sort an AppointmentService</h2>
+    <div class="stage-kind">Give each method a home · then check against the suggested split</div>
+    <pre class="codeblock" id="csAppt" style="min-height:0"></pre>
+    <div class="sorter" id="sorter"></div>
+    <div class="controls" style="margin-top:10px"><button class="btn primary" type="button" id="sortCheck">Check my split</button><button class="btn" type="button" id="sortShow">Show suggested split</button></div>
+    <p class="status-line" id="sortStatus">Ask of each method: who would ask me to change this?</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Class name ends in Manager, Helper, Utils, Processor</span><span class="arrow">→</span><span class="then">probably several responsibilities; list who changes it</span></li>
+      <li><span class="if">A class mixes business rules with SQL, SMTP, HTTP or file I/O</span><span class="arrow">→</span><span class="then">move the I/O into its own class (repository, sender, client)</span></li>
+      <li><span class="if">Unrelated features keep causing merge conflicts in one file</span><span class="arrow">→</span><span class="then">that file has more than one reason to change</span></li>
+      <li><span class="if">Tests need a database and an SMTP server to check one rule</span><span class="arrow">→</span><span class="then">the rule is tangled with I/O; split it out</span></li>
+      <li><span class="if">Tempted to make one class per method</span><span class="arrow">→</span><span class="then">stop: keep closely related methods together</span></li>
+      <li><span class="if">Interview: "what is SRP?"</span><span class="arrow">→</span><span class="then">"one reason to change, meaning one actor it answers to", plus an example</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: SRP in practice</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Responsibility</th><th>Changes when…</th><th>Typical home in a .NET app</th></tr></thead>
+        <tbody>
+          <tr><td>Data and simple derived values</td><td>the domain concept changes</td><td class="mono">Student (entity / record)</td></tr>
+          <tr><td>Business rules</td><td>the business changes a rule</td><td class="mono">EnrolmentService (domain / application service)</td></tr>
+          <tr><td>Persistence</td><td>the schema or database changes</td><td class="mono">StudentRepository, EF Core DbContext</td></tr>
+          <tr><td>Notifications</td><td>templates or providers change</td><td class="mono">WelcomeEmailSender (IEmailSender)</td></tr>
+          <tr><td>HTTP shape</td><td>the API contract changes</td><td class="mono">StudentsController + DTOs</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>Defining "reason to change":</b> Robert C. Martin, who named the principle, later phrased it as "a module should be responsible to one, and only one, actor". Asking <i>who</i> requests changes is more practical than counting methods.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>The limit from your notes:</b> a class doesn't have to do only one thing. Its responsibilities should be closely related so it doesn't bloat, and splitting too far just scatters one idea across many files.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Testing is the payoff you'll feel first:</b> once the rule lives in <span class="mono">EnrolmentService</span>, a unit test needs no database or mail server.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>State SRP in one sentence, and give the "actor" version.<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>A class should have one reason to change.</b> Put another way: it should answer to one actor (one team or role that requests changes).</p></div></details>
+      <details><summary>Why does a class with several reasons to change cause merge conflicts?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Unrelated features (email, database, enrolment) all live in one file, so developers working on different tickets edit the <b>same file at the same time</b>.</p></div></details>
+      <details><summary>A <span class="mono">ReportService</span> loads data, formats it as PDF and emails it. How would you split it?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Three reasons to change: data source, layout, delivery. For example <span class="mono">ReportDataLoader</span>, <span class="mono">PdfReportRenderer</span>, <span class="mono">ReportMailer</span>, plus a small coordinator that calls them in order.</p></div></details>
+      <details><summary>Does SRP mean every class should have one method?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>No.</b> A class can have many methods if they serve the same responsibility. <span class="mono">StudentRepository</span> can have Save, GetById and Delete.</p></div></details>
+      <details><summary>Where should <span class="mono">GetDisplayName()</span> live, on Student or a separate formatter?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>On <b>Student</b> is fine: it's a simple value derived from the student's own data and changes for the same reason. Move it out only if formatting rules grow (locales, titles) and change for different reasons.</p></div></details>
+      <details><summary>Which SRP benefit shows up most in daily work?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Easier testing and smaller, safer changes.</b> Each class can be tested without the others, and a change touches one file with fewer side effects.</p></div></details>
+    </div>
+  </section>
+
+  <nav class="solid-nav" aria-label="SOLID pages"><a href="solid.html">← SOLID overview</a><a href="solid-ocp.html">O · Open-closed →</a></nav>
+
+  <footer>Sources: your Notion notes "SOLID Principles: Five Guidelines for Object-Oriented Code" (LLD, Topic-Wise Explanation); Robert C. Martin, <i>Clean Architecture</i> ("responsible to one actor"). Class names, tickets and the sorter example are illustrative.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  /* ===== C# before / after ===== */
+  K.codeBlock($('csBefore'), `public class Student
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = "";
+    public string Email { get; set; } = "";
+
+    public string GetDisplayName() => $"{Name} (#{Id})";
+
+    public void Save()                      // reason 2: database
+    {
+        using var db = new SqlConnection(Config.Db);
+        db.Execute("INSERT INTO Students ...", this);
+    }
+
+    public void SendWelcomeEmail()          // reason 3: email
+    {
+        var smtp = new SmtpClient("smtp.example.com");
+        smtp.Send("admin@example.com", Email,
+                  "Welcome", $"Hi {Name}");
+    }
+
+    public void Enrol(Course course)        // reason 4: rules
+    {
+        if (course.Students.Count >= course.Seats)
+            throw new InvalidOperationException("Course full");
+        course.Students.Add(this);
+    }
+}`, 'cs');
+  K.codeBlock($('csAfter'), `public class Student
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = "";
+    public string Email { get; set; } = "";
+    public string GetDisplayName() => $"{Name} (#{Id})";
+}
+
+public class StudentRepository        // changes with the DB
+{
+    public void Save(Student s) { ... }  // SQL only here
+}
+
+public class WelcomeEmailSender       // changes with email
+{
+    public void Send(Student s) { ... }  // SMTP only here
+}
+
+public class EnrolmentService         // changes with rules
+{
+    public void Enrol(Student s, Course c)
+    {
+        if (c.Students.Count >= c.Seats)
+            throw new InvalidOperationException("Course full");
+        c.Students.Add(s);
+    }
+}`, 'cs');
+
+  /* ===== Walkthrough ===== */
+  const sv = $('srpSvg');
+  K.umlDefs(sv);
+  const B = K.el('g', { class: 'sx' }, sv), A = K.el('g', { class: 'sx' }, sv), FX = K.el('g', {}, sv);
+  // before layout
+  const actors = [
+    { y: 70, t: 'DB team', s: 'add a Phone column', row: 5 },
+    { y: 180, t: 'Marketing', s: 'new welcome email', row: 6 },
+    { y: 290, t: 'Academic office', s: 'max 5 courses each', row: 7 }
+  ].map(a => ({ ...a, n: K.node(B, 95, a.y + 25, 160, 52, a.t, a.s) }));
+  const god = K.classBox(B, 300, 90, 250, { name: 'Student', fields: ['+ Id: int', '+ Name: string', '+ Email: string'], methods: ['+ GetDisplayName(): string', '+ Save()', '+ SendWelcomeEmail()', '+ Enrol(course)'] });
+  const rowY = r => +r.querySelector('rect').getAttribute('y') + 9;
+  const arrows = actors.map(a => { const l = K.umlLink(B, [175, a.y + 25], [300, rowY(god.rows[a.row - 1])], 'creates'); l.classList.add('sx'); return l; });
+  const file = K.node(B, 655, 178, 180, 64, 'Student.cs', '3 people editing');
+  file.g.classList.add('sx');
+  const conflict = K.text(B, 655, 232, '⚠ merge conflicts', 'mlabel bad'); conflict.classList.add('sx');
+  // after layout
+  const stu = K.classBox(A, 270, 22, 220, { name: 'Student', fields: ['+ Id, Name, Email'], methods: ['+ GetDisplayName(): string'] });
+  const svc = [
+    { x: 20, name: 'StudentRepository', m: '+ Save(student)', who: 'changes for: DB team' },
+    { x: 270, name: 'WelcomeEmailSender', m: '+ Send(student)', who: 'changes for: Marketing' },
+    { x: 520, name: 'EnrolmentService', m: '+ Enrol(student, course)', who: 'changes for: Academic office' }
+  ].map(o => { const b = K.classBox(A, o.x, 250, 220, { name: o.name, methods: [o.m] }); const l = K.umlLink(A, b.top, [stu.cx, stu.bottom[1]], 'uses', [[b.cx, 200], [stu.cx, 200]]); const w = K.text(A, b.cx, 250 + b.h + 22, o.who, 'mlabel muted'); return { b, l, w }; });
+  const keep = K.text(A, stu.cx, 22 + stu.h + 20, 'data + closely related helpers stay together', 'mlabel ok'); keep.classList.add('sx');
+
+  function show(i) {
+    FX.textContent = '';
+    const after = i >= 5;
+    B.classList.toggle('gone', after); A.classList.toggle('gone', !after);
+    god.rows.forEach((r, k) => { r.classList.remove('bad', 'dim'); });
+    actors.forEach((a, k) => { const on = i >= k + 1 && i <= 4; a.n.g.classList.toggle('bad', on); a.n.g.classList.toggle('dim', !on && i >= 1 && i <= 4); arrows[k].classList.toggle('gone', !on); if (on) god.rows[a.row - 1].classList.add('bad'); });
+    god.g.classList.toggle('bad', i === 4);
+    file.g.classList.toggle('gone', i !== 4); conflict.classList.toggle('gone', i !== 4); file.g.classList.toggle('bad', i === 4);
+    // after
+    svc.forEach((o, k) => {
+      const dim = i === 6 && k !== 0 || i === 7;
+      o.b.g.classList.toggle('dim', dim); o.l.classList.toggle('dim', dim); o.w.classList.toggle('dim', dim);
+      o.b.g.classList.toggle('on', i === 6 && k === 0);
+      o.w.classList.toggle('accent', i === 6 && k === 0);
+    });
+    stu.g.classList.toggle('dim', i === 6); stu.g.classList.toggle('on', i === 7);
+    keep.classList.toggle('gone', i !== 7);
+  }
+  async function hit(k, run) {
+    const a = actors[k], p = K.pill(FX, 'change', 'bad');
+    await K.move(p, [175, a.y + 25], [300, rowY(god.rows[a.row - 1])], 700, run); p.remove();
+  }
+  K.story({
+    root: $('srpStory'), show, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'One class, four jobs', text: '<span class="mono">Student</span> holds the student\'s data, formats a display name, <b>saves itself to SQL</b>, <b>sends an email</b> and <b>enforces enrolment rules</b>. It compiles and works. The trouble starts when things change.' },
+      { title: 'Change request 1: the database', text: 'The DB team adds a Phone column. Someone edits <span class="mono">Save()</span>, inside <span class="mono">Student.cs</span>.', play: run => hit(0, run) },
+      { title: 'Change request 2: the welcome email', text: 'Marketing wants a new email. Another person edits <span class="mono">SendWelcomeEmail()</span>, in the <b>same file</b>.', play: run => hit(1, run) },
+      { title: 'Change request 3: an enrolment rule', text: 'The academic office caps students at 5 courses. A third person edits <span class="mono">Enrol()</span>, again in <span class="mono">Student.cs</span>.', play: run => hit(2, run) },
+      { title: 'Three reasons to change = trouble', text: 'Three unrelated teams drive changes to one class: three people in one file, merge conflicts, and every change risks breaking the other jobs. Testing one rule needs a database and an SMTP server too.', tip: 'Define SRP by actors: "a class should answer to one team or role". It turns a vague rule into a question you can ask in a code review.' },
+      { title: 'Split by reason to change', text: 'Each responsibility moves to its own class: <span class="mono">StudentRepository</span> (database), <span class="mono">WelcomeEmailSender</span> (email), <span class="mono">EnrolmentService</span> (rules). Each <b>uses</b> Student; Student no longer knows about SQL or SMTP.' },
+      { title: 'Replay the database change', text: 'Adding the Phone column now touches <span class="mono">StudentRepository</span> only. The email and enrolment code aren\'t even opened, so they can\'t break, and their tests don\'t need re-running.' },
+      { title: 'Not "one method per class"', text: 'Student kept its fields <b>and</b> <span class="mono">GetDisplayName()</span>: it\'s derived from the student\'s own data and changes for the same reason. SRP groups <b>closely related</b> responsibilities; it doesn\'t atomise them.' }
+    ]
+  });
+
+  /* ===== Change-request simulator ===== */
+  const TICKETS = [
+    { id: 'db', dev: 'Asha', t: 'Add Phone column', before: 'Student.cs', after: 'StudentRepository.cs' },
+    { id: 'mail', dev: 'Ravi', t: 'New welcome email', before: 'Student.cs', after: 'WelcomeEmailSender.cs' },
+    { id: 'rule', dev: 'Meera', t: 'Max 5 courses', before: 'Student.cs', after: 'EnrolmentService.cs' },
+    { id: 'name', dev: 'John', t: 'Show title in display name', before: 'Student.cs', after: 'Student.cs' }
+  ];
+  const FILES = { before: { 'Student.cs': 'StudentTests (all 4 areas)' }, after: { 'Student.cs': 'StudentTests', 'StudentRepository.cs': 'StudentRepositoryTests', 'WelcomeEmailSender.cs': 'WelcomeEmailSenderTests', 'EnrolmentService.cs': 'EnrolmentServiceTests' } };
+  let design = 'before', sent = [];
+  $('simTickets').innerHTML = TICKETS.map(t => `<button class="chip-btn" type="button" data-id="${t.id}" aria-pressed="false">${t.dev}: ${t.t}</button>`).join('');
+  function draw() {
+    const files = FILES[design], who = {};
+    sent.forEach(id => { const t = TICKETS.find(x => x.id === id); (who[t[design]] = who[t[design]] || []).push(t.dev); });
+    $('simFiles').innerHTML = Object.keys(files).map(f => { const d = who[f] || []; return `<div class="file${d.length ? ' touched' : ''}${d.length > 1 ? ' conflict' : ''}"><div class="fname">${f}</div><div class="ftests">tests: ${files[f]}</div><div class="devs">${d.map(n => `<span class="dev">${n}</span>`).join('')}</div></div>`; }).join('');
+    const touched = Object.keys(who).length, conf = Object.values(who).reduce((n, d) => n + Math.max(0, d.length - 1), 0);
+    const tests = design === 'before' ? (touched ? 4 : 0) : touched;
+    $('kFiles').querySelector('b').textContent = touched;
+    $('kConf').querySelector('b').textContent = conf; $('kConf').className = 'kpi ' + (conf ? 'bad' : sent.length ? 'good' : '');
+    $('kTests').querySelector('b').textContent = tests;
+    $('simTickets').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(sent.includes(b.dataset.id))));
+    $('simStatus').innerHTML = !sent.length ? 'Pick tickets, then switch the design and send the same ones again.'
+      : design === 'before' ? `${sent.length} ticket${sent.length > 1 ? 's' : ''}, all in <span class="mono">Student.cs</span>${conf ? `: <b class="bad-text">${conf} merge conflict${conf > 1 ? 's' : ''}</b>` : ''}. Its single test class covers all four areas, so every change re-runs everything.`
+      : `${sent.length} ticket${sent.length > 1 ? 's' : ''} across ${touched} file${touched > 1 ? 's' : ''}${conf ? `: ${conf} conflict${conf > 1 ? 's' : ''}` : ', <b class="ok-text">no conflicts</b>'}. Only the touched classes' tests need re-running.`;
+  }
+  $('simTickets').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { const id = b.dataset.id; sent = sent.includes(id) ? sent.filter(x => x !== id) : [...sent, id]; draw(); }));
+  K.seg($('simDesign'), v => { design = v; draw(); });
+  $('simAll').addEventListener('click', () => { sent = TICKETS.map(t => t.id); draw(); });
+  $('simReset').addEventListener('click', () => { sent = []; draw(); });
+  draw();
+
+  /* ===== Sorter ===== */
+  K.codeBlock($('csAppt'), `public class AppointmentService   // 8 methods, how many reasons to change?
+{
+    public void BookSlot(Patient p, DateTime slot) { ... }
+    public void CancelSlot(int appointmentId) { ... }
+    public bool IsSlotFree(DateTime slot) { ... }
+    public void SendSmsReminder(Appointment a) { ... }
+    public void SendCancellationEmail(Appointment a) { ... }
+    public decimal CalculateFee(Appointment a) { ... }
+    public byte[] GenerateInvoicePdf(Appointment a) { ... }
+    public void SaveToDatabase(Appointment a) { ... }
+}`, 'cs');
+  const HOMES = ['Booking', 'Notifications', 'Billing', 'Persistence'];
+  const M = [
+    ['BookSlot', 'Booking', 'Core scheduling rules: the clinic\'s booking policy drives it.'],
+    ['CancelSlot', 'Booking', 'Same policy owner as booking: cancellation windows, refunds of slots.'],
+    ['IsSlotFree', 'Booking', 'A booking rule; it belongs with the code that uses it.'],
+    ['SendSmsReminder', 'Notifications', 'Changes when the SMS provider or wording changes.'],
+    ['SendCancellationEmail', 'Notifications', 'Same reason as SMS: messaging channel and templates.'],
+    ['CalculateFee', 'Billing', 'Changes when finance changes pricing or tax.'],
+    ['GenerateInvoicePdf', 'Billing', 'Billing output; finance owns its content. (A separate InvoiceRenderer is also fine if layout changes often.)'],
+    ['SaveToDatabase', 'Persistence', 'Changes with the schema: belongs in an AppointmentRepository.']
+  ];
+  $('sorter').innerHTML = M.map(([m], i) => `<div class="row" data-i="${i}"><span class="mono">${m}()</span><select aria-label="Home for ${m}"><option value="">choose a class…</option>${HOMES.map(h => `<option>${h}</option>`).join('')}</select><span class="why"></span></div>`).join('');
+  const rows = [...$('sorter').children];
+  function check(reveal) {
+    let ok = 0, blank = 0;
+    rows.forEach((r, i) => {
+      const sel = r.querySelector('select'); if (reveal) sel.value = M[i][1];
+      const v = sel.value; r.classList.remove('ok', 'no');
+      if (!v) { blank++; r.querySelector('.why').textContent = ''; return; }
+      const good = v === M[i][1]; if (good) ok++;
+      r.classList.add(good ? 'ok' : 'no');
+      r.querySelector('.why').innerHTML = (good ? '✓ ' : `✗ suggested: <b>${M[i][1]}</b>. `) + M[i][2];
+    });
+    $('sortStatus').innerHTML = reveal ? 'Suggested split: <span class="mono">BookingService</span>, <span class="mono">AppointmentNotifier</span>, <span class="mono">BillingService</span>, <span class="mono">AppointmentRepository</span>. Four classes, each answering to one team.'
+      : blank ? `${ok} right so far; ${blank} still to place.` : ok === M.length ? '<b class="ok-text">All 8 match.</b> Four classes, one reason to change each.' : `${ok} of 8 match the suggested split. Read the reasons on the others: ask who would request a change.`;
+  }
+  $('sortCheck').addEventListener('click', () => check(false));
+  $('sortShow').addEventListener('click', () => check(true));
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Open-Closed Principle</title>
+<meta name="description" content="SOLID, O: add behaviour without editing tested code. A fee calculator moves from a switch to strategies, a repository gains caching through a decorator.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/theme.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/explainer.css">
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/explainer-kit.js"></script>
+<style>
+  .chain { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0; margin-top: 12px; }
+  .layer { border: 2px solid var(--line); border-radius: 14px; padding: 10px 12px; margin: 4px; background: var(--panel); transition: border-color .25s, box-shadow .25s; min-width: 140px; }
+  .layer .ln1 { font-family: var(--mono); font-size: 13px; color: var(--fg); }
+  .layer .ln2 { font-size: 12px; color: var(--muted); }
+  .layer.hot { border-color: var(--cyan); box-shadow: 0 0 0 3px var(--teal-wash); }
+  .layer.core { border-color: var(--teal); }
+  .chain .arr { align-self: center; color: var(--muted); padding: 0 2px; }
+  .ocp-log { margin: 6px 0 0; min-height: 90px; white-space: pre-wrap; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← LLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="solid-letters" aria-label="SOLID principles"><a href="solid.html" title="Overview">∗</a><a href="solid-srp.html" title="Single responsibility">S</a><b title="Open-closed">O</b><a href="solid-lsp.html" title="Liskov substitution">L</a><a href="solid-isp.html" title="Interface segregation">I</a><a href="solid-dip.html" title="Dependency inversion">D</a></div>
+    <div class="eyebrow">System Design · LLD · SOLID · O</div>
+    <h1>Open-Closed Principle</h1>
+    <ul class="lede">
+      <li>Code should be <b>open for extension</b> but <b>closed for modification</b>: add new behaviour by adding new code, not by editing classes that already work and are tested.</li>
+      <li>The usual smell is a <b>switch or if-chain over types</b> that grows with every new case.</li>
+      <li>Common tools in C#: <b>strategy</b> (one class per variant behind an interface), <b>decorator</b> (wrap a class to add behaviour), <b>extension methods</b>, inheritance.</li>
+      <li>No design is closed against <i>every</i> change. Close it against the changes you actually expect.</li>
+    </ul>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: fees, plans and a cache</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="ocpStory">
+      <div class="scroll"><svg class="diagram" id="ocpSvg" style="min-width:0" viewBox="0 0 760 380" role="img" aria-label="Class diagrams showing a fee calculator refactored to strategies, then a repository decorated with caching"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="codeH">
+    <h2 class="stage-title" id="codeH">The same thing in C#</h2>
+    <div class="stage-kind">Strategy for new plans · decorator for new behaviour</div>
+    <div class="cs-pair">
+      <div><div class="label bad-text">Before: every new plan edits this method</div><pre class="codeblock" id="csBefore"></pre></div>
+      <div><div class="label ok-text">After: a new plan is a new class</div><pre class="codeblock" id="csAfter"></pre></div>
+    </div>
+    <div class="cs-pair" style="margin-top:12px">
+      <div><div class="label ok-text">Decorator: caching added around the real repository</div><pre class="codeblock" id="csDeco"></pre></div>
+      <div><div class="label ok-text">Extension method: a new method on a type you can't edit</div><pre class="codeblock" id="csExt"></pre></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Add plans to both designs, then build a decorator stack and call it.</p>
+
+  <section aria-labelledby="simH">
+    <h2 class="stage-title" id="simH">1. Add three new plans</h2>
+    <div class="stage-kind">Same three requests, two designs · count what you touch in tested code</div>
+    <div class="seg" id="plDesign" role="group" aria-label="Design"><button type="button" data-v="switch" aria-pressed="true">switch in FeeCalculator</button><button type="button" data-v="strategy" aria-pressed="false">IDiscountPolicy strategies</button></div>
+    <div class="chips" id="plBtns" style="margin-top:10px"></div>
+    <div class="two" style="margin-top:10px">
+      <div><div class="label">Files changed</div><pre class="codeblock" id="plFiles" style="min-height:0;margin:4px 0 0"></pre></div>
+      <div><div class="label">Existing tests</div><div class="tests" id="plTests"></div></div>
+    </div>
+    <div class="kpis">
+      <div class="kpi" id="kEdit"><b>0</b><span>edits to tested, shipped code</span></div>
+      <div class="kpi" id="kNew"><b>0</b><span>new files</span></div>
+      <div class="kpi" id="kRisk"><b>0</b><span>old tests at risk</span></div>
+    </div>
+    <div class="controls" style="margin-top:10px"><button class="btn" type="button" id="plReset">Reset</button></div>
+    <p class="status-line" id="plStatus">Pick a design, then add plans.</p>
+  </section>
+
+  <section aria-labelledby="decoH">
+    <h2 class="stage-title" id="decoH">2. Decorator stack builder</h2>
+    <div class="stage-kind">Wrap the real repository in layers · then call GetPatient(42) twice</div>
+    <div class="chips" id="dcBtns"><button class="chip-btn" type="button" data-k="log" aria-pressed="false">+ Logging</button><button class="chip-btn" type="button" data-k="cache" aria-pressed="false">+ Caching</button><button class="chip-btn" type="button" data-k="retry" aria-pressed="false">+ Retry</button></div>
+    <div class="chain" id="dcChain"></div>
+    <pre class="codeblock" id="dcCode" style="min-height:0;margin-top:10px"></pre>
+    <div class="controls"><button class="btn primary" type="button" id="dcCall">Call GetPatient(42) twice</button></div>
+    <div class="card"><div class="label">What happened</div><pre class="mono ocp-log" id="dcLog">Add layers, then call.</pre></div>
+    <p class="status-line" id="dcStatus">BookingService only sees IPatientRepository, so none of this needed a change to it.</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">A switch / if-chain on a type, plan, format or channel keeps growing</span><span class="arrow">→</span><span class="then">strategy: one class per case behind an interface</span></li>
+      <li><span class="if">Need logging, caching, retry or metrics around an existing service</span><span class="arrow">→</span><span class="then">decorator registered in DI; the service is untouched</span></li>
+      <li><span class="if">Want a helper on a type you can't edit (string, DateTime, a library class)</span><span class="arrow">→</span><span class="then">extension method (no runtime switching)</span></li>
+      <li><span class="if">Choosing an implementation at runtime by key</span><span class="arrow">→</span><span class="then">register all strategies; pick by key (dictionary or keyed services)</span></li>
+      <li><span class="if">"What if we need X someday?" with no evidence</span><span class="arrow">→</span><span class="then">don't add the abstraction yet; refactor when the second case arrives</span></li>
+      <li><span class="if">Interview: "how does OCP relate to plugins?"</span><span class="arrow">→</span><span class="then">the core knows only the interface; plugins (new classes) depend on the core, not the other way round</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: ways to extend without modifying</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Technique</th><th>How</th><th>Switch at runtime?</th><th>Watch out</th></tr></thead>
+        <tbody>
+          <tr><td>Strategy</td><td>interface + one class per variant; caller gets one injected or picks by key</td><td>yes</td><td>only worth it when variants really multiply</td></tr>
+          <tr><td>Decorator</td><td>new class implements the same interface and wraps the original</td><td>yes (via DI)</td><td>only covers public members of the interface</td></tr>
+          <tr><td>Extension methods</td><td>static method with <span class="mono">this T</span> in a separate file</td><td>no</td><td>can't see private state; easy to scatter</td></tr>
+          <tr><td>Inheritance</td><td>subclass overrides virtual members</td><td>yes</td><td>tight coupling to the base class; must respect Liskov</td></tr>
+          <tr><td>Events / pipelines</td><td>new handlers or middleware subscribe without changing the publisher</td><td>yes</td><td>harder to follow the flow</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>Origin:</b> Bertrand Meyer stated the principle in 1988 (<i>Object-Oriented Software Construction</i>), meaning extension by inheritance. Robert C. Martin's later version relies on interfaces and polymorphism, which is how it's taught today. Martin calls plugin systems such as IDE extensions the principle in its purest form: the core doesn't know its plugins.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Real examples people use:</b> discounts by customer type, notification channels, payment methods, report formats, tax rules. Each is a family of variants that grows over time, which is exactly where OCP pays off.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Strategic closure:</b> you can't predict every change. Close the design along the axes that are already varying (here: plans and cross-cutting concerns), and leave the rest simple until a real second case appears.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Why is editing a tested, shipped class riskier than adding a new one?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Every existing caller depends on it. An edit can break behaviour that already worked and forces you to re-test all of it; a new class can only affect the new case.</p></div></details>
+      <details><summary>Name two ways to add behaviour to a class without editing it, and which one can be switched at runtime.<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Decorator</b> (switchable at runtime via DI) and <b>extension methods</b> (compile-time only). Strategy and inheritance also work.</p></div></details>
+      <details><summary>Your <span class="mono">PaymentProcessor</span> has <span class="mono">if (method == "card") … else if (method == "upi")</span>. How do you make it OCP-friendly?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Define <span class="mono">IPaymentMethod</span> with <span class="mono">Pay()</span>; implement <span class="mono">CardPayment</span>, <span class="mono">UpiPayment</span>; register them and pick one by key. Adding wallets is a new class.</p></div></details>
+      <details><summary>What can't a decorator do?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Change private or non-interface behaviour: it only sees the public interface members it wraps.</p></div></details>
+      <details><summary>Does OCP mean you must never edit an existing class?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>No.</b> Bug fixes and refactoring are edits. OCP is about structuring code so that <i>expected</i> new variants don't require edits.</p></div></details>
+      <details><summary>How is OCP connected to Liskov substitution?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Extension through interfaces only works if every new implementation honours the contract. A new strategy that throws or behaves differently breaks callers, which is an LSP failure.</p></div></details>
+    </div>
+  </section>
+
+  <nav class="solid-nav" aria-label="SOLID pages"><a href="solid-srp.html">← S · Single responsibility</a><a href="solid-lsp.html">L · Liskov substitution →</a></nav>
+
+  <footer>Sources: your Notion notes "SOLID Principles: Five Guidelines for Object-Oriented Code"; Robert C. Martin, "The Open Closed Principle" (Clean Coder blog, 2014); Bertrand Meyer, <i>Object-Oriented Software Construction</i> (1988); dotnettutorials.net real-time OCP examples in C#. Plans, fees and log lines are illustrative.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  K.codeBlock($('csBefore'), `public class FeeCalculator
+{
+    public decimal Fee(Patient p, decimal baseFee)
+    {
+        switch (p.Plan)
+        {
+            case "Basic":  return baseFee;
+            case "Gold":   return baseFee * 0.90m;
+            case "Staff":  return 0m;
+            // new plan? edit here, re-test all
+            default: throw new ArgumentException(p.Plan);
+        }
+    }
+}`, 'cs');
+  K.codeBlock($('csAfter'), `public interface IDiscountPolicy
+{
+    string Plan { get; }
+    decimal Apply(decimal baseFee);
+}
+public class GoldPolicy : IDiscountPolicy
+{
+    public string Plan => "Gold";
+    public decimal Apply(decimal f) => f * 0.90m;
+}
+public class SeniorPolicy : IDiscountPolicy  // new
+{
+    public string Plan => "Senior";
+    public decimal Apply(decimal f) => f * 0.70m;
+}
+public class FeeCalculator(IEnumerable<IDiscountPolicy> all)
+{
+    public decimal Fee(Patient p, decimal baseFee) =>
+        all.Single(x => x.Plan == p.Plan).Apply(baseFee);
+}`, 'cs');
+  K.codeBlock($('csDeco'), `public class CachingPatientRepository(
+    IPatientRepository inner, IMemoryCache cache) : IPatientRepository
+{
+    public Patient Get(int id) =>
+        cache.GetOrCreate(id, _ => inner.Get(id))!;
+}
+
+// Program.cs: register the real one, then wrap it
+services.AddScoped<SqlPatientRepository>();
+services.AddScoped<IPatientRepository>(sp =>
+    new CachingPatientRepository(
+        sp.GetRequiredService<SqlPatientRepository>(),
+        sp.GetRequiredService<IMemoryCache>()));`, 'cs');
+  K.codeBlock($('csExt'), `public static class DateTimeExtensions
+{
+    public static bool IsClinicHoliday(this DateTime d) =>
+        d.DayOfWeek == DayOfWeek.Sunday;
+}
+
+// DateTime was never edited, yet:
+if (slot.IsClinicHoliday()) { ... }`, 'cs');
+
+  /* ===== Walkthrough ===== */
+  const sv = $('ocpSvg'); K.umlDefs(sv);
+  const S1 = K.el('g', { class: 'sx' }, sv), S2 = K.el('g', { class: 'sx' }, sv), S3 = K.el('g', { class: 'sx' }, sv), FX = K.el('g', {}, sv);
+  // scene 1: switch
+  const calc1 = K.classBox(S1, 210, 40, 340, { name: 'FeeCalculator', methods: ['+ Fee(patient, baseFee)', '    case "Basic": …', '    case "Gold": …', '    case "Staff": …', '    case "Senior": …   ← new'] });
+  const t1 = ['Basic_PaysFull', 'Gold_Gets10Off', 'Staff_PaysNothing'].map((t, i) => K.node(S1, 145 + i * 235, 255, 210, 44, t, 'FeeCalculatorTests'));
+  // scene 2: strategy
+  const calc2 = K.classBox(S2, 250, 16, 260, { name: 'FeeCalculator', methods: ['+ Fee(patient, baseFee)'] });
+  const pol = K.classBox(S2, 260, 128, 240, { name: 'IDiscountPolicy', stereo: 'interface', methods: ['+ Apply(baseFee)'] }, 'iface');
+  K.umlLink(S2, calc2.bottom, pol.top, 'uses');
+  const impl = ['BasicPolicy', 'GoldPolicy', 'StaffPolicy', 'SeniorPolicy'].map((n, i) => { const b = K.classBox(S2, 20 + i * 185, 286, 165, { name: n }, i === 3 ? 'sx' : ''); const l = K.umlLink(S2, b.top, [pol.left[0] + 40 + i * 53, pol.bottom[1]], 'implements'); if (i === 3) l.classList.add('sx'); return { b, l }; });
+  // scene 3: decorator
+  const svc = K.classBox(S3, 270, 10, 220, { name: 'BookingService', methods: ['+ Book(patientId, slot)'] });
+  const repoI = K.classBox(S3, 270, 110, 220, { name: 'IPatientRepository', stereo: 'interface', methods: ['+ Get(id)'] }, 'iface');
+  K.umlLink(S3, svc.bottom, repoI.top, 'uses');
+  const sqlR = K.classBox(S3, 40, 262, 220, { name: 'SqlPatientRepository', methods: ['+ Get(id)'] });
+  const cache = K.classBox(S3, 500, 262, 240, { name: 'CachingPatientRepository', fields: ['- inner: IPatientRepository'], methods: ['+ Get(id)'] }, 'sx');
+  K.umlLink(S3, sqlR.top, [repoI.cx - 50, repoI.bottom[1]], 'implements');
+  const cl1 = K.umlLink(S3, cache.top, [repoI.cx + 50, repoI.bottom[1]], 'implements'); cl1.classList.add('sx');
+  const cl2 = K.umlLink(S3, [cache.left[0], cache.cy + 10], [sqlR.right[0], sqlR.cy], 'uses', [], 'wraps'); cl2.classList.add('sx');
+  const reg = K.text(S3, 380, 370, '', 'mlabel accent halo');
+
+  function show(i) {
+    FX.textContent = '';
+    S1.classList.toggle('gone', i > 1); S2.classList.toggle('gone', i < 2 || i > 3); S3.classList.toggle('gone', i < 4 || i > 6);
+    calc1.rows.forEach((r, k) => { r.classList.toggle('bad', i === 1 && k === 4); r.classList.toggle('gone', i === 0 && k === 4); });
+    calc1.g.classList.toggle('bad', i === 1);
+    t1.forEach((t, k) => { t.g.classList.toggle('bad', i === 1 && k === 1); t.g.classList.toggle('ok', i === 0 || (i === 1 && k !== 1)); t.sub.textContent = i === 1 ? (k === 1 ? 'FAILED after the edit' : 're-run, passing') : 'passing'; });
+    impl[3].b.g.classList.toggle('gone', i < 3); impl[3].l.classList.toggle('gone', i < 3);
+    impl[3].b.g.classList.toggle('on', i === 3); calc2.g.classList.toggle('ok', i === 3);
+    cache.g.classList.toggle('gone', i < 5); cl1.classList.toggle('gone', i < 5); cl2.classList.toggle('gone', i < 5);
+    cache.g.classList.toggle('on', i === 5);
+    reg.textContent = i === 6 ? 'Program.cs decides: IPatientRepository → Caching(Sql)' : '';
+    if (i === 3) K.text(FX, calc2.cx, calc2.bottom[1] + 18, 'unchanged · its tests still green', 'mlabel ok halo');
+    if (i === 5) K.text(FX, svc.cx, svc.bottom[1] + 18, 'BookingService unchanged', 'mlabel ok halo');
+    if (i === 7) { S3.classList.remove('gone'); K.text(FX, 380, 370, 'close against the changes you expect · not against everything', 'mlabel accent halo'); }
+  }
+  K.story({
+    root: $('ocpStory'), show, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'A switch that works', text: '<span class="mono">FeeCalculator</span> picks a discount with a <span class="mono">switch</span> on the patient\'s plan. Three cases, three passing tests, shipped to production.' },
+      { title: 'A new plan means editing it', text: 'Marketing adds a <b>Senior</b> plan. The only way in is to <b>modify</b> the tested method. Everything that calls it must be re-tested, and a slip in the edit broke the Gold case.', play: async run => { const p = K.pill(FX, 'edit', 'bad'); await K.move(p, [380, 0], [380, 150], 700, run); p.remove(); } },
+      { title: 'Strategy: one class per plan', text: 'Each plan becomes a class implementing <span class="mono">IDiscountPolicy</span>. <span class="mono">FeeCalculator</span> only knows the interface and receives all policies through its constructor.' },
+      { title: 'Add Senior without touching anything', text: 'A new plan is now a <b>new file</b>: <span class="mono">SeniorPolicy</span>. FeeCalculator and the other policies aren\'t edited, so their tests can\'t break. Open for extension, closed for modification.', tip: 'Say it this way: "the code that changes is new code, not old code". Then name the pattern you used.' },
+      { title: 'A different change: add caching', text: 'Patient look-ups are slow. Instead of editing <span class="mono">SqlPatientRepository</span>, look at what depends on it: <span class="mono">BookingService</span> only uses <span class="mono">IPatientRepository</span>.' },
+      { title: 'Decorator: wrap, don\'t edit', text: '<span class="mono">CachingPatientRepository</span> implements the same interface and <b>wraps</b> the SQL one: it answers from cache, or asks the inner repository and remembers. Neither the service nor the SQL class changed.' },
+      { title: 'DI decides which one runs', text: 'Program.cs registers the cached version around the SQL one. Turning caching off is a one-line registration change, and you can do it per environment. This is the "switch at runtime" advantage your notes mention.' },
+      { title: 'Know where to stop', text: 'You can\'t be closed against every possible change. Plans and cross-cutting concerns were <b>already varying</b>, so they earned an interface. Add the next abstraction when the next real variant shows up.' }
+    ]
+  });
+
+  /* ===== Playground 1: add plans ===== */
+  const PLANS = [['Senior', '30% off'], ['Student', '20% off'], ['Corporate', 'billed monthly']];
+  let design = 'switch', added = [];
+  $('plBtns').innerHTML = PLANS.map(([p, d]) => `<button class="chip-btn" type="button" data-p="${p}" aria-pressed="false">+ ${p} (${d})</button>`).join('');
+  function drawPlans() {
+    const n = added.length;
+    const files = design === 'switch'
+      ? (n ? [`FeeCalculator.cs        modified (${n} new case${n > 1 ? 's' : ''})`, ...added.map(p => `FeeCalculatorTests.cs   + ${p} test`)] : [])
+      : added.flatMap(p => [`${p}Policy.cs${' '.repeat(Math.max(1, 17 - p.length))}new`, `${p}PolicyTests.cs${' '.repeat(Math.max(1, 12 - p.length))}new`]);
+    $('plFiles').textContent = files.length ? files.join('\n') : '(nothing yet)';
+    const old = ['Basic_PaysFull', 'Gold_Gets10Off', 'Staff_PaysNothing'];
+    $('plTests').innerHTML = old.map(t => `<span class="t ${design === 'switch' && n ? 'run' : 'pass'}">${t}${design === 'switch' && n ? ' · re-run' : ' ✓'}</span>`).join('');
+    const edits = design === 'switch' ? n : 0, nw = design === 'switch' ? 0 : n * 2, risk = design === 'switch' && n ? 3 : 0;
+    $('kEdit').querySelector('b').textContent = edits; $('kEdit').className = 'kpi ' + (edits ? 'bad' : n ? 'good' : '');
+    $('kNew').querySelector('b').textContent = nw;
+    $('kRisk').querySelector('b').textContent = risk; $('kRisk').className = 'kpi ' + (risk ? 'bad' : n ? 'good' : '');
+    $('plBtns').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(added.includes(b.dataset.p))));
+    $('plStatus').innerHTML = !n ? 'Pick a design, then add plans.' : design === 'switch'
+      ? `${n} plan${n > 1 ? 's' : ''} = ${n} edit${n > 1 ? 's' : ''} to the same tested method. All 3 old tests must be re-run and are at risk from each edit.`
+      : `${n} plan${n > 1 ? 's' : ''} = ${n * 2} new files, <b class="ok-text">0 edits</b> to shipped code. Old tests can't be affected.`;
+  }
+  $('plBtns').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { const p = b.dataset.p; added = added.includes(p) ? added.filter(x => x !== p) : [...added, p]; drawPlans(); }));
+  K.seg($('plDesign'), v => { design = v; drawPlans(); });
+  $('plReset').addEventListener('click', () => { added = []; drawPlans(); });
+  drawPlans();
+
+  /* ===== Playground 2: decorator stack ===== */
+  const LAYERS = { log: ['LoggingPatientRepository', 'writes a log line per call'], cache: ['CachingPatientRepository', 'answers repeat calls from memory'], retry: ['RetryPatientRepository', 'retries a failed call once'] };
+  const ORDER = ['log', 'cache', 'retry'];
+  let on = [];
+  function stack() { return ORDER.filter(k => on.includes(k)); }
+  function drawDeco() {
+    const st = stack();
+    $('dcChain').innerHTML = `<div class="layer"><div class="ln1">BookingService</div><div class="ln2">sees IPatientRepository</div></div><span class="arr">→</span>` + st.map(k => `<div class="layer" data-k="${k}"><div class="ln1">${LAYERS[k][0]}</div><div class="ln2">${LAYERS[k][1]}</div></div><span class="arr">→</span>`).join('') + `<div class="layer core" data-k="sql"><div class="ln1">SqlPatientRepository</div><div class="ln2">the real one, never edited</div></div>`;
+    let expr = 'new SqlPatientRepository()';
+    [...st].reverse().forEach(k => { expr = `new ${LAYERS[k][0]}(${k === 'cache' ? '\n        ' : ''}${expr}${k === 'cache' ? ', cache' : ''})`; });
+    K.codeBlock($('dcCode'), `// Program.cs (manual wiring, for clarity)\nIPatientRepository repo = ${expr};`, 'cs');
+    $('dcBtns').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(on.includes(b.dataset.k))));
+  }
+  async function callTwice() {
+    const run = K.newRun('dc'); const st = stack(); const log = [];
+    const out = () => { $('dcLog').textContent = log.join('\n'); };
+    let cached = false;
+    try {
+      for (let c = 1; c <= 2; c++) {
+        log.push(`call ${c}: GetPatient(42)`); out();
+        let hitCache = false;
+        for (const k of st) {
+          const el = $('dcChain').querySelector(`[data-k=${k}]`); el.classList.add('hot'); await K.sleep(420, run); el.classList.remove('hot');
+          if (k === 'log') log.push('  [log] Get(42) started');
+          if (k === 'cache') { if (cached) { log.push('  [cache] hit, SQL not called'); hitCache = true; } else log.push('  [cache] miss, asking inner'); }
+          if (k === 'retry') log.push('  [retry] attempt 1');
+          out(); if (hitCache) break;
+        }
+        if (!hitCache) { const el = $('dcChain').querySelector('[data-k=sql]'); el.classList.add('hot'); await K.sleep(420, run); el.classList.remove('hot'); log.push('  [sql] SELECT … WHERE Id = 42  (≈40 ms)'); if (st.includes('cache')) cached = true; }
+        if (st.includes('log')) log.push(`  [log] Get(42) finished${hitCache ? ' (≈0 ms)' : ''}`);
+        out();
+      }
+      $('dcStatus').innerHTML = !st.length ? 'No layers: both calls hit SQL. Add some layers; BookingService and SqlPatientRepository never change.' : st.includes('cache') ? 'Second call never reached SQL. You added caching <b>without editing</b> either class, only the wiring.' : 'Each layer added behaviour around the real call. Only the wiring changed.';
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('dcBtns').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { const k = b.dataset.k; on = on.includes(k) ? on.filter(x => x !== k) : [...on, k]; drawDeco(); }));
+  $('dcCall').addEventListener('click', callTwice);
+  drawDeco();
+})();
+</script>
+</body>
+</html>

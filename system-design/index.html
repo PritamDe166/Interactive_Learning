@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>System Design</title>
+<meta name="description" content="System design explainers in two tracks: high-level design (HLD) and low-level design (LLD).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/hub.css">
+<script src="../assets/js/theme.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <a class="back" href="../index.html">← All subjects</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header class="hub-head">
+    <div class="eyebrow">Two tracks · learn them side by side</div>
+    <h1>System <span class="y">Design</span></h1>
+    <p class="lede">High-level design is the architecture of a whole system; low-level design is how each piece is built in code. Pick a track.</p>
+  </header>
+
+  <main class="subjects" id="tracks"></main>
+
+  <footer>Update <code>done</code> and <code>pages</code> in this page's <code>TRACKS</code> list (and the System Design entry on the main hub) when you publish an explainer.</footer>
+</div>
+
+<script>
+/* ===== Tracks. Keep these numbers in step with each track's roadmap. ===== */
+const TRACKS = [
+  {name:"HLD · High-level design", path:"hld/index.html", accent:"var(--teal)", icon:"net",
+   blurb:"119-day roadmap: networking, scaling, caching, databases, distributed systems, reliability and interview case studies.",
+   done:13, total:119, unit:"days", pages:11},
+  {name:"LLD · Low-level design", path:"lld/index.html", accent:"var(--violet)", icon:"classes",
+   blurb:"Object-oriented design, interfaces, design patterns, concurrency and classic LLD problems. Topics are added as you learn them.",
+   done:6, total:null, unit:"topics", pages:6}
+];
+
+const ICONS={
+  net:'<circle cx="5" cy="12" r="2.5"/><circle cx="19" cy="5" r="2.5"/><circle cx="19" cy="12" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M7.5 12h9M7 11l9.5-5M7 13l9.5 5"/>',
+  classes:'<rect x="3" y="3" width="8" height="7" rx="1.5"/><rect x="13" y="14" width="8" height="7" rx="1.5"/><rect x="3" y="14" width="8" height="7" rx="1.5"/><path d="M7 10v4M7 12h10v2"/>'
+};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+document.getElementById('tracks').innerHTML=TRACKS.map(s=>{
+  const pct=s.total?Math.round(s.done*100/s.total):0;
+  const progress=s.total?`<div class="track" aria-hidden="true"><i style="width:${Math.max(pct,s.done?2:0)}%"></i></div>`:'';
+  const count=s.total?`<span><b>${s.done}</b> / ${s.total} ${s.unit}</span>`:`<span><b>${s.pages}</b> explainer${s.pages===1?'':'s'} · growing</span>`;
+  return `<a class="subj" style="--acc:${s.accent}" href="${esc(s.path)}"><div class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[s.icon]}</svg></div>
+    <h2>${esc(s.name)}</h2><p>${esc(s.blurb)}</p>${progress}<div class="meta">${count}<span class="go">Open →</span></div></a>`;
+}).join('');
+</script>
+</body>
+</html>

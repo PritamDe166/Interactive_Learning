@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Liskov Substitution Principle</title>
+<meta name="description" content="SOLID, L: a subtype must work anywhere its base type is expected. Parent and Child, Rectangle and Square, contract rules and a substitution tester.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/theme.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/explainer.css">
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/explainer-kit.js"></script>
+<style>
+  .suite { display: grid; gap: 6px; margin-top: 10px; }
+  .suite .tc { display: grid; grid-template-columns: 26px minmax(0, 1fr) minmax(0, 1.2fr); gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); transition: border-color .2s; }
+  @media (max-width: 640px) { .suite .tc { grid-template-columns: 26px 1fr; } .suite .tc .res { grid-column: 2; } }
+  .suite .tc .ic { font-size: 16px; text-align: center; }
+  .suite .tc .res { font-size: 13px; color: var(--fg-soft); }
+  .suite .tc.run { border-color: var(--cyan); }
+  .suite .tc.pass { border-color: var(--teal); }
+  .suite .tc.pass .ic { color: var(--good-text); }
+  .suite .tc.fail { border-color: var(--red); }
+  .suite .tc.fail .ic, .suite .tc.fail .res b { color: var(--bad-text); }
+  .rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 10px; }
+  .rules .card p { margin: 6px 0 0; font-size: 14px; color: var(--fg-soft); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← LLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="solid-letters" aria-label="SOLID principles"><a href="solid.html" title="Overview">∗</a><a href="solid-srp.html" title="Single responsibility">S</a><a href="solid-ocp.html" title="Open-closed">O</a><b title="Liskov substitution">L</b><a href="solid-isp.html" title="Interface segregation">I</a><a href="solid-dip.html" title="Dependency inversion">D</a></div>
+    <div class="eyebrow">System Design · LLD · SOLID · L</div>
+    <h1>Liskov Substitution Principle</h1>
+    <ul class="lede">
+      <li>Anywhere the code expects a base type, you must be able to pass <b>any subtype</b> and still get correct behaviour.</li>
+      <li>"Is-a" in plain English isn't enough. A Square <i>is a</i> rectangle in maths, yet a <span class="mono">Square</span> subclass breaks code written for <span class="mono">Rectangle</span>.</li>
+      <li>Red flags: an override that <b>throws NotImplementedException / NotSupportedException</b>, does nothing, or quietly changes what the method promises.</li>
+      <li>Rule of thumb: a subtype may <b>accept more and promise more</b>, never <b>demand more or deliver less</b>.</li>
+    </ul>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: when a child can't stand in for its parent</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="lspStory">
+      <div class="scroll"><svg class="diagram" id="lspSvg" style="min-width:0" viewBox="0 0 760 380" role="img" aria-label="Class diagrams showing Parent and Child, then Rectangle and Square, failing substitution and being fixed"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="codeH">
+    <h2 class="stage-title" id="codeH">The same thing in C#</h2>
+    <div class="stage-kind">The broken hierarchy and the fix</div>
+    <div class="cs-pair">
+      <div><div class="label bad-text">Before: Child can't do what Parent promises</div><pre class="codeblock" id="csBefore"></pre></div>
+      <div><div class="label ok-text">After: each type only promises what it can do</div><pre class="codeblock" id="csAfter"></pre></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rulesH">
+    <h2 class="stage-title" id="rulesH">The contract rules</h2>
+    <div class="stage-kind">What "behaves correctly" means, from Liskov and Wing's behavioural subtyping</div>
+    <div class="rules">
+      <div class="card"><div class="label">Preconditions</div><b>can't be strengthened</b><p>A subtype can't demand more of its inputs. If <span class="mono">Send</span> accepts any message, an SMS version can't reject long ones.</p></div>
+      <div class="card"><div class="label">Postconditions</div><b>can't be weakened</b><p>A subtype must deliver at least what the base promises. If <span class="mono">Save</span> guarantees the row is stored, a subtype can't skip it.</p></div>
+      <div class="card"><div class="label">Invariants</div><b>must be preserved</b><p>Whatever is always true of the base (balance ≥ 0, width independent of height) stays true.</p></div>
+      <div class="card"><div class="label">Exceptions</div><b>no new kinds</b><p>A subtype shouldn't throw exception types callers of the base can't expect, such as NotImplementedException.</p></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">A contract test suite is written once against the base type. Plug in each implementation and see which ones can really substitute.</p>
+
+  <section aria-labelledby="simH">
+    <h2 class="stage-title" id="simH">Substitution tester</h2>
+    <div class="stage-kind">Pick a contract, plug in an implementation, run the base type's tests</div>
+    <div class="seg" id="ctSeg" role="group" aria-label="Contract"><button type="button" data-v="0" aria-pressed="true">Rectangle</button><button type="button" data-v="1" aria-pressed="false">INotifier</button><button type="button" data-v="2" aria-pressed="false">ICollection&lt;T&gt;</button></div>
+    <div class="chips" id="impBtns" style="margin-top:10px"></div>
+    <pre class="codeblock" id="ctCode" style="min-height:0;margin-top:10px"></pre>
+    <div class="suite" id="suite"></div>
+    <div class="controls" style="margin-top:10px"><button class="btn primary" type="button" id="ctRun">Run the contract tests</button></div>
+    <p class="status-line" id="ctStatus">Pick an implementation, then run.</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">An override throws NotImplementedException / NotSupportedException</span><span class="arrow">→</span><span class="then">the subtype can't keep the base's promise: fix the hierarchy or split the interface</span></li>
+      <li><span class="if">Callers check <span class="mono">if (x is Square)</span> before calling</span><span class="arrow">→</span><span class="then">substitution already failed; the type check is the symptom</span></li>
+      <li><span class="if">A subclass adds validation the base didn't have</span><span class="arrow">→</span><span class="then">strengthened precondition: callers of the base will be surprised</span></li>
+      <li><span class="if">"X is a Y" in the real world</span><span class="arrow">→</span><span class="then">ask "does X <i>behave</i> like Y for every caller?" instead</span></li>
+      <li><span class="if">Two types share some behaviour but not all</span><span class="arrow">→</span><span class="then">a smaller common base or interface, plus separate types for the rest</span></li>
+      <li><span class="if">Want to prove it</span><span class="arrow">→</span><span class="then">write contract tests against the base type and run them for every subtype</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: substitution failures and fixes</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Failure</th><th>Rule broken</th><th>Typical fix</th></tr></thead>
+        <tbody>
+          <tr><td><span class="mono">Child : Parent</span> can't GoToWork</td><td>postcondition / new exception</td><td>common <span class="mono">Human</span> base; <span class="mono">Adult</span> and <span class="mono">Child</span> separately</td></tr>
+          <tr><td><span class="mono">Square : Rectangle</span> couples width and height</td><td>invariant (independent sides)</td><td>no inheritance; both implement read-only <span class="mono">IShape</span></td></tr>
+          <tr><td><span class="mono">SmsNotifier</span> rejects &gt; 160 chars</td><td>precondition strengthened</td><td>split long messages, or make the limit part of the base contract</td></tr>
+          <tr><td><span class="mono">ReadOnlyCollection&lt;T&gt;</span> as <span class="mono">ICollection&lt;T&gt;</span>: Add throws</td><td>postcondition / new exception</td><td>accept <span class="mono">IReadOnlyCollection&lt;T&gt;</span> when you only read (added in .NET 4.5)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>Origin:</b> Barbara Liskov introduced the idea in a 1987 keynote on data abstraction; Liskov and Jeannette Wing formalised it in 1994 as "behavioural subtyping", with the pre/postcondition, invariant and history rules above.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Real .NET example:</b> arrays and <span class="mono">ReadOnlyCollection&lt;T&gt;</span> implement <span class="mono">ICollection&lt;T&gt;</span> but throw <span class="mono">NotSupportedException</span> from <span class="mono">Add</span>. Code that takes <span class="mono">ICollection&lt;T&gt;</span> and adds will crash at run time. It's both an LSP and an interface-segregation problem, which is why the read-only interfaces were introduced.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>From your notes:</b> a "not implemented" override breaks LSP because the child can't stand in for the parent; the fix in the Parent/Child example is a shared <span class="mono">Human</span> base with <span class="mono">Adult</span> and <span class="mono">Child</span> subclasses.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>State LSP in one sentence.<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Objects of a subtype must be usable wherever the base type is expected <b>without changing the correctness</b> of the program.</p></div></details>
+      <details><summary>Why does <span class="mono">throw new NotImplementedException()</span> in an override break LSP?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Callers of the base type are promised the method works. The subtype can't keep that promise, so it can't stand in for the base.</p></div></details>
+      <details><summary>Why is Square : Rectangle a violation even though a square is a rectangle?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Rectangle code assumes width and height change independently. Square breaks that invariant: set width 5, height 4, and the area is 16, not 20.</p></div></details>
+      <details><summary>A subclass of <span class="mono">PaymentGateway</span> adds "amount must be under ₹10,000". Problem?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Yes: a <b>strengthened precondition</b>. Code that worked with the base (any amount) fails with the subtype. Put the limit in the base contract, or handle large amounts differently.</p></div></details>
+      <details><summary>May a subtype return a <i>more specific</i> type or accept <i>more</i> inputs?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Yes.</b> Promising more (covariant returns, stronger guarantees) and accepting more (weaker preconditions) is safe. Demanding more or delivering less is not.</p></div></details>
+      <details><summary>How can you catch LSP violations automatically?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Write <b>contract tests</b> against the base type or interface (an abstract test class) and run the same suite for every implementation.</p></div></details>
+    </div>
+  </section>
+
+  <nav class="solid-nav" aria-label="SOLID pages"><a href="solid-ocp.html">← O · Open-closed</a><a href="solid-isp.html">I · Interface segregation →</a></nav>
+
+  <footer>Sources: your Notion notes "SOLID Principles: Five Guidelines for Object-Oriented Code"; Liskov &amp; Wing, "A behavioral notion of subtyping" (1994) as summarised on Wikipedia's Liskov substitution principle page; Microsoft Learn, ReadOnlyCollection&lt;T&gt;.ICollection&lt;T&gt;.Add; NDepend blog on ISP and .NET collections. Notifier and test names are illustrative.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  K.codeBlock($('csBefore'), `public class Parent
+{
+    public virtual void Eat() { ... }
+    public virtual void Sleep() { ... }
+    public virtual void GoToWork() { ... }
+    public virtual void MakeDinner() { ... }
+}
+
+public class Child : Parent
+{
+    public override void GoToWork()
+        => throw new NotImplementedException();
+    public override void MakeDinner()
+        => throw new NotImplementedException();
+}
+
+void StartWeekday(List<Parent> family)
+{
+    foreach (var p in family) p.GoToWork();   // crashes on a Child
+}`, 'cs');
+  K.codeBlock($('csAfter'), `public abstract class Human
+{
+    public void Eat() { ... }
+    public void Sleep() { ... }
+}
+
+public class Adult : Human
+{
+    public void GoToWork() { ... }
+    public void MakeDinner() { ... }
+}
+
+public class Child : Human
+{
+    public void GoToSchool() { ... }
+}
+
+void StartWeekday(List<Adult> adults)    // only types that can work
+{
+    foreach (var a in adults) a.GoToWork();
+}`, 'cs');
+
+  /* ===== Walkthrough ===== */
+  const sv = $('lspSvg'); K.umlDefs(sv);
+  const S1 = K.el('g', { class: 'sx' }, sv), S2 = K.el('g', { class: 'sx' }, sv), S3 = K.el('g', { class: 'sx' }, sv), S4 = K.el('g', { class: 'sx' }, sv), FX = K.el('g', {}, sv);
+  // scene 1
+  const par = K.classBox(S1, 40, 30, 230, { name: 'Parent', methods: ['+ Eat()', '+ Sleep()', '+ GoToWork()', '+ MakeDinner()'] });
+  const chi = K.classBox(S1, 40, 230, 230, { name: 'Child : Parent', methods: ['+ Eat()', '+ Sleep()', '+ GoToWork()  → throws', '+ MakeDinner() → throws'] });
+  K.umlLink(S1, chi.top, par.bottom, 'inherits');
+  const caller = K.classBox(S1, 380, 110, 340, { name: 'StartWeekday(List<Parent>)', methods: ['foreach (p in family)', '    p.GoToWork();'] });
+  const fam = ['Dad: Parent', 'Mum: Parent', 'Riya: Child'].map((t, i) => K.node(S1, 440 + i * 110, 290, 100, 44, t.split(':')[0], t.split(':')[1].trim()));
+  // scene 2: fixed hierarchy
+  const hum = K.classBox(S2, 270, 20, 220, { name: 'Human', stereo: 'abstract', methods: ['+ Eat()', '+ Sleep()'] });
+  const adu = K.classBox(S2, 90, 210, 230, { name: 'Adult', methods: ['+ GoToWork()', '+ MakeDinner()'] });
+  const kid = K.classBox(S2, 440, 210, 230, { name: 'Child', methods: ['+ GoToSchool()'] });
+  K.umlLink(S2, adu.top, [hum.cx - 40, hum.bottom[1]], 'inherits');
+  K.umlLink(S2, kid.top, [hum.cx + 40, hum.bottom[1]], 'inherits');
+  K.text(S2, adu.cx, 210 + adu.h + 22, 'StartWeekday(List<Adult>) only accepts these', 'mlabel ok halo');
+  // scene 3: rectangle / square
+  const rect = K.classBox(S3, 40, 30, 250, { name: 'Rectangle', methods: ['+ Width { get; set; }', '+ Height { get; set; }', '+ Area => Width * Height'] });
+  const sq = K.classBox(S3, 40, 230, 250, { name: 'Square : Rectangle', methods: ['+ Width  { set: both sides }', '+ Height { set: both sides }'] });
+  K.umlLink(S3, sq.top, rect.bottom, 'inherits');
+  const test = K.classBox(S3, 380, 80, 340, { name: 'Code written for Rectangle', methods: ['r.Width = 5;', 'r.Height = 4;', 'Assert(r.Area == 20);'] });
+  const res = K.text(S3, 550, 250, '', 'mlabel'); const res2 = K.text(S3, 550, 276, '', 'mlabel');
+  // scene 4: fix with IShape + .NET example
+  const shp = K.classBox(S4, 260, 16, 240, { name: 'IShape', stereo: 'interface', methods: ['+ Area { get; }'] }, 'iface');
+  const r2 = K.classBox(S4, 60, 170, 240, { name: 'Rectangle(w, h)', methods: ['+ Area => w * h'] });
+  const s2 = K.classBox(S4, 460, 170, 240, { name: 'Square(side)', methods: ['+ Area => side * side'] });
+  K.umlLink(S4, r2.top, [shp.cx - 40, shp.bottom[1]], 'implements');
+  K.umlLink(S4, s2.top, [shp.cx + 40, shp.bottom[1]], 'implements');
+  const s4t = K.text(S4, 380, 300, 'read-only shapes: nothing to break, no inheritance between them', 'mlabel ok halo');
+  const scenes = [S1, S1, S1, S2, S3, S3, S4];
+  function show(i) {
+    FX.textContent = '';
+    [S1, S2, S3, S4].forEach(s => s.classList.toggle('gone', scenes[i] !== s));
+    chi.rows.forEach((r, k) => r.classList.toggle('bad', i >= 1 && k >= 2));
+    chi.g.classList.toggle('bad', i >= 1 && i <= 2);
+    caller.g.classList.toggle('on', i === 2);
+    fam.forEach((f, k) => { f.g.classList.toggle('dim', i < 2); f.g.classList.toggle('ok', i === 2 && k < 2); f.g.classList.toggle('bad', i === 2 && k === 2); });
+    if (i === 2) K.text(FX, fam[2].g.getBBox ? 660 : 660, 340, 'NotImplementedException', 'mlabel bad halo');
+    sq.g.classList.toggle('bad', i === 5); sq.rows.forEach(r => r.classList.toggle('bad', i === 5));
+    res.textContent = i === 4 ? 'new Rectangle() → Area 20 ✓' : i === 5 ? 'new Rectangle() → Area 20 ✓' : '';
+    res.setAttribute('class', 'mlabel ok');
+    res2.textContent = i === 5 ? 'new Square() → Area 16 ✗ (Height=4 also set Width)' : '';
+    res2.setAttribute('class', 'mlabel bad');
+    test.g.classList.toggle('on', i >= 4);
+  }
+  K.story({
+    root: $('lspStory'), show, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'A Parent class', text: '<span class="mono">Parent</span> can eat, sleep, go to work and make dinner. <span class="mono">Child</span> inherits from it to reuse eating and sleeping. Sounds reasonable.' },
+      { title: 'Child can\'t keep the promises', text: 'A child can\'t go to work or make dinner, so those overrides <b>throw NotImplementedException</b>. The compiler is happy; the promise Parent made is broken.' },
+      { title: 'Code written for Parent crashes', text: '<span class="mono">StartWeekday</span> takes a list of Parents and calls <span class="mono">GoToWork()</span> on each. It works for Dad and Mum, then blows up on the Child that was passed in as a Parent.',
+        play: async run => { for (let k = 0; k < 3; k++) { const f = fam[k]; f.g.classList.remove('dim'); f.g.classList.add(k < 2 ? 'ok' : 'bad'); await K.sleep(500, run); } } },
+      { title: 'Fix the hierarchy, not the caller', text: 'Move what everyone shares into <span class="mono">Human</span>. <span class="mono">Adult</span> adds work and cooking, <span class="mono">Child</span> adds school. No type promises something it can\'t do, and StartWeekday asks for exactly what it needs: Adults.', tip: 'Don\'t "fix" LSP with <span class="mono">if (p is Child) continue;</span> in the caller. Type checks in callers are the symptom, not the cure.' },
+      { title: 'The classic: Square is a Rectangle?', text: 'In maths a square is a rectangle, so <span class="mono">Square : Rectangle</span> looks natural. To stay square, it overrides both setters to change <b>both sides</b>. Here\'s some code written for Rectangle.' },
+      { title: '…but doesn\'t behave like one', text: 'Set width 5 and height 4: a Rectangle gives 20. A Square passed in its place gives <b>16</b>, because setting the height also changed the width. It broke an <b>invariant</b> callers relied on: the sides are independent.' },
+      { title: 'Fix: share the behaviour that\'s really common', text: 'Both shapes have an <span class="mono">Area</span>, so both implement <span class="mono">IShape</span>, and they\'re created with their sizes (immutable). With nothing to mutate, there\'s nothing a caller can be surprised by.' }
+    ]
+  });
+
+  /* ===== Substitution tester ===== */
+  const CT = [
+    { name: 'Rectangle', code: `// contract tests, written once for Rectangle
+r.Width = 5; r.Height = 4;  Assert(r.Area == 20);
+r.Width = 7;                Assert(r.Height == 4);   // sides independent
+Assert(r.Area >= 0);`,
+      tests: ['Area is Width × Height after setting both', 'Setting Width leaves Height alone', 'Area is never negative'],
+      imps: [
+        { n: 'Rectangle', r: [[1, 'Area 20'], [1, 'Height still 4'], [1, 'ok']] },
+        { n: 'Square : Rectangle', r: [[0, '<b>Area 16</b>: setting Height also set Width'], [0, '<b>Height became 7</b>: invariant broken'], [1, 'ok']], why: 'Square breaks the <b>invariant</b> that sides are independent. Don\'t inherit; give both an IShape.' }
+      ] },
+    { name: 'INotifier', code: `// INotifier.Send(to, message) promises:
+//  - accepts any message up to 2,000 characters
+//  - returns a non-empty delivery id
+//  - throws only NotificationException on failure
+string id = notifier.Send("asha@example.com", longMessage);`,
+      tests: ['Sends a 600-character reminder', 'Returns a delivery id', 'Failure throws NotificationException only'],
+      imps: [
+        { n: 'EmailNotifier', r: [[1, 'sent'], [1, 'id "em-7f3a"'], [1, 'NotificationException']] },
+        { n: 'SmsNotifier v1', r: [[0, '<b>ArgumentException</b>: "max 160 chars"'], [1, 'id "sms-91"'], [0, '<b>throws ArgumentException</b>, a type callers don\'t expect']], why: 'v1 <b>strengthened a precondition</b> (≤ 160 chars) and threw a new exception type.' },
+        { n: 'SmsNotifier v2', r: [[1, 'split into 4 SMS parts, sent'], [1, 'id "sms-92"'], [1, 'NotificationException']], why: 'v2 accepts what the base accepts (splits long text), so it substitutes cleanly.' },
+        { n: 'NullNotifier', r: [[1, 'pretends to send'], [0, '<b>returns null</b>'], [1, 'never fails']], why: 'Returning null <b>weakens the postcondition</b>. Callers storing the id will crash later. A test double should return a fake id.' }
+      ] },
+    { name: 'ICollection<T>', code: `// code written for ICollection<string>
+ICollection<string> c = GetCollection();
+c.Add("ECG");      Assert(c.Contains("ECG"));
+int before = c.Count;  c.Add("X-ray");  Assert(c.Count == before + 1);`,
+      tests: ['Add then Contains', 'Add increases Count by 1'],
+      imps: [
+        { n: 'List<string>', r: [[1, 'contains "ECG"'], [1, 'Count 1 → 2']] },
+        { n: 'ReadOnlyCollection<string>', r: [[0, '<b>NotSupportedException</b> from Add'], [0, '<b>NotSupportedException</b> from Add']], why: 'A real .NET case: it implements ICollection&lt;T&gt; but can\'t add. Code that only reads should take <span class="mono">IReadOnlyCollection&lt;T&gt;</span> instead.' },
+        { n: 'string[] (array)', r: [[0, '<b>NotSupportedException</b>: "Collection was of a fixed size"'], [0, '<b>NotSupportedException</b>']], why: 'Arrays implement ICollection&lt;T&gt; too, with the same problem. The interface promises more than every implementer can do (an ISP issue as well).' }
+      ] }
+  ];
+  let ci = 0, ii = 0;
+  function loadCt() {
+    const c = CT[ci];
+    $('impBtns').innerHTML = c.imps.map((m, k) => `<button class="chip-btn mono" type="button" data-k="${k}" aria-pressed="${k === ii}">${m.n.replace(/</g, '&lt;')}</button>`).join('');
+    $('impBtns').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { ii = +b.dataset.k; loadCt(); }));
+    K.codeBlock($('ctCode'), c.code, 'cs');
+    $('suite').innerHTML = c.tests.map(t => `<div class="tc"><span class="ic">·</span><span>${t}</span><span class="res"></span></div>`).join('');
+    $('ctStatus').textContent = `Plugging ${c.imps[ii].n} in where ${c.name} is expected. Run the tests.`;
+  }
+  async function runCt() {
+    const run = K.newRun('ct'), c = CT[ci], m = c.imps[ii]; const rows = [...$('suite').children]; let fails = 0;
+    rows.forEach(r => { r.className = 'tc'; r.querySelector('.ic').textContent = '·'; r.querySelector('.res').innerHTML = ''; });
+    try {
+      for (let k = 0; k < rows.length; k++) {
+        rows[k].classList.add('run'); await K.sleep(450, run);
+        const [ok, txt] = m.r[k]; rows[k].className = 'tc ' + (ok ? 'pass' : 'fail');
+        rows[k].querySelector('.ic').textContent = ok ? '✓' : '✗'; rows[k].querySelector('.res').innerHTML = txt; if (!ok) fails++;
+      }
+      $('ctStatus').innerHTML = (fails ? `<b class="bad-text">${fails} contract test${fails > 1 ? 's' : ''} failed: ${m.n.replace(/</g, '&lt;')} can't substitute for ${c.name.replace(/</g, '&lt;')}.</b> ` : `<b class="ok-text">All passed: ${m.n.replace(/</g, '&lt;')} substitutes safely.</b> `) + (m.why || '');
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  K.seg($('ctSeg'), v => { ci = +v; ii = 0; loadCt(); });
+  $('ctRun').addEventListener('click', runCt);
+  loadCt();
+})();
+</script>
+</body>
+</html>

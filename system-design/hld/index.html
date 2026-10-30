@@ -3,27 +3,32 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>System Design Explainers</title>
-<meta name="description" content="Interactive, animated explainers for a 119-day system design roadmap.">
+<title>System Design: HLD</title>
+<meta name="description" content="High-level design (HLD): interactive, animated explainers for a 119-day system design roadmap.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="../assets/css/theme.css">
-<link rel="stylesheet" href="../assets/css/base.css">
-<link rel="stylesheet" href="../assets/css/hub.css">
-<script src="../assets/js/theme.js"></script>
+<link rel="stylesheet" href="../../assets/css/theme.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/hub.css">
+<script src="../../assets/js/theme.js"></script>
 </head>
 <body>
 <div class="wrap">
   <div class="topbar">
-    <a class="back" href="../index.html">← All subjects</a>
+    <a class="back" href="../index.html">← System Design</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
+  <nav class="track-tabs" aria-label="System design tracks">
+    <a href="index.html" aria-current="page"><b>HLD</b><span>High-level design</span></a>
+    <a href="../lld/index.html"><b>LLD</b><span>Low-level design</span></a>
+  </nav>
+
   <header class="hero">
     <div>
-      <div class="eyebrow">119 days · 17 weeks · built while learning</div>
-      <h1>System Design <span class="y">Explainers</span></h1>
-      <p class="lede">Animated, clickable walkthroughs for each topic in the roadmap. Open one, play with it, then close it and draw it from memory.</p>
+      <div class="eyebrow">High-level design · 119 days · 17 weeks</div>
+      <h1>System Design <span class="y">HLD</span></h1>
+      <p class="lede">How the pieces of a system fit together: networking, scaling, caching, data, distributed systems and reliability. Open an explainer, play with it, then close it and draw it from memory.</p>
       <svg class="flow" viewBox="0 0 560 90" aria-hidden="true">
         <path class="w" d="M70 45 H200"/><path class="w" d="M300 45 C340 45 350 18 400 18"/><path class="w" d="M300 45 H400"/><path class="w" d="M300 45 C340 45 350 72 400 72"/>
         <circle class="pkt" r="5"><animateMotion dur="2.4s" begin="0s" repeatCount="indefinite" path="M70 45 H300 C340 45 350 18 400 18"/></circle>

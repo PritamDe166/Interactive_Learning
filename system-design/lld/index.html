@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>System Design: LLD</title>
+<meta name="description" content="Low-level design (LLD): interactive explainers for object-oriented design, patterns and LLD problems.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/theme.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/hub.css">
+<script src="../../assets/js/theme.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <a class="back" href="../index.html">← System Design</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <nav class="track-tabs" aria-label="System design tracks">
+    <a href="../hld/index.html"><b>HLD</b><span>High-level design</span></a>
+    <a href="index.html" aria-current="page"><b>LLD</b><span>Low-level design</span></a>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <div class="eyebrow">Low-level design · classes, interfaces and code structure</div>
+      <h1>System Design <span class="y">LLD</span></h1>
+      <p class="lede">How one service is built inside: classes and their responsibilities, interfaces, design patterns, concurrency, and classic design problems worked through in code.</p>
+      <svg class="flow" viewBox="0 0 560 90" aria-hidden="true">
+        <rect class="n" x="20" y="14" width="150" height="62" rx="9"/><text class="t-fg" x="95" y="38">«interface»</text><text class="t-fg" x="95" y="60">INotifier</text>
+        <path class="w" d="M170 45 H250"/><path class="w" d="M250 45 L238 39 M250 45 L238 51"/>
+        <rect class="lb" x="250" y="22" width="120" height="46" rx="11"/><text class="t-on" x="310" y="50">Booking</text>
+        <path class="w" d="M370 45 C410 45 410 18 440 18"/><path class="w" d="M370 45 C410 45 410 72 440 72"/>
+        <rect class="sv" x="440" y="4" width="104" height="28" rx="8"/><text class="t-ink" x="492" y="22">EmailNotifier</text>
+        <rect class="sv" x="440" y="58" width="104" height="28" rx="8"/><text class="t-ink" x="492" y="76">SmsNotifier</text>
+      </svg>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="sLive">0</b><span>Explainers</span></div>
+      <div class="stat"><b id="sTopics">0</b><span>Topics</span></div>
+      <div class="stat"><b id="sNext">–</b><span>Next up</span></div>
+      <div class="meter">
+        <div class="row"><span>Topics covered</span><span id="sPct">0%</span></div>
+        <div class="track"><i id="bar" style="width:0"></i></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="toolbar" id="toolbar">
+    <input class="search" id="q" type="search" placeholder="Search topics, e.g. strategy, SOLID, parking lot" aria-label="Search topics">
+    <div class="seg" role="group" aria-label="Filter">
+      <button type="button" data-f="all" aria-pressed="true">All topics</button>
+      <button type="button" data-f="live" aria-pressed="false">Explainers only</button>
+    </div>
+  </div>
+
+  <main id="parts"></main>
+
+  <section class="howto" aria-label="How to use">
+    <div class="box"><h4>HLD vs LLD</h4><p><b>HLD</b> decides which services, stores and queues exist and how they talk. <b>LLD</b> decides how one of those services is written: its classes, interfaces and the patterns that keep it easy to change.</p></div>
+    <div class="box"><h4>Adding topics</h4><p>In this page's script, add a part to <code>PARTS</code> with its topics, e.g. <code>{t:"Strategy pattern", k:"strategy pattern interface"}</code>. When an explainer is ready, put the file in this folder and add <code>file:"strategy.html"</code> to its topic.</p></div>
+    <div class="box"><h4>Explainer pages</h4><p>Copy <code>_template/explainer.html</code> here; pages in this folder load shared files from <code>../../assets/</code> and link back with <code>index.html</code>.</p></div>
+  </section>
+
+  <footer>Low-level design track. Topics are added as they're learned.</footer>
+</div>
+
+<script>
+/* ===== LLD topics. Add parts and topics as you learn; publish an explainer by adding  file:"name.html"  to its topic. ===== */
+const PARTS = [
+ {part:"Part 1", name:"SOLID principles", sections:[
+  {t:"SOLID overview", k:"solid principles guidelines object oriented design", file:"solid.html"},
+  {t:"S · Single responsibility", k:"srp single responsibility one reason to change god class", file:"solid-srp.html"},
+  {t:"O · Open-closed", k:"ocp open closed extension decorator strategy extension methods", file:"solid-ocp.html"},
+  {t:"L · Liskov substitution", k:"lsp liskov substitution inheritance subclass not implemented", file:"solid-lsp.html"},
+  {t:"I · Interface segregation", k:"isp interface segregation small interfaces repository", file:"solid-isp.html"},
+  {t:"D · Dependency inversion", k:"dip dependency inversion injection abstraction constructor", file:"solid-dip.html"}
+ ]}
+];
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const all=PARTS.flatMap(p=>p.sections);
+const live=all.filter(s=>s.file);
+$('sLive').textContent=live.length;
+$('sTopics').textContent=all.length;
+const next=all.find(s=>!s.file);
+$('sNext').textContent=!all.length?'–':next?`Topic ${all.indexOf(next)+1}`:'Done';
+const pct=all.length?Math.round(live.length*100/all.length):0;
+$('sPct').textContent=`${live.length} / ${all.length} · ${pct}%`;
+$('bar').style.width=Math.max(pct,live.length?2:0)+'%';
+
+let filter='all',query='';
+function card(s,n){
+  if(s.file)return `<a class="day-card live" href="${esc(s.file)}"><span class="day">Topic ${n}</span><span class="topic">${esc(s.t)}</span><span class="status">Open explainer</span></a>`;
+  return `<div class="day-card"><span class="day">Topic ${n}</span><span class="topic">${esc(s.t)}</span><span class="status">Coming soon</span></div>`;
+}
+function render(){
+  if(!all.length){
+    $('toolbar').hidden=true;
+    $('parts').innerHTML=`<div class="empty-track"><h2>No LLD topics yet</h2><p>This track is ready for topics as you learn them: object-oriented design, design patterns, concurrency and classic problems such as a parking lot or an LRU cache.</p><p>Meanwhile the <a href="../hld/index.html">HLD roadmap</a> has the explainers built so far.</p></div>`;
+    return;
+  }
+  const q=query.trim().toLowerCase();let html='',n=0;
+  PARTS.forEach((p,i)=>{
+    const items=p.sections.map(s=>({s,n:++n})).filter(({s})=>(filter==='all'||s.file)&&(!q||s.t.toLowerCase().includes(q)||(s.k||'').toLowerCase().includes(q)));
+    if(!items.length)return;
+    html+=`<section class="phase" id="p${i+1}"><div class="phase-head"><span class="num">${esc(p.part)}</span><h2>${esc(p.name)}</h2></div><div class="week"><div class="day-grid">${items.map(({s,n})=>card(s,n)).join('')}</div></div></section>`;
+  });
+  $('parts').innerHTML=html||`<p class="empty">No topics match “${esc(query)}”.</p>`;
+}
+$('q').addEventListener('input',e=>{query=e.target.value;render();});
+document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.f;document.querySelectorAll('.seg button').forEach(x=>x.setAttribute('aria-pressed',x===b));render();}));
+render();
+</script>
+</body>
+</html>

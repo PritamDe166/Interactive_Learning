@@ -415,3 +415,60 @@ body:has(.explainer)::before { content: ""; position: fixed; inset: 0 0 auto; he
 .two > * { min-width: 0; }
 .codeblock.static-code { overflow-x: auto; }
 ul.cheat li > * { min-width: 0; overflow-wrap: anywhere; }
+
+/* ---------- UML class diagrams (Kit.classBox / Kit.umlLink) ---------- */
+.uml { transition: opacity .3s; }
+.uml-box { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .25s, fill .25s; }
+.uml-name { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+.uml-stereo { fill: var(--muted); font-family: var(--mono) !important; font-size: 10.5px; text-anchor: middle; }
+.uml-sep { stroke: var(--line); stroke-width: 1.5; }
+.uml-txt { fill: var(--fg-soft); font-family: var(--mono) !important; font-size: 11.5px; }
+.uml-hl { fill: transparent; transition: fill .25s; }
+.uml-row { transition: opacity .3s; }
+.uml-row.hot .uml-hl { fill: var(--teal-wash); }
+.uml-row.hot .uml-txt { fill: var(--fg); }
+.uml-row.bad .uml-hl { fill: color-mix(in srgb, var(--red) 22%, transparent); }
+.uml-row.bad .uml-txt { fill: var(--bad-text); }
+.uml-row.dim { opacity: .3; }
+.uml.on .uml-box { stroke: var(--cyan); fill: var(--teal-wash); }
+.uml.ok .uml-box { stroke: var(--teal); }
+.uml.bad .uml-box { stroke: var(--red); }
+.uml.iface .uml-box { stroke-dasharray: 6 4; }
+.uml.dim { opacity: .3; }
+.uml-link path { fill: none; stroke: var(--fg-soft); stroke-width: 1.8; transition: opacity .3s, stroke .25s; }
+.uml-link.uses path, .uml-link.implements path { stroke-dasharray: 6 4; }
+.uml-link.hot path { stroke: var(--cyan); }
+.uml-link.bad path { stroke: var(--red); }
+.uml-link.dim { opacity: .25; }
+.uml-tri { fill: var(--panel); stroke: var(--fg-soft); stroke-width: 1.6; }
+.uml-open { fill: none; stroke: var(--fg-soft); stroke-width: 1.6; }
+.cs-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 12px; }
+.cs-pair .codeblock { margin: 0; min-height: 0; overflow-x: auto; font-size: 12.5px; }
+.cs-pair .label.bad-text, .cs-pair .label.ok-text { margin-bottom: 4px; }
+
+/* ---------- SOLID / LLD page helpers ---------- */
+.solid-nav { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin: 28px 0 8px; }
+.solid-nav a, .solid-nav span { padding: 10px 14px; border: 1px solid var(--line); border-radius: 12px; text-decoration: none; color: var(--fg); background: var(--panel); }
+.solid-nav span { color: var(--muted); border-style: dashed; background: transparent; }
+.solid-letters { display: inline-flex; gap: 4px; margin-bottom: 10px; }
+.solid-letters a, .solid-letters b, .solid-letters span { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; border: 1px solid var(--line); font-family: var(--mono); text-decoration: none; color: var(--muted); }
+.solid-letters a:hover { border-color: var(--cyan); color: var(--fg); }
+.solid-letters b { background: var(--teal); color: var(--on-accent); border-color: var(--teal); }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 12px; }
+.kpi { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--panel); }
+.kpi b { font-size: 24px; display: block; }
+.kpi span { font-size: 12px; color: var(--muted); }
+.kpi.bad b { color: var(--bad-text); }
+.kpi.good b { color: var(--good-text); }
+.tests { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.tests .t { font-family: var(--mono); font-size: 12px; padding: 4px 9px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel-2); }
+.tests .t.pass { border-color: var(--teal); color: var(--good-text); }
+.tests .t.fail { border-color: var(--red); color: var(--bad-text); }
+.tests .t.run { border-color: var(--cyan); }
+.matrix { width: 100%; border-collapse: collapse; font-size: 13px; }
+.matrix th, .matrix td { border: 1px solid var(--line); padding: 6px 8px; text-align: center; }
+.matrix th:first-child, .matrix td:first-child { text-align: left; }
+.matrix td.use { color: var(--good-text); }
+.matrix td.waste { color: var(--bad-text); background: color-mix(in srgb, var(--red) 10%, transparent); }
+.matrix td.na { color: var(--muted); }
+.uml-row.gone, .uml-link.gone { opacity: 0; }

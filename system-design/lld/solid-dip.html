@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dependency Inversion Principle</title>
+<meta name="description" content="SOLID, D: high-level policy and low-level details both depend on an abstraction the high-level side owns. Watch the dependency arrow flip, then wire implementations with constructor injection.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/theme.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/explainer.css">
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/explainer-kit.js"></script>
+<style>
+  .proj rect { fill: transparent; stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 2 5; }
+  .proj text { fill: var(--muted); font-family: var(--mono) !important; font-size: 12px; }
+  .proj.hot rect { stroke: var(--cyan); }
+  .dip-log { margin: 6px 0 0; min-height: 70px; white-space: pre-wrap; font-size: 13px; }
+  select.dip-sel { font: inherit; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); }
+  select.dip-sel:disabled { opacity: .45; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← LLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="solid-letters" aria-label="SOLID principles"><a href="solid.html" title="Overview">∗</a><a href="solid-srp.html" title="Single responsibility">S</a><a href="solid-ocp.html" title="Open-closed">O</a><a href="solid-lsp.html" title="Liskov substitution">L</a><a href="solid-isp.html" title="Interface segregation">I</a><b title="Dependency inversion">D</b></div>
+    <div class="eyebrow">System Design · LLD · SOLID · D</div>
+    <h1>Dependency Inversion Principle</h1>
+    <ul class="lede">
+      <li><b>High-level modules</b> (business rules) shouldn't depend on <b>low-level modules</b> (SQL, SMTP, HTTP). Both should depend on an <b>abstraction</b>.</li>
+      <li>The abstraction belongs to the <b>high-level side</b>: the domain defines <span class="mono">IBookingRepository</span>, the SQL project implements it. That's the "inversion": the arrow now points from detail to policy.</li>
+      <li><b>Dependency injection</b> (passing the implementation in through the constructor) is how you wire it up. DI is the mechanism; DIP is the direction.</li>
+      <li>Biggest everyday payoff: you can test business rules with a <b>fake</b> instead of a real database.</li>
+    </ul>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: flipping the arrow</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="dipStory">
+      <div class="scroll"><svg class="diagram" id="dipSvg" style="min-width:0" viewBox="0 0 760 400" role="img" aria-label="Class diagram across Domain and Infrastructure projects; the dependency between them flips direction"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="codeH">
+    <h2 class="stage-title" id="codeH">The same thing in C#</h2>
+    <div class="stage-kind">Before, after, and the composition root</div>
+    <div class="cs-pair">
+      <div><div class="label bad-text">Before: the service builds its own SQL repository</div><pre class="codeblock" id="csBefore"></pre></div>
+      <div><div class="label ok-text">After: the service asks for an abstraction it owns</div><pre class="codeblock" id="csAfter"></pre></div>
+    </div>
+    <div class="cs-pair" style="margin-top:12px">
+      <div><div class="label ok-text">Program.cs: the one place that knows the concrete classes</div><pre class="codeblock" id="csRoot"></pre></div>
+      <div><div class="label ok-text">Unit test: no database needed</div><pre class="codeblock" id="csTest"></pre></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Swap implementations under both designs, then decide where the interface should live.</p>
+
+  <section aria-labelledby="simH">
+    <h2 class="stage-title" id="simH">1. Swap the repository</h2>
+    <div class="stage-kind">Book Asha at 9:00 with different repositories · without editing BookingService</div>
+    <div class="controls" style="flex-wrap:wrap;gap:14px;justify-content:flex-start">
+      <div class="chip-group" style="margin:0"><div class="label">BookingService gets its repository by</div><div class="seg" id="mdSeg" role="group" aria-label="Wiring"><button type="button" data-v="new" aria-pressed="true">new SqlBookingRepository()</button><button type="button" data-v="di" aria-pressed="false">constructor injection</button></div></div>
+      <div class="chip-group" style="margin:0"><label class="label" for="impSel">Registered implementation</label><select class="dip-sel" id="impSel"><option value="sql">SqlBookingRepository</option><option value="mem">InMemoryBookingRepository</option><option value="fake">FakeBookingRepository (tests)</option><option value="cache">CachingBookingRepository → Sql</option></select></div>
+    </div>
+    <pre class="codeblock" id="wireCode" style="min-height:0;margin-top:10px"></pre>
+    <div class="controls"><button class="btn primary" type="button" id="bookBtn">Book Asha at 9:00</button></div>
+    <div class="card"><div class="label">What happened</div><pre class="mono dip-log" id="bookLog">Press Book.</pre></div>
+    <p class="status-line" id="bookStatus"></p>
+  </section>
+
+  <section aria-labelledby="ownH">
+    <h2 class="stage-title" id="ownH">2. Who owns the interface?</h2>
+    <div class="stage-kind">Same interface, two homes · watch the project references</div>
+    <div class="seg" id="owSeg" role="group" aria-label="Interface location"><button type="button" data-v="infra" aria-pressed="true">IBookingRepository in Infrastructure</button><button type="button" data-v="domain" aria-pressed="false">IBookingRepository in Domain</button></div>
+    <div class="scroll"><svg class="diagram narrow" id="owSvg" viewBox="0 0 660 230" style="min-width:540px;max-width:720px;margin:10px auto 0;display:block" role="img" aria-label="Project reference graph"></svg></div>
+    <p class="status-line" id="owStatus"></p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if"><span class="mono">new SqlSomething()</span>, <span class="mono">new HttpClient()</span>, <span class="mono">DateTime.Now</span> inside business logic</span><span class="arrow">→</span><span class="then">hidden dependency on a detail: ask for an abstraction instead</span></li>
+      <li><span class="if">Can't unit-test a rule without a database or network</span><span class="arrow">→</span><span class="then">invert: interface owned by the domain + a fake in tests</span></li>
+      <li><span class="if">Where does the interface go?</span><span class="arrow">→</span><span class="then">next to the code that <b>uses</b> it (domain), named in domain terms</span></li>
+      <li><span class="if">Who creates the concrete classes?</span><span class="arrow">→</span><span class="then">the composition root (Program.cs / DI container), nowhere else</span></li>
+      <li><span class="if">"We use DI, so we follow DIP"</span><span class="arrow">→</span><span class="then">only if what's injected is an abstraction the high-level code owns</span></li>
+      <li><span class="if">Stable, side-effect-free code (string, Math, your own value objects)</span><span class="arrow">→</span><span class="then">depend on it directly; no interface needed</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: DIP, DI and IoC</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Term</th><th>What it is</th><th>In ASP.NET Core</th></tr></thead>
+        <tbody>
+          <tr><td>Dependency Inversion Principle</td><td>a design rule about the <b>direction</b> of dependencies: details depend on policy-owned abstractions</td><td>interfaces in the domain/application project, implemented in infrastructure</td></tr>
+          <tr><td>Dependency Injection</td><td>a <b>technique</b>: give an object its dependencies from outside (constructor, parameter)</td><td>constructor parameters; <span class="mono">builder.Services.AddScoped&lt;I, Impl&gt;()</span></td></tr>
+          <tr><td>Inversion of Control</td><td>a broader idea: a framework calls your code and controls creation and flow</td><td>the host builds controllers and services for you</td></tr>
+          <tr><td>DI container</td><td>a <b>tool</b> that automates injection</td><td>Microsoft.Extensions.DependencyInjection</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>The two statements</b> (Robert C. Martin, 1996): high-level modules should not depend on low-level modules, both should depend on abstractions; and abstractions should not depend on details, details should depend on abstractions.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Ownership matters:</b> if <span class="mono">IBookingRepository</span> lives in the Infrastructure project, the domain still references infrastructure and nothing was inverted. Put it in the domain, name it in domain language, and use domain types in its signatures. This is the heart of Clean Architecture and Ports &amp; Adapters.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>From your notes:</b> a Service that creates its Repository depends on a concrete low-level class. Introduce an interface, inject it through the constructor, and the service no longer knows which repository it uses or how it works. Most projects have one implementation per interface, so the main practical win is mocking in tests.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>State DIP's two rules.<span class="go">Show answer</span></summary>
+        <div class="ans"><p>1. High-level modules shouldn't depend on low-level modules; both depend on abstractions. 2. Abstractions shouldn't depend on details; details depend on abstractions.</p></div></details>
+      <details><summary>What exactly is "inverted"?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>The <b>direction of the source-code dependency</b>. Before, the domain referenced the SQL code. After, the SQL code references an interface the domain defines, so the arrow points from detail to policy.</p></div></details>
+      <details><summary>Is dependency injection the same as DIP?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>No.</b> DI is passing dependencies in. You can inject a concrete <span class="mono">SqlBookingRepository</span> and still depend on a detail. DIP is satisfied only when the injected type is an abstraction owned by the high-level side.</p></div></details>
+      <details><summary>Where should <span class="mono">IBookingRepository</span> live in a Domain / Infrastructure / Api solution?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>In <b>Domain</b> (or Application). Infrastructure references Domain to implement it; Api references both and wires them in Program.cs.</p></div></details>
+      <details><summary>Why is <span class="mono">DateTime.Now</span> inside a booking rule a DIP smell?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>It's a hidden dependency on a low-level detail (the system clock), so tests can't control "now". Inject a clock abstraction, such as .NET 8's <span class="mono">TimeProvider</span>.</p></div></details>
+      <details><summary>Should every class get an interface?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>No. Invert dependencies on <b>volatile details</b> (I/O, external services, time). Depending directly on stable, pure code is fine.</p></div></details>
+    </div>
+  </section>
+
+  <nav class="solid-nav" aria-label="SOLID pages"><a href="solid-isp.html">← I · Interface segregation</a><a href="solid.html">SOLID overview →</a></nav>
+
+  <footer>Sources: your Notion notes "SOLID Principles: Five Guidelines for Object-Oriented Code"; Robert C. Martin, "The Dependency Inversion Principle" (1996), as quoted in the Wikipedia article and Coding Shuttle's LLD handbook; Mikhail Shilkov, "Dependency Inversion Implies Interfaces Are Owned by High-level Modules" (2016). Repository names and log lines are illustrative.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  K.codeBlock($('csBefore'), `// Clinic.Domain  (references Clinic.Infrastructure)
+public class BookingService
+{
+    private readonly SqlBookingRepository _repo = new();
+
+    public void Book(Patient p, DateTime slot)
+    {
+        if (_repo.IsTaken(slot))
+            throw new SlotTakenException(slot);
+        _repo.Save(new Appointment(p.Id, slot));
+    }
+}`, 'cs');
+  K.codeBlock($('csAfter'), `// Clinic.Domain  (references nothing below it)
+public interface IBookingRepository          // owned here
+{
+    bool IsTaken(DateTime slot);
+    void Save(Appointment a);
+}
+
+public class BookingService(IBookingRepository repo)
+{
+    public void Book(Patient p, DateTime slot)
+    {
+        if (repo.IsTaken(slot)) throw new SlotTakenException(slot);
+        repo.Save(new Appointment(p.Id, slot));
+    }
+}
+
+// Clinic.Infrastructure  (references Clinic.Domain)
+public class SqlBookingRepository : IBookingRepository { ... }`, 'cs');
+  K.codeBlock($('csRoot'), `// Clinic.Api/Program.cs: the composition root
+builder.Services.AddScoped<IBookingRepository, SqlBookingRepository>();
+builder.Services.AddScoped<BookingService>();`, 'cs');
+  K.codeBlock($('csTest'), `[Fact]
+public void Booking_a_taken_slot_throws()
+{
+    var fake = new FakeBookingRepository(taken: [Nine]);
+    var service = new BookingService(fake);
+
+    Assert.Throws<SlotTakenException>(
+        () => service.Book(Asha, Nine));
+}`, 'cs');
+
+  /* ===== Walkthrough ===== */
+  const sv = $('dipSvg'); K.umlDefs(sv);
+  const P = K.el('g', {}, sv), C = K.el('g', {}, sv), FX = K.el('g', {}, sv);
+  const proj = (x, y, w, h, label) => { const g = K.el('g', { class: 'proj' }, P); K.el('rect', { x, y, width: w, height: h, rx: 14 }, g); const t = K.text(g, x + 12, y + 18, label); t.style.textAnchor = 'start'; return g; };
+  const pDom = proj(10, 40, 350, 290, 'Clinic.Domain'), pInf = proj(400, 40, 350, 290, 'Clinic.Infrastructure');
+  const pTest = proj(10, 340, 350, 56, 'Clinic.Tests'); pTest.classList.add('sx');
+  const projArrow = K.text(FX, 380, 24, '', 'mlabel');
+  const svc = K.classBox(C, 50, 70, 270, { name: 'BookingService', fields: ['- repo'], methods: ['+ Book(patient, slot)'] });
+  const iface = K.classBox(C, 60, 220, 250, { name: 'IBookingRepository', stereo: 'interface', methods: ['+ IsTaken(slot)', '+ Save(appt)'] }, 'iface sx');
+  const sql = K.classBox(C, 440, 120, 270, { name: 'SqlBookingRepository', methods: ['+ IsTaken(slot)', '+ Save(appt)'] });
+  const conn = K.classBox(C, 470, 262, 210, { name: 'SqlConnection' });
+  K.umlLink(C, conn.top, sql.bottom, 'uses').classList.add('dim');
+  const before = K.umlLink(C, svc.right, [sql.left[0], sql.cy - 14], 'creates');
+  const beforeT = K.text(before, 520, 86, 'new SqlBookingRepository()', 'mlabel bad halo');
+  const use = K.umlLink(C, svc.bottom, iface.top, 'uses'); use.classList.add('sx');
+  const impl = K.umlLink(C, [sql.left[0], sql.cy + 18], [iface.right[0], iface.cy], 'implements', [[380, sql.cy + 18], [380, iface.cy]]); impl.classList.add('sx');
+  const fake = K.classBox(C, 140, 352, 200, { name: 'FakeBookingRepository' }, 'sx');
+  const fl = K.umlLink(C, [fake.left[0] + 10, fake.cy], [iface.left[0] + 20, iface.bottom[1]], 'implements', [[70, fake.cy]]); fl.classList.add('sx');
+  function show(i) {
+    FX.textContent = '';
+    const inverted = i >= 3;
+    iface.g.classList.toggle('gone', i < 2); use.classList.toggle('gone', i < 2);
+    impl.classList.toggle('gone', i < 3); before.classList.toggle('gone', i >= 2);
+    pTest.classList.toggle('gone', i < 5); fake.g.classList.toggle('gone', i < 5); fl.classList.toggle('gone', i < 5);
+    before.classList.toggle('bad', i === 1); svc.g.classList.toggle('bad', i === 1); svc.rows[0].classList.toggle('bad', i <= 1);
+    iface.g.classList.toggle('on', i === 2); impl.classList.toggle('hot', i === 3); pInf.classList.toggle('hot', i === 3); pDom.classList.toggle('hot', i === 2);
+    svc.g.classList.toggle('on', i === 4); fake.g.classList.toggle('on', i === 5);
+    const pa = K.text(FX, 380, 24, inverted ? 'Infrastructure  ──references──▶  Domain   (inverted)' : 'Domain  ──references──▶  Infrastructure', 'mlabel ' + (inverted ? 'ok' : 'bad'));
+    if (i === 4) K.text(FX, 185, svc.bottom[1] + 18, 'BookingService(IBookingRepository repo)', 'mlabel accent halo');
+    if (i === 6) K.text(FX, 555, 360, 'DI of a concrete class ≠ DIP', 'mlabel accent halo');
+  }
+  K.story({
+    root: $('dipStory'), show, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'Policy depends on a detail', text: '<span class="mono">BookingService</span> holds the clinic\'s booking rules: the <b>high-level</b> part. It creates <span class="mono">SqlBookingRepository</span> itself, so the Domain project must reference Infrastructure. The arrow points from policy down to detail.' },
+      { title: 'Why that hurts', text: 'Testing "a taken slot is rejected" now needs a real database. Moving to another store, or adding caching, means editing the booking rules. Detail changes leak upward.' },
+      { title: 'Introduce an abstraction the domain owns', text: 'The domain declares what it needs: <span class="mono">IBookingRepository</span>, in <b>its own</b> project and in its own words (IsTaken, Save). BookingService depends only on that.' },
+      { title: 'The arrow flips', text: '<span class="mono">SqlBookingRepository</span> implements the domain\'s interface, so now <b>Infrastructure references Domain</b>. The source-code dependency points from detail to policy. That reversal is the "inversion".', tip: 'Draw the project references before and after. Interviewers want to hear that the interface lives with the high-level code; otherwise nothing was inverted.' },
+      { title: 'Constructor injection wires it', text: 'BookingService receives an <span class="mono">IBookingRepository</span> through its constructor. Only <span class="mono">Program.cs</span>, the composition root, knows the concrete class and registers it with the DI container.' },
+      { title: 'Tests plug in a fake', text: 'The test project implements the same interface with an in-memory <span class="mono">FakeBookingRepository</span>. The booking rule is tested in milliseconds, no database. Per your notes, this is the benefit you\'ll use most.' },
+      { title: 'DI is not DIP', text: 'Injecting <span class="mono">SqlBookingRepository</span> (the concrete class) through the constructor is dependency injection, but the domain would still depend on infrastructure. DIP is about <b>which way</b> the dependency points, not how the object arrives.' }
+    ]
+  });
+
+  /* ===== Playground 1: swap ===== */
+  const IMPL = {
+    sql: { n: 'SqlBookingRepository', log: ['IsTaken(9:00) → SELECT … (≈30 ms) → false', 'Save → INSERT INTO Appointments … (≈25 ms)'] },
+    mem: { n: 'InMemoryBookingRepository', log: ['IsTaken(9:00) → dictionary lookup → false', 'Save → stored in memory (lost on restart; fine for demos)'] },
+    fake: { n: 'FakeBookingRepository', log: ['IsTaken(9:00) → returns what the test set up → false', 'Save → recorded; the test asserts it was called once'] },
+    cache: { n: 'CachingBookingRepository', log: ['IsTaken(9:00) → cache miss → Sql: SELECT … → false', 'Save → Sql: INSERT …; cache entry for 9:00 updated'] }
+  };
+  let mode = 'new';
+  function wire() {
+    const k = $('impSel').value; $('impSel').disabled = mode === 'new';
+    K.codeBlock($('wireCode'), mode === 'new'
+      ? `public class BookingService\n{\n    private readonly SqlBookingRepository _repo = new();   // fixed at compile time\n}`
+      : `// Program.cs\nbuilder.Services.AddScoped<IBookingRepository, ${IMPL[k].n}>();\n\npublic class BookingService(IBookingRepository repo) { ... }   // unchanged`, 'cs');
+    $('bookStatus').innerHTML = mode === 'new' ? 'The implementation is hard-wired. To use anything else you must <b>edit BookingService</b>.' : `Registration says <span class="mono">${IMPL[k].n}</span>. BookingService wasn't touched.`;
+  }
+  $('bookBtn').addEventListener('click', async () => {
+    const run = K.newRun('book'); const k = mode === 'new' ? 'sql' : $('impSel').value; const L = [`BookingService.Book(Asha, 9:00) using ${IMPL[k].n}`];
+    $('bookLog').textContent = L.join('\n');
+    try { for (const l of IMPL[k].log) { await K.sleep(450, run); L.push('  ' + l); $('bookLog').textContent = L.join('\n'); } await K.sleep(300, run); L.push('  → booked ✓'); $('bookLog').textContent = L.join('\n'); }
+    catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  });
+  K.seg($('mdSeg'), v => { mode = v; wire(); });
+  $('impSel').addEventListener('change', wire);
+  wire();
+
+  /* ===== Playground 2: ownership ===== */
+  const ow = $('owSvg'); K.umlDefs(ow);
+  function own(v) {
+    ow.innerHTML = ''; K.umlDefs(ow);
+    const api = K.node(ow, 320, 36, 180, 48, 'Clinic.Api', 'Program.cs wires it');
+    const dom = K.node(ow, 150, 180, 260, 60, 'Clinic.Domain', v === 'domain' ? 'BookingService + IBookingRepository' : 'BookingService');
+    const inf = K.node(ow, 505, 180, 290, 60, 'Clinic.Infrastructure', v === 'domain' ? 'SqlBookingRepository' : 'SqlBookingRepository + the interface');
+    K.umlLink(ow, [280, 60], [180, 150], 'creates', [], 'refs');
+    K.umlLink(ow, [360, 60], [460, 150], 'creates', [], 'refs');
+    const l = v === 'domain' ? K.umlLink(ow, [358, 186], [282, 186], 'creates', [], 'refs') : K.umlLink(ow, [282, 186], [358, 186], 'creates', [], 'refs');
+    l.classList.add(v === 'domain' ? 'hot' : 'bad');
+    dom.g.classList.add(v === 'domain' ? 'ok' : 'bad');
+    $('owStatus').innerHTML = v === 'domain'
+      ? '<b class="ok-text">Inverted.</b> Domain references nothing below it; Infrastructure depends on Domain to implement its interface. Domain can be built and tested alone.'
+      : '<b class="bad-text">Not inverted.</b> There\'s an interface, but Domain must still reference Infrastructure to see it, and it drags SQL packages along. Move the interface to Domain.';
+  }
+  K.seg($('owSeg'), own); own('infra');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Interface Segregation Principle</title>
+<meta name="description" content="SOLID, I: no client should depend on methods it doesn't use. A fat repository interface is split into role interfaces; .NET's read-only collection interfaces show the same idea.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/theme.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/explainer.css">
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/explainer-kit.js"></script>
+<style>
+  .least { display: grid; gap: 8px; margin-top: 10px; }
+  .least .row { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 10px; align-items: start; padding: 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+  @media (max-width: 700px) { .least .row { grid-template-columns: 1fr; } }
+  .least .row .codeblock { margin: 0; min-height: 0; overflow-x: auto; font-size: 12.5px; }
+  .least .opts { display: flex; flex-wrap: wrap; gap: 6px; }
+  .least .why { grid-column: 1 / -1; font-size: 13px; color: var(--fg-soft); min-height: 0; }
+  .least .row.ok { border-color: var(--teal); }
+  .least .row.no { border-color: var(--red); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← LLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="solid-letters" aria-label="SOLID principles"><a href="solid.html" title="Overview">∗</a><a href="solid-srp.html" title="Single responsibility">S</a><a href="solid-ocp.html" title="Open-closed">O</a><a href="solid-lsp.html" title="Liskov substitution">L</a><b title="Interface segregation">I</b><a href="solid-dip.html" title="Dependency inversion">D</a></div>
+    <div class="eyebrow">System Design · LLD · SOLID · I</div>
+    <h1>Interface Segregation Principle</h1>
+    <ul class="lede">
+      <li>No client should be forced to <b>depend on methods it doesn't use</b>.</li>
+      <li>A <b>fat interface</b> hurts both sides: implementers write stub methods that throw, and clients get coupled to methods they never call.</li>
+      <li>Split it into small <b>role interfaces</b> shaped around what each client needs, e.g. read, write, import.</li>
+      <li>When something needs all of them, a combined interface can <b>inherit</b> the small ones. Don't go as far as one method per interface.</li>
+    </ul>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: the do-everything repository</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="ispStory">
+      <div class="scroll"><svg class="diagram" id="ispSvg" style="min-width:0" viewBox="0 0 760 390" role="img" aria-label="Class diagram of a fat repository interface split into role interfaces"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="codeH">
+    <h2 class="stage-title" id="codeH">The same thing in C#</h2>
+    <div class="stage-kind">Fat interface vs role interfaces</div>
+    <div class="cs-pair">
+      <div><div class="label bad-text">Before: a reader forced to implement writes</div><pre class="codeblock" id="csBefore"></pre></div>
+      <div><div class="label ok-text">After: implement and depend on only what you use</div><pre class="codeblock" id="csAfter"></pre></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Compare three ways of cutting the same interface, then pick the smallest .NET type each method really needs.</p>
+
+  <section aria-labelledby="simH">
+    <h2 class="stage-title" id="simH">1. How finely should you split?</h2>
+    <div class="stage-kind">Rows: who uses or implements · columns: methods · red = waste</div>
+    <div class="seg" id="spSeg" role="group" aria-label="Interface design"><button type="button" data-v="fat" aria-pressed="true">One fat IRepository</button><button type="button" data-v="role" aria-pressed="false">Role interfaces</button><button type="button" data-v="tiny" aria-pressed="false">One method each</button></div>
+    <pre class="codeblock" id="spCode" style="min-height:0;margin-top:10px"></pre>
+    <div class="scroll card table-card" style="margin-top:10px"><table class="matrix" id="spMatrix"></table></div>
+    <div class="kpis">
+      <div class="kpi" id="kIf"><b>0</b><span>interfaces to know</span></div>
+      <div class="kpi" id="kStub"><b>0</b><span>stub methods implementers must write</span></div>
+      <div class="kpi" id="kDep"><b>0</b><span>methods clients depend on but never call</span></div>
+    </div>
+    <p class="status-line" id="spStatus"></p>
+  </section>
+
+  <section aria-labelledby="leastH">
+    <h2 class="stage-title" id="leastH">2. Ask for the least you need</h2>
+    <div class="stage-kind">.NET already segregates collections · pick the parameter type for each method</div>
+    <div class="least" id="least"></div>
+    <p class="status-line" id="leastStatus">Pick a type for each method.</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Implementers throw NotSupportedException / NotImplementedException for some members</span><span class="arrow">→</span><span class="then">the interface is too fat; split it</span></li>
+      <li><span class="if">Test fakes need many empty methods</span><span class="arrow">→</span><span class="then">the class under test depends on more than it uses</span></li>
+      <li><span class="if">A method only loops over a collection</span><span class="arrow">→</span><span class="then">take <span class="mono">IEnumerable&lt;T&gt;</span>, not <span class="mono">List&lt;T&gt;</span></span></li>
+      <li><span class="if">Some clients read, others write</span><span class="arrow">→</span><span class="then">separate read and write interfaces (the same idea as CQRS)</span></li>
+      <li><span class="if">One class legitimately does everything</span><span class="arrow">→</span><span class="then">implement several role interfaces, or a combined one that inherits them</span></li>
+      <li><span class="if">Ending up with one method per interface</span><span class="arrow">→</span><span class="then">too far: group by how clients use them</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: ISP in .NET itself</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>If you only need to…</th><th>Accept</th><th>Not</th></tr></thead>
+        <tbody>
+          <tr><td>loop over items</td><td class="mono">IEnumerable&lt;T&gt;</td><td class="mono">List&lt;T&gt;</td></tr>
+          <tr><td>loop and know the count</td><td class="mono">IReadOnlyCollection&lt;T&gt;</td><td class="mono">ICollection&lt;T&gt;</td></tr>
+          <tr><td>index into it</td><td class="mono">IReadOnlyList&lt;T&gt;</td><td class="mono">IList&lt;T&gt;</td></tr>
+          <tr><td>look up by key</td><td class="mono">IReadOnlyDictionary&lt;K,V&gt;</td><td class="mono">Dictionary&lt;K,V&gt;</td></tr>
+          <tr><td>add or remove items</td><td class="mono">ICollection&lt;T&gt; / IList&lt;T&gt;</td><td>a concrete collection type</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>Origin:</b> Robert C. Martin formulated ISP while consulting for Xerox, whose printer software had one large job class that every task depended on. Small changes forced long rebuilds across the system; splitting the class's interface by client fixed it.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>.NET learned this too:</b> <span class="mono">IReadOnlyList&lt;T&gt;</span> and <span class="mono">IReadOnlyCollection&lt;T&gt;</span> arrived in .NET 4.5 so read-only callers no longer depend on <span class="mono">Add</span>/<span class="mono">Remove</span>, and arrays and read-only collections stopped needing throwing implementations (see the Liskov page).</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>From your notes:</b> split a bulky generic repository into read, write and delete interfaces, recombine with a main interface that inherits them when needed, and avoid the over-applied version with one method per interface.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>State ISP in one sentence.<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Clients should not be forced to depend on methods they do not use.</p></div></details>
+      <details><summary>Name two costs of a fat interface.<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Implementers write <b>stubs that throw</b> (also an LSP risk), and clients are <b>coupled to unrelated methods</b>: changes to those ripple to them, and their test fakes grow.</p></div></details>
+      <details><summary>How is ISP different from SRP?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>SRP looks at a <b>class</b> from the side of who changes it. ISP looks at an <b>interface</b> from the side of who uses it. One class can implement several small interfaces and still have one responsibility.</p></div></details>
+      <details><summary>A <span class="mono">PrintSummary(List&lt;Patient&gt; patients)</span> only loops. What should the parameter be?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">IEnumerable&lt;Patient&gt;</span>. Callers can then pass arrays, lists, query results or generators.</p></div></details>
+      <details><summary>How do you keep convenience for a class that needs everything?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Define <span class="mono">IRepository&lt;T&gt; : IReadRepository&lt;T&gt;, IWriteRepository&lt;T&gt;</span>. Full implementations implement the combined one; narrow clients still ask for the small ones.</p></div></details>
+      <details><summary>What's the danger of applying ISP too strictly?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>A sprawl of single-method interfaces that are hard to find and wire up. Group methods by the <b>roles</b> clients actually play.</p></div></details>
+    </div>
+  </section>
+
+  <nav class="solid-nav" aria-label="SOLID pages"><a href="solid-lsp.html">← L · Liskov substitution</a><a href="solid-dip.html">D · Dependency inversion →</a></nav>
+
+  <footer>Sources: your Notion notes "SOLID Principles: Five Guidelines for Object-Oriented Code"; NDepend blog, "SOLID Design: The Interface Segregation Principle" (.NET collection interfaces); Stackify, "Interface Segregation Principle" (Xerox origin). Class names and counts are illustrative.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  K.codeBlock($('csBefore'), `public interface IRepository<T>
+{
+    T Get(int id);
+    IEnumerable<T> GetAll();
+    void Add(T item);
+    void Update(T item);
+    void Delete(int id);
+    void BulkImport(Stream csv);
+}
+
+public class AuditLogReader : IRepository<AuditEntry>
+{
+    public AuditEntry Get(int id) => ...;
+    public IEnumerable<AuditEntry> GetAll() => ...;
+    public void Add(AuditEntry e) => throw new NotSupportedException();
+    public void Update(AuditEntry e) => throw new NotSupportedException();
+    public void Delete(int id) => throw new NotSupportedException();
+    public void BulkImport(Stream s) => throw new NotSupportedException();
+}`, 'cs');
+  K.codeBlock($('csAfter'), `public interface IReadRepository<T>
+{
+    T Get(int id);
+    IEnumerable<T> GetAll();
+}
+public interface IWriteRepository<T>
+{
+    void Add(T item); void Update(T item); void Delete(int id);
+}
+public interface IImportRepository { void BulkImport(Stream csv); }
+
+// convenience for classes that do it all
+public interface IRepository<T> : IReadRepository<T>, IWriteRepository<T> { }
+
+public class AuditLogReader : IReadRepository<AuditEntry> { /* 2 methods */ }
+
+public class ReportService(IReadRepository<Patient> patients) { ... }`, 'cs');
+
+  /* ===== Walkthrough ===== */
+  const sv = $('ispSvg'); K.umlDefs(sv);
+  const S1 = K.el('g', { class: 'sx' }, sv), S2 = K.el('g', { class: 'sx' }, sv), FX = K.el('g', {}, sv);
+  const M6 = ['+ Get(id)', '+ GetAll()', '+ Add(item)', '+ Update(item)', '+ Delete(id)', '+ BulkImport(csv)'];
+  const fat = K.classBox(S1, 260, 20, 240, { name: 'IRepository<T>', stereo: 'interface', methods: M6 }, 'iface');
+  const rep = K.classBox(S1, 20, 40, 190, { name: 'ReportService', methods: ['calls GetAll() only'] });
+  const imp = K.classBox(S1, 560, 40, 180, { name: 'ImportJob', methods: ['calls BulkImport() only'] });
+  const l1 = K.umlLink(S1, rep.right, [fat.left[0], 95], 'uses');
+  const l2 = K.umlLink(S1, imp.left, [fat.right[0], 95], 'uses');
+  const sqlA = K.classBox(S1, 80, 262, 230, { name: 'SqlPatientRepository', methods: ['all 6 implemented'] });
+  const aud = K.classBox(S1, 430, 262, 260, { name: 'AuditLogReader', methods: ['+ Get, GetAll', '+ Add, Update, Delete → throw', '+ BulkImport → throws'] });
+  K.umlLink(S1, sqlA.top, [fat.cx - 50, fat.bottom[1]], 'implements');
+  K.umlLink(S1, aud.top, [fat.cx + 50, fat.bottom[1]], 'implements');
+  // scene 2
+  const rd = K.classBox(S2, 20, 120, 220, { name: 'IReadRepository<T>', stereo: 'interface', methods: ['+ Get(id)', '+ GetAll()'] }, 'iface');
+  const wr = K.classBox(S2, 270, 120, 220, { name: 'IWriteRepository<T>', stereo: 'interface', methods: ['+ Add  + Update  + Delete'] }, 'iface');
+  const ip = K.classBox(S2, 520, 120, 220, { name: 'IImportRepository', stereo: 'interface', methods: ['+ BulkImport(csv)'] }, 'iface');
+  const rep2 = K.classBox(S2, 30, 10, 200, { name: 'ReportService' });
+  const imp2 = K.classBox(S2, 530, 10, 200, { name: 'ImportJob' });
+  K.umlLink(S2, rep2.bottom, rd.top, 'uses'); K.umlLink(S2, imp2.bottom, ip.top, 'uses');
+  const aud2 = K.classBox(S2, 20, 300, 220, { name: 'AuditLogReader', methods: ['2 real methods, 0 stubs'] });
+  K.umlLink(S2, aud2.top, rd.bottom, 'implements');
+  const comb = K.classBox(S2, 300, 10, 190, { name: 'IRepository<T>', stereo: 'interface', methods: ['(inherits read + write)'] }, 'iface sx');
+  const cl1 = K.umlLink(S2, [comb.cx - 30, comb.bottom[1]], [rd.right[0] - 10, rd.top[1]], 'inherits'); const cl2 = K.umlLink(S2, [comb.cx + 30, comb.bottom[1]], [wr.cx, wr.top[1]], 'inherits');
+  const sql2 = K.classBox(S2, 300, 300, 260, { name: 'SqlPatientRepository', methods: [': IRepository<T>, IImportRepository'] }, 'sx');
+  const sl1 = K.umlLink(S2, sql2.top, [wr.cx, wr.bottom[1]], 'implements'), sl2 = K.umlLink(S2, [sql2.right[0] - 30, sql2.top[1]], [ip.cx, ip.bottom[1]], 'implements');
+  [cl1, cl2, sl1, sl2].forEach(l => l.classList.add('sx'));
+  function show(i) {
+    FX.textContent = '';
+    S1.classList.toggle('gone', i > 2); S2.classList.toggle('gone', i < 3);
+    aud.rows.forEach((r, k) => r.classList.toggle('bad', i >= 1 && k >= 1)); aud.g.classList.toggle('bad', i === 1);
+    fat.rows.forEach((r, k) => { r.classList.toggle('hot', i === 2 && k === 1); r.classList.toggle('bad', i === 2 && k === 5); });
+    rep.g.classList.toggle('bad', i === 2); l1.classList.toggle('bad', i === 2);
+    if (i === 2) { const t = K.text(FX, 20, rep.bottom[1] + 22, 'rebuild + redeploy; fake needs all 6', 'mlabel bad halo'); t.style.textAnchor = 'start'; }
+    const extra = i >= 5;
+    comb.g.classList.toggle('gone', !extra); sql2.g.classList.toggle('gone', !extra); [cl1, cl2, sl1, sl2].forEach(l => l.classList.toggle('gone', !extra));
+    aud2.g.classList.toggle('ok', i === 4); rep2.g.classList.toggle('on', i === 4); imp2.g.classList.toggle('on', i === 4);
+    if (i === 6) K.text(FX, 380, 380, 'IList<T> → IReadOnlyList<T>: .NET split its own collections the same way', 'mlabel accent halo');
+    if (i === 7) K.text(FX, 380, 380, 'group by client role · not one interface per method', 'mlabel accent halo');
+  }
+  K.story({
+    root: $('ispStory'), show, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'One interface for every repository', text: 'A generic <span class="mono">IRepository&lt;T&gt;</span> with six methods looks tidy. <span class="mono">ReportService</span> only reads; <span class="mono">ImportJob</span> only imports. Both depend on the whole thing.' },
+      { title: 'Implementers forced to write stubs', text: '<span class="mono">AuditLogReader</span> is read-only by design, yet it must implement Add, Update, Delete and BulkImport. They throw <span class="mono">NotSupportedException</span>, a trap for anyone holding it as an <span class="mono">IRepository</span>.' },
+      { title: 'Clients coupled to methods they never call', text: 'Change <span class="mono">BulkImport</span>\'s signature and <span class="mono">ReportService</span>, which only calls <span class="mono">GetAll</span>, is affected anyway: rebuild, redeploy, and its test fake must implement all six.' },
+      { title: 'Split into role interfaces', text: 'Cut along how clients use it: <span class="mono">IReadRepository</span>, <span class="mono">IWriteRepository</span>, <span class="mono">IImportRepository</span>. Each client asks for exactly its role.' },
+      { title: 'No more stubs or stray coupling', text: '<span class="mono">AuditLogReader</span> implements the read role only: two real methods. ReportService\'s fake needs two methods, and import changes no longer touch it.', tip: 'Mention test fakes: "the smaller the interface a class depends on, the smaller the mock". It shows you\'ve felt the pain.' },
+      { title: 'Recombine when something needs it all', text: '<span class="mono">IRepository&lt;T&gt;</span> can still exist, <b>inheriting</b> read and write. The SQL repository implements it plus import, so code needing everything has one convenient type.' },
+      { title: '.NET did the same', text: '<span class="mono">IList&lt;T&gt;</span> includes Add and Remove. Since .NET 4.5, read-only callers can ask for <span class="mono">IReadOnlyList&lt;T&gt;</span> or <span class="mono">IReadOnlyCollection&lt;T&gt;</span> instead, and accept far more kinds of collection.' },
+      { title: 'Don\'t split to dust', text: 'One method per interface means dozens of tiny types to find and wire up. Your notes call this out: group methods by the role a client plays, then stop.' }
+    ]
+  });
+
+  /* ===== Playground 1: split matrix ===== */
+  const METH = ['Get', 'GetAll', 'Add', 'Update', 'Delete', 'BulkImport'];
+  const WHO = [
+    { n: 'ReportService', kind: 'client', uses: ['GetAll'] },
+    { n: 'BookingService', kind: 'client', uses: ['Get', 'Add', 'Update'] },
+    { n: 'ImportJob', kind: 'client', uses: ['BulkImport'] },
+    { n: 'AuditLogReader', kind: 'impl', does: ['Get', 'GetAll'] },
+    { n: 'SqlPatientRepository', kind: 'impl', does: METH }
+  ];
+  const DESIGNS = {
+    fat: { ifs: [['IRepository', METH]], code: 'interface IRepository<T> { Get; GetAll; Add; Update; Delete; BulkImport; }' },
+    role: { ifs: [['IReadRepository', ['Get', 'GetAll']], ['IWriteRepository', ['Add', 'Update', 'Delete']], ['IImportRepository', ['BulkImport']]], code: 'interface IReadRepository<T>   { Get; GetAll; }\ninterface IWriteRepository<T>  { Add; Update; Delete; }\ninterface IImportRepository    { BulkImport; }' },
+    tiny: { ifs: METH.map(m => ['I' + m, [m]]), code: 'interface IGet<T> { Get; }        interface IGetAll<T> { GetAll; }\ninterface IAdd<T> { Add; }        interface IUpdate<T> { Update; }\ninterface IDelete<T> { Delete; }  interface IBulkImport { BulkImport; }' }
+  };
+  function spDraw(d) {
+    const D = DESIGNS[d]; K.codeBlock($('spCode'), D.code, 'cs');
+    const ifOf = m => D.ifs.find(([, ms]) => ms.includes(m))[0];
+    let stubs = 0, dep = 0;
+    const rows = WHO.map(w => {
+      const need = w.kind === 'client' ? w.uses : w.does;
+      const ifs = new Set(need.map(ifOf));                       // interfaces this row has to depend on / implement
+      const covered = D.ifs.filter(([n]) => ifs.has(n)).flatMap(([, ms]) => ms);
+      const cells = METH.map(m => {
+        if (need.includes(m)) return `<td class="use">${w.kind === 'client' ? 'calls' : 'real'}</td>`;
+        if (covered.includes(m)) { if (w.kind === 'client') { dep++; return '<td class="waste">depends, unused</td>'; } stubs++; return '<td class="waste">stub throws</td>'; }
+        return '<td class="na">·</td>';
+      }).join('');
+      return `<tr><td><span class="mono">${w.n}</span><br><span class="muted" style="font-size:11px">${w.kind === 'client' ? 'uses' : 'implements'} ${[...ifs].join(', ')}</span></td>${cells}</tr>`;
+    }).join('');
+    $('spMatrix').innerHTML = `<thead><tr><th></th>${METH.map(m => `<th class="mono">${m}</th>`).join('')}</tr></thead><tbody>${rows}</tbody>`;
+    $('kIf').querySelector('b').textContent = D.ifs.length; $('kIf').className = 'kpi ' + (D.ifs.length > 4 ? 'bad' : '');
+    $('kStub').querySelector('b').textContent = stubs; $('kStub').className = 'kpi ' + (stubs ? 'bad' : 'good');
+    $('kDep').querySelector('b').textContent = dep; $('kDep').className = 'kpi ' + (dep ? 'bad' : 'good');
+    $('spStatus').innerHTML = d === 'fat' ? 'Every client depends on all six methods, and the read-only implementer writes four stubs.' : d === 'role' ? '<b class="ok-text">No stubs, almost no stray coupling</b>, with only three interfaces. BookingService uses two roles (read and write), which is fine.' : 'Also zero waste, but now there are six interfaces to name, find and inject; BookingService needs three of them. Correct, but harder to live with.';
+  }
+  K.seg($('spSeg'), spDraw); spDraw('fat');
+
+  /* ===== Playground 2: least you need ===== */
+  const TYPES = ['List<T>', 'IList<T>', 'IReadOnlyList<T>', 'IEnumerable<T>'];
+  const Q = [
+    { code: `decimal TotalFees(??? fees)
+{
+    decimal sum = 0;
+    foreach (var f in fees) sum += f;
+    return sum;
+}`, a: 'IEnumerable<T>', ok: TYPES, miss: '', why: 'It only loops, so <span class="mono">IEnumerable&lt;decimal&gt;</span> is enough. Arrays, lists, LINQ queries and generators all fit.' },
+    { code: `string FirstAndLast(??? names)
+    => $"{names[0]} … {names[names.Count - 1]}";`, a: 'IReadOnlyList<T>', ok: ['List<T>', 'IList<T>', 'IReadOnlyList<T>'], miss: 'IEnumerable&lt;T&gt; has no indexer or Count.', why: 'It needs indexing and Count but never changes the list: <span class="mono">IReadOnlyList&lt;string&gt;</span>. Arrays and lists both qualify.' },
+    { code: `void AddDefaultTests(??? tests)
+{
+    tests.Add("CBC");
+    tests.Insert(0, "Vitals");
+}`, a: 'IList<T>', ok: ['List<T>', 'IList<T>'], miss: 'read-only and enumerable types have no Add or Insert.', why: 'It inserts at a position, which needs <span class="mono">IList&lt;string&gt;</span>. A concrete <span class="mono">List&lt;T&gt;</span> would work but ties callers to one class.' }
+  ];
+  $('least').innerHTML = Q.map((q, i) => `<div class="row" data-i="${i}"><pre class="codeblock"></pre><div class="opts">${TYPES.map(t => `<button class="chip-btn mono" type="button" data-t="${t}">${t.replace(/</g, '&lt;')}</button>`).join('')}</div><div class="why"></div></div>`).join('');
+  [...$('least').children].forEach((row, i) => {
+    K.codeBlock(row.querySelector('pre'), Q[i].code, 'cs');
+    row.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      row.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+      const ok = b.dataset.t === Q[i].a; row.className = 'row ' + (ok ? 'ok' : 'no');
+      const compiles = Q[i].ok.includes(b.dataset.t);
+      row.querySelector('.why').innerHTML = ok ? '<b class="ok-text">Yes.</b> ' + Q[i].why
+        : compiles ? '<b class="bad-text">Compiles, but asks for more than the method uses.</b> Try a smaller type.'
+        : `<b class="bad-text">Won't compile:</b> ${Q[i].miss}`;
+      const done = [...$('least').children].filter(r => r.classList.contains('ok')).length;
+      $('leastStatus').innerHTML = done === Q.length ? '<b class="ok-text">All three right.</b> Taking the smallest interface is ISP applied to parameters.' : `${done} of ${Q.length} right.`;
+    }));
+  });
+})();
+</script>
+</body>
+</html>
