@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Change detection</title>
+<meta name="description" content="Angular 22 change detection, recorded from CareDesk: zoneless and OnPush by default. See which components refresh after a click, a keystroke, a new input or a signal change, and why a plain field set in a timer never shows.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .ng-left { display: grid; gap: 12px; min-width: 0; align-content: start; }
+  .cdt .tl { stroke: var(--line); stroke-width: 2; }
+  .cdt .node { cursor: default; }
+  .cdt .node.flash rect { stroke: var(--cyan); fill: var(--teal-wash); stroke-width: 3.5; }
+  .cdt .node.skip { opacity: .35; }
+  .cdt .node.eager rect { stroke-dasharray: 6 4; }
+  .cdt .src { fill: var(--orange); }
+  .cdt .tagx { font-family: var(--mono) !important; font-size: 11px; fill: var(--muted); }
+  .cdt .count { font-family: var(--mono) !important; font-size: 12px; font-weight: 700; fill: var(--cyan); }
+  .pick .node { cursor: pointer; }
+  .pick .node.guess rect { stroke: var(--violet); stroke-width: 3.5; }
+  .pick .node.right rect { stroke: var(--teal); stroke-width: 3.5; }
+  .pick .node.wrong rect { stroke: var(--red); stroke-width: 3.5; }
+  .screen { font-family: var(--mono); font-size: 13px; padding: 8px 10px; border-radius: 8px; background: var(--panel-2); }
+  .screen.stale { color: var(--bad-text); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Angular roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Angular 22 · Part 2 · Data flow · added topic</div>
+    <h1>Change detection</h1>
+    <ul class="lede">
+      <li><b>Change detection</b> = Angular re-evaluating templates and patching the DOM where values changed.</li>
+      <li>Angular 22 apps are <b>zoneless</b>: a refresh is scheduled by a <b>signal change</b>, a <b>template event</b>, an input change or <span class="mono">markForCheck()</span>, not by every timer or HTTP callback.</li>
+      <li>Components are <b>OnPush by default</b>: a component is skipped unless something it depends on changed.</li>
+      <li>An event marks its component <b>and its ancestors</b>; a signal refreshes <b>only the views that read it</b>.</li>
+      <li>A plain field changed in a <span class="mono">setInterval</span> never shows. Use a signal.</li>
+    </ul>
+    <div class="cd-trail" data-stage="7"></div>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: who refreshes in CareDesk?</h2>
+    <div class="stage-kind">Each component logged "[checked] Name" whenever its template was evaluated · flashes replay the real logs</div>
+    <div class="story" id="cdStory">
+      <div class="ng-left">
+        <div class="scroll"><svg class="diagram cdt" id="cdSvg" style="min-width:0" viewBox="0 0 640 320" role="img" aria-label="CareDesk component tree: App with Header and PatientList; PatientList with PatientCard"></svg></div>
+        <div class="screen" id="cdScreen"></div>
+        <div id="cdCard"></div>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Predict which components refresh. Then switch the Header to the old Eager strategy and try again.</p>
+
+  <section aria-labelledby="predH">
+    <h2 class="stage-title" id="predH">What refreshes?</h2>
+    <div class="stage-kind">Pick an action, click the components you think are checked, then press Reveal · answers are the real logs</div>
+    <div class="seg" id="actSeg" role="group" aria-label="Action" style="flex-wrap:wrap">
+      <button type="button" data-v="click" aria-pressed="true">Click Select in a card</button>
+      <button type="button" data-v="type" aria-pressed="false">Type in the search box</button>
+      <button type="button" data-v="input" aria-pressed="false">Admit next (new input)</button>
+      <button type="button" data-v="sig" aria-pressed="false">Card clock signal ticks</button>
+      <button type="button" data-v="plain" aria-pressed="false">Header plain field in a timer</button>
+    </div>
+    <div class="controls" style="justify-content:flex-start;margin-top:8px"><span class="mono" style="font-size:13px">Header strategy:</span><div class="seg" id="strSeg" role="group" aria-label="Header strategy"><button type="button" data-v="onpush" aria-pressed="true">OnPush (default)</button><button type="button" data-v="eager" aria-pressed="false">Eager</button></div></div>
+    <div class="scroll"><svg class="diagram cdt pick" id="pkSvg" viewBox="0 0 640 320" style="min-width:520px;max-width:640px;display:block;margin:8px auto 0" role="img" aria-label="Click components to predict"></svg></div>
+    <div class="controls" style="justify-content:flex-start"><button class="btn primary" type="button" id="pkGo">Reveal</button><button class="btn" type="button" id="pkClr">Clear</button></div>
+    <p class="status-line" id="pkRes"></p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Value changes but the screen doesn't</span><span class="arrow">→</span><span class="then">it's a plain field changed outside a template event: make it a <span class="mono">signal</span></span></li>
+      <li><span class="if">Data from a timer, WebSocket or third-party callback</span><span class="arrow">→</span><span class="then"><span class="mono">signal.set()</span> (or <span class="mono">toSignal()</span> for observables)</span></li>
+      <li><span class="if">Mutated an object or array inside a signal</span><span class="arrow">→</span><span class="then">no refresh; replace it (<span class="mono">update(list =&gt; [...list, p])</span>)</span></li>
+      <li><span class="if">Click handler in a deep child</span><span class="arrow">→</span><span class="then">that child and its ancestors are refreshed; siblings aren't</span></li>
+      <li><span class="if">Legacy code that relies on "everything is checked"</span><span class="arrow">→</span><span class="then"><span class="mono">changeDetection: ChangeDetectionStrategy.Eager</span> on that component</span></li>
+      <li><span class="if">Interview: "Default vs OnPush"</span><span class="arrow">→</span><span class="then">since v22: OnPush is the default, the old Default is called Eager</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: what schedules a refresh</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Trigger</th><th>What gets refreshed (OnPush)</th><th>CareDesk evidence</th></tr></thead>
+        <tbody>
+          <tr><td>Template event (<span class="mono">(click)</span>, <span class="mono">(input)</span>)</td><td>that component and its ancestors</td><td>Select in card → App, PatientList, PatientCard</td></tr>
+          <tr><td>New input reference</td><td>the child receiving it</td><td>Admit next → PatientCard refreshed</td></tr>
+          <tr><td>Signal read in a template changes</td><td>only the views that read it</td><td>card clock → PatientCard only</td></tr>
+          <tr><td><span class="mono">markForCheck()</span> / <span class="mono">async</span> pipe</td><td>that component and ancestors</td><td>(used with observables)</td></tr>
+          <tr><td>Plain field changed in a timer / promise</td><td><b>nothing</b> (zoneless)</td><td>header stayed at "plain 0"</td></tr>
+          <tr><td>Eager component</td><td>checked whenever its parent is checked</td><td>Eager Header refreshed on every card click</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cc-pair" style="margin-top:14px">
+      <div><div class="label bad-text">Doesn't update in a zoneless app</div><div id="badClock"></div></div>
+      <div><div class="label ok-text">CareDesk's header clock</div><div id="goodClock"></div></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>Not in your notes.</b> This page fills a gap: your notes rely on change detection (ngOnChanges, ngModel) without explaining it. It's a frequent interview topic, and the rules changed a lot between Angular 16 and 22.</p></div>
+      <div class="note"><span class="flag add">Updated</span><p><b>zone.js is gone by default.</b> Older apps loaded zone.js, which patched timers, promises and events to trigger a check of the whole tree after any async work. New apps are zoneless: smaller, faster, and explicit about what changed. That's why CareDesk's header clock needed a signal.</p></div>
+      <div class="note"><span class="flag add">Updated</span><p><b>OnPush by default (v22).</b> <span class="mono">ChangeDetectionStrategy.OnPush</span> is now the default and the old <span class="mono">Default</span> strategy is named <span class="mono">Eager</span>. Existing code you see in interviews may still set <span class="mono">OnPush</span> explicitly; it means the same thing.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>First render ran a second pass.</b> In the real logs, App and PatientList were checked again right after the first render (caused by the search box's <span class="mono">ngModel</span>: with the box removed, the second pass disappeared). Extra passes are normal; never rely on how many times a template is evaluated.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>What is change detection?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>The process where Angular re-evaluates template bindings and updates the DOM where values changed. Zoneless Angular runs it when something tells it data changed: signals, template events, input changes, <span class="mono">markForCheck</span>.</p></div></details>
+      <details><summary>A card button is clicked. Is the Header checked?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Not with OnPush (the default): only the card and its ancestors (PatientList, App). With <span class="mono">Eager</span>, yes: the Header is checked every time App is.</p></div></details>
+      <details><summary>Why didn't the header clock update with a plain field?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Nothing told Angular: <span class="mono">setInterval</span> isn't a template event and there's no zone.js. Writing a signal schedules the refresh.</p></div></details>
+      <details><summary>A signal read only in PatientCard changes. What's refreshed?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Only PatientCard. In the real run the clock tick logged a single <span class="mono">[checked] PatientCard</span>.</p></div></details>
+      <details><summary>Typing in the list's search: is the card refreshed?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>No. Its input (<span class="mono">patient</span>) is the same object and it reads no changed signals, so OnPush skips it. (Its <span class="mono">ngDoCheck</span> still runs, as the Lifecycle page showed.)</p></div></details>
+      <details><summary>What did <span class="mono">ChangeDetectionStrategy.Default</span> become?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">ChangeDetectionStrategy.Eager</span>, and <span class="mono">OnPush</span> became the default, in Angular 22.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: angular.dev "Zoneless", "Skipping component subtrees" and "Signals"; Angular blog "Announcing Angular v22"; Ninja Squad "What's new in Angular 22". All refresh results were recorded from CareDesk (Angular CLI 22.2.5, zoneless) with a template call that logs "[checked] Name"; timers were triggered from the test script.</footer>
+</div>
+
+<script src="caredesk.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const POS = { App: [320, 45], Header: [150, 160], PatientList: [490, 160], PatientCard: [490, 270] };
+  function tree(svg) {
+    K.el('line', { x1: 320, y1: 69, x2: 150, y2: 136, class: 'tl' }, svg);
+    K.el('line', { x1: 320, y1: 69, x2: 490, y2: 136, class: 'tl' }, svg);
+    K.el('line', { x1: 490, y1: 184, x2: 490, y2: 246, class: 'tl' }, svg);
+    const N = {};
+    for (const [k, [x, y]] of Object.entries(POS)) { N[k] = K.node(svg, x, y, 190, 48, k, k === 'Header' ? 'clock: now()' : k === 'PatientCard' ? 'waited()' : k === 'PatientList' ? 'search()' : 'root'); N[k].g.dataset.k = k; }
+    return N;
+  }
+  const N = tree($('cdSvg'));
+  const FX = K.el('g', {}, $('cdSvg'));
+  // real logs
+  const R = {
+    first: ['App', 'Header', 'PatientList', 'PatientCard', 'App', 'PatientList'],
+    click: ['App', 'PatientList', 'PatientCard'],
+    type: ['App', 'PatientList'],
+    input: ['App', 'PatientList', 'PatientCard'],
+    sig: ['PatientCard'],
+    plain: [],
+    plainSig: ['Header'],
+    eagerClick: ['App', 'Header', 'PatientList', 'PatientCard'],
+    eagerPlain: []
+  };
+  const SRC = { click: 'PatientCard', type: 'PatientList', input: 'PatientList', sig: 'PatientCard', plain: 'Header', plainSig: 'Header', eagerClick: 'PatientCard' };
+  function paint(list, src, eager) {
+    for (const k in N) {
+      N[k].g.classList.toggle('flash', list.includes(k));
+      N[k].g.classList.toggle('skip', list.length > 0 && !list.includes(k));
+      N[k].g.classList.toggle('eager', !!eager && k === 'Header');
+    }
+    FX.textContent = '';
+    if (src) { const [x, y] = POS[src]; K.el('circle', { cx: x + 88, cy: y - 22, r: 7, class: 'src' }, FX); }
+    const counts = {}; list.forEach(k => counts[k] = (counts[k] || 0) + 1);
+    for (const k in counts) if (counts[k] > 1) { const [x, y] = POS[k]; K.text(FX, x - 80, y - 28, '×' + counts[k], 'count'); }
+  }
+  async function flashSeq(run, list, src, eager) {
+    paint([], src, eager);
+    for (const k in N) N[k].g.classList.add('skip');
+    const seen = [];
+    for (const k of list) { seen.push(k); paint(seen, src, eager); await K.sleep(380, run); }
+    if (!list.length) await K.sleep(500, run);
+  }
+  const HEADER_GOOD = `import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+
+@Component({
+  imports: [DatePipe],
+  selector: 'app-header',
+  templateUrl: './header.html',
+})
+export class Header {
+  protected readonly title = signal('CareDesk');
+  protected readonly now = signal(new Date());
+
+  constructor() {
+    const id = setInterval(() => this.now.set(new Date()), 1000);
+    inject(DestroyRef).onDestroy(() => clearInterval(id));
+  }
+}`;
+  const HEADER_BAD = `export class Header {
+  protected now = new Date();               // plain field
+
+  constructor() {
+    setInterval(() => this.now = new Date(), 1000);
+  }
+}`;
+  const TRACE = `<!-- added to each template for the experiment -->
+<i hidden>{{ trace() }}</i>
+
+protected trace() {
+  console.log('[checked] PatientCard');
+  return '';
+}`;
+  const LISTH = `<input placeholder="Search patients" [(ngModel)]="search" />
+...
+@if (patient(); as p) {
+  <app-patient-card [patient]="p" [(note)]="note" (reviewed)="onReviewed($event)" />
+}`;
+  const CARDH = `<article [class.urgent]="patient().triage === 'urgent'" [class.selected]="selected()">
+  <h3>{{ heading() }}</h3>
+  <p>... waiting {{ waited() }} s</p>
+  ...
+  <button type="button" (click)="toggle()">Select</button>
+</article>`;
+  K.codeCard($('badClock'), { file: 'header.ts (naive)', lang: 'ts', code: HEADER_BAD, marks: { 2: 'bad', 5: ['bad', 'no one is told'] } });
+  K.codeCard($('goodClock'), { file: 'header.ts (step 7)', lang: 'ts', code: HEADER_GOOD, marks: { 11: 'ok', 14: ['ok', 'signal write schedules a refresh'] } });
+
+  const S = [
+    { list: [], card: ['experiment: who was checked?', 'ts', TRACE, { 2: 'hot', 5: 'hot' }], scr: 'Every template logs when Angular evaluates it.' },
+    { key: 'first', card: ['experiment', 'ts', TRACE, {}], scr: 'First render: every component, then App and PatientList once more.' },
+    { key: 'click', card: ['patient-card.html', 'ng', CARDH, { 5: ['up', 'event here'] }], scr: 'Select clicked in PatientCard.' },
+    { key: 'type', card: ['patient-list.html', 'ng', LISTH, { 1: ['up', 'event here'], 4: ['hot', 'same p: card skipped'] }], scr: 'Typing "Ra" in the search box.' },
+    { key: 'input', card: ['patient-list.html', 'ng', LISTH, { 4: ['hot', 'new p'] }], scr: 'Admit next: the card gets a new patient object.' },
+    { key: 'sig', card: ['patient-card.html', 'ng', CARDH, { 3: ['ok', 'only reader of waited()'] }], scr: 'The card\'s waiting clock signal ticks. No event anywhere.' },
+    { key: 'plain', card: ['header.ts (naive)', 'ts', HEADER_BAD, { 2: 'bad', 5: ['bad', 'no one is told'] }], scr: 'Clinic portal · 15:07:45   →  2 s later  →  Clinic portal · 15:07:45', stale: true },
+    { key: 'plainSig', card: ['header.ts (step 7)', 'ts', HEADER_GOOD, { 11: 'ok', 14: ['ok', 'signal write'] }], scr: 'Clinic portal · 15:07:36   →  2 s later  →  Clinic portal · 15:07:38' },
+    { key: 'eagerClick', eager: true, card: ['header.ts (experiment)', 'ts', `@Component({
+  selector: 'app-header',
+  changeDetection: ChangeDetectionStrategy.Eager,   // the old "Default"
+  ...
+})`, { 3: 'hot' }], scr: 'Header set to Eager, then Select clicked in PatientCard.' }
+  ];
+  function show(i) {
+    const s = S[i];
+    paint(s.key ? R[s.key] : [], SRC[s.key], s.eager);
+    $('cdScreen').textContent = s.scr; $('cdScreen').classList.toggle('stale', !!s.stale);
+    K.codeCard($('cdCard'), { file: s.card[0], lang: s.card[1], code: s.card[2], marks: s.card[3], dim: Object.keys(s.card[3]).length > 0, out: s.key ? (R[s.key].length ? R[s.key].map(k => '[checked] ' + k) : ['(nothing logged)']) : undefined, outLabel: 'Console (real run)' });
+  }
+  const P = key => async run => { const s = S.find(x => x.key === key); await flashSeq(run, R[key], SRC[key], s && s.eager); };
+  K.story({
+    root: $('cdStory'), show, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'How we\'ll watch it', text: 'To see change detection, each CareDesk component calls <span class="mono">trace()</span> from its template, which logs "[checked] Name". Every time Angular evaluates a template, we get a line. The tree flashes in the same order as the real log.' },
+      { title: 'First render: everyone', text: 'On start-up every component\'s template ran, top-down. Then App and PatientList ran once more (the search box\'s <span class="mono">ngModel</span> settling its value).', play: P('first') },
+      { title: 'An event: the path to the root', text: 'Clicking Select inside the card (orange dot) marked the card <b>and its ancestors</b> for refresh: App → PatientList → PatientCard. The Header, a sibling branch, was skipped.', play: P('click'), tip: 'OnPush in one sentence: "re-check me only when my inputs change, an event happens inside me, or a signal I read changes".' },
+      { title: 'A parent event skips the child', text: 'Typing in PatientList\'s search refreshed App and PatientList. The card was skipped: its <span class="mono">patient</span> input is the same object and it reads no signal that changed.', play: P('type') },
+      { title: 'A new input refreshes the child', text: '"Admit next" passed a <b>new</b> patient object down. A changed input reference marks the child, so the card refreshed too.', play: P('input') },
+      { title: 'A signal: only its readers', text: 'The card\'s <span class="mono">waited</span> signal ticked with no click anywhere. Only PatientCard was refreshed: signals tell Angular exactly which views read them, so it doesn\'t touch the rest of the tree.', play: P('sig') },
+      { title: 'The zoneless trap', text: 'First attempt at this step\'s feature, a clock in the header: a plain field updated by <span class="mono">setInterval</span>. Nothing was checked, and the time on screen froze. Without zone.js, Angular has no idea a timer changed a field.', play: P('plain') },
+      { title: 'Fix: make it a signal', text: '<span class="mono">now = signal(new Date())</span> and <span class="mono">now.set(new Date())</span> in the timer. Each write refreshed just the Header and the clock ticked. That\'s step 7 of CareDesk: a live clock, and you now know who refreshes when.', play: P('plainSig') },
+      { title: 'Eager: the old default', text: 'Setting the Header to <span class="mono">ChangeDetectionStrategy.Eager</span> (called <span class="mono">Default</span> before v22) made it refresh on <b>every</b> pass, here after a click deep in the card, even though nothing in the Header changed.', play: P('eagerClick') }
+    ]
+  });
+
+  /* ===== predictor ===== */
+  const pk = $('pkSvg'); const PN = tree(pk); const PFX = K.el('g', {}, pk);
+  let act = 'click', strat = 'onpush', guess = new Set();
+  const ANS = (a, s) => s === 'eager' ? ({ click: R.eagerClick, type: ['App', 'Header', 'PatientList'], input: ['App', 'Header', 'PatientList', 'PatientCard'], sig: ['PatientCard'], plain: [] })[a] : R[a];
+  function pclear() { guess.clear(); for (const k in PN) PN[k].g.setAttribute('class', 'node'); $('pkRes').textContent = ''; PFX.textContent = ''; const src = SRC[act]; if (src) { const [x, y] = POS[src]; K.el('circle', { cx: x + 88, cy: y - 22, r: 7, class: 'src' }, PFX); } for (const k in PN) PN[k].g.classList.toggle('eager', strat === 'eager' && k === 'Header'); }
+  for (const k in PN) PN[k].g.addEventListener('click', () => { guess.has(k) ? guess.delete(k) : guess.add(k); PN[k].g.classList.toggle('guess', guess.has(k)); });
+  K.seg($('actSeg'), v => { act = v; pclear(); });
+  K.seg($('strSeg'), v => { strat = v; pclear(); });
+  $('pkClr').addEventListener('click', pclear);
+  $('pkGo').addEventListener('click', () => {
+    const ans = ANS(act, strat); let right = 0;
+    for (const k in PN) { const ok = ans.includes(k) === guess.has(k); if (ok) right++; PN[k].g.setAttribute('class', 'node ' + (ok ? 'right' : 'wrong') + (ans.includes(k) ? ' flash' : '') + (strat === 'eager' && k === 'Header' ? ' eager' : '')); }
+    $('pkRes').innerHTML = `<b>${right} / 4</b> right. Checked: <span class="mono">${ans.length ? ans.join(' → ') : 'nothing'}</span>. From the real run.`;
+  });
+  pclear();
+})();
+</script>
+</body>
+</html>

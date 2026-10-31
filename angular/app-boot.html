@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How an Angular app boots</title>
+<meta name="description" content="Angular 22: from ng new to pixels. Follow CareDesk from the CLI through index.html, main.ts and bootstrapApplication until the App component fills app-root.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .ng-left { display: grid; gap: 12px; min-width: 0; align-content: start; }
+  .lane-h rect { fill: var(--panel-2); stroke: var(--line); stroke-width: 1.5; }
+  .lane-h text { fill: var(--fg); font-weight: 700; font-size: 13px; text-anchor: middle; }
+  .lifeline { stroke: var(--line); stroke-width: 2; stroke-dasharray: 3 5; }
+  .sq { transition: opacity .3s; }
+  .sq line, .sq path { stroke: var(--fg-soft); stroke-width: 2; fill: none; }
+  .sq text { fill: var(--fg-soft); font-family: var(--mono) !important; font-size: 11.5px; }
+  .sq.now line, .sq.now path { stroke: var(--cyan); stroke-width: 2.6; }
+  .sq.now text { fill: var(--fg); }
+  .sq.old { opacity: .45; }
+  .sq.gone { opacity: 0; }
+  .sq-ah { fill: var(--fg-soft); } .sq.now .sq-ah { fill: var(--cyan); }
+  .appwin-body h1 { margin: 0; font-size: 22px; } .appwin-body p { margin: 2px 0 0; color: var(--muted); }
+  .appwin-body .empty { font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
+  .pipe { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr)); gap: 8px; margin-top: 12px; }
+  .pipe div { border: 1.5px solid var(--line); border-radius: 10px; padding: 8px 10px; background: var(--panel); font-size: 13px; text-align: center; transition: border-color .25s; }
+  .pipe div b { display: block; font-size: 14px; }
+  .pipe div.ok { border-color: var(--teal); } .pipe div.bad { border-color: var(--red); } .pipe div.skip { opacity: .4; }
+  .err-out { font-family: var(--mono); font-size: 12.5px; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Angular roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Angular 22 · Part 1 · Foundations</div>
+    <h1>How an Angular app boots</h1>
+    <ul class="lede">
+      <li><b>Node.js and the Angular CLI</b> are build tools on your machine. The app itself runs in the <b>browser</b>.</li>
+      <li><span class="mono">ng new</span> creates the workspace; <span class="mono">ng serve</span> compiles TypeScript and templates into JavaScript and serves it.</li>
+      <li>The browser first gets an almost empty <span class="mono">index.html</span>: just <span class="mono">&lt;app-root&gt;&lt;/app-root&gt;</span> and a script tag.</li>
+      <li><span class="mono">main.ts</span> calls <span class="mono">bootstrapApplication(App, appConfig)</span>. <b>appConfig</b> lists app-wide providers. There's no NgModule.</li>
+      <li>Angular finds <span class="mono">&lt;app-root&gt;</span>, creates <span class="mono">App</span> and renders its template inside it.</li>
+    </ul>
+    <div class="cd-trail" data-stage="1"></div>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: from ng new to "CareDesk" on screen</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time · console lines come from a real run of CareDesk</div>
+    <div class="story" id="bootStory">
+      <div class="ng-left">
+        <div class="scroll"><svg class="diagram" id="bootSvg" style="min-width:0" viewBox="0 0 640 430" role="img" aria-label="Sequence diagram with four lanes: terminal, Angular CLI, browser and Angular runtime"></svg></div>
+        <div id="bootCard"></div>
+        <div class="appwin"><div class="appwin-bar"><i></i><i></i><i></i><span class="appwin-url" id="bootUrl">about:blank</span></div><div class="appwin-body" id="bootWin"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">A blank page is the classic first Angular bug. Find out where each mistake stops the boot.</p>
+
+  <section aria-labelledby="blankH">
+    <h2 class="stage-title" id="blankH">Why is my page blank?</h2>
+    <div class="stage-kind">Each mistake was made in the real CareDesk project · messages are the real output</div>
+    <div class="seg" id="bugSeg" role="group" aria-label="Mistake" style="flex-wrap:wrap">
+      <button type="button" data-v="ok" aria-pressed="true">No mistake</button>
+      <button type="button" data-v="sel" aria-pressed="false">Selector doesn't match</button>
+      <button type="button" data-v="imp" aria-pressed="false">Child not imported</button>
+      <button type="button" data-v="typo" aria-pressed="false">Typo in the template</button>
+      <button type="button" data-v="prov" aria-pressed="false">Service with no provider</button>
+    </div>
+    <div class="pipe" id="pipe">
+      <div data-k="build"><b>ng build</b>compile TS + templates</div>
+      <div data-k="load"><b>Browser</b>loads index.html + main.js</div>
+      <div data-k="boot"><b>bootstrap</b>providers, find &lt;app-root&gt;</div>
+      <div data-k="render"><b>render</b>App template on screen</div>
+    </div>
+    <div class="two" style="margin-top:12px">
+      <div id="bugCode"></div>
+      <div class="card"><div class="label" id="bugWhere">Result</div><pre class="err-out" id="bugOut"></pre><p class="status-line" id="bugWhy" style="margin:0"></p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Start a project</span><span class="arrow">→</span><span class="then"><span class="mono">npm install -g @angular/cli</span> → <span class="mono">ng new caredesk</span> → <span class="mono">cd caredesk</span> → <span class="mono">ng serve --open</span></span></li>
+      <li><span class="if">Where does the app start?</span><span class="arrow">→</span><span class="then"><span class="mono">src/main.ts</span> → <span class="mono">bootstrapApplication(App, appConfig)</span></span></li>
+      <li><span class="if">Need something app-wide (router, HTTP, animations)</span><span class="arrow">→</span><span class="then">add a <span class="mono">provideX()</span> to <span class="mono">appConfig.providers</span></span></li>
+      <li><span class="if">Blank page</span><span class="arrow">→</span><span class="then">read the terminal (build errors, NG8xxx) first, then the browser console (runtime errors, NG0xxx)</span></li>
+      <li><span class="if">"View source" shows an empty <span class="mono">&lt;app-root&gt;</span></span><span class="arrow">→</span><span class="then">normal: it's a client-rendered app; use DevTools Elements to see the rendered DOM</span></li>
+      <li><span class="if">You see <span class="mono">AppModule</span> / <span class="mono">bootstrapModule</span></span><span class="arrow">→</span><span class="then">older NgModule style; new projects use standalone components</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: what ng new gave CareDesk</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>File</th><th>What it's for</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">package.json</td><td>dependencies (<span class="mono">@angular/core</span>, <span class="mono">router</span>, <span class="mono">forms</span>, <span class="mono">rxjs</span>…) and scripts: <span class="mono">npm start</span> = <span class="mono">ng serve</span></td></tr>
+          <tr><td class="mono">angular.json</td><td>workspace config: entry point (<span class="mono">src/main.ts</span>), global styles, assets folder <span class="mono">public/</span>, build budgets</td></tr>
+          <tr><td class="mono">tsconfig*.json</td><td>TypeScript and Angular compiler options; strict type checking of templates is on</td></tr>
+          <tr><td class="mono">src/index.html</td><td>the single HTML page; holds <span class="mono">&lt;app-root&gt;</span></td></tr>
+          <tr><td class="mono">src/main.ts</td><td>entry point: bootstraps <span class="mono">App</span></td></tr>
+          <tr><td class="mono">src/styles.css</td><td>global styles</td></tr>
+          <tr><td class="mono">src/app/app.ts · .html · .css</td><td>the root component: class, template, component-scoped styles</td></tr>
+          <tr><td class="mono">src/app/app.config.ts</td><td>app-wide providers (<span class="mono">provideRouter</span>, error listeners)</td></tr>
+          <tr><td class="mono">src/app/app.routes.ts</td><td>the route table (empty for now; filled on the Routing page)</td></tr>
+          <tr><td class="mono">public/</td><td>static files copied as-is (favicon, images)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cc-pair" style="margin-top:14px">
+      <div><div class="label bad-text">Before: NgModule bootstrap (your notes, Angular 16)</div><div id="oldBoot"></div></div>
+      <div><div class="label ok-text">After: standalone bootstrap (Angular 22)</div><div id="newBoot"></div></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>"Angular uses Node.js on the server side."</b> Node is only needed on your machine (and in CI) to run the CLI, the dev server and the build. The built app is plain JavaScript, HTML and CSS that runs in the browser and can be hosted anywhere static, such as S3, Azure Static Web Apps or IIS. (Server-side rendering is an optional extra.)</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>Install steps had no commands.</b> They are: install Node.js (Angular 22 needs Node 22.22+, 24.15+ or 26+), then <span class="mono">npm install -g @angular/cli</span>, <span class="mono">ng new caredesk</span>, <span class="mono">cd caredesk</span>, <span class="mono">ng serve --open</span> (opens <span class="mono">http://localhost:4200</span>).</p></div>
+      <div class="note"><span class="flag add">Updated</span><p><b>No app.module.ts any more.</b> Your notes' structure had <span class="mono">app.module.ts</span> with <span class="mono">declarations</span> and <span class="mono">imports</span>. Since v17 new projects are standalone: each component lists what it uses in its own <span class="mono">imports</span>, and app-wide services go in <span class="mono">app.config.ts</span>. The CLI also dropped the <span class="mono">.component</span> suffix: <span class="mono">app.ts</span> holds <span class="mono">class App</span>.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Zoneless by default.</b> CareDesk was created without zone.js: Angular updates the screen when signals change or template events fire, not by patching every browser API. More on the Change detection page.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>HttpClient no longer needs <span class="mono">provideHttpClient()</span> to be injected.</b> In the real project, <span class="mono">inject(HttpClient)</span> worked with the default config. You still add <span class="mono">provideHttpClient(...)</span> when you want options such as interceptors (Guards &amp; login page).</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>What's the first TypeScript file that runs?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">src/main.ts</span> (set as the entry point in <span class="mono">angular.json</span>). It calls <span class="mono">bootstrapApplication(App, appConfig)</span>.</p></div></details>
+      <details><summary>How does Angular know where to draw App?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>App's <span class="mono">selector: 'app-root'</span> is matched against <span class="mono">index.html</span>. Angular renders App's template inside that element. No match → <span class="mono">NG05104</span> and a blank page.</p></div></details>
+      <details><summary>What goes in <span class="mono">appConfig.providers</span>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>App-wide services and features: <span class="mono">provideRouter(routes)</span>, <span class="mono">provideHttpClient(withInterceptors(...))</span>, error listeners. They form the root injector every component can inject from.</p></div></details>
+      <details><summary>Does a deployed Angular app need Node.js on the server?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>No. <span class="mono">ng build</span> produces static files in <span class="mono">dist/</span>. Any static host works. Node is needed only for building, or if you choose server-side rendering.</p></div></details>
+      <details><summary>Constructor or ngOnInit: which logged first in CareDesk?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>The constructor, then <span class="mono">ngOnInit</span>, then <span class="mono">afterNextRender</span> once the DOM was painted, and finally the bootstrap promise resolved.</p></div></details>
+      <details><summary>A typo in a template: build error or runtime error?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Build error. Templates are compiled ahead of time and type-checked: <span class="mono">TS2551: Property 'titel' does not exist on type 'App'. Did you mean 'title'?</span></p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: your Obsidian notes "Why and What", "Installing Angular", "Angular File Structure" and "Bootstrap Setup"; angular.dev "Installation", "Workspace and project file structure" and the bootstrapApplication API reference; Angular CLI 22.2.5 <span class="mono">ng new caredesk --zoneless</span> output. All console lines and error messages are from the real CareDesk project (console.log calls added for the run).</footer>
+</div>
+
+<script src="caredesk.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const F = {
+    term: ['terminal', 'txt', `$ npm install -g @angular/cli
+$ ng new caredesk --zoneless
+  CREATE caredesk/angular.json
+  CREATE caredesk/package.json
+  CREATE caredesk/src/index.html
+  CREATE caredesk/src/main.ts
+  CREATE caredesk/src/app/app.ts
+  CREATE caredesk/src/app/app.html
+  CREATE caredesk/src/app/app.config.ts
+  CREATE caredesk/src/app/app.routes.ts
+  ✔ Packages installed successfully.
+$ cd caredesk`],
+    serve: ['terminal', 'txt', `$ ng serve --open
+Initial chunk files | Names   |  Raw size
+main.js             | main    | ...
+styles.css          | styles  | ...
+
+Application bundle generation complete.
+  ➜  Local:   http://localhost:4200/`],
+    index: ['src/index.html', 'ng', `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Caredesk</title>
+  <base href="/">
+</head>
+<body>
+  <app-root></app-root>
+  <script src="main.js" type="module"><\/script>
+</body>
+</html>`],
+    main: ['src/main.ts', 'ts', `import { bootstrapApplication } from '@angular/platform-browser';
+import { appConfig } from './app/app.config';
+import { App } from './app/app';
+
+bootstrapApplication(App, appConfig)
+  .catch((err) => console.error(err));`],
+    config: ['src/app/app.config.ts', 'ts', `import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { routes } from './app.routes';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideRouter(routes)
+  ]
+};`],
+    app: ['src/app/app.ts', 'ts', `import { Component, signal } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+
+@Component({
+  imports: [RouterOutlet],
+  selector: 'app-root',
+  styleUrl: './app.css',
+  templateUrl: './app.html',
+})
+export class App {
+  protected readonly title = signal('CareDesk');
+}`],
+    html: ['src/app/app.html', 'ng', `<header>
+  <h1>{{ title() }}</h1>
+  <p>Clinic portal</p>
+</header>
+<router-outlet />`],
+    module: ['src/app/app.module.ts (Angular 16)', 'ts', `@NgModule({
+  declarations: [AppComponent, NavbarComponent],
+  imports: [BrowserModule, AppRoutingModule, FormsModule],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule {}`]
+  };
+  const LOG = ['main.ts runs · <app-root> is empty: ""', 'bootstrapApplication(App, appConfig)', 'App constructor', 'App ngOnInit', 'afterNextRender · <h1> says: CareDesk', 'bootstrap resolved · root components: 1'];
+
+  /* ===== sequence diagram ===== */
+  const sv = $('bootSvg');
+  const defs = K.el('defs', {}, sv);
+  defs.innerHTML = '<marker id="sqah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto" markerUnits="userSpaceOnUse"><path class="sq-ah" d="M0 0 L10 5 L0 10 z"/></marker>';
+  const X = { term: 75, cli: 225, br: 395, ng: 560 };
+  [['term', 'Terminal'], ['cli', 'Angular CLI'], ['br', 'Browser'], ['ng', 'Angular runtime']].forEach(([k, l]) => {
+    K.el('line', { x1: X[k], y1: 46, x2: X[k], y2: 425, class: 'lifeline' }, sv);
+    const g = K.el('g', { class: 'lane-h' }, sv);
+    K.el('rect', { x: X[k] - 66, y: 10, width: 132, height: 34, rx: 9 }, g); K.text(g, X[k], 32, l);
+  });
+  const M = [
+    { s: 0, a: 'term', y: 72, t: 'ng new caredesk → files + npm install' },
+    { s: 1, a: 'term', b: 'cli', y: 112, t: 'ng serve' },
+    { s: 1, a: 'cli', y: 142, t: 'compile TS + templates → main.js' },
+    { s: 2, a: 'br', b: 'cli', y: 182, t: 'GET localhost:4200/' },
+    { s: 2, a: 'cli', b: 'br', y: 206, t: 'index.html (empty <app-root>)' },
+    { s: 3, a: 'br', b: 'cli', y: 236, t: 'GET main.js' },
+    { s: 3, a: 'cli', b: 'br', y: 258, t: 'main.js' },
+    { s: 3, a: 'br', b: 'ng', y: 284, t: 'bootstrapApplication(…)' },
+    { s: 4, a: 'ng', y: 312, t: 'providers → root injector' },
+    { s: 5, a: 'ng', y: 348, t: 'match <app-root> · new App()' },
+    { s: 6, a: 'ng', b: 'br', y: 392, t: 'render template into <app-root>' }
+  ];
+  M.forEach(m => {
+    const g = m.g = K.el('g', { class: 'sq gone' }, sv);
+    if (m.b) {
+      const x1 = X[m.a], x2 = X[m.b], dir = Math.sign(x2 - x1);
+      K.el('line', { x1, y1: m.y, x2: x2 - dir * 3, y2: m.y, 'marker-end': 'url(#sqah)' }, g);
+      const t = K.text(g, (x1 + x2) / 2, m.y - 6, m.t); t.style.textAnchor = 'middle'; t.classList.add('halo');
+    } else {
+      const x = X[m.a];
+      K.el('path', { d: `M${x} ${m.y - 8} h22 v16 h-19`, 'marker-end': 'url(#sqah)' }, g);
+      const right = x < 450;
+      const t = K.text(g, right ? x + 28 : x - 6, m.y + 4, m.t); t.style.textAnchor = right ? 'start' : 'end';
+    }
+  });
+  const STEP = [
+    { card: 'term', url: 'about:blank', win: 'none', out: null },
+    { card: 'serve', url: 'about:blank', win: 'none', out: null },
+    { card: 'index', marks: { 9: ['hot', 'empty: nothing to see yet'] }, url: 'localhost:4200', win: 'empty', out: null },
+    { card: 'main', marks: { 5: ['hot', 'the one entry point'] }, url: 'localhost:4200', win: 'empty', out: LOG.slice(0, 2) },
+    { card: 'config', marks: { 7: 'hot', 8: 'hot' }, url: 'localhost:4200', win: 'empty', out: LOG.slice(0, 2) },
+    { card: 'app', marks: { 6: ['hot', 'matched against index.html'], 11: 'ok' }, url: 'localhost:4200', win: 'empty', out: LOG.slice(0, 4) },
+    { card: 'html', marks: { 2: 'hot', 3: 'hot' }, url: 'localhost:4200', win: 'full', out: LOG },
+    { card: 'module', marks: { 1: 'bad', 2: 'bad', 5: 'bad' }, url: 'localhost:4200', win: 'full', out: null }
+  ];
+  function win(kind) {
+    $('bootWin').innerHTML = kind === 'none' ? '<span class="empty">(no page loaded)</span>'
+      : kind === 'empty' ? '<span class="empty">&lt;app-root&gt;&lt;/app-root&gt; · blank white page</span>'
+      : '<h1>CareDesk</h1><p>Clinic portal</p>';
+  }
+  function show(i) {
+    M.forEach(m => m.g.setAttribute('class', 'sq ' + (m.s > i ? 'gone' : m.s === i ? 'now' : 'old')));
+    const st = STEP[i], f = F[st.card];
+    K.codeCard($('bootCard'), { file: f[0], lang: f[1], code: f[2], marks: st.marks || {}, dim: !!st.marks, out: st.out || undefined, outLabel: 'Console (real run)' });
+    $('bootUrl').textContent = st.url; win(st.win);
+  }
+  K.story({
+    root: $('bootStory'), show, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'ng new creates the workspace', text: 'The Angular CLI (installed once with npm) generates the CareDesk folder: config files, <span class="mono">src/</span> with the root component, and <span class="mono">node_modules</span>. Node.js runs these tools on <b>your machine</b>; it isn\'t part of the app the user downloads.' },
+      { title: 'ng serve builds and serves', text: 'The CLI compiles TypeScript <b>and the HTML templates</b> into plain JavaScript (ahead-of-time), bundles it as <span class="mono">main.js</span>, and starts a dev server on port 4200 that rebuilds on every save.', tip: 'AOT compilation is why template mistakes fail the build instead of failing in the browser.' },
+      { title: 'The browser gets an empty page', text: 'The first response is <span class="mono">index.html</span>. Its body holds only <span class="mono">&lt;app-root&gt;&lt;/app-root&gt;</span> and the script tag the build added. At this moment the page is blank: everything you\'ll see is drawn by JavaScript.' },
+      { title: 'main.ts calls bootstrapApplication', text: 'Once <span class="mono">main.js</span> loads, the code from <span class="mono">main.ts</span> runs. It hands Angular two things: the <b>root component</b> (App) and the <b>app config</b>. The console confirms <span class="mono">&lt;app-root&gt;</span> is still empty.' },
+      { title: 'Providers become the root injector', text: '<span class="mono">appConfig.providers</span> lists what the whole app can use: here the router and global error listeners. Angular turns them into the <b>root injector</b>, the place components ask for services (Services &amp; DI page).' },
+      { title: 'Angular finds &lt;app-root&gt; and creates App', text: 'App\'s <span class="mono">selector: \'app-root\'</span> is matched against the page. Angular creates the App instance (constructor), then calls <span class="mono">ngOnInit</span>. Standalone components declare what they use in <span class="mono">imports</span>, here <span class="mono">RouterOutlet</span>.' },
+      { title: 'The template is rendered', text: 'Angular renders <span class="mono">app.html</span> into <span class="mono">&lt;app-root&gt;</span>: <span class="mono">{{ title() }}</span> becomes "CareDesk". <span class="mono">afterNextRender</span> fires once the DOM is on screen, then the bootstrap promise resolves. Step 1 of CareDesk is done.', play: async run => { await K.sleep(400, run); } },
+      { title: 'What older projects look like', text: 'Your notes (Angular 16) bootstrapped an <span class="mono">AppModule</span> that <b>declared</b> every component. You\'ll still meet it in existing codebases. In standalone apps each component imports what it needs, and <span class="mono">bootstrapApplication</span> replaces <span class="mono">bootstrapModule</span>.', tip: 'Be ready to explain both: "standalone components with bootstrapApplication and providers in app.config, versus NgModules with declarations and bootstrapModule".' }
+    ]
+  });
+
+  /* ===== old vs new ===== */
+  K.codeCard($('oldBoot'), { file: 'main.ts + app.module.ts', lang: 'ts', code: `// main.ts
+platformBrowserDynamic().bootstrapModule(AppModule);
+
+// app.module.ts
+@NgModule({
+  declarations: [AppComponent, NavbarComponent],
+  imports: [BrowserModule, AppRoutingModule],
+  bootstrap: [AppComponent]
+})
+export class AppModule {}` });
+  K.codeCard($('newBoot'), { file: 'main.ts + app.config.ts', lang: 'ts', code: `// main.ts
+bootstrapApplication(App, appConfig);
+
+// app.config.ts
+export const appConfig: ApplicationConfig = {
+  providers: [provideRouter(routes)]
+};
+
+// each component imports what its template uses
+@Component({ imports: [RouterOutlet], ... })`, caption: 'No module layer: fewer files, and each component is self-describing' });
+
+  /* ===== blank page playground ===== */
+  const BUGS = {
+    ok: { file: 'src/app/app.ts', code: F.app[2], marks: { 6: 'ok' }, fail: null, out: LOG.join('\n'), why: 'All four stages pass. The page shows "CareDesk".' },
+    sel: { file: 'src/app/app.ts', code: F.app[2].replace("'app-root'", "'app-main'"), marks: { 6: ['bad', 'index.html has <app-root>'] }, fail: 'boot', out: 'main.ts runs · <app-root> is empty: ""\nbootstrapApplication(App, appConfig)\nERROR RuntimeError: NG05104: The selector "app-main" did not match any elements.', why: 'It builds fine; the browser console shows the error. The selector must match the tag in index.html.' },
+    imp: { file: 'src/app/app.html', lang: 'ng', code: `<header>\n  <h1>{{ title() }}</h1>\n  <p>Clinic portal</p>\n</header>\n<app-patient-list />`, marks: { 5: ['bad', 'PatientList not in imports'] }, fail: 'build', out: "✘ [ERROR] NG8001: 'app-patient-list' is not a known element:\n1. If 'app-patient-list' is an Angular component, then verify that it is included in the '@Component.imports' of this component.", why: 'Standalone components must list every child component they use in <span class="mono">imports</span>. Caught at build time.' },
+    typo: { file: 'src/app/app.html', lang: 'ng', code: F.html[2].replace('title()', 'titel()'), marks: { 2: ['bad', 'titel'] }, fail: 'build', out: "✘ [ERROR] TS2551: Property 'titel' does not exist on type 'App'. Did you mean 'title'?", why: 'Templates are type-checked against the component class during the build.' },
+    prov: { file: 'src/app/app.ts', code: `export class PatientStore { list = ['Asha']; }   // no @Injectable, no provider
+
+export class App {
+  store = inject(PatientStore);
+}`, marks: { 1: 'bad', 4: ['bad', 'nothing provides this'] }, fail: 'boot', out: 'main.ts runs · <app-root> is empty: ""\nbootstrapApplication(App, appConfig)\nERROR ɵNotFound: NG0201: No provider found for `PatientStore`. Source: Environment Injector.', why: 'Builds fine, fails when Angular creates App. Mark the class <span class="mono">@Injectable({ providedIn: \'root\' })</span> (Services &amp; DI page).' }
+  };
+  function bug(v) {
+    const b = BUGS[v], order = ['build', 'load', 'boot', 'render'], fi = b.fail ? order.indexOf(b.fail) : 9;
+    $('pipe').querySelectorAll('div').forEach((d, i) => d.className = i < fi ? 'ok' : i === fi ? 'bad' : 'skip');
+    K.codeCard($('bugCode'), { file: b.file, lang: b.lang || 'ts', code: b.code, marks: b.marks });
+    $('bugWhere').textContent = !b.fail ? 'Console' : b.fail === 'build' ? 'Terminal (ng serve)' : 'Browser console';
+    $('bugOut').textContent = b.out; $('bugOut').className = 'err-out ' + (b.fail ? 'bad-text' : '');
+    $('bugWhy').innerHTML = b.why;
+  }
+  K.seg($('bugSeg'), bug); bug('ok');
+})();
+</script>
+</body>
+</html>

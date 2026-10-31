@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Signals</title>
+<meta name="description" content="Angular 22 signals on CareDesk's patient list: signal, computed, linkedSignal and effect as a dependency graph. Watch a search keystroke mark dependants dirty and pull fresh values, with logs from a real run.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .ng-left { display: grid; gap: 12px; min-width: 0; align-content: start; }
+  .sg .edge { stroke: var(--line); stroke-width: 2; fill: none; transition: stroke .2s, stroke-width .2s; }
+  .sg .edge.hot { stroke: var(--cyan); stroke-width: 3; }
+  .sg .sn rect { fill: var(--panel); stroke-width: 2.5; transition: fill .2s, stroke-width .2s; }
+  .sg .sn.k-signal rect { stroke: var(--teal); } .sg .sn.k-computed rect { stroke: var(--cyan); } .sg .sn.k-linked rect { stroke: var(--violet); } .sg .sn.k-effect rect { stroke: var(--orange); } .sg .sn.k-tpl rect { stroke: var(--muted); stroke-dasharray: 5 4; }
+  .sg .sn .t { fill: var(--fg); font-weight: 700; font-size: 13px; text-anchor: middle; }
+  .sg .sn .k { fill: var(--muted); font-family: var(--mono) !important; font-size: 10.5px; text-anchor: middle; }
+  .sg .sn .v { fill: var(--fg-soft); font-family: var(--mono) !important; font-size: 11px; text-anchor: middle; }
+  .sg .sn.dirty rect { fill: color-mix(in srgb, var(--orange) 22%, var(--panel)); }
+  .sg .sn.ran rect { fill: var(--teal-wash); stroke-width: 4; }
+  .sg .sn.same rect { fill: var(--panel-2); }
+  .sg .sn.idle { opacity: .45; }
+  .sg .badge { font-family: var(--mono) !important; font-size: 10.5px; font-weight: 700; }
+  .sg .badge.dirty { fill: var(--orange); } .sg .badge.ran { fill: var(--good-text); } .sg .badge.same { fill: var(--muted); }
+  .keys { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--fg-soft); }
+  .keys span::before { content: ''; display: inline-block; width: 14px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: 0; border: 2px solid var(--teal); }
+  .keys .kc::before { border-color: var(--cyan); } .keys .kl::before { border-color: var(--violet); } .keys .ke::before { border-color: var(--orange); } .keys .kt::before { border-color: var(--muted); border-style: dashed; }
+  .lab-ctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+  .lab-ctl input[type=text] { font: inherit; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); width: 200px; max-width: 100%; }
+  .slog { font-family: var(--mono); font-size: 12.5px; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; min-height: 6em; color: var(--fg-soft); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Angular roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Angular 22 · Part 2 · Data flow · added topic</div>
+    <h1>Signals</h1>
+    <ul class="lede">
+      <li>A <span class="mono">signal</span> is a value that tells its readers when it changes. Read it by calling it: <span class="mono">search()</span>.</li>
+      <li><span class="mono">computed</span> derives a value from other signals. It's <b>lazy</b> (runs only when read) and <b>cached</b> (re-runs only when a dependency changed).</li>
+      <li><span class="mono">linkedSignal</span> is a writable value that <b>resets</b> when its source changes.</li>
+      <li><span class="mono">effect</span> runs side effects (save, log, call a library), not derivations.</li>
+      <li>Change = new value. Setting an <b>equal</b> value (same object, same number) stops propagation.</li>
+    </ul>
+    <div class="keys" aria-label="Node colours"><span>signal</span><span class="kc">computed</span><span class="kl">linkedSignal</span><span class="ke">effect</span><span class="kt">template</span></div>
+    <div class="cd-trail" data-stage="8"></div>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: the waiting room as a signal graph</h2>
+    <div class="stage-kind">Orange = marked dirty · green = re-ran · grey = re-ran but value equal · logs from the real run</div>
+    <div class="story" id="sgStory">
+      <div class="ng-left">
+        <div class="scroll"><svg class="diagram sg" id="sgSvg" style="min-width:0" viewBox="0 0 700 330" role="img" aria-label="Signal graph: patients and search feed filtered, which feeds urgent and first; first feeds note; search feeds an effect; template reads the results"></svg></div>
+        <div id="sgCard"></div>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Type in the search, discharge patients and watch which nodes re-run. The log follows the real app's rules.</p>
+
+  <section aria-labelledby="labH">
+    <h2 class="stage-title" id="labH">Signal graph lab</h2>
+    <div class="stage-kind">Same graph, live</div>
+    <div class="lab-ctl"><input type="text" id="lSearch" placeholder="Search patients" aria-label="Search patients" autocomplete="off"><button class="btn" type="button" id="lDis">Discharge first</button><button class="btn" type="button" id="lNote">Type a note</button><button class="btn" type="button" id="lSame">Set same search</button><button class="btn" type="button" id="lReset">Reset</button></div>
+    <div class="scroll"><svg class="diagram sg" id="labSvg" viewBox="0 0 700 330" style="min-width:560px;max-width:760px;display:block;margin:8px auto 0" role="img" aria-label="Live signal graph"></svg></div>
+    <div class="card"><div class="label">Console</div><pre class="slog" id="lLog"></pre></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">State that changes</span><span class="arrow">→</span><span class="then"><span class="mono">signal(initial)</span>; <span class="mono">.set(v)</span> or <span class="mono">.update(old =&gt; new)</span></span></li>
+      <li><span class="if">A value calculated from other state</span><span class="arrow">→</span><span class="then"><span class="mono">computed(() =&gt; …)</span>, never an effect that sets a signal</span></li>
+      <li><span class="if">Editable value that should reset when something else changes</span><span class="arrow">→</span><span class="then"><span class="mono">linkedSignal({ source, computation })</span></span></li>
+      <li><span class="if">Save, log, sync with localStorage or a chart library</span><span class="arrow">→</span><span class="then"><span class="mono">effect(() =&gt; …)</span></span></li>
+      <li><span class="if">Arrays and objects in signals</span><span class="arrow">→</span><span class="then">replace, don't mutate: <span class="mono">update(list =&gt; list.filter(...))</span></span></li>
+      <li><span class="if">Read a signal without depending on it</span><span class="arrow">→</span><span class="then"><span class="mono">untracked(() =&gt; other())</span></span></li>
+      <li><span class="if">Have an Observable, want a signal</span><span class="arrow">→</span><span class="then"><span class="mono">toSignal(obs$)</span> (HTTP page)</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: the signal family</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>API</th><th>Writable?</th><th>Runs when</th><th>CareDesk</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">signal(v)</td><td>yes</td><td>—</td><td class="mono">patients, search, message</td></tr>
+          <tr><td class="mono">computed(fn)</td><td>no</td><td>read after a dependency changed</td><td class="mono">filtered, urgent, first</td></tr>
+          <tr><td class="mono">linkedSignal(...)</td><td>yes</td><td>read after its source changed (resets)</td><td class="mono">note</td></tr>
+          <tr><td class="mono">effect(fn)</td><td>—</td><td>after a dependency changed, scheduled once</td><td>save search to localStorage</td></tr>
+          <tr><td class="mono">input() / model()</td><td>no / yes</td><td>parent binds a new value</td><td class="mono">patient, note on the card</td></tr>
+          <tr><td class="mono">resource / httpResource</td><td>—</td><td>params change → async load</td><td>step 15 (API)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cc-pair" style="margin-top:14px">
+      <div><div class="label bad-text">Avoid: an effect that copies state</div><div id="effBad"></div></div>
+      <div><div class="label ok-text">Prefer: computed (or linkedSignal if it must be editable)</div><div id="effGood"></div></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>Not in your notes.</b> Signals arrived after Angular 16. In Angular 22 they're the core of reactivity: inputs, outputs, queries, forms and HTTP resources all speak signals, and zoneless change detection depends on them.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Laziness, proven.</b> CareDesk had a <span class="mono">computed</span> that nothing read. Its log line never appeared in any scenario: a computed that isn't read is never evaluated.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Batched and glitch-free.</b> Writing <span class="mono">'m'</span> then <span class="mono">'me'</span> in the same function produced one effect run (<span class="mono">"me"</span>) and one recompute of each computed. Readers never see a half-updated graph.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Equality stops the wave.</b> Typing "ra" after "r" made <span class="mono">filtered</span> return a new array, but <span class="mono">first</span> was still the same Ravi object, so <span class="mono">note</span> did not reset. Default equality is <span class="mono">Object.is</span>; pass <span class="mono">{ equal: fn }</span> to customise it.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>What makes <span class="mono">computed</span> lazy and cached?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>It runs only when someone reads it, and it re-runs only if a signal it read last time has changed since. Otherwise it returns the cached value.</p></div></details>
+      <details><summary>The search is set to the value it already has. What runs?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Nothing. Equal values don't notify. In the real run, only our own "set same value" log appeared.</p></div></details>
+      <details><summary>Two <span class="mono">set()</span> calls in a row: how many effect runs?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>One, with the final value. Effects are scheduled, not run synchronously on each write.</p></div></details>
+      <details><summary>Why not <span class="mono">effect(() =&gt; this.count.set(this.list().length))</span>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>It duplicates state and runs later than the read, so the UI can briefly be inconsistent. <span class="mono">count = computed(() =&gt; this.list().length)</span> is always correct and needs no syncing.</p></div></details>
+      <details><summary>When is <span class="mono">linkedSignal</span> the right tool?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>When a value must be editable by the user but should reset (or be recalculated) when another signal changes. CareDesk's note resets whenever the patient shown changes.</p></div></details>
+      <details><summary>How does a signal help change detection?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Templates that read a signal are registered as its consumers. When it changes, Angular schedules a refresh of exactly those views, which is what zoneless Angular relies on.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: angular.dev "Signals", "Dependent state with linkedSignal" and "Effects"; Angular DevTools signal graph (node types signal, computed, linkedSignal, effect, template). Every log line was recorded from CareDesk's PatientList (Angular CLI 22.2.5) with a console.log inside each computed, linkedSignal and effect.</footer>
+</div>
+
+<script src="caredesk.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const NODES = {
+    patients: { x: 85, y: 70, k: 'signal', t: 'patients' },
+    search: { x: 85, y: 230, k: 'signal', t: 'search' },
+    filtered: { x: 280, y: 150, k: 'computed', t: 'filtered' },
+    urgent: { x: 470, y: 70, k: 'computed', t: 'urgent' },
+    first: { x: 470, y: 185, k: 'computed', t: 'first' },
+    note: { x: 625, y: 255, k: 'linked', t: 'note' },
+    effect: { x: 280, y: 290, k: 'effect', t: 'save search' },
+    tpl: { x: 625, y: 120, k: 'tpl', t: 'template' }
+  };
+  const EDGES = [['patients', 'filtered'], ['search', 'filtered'], ['search', 'effect'], ['filtered', 'urgent'], ['filtered', 'first'], ['first', 'note'], ['urgent', 'tpl'], ['filtered', 'tpl'], ['first', 'tpl'], ['note', 'tpl']];
+  const KIND = { signal: 'signal', computed: 'computed', linked: 'linkedSignal', effect: 'effect', tpl: 'list + card' };
+  function graph(svg) {
+    const E = {}, N = {};
+    const eg = K.el('g', {}, svg), ng = K.el('g', {}, svg);
+    EDGES.forEach(([a, b]) => { const A = NODES[a], B = NODES[b]; const mx = (A.x + B.x) / 2; E[a + '>' + b] = K.el('path', { d: `M${A.x + 58} ${A.y} C${mx} ${A.y} ${mx} ${B.y} ${B.x - 58} ${B.y}`, class: 'edge' }, eg); });
+    for (const [id, n] of Object.entries(NODES)) {
+      const g = K.el('g', { class: 'sn k-' + n.k }, ng);
+      K.el('rect', { x: n.x - 58, y: n.y - 30, width: 116, height: 60, rx: 10 }, g);
+      K.text(g, n.x, n.y - 13, KIND[n.k], 'k'); K.text(g, n.x, n.y + 3, n.t, 't');
+      const v = K.text(g, n.x, n.y + 19, '', 'v');
+      const b = K.text(g, n.x + 52, n.y - 34, '', 'badge'); b.style.textAnchor = 'end';
+      N[id] = { g, v, b };
+    }
+    return { N, E };
+  }
+  const G = graph($('sgSvg'));
+  const short = arr => '[' + arr.join(', ') + ']';
+  function setVals(N, v) {
+    N.patients.v.textContent = short(v.patients); N.search.v.textContent = JSON.stringify(v.search);
+    N.filtered.v.textContent = short(v.filtered); N.urgent.v.textContent = String(v.urgent);
+    N.first.v.textContent = v.first ? v.first : 'null'; N.note.v.textContent = JSON.stringify(v.note);
+    N.effect.v.textContent = 'localStorage'; N.tpl.v.textContent = `${v.filtered.length}/${v.patients.length} · ${v.urgent} urgent`;
+  }
+  function states(N, E, st) {
+    for (const id in N) { const s = st[id]; N[id].g.setAttribute('class', `sn k-${NODES[id].k} ${s || (Object.keys(st).length ? 'idle' : '')}`); N[id].b.textContent = s === 'dirty' ? 'dirty' : s === 'ran' ? 're-ran' : s === 'same' ? 'equal' : ''; N[id].b.setAttribute('class', 'badge ' + (s || '')); }
+    for (const k in E) { const [a, b] = k.split('>'); E[k].classList.toggle('hot', !!st[a] && !!st[b] && st[b] !== 'idle'); }
+  }
+  const ALL = ['Asha', 'Ravi', 'Meera'];
+  const V = {
+    init: { patients: ALL, search: '', filtered: ALL, urgent: 1, first: 'Asha', note: '' },
+    noted: { patients: ALL, search: '', filtered: ALL, urgent: 1, first: 'Asha', note: 'call back' },
+    r: { patients: ALL, search: 'r', filtered: ['Ravi', 'Meera'], urgent: 0, first: 'Ravi', note: '' },
+    ra: { patients: ALL, search: 'ra', filtered: ['Ravi', 'Meera'], urgent: 0, first: 'Ravi', note: 'call back' },
+    me: { patients: ALL, search: 'me', filtered: ['Meera'], urgent: 0, first: 'Meera', note: '' },
+    dis: { patients: ['Ravi', 'Meera'], search: '', filtered: ['Ravi', 'Meera'], urgent: 0, first: 'Ravi', note: '' }
+  };
+  const LIST_TS = `export class PatientList {
+  protected readonly patients = signal<Patient[]>(PATIENTS);
+  protected readonly search = signal(localStorage.getItem('caredesk.search') ?? '');
+
+  protected readonly filtered = computed(() => {
+    const q = this.search().trim().toLowerCase();
+    return this.patients().filter(p => p.name.toLowerCase().includes(q));
+  });
+  protected readonly urgent = computed(() => this.filtered().filter(p => p.triage === 'urgent').length);
+  protected readonly first = computed(() => this.filtered()[0] ?? null);
+
+  // a note per patient: resets when the shown patient changes, but stays writable
+  protected readonly note = linkedSignal({ source: this.first, computation: () => '' });
+  protected readonly message = signal('');
+
+  constructor() {
+    effect(() => localStorage.setItem('caredesk.search', this.search()));
+  }
+
+  discharge(id: number) {
+    this.patients.update(list => list.filter(p => p.id !== id));
+  }
+}`;
+  const LIST_HTML = `<input placeholder="Search patients" [(ngModel)]="search" />
+<p>{{ filtered().length }} of {{ patients().length }} patients · {{ urgent() }} urgent</p>
+
+@if (first(); as p) {
+  <app-patient-card [patient]="p" [(note)]="note" (reviewed)="onReviewed($event)" />
+  <button (click)="discharge(p.id)">Discharge {{ p.name }}</button>
+} @else {
+  <p>No one matches "{{ search() }}".</p>
+}`;
+  const LOG = {
+    first: ['effect: save search = ""', 'computed filtered → ["Asha","Ravi","Meera"]', 'computed urgent → 1', 'computed first → Asha', 'linkedSignal note reset'],
+    r: ['effect: save search = "r"', 'computed filtered → ["Ravi","Meera"]', 'computed urgent → 0', 'computed first → Ravi', 'linkedSignal note reset'],
+    ra: ['effect: save search = "ra"', 'computed filtered → ["Ravi","Meera"]', 'computed urgent → 0', 'computed first → Ravi'],
+    same: ['set same value'],
+    two: ['two writes done (sync)', 'effect: save search = "me"', 'computed filtered → ["Meera"]', 'computed urgent → 0', 'computed first → Meera', 'linkedSignal note reset'],
+    dis: ['computed filtered → ["Ravi","Meera"]', 'computed urgent → 0', 'computed first → Ravi', 'linkedSignal note reset']
+  };
+  const S = [
+    { v: 'init', st: {}, card: ['patient-list.ts', LIST_TS, { 2: 'hot', 3: 'hot', 5: 'hot', 9: 'hot', 10: 'hot', 13: 'two', 17: 'up' }] },
+    { v: 'init', st: { patients: 'ran', search: 'ran' }, card: ['patient-list.ts', LIST_TS, { 2: ['ok', 'writable'], 3: ['ok', 'starts from localStorage'], 21: ['hot', 'update(old => new)'] }] },
+    { v: 'init', st: { filtered: 'ran', urgent: 'ran', first: 'ran' }, card: ['patient-list.ts', LIST_TS, { 5: ['hot', 'reads search() + patients()'], 6: 'hot', 7: 'hot', 9: 'hot', 10: 'hot' }], out: [...LOG.first, '(a computed nothing reads: never logged)'] },
+    { v: 'init', st: { filtered: 'ran', urgent: 'ran', first: 'ran', note: 'ran', effect: 'ran', tpl: 'ran' }, card: ['patient-list.html', LIST_HTML, { 2: ['hot', 'template reads 3 signals'], 4: 'hot' }], out: LOG.first, lang: 'ng' },
+    { v: 'r', st: { search: 'ran', filtered: 'ran', urgent: 'ran', first: 'ran', note: 'ran', effect: 'ran', tpl: 'ran' }, card: ['patient-list.html', LIST_HTML, { 1: ['two', 'types "r"'] }], out: LOG.r, lang: 'ng', play: 'r' },
+    { v: 'ra', st: { search: 'ran', filtered: 'ran', urgent: 'same', first: 'same', note: 'idle', effect: 'ran', tpl: 'ran' }, card: ['patient-list.ts', LIST_TS, { 10: ['hot', 'still the same Ravi'], 13: ['two', 'not reset'] }], out: LOG.ra, play: 'ra' },
+    { v: 'ra', st: { search: 'same' }, card: ['experiment', `this.search.set(this.search());   // same value
+console.log('set same value');`, { 1: 'hot' }], out: LOG.same },
+    { v: 'me', st: { search: 'ran', filtered: 'ran', urgent: 'same', first: 'ran', note: 'ran', effect: 'ran', tpl: 'ran' }, card: ['experiment', `this.search.set('m');
+this.search.set('me');
+console.log('two writes done (sync)');`, { 1: 'hot', 2: 'hot' }], out: LOG.two },
+    { v: 'me', st: { search: 'ran', effect: 'ran' }, card: ['patient-list.ts', LIST_TS, { 17: ['up', 'side effect'], 3: ['ok', 'read back on start'] }], out: ['(type "me", reload the page)', 'after reload input = "me" | 1 of 3 patients · 0 urgent | card: Meera · Dermatology'] },
+    { v: 'dis', st: { patients: 'ran', filtered: 'ran', urgent: 'ran', first: 'ran', note: 'ran', tpl: 'ran' }, card: ['patient-list.ts', LIST_TS, { 20: 'hot', 21: ['ok', 'new array, not splice'] }], out: LOG.dis, play: 'dis' }
+  ];
+  function show(i) {
+    const s = S[i];
+    setVals(G.N, V[s.v]);
+    if (i === 1) setVals(G.N, V.init);
+    states(G.N, G.E, s.st);
+    K.codeCard($('sgCard'), { file: s.card[0], lang: s.lang || 'ts', code: s.card[1], marks: s.card[2], dim: true, out: s.out, outLabel: 'Console (real run)' });
+  }
+  // push (dirty) then pull (recompute) animation
+  async function wave(run, from, order) {
+    const st = {}; st[from] = 'ran'; states(G.N, G.E, st); await K.sleep(350, run);
+    const dirty = ['filtered', 'urgent', 'first', 'note', 'effect', 'tpl'].filter(n => from === 'patients' ? n !== 'effect' : true);
+    for (const n of dirty) { st[n] = 'dirty'; states(G.N, G.E, st); await K.sleep(160, run); }
+    await K.sleep(400, run);
+    for (const [n, r] of order) { st[n] = r; states(G.N, G.E, st); await K.sleep(330, run); }
+  }
+  const PLAYS = {
+    r: run => wave(run, 'search', [['effect', 'ran'], ['filtered', 'ran'], ['urgent', 'ran'], ['first', 'ran'], ['note', 'ran'], ['tpl', 'ran']]),
+    ra: run => wave(run, 'search', [['effect', 'ran'], ['filtered', 'ran'], ['urgent', 'same'], ['first', 'same'], ['note', 'idle'], ['tpl', 'ran']]),
+    dis: run => wave(run, 'patients', [['filtered', 'ran'], ['urgent', 'ran'], ['first', 'ran'], ['note', 'ran'], ['tpl', 'ran']])
+  };
+  const steps = [
+    { title: 'This step\'s feature: a smarter waiting room', text: 'PatientList now keeps <b>all</b> patients in a signal, filters them by the search, counts urgent cases, shows the first match, remembers the search across reloads, and keeps a note that resets per patient. All of it is signals, drawn here as a graph like Angular DevTools shows it.' },
+    { title: 'signal: a value with listeners', text: '<span class="mono">patients</span> and <span class="mono">search</span> are writable signals. Read with <span class="mono">search()</span>, write with <span class="mono">set</span> or <span class="mono">update</span>. Every place that reads one is recorded as a consumer.' },
+    { title: 'computed: derived, lazy, cached', text: '<span class="mono">filtered</span> reads <span class="mono">search()</span> and <span class="mono">patients()</span>; <span class="mono">urgent</span> and <span class="mono">first</span> read <span class="mono">filtered()</span>. Angular tracks those reads automatically, so there are no dependency arrays. A computed nobody read never ran at all.' },
+    { title: 'First render', text: 'The template reads <span class="mono">filtered</span>, <span class="mono">urgent</span> and <span class="mono">first</span>, which pulls each value once. The effect runs once to save the empty search. <span class="mono">note</span> starts at its computed reset value, <span class="mono">\'\'</span>.' },
+    { title: 'Type "r": dirty, then pull', text: 'Writing <span class="mono">search</span> first marks every dependant <b>dirty</b> (orange): nothing is recomputed yet. Then readers pull: <span class="mono">filtered</span> recomputes, then <span class="mono">urgent</span> and <span class="mono">first</span>; <span class="mono">first</span> changed to Ravi, so <span class="mono">note</span> reset. The effect saves "r".', tip: 'Describe signals as "push dirty, pull values": invalidation is pushed eagerly, recomputation is pulled lazily.' },
+    { title: 'Type "ra": equality stops the wave', text: '<span class="mono">filtered</span> recomputed and returned a new array, so <span class="mono">urgent</span> and <span class="mono">first</span> re-ran. But <span class="mono">first</span> returned the <b>same</b> Ravi object, so <span class="mono">note</span> wasn\'t touched: no "note reset" in the log, the typed note survived.' },
+    { title: 'Same value: nothing at all', text: 'Setting <span class="mono">search</span> to the value it already holds notified no one. No computed, no effect, no template refresh: only our own log line.' },
+    { title: 'Two writes, one update', text: 'Writing <span class="mono">\'m\'</span> and then <span class="mono">\'me\'</span> in one function gave a single effect run with "me" and one recompute per node. Effects are scheduled, and readers only ever see a consistent graph.' },
+    { title: 'effect: for side effects', text: 'The effect saves the search to <span class="mono">localStorage</span>; the signal starts from that value. In the real run, typing "me" and reloading reopened CareDesk on Meera. Effects are for the outside world. Use computed for values.' },
+    { title: 'Replace arrays, don\'t mutate', text: '"Discharge Asha" runs <span class="mono">patients.update(list =&gt; list.filter(…))</span>, a <b>new</b> array. The whole graph refreshed: 2 of 2 patients, 0 urgent, Ravi shown. <span class="mono">list.splice(…)</span> would change nothing on screen (the trap from step 5). Step 8 of CareDesk is done.' }
+  ];
+  steps.forEach((st, i) => { if (S[i].play) st.play = PLAYS[S[i].play]; });
+  K.story({ root: $('sgStory'), show, tipLabel: 'Interview tip', steps });
+
+  K.codeCard($('effBad'), { file: 'anti-pattern', lang: 'ts', code: `urgent = signal(0);
+constructor() {
+  effect(() => this.urgent.set(
+    this.filtered().filter(p => p.triage === 'urgent').length));
+}`, marks: { 3: 'bad', 4: 'bad' } });
+  K.codeCard($('effGood'), { file: 'patient-list.ts', lang: 'ts', code: `urgent = computed(() =>
+  this.filtered().filter(p => p.triage === 'urgent').length);
+
+note = linkedSignal({ source: this.first, computation: () => '' });`, marks: { 1: 'ok', 4: 'ok' } });
+
+  /* ===== lab: simulates the same graph with the same rules ===== */
+  const L = graph($('labSvg'));
+  const PAT = [{ id: 1, name: 'Asha', triage: 'urgent' }, { id: 2, name: 'Ravi', triage: 'routine' }, { id: 3, name: 'Meera', triage: 'routine' }];
+  let patients, search, filtered, urgent, first, note, lines;
+  const log = (...l) => { lines.push(...l); lines = lines.slice(-12); $('lLog').textContent = lines.join('\n'); };
+  function recompute(changed) {
+    const st = {}; changed.forEach(c => st[c] = 'ran');
+    if (changed.includes('search')) { log(`effect: save search = ${JSON.stringify(search)}`); st.effect = 'ran'; }
+    const q = search.trim().toLowerCase();
+    filtered = patients.filter(p => p.name.toLowerCase().includes(q)); st.filtered = 'ran';
+    log(`computed filtered → ${JSON.stringify(filtered.map(p => p.name))}`);
+    const u = filtered.filter(p => p.triage === 'urgent').length; log(`computed urgent → ${u}`); st.urgent = u === urgent ? 'same' : 'ran'; urgent = u;
+    const f = filtered[0] || null; log(`computed first → ${f ? f.name : null}`);
+    if (f !== first) { st.first = 'ran'; first = f; note = ''; log('linkedSignal note reset'); st.note = 'ran'; } else st.first = 'same';
+    st.tpl = 'ran';
+    paintLab(st);
+  }
+  function paintLab(st) {
+    setVals(L.N, { patients: patients.map(p => p.name), search, filtered: filtered.map(p => p.name), urgent, first: first && first.name, note });
+    states(L.N, L.E, st);
+  }
+  function reset() { patients = PAT.slice(); search = ''; lines = []; urgent = undefined; first = undefined; note = ''; $('lSearch').value = ''; log('// first render'); recompute(['patients', 'search']); }
+  $('lSearch').addEventListener('input', e => { if (e.target.value === search) return; search = e.target.value; recompute(['search']); });
+  $('lDis').addEventListener('click', () => { if (!first) return; const id = first.id; patients = patients.filter(p => p.id !== id); recompute(['patients']); });
+  $('lNote').addEventListener('click', () => { note = 'call back'; paintLab({ note: 'ran', tpl: 'ran' }); log('note.set("call back")'); });
+  $('lSame').addEventListener('click', () => { log('set same value'); paintLab({ search: 'same' }); });
+  $('lReset').addEventListener('click', reset);
+  reset();
+})();
+</script>
+</body>
+</html>

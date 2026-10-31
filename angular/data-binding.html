@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Data binding</title>
+<meta name="description" content="Angular 22 data binding on CareDesk's PatientCard: interpolation, property, class, style and attribute bindings flow from class to DOM; events flow back; ngModel does both.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .ng-left { display: grid; gap: 12px; min-width: 0; align-content: start; }
+  .bx rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; }
+  .bx .bt { fill: var(--fg); font-weight: 700; font-size: 14px; }
+  .bx .bs { fill: var(--muted); font-family: var(--mono) !important; font-size: 11px; }
+  .blane { transition: opacity .3s; }
+  .blane text.l { fill: var(--fg-soft); font-family: var(--mono) !important; font-size: 11.5px; }
+  .blane text.r { fill: var(--fg-soft); font-family: var(--mono) !important; font-size: 11.5px; }
+  .blane.dim { opacity: .22; }
+  .blane.now text.l, .blane.now text.r { fill: var(--fg); }
+  .blane .chip { font-family: var(--mono) !important; font-size: 11.5px; font-weight: 700; }
+  .lab { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 12px; margin-top: 10px; }
+  .pcard { border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; background: var(--panel); transition: background .2s; }
+  .pcard.urgent { border-left: 6px solid var(--red); }
+  .pcard.selected { background: var(--teal-wash); }
+  .pcard h4 { margin: 0; font-size: 19px; } .pcard p { margin: 2px 0 8px; color: var(--fg-soft); }
+  .lab-ctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .lab input[type=text] { font: inherit; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); width: 200px; max-width: 100%; }
+  .bug-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 12px; margin-top: 12px; }
+  .bug { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); padding: 12px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+  .bug .codeblock { min-height: 0; font-size: 12.5px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .bug .q { margin: 0; font-size: 14px; color: var(--fg-soft); }
+  .bug .a { margin: 0; font-size: 14px; }
+  .bug .err { font-family: var(--mono); font-size: 12px; color: var(--bad-text); overflow-wrap: anywhere; display: block; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Angular roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Angular 22 · Part 2 · Data flow</div>
+    <h1>Data binding</h1>
+    <ul class="lede">
+      <li>Bindings connect a component's <b>class</b> to its <b>template</b>. Angular keeps the DOM in step for you.</li>
+      <li><b>Class → DOM</b> (cyan): <span class="mono">{{ value }}</span>, <span class="mono">[property]</span>, <span class="mono">[class.x]</span>, <span class="mono">[style.x]</span>, <span class="mono">[attr.x]</span>.</li>
+      <li><b>DOM → class</b> (orange): <span class="mono">(event)="handler()"</span>.</li>
+      <li><b>Both ways</b> (violet): <span class="mono">[(ngModel)]</span> = <span class="mono">[ngModel]</span> + <span class="mono">(ngModelChange)</span>. Needs <span class="mono">FormsModule</span>.</li>
+      <li>The right-hand side is a <b>template expression</b>, type-checked against the class.</li>
+    </ul>
+    <p class="ng-legend" aria-label="Colour key"><span>class → DOM</span><span class="lg-up">DOM → class (events)</span><span class="lg-two">both ways</span></p>
+    <div class="cd-trail" data-stage="4"></div>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: wiring up PatientCard and the search box</h2>
+    <div class="stage-kind">Left box: the component class · right box: the DOM it produces · DOM values and logs from the real build</div>
+    <div class="story" id="bStory">
+      <div class="ng-left">
+        <div class="scroll"><svg class="diagram" id="bSvg" style="min-width:0" viewBox="0 0 640 340" role="img" aria-label="Binding lanes between the component class and the DOM"></svg></div>
+        <div id="bCard"></div>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the class's data and watch the DOM update, then look at four binding mistakes.</p>
+
+  <section aria-labelledby="labH">
+    <h2 class="stage-title" id="labH">1. Binding lab</h2>
+    <div class="stage-kind">Left: what the user sees · right: the DOM Angular writes (same format as the real build)</div>
+    <div class="lab">
+      <div>
+        <div class="lab-ctl" style="margin-bottom:10px"><span class="mono" style="font-size:13px">patient.triage =</span><div class="seg" id="triSeg" role="group" aria-label="Triage"><button type="button" data-v="urgent" aria-pressed="true">'urgent'</button><button type="button" data-v="routine" aria-pressed="false">'routine'</button></div></div>
+        <div class="pcard" id="lCard"><h4>Asha</h4><p>Cardiology · <span id="lTri">urgent</span></p><button class="btn" type="button" id="lSel">Select</button></div>
+        <div class="lab-ctl" style="margin-top:10px"><input type="text" id="lSearch" placeholder="Search patients" aria-label="Search patients"><span class="mono" style="font-size:13px" id="lSearchOut">Searching for: ""</span></div>
+      </div>
+      <div><div id="lDom"></div><div class="card" style="margin-top:10px"><div class="label">Console</div><pre class="mono" id="lLog" style="margin:0;white-space:pre-wrap;font-size:12.5px;min-height:3em"></pre></div></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="bugH">
+    <h2 class="stage-title" id="bugH">2. What happens here?</h2>
+    <div class="stage-kind">Each one was tried in CareDesk · predict, then reveal</div>
+    <div class="bug-grid" id="bugs"></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Show a value as text</span><span class="arrow">→</span><span class="then"><span class="mono">{{ patient.name }}</span></span></li>
+      <li><span class="if">Set a DOM property (value, disabled, src, hidden)</span><span class="arrow">→</span><span class="then"><span class="mono">[disabled]="isBusy()"</span></span></li>
+      <li><span class="if">Toggle one CSS class</span><span class="arrow">→</span><span class="then"><span class="mono">[class.urgent]="cond"</span>; several: <span class="mono">[class]="{ urgent: a, selected: b }"</span></span></li>
+      <li><span class="if">aria-*, colspan, data-* (no matching DOM property)</span><span class="arrow">→</span><span class="then"><span class="mono">[attr.aria-pressed]="selected()"</span>; <span class="mono">null</span> removes it</span></li>
+      <li><span class="if">React to the user</span><span class="arrow">→</span><span class="then"><span class="mono">(click)="toggle()"</span>, <span class="mono">(keyup.enter)="go()"</span>, <span class="mono">$event</span> for the event object</span></li>
+      <li><span class="if">Keep an input and a field in sync</span><span class="arrow">→</span><span class="then"><span class="mono">[(ngModel)]="search"</span> + <span class="mono">FormsModule</span> in <span class="mono">imports</span></span></li>
+      <li><span class="if">Run extra code when the input changes</span><span class="arrow">→</span><span class="then"><span class="mono">[ngModel]="search()" (ngModelChange)="onSearch($event)"</span></span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: binding syntax</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Syntax</th><th>Direction</th><th>CareDesk</th><th>Real DOM result</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">{{ expr }}</td><td>class → DOM</td><td class="mono">{{ patient.name }}</td><td class="mono">&lt;h3&gt;Asha&lt;/h3&gt;</td></tr>
+          <tr><td class="mono">[prop]="expr"</td><td>class → DOM</td><td class="mono">[style.font-weight]="… ? 700 : 400"</td><td class="mono">style="font-weight: 700;"</td></tr>
+          <tr><td class="mono">[class.name]</td><td>class → DOM</td><td class="mono">[class.urgent]="patient.triage === 'urgent'"</td><td class="mono">class="urgent"</td></tr>
+          <tr><td class="mono">[attr.name]</td><td>class → DOM</td><td class="mono">[attr.aria-pressed]="selected()"</td><td class="mono">aria-pressed="false"</td></tr>
+          <tr><td class="mono">(event)="stmt"</td><td>DOM → class</td><td class="mono">(click)="toggle()"</td><td class="mono">[card] selected = true</td></tr>
+          <tr><td class="mono">[(ngModel)]</td><td>both</td><td class="mono">[(ngModel)]="search"</td><td class="mono">Searching for: "Ra"</td></tr>
+          <tr><td class="mono">#ref</td><td>template variable</td><td class="mono">&lt;input #box&gt; … box.value</td><td>reference to the element in the template</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>The <span class="mono">name</span> attribute.</b> Your notes say <span class="mono">ngModel</span> always needs <span class="mono">name</span>. Only inside a <span class="mono">&lt;form&gt;</span>, where ngForm registers each control by name. CareDesk's search box sits outside a form and works without it (forms are covered on the Template-driven forms page).</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>Typing the handler.</b> The notes' <span class="mono">sendtoParentEmitter(e: any)</span> works, but <span class="mono">(ngModelChange)</span> emits the new value, so type it: <span class="mono">onSearch(text: string)</span>. With <span class="mono">any</span> you lose the template type check shown on the TypeScript page.</p></div>
+      <div class="note"><span class="flag add">Updated</span><p><b><span class="mono">ngModel</span> works with signals.</b> <span class="mono">[(ngModel)]="search"</span> with <span class="mono">search = signal('')</span> reads and writes the signal directly; in the real run typing "Ra" updated <span class="mono">search()</span>.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Property vs attribute.</b> After typing "Ra", the input's <span class="mono">value</span> <b>property</b> was "Ra" while <span class="mono">getAttribute('value')</span> returned null. <span class="mono">[value]</span> and <span class="mono">ngModel</span> set properties; the HTML attribute only holds the initial value. Use <span class="mono">[attr.x]</span> only when there is no property (aria-*, colspan).</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Name the four kinds of binding and their direction.<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Interpolation <span class="mono">{{ }}</span> and property binding <span class="mono">[ ]</span>: class → DOM. Event binding <span class="mono">( )</span>: DOM → class. Two-way <span class="mono">[( )]</span>: both.</p></div></details>
+      <details><summary>What does <span class="mono">[(ngModel)]="search"</span> expand to?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">[ngModel]="search()" (ngModelChange)="search.set($event)"</span> for a signal (or <span class="mono">search = $event</span> for a plain field). It needs <span class="mono">FormsModule</span>, otherwise NG8002.</p></div></details>
+      <details><summary><span class="mono">disabled="false"</span> on a button: enabled or disabled?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Disabled.</b> A static attribute is a string, and any value of the <span class="mono">disabled</span> attribute disables. Use <span class="mono">[disabled]="false"</span>.</p></div></details>
+      <details><summary>When do you need <span class="mono">[attr.x]</span>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>When the HTML attribute has no matching DOM property: <span class="mono">aria-*</span>, <span class="mono">colspan</span>, <span class="mono">data-*</span>, SVG attributes. Binding <span class="mono">null</span> removes the attribute.</p></div></details>
+      <details><summary><span class="mono">(click)="toggle"</span> without parentheses: what happens?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Nothing on click: the expression just reads the function. The build warns <span class="mono">NG8111: Function in event binding should be invoked: toggle()</span>.</p></div></details>
+      <details><summary>Is <span class="mono">title="{{ patient.name }}"</span> different from <span class="mono">[title]="patient.name"</span>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>No, interpolation in an attribute is turned into the same property binding. Prefer <span class="mono">[title]</span> for non-string values.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: your Obsidian notes "ngModel and ngModelChange Directive" and "Growing the Application"; angular.dev "Binding dynamic text, properties and attributes", "Adding event listeners" and "Two-way binding". DOM values, logs and messages are from the real CareDesk build (Angular CLI 22.2.5).</footer>
+</div>
+
+<script src="caredesk.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const CARD_HTML = `<article [class.urgent]="patient.triage === 'urgent'" [class.selected]="selected()">
+  <h3>{{ patient.name }}</h3>
+  <p>{{ patient.department }} · <span [style.font-weight]="patient.triage === 'urgent' ? 700 : 400">{{ patient.triage }}</span></p>
+  <button type="button" [attr.aria-pressed]="selected()" (click)="toggle()">
+    {{ selected() ? 'Selected' : 'Select' }}
+  </button>
+</article>`;
+  const CARD_TS = `export class PatientCard {
+  protected readonly patient = PATIENTS[0];   // hard-coded for now
+  protected readonly selected = signal(false);
+
+  toggle() {
+    this.selected.update(v => !v);
+    console.log('[card] selected =', this.selected());
+  }
+}`;
+  const LIST_HTML = `<h2>Waiting room</h2>
+<input placeholder="Search patients" [(ngModel)]="search" />
+<p>Searching for: "{{ search() }}"</p>
+<app-patient-card />`;
+  const LIST_TS = `import { FormsModule } from '@angular/forms';
+
+@Component({
+  imports: [FormsModule, PatientCard],
+  selector: 'app-patient-list',
+  ...
+})
+export class PatientList {
+  protected readonly search = signal('');
+}`;
+  const LIST_SPLIT = `<input placeholder="Search patients"
+       [ngModel]="search()"
+       (ngModelChange)="onSearch($event)" />
+
+onSearch(text: string) {
+  this.search.set(text);
+  // ...and anything else: log, analytics, reset paging
+}`;
+
+  /* ===== lanes diagram ===== */
+  const sv = $('bSvg');
+  const bx = (x, t, s) => { const g = K.el('g', { class: 'bx' }, sv); K.el('rect', { x, y: 8, width: 230, height: 324, rx: 14 }, g); K.text(g, x + 115, 30, t, 'bt').style.textAnchor = 'middle'; K.text(g, x + 115, 46, s, 'bs').style.textAnchor = 'middle'; };
+  bx(10, 'Component class', 'PatientCard / PatientList'); bx(400, 'DOM', 'what the browser shows');
+  const LANES = [
+    { y: 82, l: "patient.name", r: '<h3>Asha</h3>', chip: '{{ }}', kind: 'down' },
+    { y: 126, l: "patient.triage", r: 'style="font-weight: 700;"', chip: '[style.x]', kind: 'down' },
+    { y: 170, l: "patient.triage", r: 'class="urgent"', chip: '[class.x]', kind: 'down' },
+    { y: 214, l: "selected() = false", r: 'aria-pressed="false"', chip: '[attr.x]', kind: 'down' },
+    { y: 258, l: "toggle()", r: '<button> clicked', chip: '(click)', kind: 'up' },
+    { y: 304, l: "search = signal('')", r: '<input> "Ra"', chip: '[(ngModel)]', kind: 'two' }
+  ];
+  LANES.forEach(L => {
+    const g = L.g = K.el('g', { class: 'blane dim' }, sv);
+    L.lt = K.text(g, 22, L.y + 4, L.l, 'l'); L.lt.style.textAnchor = 'start';
+    L.rt = K.text(g, 412, L.y + 4, L.r, 'r'); L.rt.style.textAnchor = 'start';
+    const a = L.kind === 'up' ? [385, L.y] : [255, L.y], b = L.kind === 'up' ? [255, L.y] : [385, L.y];
+    K.ngWire(g, a, b, L.kind);
+    const c = K.text(g, 320, L.y - 8, L.chip, 'bchip mlabel halo ' + L.kind); c.style.textAnchor = 'middle';
+  });
+  const S = [
+    { on: [0, 1, 2, 3, 4, 5], card: ['patient-card.html', 'ng', CARD_HTML, {}] },
+    { on: [0], card: ['patient-card.html', 'ng', CARD_HTML, { 2: ['hot', 'text from the class'] }] },
+    { on: [1], card: ['patient-card.html', 'ng', CARD_HTML, { 3: ['hot', 'sets el.style.fontWeight'] }] },
+    { on: [2], card: ['patient-card.html', 'ng', CARD_HTML, { 1: ['hot', 'adds or removes one class'] }] },
+    { on: [3], card: ['patient-card.html', 'ng', CARD_HTML, { 4: ['hot', 'writes an HTML attribute'] }] },
+    { on: [4], card: ['patient-card.ts', 'ts', CARD_TS, { 5: ['up', 'runs on click'], 6: 'up', 7: 'up' }], out: ['[card] selected = true'], after: { 3: 'aria-pressed="true"', 2: 'class="urgent selected"' } },
+    { on: [5], card: ['patient-list.html', 'ng', LIST_HTML, { 2: ['two', 'value in, typing out'], 3: 'hot' }], after: { 3: 'aria-pressed="true"', 2: 'class="urgent selected"' } },
+    { on: [5], card: ['patient-list.ts', 'ts', LIST_TS, { 1: 'hot', 4: ['hot', 'or NG8002'] }], after: { 3: 'aria-pressed="true"', 2: 'class="urgent selected"' } },
+    { on: [5], card: ['patient-list.html (split form)', 'ng', LIST_SPLIT, { 2: 'hot', 3: ['up', 'your handler'] }], after: { 3: 'aria-pressed="true"', 2: 'class="urgent selected"' } }
+  ];
+  function show(i) {
+    const s = S[i];
+    LANES.forEach((L, k) => { L.g.setAttribute('class', 'blane ' + (s.on.includes(k) ? (s.on.length === 1 ? 'now' : '') : 'dim')); L.rt.textContent = (s.after && s.after[k]) || L.r; });
+    LANES[3].lt.textContent = s.after ? 'selected() = true' : 'selected() = false';
+    const [file, lang, code, marks] = s.card;
+    K.codeCard($('bCard'), { file, lang, code, marks, dim: Object.keys(marks).length > 0, out: s.out, outLabel: 'Console (real run)' });
+  }
+  async function pillAlong(run, k, label, cls) {
+    const L = LANES[k], up = L.kind === 'up';
+    const p = K.pill(sv, label, cls);
+    await K.move(p, [up ? 380 : 262, L.y], [up ? 262 : 380, L.y], 800, run); p.remove();
+  }
+  K.story({
+    root: $('bStory'), show, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'Two worlds: the class and the DOM', text: 'PatientCard\'s class holds data (<span class="mono">patient</span>, <span class="mono">selected</span>) and behaviour (<span class="mono">toggle()</span>). The browser holds elements. Bindings in the template are the wires between them, each with a <b>direction</b>.' },
+      { title: 'Interpolation: {{ }} puts text on the page', text: '<span class="mono">{{ patient.name }}</span> evaluates the expression and writes the result as text. When the value changes, Angular updates only that text node.', play: async run => { await pillAlong(run, 0, "'Asha'", ''); } },
+      { title: 'Property binding: [x]="expr"', text: 'Square brackets set a <b>DOM property</b> from an expression. Here <span class="mono">[style.font-weight]</span> makes urgent triage bold. The real DOM got <span class="mono">style="font-weight: 700;"</span>. Same idea for <span class="mono">[disabled]</span>, <span class="mono">[src]</span>, <span class="mono">[value]</span>.', play: async run => { await pillAlong(run, 1, '700', ''); } },
+      { title: 'Class binding: [class.urgent]', text: '<span class="mono">[class.urgent]</span> adds the class while the condition is true and removes it otherwise. CareDesk uses it for a red stripe on urgent patients. Typos are caught: comparing with <span class="mono">\'urgnt\'</span> failed the build because <span class="mono">Triage</span> has no such value.', play: async run => { await pillAlong(run, 2, 'urgent', ''); } },
+      { title: 'Attribute binding: [attr.x]', text: 'Some HTML attributes have no DOM property, such as <span class="mono">aria-pressed</span>. <span class="mono">[attr.aria-pressed]</span> writes the attribute itself, so screen readers know whether the card is selected.', play: async run => { await pillAlong(run, 3, 'false', ''); } },
+      { title: 'Event binding: (click)="toggle()"', text: 'Round brackets go the other way: a DOM event calls a method on the class. <span class="mono">toggle()</span> flips the <span class="mono">selected</span> signal; Angular then updates every binding that reads it: the class, the attribute and the button text.', play: async run => { await pillAlong(run, 4, 'click', 'up'); }, tip: 'Brackets tell the direction: [ ] into the DOM, ( ) out of it, [( )] both. The "banana in a box" mnemonic is for the last one.' },
+      { title: 'Two-way: [(ngModel)]', text: 'The search box needs both directions: show <span class="mono">search()</span> and update it as the user types. <span class="mono">[(ngModel)]="search"</span> does that. Typing "Ra" in the real app updated the paragraph to <span class="mono">Searching for: "Ra"</span>.', play: async run => { await pillAlong(run, 5, "'Ra'", 'two'); } },
+      { title: 'ngModel lives in FormsModule', text: '<span class="mono">ngModel</span> is a directive from <span class="mono">@angular/forms</span>, so PatientList imports <span class="mono">FormsModule</span>. Without it the build fails with NG8002 "Can\'t bind to \'ngModel\'".' },
+      { title: 'Splitting it: [ngModel] + (ngModelChange)', text: 'Your notes\' pattern: when typing should do more than store the value (emit to a parent, reset paging), split the binding and handle <span class="mono">(ngModelChange)</span> yourself. Step 4 of CareDesk is done: a card that shows, highlights and reacts, plus a search box.' }
+    ]
+  });
+
+  /* ===== lab ===== */
+  let tri = 'urgent', sel = false, search = '', logs = [];
+  function domStr() {
+    const cls = [tri === 'urgent' ? 'urgent' : '', sel ? 'selected' : ''].filter(Boolean).join(' ');
+    return `<app-patient-card>
+  <article${cls ? ` class="${cls}"` : ''}>
+    <h3>Asha</h3>
+    <p>Cardiology · <span style="font-weight: ${tri === 'urgent' ? 700 : 400};">${tri}</span></p>
+    <button type="button" aria-pressed="${sel}"> ${sel ? 'Selected' : 'Select'} </button>
+  </article>
+</app-patient-card>
+<input placeholder="Search patients" class="${search ? 'ng-untouched ng-valid ng-dirty' : 'ng-untouched ng-pristine ng-valid'}">
+<p>Searching for: "${search}"</p>`;
+  }
+  function lab() {
+    const c = $('lCard'); c.classList.toggle('urgent', tri === 'urgent'); c.classList.toggle('selected', sel);
+    $('lTri').textContent = tri; $('lTri').style.fontWeight = tri === 'urgent' ? 700 : 400;
+    $('lSel').textContent = sel ? 'Selected' : 'Select'; $('lSel').setAttribute('aria-pressed', sel);
+    $('lSearchOut').textContent = `Searching for: "${search}"`;
+    K.codeCard($('lDom'), { file: 'Elements (DevTools)', lang: 'ng', code: domStr() });
+    $('lLog').textContent = logs.slice(-4).join('\n');
+  }
+  K.seg($('triSeg'), v => { tri = v; lab(); });
+  $('lSel').addEventListener('click', () => { sel = !sel; logs.push('[card] selected = ' + sel); lab(); });
+  $('lSearch').addEventListener('input', e => { search = e.target.value; lab(); });
+  lab();
+
+  /* ===== what happens ===== */
+  const BUGS = [
+    { q: 'A static attribute to enable the button', lang: 'ng', code: '<button disabled="false" (click)="toggle()">Select</button>', a: '<b class="bad-text">Disabled.</b> In the real build <span class="mono">button.disabled</span> was <span class="mono">true</span>: any value of the attribute disables. Use <span class="mono">[disabled]="false"</span>.' },
+    { q: 'Forgot the parentheses', lang: 'ng', code: '<button (click)="toggle">Select</button>', a: '<b class="bad-text">Clicking does nothing.</b> The build warns:', err: 'NG8111: Function in event binding should be invoked: toggle().' },
+    { q: 'ngModel without FormsModule', lang: 'ts', code: "@Component({\n  imports: [PatientCard],\n  ...\n})", a: '<b class="bad-text">Build error.</b>', err: "NG8002: Can't bind to 'ngModel' since it isn't a known property of 'input'." },
+    { q: 'Typo in a compared value', lang: 'ng', code: `<article [class.urgent]="patient.triage === 'urgnt'">`, a: '<b class="bad-text">Build error</b>, thanks to the Triage union type:', err: "TS2367: This comparison appears to be unintentional because the types 'Triage' and '\"urgnt\"' have no overlap." }
+  ];
+  BUGS.forEach((b, i) => {
+    const d = document.createElement('div'); d.className = 'bug';
+    d.innerHTML = `<p class="q"><b>${i + 1}.</b> ${b.q}</p><pre class="codeblock"></pre><button class="btn" type="button">What happens?</button><p class="a" hidden>${b.a}${b.err ? `<span class="err">${b.err.replace(/</g, '&lt;')}</span>` : ''}</p>`;
+    K.codeBlock(d.querySelector('pre'), b.code, b.lang);
+    d.querySelector('button').addEventListener('click', e => { d.querySelector('.a').hidden = false; e.target.hidden = true; });
+    $('bugs').appendChild(d);
+  });
+})();
+</script>
+</body>
+</html>

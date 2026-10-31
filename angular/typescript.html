@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TypeScript for Angular</title>
+<meta name="description" content="The TypeScript you need for Angular 22, built around CareDesk's Patient type: interfaces, union types, optional fields, generics, classes, decorators, and what disappears at run time.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .ng-left { display: grid; gap: 12px; min-width: 0; align-content: start; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Angular roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Angular 22 · Part 1 · Foundations</div>
+    <h1>TypeScript for Angular</h1>
+    <ul class="lede">
+      <li>TypeScript is <b>JavaScript plus types</b>. Types are checked when you build, then <b>erased</b>: the browser runs plain JavaScript.</li>
+      <li>An <span class="mono">interface</span> describes the <b>shape</b> of data, like a C# DTO without behaviour.</li>
+      <li><b>Union types</b> (<span class="mono">'routine' | 'urgent'</span>) and <b>optional fields</b> (<span class="mono">phone?</span>) catch whole classes of bugs.</li>
+      <li><b>Generics</b> appear everywhere in Angular: <span class="mono">signal&lt;Patient[]&gt;</span>, <span class="mono">input&lt;Patient&gt;</span>, <span class="mono">output&lt;string&gt;</span>.</li>
+      <li>Angular checks <b>templates</b> with the same types, so a typo in HTML fails the build.</li>
+    </ul>
+    <div class="cd-trail" data-stage="2"></div>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: typing CareDesk's patients</h2>
+    <div class="stage-kind">Every message below is real output from TypeScript 6.0 (the version Angular 22 uses)</div>
+    <div class="story" id="tsStory">
+      <div class="ng-left">
+        <div class="ng-pipe" id="tsPipe">
+          <div data-k="src"><b>.ts source</b>what you write</div>
+          <div data-k="check"><b>type checker</b>ng build / editor</div>
+          <div data-k="js"><b>.js output</b>types erased</div>
+          <div data-k="run"><b>browser</b>runs JavaScript</div>
+        </div>
+        <div id="tsCard"></div>
+        <div class="card"><div class="label" id="tsResH">Type checker</div><ul class="checks" id="tsRes"></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change one thing about a new patient and see what the checker says.</p>
+
+  <section aria-labelledby="plH">
+    <h2 class="stage-title" id="plH">Type-check a new patient</h2>
+    <div class="stage-kind">Pick a change · the message is real tsc output</div>
+    <div class="seg" id="plSeg" role="group" aria-label="Change" style="flex-wrap:wrap">
+      <button type="button" data-v="ok" aria-pressed="true">Valid</button>
+      <button type="button" data-v="tri" aria-pressed="false">triage: 'critical'</button>
+      <button type="button" data-v="miss" aria-pressed="false">No department</button>
+      <button type="button" data-v="id" aria-pressed="false">id: '4'</button>
+      <button type="button" data-v="extra" aria-pressed="false">Extra field ward</button>
+      <button type="button" data-v="any" aria-pressed="false">Cast to any</button>
+    </div>
+    <div class="two">
+      <div id="plCard"></div>
+      <div class="card"><div class="label" id="plWhen">Result</div><ul class="checks" id="plRes"></ul><p class="status-line" id="plWhy" style="margin:0"></p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Shape of data from an API</span><span class="arrow">→</span><span class="then"><span class="mono">interface Patient { ... }</span> (or <span class="mono">type</span>); no class needed</span></li>
+      <li><span class="if">A field with a fixed set of values</span><span class="arrow">→</span><span class="then">union of literals: <span class="mono">type Triage = 'routine' | 'urgent'</span></span></li>
+      <li><span class="if">A field that may be missing</span><span class="arrow">→</span><span class="then"><span class="mono">phone?: string</span>, then read it with <span class="mono">p.phone?.length</span> or check first</span></li>
+      <li><span class="if">TS2564 "has no initializer"</span><span class="arrow">→</span><span class="then">give a default, make it optional (<span class="mono">?</span>), or in Angular use <span class="mono">input.required()</span></span></li>
+      <li><span class="if">Tempted to write <span class="mono">any</span></span><span class="arrow">→</span><span class="then">use <span class="mono">unknown</span> and narrow it; <span class="mono">any</span> switches checking off</span></li>
+      <li><span class="if">Member only the template uses</span><span class="arrow">→</span><span class="then"><span class="mono">protected</span> (what <span class="mono">ng new</span> generates for <span class="mono">title</span>)</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: TypeScript next to C#</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>TypeScript</th><th>Closest C#</th><th>Difference</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">interface Patient { id: number }</td><td class="mono">record PatientDto(int Id)</td><td>structural: any object with the right shape fits, no <span class="mono">implements</span> needed; gone at run time</td></tr>
+          <tr><td class="mono">type Triage = 'routine' | 'urgent'</td><td class="mono">enum Triage</td><td>the values are plain strings at run time</td></tr>
+          <tr><td class="mono">phone?: string</td><td class="mono">string? Phone</td><td>value is <span class="mono">undefined</span> when absent (not null)</td></tr>
+          <tr><td class="mono">Patient[]</td><td class="mono">List&lt;Patient&gt;</td><td>a JavaScript array</td></tr>
+          <tr><td class="mono">signal&lt;Patient[]&gt;(…)</td><td class="mono">new Box&lt;List&lt;Patient&gt;&gt;(…)</td><td>generics work the same way; often inferred</td></tr>
+          <tr><td class="mono">(p: Patient) =&gt; p.name</td><td class="mono">p =&gt; p.Name</td><td>arrow functions = lambdas; also keep <span class="mono">this</span></td></tr>
+          <tr><td class="mono">@Component({...})</td><td>an attribute such as <span class="mono">[ApiController]</span></td><td>a decorator is a function that attaches metadata to the class</td></tr>
+          <tr><td class="mono">unknown</td><td class="mono">object</td><td>must be narrowed before use; <span class="mono">any</span> is like <span class="mono">dynamic</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>"String" vs "string".</b> Your notes list <span class="mono">String</span>. Use lowercase <span class="mono">string</span>, <span class="mono">number</span>, <span class="mono">boolean</span>: the capitalised names are JavaScript wrapper objects. The list also misses the types you'll use most in Angular: interfaces, unions, literal types, <span class="mono">unknown</span>, <span class="mono">undefined</span>.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>Classes aren't a TypeScript invention.</b> <span class="mono">class</span>, modules and <span class="mono">let</span>/<span class="mono">const</span> are standard JavaScript (ES2015+). TypeScript adds types, access modifiers (<span class="mono">private</span>, <span class="mono">protected</span>, <span class="mono">readonly</span>), interfaces and decorators on top.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>Uninitialised fields are <span class="mono">undefined</span>, not null.</b> In the real run, <span class="mono">new PatientCard().patient</span> printed <span class="mono">undefined</span>. With strict mode (on in Angular projects), a field without a default must be marked optional or the build fails with TS2564.</p></div>
+      <div class="note"><span class="flag add">Updated</span><p><b>Compiler versions.</b> Angular 22 uses TypeScript 6.0 (strict mode is now the default). TypeScript 7.0, a native Go rewrite of the compiler, reached general availability in July 2026; Angular adopts new TypeScript versions in its own releases, so use the version <span class="mono">ng new</span> installs.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Does <span class="mono">interface Patient</span> exist when the app runs?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>No. Interfaces and type annotations are erased. The emitted <span class="mono">patient.js</span> contains only <span class="mono">PATIENTS</span> and <span class="mono">label</span>. So data from an API isn't checked at run time; validate it if you don't trust it.</p></div></details>
+      <details><summary>What does <span class="mono">triage: 'critical'</span> give, and why?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">TS2322: Type '"critical"' is not assignable to type 'Triage'</span>. <span class="mono">Triage</span> only allows the two listed strings.</p></div></details>
+      <details><summary>Why does <span class="mono">p.phone.length</span> fail to compile?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">phone</span> is optional, so it may be <span class="mono">undefined</span> (TS18048). Use <span class="mono">p.phone?.length</span> or check <span class="mono">if (p.phone)</span> first.</p></div></details>
+      <details><summary><span class="mono">any</span> vs <span class="mono">unknown</span>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">any</span> turns checking off: <span class="mono">x.nmae.toUpperCase()</span> compiled and crashed at run time. <span class="mono">unknown</span> forces you to check the type before using it (TS18046 otherwise).</p></div></details>
+      <details><summary>What's the <span class="mono">&lt;Patient[]&gt;</span> in <span class="mono">signal&lt;Patient[]&gt;(PATIENTS)</span>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>A generic type argument: this signal holds an array of patients, so <span class="mono">patients()</span> is typed <span class="mono">Patient[]</span> everywhere, including templates.</p></div></details>
+      <details><summary>Is a typo in a template caught?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Yes. <span class="mono">{{ patients()[0].nmae }}</span> failed the CareDesk build with <span class="mono">TS2339: Property 'nmae' does not exist on type 'Patient'</span>.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: your Obsidian note "Intro Into TypeScript"; typescriptlang.org Handbook (Everyday Types, Object Types, Generics, Classes); angular.dev "Template type checking"; Microsoft TypeScript blog and Visual Studio Magazine on TypeScript 7.0. All messages were produced with TypeScript 6.0.3 in strict mode and by building CareDesk with Angular CLI 22.2.5.</footer>
+</div>
+
+<script src="caredesk.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const FULL = `export type Triage = 'routine' | 'urgent';
+
+export interface Patient {
+  id: number;
+  name: string;
+  department: string;
+  triage: Triage;
+  phone?: string;
+}
+
+export const PATIENTS: Patient[] = [
+  { id: 1, name: 'Asha', department: 'Cardiology', triage: 'urgent' },
+  { id: 2, name: 'Ravi', department: 'Orthopaedics', triage: 'routine' },
+  { id: 3, name: 'Meera', department: 'Dermatology', triage: 'routine', phone: '98450 12345' },
+];
+
+export function label(p: Patient): string {
+  return \`\${p.name} · \${p.department}\`;
+}`;
+  const JS = `export const PATIENTS = [
+    { id: 1, name: 'Asha', department: 'Cardiology', triage: 'urgent' },
+    { id: 2, name: 'Ravi', department: 'Orthopaedics', triage: 'routine' },
+    { id: 3, name: 'Meera', department: 'Dermatology', triage: 'routine', phone: '98450 12345' },
+];
+export function label(p) {
+    return \`\${p.name} · \${p.department}\`;
+}`;
+  const APP = `import { Component, signal } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { PATIENTS, Patient } from './patient';
+
+@Component({
+  imports: [RouterOutlet],
+  selector: 'app-root',
+  styleUrl: './app.css',
+  templateUrl: './app.html',
+})
+export class App {
+  protected readonly title = signal('CareDesk');
+  protected readonly patients = signal<Patient[]>(PATIENTS);
+}`;
+  const S = [
+    { pipe: { run: 'bad' }, file: 'plain JavaScript (no types)', lang: 'ts', code: `const asha = { id: 1, name: 'Asha', department: 'Cardiology' };
+
+console.log(asha.nmae.toUpperCase());`, marks: { 3: ['bad', 'typo: nmae'] }, resH: 'Browser console', res: [['bad', "TypeError: Cannot read properties of undefined (reading 'toUpperCase')"]] },
+    { pipe: { check: 'on' }, file: 'src/app/patient.ts', code: FULL, marks: { 3: 'hot', 4: 'hot', 5: 'hot', 6: 'hot', 7: 'hot', 9: 'hot' }, res: [['ok', '✓ interface Patient: a named shape. Any object with these fields fits.']] },
+    { pipe: { check: 'bad' }, file: 'src/app/patient.ts', code: FULL, marks: { 1: ['hot', 'only these two strings'], 7: 'hot' }, res: [['bad', `{ ..., triage: 'critical' }`], ['bad', `error TS2322: Type '"critical"' is not assignable to type 'Triage'.`]] },
+    { pipe: { check: 'bad' }, file: 'src/app/patient.ts', code: FULL, marks: { 8: ['hot', 'may be undefined'], 14: 'ok' }, res: [['bad', 'p.phone.length'], ['bad', "error TS18048: 'p.phone' is possibly 'undefined'."], ['ok', '✓ p.phone?.length  (optional chaining)']] },
+    { pipe: { check: 'ok' }, file: 'src/app/app.ts', code: APP, marks: { 3: 'hot', 13: ['hot', 'generic: a signal of Patient[]'] }, res: [['ok', '✓ patients() is typed Patient[] in the class and in the template'], ['info', 'In the browser: "Clinic portal · 3 patients waiting"']] },
+    { pipe: { check: 'bad' }, file: 'a field with no value', code: `class PatientCard {
+  patient: Patient;            // ✗
+}
+
+class PatientCard {
+  patient?: Patient;           // ✓ optional
+  count = 0;                   // ✓ default, type inferred
+}`, marks: { 2: 'bad', 6: 'ok', 7: 'ok' }, res: [['bad', "error TS2564: Property 'patient' has no initializer and is not definitely assigned in the constructor."], ['ok', 'new PatientCard().patient = undefined   (real run)']] },
+    { pipe: { src: 'on' }, file: 'src/app/app.ts', code: APP, marks: { 5: ['hot', 'decorator: metadata for Angular'], 6: 'hot', 7: 'hot', 8: 'hot', 9: 'hot', 12: ['ok', 'protected: for the template'] }, res: [['info', 'A decorator is a function. @Component tells Angular this class is a component and where its template and styles are.']] },
+    { pipe: { js: 'on', run: 'on' }, file: 'patient.js (what tsc emitted)', lang: 'ts', code: JS, marks: { 1: 'ok', 6: 'ok' }, res: [['info', 'type Triage → gone'], ['info', 'interface Patient → gone'], ['info', 'p: Patient, : string → gone']], resH: 'Erased' },
+    { pipe: { check: 'bad' }, file: 'src/app/app.html', lang: 'ng', code: `<header>
+  <h1>{{ title() }}</h1>
+  <p>Clinic portal · {{ patients()[0].nmae }}</p>
+</header>
+<router-outlet />`, marks: { 3: ['bad', 'typo'] }, resH: 'ng build', res: [['bad', "✘ [ERROR] TS2339: Property 'nmae' does not exist on type 'Patient'."]] }
+  ];
+  function show(i) {
+    const s = S[i];
+    $('tsPipe').querySelectorAll('div').forEach(d => { const v = s.pipe[d.dataset.k]; d.className = v || 'off'; });
+    K.codeCard($('tsCard'), { file: s.file, lang: s.lang || 'ts', code: s.code, marks: s.marks, dim: true });
+    $('tsResH').textContent = s.resH || 'Type checker';
+    $('tsRes').innerHTML = s.res.map(([c, t]) => `<li class="${c}">${t.replace(/</g, '&lt;')}</li>`).join('');
+  }
+  K.story({
+    root: $('tsStory'), show, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'The problem: JavaScript finds typos late', text: 'In plain JavaScript an object is just a bag of fields. Misspell <span class="mono">name</span> and nothing complains until the code <b>runs</b>, in a user\'s browser. That crash is real output.' },
+      { title: 'Describe the shape with an interface', text: 'CareDesk\'s first file is <span class="mono">patient.ts</span>. <span class="mono">interface Patient</span> lists the fields and their types. It\'s <b>structural</b>: any object with these fields is a Patient, no <span class="mono">implements</span> or <span class="mono">new</span> needed.' },
+      { title: 'Union types limit the values', text: '<span class="mono">type Triage = \'routine\' | \'urgent\'</span> allows exactly two strings. A patient marked <span class="mono">\'critical\'</span> is rejected at build time, and your editor autocompletes the valid ones.' },
+      { title: 'Optional fields: ? means "may be undefined"', text: 'Not every patient gives a phone number, so <span class="mono">phone?: string</span>. TypeScript then refuses <span class="mono">p.phone.length</span> until you handle the missing case, for example with optional chaining <span class="mono">?.</span>.' },
+      { title: 'Generics: a signal of Patient[]', text: 'App now holds <span class="mono">signal&lt;Patient[]&gt;(PATIENTS)</span>. The type in angle brackets flows everywhere: <span class="mono">patients()</span> returns <span class="mono">Patient[]</span>, and the template can safely show <span class="mono">patients().length</span>. Same idea as <span class="mono">List&lt;T&gt;</span> in C#.' },
+      { title: 'Class fields must start with a value', text: 'Strict mode requires every field to be initialised. Give it a default, mark it optional (its value is then <span class="mono">undefined</span>, not null), or, for component inputs, use <span class="mono">input.required()</span> as on the Parent ↔ child page.' },
+      { title: 'Decorators add Angular metadata', text: '<span class="mono">@Component({...})</span> is a decorator: a function that tags the class with metadata (selector, template, styles, imports). <span class="mono">protected</span> marks members meant for the template rather than other classes; that\'s what <span class="mono">ng new</span> generates.' },
+      { title: 'Types are erased', text: 'This is the JavaScript TypeScript actually emitted for <span class="mono">patient.ts</span>. The interface, the union type and every annotation are gone. Types protect you while building, not at run time.', tip: '"TypeScript types don\'t exist at run time" is a favourite question. Follow-up: so validate API responses (or use <span class="mono">unknown</span>) at the boundary.' },
+      { title: 'Templates are type-checked too', text: 'Angular compiles templates with the same type information. A typo inside <span class="mono">app.html</span> fails <span class="mono">ng build</span>, just like a typo in a .ts file. Step 2 of CareDesk is done: typed data and "3 patients waiting" on screen.' }
+    ]
+  });
+
+  /* ===== playground ===== */
+  const base = (line) => `import { Patient } from './patient';
+
+const kiran: Patient = ${line};`;
+  const P = {
+    ok: { line: `{ id: 4, name: 'Kiran', department: 'ENT', triage: 'routine' }`, res: [['ok', '✓ no errors']], why: 'Every required field is present with the right type.' },
+    tri: { line: `{ id: 4, name: 'Kiran', department: 'ENT', triage: 'critical' }`, res: [['bad', `error TS2322: Type '"critical"' is not assignable to type 'Triage'.`]], why: 'Only <span class="mono">\'routine\'</span> or <span class="mono">\'urgent\'</span> are allowed.' },
+    miss: { line: `{ id: 4, name: 'Kiran', triage: 'routine' }`, res: [['bad', `error TS2741: Property 'department' is missing in type '{ id: number; name: string; triage: "routine"; }' but required in type 'Patient'.`]], why: 'Required fields must be there. Mark it <span class="mono">department?</span> if it can really be missing.' },
+    id: { line: `{ id: '4', name: 'Kiran', department: 'ENT', triage: 'routine' }`, res: [['bad', `error TS2322: Type 'string' is not assignable to type 'number'.`]], why: 'A common one when IDs arrive from a form or URL as strings. Convert with <span class="mono">Number(...)</span>.' },
+    extra: { line: `{ id: 4, name: 'Kiran', department: 'ENT', triage: 'routine', ward: 'B2' }`, res: [['bad', `error TS2353: Object literal may only specify known properties, and 'ward' does not exist in type 'Patient'.`]], why: 'Extra properties are flagged on object literals: usually a typo or a field you forgot to add to the interface.' },
+    any: { line: `{ id: 4, name: 'Kiran' } as any`, res: [['ok', '✓ no errors at build time…'], ['bad', "…but kiran.department.toUpperCase() → TypeError at run time"]], why: '<span class="mono">as any</span> silences the checker. The bug moves to run time, which is exactly what TypeScript was protecting you from.' }
+  };
+  K.seg($('plSeg'), v => {
+    const p = P[v];
+    K.codeCard($('plCard'), { file: 'new-patient.ts', lang: 'ts', code: base(p.line), marks: { 3: v === 'ok' ? 'ok' : 'bad' } });
+    $('plRes').innerHTML = p.res.map(([c, t]) => `<li class="${c}">${t.replace(/</g, '&lt;')}</li>`).join('');
+    $('plWhy').innerHTML = p.why;
+  });
+  $('plSeg').querySelector('button').click();
+})();
+</script>
+</body>
+</html>

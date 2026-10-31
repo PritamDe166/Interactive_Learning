@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Services & dependency injection</title>
+<meta name="description" content="Angular 22 services and dependency injection on CareDesk: a PatientStore shared by the header and the list with @Service and inject(). Watch lookups walk the injector tree, and see a component-level provider split the state.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .ng-left { display: grid; gap: 12px; min-width: 0; align-content: start; }
+  .inj .tl { stroke: var(--line); stroke-width: 2; }
+  .inj .ibox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .inj .ibox.root rect { stroke: var(--teal); stroke-dasharray: 0; }
+  .inj .ibox .t { fill: var(--fg); font-weight: 700; font-size: 13.5px; }
+  .inj .ibox .s { fill: var(--muted); font-family: var(--mono) !important; font-size: 10.5px; }
+  .inj .ibox.look rect { stroke: var(--orange); stroke-width: 3; }
+  .inj .ibox.found rect { stroke: var(--teal); stroke-width: 3.5; fill: var(--teal-wash); }
+  .inj .ibox.miss rect { stroke: var(--red); stroke-width: 3; }
+  .inj .inst rect { fill: var(--yellow); }
+  .inj .inst text { fill: var(--ink); font-family: var(--mono) !important; font-size: 11px; font-weight: 700; }
+  .inj .inst.two rect { fill: var(--violet); }
+  .inj .reads { font-family: var(--mono) !important; font-size: 11px; fill: var(--cyan); }
+  .inj .reads.bad { fill: var(--bad-text); }
+  .lab-ctl { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin-top: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Angular roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Angular 22 · Part 3 · Control flow &amp; structure</div>
+    <h1>Services &amp; dependency injection</h1>
+    <ul class="lede">
+      <li>A <b>service</b> is a class for state or logic that several components share, such as CareDesk's <span class="mono">PatientStore</span>.</li>
+      <li>Components ask for it with <span class="mono">inject(PatientStore)</span>; Angular's <b>injector</b> creates it and hands out the same instance.</li>
+      <li>New in v22: <span class="mono">@Service()</span>, a shorthand for <span class="mono">@Injectable({ providedIn: 'root' })</span>: one app-wide instance.</li>
+      <li>Lookups walk <b>up the injector tree</b>; the first provider found wins. A component's own <span class="mono">providers</span> make a separate instance.</li>
+    </ul>
+    <div class="cd-trail" data-stage="10"></div>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: one store, two readers</h2>
+    <div class="stage-kind">Orange = where Angular looks · green = where it finds a provider · yellow tag = the instance · results from the real CareDesk run</div>
+    <div class="story" id="diStory">
+      <div class="ng-left">
+        <div class="scroll"><svg class="diagram inj" id="diSvg" style="min-width:0" viewBox="0 0 640 430" role="img" aria-label="Injector tree: root injector above App, which has Header and PatientList; PatientList has PatientCard"></svg></div>
+        <div id="diCard"></div>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Choose where PatientStore is provided and who asks for it. Angular's lookup rule does the rest.</p>
+
+  <section aria-labelledby="labH">
+    <h2 class="stage-title" id="labH">Injector resolver</h2>
+    <div class="stage-kind">Results follow the rules confirmed in the real runs (root: one instance; component providers: one per component; none: NG0201)</div>
+    <div class="lab-ctl">
+      <div><div class="label">PatientStore is provided by</div><div class="seg" id="provSeg" role="group" aria-label="Provider"><button type="button" data-v="root" aria-pressed="true">@Service() (root)</button><button type="button" data-v="list" aria-pressed="false">root + PatientList providers</button><button type="button" data-v="none" aria-pressed="false">autoProvided: false only</button></div></div>
+      <div><div class="label">Who calls inject(PatientStore)?</div><div class="seg" id="whoSeg" role="group" aria-label="Component"><button type="button" data-v="Header" aria-pressed="true">Header</button><button type="button" data-v="PatientList" aria-pressed="false">PatientList</button><button type="button" data-v="PatientCard" aria-pressed="false">PatientCard</button></div></div>
+    </div>
+    <div class="scroll"><svg class="diagram inj" id="labSvg" viewBox="0 0 640 430" style="min-width:520px;max-width:680px;display:block;margin:8px auto 0" role="img" aria-label="Injector tree lookup"></svg></div>
+    <p class="status-line" id="labRes"></p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Shared state or logic for the whole app</span><span class="arrow">→</span><span class="then"><span class="mono">@Service()</span> class (root singleton)</span></li>
+      <li><span class="if">Get a service</span><span class="arrow">→</span><span class="then"><span class="mono">private readonly store = inject(PatientStore);</span> as a field</span></li>
+      <li><span class="if">One instance per component (a wizard, a dialog draft)</span><span class="arrow">→</span><span class="then"><span class="mono">@Service({ autoProvided: false })</span> + <span class="mono">providers: [X]</span> on that component</span></li>
+      <li><span class="if">Expose state safely</span><span class="arrow">→</span><span class="then">private writable signal + public <span class="mono">asReadonly()</span> + methods to change it</span></li>
+      <li><span class="if">NG0201 "No provider found"</span><span class="arrow">→</span><span class="then">nothing up the tree provides it: add <span class="mono">@Service()</span> or a <span class="mono">providers</span> entry</span></li>
+      <li><span class="if">NG0203 "must be called from an injection context"</span><span class="arrow">→</span><span class="then">move <span class="mono">inject()</span> to a field or the constructor</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: ways to provide</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Where</th><th>Lifetime</th><th>.NET analogy</th></tr></thead>
+        <tbody>
+          <tr><td><span class="mono">@Service()</span> / <span class="mono">@Injectable({ providedIn: 'root' })</span></td><td>one per app, created on first inject (tree-shakable)</td><td class="mono">AddSingleton</td></tr>
+          <tr><td><span class="mono">providers: [...]</span> in <span class="mono">appConfig</span></td><td>one per app</td><td class="mono">AddSingleton in Program.cs</td></tr>
+          <tr><td><span class="mono">providers: [...]</span> on a route</td><td>one per route subtree</td><td>a child scope</td></tr>
+          <tr><td><span class="mono">providers: [...]</span> on a component</td><td>one per component instance, destroyed with it</td><td><span class="mono">AddScoped</span>, scope = component</td></tr>
+          <tr><td><span class="mono">{ provide: Token, useValue / useClass / useFactory }</span></td><td>as above</td><td>registering an implementation for an interface</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cc-pair" style="margin-top:14px">
+      <div><div class="label bad-text">Before: your notes (Angular 16)</div><div id="oldDi"></div></div>
+      <div><div class="label ok-text">After: Angular 22</div><div id="newDi"></div></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>"A service has to be injected to the root."</b> Root is the usual choice, not a requirement. A class becomes injectable wherever it's <i>provided</i>: root, the app config, a route or a component. CareDesk's experiment with <span class="mono">providers: [PatientStore]</span> on PatientList got a second, separate instance.</p></div>
+      <div class="note"><span class="flag add">Updated</span><p><b><span class="mono">ng g s</span> now generates <span class="mono">@Service()</span>.</b> In CLI 22.2, <span class="mono">ng g s patient-store</span> created <span class="mono">patient-store.ts</span> with <span class="mono">@Service() export class PatientStore {}</span>. <span class="mono">@Injectable</span> still works. Migrate with <span class="mono">ng generate @angular/core:inject</span> then <span class="mono">ng generate @angular/core:service</span>.</p></div>
+      <div class="note"><span class="flag add">Updated</span><p><b><span class="mono">inject()</span> instead of constructor parameters.</b> Your notes inject with <span class="mono">constructor(private loginAuth: LoginAuthService)</span>. That still works in components and <span class="mono">@Injectable</span> classes, but a <span class="mono">@Service</span> class refuses it: <span class="mono">NG2028: @Service class cannot use constructor dependency injection. Use the `inject` function instead.</span></p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Constants vs services.</b> Your notes' <span class="mono">export const UserLoginDetails = [...]</span> is fine for fixed data (CareDesk's <span class="mono">PATIENTS</span> too). Use a service when the data changes, needs logic, or comes from an API.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Header and PatientList both inject PatientStore. How many instances?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>One. <span class="mono">@Service()</span> provides it in the root injector; the real run logged "PatientStore created #1" once, and a discharge in the list updated the header.</p></div></details>
+      <details><summary>PatientList adds <span class="mono">providers: [PatientStore]</span>. What breaks?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>The list gets its own instance (#2). Discharging Asha changed the list to "2 of 2" while the header, still on #1, kept saying "3 waiting".</p></div></details>
+      <details><summary>How does Angular find a provider?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>It starts at the requesting component's injector and walks up through its ancestors to the root (environment) injector. The first provider found wins. None found: NG0201.</p></div></details>
+      <details><summary>Where can you call <span class="mono">inject()</span>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>In an injection context: field initialisers, the constructor, provider factories, guards and interceptors. Calling it in a click handler threw NG0203 in CareDesk.</p></div></details>
+      <details><summary>What's the difference between <span class="mono">@Service()</span> and <span class="mono">@Injectable()</span>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">@Service()</span> is root-provided by default and requires <span class="mono">inject()</span> (no constructor parameters). <span class="mono">@Injectable()</span> without options isn't provided anywhere until you list it in <span class="mono">providers</span>.</p></div></details>
+      <details><summary>Why make the store's signal private with <span class="mono">asReadonly()</span>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>So components can read but not <span class="mono">set</span> the list directly. All changes go through methods like <span class="mono">discharge()</span>, which keeps rules in one place (same reasoning as encapsulation in C#).</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: your Obsidian notes "Creating a Service in angular", "Constants in angular" and "Creating a data model"; angular.dev "Dependency injection", "Hierarchical injectors" and the injectable-to-service migration guide; Brian Treese, "Angular 22 @Service vs @Injectable". Instances, numbers and errors on this page were recorded in CareDesk (Angular CLI 22.2.5).</footer>
+</div>
+
+<script src="caredesk.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const POS = { root: [320, 40, 300, 'Root injector', 'environment · @Service() classes'], App: [320, 140, 190, 'App', 'element injector'], Header: [150, 245, 190, 'Header', 'element injector'], PatientList: [490, 245, 190, 'PatientList', 'element injector'], PatientCard: [490, 345, 190, 'PatientCard', 'element injector'] };
+  const PARENT = { App: 'root', Header: 'App', PatientList: 'App', PatientCard: 'PatientList' };
+  function tree(svg) {
+    const lines = [['root', 'App'], ['App', 'Header'], ['App', 'PatientList'], ['PatientList', 'PatientCard']];
+    lines.forEach(([a, b]) => K.el('line', { x1: POS[a][0], y1: POS[a][1] + 24, x2: POS[b][0], y2: POS[b][1] - 24, class: 'tl' }, svg));
+    const B = {};
+    for (const [k, [x, y, w, t, s]] of Object.entries(POS)) {
+      const g = K.el('g', { class: 'ibox' + (k === 'root' ? ' root' : '') }, svg);
+      K.el('rect', { x: x - w / 2, y: y - 24, width: w, height: 48, rx: 10 }, g);
+      const tt = K.text(g, x - w / 2 + 12, y - 4, t, 't'); tt.style.textAnchor = 'start';
+      const ss = K.text(g, x - w / 2 + 12, y + 13, s, 's'); ss.style.textAnchor = 'start';
+      B[k] = g;
+    }
+    const FX = K.el('g', {}, svg);
+    return { B, FX };
+  }
+  function inst(FX, k, label, two) {
+    const [x, y, w] = POS[k]; const g = K.el('g', { class: 'inst' + (two ? ' two' : '') }, FX);
+    const tw = label.length * 7 + 16;
+    K.el('rect', { x: x - tw / 2, y: y + 30, width: tw, height: 22, rx: 6 }, g);
+    const t = K.text(g, x, y + 45, label); t.style.textAnchor = 'middle';
+  }
+  function reads(FX, k, txt, bad) { const [x, y, w] = POS[k]; const t = K.text(FX, x, y + 68, txt, 'reads' + (bad ? ' bad' : '')); t.style.textAnchor = 'middle'; }
+  const T = tree($('diSvg'));
+  function mark(T, st) { for (const k in T.B) T.B[k].setAttribute('class', 'ibox' + (k === 'root' ? ' root' : '') + (st[k] ? ' ' + st[k] : '')); }
+
+  const STORE = `import { Service, computed, signal } from '@angular/core';
+import { PATIENTS, Patient } from './patient';
+
+@Service()
+export class PatientStore {
+  private readonly list = signal<Patient[]>(PATIENTS);
+
+  readonly patients = this.list.asReadonly();
+  readonly waiting = computed(() => this.patients().length);
+  readonly urgent = computed(() => this.patients().filter(p => p.triage === 'urgent').length);
+
+  discharge(id: number) {
+    this.list.update(list => list.filter(p => p.id !== id));
+  }
+}`;
+  const HEADER = `export class Header {
+  protected readonly store = inject(PatientStore);
+  protected readonly title = signal('CareDesk');
+  protected readonly now = signal(new Date());
+  ...
+}
+
+<!-- header.html -->
+<p>Clinic portal · {{ now() | date: 'HH:mm:ss' }}
+   · {{ store.waiting() }} waiting · {{ store.urgent() }} urgent</p>`;
+  const LIST = `export class PatientList {
+  protected readonly store = inject(PatientStore);
+  protected readonly search = signal(localStorage.getItem('caredesk.search') ?? '');
+
+  protected readonly filtered = computed(() => {
+    const q = this.search().trim().toLowerCase();
+    return this.store.patients().filter(p => p.name.toLowerCase().includes(q));
+  });
+
+  discharge(id: number) { this.store.discharge(id); }
+}`;
+  const LISTPROV = `@Component({
+  imports: [FormsModule, PatientCard],
+  providers: [PatientStore],            // experiment: own instance
+  selector: 'app-patient-list',
+  ...
+})
+export class PatientList {
+  protected readonly store = inject(PatientStore);
+}`;
+  const SCOPED = `@Service({ autoProvided: false })      // not in root
+export class BookingDraft { ... }
+
+@Component({
+  providers: [BookingDraft],            // one per booking dialog
+  ...
+})
+export class BookingDialog {
+  private readonly draft = inject(BookingDraft);
+}`;
+  const CTX = `discharge(id: number) {
+  inject(PatientStore).discharge(id);   // inside a click handler
+}`;
+  const S = [
+    { st: {}, inst: [], reads: [], card: ['header.ts (wish)', 'ts', `// The header lives in a different branch from the list.
+// To show "3 waiting" it would need the list's data
+// passed up to App and down again through inputs...`, {}] },
+    { st: {}, inst: [], reads: [], card: ['terminal + patient-store.ts', 'ts', `// $ ng g s patient-store
+// CREATE src/app/patient-store.ts (83 bytes)
+
+import { Service } from '@angular/core';
+
+@Service()
+export class PatientStore {}`, { 1: 'hot', 6: ['hot', 'new in v22'] }] },
+    { st: { root: 'found' }, inst: [['root', 'PatientStore #1']], reads: [], card: ['patient-store.ts', 'ts', STORE, { 4: 'hot', 6: ['hot', 'only the store can write'], 8: ['ok', 'readers get read-only'], 9: 'ok', 10: 'ok', 12: 'hot' }], out: ['PatientStore created #1'] },
+    { st: { Header: 'look', App: 'look', root: 'found' }, inst: [['root', 'PatientStore #1']], reads: [['Header', 'inject(PatientStore) → #1'], ['PatientList', 'inject(PatientStore) → #1']], card: ['header.ts', 'ts', HEADER, { 2: ['hot', 'walks up to root'], 9: 'hot' }], play: 'lookHeader' },
+    { st: { root: 'found' }, inst: [['root', 'PatientStore #1']], reads: [['Header', '2 waiting · 0 urgent'], ['PatientList', '2 of 2 patients']], card: ['patient-list.ts', 'ts', LIST, { 2: 'hot', 10: ['ok', 'store.discharge()'] }], out: ['header: 3 waiting · 1 urgent | list: 3 of 3 patients · 1 urgent', '— Discharge Asha —', 'header: 2 waiting · 0 urgent | list: 2 of 2 patients · 0 urgent'] },
+    { st: { PatientList: 'found', root: 'found' }, inst: [['root', 'PatientStore #1'], ['PatientList', 'PatientStore #2', true]], reads: [['Header', '3 waiting · 1 urgent ✗', true], ['PatientList', '2 of 2 patients']], card: ['patient-list.ts (experiment)', 'ts', LISTPROV, { 3: ['bad', 'second instance'] }], out: ['PatientStore created #1', 'PatientStore created #2', '— Discharge Asha —', 'header: 3 waiting · 1 urgent | list: 2 of 2 patients · 0 urgent'] },
+    { st: { Header: 'miss', App: 'miss', root: 'miss' }, inst: [], reads: [['Header', 'NG0201', true]], card: ['scoped service', 'ts', SCOPED, { 1: 'hot', 5: ['hot', 'provide it here'] }], out: ['(PatientStore set to autoProvided: false, no providers)', 'NG0201: No provider found for `_PatientStore`. Source: Standalone[_App].'] },
+    { st: { PatientList: 'miss' }, inst: [['root', 'PatientStore #1']], reads: [['PatientList', 'NG0203', true]], card: ['patient-list.ts (experiment)', 'ts', CTX, { 2: 'bad' }], out: ['NG0203: The `_PatientStore` token injection failed. `inject()` function must be called from an injection context such as a constructor, a factory function, a field initializer, or a function used with `runInInjectionContext`.'] },
+    { st: { root: 'found' }, inst: [['root', 'PatientStore #1']], reads: [], card: ['your notes vs @Service', 'ts', `@Service()
+export class PatientStore {
+  constructor(private destroyRef: DestroyRef) {}   // ✗
+}`, { 3: 'bad' }], out: ['✘ [ERROR] NG2028: @Service class cannot use constructor dependency injection. Use the `inject` function instead.'], outH: 'ng build' }
+  ];
+  function show(i) {
+    const s = S[i]; mark(T, s.st); T.FX.textContent = '';
+    s.inst.forEach(([k, l, two]) => inst(T.FX, k, l, two));
+    s.reads.forEach(([k, t, bad]) => reads(T.FX, k, t, bad));
+    K.codeCard($('diCard'), { file: s.card[0], lang: s.card[1], code: s.card[2], marks: s.card[3], dim: Object.keys(s.card[3]).length > 0, out: s.out, outLabel: s.outH || 'Console (real run)' });
+  }
+  async function walk(run, T, from, foundAt) {
+    let k = from; const st = {};
+    while (k) { st[k] = k === foundAt ? 'found' : 'look'; mark(T, st); await K.sleep(450, run); if (k === foundAt) break; k = PARENT[k]; }
+  }
+  K.story({
+    root: $('diStory'), show, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'The problem: siblings need the same data', text: 'This step\'s feature: the header shows "3 waiting · 1 urgent". But the patients live in PatientList, a <b>sibling</b> branch. Inputs and outputs would mean hoisting state into App and threading it down to both. A service is the shared home instead.' },
+      { title: 'Generate a service', text: 'In CLI 22, <span class="mono">ng g s patient-store</span> creates a class marked <span class="mono">@Service()</span>. That decorator registers it with the <b>root injector</b>, so the whole app shares one instance, created the first time someone asks.' },
+      { title: 'Design the store', text: 'The patients move out of PatientList into a private writable signal. Readers get <span class="mono">asReadonly()</span> plus computed counts; the only way to change the list is a method like <span class="mono">discharge()</span>. Encapsulation, the same as you\'d do in C#.' },
+      { title: 'inject() walks up the tree', text: 'Header asks <span class="mono">inject(PatientStore)</span>. Angular checks Header\'s own injector, then App\'s, then the root, where it finds the provider. PatientList does the same and gets the <b>same</b> instance. The real run logged "PatientStore created #1" once.', play: async run => { await walk(run, T, 'Header', 'root'); }, tip: 'Explain resolution as "nearest provider up the tree wins", like scopes resolving from inner to outer.' },
+      { title: 'One change, both readers update', text: 'Discharging Asha calls <span class="mono">store.discharge()</span>. Because both components read the same signals, the header dropped to "2 waiting · 0 urgent" and the list to "2 of 2". Step 10 of CareDesk is done.' },
+      { title: 'Trap: a provider on the component', text: 'Adding <span class="mono">providers: [PatientStore]</span> to PatientList gave the list its own instance (#2). PatientList\'s lookup stops there; the header still reaches #1 at the root. After a discharge the list said 2, the header still said 3.', play: async run => { await walk(run, T, 'PatientList', 'PatientList'); } },
+      { title: 'When per-component is right', text: 'Sometimes you <b>want</b> an instance per component, like a draft for each booking dialog. Mark the service <span class="mono">@Service({ autoProvided: false })</span> and list it in that component\'s <span class="mono">providers</span>. Forget the providers and the walk reaches the root empty-handed: NG0201.', play: async run => { const st = {}; for (const k of ['Header', 'App', 'root']) { st[k] = 'miss'; mark(T, st); await K.sleep(400, run); } } },
+      { title: 'inject() needs an injection context', text: '<span class="mono">inject()</span> works while Angular is creating something: field initialisers, the constructor, factories, guards and interceptors. Called from a click handler it threw NG0203. Inject into a field, then use the field.' },
+      { title: 'Constructor injection and @Service', text: 'Your notes inject through the constructor. That still works for components and <span class="mono">@Injectable</span>, but <span class="mono">@Service</span> requires <span class="mono">inject()</span>; the build refused the constructor version with NG2028.' }
+    ]
+  });
+
+  K.codeCard($('oldDi'), { file: 'login-auth.service.ts + login.component.ts', lang: 'ts', code: `@Injectable({ providedIn: 'root' })
+export class LoginAuthService { ... }
+
+export class LoginComponent {
+  constructor(private loginAuth: LoginAuthService) {}
+}`, marks: { 1: 'bad', 5: 'bad' } });
+  K.codeCard($('newDi'), { file: 'patient-store.ts + header.ts', lang: 'ts', code: `@Service()
+export class PatientStore { ... }
+
+export class Header {
+  protected readonly store = inject(PatientStore);
+}`, marks: { 1: 'ok', 5: 'ok' } });
+
+  /* ===== resolver lab ===== */
+  const L = tree($('labSvg'));
+  let prov = 'root', who = 'Header';
+  async function resolve() {
+    const run = K.newRun('lab');
+    L.FX.textContent = ''; mark(L, {});
+    const has = k => (prov === 'root' && k === 'root') || (prov === 'list' && (k === 'root' || k === 'PatientList'));
+    if (prov !== 'none') inst(L.FX, 'root', 'PatientStore #1');
+    if (prov === 'list') inst(L.FX, 'PatientList', 'PatientStore #2', true);
+    let k = who; const st = {}; let found = null;
+    try {
+      while (k) { st[k] = has(k) ? 'found' : 'look'; mark(L, st); await K.sleep(380, run); if (has(k)) { found = k; break; } k = PARENT[k]; }
+      if (!found) { for (const x in st) st[x] = 'miss'; mark(L, st); }
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; return; }
+    const id = found === 'PatientList' ? '#2' : '#1';
+    $('labRes').innerHTML = found
+      ? `<b class="ok-text">${who} gets PatientStore ${id}</b> (found at ${found === 'root' ? 'the root injector' : 'PatientList\'s injector'}).${prov === 'list' && who === 'Header' ? ' The list uses #2, so they no longer share state.' : ''}${prov === 'list' && who === 'PatientCard' ? ' The card is inside PatientList, so it shares the list\'s #2.' : ''}`
+      : `<b class="bad-text">NG0201: No provider found for PatientStore.</b> The walk reached the root without a provider.`;
+  }
+  K.seg($('provSeg'), v => { prov = v; resolve(); });
+  K.seg($('whoSeg'), v => { who = v; resolve(); });
+  resolve();
+})();
+</script>
+</body>
+</html>

@@ -48,17 +48,20 @@ const SUBJECTS = [
   {name:"Python", path:"python-fundamentals/index.html", accent:"var(--blue)", icon:"code",
    blurb:"Fundamentals stepped line by line, with edit-and-run boxes: objects, collections, functions, files, classes, then generators, decorators, type hints and APIs.",
    done:20, total:20, unit:"topics", pages:20},
+  {name:"Angular", path:"angular/index.html", accent:"var(--red)", icon:"shield",
+   blurb:"Modern Angular 22 learned by building one app, CareDesk, in 15 steps: components, bindings, signals, DI, routing, guards, forms and HTTP, every snippet run for real.",
+   done:15, total:15, unit:"topics", pages:15},
   {name:"AI", path:null, accent:"var(--violet)", icon:"spark",
    blurb:"Embeddings, transformers and attention, RAG pipelines, agents and evaluation.",
    done:0, total:null, unit:"topics"}
 ];
 const RECENT = [
-  {subject:"System Design", title:"SOLID: Dependency inversion", note:"LLD", href:"system-design/lld/solid-dip.html"},
-  {subject:"System Design", title:"SOLID: Interface segregation", note:"LLD", href:"system-design/lld/solid-isp.html"},
-  {subject:"System Design", title:"SOLID: Liskov substitution", note:"LLD", href:"system-design/lld/solid-lsp.html"},
-  {subject:"System Design", title:"SOLID: Open-closed", note:"LLD", href:"system-design/lld/solid-ocp.html"},
-  {subject:"System Design", title:"SOLID: Single responsibility", note:"LLD", href:"system-design/lld/solid-srp.html"},
-  {subject:"System Design", title:"SOLID principles overview", note:"LLD", href:"system-design/lld/solid.html"}
+  {subject:"Angular", title:"HTTP, resource & RxJS basics", note:"Step 15", href:"angular/http.html"},
+  {subject:"Angular", title:"Reactive forms & Signal Forms", note:"Step 14", href:"angular/reactive-forms.html"},
+  {subject:"Angular", title:"Template-driven forms", note:"Step 13", href:"angular/template-forms.html"},
+  {subject:"Angular", title:"Route guards & login flow", note:"Step 12", href:"angular/guards-login.html"},
+  {subject:"Angular", title:"Routing", note:"Step 11", href:"angular/routing.html"},
+  {subject:"Angular", title:"How an Angular app boots", note:"Start here", href:"angular/app-boot.html"}
 ];
 
 /* ===== Render ===== */
@@ -66,6 +69,7 @@ const ICONS={
   net:'<circle cx="5" cy="12" r="2.5"/><circle cx="19" cy="5" r="2.5"/><circle cx="19" cy="12" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M7.5 12h9M7 11l9.5-5M7 13l9.5 5"/>',
   cloud:'<path d="M7 18h10a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.2 9.5 4.3 4.3 0 0 0 7 18z"/>',
   code:'<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16"/>',
+  shield:'<path d="M12 3l8 3-1.2 10.5L12 21l-6.8-4.5L4 6z"/><path d="M12 7l-3.5 8M12 7l3.5 8M9.6 12.5h4.8"/>',
   spark:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"/><circle cx="12" cy="12" r="2.2"/>'
 };
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));

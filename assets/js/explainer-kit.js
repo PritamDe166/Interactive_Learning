@@ -34,7 +34,13 @@
    UML class diagrams: Kit.umlDefs(svg); Kit.classBox(svg, x, y, w, {name, stereo, fields, methods});
    Kit.umlLink(svg, fromPt, toPt, 'uses'|'implements'|'inherits'|'creates', bends, label).
    Kit.pyHighlight(line) / Kit.csHighlight(line) return HTML with .k/.s/.n/.c/.b token spans
-   (C#: .b marks type names). Kit.codeBlock(pre, code, 'cs'|'py') fills a .codeblock.
+   (C#: .b marks type names). Kit.codeBlock(pre, code, 'cs'|'py'|'ts'|'ng') fills a .codeblock.
+   Angular: Kit.tsHighlight / Kit.ngHighlight (templates: .bd [prop], .ev (event), .tw [(model)], .ip {{ }}).
+   Kit.codeCard(el, { file, lang, code, marks: { 3: 'hot', 5: ['bad', 'note'] }, dim, out: [...], caption })
+     renders a file card with numbered, marked lines and an optional console.
+   Kit.compBox(svg, x, y, w, { name, role, rows }) draws a component; .set(i, text) updates a row.
+   Kit.ngWire(svg, a, b, 'down'|'up'|'two', label, bends) draws a data-flow wire
+     (down = inputs, cyan · up = outputs, orange · two = model(), violet).
 
    Edit-and-run box (real Python via Pyodide, loaded on first Run):
      Kit.pyRunner(el, { starters: [{ label, code, inputs? }] })
@@ -254,9 +260,106 @@
       return out;
     },
 
-    /** fill a <pre class="codeblock"> with highlighted lines; lang 'cs' or 'py'; returns the line elements */
+    /** TypeScript line highlighter (Angular class files): .k keyword/decorator, .s string, .n Angular signal API or number, .c comment, .b type name */
+    tsHighlight(src) {
+      const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const KW = new Set('import from export default class interface type extends implements const let var new return this if else for of in typeof keyof readonly private public protected static constructor async await true false null undefined void string number boolean any never unknown as'.split(' '));
+      const NG = new Set('signal computed effect input model output linkedSignal resource httpResource inject viewChild contentChild'.split(' '));
+      const re = /(\/\/.*$)|(\/\*.*?\*\/)|('(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*"|`(?:\\.|[^`\\])*`)|(@[A-Za-z]\w*)|(\b\d+(?:\.\d+)?\b)|([A-Za-z_$][\w$]*)|([\s\S])/g;
+      let out = '', m;
+      while ((m = re.exec(src))) {
+        if (m[1] || m[2]) out += `<span class="c">${esc(m[1] || m[2])}</span>`;
+        else if (m[3]) out += `<span class="s">${esc(m[3])}</span>`;
+        else if (m[4]) out += `<span class="k">${m[4]}</span>`;
+        else if (m[5]) out += `<span class="n">${m[5]}</span>`;
+        else if (m[6]) {
+          const w = m[6], nx = src[re.lastIndex];
+          out += KW.has(w) ? `<span class="k">${w}</span>` : (NG.has(w) && (nx === '(' || nx === '.' || nx === '<') ? `<span class="n">${w}</span>` : (/^[A-Z]/.test(w) ? `<span class="b">${w}</span>` : w));
+        } else out += esc(m[0]);
+      }
+      return out;
+    },
+
+    /** Angular template line highlighter: .bd [property], .ev (event), .tw [(two-way)], .ip {{ interpolation }},
+        .k @if/@for blocks and #refs, .b tag names, .s plain attribute values, .c comments */
+    ngHighlight(src) {
+      const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const re = /(<!--.*?-->)|(\{\{.*?\}\})|(@(?:else if|if|else|for|switch|case|default|empty|let|defer)\b)|(<\/?[\w-]+)|(\/?>)|(\[\([\w.-]+\)\]|\[[\w.@-]+\](?==)|\([\w.-]+\)(?==))(="[^"]*")?|(#[\w-]+)|([\w-]+)(="[^"]*")|([\s\S])/g;
+      let out = '', m;
+      while ((m = re.exec(src))) {
+        if (m[1]) out += `<span class="c">${esc(m[1])}</span>`;
+        else if (m[2]) out += `<span class="ip">${esc(m[2])}</span>`;
+        else if (m[3]) out += `<span class="k">${m[3]}</span>`;
+        else if (m[4]) out += `${esc(m[4].startsWith('</') ? '</' : '<')}<span class="b">${m[4].replace(/^<\/?/, '')}</span>`;
+        else if (m[5]) out += esc(m[5]);
+        else if (m[6]) { const c = m[6].startsWith('[(') ? 'tw' : m[6][0] === '[' ? 'bd' : 'ev'; out += `<span class="${c}">${esc(m[6])}</span>${m[7] ? `<span class="ex">${esc(m[7])}</span>` : ''}`; }
+        else if (m[8]) out += `<span class="k">${m[8]}</span>`;
+        else if (m[9]) out += `${m[9]}<span class="s">${esc(m[10])}</span>`;
+        else out += esc(m[0]);
+      }
+      return out;
+    },
+
+    /** code card (filename bar, numbered lines, per-line marks, optional console and caption).
+        opts: { file, lang: 'ts'|'ng'|'cs'|'py', code, marks: { lineNo: 'hot'|'bad'|'ok'|['bad', 'note'] }, dim: bool (dim unmarked lines),
+                out: ['console line', ...], outLabel, caption } */
+    codeCard(el, o) {
+      const esc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const hl = { cs: K.csHighlight, ts: K.tsHighlight, ng: K.ngHighlight, txt: esc }[o.lang] || K.pyHighlight;
+      const marks = o.marks || {};
+      const lines = o.code.replace(/\n$/, '').split('\n').map((l, i) => {
+        let mk = marks[i + 1], note = '';
+        if (Array.isArray(mk)) { note = mk[1]; mk = mk[0]; }
+        const cls = mk ? ' mk-' + mk : (o.dim && Object.keys(marks).length ? ' mk-dim' : '');
+        return `<span class="ln${cls}"><span class="cc-gut">${i + 1}</span>${hl(l) || ' '}${note ? `<span class="cc-note mk-${mk}">◀ ${esc(note)}</span>` : ''}</span>`;
+      }).join('');
+      el.classList.add('cc');
+      el.innerHTML = `<div class="cc-head"><span class="cc-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="cc-file">${esc(o.file || '')}</span></div>`
+        + `<pre class="cc-code">${lines}</pre>`
+        + (o.out ? `<div class="cc-out"><div class="cc-out-h">${esc(o.outLabel || 'Console')}</div><pre>${o.out.length ? o.out.map(esc).join('\n') : '<span class="muted">(nothing logged)</span>'}</pre></div>` : '')
+        + (o.caption ? `<div class="cc-cap"><span>${o.caption}</span></div>` : '');
+      return el;
+    },
+
+    /** Angular component box for component trees. x,y = top-left. spec: { name, role?, rows: [] }.
+        Returns { g, h, rows: [{ g, t }], set(i, text), top, bottom, left, right } */
+    compBox(parent, x, y, w, spec, cls) {
+      const g = K.el('g', { class: 'cbox ' + (cls || '') }, parent);
+      const RH = 22, head = 34, rows = spec.rows || [];
+      const h = head + rows.length * RH + (rows.length ? 10 : 0);
+      K.el('rect', { x, y, width: w, height: h, rx: 12, class: 'cb-box' }, g);
+      const n = K.text(g, x + 14, y + 22, spec.name, 'cb-name'); n.style.textAnchor = 'start';
+      if (spec.role) { const r = K.text(g, x + w - 14, y + 22, spec.role, 'cb-role'); r.style.textAnchor = 'end'; }
+      if (rows.length) K.el('line', { x1: x, y1: y + head, x2: x + w, y2: y + head, class: 'cb-sep' }, g);
+      const out = rows.map((t, i) => {
+        const rg = K.el('g', { class: 'cb-row' }, g);
+        K.el('rect', { x: x + 4, y: y + head + 5 + i * RH, width: w - 8, height: RH - 2, rx: 5, class: 'cb-hl' }, rg);
+        const tx = K.text(rg, x + 14, y + head + 20 + i * RH, t, 'cb-txt'); tx.style.textAnchor = 'start';
+        return { g: rg, t: tx };
+      });
+      return { g, h, rows: out, set(i, text) { out[i].t.textContent = text; }, top: [x + w / 2, y], bottom: [x + w / 2, y + h], left: [x, y + h / 2], right: [x + w, y + h / 2] };
+    },
+
+    /** data-flow wire between components. kind: 'down' (inputs, cyan), 'up' (outputs/events, orange), 'two' (model, violet).
+        Arrowheads are created per <svg> on first use. Returns <g> holding the path (and label). */
+    ngWire(parent, a, b, kind = 'down', label, pts = []) {
+      const svg = parent.ownerSVGElement || parent, pre = (svg.id || 'ngsvg') + '-ng-';
+      if (!svg.querySelector('#' + pre + 'down')) {
+        const d = K.el('defs', {}, svg);
+        d.innerHTML = ['down', 'up', 'two', 'bad'].map(k => `<marker id="${pre}${k}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path class="ng-ah ${k}" d="M0 0 L10 5 L0 10 z"/></marker>`).join('');
+        svg.insertBefore(d, svg.firstChild);
+      }
+      const all = [a, ...pts, b];
+      const g = K.el('g', { class: 'ngw-g ' + kind }, parent);
+      const p = K.el('path', { d: 'M' + all.map(q => q.join(' ')).join(' L'), class: 'ngw ' + kind, 'marker-end': `url(#${pre}${kind})` }, g);
+      if (kind === 'two') p.setAttribute('marker-start', `url(#${pre}two)`);
+      if (label) { const m = all[Math.floor((all.length - 1) / 2)], n = all[Math.floor((all.length - 1) / 2) + 1]; const t = K.text(g, (m[0] + n[0]) / 2 + 10, (m[1] + n[1]) / 2 + 4, label, 'mlabel halo ' + kind); t.style.textAnchor = 'start'; }
+      return g;
+    },
+
+    /** fill a <pre class="codeblock"> with highlighted lines; lang 'cs', 'py', 'ts' or 'ng'; returns the line elements */
     codeBlock(pre, code, lang = 'py') {
-      const hl = lang === 'cs' ? K.csHighlight : K.pyHighlight;
+      const hl = { cs: K.csHighlight, ts: K.tsHighlight, ng: K.ngHighlight }[lang] || K.pyHighlight;
       pre.innerHTML = code.replace(/\n$/, '').split('\n').map(l => `<span class="ln">${hl(l) || ' '}</span>`).join('');
       return [...pre.children];
     },

@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Template control flow</title>
+<meta name="description" content="Angular 22 built-in control flow on CareDesk: @for with track, @empty, @if, @switch and @let. See why track $index moved a nurse's note onto the wrong patient in a real run.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .ng-left { display: grid; gap: 12px; min-width: 0; align-content: start; }
+  .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 12px; }
+  .inst { display: grid; gap: 8px; }
+  .ib { position: relative; border: 2px solid var(--line); border-radius: 10px; padding: 8px 10px 8px 12px; background: var(--panel); transition: opacity .35s, transform .35s, border-color .25s, background .25s; }
+  .ib .id { position: absolute; top: 6px; right: 8px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .ib .pos { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .ib b { font-size: 16px; } .ib .bd { font-size: 11px; padding: 1px 7px; border-radius: 999px; background: var(--panel-2); margin-left: 6px; }
+  .ib .bd.u { background: var(--red); color: var(--on-accent); }
+  .ib .stt { font-family: var(--mono); font-size: 12px; color: var(--fg-soft); margin-top: 3px; }
+  .ib.urg { border-left: 6px solid var(--red); }
+  .ib.sel { background: var(--teal-wash); }
+  .ib.gone { opacity: 0; transform: translateX(30px); }
+  .ib.new { border-color: var(--cyan); }
+  .ib.wrong { border-color: var(--red); box-shadow: 0 0 0 2px color-mix(in srgb, var(--red) 35%, transparent); }
+  .ib.kept { border-color: var(--teal); }
+  .empty-p { font-family: var(--mono); font-size: 13px; color: var(--muted); padding: 10px; border: 1px dashed var(--line); border-radius: 10px; }
+  .lab-ctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+  .ib input { font: inherit; font-size: 13px; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); width: 140px; max-width: 100%; }
+  .ib .row2 { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 4px; }
+  .ib .btn { padding: 4px 10px; font-size: 13px; }
+  .tlog { font-family: var(--mono); font-size: 12.5px; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; min-height: 4em; color: var(--fg-soft); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Angular roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Angular 22 · Part 3 · Control flow &amp; structure · added topic</div>
+    <h1>Template control flow</h1>
+    <ul class="lede">
+      <li>Templates decide <b>what exists</b> with blocks: <span class="mono">@if</span>, <span class="mono">@for</span>, <span class="mono">@switch</span>, plus <span class="mono">@let</span> for local values.</li>
+      <li><span class="mono">@for</span> needs a <span class="mono">track</span> expression: how Angular matches items to the DOM it already built.</li>
+      <li>Track by a <b>stable id</b> (<span class="mono">track p.id</span>). Tracking by <span class="mono">$index</span> can move state to the wrong item.</li>
+      <li><span class="mono">@empty</span> renders when the list is empty; <span class="mono">@else</span> pairs with <span class="mono">@if</span>.</li>
+      <li>These replace <span class="mono">*ngIf</span>, <span class="mono">*ngFor</span> and <span class="mono">[ngSwitch]</span>, deprecated since v20.</li>
+    </ul>
+    <div class="cd-trail" data-stage="9"></div>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: one card per patient</h2>
+    <div class="stage-kind">Right of the code: the card instances Angular keeps · results from the real CareDesk run</div>
+    <div class="story" id="cfStory">
+      <div class="ng-left">
+        <div id="cfCard"></div>
+        <div><div class="label" id="cfLabel">Rendered</div><div class="inst" id="cfInst"></div><p class="status-line" id="cfNote" style="margin:8px 0 0"></p></div>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Select a patient, type a note, then discharge or re-fetch under each tracking strategy.</p>
+
+  <section aria-labelledby="labH">
+    <h2 class="stage-title" id="labH">Track lab</h2>
+    <div class="stage-kind">Instance letters show which card component Angular reused · behaviour matches the real runs</div>
+    <div class="lab-ctl"><span class="mono" style="font-size:13px">track</span><div class="seg" id="trSeg" role="group" aria-label="Track expression"><button type="button" data-v="id" aria-pressed="true">p.id</button><button type="button" data-v="index" aria-pressed="false">$index</button><button type="button" data-v="obj" aria-pressed="false">p (object)</button></div><button class="btn" type="button" id="lRefetch">Re-fetch patients</button><button class="btn" type="button" id="lReset">Reset</button></div>
+    <div class="split" style="margin-top:10px">
+      <div class="inst" id="lInst"></div>
+      <div class="card"><div class="label">Console</div><pre class="tlog" id="lLog"></pre></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Show something conditionally</span><span class="arrow">→</span><span class="then"><span class="mono">@if (cond) { … } @else if (…) { … } @else { … }</span></span></li>
+      <li><span class="if">Need the value you tested</span><span class="arrow">→</span><span class="then"><span class="mono">@if (first(); as p) { {{ p.name }} }</span></span></li>
+      <li><span class="if">Loop over items</span><span class="arrow">→</span><span class="then"><span class="mono">@for (p of list(); track p.id) { … } @empty { … }</span></span></li>
+      <li><span class="if">Items have an id</span><span class="arrow">→</span><span class="then"><span class="mono">track p.id</span>. No id and static list → <span class="mono">track $index</span></span></li>
+      <li><span class="if">Position, first/last, odd/even</span><span class="arrow">→</span><span class="then"><span class="mono">$index</span>, <span class="mono">$count</span>, <span class="mono">$first</span>, <span class="mono">$last</span>, <span class="mono">$even</span>, <span class="mono">$odd</span></span></li>
+      <li><span class="if">One value, several cases</span><span class="arrow">→</span><span class="then"><span class="mono">@switch (x) { @case ('a') { … } @default { … } }</span></span></li>
+      <li><span class="if">Reuse an expression in the template</span><span class="arrow">→</span><span class="then"><span class="mono">@let total = patients().length;</span></span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: old directives vs blocks</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Before (v16, your notes era)</th><th>Angular 22</th><th>Difference</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">*ngIf="cond; else other"</td><td class="mono">@if (cond) { } @else { }</td><td>no <span class="mono">&lt;ng-template&gt;</span> needed for else; built in, no import</td></tr>
+          <tr><td class="mono">*ngFor="let p of list; trackBy: byId"</td><td class="mono">@for (p of list; track p.id) { }</td><td><span class="mono">track</span> is required and is an expression, not a method</td></tr>
+          <tr><td>(no equivalent)</td><td class="mono">@empty { }</td><td>empty state without an extra <span class="mono">@if</span></td></tr>
+          <tr><td class="mono">[ngSwitch] / *ngSwitchCase</td><td class="mono">@switch / @case / @default</td><td>type-checked against the switched value</td></tr>
+          <tr><td class="mono">*ngIf="x as y" tricks</td><td class="mono">@let y = x;</td><td>a template-local constant</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cc-pair" style="margin-top:14px">
+      <div><div class="label bad-text">Before: structural directives</div><div id="oldCf"></div></div>
+      <div><div class="label ok-text">After: built-in blocks</div><div id="newCf"></div></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>Not in your notes.</b> Control flow is how every list and condition in a modern template is written, and the example in your screenshot (<span class="mono">@if (a &gt; b) … @else if … @else</span>) is this syntax.</p></div>
+      <div class="note"><span class="flag add">Updated</span><p><b>Deprecated, not removed.</b> In CareDesk, a template using <span class="mono">*ngFor</span> and <span class="mono">*ngIf</span> (with <span class="mono">NgFor</span>, <span class="mono">NgIf</span> imported) still built without warnings in v22. The deprecation shows in your editor. Migrate with <span class="mono">ng generate @angular/core:control-flow</span>.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Angular warns about bad tracking.</b> With <span class="mono">track p</span> and freshly fetched objects, the browser console showed <span class="mono">NG0956: The configured tracking expression (track by identity) caused re-creation of the entire collection of size 3</span>.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>What does <span class="mono">track</span> do in <span class="mono">@for</span>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>It gives each item an identity so Angular can match new data to the DOM and component instances it already created: keep, move, create or destroy only what changed.</p></div></details>
+      <details><summary>Why was <span class="mono">track $index</span> dangerous in CareDesk?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Discharging Asha shifted everyone up a position. The card instance at position 1, which held Asha's "Selected" state and note "needs ECG", was reused for Ravi, so Ravi showed Asha's state.</p></div></details>
+      <details><summary>What's wrong with <span class="mono">track p</span> (the object)?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>It works while objects keep their identity, but after a re-fetch every object is new, so every card was destroyed and recreated (NG0956) and local state was lost.</p></div></details>
+      <details><summary>How do you show "No one matches"?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Add <span class="mono">@empty { &lt;p&gt;No one matches…&lt;/p&gt; }</span> after the <span class="mono">@for</span> block.</p></div></details>
+      <details><summary>Do you need to import anything for <span class="mono">@if</span>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>No. Blocks are part of the template syntax. <span class="mono">*ngIf</span> needed <span class="mono">NgIf</span> (or <span class="mono">CommonModule</span>) in <span class="mono">imports</span>.</p></div></details>
+      <details><summary>What is <span class="mono">@let</span> for?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>A read-only local variable in the template, e.g. <span class="mono">@let total = patients().length;</span>, so you don't repeat the expression.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: angular.dev "Control flow" and "@for track and identity", the NG0956 error guide, and the control-flow migration guide. All renders, logs and warnings are from CareDesk (Angular CLI 22.2.5): the card's ngOnInit and ngOnDestroy logged their patient for the tracking runs.</footer>
+</div>
+
+<script src="caredesk.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const LIST_HTML = `<h2>Waiting room</h2>
+<input placeholder="Search patients" [(ngModel)]="search" />
+@let total = patients().length;
+<p>{{ filtered().length }} of {{ total }} patients · {{ urgent() }} urgent</p>
+<p>Last message: {{ message() }}</p>
+
+@for (p of filtered(); track p.id; let i = $index) {
+  <section class="row">
+    <span class="pos">{{ i + 1 }}</span>
+    <app-patient-card [patient]="p" (reviewed)="onReviewed($event)" />
+    <button (click)="discharge(p.id)">Discharge</button>
+  </section>
+} @empty {
+  <p>No one matches "{{ search() }}".</p>
+}`;
+  const CARD_HTML = `<article [class.urgent]="patient().triage === 'urgent'" [class.selected]="selected()">
+  <h3>{{ heading() }}</h3>
+  <p>
+    @switch (patient().triage) {
+      @case ('urgent') { <span class="badge urgent">Urgent</span> }
+      @case ('routine') { <span class="badge">Routine</span> }
+    }
+    · waiting {{ waited() }} s
+  </p>
+  ...
+</article>`;
+  const STEP8 = `@if (first(); as p) {
+  <app-patient-card [patient]="p" ... />
+  <button (click)="discharge(p.id)">Discharge {{ p.name }}</button>
+} @else {
+  <p>No one matches "{{ search() }}".</p>
+}`;
+  const P = { Asha: 'urgent', Ravi: 'routine', Meera: 'routine' };
+  // inst: [{id, name, sel, note, cls}]
+  function render(el, list, opts = {}) {
+    if (!list) { el.innerHTML = `<div class="empty-p">No one matches "zz".</div>`; return; }
+    el.innerHTML = list.map((x, i) => `<div class="ib ${P[x.name] === 'urgent' ? 'urg' : ''} ${x.sel ? 'sel' : ''} ${x.cls || ''}"><span class="id">instance ${x.id}</span><span class="pos">${i + 1}</span> <b>${x.name}</b><span class="bd ${P[x.name] === 'urgent' ? 'u' : ''}">${P[x.name] === 'urgent' ? 'Urgent' : 'Routine'}</span><div class="stt">${x.sel ? 'Selected' : 'Select'} · note: ${x.note ? '"' + x.note + '"' : '—'}</div></div>`).join('');
+  }
+  const base = () => [{ id: 'A', name: 'Asha' }, { id: 'B', name: 'Ravi' }, { id: 'C', name: 'Meera' }];
+  const marked = () => [{ id: 'A', name: 'Asha', sel: true, note: 'needs ECG' }, { id: 'B', name: 'Ravi' }, { id: 'C', name: 'Meera' }];
+  const S = [
+    { file: 'patient-list.html (step 8)', lang: 'ng', code: STEP8, marks: { 1: 'hot' }, inst: [{ id: 'A', name: 'Asha' }], label: 'Rendered: one card', note: 'Step 8 showed only the first match.' },
+    { file: 'patient-list.html', lang: 'ng', code: LIST_HTML, marks: { 7: ['hot', 'one block per patient'], 8: 'hot', 9: 'hot', 10: 'hot', 11: 'hot', 12: 'hot' }, inst: base(), label: 'Rendered: 3 card instances', note: '<span class="mono">3 of 3 patients · 1 urgent</span> (real)' },
+    { file: 'patient-list.html', lang: 'ng', code: LIST_HTML, marks: { 13: 'hot', 14: ['hot', 'list is empty'] }, inst: null, label: 'Rendered: search "zz"', note: 'Real output: <span class="mono">No one matches "zz".</span>' },
+    { file: 'patient-card.html', lang: 'ng', code: CARD_HTML, marks: { 4: 'hot', 5: 'hot', 6: 'hot' }, inst: base(), label: 'Rendered badges', note: 'Real badges: Urgent, Routine, Routine' },
+    { file: 'patient-list.html', lang: 'ng', code: LIST_HTML, marks: { 3: ['hot', 'template-local constant'], 4: 'hot', 7: ['hot', '$index as i'], 9: 'hot' }, inst: base(), label: 'Rendered', note: '' },
+    { file: 'patient-list.html', lang: 'ng', code: LIST_HTML.replace('track p.id', 'track p.id'), marks: { 7: ['ok', 'track p.id'] }, inst: [{ id: 'A', name: 'Asha', sel: true, note: 'needs ECG', cls: 'gone' }, { id: 'B', name: 'Ravi', cls: 'kept' }, { id: 'C', name: 'Meera', cls: 'kept' }], label: 'Discharge Asha · track p.id', note: 'Log: <span class="mono">card destroyed: Asha</span>. Ravi and Meera keep their instances and state.' },
+    { file: 'patient-list.html (experiment)', lang: 'ng', code: LIST_HTML.replace('track p.id', 'track $index'), marks: { 7: ['bad', 'track $index'] }, inst: [{ id: 'A', name: 'Ravi', sel: true, note: 'needs ECG', cls: 'wrong' }, { id: 'B', name: 'Meera', cls: 'kept' }, { id: 'C', name: 'Meera', cls: 'gone' }], label: 'Discharge Asha · track $index', note: 'Log: <span class="mono">card destroyed: Meera</span>. Real result: Ravi\'s card shows <b>Selected</b> and note <b>"needs ECG"</b>, Asha\'s state.' },
+    { file: 'patient-list.html (experiment)', lang: 'ng', code: LIST_HTML.replace('track p.id', 'track p'), marks: { 7: ['bad', 'track p (identity)'] }, inst: [{ id: 'D', name: 'Asha', cls: 'new' }, { id: 'E', name: 'Ravi', cls: 'new' }, { id: 'F', name: 'Meera', cls: 'new' }], label: 'Re-fetch (fresh objects) · track p', note: 'Log: all 3 destroyed, NG0956 warning, all 3 created. Asha\'s "Selected" was lost.' },
+    { file: 'patient-list.html (old syntax)', lang: 'ng', code: `<div *ngFor="let p of filtered(); trackBy: byId">
+  <app-patient-card *ngIf="p" [patient]="p" />
+</div>
+
+// patient-list.ts
+imports: [FormsModule, PatientCard, NgFor, NgIf],
+byId(_: number, p: Patient) { return p.id; }`, marks: { 1: 'bad', 2: 'bad', 5: 'bad' }, inst: base(), label: 'Rendered', note: 'Still builds in v22 (no warning). Migrate: <span class="mono">ng generate @angular/core:control-flow</span>' }
+  ];
+  function show(i) {
+    const s = S[i];
+    K.codeCard($('cfCard'), { file: s.file, lang: s.lang, code: s.code, marks: s.marks, dim: true });
+    $('cfLabel').textContent = s.label; render($('cfInst'), s.inst); $('cfNote').innerHTML = s.note;
+  }
+  async function animate(run, before, after) {
+    render($('cfInst'), before); await K.sleep(700, run);
+    render($('cfInst'), after);
+  }
+  K.story({
+    root: $('cfStory'), show, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'Where we are: one card', text: 'Step 8\'s list already filtered patients, but showed only the first match with <span class="mono">@if</span>. Now every waiting patient gets a card.' },
+      { title: '@for: one block per item', text: '<span class="mono">@for (p of filtered(); track p.id)</span> repeats the block for each patient. Each repetition creates a PatientCard <b>instance</b> (A, B, C on the right). <span class="mono">let i = $index</span> exposes the position for the queue number.', tip: '<span class="mono">track</span> is mandatory in @for. Forgetting it is a compile error, which is deliberate: it forces you to think about identity.' },
+      { title: '@empty: the empty state', text: 'When <span class="mono">filtered()</span> is empty, the <span class="mono">@empty</span> block renders instead. No extra <span class="mono">@if (filtered().length === 0)</span> needed.' },
+      { title: '@switch: one value, several looks', text: 'Inside the card, <span class="mono">@switch (patient().triage)</span> picks a badge. Cases are checked against the <span class="mono">Triage</span> type from step 2.' },
+      { title: '@let: name an expression', text: '<span class="mono">@let total = patients().length;</span> declares a read-only template variable. The loop\'s <span class="mono">$index</span>, <span class="mono">$count</span>, <span class="mono">$first</span>, <span class="mono">$last</span>, <span class="mono">$even</span> and <span class="mono">$odd</span> work the same way.' },
+      { title: 'Why track matters: by id', text: 'Asha is selected with the note "needs ECG". Discharge her. With <span class="mono">track p.id</span>, Angular matched Ravi and Meera to their existing instances (B, C) and destroyed only A. Their state is untouched.', play: async run => { await animate(run, marked(), S[5].inst); } },
+      { title: 'track $index: state on the wrong patient', text: 'Same action with <span class="mono">track $index</span>. Position 1 still exists, so instance A was <b>reused for Ravi</b>; the last instance was destroyed instead. In the real run Ravi\'s card showed "Selected" and "needs ECG". In a clinic that\'s a safety bug.', play: async run => { await animate(run, marked(), S[6].inst); } },
+      { title: 'track p: fine until data is re-fetched', text: 'Tracking by the object itself survived the discharge, but when the same patients came back as fresh objects (as after an API refresh), every card was destroyed and recreated and Angular logged NG0956.', play: async run => { await animate(run, marked(), S[7].inst); } },
+      { title: 'The old way', text: '<span class="mono">*ngFor</span>, <span class="mono">*ngIf</span> and <span class="mono">[ngSwitch]</span> still compile but are deprecated since v20 and need imports. The blocks need none, read like code, and are faster. Step 9 of CareDesk is done: the whole waiting room on screen.' }
+    ]
+  });
+
+  K.codeCard($('oldCf'), { file: 'Angular 16 style', lang: 'ng', code: `<div *ngIf="patients.length; else none">
+  <app-patient-card *ngFor="let p of patients; trackBy: byId"
+                    [patient]="p" />
+</div>
+<ng-template #none><p>No one waiting</p></ng-template>`, marks: { 1: 'bad', 2: 'bad', 5: 'bad' } });
+  K.codeCard($('newCf'), { file: 'Angular 22', lang: 'ng', code: `@for (p of patients(); track p.id) {
+  <app-patient-card [patient]="p" />
+} @empty {
+  <p>No one waiting</p>
+}`, marks: { 1: 'ok', 3: 'ok' } });
+
+  /* ===== lab ===== */
+  let mode = 'id', data, inst, next, lines;
+  const NAMES = ['Asha', 'Ravi', 'Meera'];
+  const log = l => { lines.push(l); lines = lines.slice(-10); $('lLog').textContent = lines.join('\n'); };
+  function reset() { data = NAMES.map((n, i) => ({ id: i + 1, name: n, v: 0 })); next = 3; inst = data.map((d, i) => ({ key: 'ABC'[i], d, sel: false, note: '', created: true })); lines = []; log('// 3 cards created: A, B, C'); paint(); }
+  const keyOf = (d, i) => mode === 'id' ? 'id' + d.id : mode === 'index' ? 'ix' + i : d;
+  function reconcile(newData) {
+    const old = inst.map((x, i) => ({ ...x, k: keyOf(x.d, i) }));
+    const out = [];
+    newData.forEach((d, i) => {
+      const k = keyOf(d, i); const j = old.findIndex(o => o.k === k);
+      if (j >= 0) { const o = old.splice(j, 1)[0]; out.push({ ...o, d, created: false, moved: o.d !== d }); }
+      else { const key = String.fromCharCode(65 + next++); out.push({ key, d, sel: false, note: '', created: true }); log(`card created for ${d.name} (instance ${key})`); }
+    });
+    old.forEach(o => log(`card destroyed: ${o.d.name} (instance ${o.key})`));
+    if (mode === 'obj' && old.length === inst.length && inst.length > 1 && newData.length === inst.length) log('NG0956: tracking by identity re-created the entire collection');
+    inst = out; paint();
+  }
+  function paint() {
+    const el = $('lInst');
+    el.innerHTML = inst.length ? inst.map((x, i) => `<div class="ib ${x.d.name === 'Asha' ? 'urg' : ''} ${x.sel ? 'sel' : ''} ${x.created ? 'new' : 'kept'}"><span class="id">instance ${x.key}</span><span class="pos">${i + 1}</span> <b>${x.d.name}</b><div class="row2"><button class="btn" type="button" data-a="sel" data-i="${i}">${x.sel ? 'Selected' : 'Select'}</button><input type="text" data-i="${i}" placeholder="Nurse's note" value="${x.note.replace(/"/g, '&quot;')}" aria-label="Note for ${x.d.name}"><button class="btn" type="button" data-a="dis" data-i="${i}">Discharge</button></div></div>`).join('') : '<div class="empty-p">No one is waiting.</div>';
+  }
+  $('lInst').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return; const i = +b.dataset.i;
+    if (b.dataset.a === 'sel') { inst[i].sel = !inst[i].sel; paint(); }
+    if (b.dataset.a === 'dis') { const id = inst[i].d.id; data = data.filter(d => d.id !== id); reconcile(data); }
+  });
+  $('lInst').addEventListener('input', e => { if (e.target.matches('input')) inst[+e.target.dataset.i].note = e.target.value; });
+  $('lRefetch').addEventListener('click', () => { data = data.map(d => ({ ...d })); log('// re-fetch: same patients, new objects'); reconcile(data); });
+  $('lReset').addEventListener('click', reset);
+  K.seg($('trSeg'), v => { mode = v; reset(); });
+  reset();
+})();
+</script>
+</body>
+</html>

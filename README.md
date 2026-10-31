@@ -27,7 +27,8 @@ Interactive_explainations/
 │   └── lld/                        # low-level design
 │       └── index.html              # LLD topics, added as they're learned
 ├── aws-cloud-practitioner/         # CLF-C02 sections
-└── python-fundamentals/            # Python topics (code stepper + edit-and-run)
+├── python-fundamentals/            # Python topics (code stepper + edit-and-run)
+└── angular/                        # Modern Angular (v22): data flow and control flow, 15 topics
 ```
 
 ## Rules of the road
@@ -35,6 +36,7 @@ Interactive_explainations/
 - **Colours live only in `theme.css`.** Pages and other CSS files use tokens such as `var(--fg)`, `var(--cyan)`, `var(--accent-text)`, so both themes work automatically.
 - **Shared look and helpers go in `assets/`; page-specific animation code stays in the page.** Explainers load `theme.js` and `explainer-kit.js`.
 - **Links point at files explicitly** (`folder/index.html`, not `folder/`), so pages work from disk, GitHub Pages and S3/CloudFront alike.
+- **Angular pages** use the same colour key everywhere: cyan = data down (`input()`, `[prop]`), orange = events up (`output()`, `(event)`), violet = two-way (`model()`, `[(x)]`). Kit helpers: `codeCard`, `compBox`, `ngWire`, `tsHighlight`, `ngHighlight`. All 15 pages build one running example, **CareDesk** (a clinic portal); `angular/caredesk.js` holds the step list and draws the "Building CareDesk" strip (`<div class="cd-trail" data-stage="N">`). Every snippet is built and run in a real Angular project before it goes on a page.
 - Pages one folder deep reference assets as `../assets/...`; pages two deep (`system-design/hld/`, `system-design/lld/`) use `../../assets/...`; the root hub uses `assets/...`.
 
 ## Adding an explainer

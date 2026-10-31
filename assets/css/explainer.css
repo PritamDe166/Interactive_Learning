@@ -472,3 +472,97 @@ ul.cheat li > * { min-width: 0; overflow-wrap: anywhere; }
 .matrix td.waste { color: var(--bad-text); background: color-mix(in srgb, var(--red) 10%, transparent); }
 .matrix td.na { color: var(--muted); }
 .uml-row.gone, .uml-link.gone { opacity: 0; }
+
+/* ---- Angular: code cards, template tokens, component boxes, data-flow wires ---- */
+.codeblock .bd, .cc .bd { color: var(--cyan); font-weight: 600; }
+.codeblock .ev, .cc .ev { color: var(--orange); font-weight: 600; }
+.codeblock .tw, .cc .tw { color: var(--violet); font-weight: 600; }
+.codeblock .ip, .cc .ip { color: var(--cyan); }
+.codeblock .ex, .cc .ex { color: var(--fg-soft); }
+.cc { background: var(--code-bg); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; min-width: 0; }
+.cc-head { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--panel-2); border-bottom: 1px solid var(--line); }
+.cc-dots { display: inline-flex; gap: 5px; }
+.cc-dots i { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+.cc-file { font-family: var(--mono); font-size: 12.5px; color: var(--fg-soft); }
+.cc-code { margin: 0; padding: 10px 0; font-family: var(--mono); font-size: 12.5px; line-height: 1.65; color: var(--fg); white-space: pre; overflow-x: auto; }
+.cc .k { color: var(--accent-text); font-weight: 600; }
+.cc .c { color: var(--muted); }
+.cc .s { color: var(--good-text); }
+.cc .n { color: var(--cyan); }
+.cc .b { font-weight: 600; }
+.cc-code .ln { display: block; padding-right: 14px; border-left: 3px solid transparent; transition: background .25s, opacity .25s; }
+.cc-gut { display: inline-block; width: 2.6em; padding-right: .9em; text-align: right; color: var(--faint); user-select: none; }
+.cc-code .ln.mk-hot { background: var(--teal-wash); border-left-color: var(--cyan); }
+.cc-code .ln.mk-bad { background: color-mix(in srgb, var(--red) 16%, transparent); border-left-color: var(--red); }
+.cc-code .ln.mk-ok { background: color-mix(in srgb, var(--teal) 16%, transparent); border-left-color: var(--teal); }
+.cc-code .ln.mk-up { background: color-mix(in srgb, var(--orange) 15%, transparent); border-left-color: var(--orange); }
+.cc-code .ln.mk-two { background: color-mix(in srgb, var(--violet) 16%, transparent); border-left-color: var(--violet); }
+.cc-code .ln.mk-dim { opacity: .45; }
+.cc-note { margin-left: 2ch; font-size: 11.5px; font-weight: 600; color: var(--cyan); }
+.cc-note.mk-bad { color: var(--bad-text); } .cc-note.mk-ok { color: var(--good-text); } .cc-note.mk-up { color: var(--orange); } .cc-note.mk-two { color: var(--violet); }
+.cc-out { border-top: 1px solid var(--line); padding: 8px 14px 10px; }
+.cc-out-h { font-family: var(--mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.cc-out pre { margin: 0; font-family: var(--mono); font-size: 12px; line-height: 1.6; color: var(--fg-soft); white-space: pre-wrap; overflow-wrap: anywhere; }
+.cc-cap { padding: 0 12px 12px; display: flex; justify-content: center; }
+.cc-cap span { background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 5px 14px; font-size: 13px; color: var(--fg-soft); text-align: center; }
+.cc-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 12px; }
+.cc-pair > div { min-width: 0; }
+.cc-pair .label { margin-bottom: 4px; }
+.cb-box { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .25s; }
+.cbox.on .cb-box { stroke: var(--cyan); }
+.cbox.bad .cb-box { stroke: var(--red); }
+.cb-name { fill: var(--fg); font-size: 15px; font-weight: 700; }
+.cb-role { fill: var(--muted); font-family: var(--mono) !important; font-size: 11.5px; }
+.cb-sep { stroke: var(--line); stroke-width: 1.5; }
+.cb-txt { fill: var(--fg-soft); font-family: var(--mono) !important; font-size: 12px; transition: fill .25s; }
+.cb-hl { fill: transparent; transition: fill .25s; }
+.cb-row { transition: opacity .3s; }
+.cb-row.hot .cb-hl { fill: var(--teal-wash); } .cb-row.hot .cb-txt { fill: var(--fg); }
+.cb-row.bad .cb-hl { fill: color-mix(in srgb, var(--red) 20%, transparent); } .cb-row.bad .cb-txt { fill: var(--bad-text); }
+.cb-row.up .cb-hl { fill: color-mix(in srgb, var(--orange) 18%, transparent); }
+.cb-row.two .cb-hl { fill: color-mix(in srgb, var(--violet) 18%, transparent); }
+.cb-row.dim { opacity: .35; }
+.ngw { fill: none; stroke-width: 2.5; transition: opacity .3s, stroke-width .2s; }
+.ngw.down { stroke: var(--cyan); } .ngw.up { stroke: var(--orange); } .ngw.two { stroke: var(--violet); } .ngw.bad { stroke: var(--red); stroke-dasharray: 6 5; }
+.ngw-g.hot .ngw { stroke-width: 4; }
+.ngw-g.dim { opacity: .25; }
+.ng-ah.down { fill: var(--cyan); } .ng-ah.up { fill: var(--orange); } .ng-ah.two { fill: var(--violet); } .ng-ah.bad { fill: var(--red); }
+.mlabel.down { fill: var(--cyan); } .mlabel.up { fill: var(--orange); } .mlabel.two { fill: var(--violet); }
+.pill.up rect { fill: var(--orange); } .pill.two rect { fill: var(--violet); }
+:root[data-theme="light"] .pill.up text, :root[data-theme="light"] .pill.two text { fill: var(--on-accent); }
+.ng-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--fg-soft); margin: 8px 0 0; }
+.ng-legend span::before { content: ''; display: inline-block; width: 18px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; background: var(--cyan); }
+.ng-legend .lg-up::before { background: var(--orange); } .ng-legend .lg-two::before { background: var(--violet); } .ng-legend .lg-sig::before { background: var(--teal); }
+/* ---- CareDesk running-example strip (Angular pages) ---- */
+.cd-trail { border: 1px solid var(--line); border-left: 4px solid var(--red); border-radius: 14px; background: var(--panel); padding: 12px 16px; margin: 14px 0 4px; display: grid; gap: 8px; }
+.cd-top { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.cd-brand { font-weight: 700; }
+.cd-step { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.cd-dots { display: flex; gap: 5px; flex-wrap: wrap; }
+.cd-dots a { width: 22px; height: 7px; border-radius: 4px; background: var(--line); }
+.cd-dots a.done { background: var(--teal); }
+.cd-dots a.now { background: var(--red); }
+.cd-adds { margin: 0; color: var(--fg-soft); font-size: 15px; }
+.cd-adds b { color: var(--fg); }
+.cd-nav { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 13px; }
+.cd-nav a { color: var(--cyan); text-decoration: none; }
+.cd-nav a:hover { text-decoration: underline; }
+/* browser-window mock for "what the app looks like now" */
+.appwin { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--bg); min-width: 0; }
+.appwin-bar { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: var(--panel-2); border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.appwin-bar i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); display: inline-block; }
+.appwin-url { flex: 1; background: var(--panel); border-radius: 6px; padding: 2px 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.appwin-body { padding: 12px 14px; min-height: 60px; }
+/* stage row: highlights where something happens (build → browser) */
+.ng-pipe { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 120px), 1fr)); gap: 8px; }
+.ng-pipe > div { border: 1.5px solid var(--line); border-radius: 10px; padding: 7px 10px; background: var(--panel); font-size: 12.5px; text-align: center; color: var(--muted); transition: border-color .25s, color .25s, opacity .25s; }
+.ng-pipe > div b { display: block; font-size: 13.5px; color: var(--fg); }
+.ng-pipe > div.on { border-color: var(--cyan); color: var(--fg-soft); }
+.ng-pipe > div.ok { border-color: var(--teal); }
+.ng-pipe > div.bad { border-color: var(--red); color: var(--bad-text); }
+.ng-pipe > div.off { opacity: .45; }
+.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-family: var(--mono); font-size: 12.5px; }
+.checks li { padding: 6px 10px; border-radius: 8px; background: var(--panel-2); overflow-wrap: anywhere; }
+.checks li.bad { color: var(--bad-text); background: color-mix(in srgb, var(--red) 12%, transparent); }
+.checks li.ok { color: var(--good-text); }
+.checks li.info { color: var(--fg-soft); }

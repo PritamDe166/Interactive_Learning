@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HTTP, resource & RxJS basics</title>
+<meta name="description" content="Angular 22 HTTP on CareDesk: load patients with httpResource (loading, error, retry as signals), keep a local copy with linkedSignal, post bookings with HttpClient, and the RxJS basics: cold Observables, subscribe and pipe.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .ng-left { display: grid; gap: 12px; min-width: 0; align-content: start; }
+  .hx .node.cur rect { stroke: var(--cyan); stroke-width: 3.5; fill: var(--teal-wash); }
+  .hx .node.err rect { stroke: var(--red); stroke-width: 3.5; }
+  .hx .node.idle { opacity: .45; }
+  .hx .edge { stroke: var(--line); stroke-width: 2; fill: none; }
+  .hx .elbl { font-family: var(--mono) !important; font-size: 10.5px; fill: var(--muted); }
+  .hx .sig text { font-family: var(--mono) !important; font-size: 12px; }
+  .hx .sig .k { fill: var(--fg-soft); } .hx .sig .v { fill: var(--cyan); font-weight: 700; } .hx .sig .v.bad { fill: var(--bad-text); }
+  .hx .wire { stroke: var(--line); stroke-width: 2; }
+  .hx .req rect { fill: var(--pill); } .hx .req text { fill: var(--ink); font-family: var(--mono) !important; font-size: 11px; font-weight: 700; }
+  .hx .req.post rect { fill: var(--orange); } .hx .req.bad rect { fill: var(--red); } .hx .req.bad text { fill: var(--on-accent); }
+  .ui { font-size: 14px; padding: 8px 10px; border-radius: 8px; background: var(--panel-2); min-height: 2.4em; }
+  .ui .err { color: var(--bad-text); } .ui .muted { color: var(--muted); }
+  .lab-ctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+  .marble { display: grid; gap: 8px; margin-top: 10px; }
+  .mline { position: relative; height: 34px; border-bottom: 2px solid var(--line); overflow: hidden; }
+  .mline span { position: absolute; bottom: -12px; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--ink); background: var(--pill); }
+  .mline span.done { background: var(--teal); color: var(--on-accent); border-radius: 4px; width: 6px; }
+  .mlbl { font-family: var(--mono); font-size: 12px; color: var(--fg-soft); }
+  .rlog { font-family: var(--mono); font-size: 12.5px; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; min-height: 3em; color: var(--fg-soft); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Angular roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Angular 22 · Part 4 · Forms &amp; data · added topic</div>
+    <h1>HTTP, resource &amp; RxJS basics</h1>
+    <ul class="lede">
+      <li><span class="mono">httpResource(() =&gt; url)</span> fetches data and exposes <b>signals</b>: <span class="mono">isLoading()</span>, <span class="mono">hasValue()</span>, <span class="mono">value()</span>, <span class="mono">error()</span>.</li>
+      <li>The URL function is reactive: when its signals change the request re-runs; returning <span class="mono">undefined</span> means "don't fetch".</li>
+      <li><span class="mono">HttpClient</span> methods return an <b>Observable</b>: nothing is sent until you <span class="mono">subscribe</span>, and each subscription sends again.</li>
+      <li>RxJS operators go in <span class="mono">pipe()</span>: <span class="mono">map</span>, <span class="mono">tap</span>, <span class="mono">catchError</span>…</li>
+      <li>Rule of thumb: <b>reads</b> → <span class="mono">httpResource</span>; <b>writes</b> (POST, PUT, DELETE) → <span class="mono">HttpClient</span>.</li>
+    </ul>
+    <div class="cd-trail" data-stage="15"></div>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: CareDesk talks to an API</h2>
+    <div class="stage-kind">Top: the resource's state · bottom: requests on the wire · every request, header and message from the real run</div>
+    <div class="story" id="hStory">
+      <div class="ng-left">
+        <div class="scroll"><svg class="diagram hx" id="hSvg" style="min-width:0" viewBox="0 0 680 330" role="img" aria-label="Resource states idle, loading, resolved and error, the signals it exposes, and requests travelling to the API through the interceptor"></svg></div>
+        <div class="ui" id="hUi"></div>
+        <div id="hCard"></div>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Drive the resource yourself, then see when an Observable actually sends a request.</p>
+
+  <section aria-labelledby="labH">
+    <h2 class="stage-title" id="labH">1. Resource lab</h2>
+    <div class="stage-kind">You play the server · the states follow what CareDesk's real resource did</div>
+    <div class="lab-ctl">
+      <button class="btn" type="button" id="lIn">Sign in</button><button class="btn" type="button" id="lOut">Sign out</button>
+      <span class="mono" style="font-size:13px">server answers:</span>
+      <button class="btn primary" type="button" id="l200">200 OK</button><button class="btn" type="button" id="l500">500 error</button>
+      <button class="btn" type="button" id="lRetry">Retry (reload)</button><button class="btn" type="button" id="lDis">Discharge first</button>
+    </div>
+    <div class="scroll"><svg class="diagram hx" id="labSvg" viewBox="0 0 680 330" style="min-width:540px;max-width:720px;display:block;margin:8px auto 0" role="img" aria-label="Live resource state"></svg></div>
+    <div class="ui" id="lUi"></div>
+  </section>
+
+  <section aria-labelledby="rxH">
+    <h2 class="stage-title" id="rxH">2. When does an Observable send?</h2>
+    <div class="stage-kind">Each dot is a subscription that sends a request · results match the real run</div>
+    <div class="lab-ctl">
+      <button class="btn" type="button" id="rCreate">const obs$ = http.get(url)</button>
+      <button class="btn" type="button" id="rSub">obs$.subscribe()</button>
+      <button class="btn" type="button" id="rReset">Reset</button>
+    </div>
+    <div class="marble"><div class="mlbl">requests on the wire</div><div class="mline" id="rLine"></div></div>
+    <div class="card" style="margin-top:10px"><div class="label">Console</div><pre class="rlog" id="rLog"></pre></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Load data for a page</span><span class="arrow">→</span><span class="then"><span class="mono">res = httpResource&lt;T&gt;(() =&gt; url)</span>; template reads <span class="mono">res.value()</span></span></li>
+      <li><span class="if">Request depends on state (id, filter, signed in)</span><span class="arrow">→</span><span class="then">read the signals inside the URL function; return <span class="mono">undefined</span> to skip</span></li>
+      <li><span class="if">Show loading / error</span><span class="arrow">→</span><span class="then"><span class="mono">res.isLoading()</span>, <span class="mono">res.error()</span>, <span class="mono">res.reload()</span> for retry</span></li>
+      <li><span class="if">Read the value safely</span><span class="arrow">→</span><span class="then"><span class="mono">res.hasValue() ? res.value() : []</span> (value() throws in the error state)</span></li>
+      <li><span class="if">Editable copy of server data</span><span class="arrow">→</span><span class="then"><span class="mono">linkedSignal(() =&gt; res.hasValue() ? res.value() : [])</span></span></li>
+      <li><span class="if">Save something</span><span class="arrow">→</span><span class="then"><span class="mono">http.post&lt;T&gt;(url, body).subscribe({ next, error })</span></span></li>
+      <li><span class="if">Observable → signal</span><span class="arrow">→</span><span class="then"><span class="mono">toSignal(obs$, { initialValue })</span> (used on step 14)</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: CareDesk's data layer</h2>
+    <div class="cc-pair">
+      <div id="refStore"></div>
+      <div id="refAppt"></div>
+    </div>
+    <div class="scroll card table-card" style="margin-top:14px">
+      <table>
+        <thead><tr><th>Tool</th><th>Returns</th><th>Use for</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">httpResource()</td><td>a resource with signals</td><td>GET data that a page shows; re-fetch when inputs change</td></tr>
+          <tr><td class="mono">resource({ params, loader })</td><td>same, any async loader</td><td>non-HTTP async work (IndexedDB, a SDK call)</td></tr>
+          <tr><td class="mono">HttpClient.get/post/put/delete</td><td>cold Observable</td><td>writes, and reads that need RxJS operators</td></tr>
+          <tr><td class="mono">toSignal / toObservable</td><td>bridge</td><td>mix RxJS streams with signals</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>Not in your notes</b> beyond "Angular has intuitive HTTP components". This page adds the modern resource API and just enough RxJS to read existing code.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b><span class="mono">value()</span> throws in the error state.</b> CareDesk's first version used <span class="mono">res.value() ?? []</span>. When the server returned 500 the console showed <span class="mono">ResourceValueError: Resource is currently in an error state (see Error.cause for details): Http failure response for …/api/patients.json: 500 Internal Server Error</span>. Guard with <span class="mono">hasValue()</span>.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Fetching too early.</b> The first version also requested patients on the login page, without a token, because the header injects the store at start-up. Making the URL depend on <span class="mono">isLoggedIn()</span> removed that request and made the list load by itself right after sign-in.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>About the API.</b> CareDesk reads <span class="mono">public/api/patients.json</span>, a static sample file served by <span class="mono">ng serve</span>. The POST to <span class="mono">/api/appointments</span> was answered by the test script with 201; a real backend (an ASP.NET Core minimal API, say) would validate the bearer token there.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>What signals does <span class="mono">httpResource</span> give you?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">value()</span>, <span class="mono">hasValue()</span>, <span class="mono">isLoading()</span>, <span class="mono">error()</span> and <span class="mono">status()</span>, plus <span class="mono">reload()</span>. The template reads them like any signal.</p></div></details>
+      <details><summary>How do you stop a resource from fetching?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Return <span class="mono">undefined</span> from the URL function. CareDesk does that while signed out; no request was sent on the login page.</p></div></details>
+      <details><summary><span class="mono">http.get(url)</span> without <span class="mono">subscribe</span>: request or not?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>No request. HttpClient Observables are cold: they run when subscribed, and each subscription runs again (two subscribes = two GETs in the real run).</p></div></details>
+      <details><summary>What does <span class="mono">pipe(map(...))</span> do?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Transforms each emitted value. In the real run, mapping the patient list to urgent names emitted <span class="mono">["Asha","Kiran"]</span> from one GET.</p></div></details>
+      <details><summary>Why keep a <span class="mono">linkedSignal</span> copy of the server list?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>So the UI can change it locally (discharge, admit) while still resetting automatically whenever the resource loads new data.</p></div></details>
+      <details><summary>Promise or Observable for HTTP?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>HttpClient uses Observables: lazy, cancellable, composable with operators, and able to emit progress events. For simple reads in new code, <span class="mono">httpResource</span> hides that and gives signals.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: angular.dev "HTTP client", "httpResource" and "Async reactivity with resources"; rxjs.dev "Observable" and "Operators"; your Obsidian note "Why and What". Requests, headers, states and messages were recorded in CareDesk (Angular CLI 22.2.5), with the test script holding, failing or answering API calls.</footer>
+</div>
+
+<script src="caredesk.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  function diagram(svg) {
+    const ST = { idle: [80, 60, 'idle', 'no URL'], loading: [250, 60, 'loading', 'request in flight'], resolved: [440, 60, 'resolved', 'value ready'], error: [610, 60, 'error', 'error() set'] };
+    K.el('path', { d: 'M145 60 H185', class: 'edge' }, svg); K.el('path', { d: 'M315 60 H375', class: 'edge' }, svg); K.el('path', { d: 'M250 84 C 300 130 560 130 610 84', class: 'edge' }, svg);
+    const N = {}; for (const [k, [x, y, t, s]] of Object.entries(ST)) N[k] = K.node(svg, x, y, 130, 48, t, s);
+    const sig = K.el('g', { class: 'sig' }, svg);
+    const rows = ['isLoading()', 'hasValue()', 'value()', 'error()'].map((k, i) => { const y = 160 + i * 0; const kx = 30 + i * 165; const a = K.text(sig, kx, 165, k, 'k'); a.style.textAnchor = 'start'; const b = K.text(sig, kx, 185, '', 'v'); b.style.textAnchor = 'start'; return b; });
+    K.el('line', { x1: 20, y1: 270, x2: 660, y2: 270, class: 'wire' }, svg);
+    const lbls = [[60, 'store'], [330, 'authInterceptor'], [610, 'API']];
+    lbls.forEach(([x, t]) => { const e = K.text(svg, x, 300, t, 'elbl'); e.style.textAnchor = 'middle'; K.el('circle', { cx: x, cy: 270, r: 5, class: 'req' }, svg); });
+    const FX = K.el('g', {}, svg);
+    return { N, rows, FX };
+  }
+  function paint(D, st) {
+    for (const k in D.N) D.N[k].g.setAttribute('class', 'node ' + (st.state === k ? (k === 'error' ? 'err' : 'cur') : 'idle'));
+    const v = [st.loading, st.has, st.value, st.error];
+    D.rows.forEach((r, i) => { r.textContent = String(v[i]); r.setAttribute('class', 'v' + (i === 3 && st.error !== 'undefined' ? ' bad' : '')); });
+  }
+  function reqPill(D, label, cls) { const g = K.pill(D.FX, label, 'req ' + (cls || '')); return g; }
+  const D = diagram($('hSvg'));
+  const STORE = `@Service()
+export class PatientStore {
+  private readonly auth = inject(AuthStore);
+
+  // GET /api/patients.json once signed in (undefined = no request); re-runs when the URL changes
+  private readonly res = httpResource<Patient[]>(() => this.auth.isLoggedIn() ? '/api/patients.json' : undefined);
+  readonly loading = this.res.isLoading;
+  readonly error = this.res.error;
+  reload() { this.res.reload(); }
+
+  // local, editable copy that resets whenever the server data changes
+  private readonly list = linkedSignal(() => this.res.hasValue() ? this.res.value() : []);
+
+  readonly patients = this.list.asReadonly();
+  readonly waiting = computed(() => this.patients().length);
+  readonly urgent = computed(() => this.patients().filter(p => p.triage === 'urgent').length);
+
+  discharge(id: number) {
+    this.list.update(list => list.filter(p => p.id !== id));
+  }
+}`;
+  const LISTH = `@if (store.loading()) { <p class="loading">Loading patients…</p> }
+@if (store.error()) {
+  <p class="err">Could not load patients. <button (click)="store.reload()">Retry</button></p>
+}
+@let total = store.waiting();
+...`;
+  const APPT = `@Service()
+export class AppointmentStore {
+  private readonly http = inject(HttpClient);
+  private readonly list = signal<Appointment[]>([]);
+  readonly appointments = this.list.asReadonly();
+
+  add(a: Appointment): Observable<Appointment> {
+    return this.http.post<Appointment>('/api/appointments', a).pipe(
+      tap(saved => this.list.update(all => [...all, saved])),
+    );
+  }
+}
+
+// booking-form.ts
+this.store.add({ patientId: this.patient().id, ...this.model }).subscribe({
+  next: () => { this.booked.set(summary); form.resetForm({ ... }); },
+  error: () => this.booked.set('Could not save, please try again'),
+});`;
+  const RX = `const obs$ = this.http.get<Patient[]>('/api/patients.json');   // nothing sent yet
+
+obs$.subscribe();          // GET #1
+obs$.subscribe();          // GET #2: each subscription runs again
+
+this.http.get<Patient[]>('/api/patients.json').pipe(
+  map(list => list.filter(p => p.triage === 'urgent').map(p => p.name)),
+).subscribe(names => console.log('urgent names:', JSON.stringify(names)));`;
+  K.codeCard($('refStore'), { file: 'patient-store.ts', lang: 'ts', code: STORE });
+  K.codeCard($('refAppt'), { file: 'appointment-store.ts + booking-form.ts', lang: 'ts', code: APPT });
+  const sIdle = { state: 'idle', loading: false, has: false, value: 'undefined', error: 'undefined' };
+  const sLoad = { state: 'loading', loading: true, has: false, value: 'undefined', error: 'undefined' };
+  const sOk = { state: 'resolved', loading: false, has: true, value: 'Patient[4]', error: 'undefined' };
+  const sErr = { state: 'error', loading: false, has: false, value: 'throws!', error: 'HttpErrorResponse 500' };
+  const S = [
+    { st: sIdle, ui: 'Waiting room: (data comes from the API now)', card: ['patient-store.ts', 'ts', STORE, { 6: ['hot', 'reads become a resource'], 12: 'hot' }] },
+    { st: sIdle, ui: '<span class="muted">/login · signed out · no API requests</span>', card: ['patient-store.ts', 'ts', STORE, { 6: ['hot', 'undefined → no request'] }], out: ['on /login, signed out → api requests: []'] },
+    { st: sLoad, ui: 'Loading patients… <span class="muted">· 0 cards · header "0 waiting · 0 urgent"</span>', card: ['patient-list.html', 'ng', LISTH, { 1: ['hot', 'isLoading()'] }], out: ['sign in → GET /api/patients.json auth=Bearer… (held by the test)', 'page: "Loading patients…" · 0 cards'] , play: 'get' },
+    { st: sOk, ui: 'Asha · Ravi · Meera · Kiran <span class="muted">· header "4 waiting · 2 urgent"</span>', card: ['patient-store.ts', 'ts', STORE, { 12: ['ok', 'list follows the server'], 15: 'ok', 16: 'ok' }], out: ['response released → cards: Asha, Ravi, Meera, Kiran', 'header: 4 waiting · 2 urgent'], play: 'back' },
+    { st: sOk, ui: 'Ravi · Meera · Kiran <span class="muted">· header "3 waiting · 1 urgent" · no request</span>', card: ['patient-store.ts', 'ts', STORE, { 12: 'two', 18: 'hot', 19: ['hot', 'local edit'] }], out: ['discharge Asha → 3 waiting · 1 urgent · requests: []'] },
+    { st: sErr, ui: '<span class="err">Could not load patients.</span> [Retry] <span class="muted">· 0 cards</span>', card: ['patient-list.html', 'ng', LISTH, { 2: ['bad', 'error()'], 3: 'bad' }], out: ['reload page, server answers 500', 'page: "Could not load patients. Retry" · 0 cards', 'first version (value() ?? []) logged: ResourceValueError: Resource is currently in an error state …'], play: 'fail' },
+    { st: sOk, ui: 'Asha · Ravi · Meera · Kiran', card: ['patient-list.html', 'ng', LISTH, { 3: ['ok', 'reload()'] }], out: ['Retry → GET /api/patients.json auth=Bearer… → 4 cards'], play: 'get2' },
+    { st: sOk, ui: 'Booked: Dr Leela on 2026-11-04', card: ['appointment-store.ts', 'ts', APPT, { 8: ['up', 'cold until subscribed'], 9: 'hot', 15: ['hot', 'subscribe sends it'] }], out: ['POST /api/appointments auth=Bearer… → 201', 'page: "Booked: Dr Leela on 2026-11-04"'], play: 'post' },
+    { st: sOk, ui: '<span class="muted">RxJS experiments in the console</span>', card: ['rxjs basics (experiment)', 'ts', RX, { 1: 'hot', 3: 'hot', 4: 'hot', 6: 'ok', 7: 'ok' }], out: ['get() called, not subscribed → requests: []', 'subscribed twice → GET, GET', 'urgent names: ["Asha","Kiran"] (one GET)'] },
+    { st: sIdle, ui: '<span class="muted">/login · header "0 waiting · 0 urgent" · no request</span>', card: ['patient-store.ts', 'ts', STORE, { 6: ['hot', 'signed out → undefined'] }], out: ['sign out → header: 0 waiting · 0 urgent · requests: []'] }
+  ];
+  function show(i) {
+    const s = S[i]; paint(D, s.st); D.FX.textContent = '';
+    $('hUi').innerHTML = s.ui;
+    K.codeCard($('hCard'), { file: s.card[0], lang: s.card[1], code: s.card[2], marks: s.card[3], dim: Object.keys(s.card[3]).length > 0, out: s.out, outLabel: 'Real run' });
+  }
+  const PLAYS = {
+    get: async run => { const p = reqPill(D, 'GET', ''); await K.move(p, [60, 250], [330, 250], 500, run); await K.move(p, [330, 250], [610, 250], 500, run); },
+    back: async run => { const p = reqPill(D, '200 · 4 patients', ''); await K.move(p, [610, 250], [60, 250], 800, run); p.remove(); },
+    fail: async run => { const p = reqPill(D, 'GET', ''); await K.move(p, [60, 250], [610, 250], 700, run); p.remove(); const q = reqPill(D, '500', 'bad'); await K.move(q, [610, 250], [60, 250], 700, run); q.remove(); },
+    get2: async run => { const p = reqPill(D, 'GET', ''); await K.move(p, [60, 250], [610, 250], 700, run); p.remove(); const q = reqPill(D, '200', ''); await K.move(q, [610, 250], [60, 250], 600, run); q.remove(); },
+    post: async run => { const p = reqPill(D, 'POST + Bearer', 'post'); await K.move(p, [60, 250], [610, 250], 800, run); p.remove(); const q = reqPill(D, '201', ''); await K.move(q, [610, 250], [60, 250], 600, run); q.remove(); }
+  };
+  const steps = [
+    { title: 'This step\'s feature: real data', text: 'Until now the patients were a constant in <span class="mono">patient.ts</span>. Now PatientStore loads them from <span class="mono">/api/patients.json</span>, which also contains a fourth patient, Kiran. The store\'s public API (patients, waiting, urgent, discharge) doesn\'t change, so no component had to.' },
+    { title: 'A resource with a reactive URL', text: '<span class="mono">httpResource</span> takes a function that returns the URL. It reads <span class="mono">isLoggedIn()</span>: signed out it returns <span class="mono">undefined</span>, which means "don\'t fetch". On the login page the real run sent no API request at all.' },
+    { title: 'Signing in triggers the request', text: 'Signing in flips <span class="mono">isLoggedIn()</span>, the URL function now returns a URL, and the resource fetches by itself. The interceptor from step 12 added the bearer token. While the test held the response, the page showed "Loading patients…" from <span class="mono">isLoading()</span>.' },
+    { title: 'Resolved', text: 'When the response arrived, <span class="mono">value()</span> held four patients. The <span class="mono">linkedSignal</span> list reset to them, and everything built on it (cards, counts, header) updated: "4 waiting · 2 urgent".' },
+    { title: 'Local edits without a request', text: 'Discharging Asha changes the <span class="mono">linkedSignal</span> copy only: 3 waiting, no HTTP call. If the resource reloads, the list resets to the server\'s data, which is the behaviour you want from a cache.' },
+    { title: 'When the server fails', text: 'With a 500, <span class="mono">error()</span> is set and the list shows the retry message. Careful: <span class="mono">value()</span> <b>throws</b> in this state. The first version (<span class="mono">value() ?? []</span>) logged a ResourceValueError; <span class="mono">hasValue()</span> fixed it.', tip: 'Loading, error and empty states are what interviewers look for in "fetch and show a list". Resources give you all three as signals.' },
+    { title: 'Retry = reload()', text: 'The Retry button calls <span class="mono">store.reload()</span>, which re-runs the same request. One GET, four cards back.' },
+    { title: 'Writes use HttpClient', text: 'Booking an appointment is a POST. <span class="mono">http.post()</span> returns an Observable; <span class="mono">tap</span> records the saved booking, and <span class="mono">subscribe</span> in the form actually sends it, with <span class="mono">next</span> and <span class="mono">error</span> handlers. The request carried the bearer token.' },
+    { title: 'RxJS basics', text: 'HttpClient Observables are <b>cold</b>: creating one sent nothing; subscribing twice sent two GETs. <span class="mono">pipe(map(…))</span> transforms the result, here to urgent names. That\'s enough RxJS to read most Angular code.' },
+    { title: 'Signing out clears it', text: 'After sign-out the URL function returns <span class="mono">undefined</span> again, the resource goes idle, its value clears and the header drops to "0 waiting". CareDesk is complete: 15 steps, one app.' }
+  ];
+  steps.forEach((st, i) => { if (S[i].play) st.play = PLAYS[S[i].play]; });
+  K.story({ root: $('hStory'), show, tipLabel: 'Interview tip', steps });
+
+  /* ===== resource lab ===== */
+  const LD = diagram($('labSvg'));
+  let signed = false, pending = false, data = null, err = false, count = 0;
+  const NAMES = ['Asha', 'Ravi', 'Meera', 'Kiran'];
+  function state() {
+    if (!signed) return sIdle;
+    if (pending) return { ...sLoad, has: !!data, value: data ? `Patient[${data.length}]` : 'undefined' };
+    if (err) return sErr;
+    return data ? { ...sOk, value: `Patient[${data.length}]` } : sIdle;
+  }
+  function lab(msg) {
+    paint(LD, state());
+    const urg = data ? data.filter(n => n === 'Asha' || n === 'Kiran').length : 0;
+    $('lUi').innerHTML = !signed ? '<span class="muted">Signed out: no request. Header "0 waiting".</span>'
+      : pending ? `Loading patients… <span class="muted">(request ${count} in flight: answer it)</span>`
+      : err ? '<span class="err">Could not load patients.</span> <span class="muted">Press Retry.</span>'
+      : data ? `${data.join(' · ')} <span class="muted">· ${data.length} waiting · ${urg} urgent${msg ? ' · ' + msg : ''}</span>` : '';
+  }
+  function fetchNow() { count++; pending = true; err = false; LD.FX.textContent = ''; const p = reqPill(LD, 'GET #' + count, ''); p.setAttribute('transform', 'translate(610,250)'); lab(); }
+  $('lIn').addEventListener('click', () => { if (signed) return; signed = true; fetchNow(); });
+  $('lOut').addEventListener('click', () => { signed = false; pending = false; data = null; err = false; LD.FX.textContent = ''; lab(); });
+  $('l200').addEventListener('click', () => { if (!pending) return; pending = false; err = false; data = NAMES.slice(); LD.FX.textContent = ''; lab('fresh from the server'); });
+  $('l500').addEventListener('click', () => { if (!pending) return; pending = false; err = true; data = null; LD.FX.textContent = ''; lab(); });
+  $('lRetry').addEventListener('click', () => { if (signed && !pending) fetchNow(); });
+  $('lDis').addEventListener('click', () => { if (data && data.length && !pending && !err) { data = data.slice(1); lab('local edit, no request'); } });
+  lab();
+
+  /* ===== observable lab ===== */
+  let created = false, subs = 0;
+  const rlog = []; const rl = l => { rlog.push(l); $('rLog').textContent = rlog.slice(-6).join('\n'); };
+  $('rCreate').addEventListener('click', () => { created = true; rl("const obs$ = http.get('/api/patients.json')  → requests: none"); });
+  $('rSub').addEventListener('click', () => {
+    if (!created) { rl('create the Observable first'); return; }
+    subs++; const s = document.createElement('span'); s.textContent = subs; s.style.left = (subs * 34) + 'px'; $('rLine').appendChild(s);
+    rl(`obs$.subscribe()  → GET /api/patients.json (#${subs})`);
+  });
+  $('rReset').addEventListener('click', () => { created = false; subs = 0; $('rLine').innerHTML = ''; rlog.length = 0; $('rLog').textContent = ''; });
+})();
+</script>
+</body>
+</html>

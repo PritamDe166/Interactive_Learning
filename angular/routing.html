@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Routing</title>
+<meta name="description" content="Angular 22 routing on CareDesk: a route table, router-outlet, routerLink, route parameters as inputs, lazy loading, redirects, wildcards and routerLinkActive, with every result from a real run.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .ng-left { display: grid; gap: 12px; min-width: 0; align-content: start; }
+  .rt .url rect { fill: var(--panel-2); stroke: var(--line); stroke-width: 1.5; }
+  .rt .url text { fill: var(--fg); font-family: var(--mono) !important; font-size: 13px; }
+  .rt .row rect { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; transition: fill .2s, stroke .2s; }
+  .rt .row text { fill: var(--fg-soft); font-family: var(--mono) !important; font-size: 12px; }
+  .rt .row text.n { fill: var(--muted); font-size: 11px; }
+  .rt .row.scan rect { stroke: var(--orange); stroke-width: 2.5; }
+  .rt .row.no rect { fill: var(--panel-2); } .rt .row.no text { fill: var(--muted); }
+  .rt .row.hit rect { stroke: var(--teal); stroke-width: 3; fill: var(--teal-wash); } .rt .row.hit text { fill: var(--fg); }
+  .rt .row.err rect { stroke: var(--red); stroke-width: 3; }
+  .rt .outlet rect { fill: var(--panel); stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 6 4; }
+  .rt .outlet text { fill: var(--fg); font-size: 13px; }
+  .rt .outlet text.s { fill: var(--muted); font-family: var(--mono) !important; font-size: 11px; }
+  .rt .chunk rect { fill: var(--violet); } .rt .chunk text { fill: var(--ink); font-family: var(--mono) !important; font-size: 11px; font-weight: 700; }
+  .rt .verdict { font-size: 12.5px; font-family: var(--mono) !important; }
+  .rt .verdict.ok { fill: var(--good-text); } .rt .verdict.bad { fill: var(--bad-text); }
+  .lab-ctl { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin-top: 10px; }
+  .lab-ctl input[type=text] { font-family: var(--mono); font-size: 14px; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); width: 220px; max-width: 100%; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Angular roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Angular 22 · Part 3 · Control flow &amp; structure</div>
+    <h1>Routing</h1>
+    <ul class="lede">
+      <li>The <b>router</b> maps the URL to a component and renders it in <span class="mono">&lt;router-outlet /&gt;</span>, without reloading the page.</li>
+      <li>Routes are checked <b>top to bottom; the first match wins</b>. Put <span class="mono">'**'</span> last.</li>
+      <li><span class="mono">routerLink</span> navigates inside the app; <span class="mono">href</span> reloads everything.</li>
+      <li>URL parameters such as <span class="mono">:id</span> can arrive as a component <b>input</b> (<span class="mono">withComponentInputBinding</span>).</li>
+      <li><span class="mono">loadComponent</span> lazy-loads a page: its code downloads on first visit.</li>
+    </ul>
+    <div class="cd-trail" data-stage="11"></div>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: CareDesk gets pages</h2>
+    <div class="stage-kind">Orange = route being checked · green = match · URLs, titles and file downloads from the real run</div>
+    <div class="story" id="rtStory">
+      <div class="ng-left">
+        <div class="scroll"><svg class="diagram rt" id="rtSvg" style="min-width:0" viewBox="0 0 640 370" role="img" aria-label="URL bar, the route table checked top to bottom, and the router outlet showing the matched component"></svg></div>
+        <div id="rtCard"></div>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Type a URL and watch the router walk the table. Then break the table the two classic ways.</p>
+
+  <section aria-labelledby="labH">
+    <h2 class="stage-title" id="labH">Router simulator</h2>
+    <div class="stage-kind">Matching follows the rules confirmed in the real runs</div>
+    <div class="lab-ctl">
+      <label class="mono" for="lUrl" style="font-size:13px">localhost:4200</label><input type="text" id="lUrl" value="/patients/2" autocomplete="off" spellcheck="false">
+      <button class="btn primary" type="button" id="lGo">Navigate</button>
+      <span style="font-size:13px">Try: <a href="#" data-u="/">/</a> · <a href="#" data-u="/patients">/patients</a> · <a href="#" data-u="/patients/3">/patients/3</a> · <a href="#" data-u="/patients/99">/patients/99</a> · <a href="#" data-u="/billing">/billing</a></span>
+    </div>
+    <div class="lab-ctl">
+      <div class="seg" id="wSeg" role="group" aria-label="Wildcard position"><button type="button" data-v="last" aria-pressed="true">'**' last</button><button type="button" data-v="first" aria-pressed="false">'**' first</button></div>
+      <div class="seg" id="pmSeg" role="group" aria-label="pathMatch"><button type="button" data-v="full" aria-pressed="true">pathMatch: 'full'</button><button type="button" data-v="none" aria-pressed="false">no pathMatch</button></div>
+    </div>
+    <div class="scroll"><svg class="diagram rt" id="labSvg" viewBox="0 0 640 370" style="min-width:520px;max-width:680px;display:block;margin:8px auto 0" role="img" aria-label="Route matching"></svg></div>
+    <p class="status-line" id="labRes"></p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Default page</span><span class="arrow">→</span><span class="then"><span class="mono">{ path: '', redirectTo: 'patients', pathMatch: 'full' }</span></span></li>
+      <li><span class="if">Page with a parameter</span><span class="arrow">→</span><span class="then"><span class="mono">{ path: 'patients/:id', … }</span> + <span class="mono">id = input.required&lt;string&gt;()</span></span></li>
+      <li><span class="if">Link in a template</span><span class="arrow">→</span><span class="then"><span class="mono">routerLink="/patients"</span> or <span class="mono">[routerLink]="['/patients', p.id]"</span></span></li>
+      <li><span class="if">Navigate from code</span><span class="arrow">→</span><span class="then"><span class="mono">inject(Router).navigate(['/patients'])</span></span></li>
+      <li><span class="if">Highlight the current link</span><span class="arrow">→</span><span class="then"><span class="mono">routerLinkActive="active"</span>, add <span class="mono">[routerLinkActiveOptions]="{ exact: true }"</span> for parents</span></li>
+      <li><span class="if">Big page used rarely</span><span class="arrow">→</span><span class="then"><span class="mono">loadComponent: () =&gt; import('./x').then(m =&gt; m.X)</span></span></li>
+      <li><span class="if">Unknown URL</span><span class="arrow">→</span><span class="then"><span class="mono">{ path: '**', component: NotFound }</span>, always last</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: CareDesk's routes</h2>
+    <div class="cc-pair">
+      <div id="refRoutes"></div>
+      <div id="refDetail"></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b><span class="mono">routerLinkActiveOptions</span> needs square brackets.</b> Your notes write it as a plain attribute. Without brackets the value is the string <span class="mono">"{ exact: true }"</span>, and the CareDesk build failed: <span class="mono">TS2322: Type '"{ exact: true }"' is not assignable to type '{ exact: boolean; } | Partial&lt;IsActiveMatchOptions&gt; | …'</span>. Also, it's <span class="mono">routerLinkActive</span> (camel case).</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>What <span class="mono">pathMatch: 'full'</span> means.</b> The notes say it makes the router find a full match for <span class="mono">home</span>. It applies to the <b>empty path</b> itself: redirect only when the whole URL is empty. Every URL starts with an empty prefix, so without it the route would match everything; Angular refuses that configuration (NG04014).</p></div>
+      <div class="note"><span class="flag add">Updated</span><p><b>No routing module.</b> The notes' <span class="mono">AppRoutingModule</span> with <span class="mono">RouterModule.forRoot(routes)</span> is replaced by <span class="mono">app.routes.ts</span> plus <span class="mono">provideRouter(routes)</span> in <span class="mono">app.config.ts</span>. Components import <span class="mono">RouterOutlet</span>, <span class="mono">RouterLink</span>, <span class="mono">RouterLinkActive</span> themselves.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Route titles and parameters as inputs.</b> <span class="mono">title</span> on a route set the browser tab ("Patient · CareDesk" on <span class="mono">/patients/2</span>). <span class="mono">withComponentInputBinding()</span> passed <span class="mono">:id</span> straight into <span class="mono">id = input.required&lt;string&gt;()</span>. URL values are always strings: convert with <span class="mono">Number()</span>.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>How does the router choose a route?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>It checks the routes in array order and takes the first whose path matches the URL. Order matters: specific before general, <span class="mono">'**'</span> last.</p></div></details>
+      <details><summary><span class="mono">'**'</span> was put first. What happened?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Every URL, including <span class="mono">/</span> and <span class="mono">/patients/2</span>, showed "Page not found" in the real run.</p></div></details>
+      <details><summary><span class="mono">href="/patients"</span> vs <span class="mono">routerLink="/patients"</span>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">href</span> made the browser reload the app (main.js was downloaded again and all state reset). <span class="mono">routerLink</span> swapped the component in place with no downloads.</p></div></details>
+      <details><summary>What does lazy loading change?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>PatientDetail's code moved into a separate chunk (<span class="mono">chunk-FPJUGB3L.js</span>) that downloaded only when the first patient link was clicked, keeping the first load smaller.</p></div></details>
+      <details><summary>Why is <span class="mono">id</span> a string input?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Everything in a URL is text. Convert it (<span class="mono">Number(this.id())</span>), and handle ids that don't exist: <span class="mono">/patients/99</span> showed "No patient with id 99."</p></div></details>
+      <details><summary>Why did "Waiting room" lose its active style on <span class="mono">/patients/2</span>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">{ exact: true }</span>. Without it the link counts as active for any URL that starts with <span class="mono">/patients</span>; in the real run it stayed active on the detail page.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: your Obsidian notes "Routing Concepts" and "Navbar example"; angular.dev "Routing overview", "Define routes", "Navigate to routes", "Read route state" and the NG04014 error guide. URLs, titles, chunk names and errors on this page were recorded in CareDesk (Angular CLI 22.2.5); chunk file names change with every build.</footer>
+</div>
+
+<script src="caredesk.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const ROUTES_LAST = [
+    { p: "''", t: "redirectTo 'patients' (full)", kind: 'redir' },
+    { p: "'patients'", t: 'PatientList', kind: 'list' },
+    { p: "'patients/:id'", t: 'loadComponent → PatientDetail', kind: 'detail' },
+    { p: "'**'", t: 'NotFound', kind: 'wild' }
+  ];
+  function build(svg, routes) {
+    svg.textContent = '';
+    const url = K.el('g', { class: 'url' }, svg); K.el('rect', { x: 20, y: 12, width: 600, height: 34, rx: 17 }, url);
+    const ut = K.text(url, 40, 34, 'localhost:4200/'); ut.style.textAnchor = 'start';
+    const rows = routes.map((r, i) => {
+      const g = K.el('g', { class: 'row' }, svg); const y = 70 + i * 46;
+      K.el('rect', { x: 40, y, width: 560, height: 38, rx: 8 }, g);
+      const n = K.text(g, 54, y + 23, String(i + 1), 'n'); n.style.textAnchor = 'start';
+      const a = K.text(g, 76, y + 24, 'path: ' + r.p); a.style.textAnchor = 'start';
+      const b = K.text(g, 330, y + 24, r.t); b.style.textAnchor = 'start';
+      return g;
+    });
+    const out = K.el('g', { class: 'outlet' }, svg); K.el('rect', { x: 40, y: 270, width: 560, height: 60, rx: 10 }, out);
+    const o1 = K.text(out, 56, 293, '<router-outlet />', 's'); o1.style.textAnchor = 'start';
+    const o2 = K.text(out, 56, 316, ''); o2.style.textAnchor = 'start';
+    const fx = K.el('g', {}, svg);
+    return { ut, rows, o2, fx };
+  }
+  const G = build($('rtSvg'), ROUTES_LAST);
+  function paint(G, url, st, outText, extra) {
+    G.ut.textContent = 'localhost:4200' + url;
+    G.rows.forEach((r, i) => r.setAttribute('class', 'row ' + (st[i] || '')));
+    G.o2.textContent = outText || '';
+    G.fx.textContent = '';
+    if (extra && extra.chunk) { const g = K.el('g', { class: 'chunk' }, G.fx); K.el('rect', { x: 420, y: 284, width: 170, height: 26, rx: 6 }, g); const t = K.text(g, 505, 301, '↓ ' + extra.chunk); t.style.textAnchor = 'middle'; }
+    if (extra && extra.verdict) { const t = K.text(G.fx, 40, 356, extra.verdict, 'verdict ' + (extra.bad ? 'bad' : 'ok')); t.style.textAnchor = 'start'; }
+  }
+  const ROUTES_TS = `import { Routes } from '@angular/router';
+import { PatientList } from './patient-list/patient-list';
+import { NotFound } from './not-found/not-found';
+
+export const routes: Routes = [
+  { path: '', redirectTo: 'patients', pathMatch: 'full' },
+  { path: 'patients', component: PatientList, title: 'Waiting room · CareDesk' },
+  {
+    path: 'patients/:id',
+    loadComponent: () => import('./patient-detail/patient-detail').then(m => m.PatientDetail),
+    title: 'Patient · CareDesk',
+  },
+  { path: '**', component: NotFound, title: 'Not found · CareDesk' },
+];`;
+  const CONFIG = `// app.config.ts
+providers: [
+  provideBrowserGlobalErrorListeners(),
+  provideRouter(routes, withComponentInputBinding())
+]
+
+// app.html: the list moved into a route
+<app-header />
+<main>
+  <router-outlet />
+</main>`;
+  const CARD = `<!-- patient-card.html -->
+<h3><a [routerLink]="['/patients', patient().id]">{{ heading() }}</a></h3>`;
+  const DETAIL = `export class PatientDetail {
+  private readonly store = inject(PatientStore);
+  private readonly router = inject(Router);
+
+  readonly id = input.required<string>();          // from the URL: /patients/:id
+  protected readonly patient = computed(() => this.store.byId(Number(this.id())));
+
+  discharge() {
+    this.store.discharge(Number(this.id()));
+    this.router.navigate(['/patients']);
+  }
+}`;
+  const DETAIL_HTML = `<a routerLink="/patients">← Waiting room</a>
+@if (patient(); as p) {
+  <h2>{{ p.name }}</h2>
+  <p>{{ p.department }} · {{ p.triage }}</p>
+  <button (click)="discharge()">Discharge</button>
+} @else {
+  <p>No patient with id {{ id() }}.</p>
+}`;
+  const NAV = `<nav>
+  <a routerLink="/patients" routerLinkActive="active"
+     [routerLinkActiveOptions]="{ exact: true }">Waiting room</a>
+</nav>`;
+  const S = [
+    { url: '', st: {}, out: '', card: ['app.config.ts + app.html', 'ts', CONFIG, { 4: 'hot', 10: ['hot', 'pages render here'] }] },
+    { url: '', st: {}, out: '', card: ['app.routes.ts', 'ts', ROUTES_TS, { 6: 'hot', 7: 'hot', 8: 'hot', 9: 'hot', 10: 'hot', 13: 'hot' }] },
+    { url: '/patients', st: { 0: 'no', 1: 'hit' }, out: 'PatientList  ·  tab title "Waiting room · CareDesk"', card: ['app.routes.ts', 'ts', ROUTES_TS, { 6: ['hot', '/ → /patients'], 7: 'ok' }], extra: { verdict: 'real: / → /patients · title "Waiting room · CareDesk"' }, play: [['/', [[0, 'scan'], [0, 'hit']]], ['/patients', [[0, 'no'], [1, 'scan'], [1, 'hit']]]] },
+    { url: '/patients/2', st: { 0: 'no', 1: 'no', 2: 'hit' }, out: 'PatientDetail (id = "2")  ·  "Ravi"', card: ['patient-card.html', 'ng', CARD, { 2: ['hot', 'link with a parameter'] }], extra: { chunk: 'chunk-FPJUGB3L.js', verdict: 'real: lazy chunk downloaded on first visit · title "Patient · CareDesk"' }, play: [['/patients/2', [[0, 'scan'], [0, 'no'], [1, 'scan'], [1, 'no'], [2, 'scan'], [2, 'hit']]]] },
+    { url: '/patients/99', st: { 0: 'no', 1: 'no', 2: 'hit' }, out: 'PatientDetail (id = "99")  ·  "No patient with id 99."', card: ['patient-detail.ts', 'ts', DETAIL, { 5: ['hot', 'URL values are strings'], 6: 'hot' }], extra: { verdict: 'the route matches; the component handles a missing patient' } },
+    { url: '/patients', st: { 0: 'no', 1: 'hit' }, out: 'PatientList  ·  header "2 waiting · 1 urgent"', card: ['patient-detail.ts', 'ts', DETAIL, { 8: 'hot', 9: 'hot', 10: ['ok', 'navigate from code'] }], extra: { verdict: 'real: discharge Ravi → /patients, cards Asha + Meera' } },
+    { url: '/billing', st: { 0: 'no', 1: 'no', 2: 'no', 3: 'hit' }, out: 'NotFound  ·  "Page not found"', card: ['app.routes.ts', 'ts', ROUTES_TS, { 13: ['ok', 'always last'] }], extra: { verdict: 'real: /billing → "Page not found" · title "Not found · CareDesk"' }, play: [['/billing', [[0, 'no'], [1, 'no'], [2, 'no'], [3, 'scan'], [3, 'hit']]]] },
+    { url: '/', st: { 0: 'err' }, out: '(nothing rendered)', card: ['app.routes.ts (experiment)', 'ts', `{ path: '', redirectTo: 'patients' },   // no pathMatch`, { 1: 'bad' }], out2: ["NG04014: Invalid configuration of route '{path: \"\", redirectTo: \"patients\"}': please provide 'pathMatch'. The default value of 'pathMatch' is 'prefix', but often the intent is to use 'full'."], extra: { verdict: 'real: runtime error, empty page', bad: true } },
+    { url: '/patients/2', st: { 0: 'no', 1: 'no', 2: 'hit' }, out: 'PatientDetail  ·  nav link: not active', card: ['header.html', 'ng', NAV, { 2: 'hot', 3: ['hot', 'needs [ ]'] }], out2: ['/patients/2 with exact: true    → class ""', '/patients/2 without exact      → class "active"', 'href="/patients" instead       → main.js downloaded again (full reload)', 'options without [ ] → TS2322 (build error)'] }
+  ];
+  function show(i) {
+    const s = S[i];
+    paint(G, s.url, s.st, s.out, s.extra);
+    K.codeCard($('rtCard'), { file: s.card[0], lang: s.card[1], code: s.card[2], marks: s.card[3], dim: Object.keys(s.card[3]).length > 0, out: s.out2, outLabel: 'Real run' });
+  }
+  async function scan(run, seq) {
+    for (const [url, steps] of seq) {
+      const st = {};
+      paint(G, url, st, '');
+      for (const [i, v] of steps) { st[i] = v; paint(G, url, st, ''); await K.sleep(380, run); }
+      await K.sleep(250, run);
+    }
+  }
+  const steps = [
+    { title: 'Why routes', text: 'CareDesk needs addresses: the waiting room, a page per patient, and something for wrong URLs. The router turns the URL into a component inside <span class="mono">&lt;router-outlet /&gt;</span>. <span class="mono">app.html</span> now hosts the outlet instead of the list itself.' },
+    { title: 'The route table', text: '<span class="mono">app.routes.ts</span> lists path → component pairs. <span class="mono">provideRouter(routes, withComponentInputBinding())</span> in <span class="mono">app.config.ts</span> turns it on and lets URL parameters arrive as inputs. Each route can also set the tab <span class="mono">title</span>.' },
+    { title: 'Opening "/"', text: 'The router checks routes top-down. The empty path with <span class="mono">pathMatch: \'full\'</span> matches only an empty URL and redirects to <span class="mono">patients</span>. The second pass finds <span class="mono">\'patients\'</span> and renders PatientList.' },
+    { title: 'routerLink and a parameter', text: 'Each card\'s heading is a <span class="mono">[routerLink]="[\'/patients\', p.id]"</span>. Clicking Ravi gave <span class="mono">/patients/2</span>: rows 1 and 2 don\'t match, <span class="mono">patients/:id</span> does with <span class="mono">id = "2"</span>. Its code arrived as a separate chunk, downloaded only now (lazy loading).', tip: 'Lazy loading = smaller first download. Each <span class="mono">loadComponent</span> becomes its own JavaScript chunk.' },
+    { title: 'The parameter is an input', text: '<span class="mono">id = input.required&lt;string&gt;()</span> receives "2". It\'s always a string, so the component converts it to look up the patient. An unknown id still matches the route; the component shows "No patient with id 99."' },
+    { title: 'Navigating from code', text: 'After discharging on the detail page, <span class="mono">router.navigate([\'/patients\'])</span> goes back to the list. In the real run the header immediately said "2 waiting · 1 urgent" (same PatientStore from step 10).' },
+    { title: 'Wildcard: last, always', text: '<span class="mono">/billing</span> matches nothing until <span class="mono">\'**\'</span>, which matches anything. Put it first and it wins every time: in the real run every URL showed "Page not found".' },
+    { title: 'Forgetting pathMatch', text: 'Without <span class="mono">pathMatch: \'full\'</span>, the empty path would match every URL as a prefix and redirect forever. Angular stops at start-up with NG04014 and renders nothing.' },
+    { title: 'Active links', text: '<span class="mono">routerLinkActive="active"</span> styles the nav link for the current page. With <span class="mono">{ exact: true }</span> it\'s active only on <span class="mono">/patients</span>, not <span class="mono">/patients/2</span>. Note the square brackets, and never use <span class="mono">href</span> for internal links. Step 11 of CareDesk is done.' }
+  ];
+  steps.forEach((st, i) => { if (S[i].play) st.play = run => scan(run, S[i].play); });
+  K.story({ root: $('rtStory'), show, tipLabel: 'Interview tip', steps });
+
+  K.codeCard($('refRoutes'), { file: 'app.routes.ts', lang: 'ts', code: ROUTES_TS });
+  K.codeCard($('refDetail'), { file: 'patient-detail.html', lang: 'ng', code: DETAIL_HTML });
+
+  /* ===== simulator ===== */
+  let wild = 'last', pm = 'full';
+  const L = { svg: $('labSvg') };
+  function routesNow() {
+    const r = ROUTES_LAST.slice(0, 3).map(x => ({ ...x }));
+    if (pm === 'none') r[0].t = "redirectTo 'patients' (no pathMatch)";
+    return wild === 'first' ? [ROUTES_LAST[3], ...r] : [...r, ROUTES_LAST[3]];
+  }
+  function matches(r, segs) {
+    if (r.kind === 'wild') return true;
+    if (r.kind === 'redir') return segs.length === 0;
+    if (r.kind === 'list') return segs.length === 1 && segs[0] === 'patients';
+    if (r.kind === 'detail') return segs.length === 2 && segs[0] === 'patients';
+  }
+  async function go() {
+    const run = K.newRun('lab');
+    const rts = routesNow(); const LG = build(L.svg, rts);
+    let url = $('lUrl').value.trim(); if (!url.startsWith('/')) url = '/' + url;
+    try {
+      if (pm === 'none') { const st = {}; st[rts.findIndex(r => r.kind === 'redir')] = 'err'; paint(LG, url, st, '(nothing rendered)', { verdict: 'NG04014 at start-up: provide pathMatch', bad: true }); $('labRes').innerHTML = '<b class="bad-text">NG04014.</b> Angular validates the whole table at start-up, whatever the URL.'; return; }
+      let segs = url.split('/').filter(Boolean), hops = 0;
+      while (hops++ < 3) {
+        const st = {}; let hit = -1;
+        for (let i = 0; i < rts.length; i++) { st[i] = 'scan'; paint(LG, url, st, ''); await K.sleep(300, run); if (matches(rts[i], segs)) { st[i] = 'hit'; hit = i; break; } st[i] = 'no'; }
+        paint(LG, url, st, '');
+        const r = rts[hit];
+        if (r.kind === 'redir') { await K.sleep(400, run); url = '/patients'; segs = ['patients']; continue; }
+        const out = r.kind === 'list' ? 'PatientList' : r.kind === 'detail' ? `PatientDetail (id = "${segs[1]}")${['1', '2', '3'].includes(segs[1]) ? '' : '  ·  "No patient with id ' + segs[1] + '."'}` : 'NotFound  ·  "Page not found"';
+        paint(LG, url, st, out, r.kind === 'detail' ? { chunk: 'chunk-….js (first visit)' } : null);
+        $('labRes').innerHTML = `Matched route ${hit + 1} (<span class="mono">${r.p}</span>). ${wild === 'first' && r.kind === 'wild' ? '<b class="bad-text">The wildcard is first, so it wins for every URL.</b>' : ''}`;
+        break;
+      }
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('lGo').addEventListener('click', go);
+  $('lUrl').addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+  document.querySelectorAll('[data-u]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); $('lUrl').value = a.dataset.u; go(); }));
+  K.seg($('wSeg'), v => { wild = v; go(); });
+  K.seg($('pmSeg'), v => { pm = v; go(); });
+  go();
+})();
+</script>
+</body>
+</html>

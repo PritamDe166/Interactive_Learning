@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Route guards & login flow</title>
+<meta name="description" content="Angular 22 route guards on CareDesk: a functional authGuard that redirects to a login page with a returnUrl, an AuthStore holding a demo token, and an HTTP interceptor that attaches it, with results from a real run.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .ng-left { display: grid; gap: 12px; min-width: 0; align-content: start; }
+  .gf .node.gate rect { stroke: var(--yellow); stroke-width: 2.5; }
+  .gf .node.ok rect { stroke: var(--teal); stroke-width: 3; fill: var(--teal-wash); }
+  .gf .node.bad rect { stroke: var(--red); stroke-width: 3; }
+  .gf .node.idle { opacity: .4; }
+  .gf .path { stroke: var(--line); stroke-width: 2.2; fill: none; }
+  .gf .path.hot { stroke: var(--cyan); stroke-width: 3; }
+  .gf .path.red { stroke: var(--red); stroke-width: 3; stroke-dasharray: 6 4; }
+  .gf .lbl { font-family: var(--mono) !important; font-size: 11px; fill: var(--fg-soft); }
+  .gf .lbl.bad { fill: var(--bad-text); } .gf .lbl.ok { fill: var(--good-text); }
+  .gf .sect { font-size: 11px; fill: var(--muted); font-family: var(--mono) !important; letter-spacing: .06em; }
+  .lab-ctl { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin-top: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Angular roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Angular 22 · Part 3 · Control flow &amp; structure</div>
+    <h1>Route guards &amp; login flow</h1>
+    <ul class="lede">
+      <li>A <b>guard</b> is a function the router runs before entering a route: return <span class="mono">true</span> to continue, or a <span class="mono">UrlTree</span> to redirect.</li>
+      <li>CareDesk's <span class="mono">authGuard</span> sends signed-out users to <span class="mono">/login?returnUrl=…</span> and brings them back after sign-in.</li>
+      <li>An <b>interceptor</b> sees every <span class="mono">HttpClient</span> request; CareDesk's adds <span class="mono">Authorization: Bearer …</span>.</li>
+      <li>Guards are <b>user experience, not security</b>. Anyone can edit the browser; the server must check the token.</li>
+      <li>Functional guards (<span class="mono">CanActivateFn</span>) replaced class-based guards, which are deprecated.</li>
+    </ul>
+    <div class="cd-trail" data-stage="12"></div>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: signing in to CareDesk</h2>
+    <div class="stage-kind">Top row: navigation · bottom row: API requests · URLs and headers from the real run</div>
+    <div class="story" id="gStory">
+      <div class="ng-left">
+        <div class="scroll"><svg class="diagram gf" id="gSvg" style="min-width:0" viewBox="0 0 680 340" role="img" aria-label="Navigation passes the router and authGuard to a page or is redirected to login; API requests pass the auth interceptor"></svg></div>
+        <div id="gCard"></div>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Sign in and out, open pages, send a request. The rules match CareDesk's real behaviour.</p>
+
+  <section aria-labelledby="labH">
+    <h2 class="stage-title" id="labH">Guard simulator</h2>
+    <div class="lab-ctl">
+      <div><div class="label">Session</div><div class="seg" id="sesSeg" role="group" aria-label="Session"><button type="button" data-v="out" aria-pressed="true">Signed out</button><button type="button" data-v="in" aria-pressed="false">Signed in (Nurse Kavya)</button><button type="button" data-v="fake" aria-pressed="false">Token edited by hand</button></div></div>
+      <div><div class="label">Open</div><div class="seg" id="urlSeg" role="group" aria-label="URL"><button type="button" data-v="/patients" aria-pressed="true">/patients</button><button type="button" data-v="/patients/2" aria-pressed="false">/patients/2</button><button type="button" data-v="/login" aria-pressed="false">/login</button></div></div>
+      <button class="btn" type="button" id="apiBtn">Send GET /api/ping.json</button>
+    </div>
+    <div class="scroll"><svg class="diagram gf" id="labSvg" viewBox="0 0 680 340" style="min-width:540px;max-width:720px;display:block;margin:8px auto 0" role="img" aria-label="Guard simulation"></svg></div>
+    <p class="status-line" id="labRes"></p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Protect a route</span><span class="arrow">→</span><span class="then"><span class="mono">canActivate: [authGuard]</span> on the route</span></li>
+      <li><span class="if">Redirect from a guard</span><span class="arrow">→</span><span class="then"><span class="mono">return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } })</span></span></li>
+      <li><span class="if">Generate one</span><span class="arrow">→</span><span class="then"><span class="mono">ng g guard auth --functional</span> (or pick CanActivate in the prompt)</span></li>
+      <li><span class="if">Add a header to every API call</span><span class="arrow">→</span><span class="then"><span class="mono">HttpInterceptorFn</span> + <span class="mono">provideHttpClient(withInterceptors([...]))</span></span></li>
+      <li><span class="if">Optional query param bound to an input</span><span class="arrow">→</span><span class="then">it's <span class="mono">undefined</span> when absent: <span class="mono">this.returnUrl() ?? '/patients'</span></span></li>
+      <li><span class="if">"Is the guard enough security?"</span><span class="arrow">→</span><span class="then">no: validate the token on the server for every API call</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: CareDesk's auth pieces</h2>
+    <div class="cc-pair">
+      <div id="refStore"></div>
+      <div id="refGuard"></div>
+    </div>
+    <div class="scroll card table-card" style="margin-top:14px">
+      <table>
+        <thead><tr><th>Guard</th><th>Runs</th><th>Typical use</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">canActivate</td><td>before entering a route</td><td>signed in? has a role?</td></tr>
+          <tr><td class="mono">canActivateChild</td><td>before entering any child route</td><td>protect a whole section</td></tr>
+          <tr><td class="mono">canDeactivate</td><td>before leaving a route</td><td>"You have unsaved changes"</td></tr>
+          <tr><td class="mono">canMatch</td><td>while matching (can skip the route)</td><td>different component per role; don't even download a lazy chunk</td></tr>
+          <tr><td class="mono">resolve</td><td>before activation, to fetch data</td><td>load the patient before showing the page</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>What was deprecated.</b> The notes say "the CanActivate function has been deprecated" in v16. It was the <b>class-based</b> guard (a class implementing the <span class="mono">CanActivate</span> interface) that was deprecated; the <span class="mono">canActivate</span> route property is current, and takes functions like CareDesk's <span class="mono">authGuard</span>.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>Return a UrlTree instead of navigate + false.</b> The notes' guard calls <span class="mono">router.navigate(['login'])</span> and returns <span class="mono">false</span>. Returning <span class="mono">router.createUrlTree(...)</span> lets the router cancel and redirect in one step, and lets you carry a <span class="mono">returnUrl</span>.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>The login check loop.</b> The notes' <span class="mono">forEach</span> with <span class="mono">return true</span> doesn't stop the loop (return only exits the callback). Use <span class="mono">some()</span> or <span class="mono">find()</span>, as <span class="mono">AuthStore.login</span> does.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>Demo token ≠ authentication.</b> A random token created in the browser and stored in <span class="mono">localStorage</span> proves nothing: in the real run, setting <span class="mono">caredesk.token</span> to "anything" by hand opened the patient list. Real apps get a signed token (or an HttpOnly cookie) from a server that checks credentials, and the API verifies it on every request.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Input binding sets <span class="mono">undefined</span>.</b> With <span class="mono">withComponentInputBinding()</span>, opening <span class="mono">/login</span> without <span class="mono">?returnUrl</span> set the input to <span class="mono">undefined</span>, overriding its default, and navigation logged <span class="mono">NG04018: Error parsing URL undefined</span>. Fixed with <span class="mono">?? '/patients'</span>.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>What can a <span class="mono">CanActivateFn</span> return?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">true</span>/<span class="mono">false</span>, a <span class="mono">UrlTree</span> or <span class="mono">RedirectCommand</span> to redirect, or an Observable/Promise of those for async checks.</p></div></details>
+      <details><summary>Signed out, Arjun opens <span class="mono">/patients/2</span>. What happens?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>The guard redirects to <span class="mono">/login?returnUrl=%2Fpatients%2F2</span>. After signing in, <span class="mono">navigateByUrl(returnUrl)</span> took him straight to Ravi's page.</p></div></details>
+      <details><summary>Where does <span class="mono">inject()</span> work inside a guard?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Anywhere in the guard function body: the router runs guards in an injection context, so <span class="mono">inject(AuthStore)</span> and <span class="mono">inject(Router)</span> work.</p></div></details>
+      <details><summary>Why is a client-side guard not security?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>The code runs on the user's machine and can be changed or skipped. It only stops honest users from seeing pages they can't use. The API must reject requests without a valid token.</p></div></details>
+      <details><summary>What does an interceptor do here?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>It clones each outgoing request and adds <span class="mono">Authorization: Bearer &lt;token&gt;</span>. Signed out, requests went without the header; signed in, they carried <span class="mono">Bearer demo-…</span>.</p></div></details>
+      <details><summary>Why clone the request?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">HttpRequest</span> objects are immutable. <span class="mono">req.clone({ setHeaders: {...} })</span> creates a modified copy to pass to <span class="mono">next()</span>.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: your Obsidian notes "RouteGuard explaination", "Implementing token for login", "Routing Concepts" and "Constants in angular"; angular.dev "Route guards", "Interceptors" and the NG04018 guide. URLs, headers and messages are from CareDesk (Angular CLI 22.2.5). Staff emails use the reserved .test domain; the app stores no passwords.</footer>
+</div>
+
+<script src="caredesk.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  function flow(svg) {
+    const NP = { url: [75, 70, 'URL', '/patients'], router: [225, 70, 'Router', 'match route'], guard: [385, 70, 'authGuard', 'signed in?'], page: [575, 70, 'Page', 'PatientList'], login: [385, 175, 'Login', '/login?returnUrl=…'], http: [100, 285, 'HttpClient', 'GET /api/…'], icp: [350, 285, 'authInterceptor', 'add header'], api: [585, 285, 'API (server)', 'must verify']};
+    const paths = {
+      a: K.el('path', { d: 'M135 70 H165', class: 'path' }, svg), b: K.el('path', { d: 'M285 70 H315', class: 'path' }, svg),
+      c: K.el('path', { d: 'M455 70 H505', class: 'path' }, svg), d: K.el('path', { d: 'M385 94 V151', class: 'path' }, svg),
+      e: K.el('path', { d: 'M455 175 H575 V94', class: 'path' }, svg), f: K.el('path', { d: 'M165 285 H270', class: 'path' }, svg), g: K.el('path', { d: 'M430 285 H515', class: 'path' }, svg)
+    };
+    const s1 = K.text(svg, 10, 22, 'NAVIGATION', 'sect'); s1.style.textAnchor = 'start';
+    const s2 = K.text(svg, 10, 240, 'API REQUESTS', 'sect'); s2.style.textAnchor = 'start';
+    const N = {};
+    for (const [k, [x, y, t, s]] of Object.entries(NP)) { N[k] = K.node(svg, x, y, k === 'icp' ? 160 : 130, 48, t, s, k === 'guard' ? 'gate' : ''); }
+    const FX = K.el('g', {}, svg);
+    return { N, paths, FX, NP };
+  }
+  function paint(F, o) {
+    for (const k in F.N) { const n = F.N[k]; n.g.setAttribute('class', 'node ' + (k === 'guard' ? 'gate ' : '') + (o.nodes && o.nodes[k] ? o.nodes[k] : (o.nodes ? 'idle' : ''))); }
+    for (const k in F.paths) F.paths[k].setAttribute('class', 'path ' + ((o.paths && o.paths[k]) || ''));
+    if (o.sub) for (const k in o.sub) F.N[k].sub.textContent = o.sub[k];
+    F.FX.textContent = '';
+    (o.labels || []).forEach(([x, y, t, c]) => { const e = K.text(F.FX, x, y, t, 'lbl ' + (c || '')); e.style.textAnchor = 'middle'; });
+  }
+  const G = flow($('gSvg'));
+  const DEF = { url: '/patients', page: 'PatientList', login: '/login?returnUrl=…', http: 'GET /api/…', api: 'must verify' };
+  const STORE = `// Demo only: staff who may sign in (no passwords in this teaching app)
+const STAFF = [
+  { name: 'Nurse Kavya', email: 'kavya@caredesk.test' },
+  { name: 'Dr Arjun', email: 'arjun@caredesk.test' },
+];
+
+@Service()
+export class AuthStore {
+  private readonly token = signal(localStorage.getItem('caredesk.token'));
+  readonly user = signal(localStorage.getItem('caredesk.user'));
+  readonly isLoggedIn = computed(() => this.token() !== null);
+
+  login(email: string): boolean {
+    const found = STAFF.find(s => s.email.toLowerCase() === email.trim().toLowerCase());
+    if (!found) return false;
+    const token = 'demo-' + crypto.randomUUID();      // a real app gets this from the server
+    localStorage.setItem('caredesk.token', token);
+    localStorage.setItem('caredesk.user', found.name);
+    this.token.set(token);
+    this.user.set(found.name);
+    return true;
+  }
+
+  logout() { /* remove both keys, set signals to null */ }
+  bearer() { return this.token(); }
+}`;
+  const GUARD = `import { inject } from '@angular/core';
+import { CanActivateFn, Router } from '@angular/router';
+import { AuthStore } from './auth-store';
+
+export const authGuard: CanActivateFn = (route, state) => {
+  if (inject(AuthStore).isLoggedIn()) {
+    return true;
+  }
+  return inject(Router).createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
+};
+
+// app.routes.ts
+{ path: 'patients', component: PatientList, canActivate: [authGuard], ... },
+{ path: 'patients/:id', canActivate: [authGuard], loadComponent: ..., ... },
+{ path: 'login', component: Login, ... },`;
+  const LOGIN = `export class Login {
+  private readonly auth = inject(AuthStore);
+  private readonly router = inject(Router);
+
+  readonly returnUrl = input<string>();             // from ?returnUrl=... (undefined if absent)
+  protected readonly email = signal('');
+  protected readonly error = signal('');
+
+  signIn() {
+    if (this.auth.login(this.email())) {
+      this.router.navigateByUrl(this.returnUrl() ?? '/patients');
+    } else {
+      this.error.set('Unknown staff email');
+    }
+  }
+}`;
+  const ICP = `export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const token = inject(AuthStore).bearer();
+  if (!token) return next(req);
+  return next(req.clone({ setHeaders: { Authorization: \`Bearer \${token}\` } }));
+};
+
+// app.config.ts
+provideHttpClient(withInterceptors([authInterceptor]))`;
+  const HEADER = `<nav>
+  <a routerLink="/patients" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Waiting room</a>
+  @if (auth.isLoggedIn()) {
+    <span>{{ auth.user() }}</span> <button (click)="signOut()">Sign out</button>
+  }
+</nav>
+
+signOut() {
+  this.auth.logout();
+  this.router.navigate(['/login']);
+}`;
+  const S = [
+    { o: {}, sub: DEF, card: ['auth-store.ts', STORE, { 8: 'hot', 9: ['hot', 'survives reloads'], 11: ['ok', 'what the guard asks'], 16: ['bad', 'demo only'] }] },
+    { o: { nodes: { url: 'ok', router: 'ok', guard: 'bad', login: 'ok' }, paths: { a: 'hot', b: 'hot', d: 'red' }, labels: [[440, 125, 'UrlTree → /login', 'bad']] }, sub: { ...DEF, url: '/patients', login: '/login?returnUrl=%2Fpatients' }, card: ['auth-guard.ts', GUARD, { 6: 'hot', 9: ['bad', 'redirect, remember where'] }], out: ['open /patients (signed out) → /login?returnUrl=%2Fpatients', 'tab title: "Sign in · CareDesk"'] },
+    { o: { nodes: { login: 'bad' }, paths: {}, labels: [[385, 220, 'Unknown staff email', 'bad']] }, sub: { ...DEF, login: '/login?returnUrl=%2Fpatients' }, card: ['login.ts', LOGIN, { 10: 'hot', 13: ['bad', 'someone@else.test'] }], out: ['someone@else.test → "Unknown staff email" (still on /login)'] },
+    { o: { nodes: { login: 'ok', guard: 'ok', page: 'ok' }, paths: { e: 'hot' }, labels: [[530, 165, 'navigateByUrl(returnUrl)', 'ok']] }, sub: { ...DEF, login: 'kavya@caredesk.test', page: 'PatientList' }, card: ['login.ts', LOGIN, { 10: 'ok', 11: ['ok', 'back to /patients'] }], out: ['kavya@caredesk.test → /patients', 'header: "Nurse Kavya  Sign out"', 'localStorage caredesk.token = demo-452fefa…'] },
+    { o: { nodes: { url: 'ok', router: 'ok', guard: 'ok', login: 'ok', page: 'ok' }, paths: { a: 'hot', b: 'hot', d: 'red', e: 'hot' } }, sub: { ...DEF, url: '/patients/2', login: '?returnUrl=%2Fpatients%2F2', page: 'PatientDetail: Ravi' }, card: ['auth-guard.ts', GUARD, { 9: ['hot', 'state.url = /patients/2'] }], out: ['open /patients/2 (signed out) → /login?returnUrl=%2Fpatients%2F2', 'sign in as arjun@caredesk.test → /patients/2 · h2 "Ravi"'] },
+    { o: { nodes: { login: 'bad' } }, sub: { ...DEF, login: '/login (no returnUrl)' }, card: ['login.ts (first version)', `readonly returnUrl = input('/patients');   // default ignored!
+
+this.router.navigateByUrl(this.returnUrl());`, { 1: 'bad', 3: 'bad' }], out: ["NG04018: Error parsing URL undefined. Falling back to '/' instead.", "TypeError: Cannot read properties of undefined (reading 'startsWith')"] },
+    { o: { nodes: { login: 'ok' } }, sub: { ...DEF, login: '/login' }, card: ['header.html + header.ts', HEADER, { 3: 'hot', 4: 'hot', 10: 'hot', 11: 'hot' }], lang: 'ng', out: ['Sign out → /login · caredesk.token = null'] },
+    { o: { nodes: { http: 'ok', icp: 'ok', api: 'ok' }, paths: { f: 'hot', g: 'hot' }, labels: [[470, 330, 'Authorization: Bearer demo-c7466eed…', 'ok']] }, sub: { ...DEF, http: 'GET /api/ping.json' }, card: ['auth-interceptor.ts', ICP, { 2: 'hot', 3: ['hot', 'signed out: unchanged'], 4: ['ok', 'immutable: clone'], 8: 'hot' }], out: ['signed out → Authorization: (none)', 'signed in  → Authorization: Bearer demo-c7466eed…'] },
+    { o: { nodes: { guard: 'bad', page: 'bad', api: 'ok' }, paths: { a: 'hot', b: 'hot', c: 'red' }, labels: [[480, 125, 'token = "anything" → let in', 'bad']] }, sub: { ...DEF, guard: 'token present', page: 'PatientList (3 cards)', api: 'must verify!' }, card: ['DevTools console', `localStorage.setItem('caredesk.token', 'anything');
+// reload /patients`, { 1: 'bad' }], lang: 'ts', out: ['tampered token "anything" → /patients → 3 cards shown'] }
+  ];
+  function show(i) {
+    const s = S[i];
+    paint(G, { ...s.o, sub: s.sub });
+    K.codeCard($('gCard'), { file: s.card[0], lang: s.lang || 'ts', code: s.card[1], marks: s.card[2], dim: Object.keys(s.card[2]).length > 0, out: s.out, outLabel: 'Real run' });
+  }
+  async function travel(run, pts, cls) { const p = K.pill(G.FX, '', cls || ''); p.querySelector('rect').setAttribute('width', 16); p.querySelector('rect').setAttribute('x', -8); for (let i = 1; i < pts.length; i++) await K.move(p, pts[i - 1], pts[i], 450, run); p.remove(); }
+  K.story({
+    root: $('gStory'), show, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'This step\'s feature: staff only', text: 'Patient pages should need a signed-in staff member. <span class="mono">AuthStore</span> (a <span class="mono">@Service</span> like step 10) keeps a token in a signal and in <span class="mono">localStorage</span>, so a reload keeps you signed in. The token here is a demo: no server checks it yet.' },
+      { title: 'The guard redirects', text: 'Signed out, opening <span class="mono">/patients</span>: the router matched the route, ran <span class="mono">authGuard</span>, and the guard returned a <span class="mono">UrlTree</span> for <span class="mono">/login</span>, remembering where you wanted to go in <span class="mono">returnUrl</span>.', play: async run => { await travel(run, [[75, 70], [225, 70], [385, 70], [385, 175]], 'bad'); } },
+      { title: 'A wrong email', text: '<span class="mono">login()</span> looks the email up with <span class="mono">find()</span>. Unknown, so it returns false and the page shows "Unknown staff email". (The notes\' <span class="mono">forEach</span> + <span class="mono">return</span> version has a bug; see Corrected below.)' },
+      { title: 'Signed in, sent back', text: 'With <span class="mono">kavya@caredesk.test</span> the store saves a token and the user\'s name, and <span class="mono">navigateByUrl(returnUrl)</span> returns to <span class="mono">/patients</span>. This time the guard says yes.', play: async run => { await travel(run, [[385, 175], [575, 175], [575, 70]]); } },
+      { title: 'Deep links keep their place', text: 'Signed out, a colleague opens a shared link to <span class="mono">/patients/2</span>. The guard stores the full URL; after signing in as Dr Arjun the real run landed on Ravi\'s page, not the list.', tip: 'Mention returnUrl: it\'s the detail that separates a working login flow from a demo one.' },
+      { title: 'Gotcha: optional query params', text: 'Opening <span class="mono">/login</span> directly has no <span class="mono">returnUrl</span>. With router input binding the input is set to <span class="mono">undefined</span>, overriding <span class="mono">input(\'/patients\')</span>\'s default, and the first version crashed into NG04018. Make the input optional and fall back with <span class="mono">??</span>.' },
+      { title: 'Signing out', text: 'The header shows the user and a Sign out button while <span class="mono">isLoggedIn()</span> is true. Signing out clears the token and goes to <span class="mono">/login</span>; the guard now blocks patient pages again.' },
+      { title: 'The interceptor adds the token', text: 'Every <span class="mono">HttpClient</span> request passes through <span class="mono">authInterceptor</span>. Signed out, the request went unchanged; signed in, it carried <span class="mono">Authorization: Bearer demo-…</span>. CareDesk starts calling its API on step 15.', play: async run => { await travel(run, [[100, 285], [350, 285], [585, 285]]); } },
+      { title: 'Guards are not security', text: 'Setting the token to "anything" in DevTools opened the patient list: the guard only checks that a token exists. Real protection lives on the server, which must reject requests whose token it didn\'t issue. Step 12 of CareDesk is done.' }
+    ]
+  });
+  K.codeCard($('refStore'), { file: 'auth-store.ts', lang: 'ts', code: STORE });
+  K.codeCard($('refGuard'), { file: 'auth-guard.ts + auth-interceptor.ts', lang: 'ts', code: GUARD.split('\n// app.routes.ts')[0] + '\n' + ICP });
+
+  /* ===== simulator ===== */
+  const L = flow($('labSvg'));
+  let ses = 'out', url = '/patients';
+  function sim() {
+    const signed = ses !== 'out';
+    if (url === '/login') { paint(L, { nodes: { url: 'ok', router: 'ok', login: 'ok' }, paths: { a: 'hot', b: 'hot' }, sub: { ...DEF, url, login: '/login (no guard)' } }); $('labRes').innerHTML = 'The login route has no guard, so it always opens.'; return; }
+    const page = url === '/patients' ? 'PatientList' : 'PatientDetail: Ravi';
+    if (signed) {
+      paint(L, { nodes: { url: 'ok', router: 'ok', guard: 'ok', page: ses === 'fake' ? 'bad' : 'ok' }, paths: { a: 'hot', b: 'hot', c: ses === 'fake' ? 'red' : 'hot' }, sub: { ...DEF, url, page }, labels: [[480, 125, ses === 'fake' ? 'token exists → true' : 'true', ses === 'fake' ? 'bad' : 'ok']] });
+      $('labRes').innerHTML = ses === 'fake' ? '<b class="bad-text">Let in with a fake token.</b> The guard can\'t tell; only the server can.' : `<b class="ok-text">Guard returned true.</b> ${page} renders.`;
+    } else {
+      paint(L, { nodes: { url: 'ok', router: 'ok', guard: 'bad', login: 'ok' }, paths: { a: 'hot', b: 'hot', d: 'red' }, sub: { ...DEF, url, login: '?returnUrl=' + encodeURIComponent(url) }, labels: [[440, 125, 'UrlTree → /login', 'bad']] });
+      $('labRes').innerHTML = `<b class="bad-text">Redirected</b> to <span class="mono">/login?returnUrl=${encodeURIComponent(url)}</span>. After signing in you come back to <span class="mono">${url}</span>.`;
+    }
+  }
+  $('apiBtn').addEventListener('click', () => {
+    const hdr = ses === 'out' ? '(no Authorization header)' : ses === 'fake' ? 'Authorization: Bearer anything' : 'Authorization: Bearer demo-c7466eed…';
+    paint(L, { nodes: { http: 'ok', icp: 'ok', api: ses === 'in' ? 'ok' : 'bad' }, paths: { f: 'hot', g: ses === 'in' ? 'hot' : 'red' }, sub: { ...DEF, http: 'GET /api/ping.json' }, labels: [[470, 330, hdr, ses === 'in' ? 'ok' : 'bad']] });
+    $('labRes').innerHTML = ses === 'in' ? 'The interceptor attached the token. A real API would verify it and answer.' : ses === 'fake' ? 'The fake token is sent. <b>This</b> is where a real server says 401 Unauthorized.' : 'No token, no header. A protected API would answer 401.';
+  });
+  K.seg($('sesSeg'), v => { ses = v; sim(); });
+  K.seg($('urlSeg'), v => { url = v; sim(); });
+  sim();
+})();
+</script>
+</body>
+</html>

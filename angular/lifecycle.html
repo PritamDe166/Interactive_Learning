@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lifecycle hooks</title>
+<meta name="description" content="Angular 22 lifecycle hooks, recorded from CareDesk's PatientCard: which hooks run when a card is created, checked, given a new input and destroyed, and why a forgotten clearInterval leaks.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .ng-left { display: grid; gap: 12px; min-width: 0; align-content: start; }
+  .hg { width: 100%; border-collapse: separate; border-spacing: 3px; font-size: 12px; min-width: 560px; }
+  .hg th { text-transform: none; letter-spacing: 0; border: 0; background: none; font-weight: 600; color: var(--fg-soft); padding: 4px 6px; text-align: center; font-size: 11.5px; line-height: 1.3; vertical-align: bottom; }
+  .hg th.hk { text-align: left; font-family: var(--mono); font-weight: 500; white-space: nowrap; }
+  .hg th.col.now { color: var(--fg); }
+  .hg td { height: 22px; padding: 0; border: 0; border-radius: 5px; background: var(--panel-2); text-align: center; font-family: var(--mono); font-size: 11px; color: transparent; transition: background .2s, color .2s; }
+  .hg td.on { color: var(--ink); font-weight: 700; }
+  .hg tr.k-init td.on { background: var(--pill); }
+  .hg tr.k-check td.on { background: var(--teal); color: var(--on-accent); }
+  .hg tr.k-render td.on { background: var(--violet); }
+  .hg tr.k-destroy td.on { background: var(--red); color: var(--on-accent); }
+  .hg td.colnow { box-shadow: inset 0 0 0 1.5px var(--cyan); }
+  .hg tr.hot th.hk { color: var(--fg); font-weight: 700; }
+  .keys { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--fg-soft); }
+  .keys span::before { content: ''; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; background: var(--pill); }
+  .keys .kc::before { background: var(--teal); } .keys .kr::before { background: var(--violet); } .keys .kd::before { background: var(--red); }
+  .pred { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 6px; margin: 10px 0; }
+  .pred label { display: flex; gap: 8px; align-items: center; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); font-family: var(--mono); font-size: 12.5px; cursor: pointer; }
+  .pred label.right { border-color: var(--teal); } .pred label.wrong { border-color: var(--red); background: color-mix(in srgb, var(--red) 10%, transparent); }
+  .pred label .why { margin-left: auto; font-family: var(--display); font-size: 12px; }
+  #predRes { overflow-wrap: anywhere; }
+  .cardmock { border: 1px solid var(--line); border-left: 6px solid var(--red); border-radius: 10px; padding: 8px 12px; background: var(--panel); }
+  .cardmock b { display: block; font-size: 17px; } .cardmock span { color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Angular roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Angular 22 · Part 2 · Data flow</div>
+    <h1>Lifecycle hooks</h1>
+    <ul class="lede">
+      <li>Angular calls <b>hook methods</b> on a component at fixed moments: created, inputs changed, checked, destroyed.</li>
+      <li><span class="mono">ngOnInit</span> = inputs are ready, start work. <span class="mono">ngOnDestroy</span> = clean up (timers, subscriptions).</li>
+      <li>The <span class="mono">…Checked</span> hooks and <span class="mono">ngDoCheck</span> run on <b>every</b> check, so keep them cheap.</li>
+      <li><span class="mono">ngOnChanges</span> runs only for <b>bound inputs</b>, before <span class="mono">ngOnInit</span> and again on each new value.</li>
+      <li>The constructor isn't a hook: it runs before inputs exist. Reading a required input there fails the build.</li>
+    </ul>
+    <div class="cd-trail" data-stage="6"></div>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: the life of a PatientCard</h2>
+    <div class="stage-kind">Every hook logged itself in the real CareDesk run · numbers show the order within each moment</div>
+    <div class="story" id="lcStory">
+      <div class="ng-left">
+        <div class="scroll card" style="padding:8px"><table class="hg" id="grid" aria-label="Which hooks ran at each moment"></table></div>
+        <div class="keys"><span>set-up (once)</span><span class="kc">every check</span><span class="kr">after render</span><span class="kd">tear-down</span></div>
+        <div id="lcCard"></div>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Predict which hooks fire, then compare with the real run.</p>
+
+  <section aria-labelledby="predH">
+    <h2 class="stage-title" id="predH">Hook predictor</h2>
+    <div class="stage-kind">Pick a moment, tick the hooks you expect, press Check</div>
+    <div class="seg" id="momSeg" role="group" aria-label="Moment" style="flex-wrap:wrap"></div>
+    <p class="status-line" id="momDesc"></p>
+    <div class="pred" id="pred"></div>
+    <div class="controls" style="justify-content:flex-start"><button class="btn primary" type="button" id="predGo">Check</button><button class="btn" type="button" id="predClear">Clear</button></div>
+    <p class="status-line" id="predRes"></p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Need an input's value to start something</span><span class="arrow">→</span><span class="then"><span class="mono">ngOnInit</span> (or a <span class="mono">computed</span> / <span class="mono">effect</span>)</span></li>
+      <li><span class="if">Started a timer, listener or subscription</span><span class="arrow">→</span><span class="then">stop it in <span class="mono">ngOnDestroy</span> or <span class="mono">inject(DestroyRef).onDestroy(…)</span></span></li>
+      <li><span class="if">Need the rendered DOM (measure, focus, chart library)</span><span class="arrow">→</span><span class="then"><span class="mono">afterNextRender(() =&gt; …)</span></span></li>
+      <li><span class="if">Need to react to an input changing</span><span class="arrow">→</span><span class="then"><span class="mono">computed</span> / <span class="mono">effect</span> first; <span class="mono">ngOnChanges</span> if you need previous values</span></li>
+      <li><span class="if">Heavy work in <span class="mono">ngDoCheck</span> / <span class="mono">…Checked</span></span><span class="arrow">→</span><span class="then">move it out: these run on every check, even when nothing changed</span></li>
+      <li><span class="if">Component disappears and comes back (<span class="mono">@if</span>, routing)</span><span class="arrow">→</span><span class="then">it's a new instance: constructor and <span class="mono">ngOnInit</span> run again, state resets</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: hooks in order</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Hook</th><th>When</th><th>Typical use</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">constructor</td><td>instance created (not a hook)</td><td><span class="mono">inject()</span> services, register <span class="mono">effect</span> / <span class="mono">afterNextRender</span></td></tr>
+          <tr><td class="mono">ngOnChanges</td><td>before init and on each new bound input value</td><td>react using previous and current values</td></tr>
+          <tr><td class="mono">ngOnInit</td><td>once, inputs set</td><td>start work that needs inputs</td></tr>
+          <tr><td class="mono">ngDoCheck</td><td>every check of the parent</td><td>custom change detection (rare)</td></tr>
+          <tr><td class="mono">ngAfterContentInit / Checked</td><td>projected content (<span class="mono">&lt;ng-content&gt;</span>) ready / checked</td><td>read <span class="mono">contentChild()</span></td></tr>
+          <tr><td class="mono">ngAfterViewInit / Checked</td><td>own view and children ready / checked</td><td>read <span class="mono">viewChild()</span></td></tr>
+          <tr><td class="mono">afterNextRender / afterEveryRender</td><td>after the DOM is updated (once / every time)</td><td>DOM measurement, third-party libraries</td></tr>
+          <tr><td class="mono">ngOnDestroy / DestroyRef.onDestroy</td><td>once, before removal</td><td>clear timers, unsubscribe</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cc-pair" style="margin-top:14px">
+      <div><div class="label ok-text">Classic: implement OnInit and OnDestroy</div><div id="classic"></div></div>
+      <div><div class="label ok-text">Modern alternative: DestroyRef keeps set-up and tear-down together</div><div id="modern"></div></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>The constructor isn't a lifecycle hook.</b> Your notes list it as "the first hook". It's a TypeScript class constructor that runs before Angular sets inputs; in CareDesk, reading <span class="mono">this.patient()</span> there failed the build with <span class="mono">NG8118: `patient` is a required `input` and does not have a value in this context</span>.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>ngOnInit runs before the DOM is ready.</b> The notes say it runs "when the component is loaded into the DOM". In the real order, <span class="mono">ngOnInit</span> came before <span class="mono">ngAfterViewInit</span> and <span class="mono">afterNextRender</span>. Use those when you need rendered elements.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>Missing hooks.</b> The notes' order table stops before <span class="mono">ngAfterViewChecked</span> and has no render hooks. The full order is in the table above, and the interfaces (<span class="mono">OnInit</span>…) are optional: Angular calls the methods if they exist; implementing the interface just lets TypeScript check the name.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Your counter example, proven.</b> The notes describe a per-second counter that keeps running after the component is gone. CareDesk's waiting clock did exactly that with <span class="mono">clearInterval</span> commented out: "tick Asha 3, 4, 5" kept logging after discharge, with zero cards in the DOM.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Check hooks ran twice on first render.</b> In the real run, after the first <span class="mono">afterEveryRender</span> Angular ran one more check pass (<span class="mono">ngDoCheck</span>, <span class="mono">…Checked</span>, <span class="mono">afterEveryRender</span>). Don't rely on how many times check hooks run.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Constructor or ngOnInit: where do you read an input?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">ngOnInit</span> (or a <span class="mono">computed</span>). Inputs aren't set when the constructor runs; for a required signal input Angular even fails the build (NG8118).</p></div></details>
+      <details><summary>The list gives the card a new patient object. Does ngOnInit run again?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>No. The same instance gets <span class="mono">ngOnChanges: patient</span> and a check. <span class="mono">ngOnInit</span> runs once per instance.</p></div></details>
+      <details><summary>The user types in the list's search box. Which card hooks run?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">ngDoCheck</span>, <span class="mono">ngAfterContentChecked</span>, <span class="mono">ngAfterViewChecked</span>, <span class="mono">afterEveryRender</span>. Nothing about the card changed, yet its check hooks ran.</p></div></details>
+      <details><summary>What happens to a setInterval you never clear?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>It keeps running after the component is destroyed, holding the component in memory (a leak). Clear it in <span class="mono">ngOnDestroy</span> or with <span class="mono">DestroyRef</span>.</p></div></details>
+      <details><summary>Discharge, then admit again. Is the waiting clock back at 0?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Yes. <span class="mono">@if</span> destroyed the old card and created a new instance: constructor, <span class="mono">ngOnChanges</span>, <span class="mono">ngOnInit</span> all ran again.</p></div></details>
+      <details><summary>Where do you put code that measures an element's size?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">afterNextRender</span> (once) or <span class="mono">afterEveryRender</span>. They run after the DOM is updated, and only in the browser (not during server rendering).</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: your Obsidian note "Lifecycle Hooks" and "ngOnChanges details"; angular.dev "Component lifecycle" and the afterNextRender / DestroyRef API references. Every hook order and log on this page was recorded from CareDesk's PatientCard (Angular CLI 22.2.5, zoneless), with a console.log in each hook.</footer>
+</div>
+
+<script src="caredesk.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const HOOKS = [['constructor', 'init'], ['ngOnChanges', 'init'], ['ngOnInit', 'init'], ['ngDoCheck', 'check'], ['ngAfterContentInit', 'init'], ['ngAfterContentChecked', 'check'], ['ngAfterViewInit', 'init'], ['ngAfterViewChecked', 'check'], ['afterNextRender', 'render'], ['afterEveryRender', 'render'], ['ngOnDestroy', 'destroy'], ['DestroyRef.onDestroy', 'destroy']];
+  // real logs per moment, in order
+  const RUNS = [
+    { h: 'Card created', d: 'CareDesk starts with Asha waiting.', log: ['constructor', 'ngOnChanges: patient,note', 'ngOnInit · patient() = Asha', 'ngDoCheck', 'ngAfterContentInit', 'ngAfterContentChecked', 'ngAfterViewInit', 'ngAfterViewChecked', 'afterNextRender', 'afterEveryRender', 'ngDoCheck', 'ngAfterContentChecked', 'ngAfterViewChecked', 'afterEveryRender'] },
+    { h: 'Click in card', d: 'The nurse presses Select on the card.', log: ['ngDoCheck', 'ngAfterContentChecked', 'ngAfterViewChecked', 'afterEveryRender'] },
+    { h: 'Type in list', d: 'Someone types in the list\'s search box. The card\'s input doesn\'t change.', log: ['ngDoCheck', 'ngAfterContentChecked', 'ngAfterViewChecked', 'afterEveryRender'] },
+    { h: 'New input', d: '"Admit next" gives the same card a new patient object (Ravi).', log: ['ngOnChanges: patient', 'ngDoCheck', 'ngAfterContentChecked', 'ngAfterViewChecked', 'afterEveryRender'] },
+    { h: 'Destroyed', d: '"Discharge" sets the patient to null, so @if removes the card.', log: ['ngOnDestroy · timer cleared', 'DestroyRef.onDestroy'] },
+    { h: 'Re-created', d: '"Admit next" again: @if creates a brand-new card.', log: ['constructor', 'ngOnChanges: patient,note', 'ngOnInit · patient() = Ravi', 'ngDoCheck', 'ngAfterContentInit', 'ngAfterContentChecked', 'ngAfterViewInit', 'ngAfterViewChecked', 'afterNextRender', 'afterEveryRender'] }
+  ];
+  const hookOf = l => HOOKS.findIndex(([h]) => l === h || l.startsWith(h + ' ') || l.startsWith(h + ':'));
+  RUNS.forEach(r => { r.cells = HOOKS.map(() => []); r.log.forEach((l, i) => { const k = hookOf(l); if (k >= 0) r.cells[k].push(i + 1); }); });
+
+  const grid = $('grid');
+  grid.innerHTML = `<thead><tr><th></th>${RUNS.map((r, j) => `<th class="col" data-c="${j}">${j + 1}. ${r.h}</th>`).join('')}</tr></thead><tbody>${HOOKS.map(([h, k], i) => `<tr class="k-${k}" data-r="${i}"><th class="hk">${h}</th>${RUNS.map((r, j) => `<td data-c="${j}"></td>`).join('')}</tr>`).join('')}</tbody>`;
+  const cell = (i, j) => grid.querySelector(`tr[data-r="${i}"] td[data-c="${j}"]`);
+  function paintCols(upto, partial) {
+    HOOKS.forEach((_, i) => RUNS.forEach((r, j) => {
+      const c = cell(i, j); let v = r.cells[i];
+      if (j === upto && partial !== undefined) v = v.filter(n => n <= partial);
+      const on = j <= upto && v.length;
+      c.className = (on ? 'on' : '') + (j === upto ? ' colnow' : '');
+      c.textContent = on ? v.join('·') : '';
+    }));
+    grid.querySelectorAll('th.col').forEach(th => th.classList.toggle('now', +th.dataset.c === upto));
+  }
+  function hot(names) { grid.querySelectorAll('tbody tr').forEach(tr => tr.classList.toggle('hot', names.includes(HOOKS[+tr.dataset.r][0]))); }
+
+  const CARD_TS = `export class PatientCard implements OnInit, OnDestroy {
+  patient = input.required<Patient>();
+  note = model('');
+  reviewed = output<string>();
+
+  protected readonly heading = computed(() => label(this.patient()));
+  protected readonly waited = signal(0);          // seconds on screen
+  private timer?: ReturnType<typeof setInterval>;
+
+  ngOnInit() {
+    this.timer = setInterval(() => this.waited.update(s => s + 1), 1000);
+  }
+
+  ngOnDestroy() {
+    clearInterval(this.timer);
+  }
+}`;
+  const LIST_HTML = `<button (click)="discharge()">Discharge</button>
+<button (click)="admit()">Admit next</button>
+
+@if (patient(); as p) {
+  <app-patient-card [patient]="p" [(note)]="note" (reviewed)="onReviewed($event)" />
+} @else {
+  <p>No one is waiting.</p>
+}`;
+  const CTOR = `constructor() {
+  console.log('constructor · patient() =', this.patient().name);
+}`;
+  const LEAK = `ngOnDestroy() {
+  // clearInterval(this.timer);   forgotten
+}`;
+  const MODERN = `export class PatientCard {
+  private readonly destroyRef = inject(DestroyRef);
+  protected readonly waited = signal(0);
+
+  ngOnInit() {
+    const id = setInterval(() => this.waited.update(s => s + 1), 1000);
+    this.destroyRef.onDestroy(() => clearInterval(id));
+  }
+}`;
+  K.codeCard($('classic'), { file: 'patient-card.ts (CareDesk)', lang: 'ts', code: CARD_TS, marks: { 10: 'hot', 11: 'hot', 14: 'bad', 15: 'bad' } });
+  K.codeCard($('modern'), { file: 'patient-card.ts (alternative)', lang: 'ts', code: MODERN, marks: { 2: 'hot', 6: 'hot', 7: ['ok', 'tear-down next to set-up'] } });
+
+  const S = [
+    { col: -1, card: ['patient-card.ts', CARD_TS, { 7: ['hot', 'new: a waiting clock'], 10: 'hot', 11: 'hot', 14: 'hot', 15: 'hot' }], hot: ['ngOnInit', 'ngOnDestroy'] },
+    { col: 0, card: ['patient-card.ts', CARD_TS, { 10: 'hot', 11: ['hot', 'clock starts'] }], out: RUNS[0].log.slice(0, 10), hot: [], partial: 10 },
+    { col: 0, card: ['patient-card.ts (experiment)', CTOR, { 2: ['bad', 'inputs not set yet'] }], out: ['✘ [ERROR] NG8118: `patient` is a required `input` and does not have a value in this context.'], outH: 'ng build', hot: ['constructor', 'ngOnChanges', 'ngOnInit'], partial: 10 },
+    { col: 0, card: ['patient-card.ts', CARD_TS, {}], out: RUNS[0].log, hot: ['ngDoCheck', 'ngAfterContentChecked', 'ngAfterViewChecked', 'afterEveryRender'] },
+    { col: 2, card: ['patient-list.html', LIST_HTML, {}], out: RUNS[2].log, hot: ['ngDoCheck', 'ngAfterContentChecked', 'ngAfterViewChecked', 'afterEveryRender'], lang: 'ng' },
+    { col: 3, card: ['patient-list.html', LIST_HTML, { 2: 'hot', 5: ['hot', 'same card, new p'] }], out: RUNS[3].log, hot: ['ngOnChanges'], lang: 'ng' },
+    { col: 4, card: ['patient-list.html', LIST_HTML, { 1: 'bad', 4: ['bad', 'patient() is null now'], 7: 'ok' }], out: RUNS[4].log, hot: ['ngOnDestroy', 'DestroyRef.onDestroy'], lang: 'ng' },
+    { col: 4, card: ['patient-card.ts (experiment)', LEAK, { 2: 'bad' }], out: ['tick Asha 1', 'tick Asha 2', '— Discharge —', 'tick Asha 3', 'tick Asha 4', 'tick Asha 5', 'cards in DOM: 0'], hot: ['ngOnDestroy'] },
+    { col: 5, card: ['patient-card.ts (alternative)', MODERN, { 2: 'hot', 7: 'ok' }], out: RUNS[5].log, hot: ['constructor', 'ngOnInit'] }
+  ];
+  function show(i) {
+    const s = S[i];
+    paintCols(s.col, s.partial);
+    hot(s.hot);
+    if (i === 1 || i === 2) { /* only first pass */ }
+    K.codeCard($('lcCard'), { file: s.card[0], lang: s.lang || 'ts', code: s.card[1], marks: s.card[2], dim: Object.keys(s.card[2]).length > 0, out: s.out, outLabel: s.outH || 'Console (real run)' });
+  }
+  async function reveal(run, col, upto) {
+    const n = upto || RUNS[col].log.length;
+    for (let k = 1; k <= n; k++) { paintCols(col, k); await K.sleep(170, run); }
+  }
+  K.story({
+    root: $('lcStory'), show, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'This step\'s feature: a waiting clock', text: 'Each card now shows how long the patient has been on screen. The clock must <b>start</b> when the card appears and <b>stop</b> when it goes, which is exactly what <span class="mono">ngOnInit</span> and <span class="mono">ngOnDestroy</span> are for. Your notes use the same counter example. The grid will fill with what really ran.' },
+      { title: 'A card is born', text: 'Creating the card ran, in order: the constructor, <span class="mono">ngOnChanges</span> (inputs arrive), <span class="mono">ngOnInit</span> (clock starts), the check hooks, the content and view hooks, then <span class="mono">afterNextRender</span> once the DOM was painted.', play: async run => { await reveal(run, 0, 10); } },
+      { title: 'Constructor vs ngOnInit', text: 'Inputs are set <b>after</b> construction. Reading <span class="mono">this.patient()</span> in the constructor isn\'t just undefined: Angular 22 refuses to build. In <span class="mono">ngOnInit</span> the log printed <span class="mono">patient() = Asha</span>.', tip: 'Classic question. Constructor: dependency injection and wiring. ngOnInit: logic that needs inputs.' },
+      { title: 'Check hooks repeat', text: 'Right after the first render, Angular ran one more check pass: <span class="mono">ngDoCheck</span>, <span class="mono">…Checked</span> and <span class="mono">afterEveryRender</span> appear twice in column 1. The "Init" hooks never repeat; the "Checked" hooks run on every check.', play: async run => { await reveal(run, 0); } },
+      { title: 'Something else changed', text: 'Typing in the <b>list\'s</b> search box doesn\'t touch the card\'s input, yet the card\'s check hooks still ran (column 3). Clicking inside the card did the same (column 2). That\'s why heavy work never belongs in <span class="mono">ngDoCheck</span> or <span class="mono">ngAfterViewChecked</span>.', play: async run => { paintCols(1); await K.sleep(300, run); await reveal(run, 2); } },
+      { title: 'A new input value', text: '"Admit next" hands the same card a new patient object. Only <span class="mono">ngOnChanges: patient</span> plus a check ran. No new constructor, no second <span class="mono">ngOnInit</span>: it\'s the same instance, so the clock keeps counting.', play: async run => { await reveal(run, 3); } },
+      { title: 'The card is destroyed', text: '"Discharge" sets the patient to <span class="mono">null</span>, so <span class="mono">@if</span> removes the card. <span class="mono">ngOnDestroy</span> clears the timer; a <span class="mono">DestroyRef</span> callback runs right after. (<span class="mono">@if</span> gets its own page on step 9.)', play: async run => { await reveal(run, 4); } },
+      { title: 'What if you forget?', text: 'With <span class="mono">clearInterval</span> commented out, the real run kept logging "tick Asha 3, 4, 5" after discharge, with zero cards in the DOM. The interval holds the destroyed component in memory: a classic leak.' },
+      { title: 'Back again = brand new', text: 'Admitting again creates a <b>new</b> card: constructor, <span class="mono">ngOnInit</span>, the clock restarts from 0. <span class="mono">inject(DestroyRef).onDestroy()</span> is the modern way to keep set-up and tear-down side by side. Step 6 of CareDesk is done.', play: async run => { await reveal(run, 5); } }
+    ]
+  });
+
+  /* ===== predictor ===== */
+  let mom = 1;
+  $('momSeg').innerHTML = RUNS.map((r, j) => `<button type="button" data-v="${j}" aria-pressed="${j === mom}">${r.h}</button>`).join('');
+  $('pred').innerHTML = HOOKS.map(([h], i) => `<label data-i="${i}"><input type="checkbox" value="${i}"> ${h}<span class="why"></span></label>`).join('');
+  function clear() { $('pred').querySelectorAll('label').forEach(l => { l.className = ''; l.querySelector('input').checked = false; l.querySelector('.why').textContent = ''; }); $('predRes').textContent = ''; }
+  K.seg($('momSeg'), v => { mom = +v; $('momDesc').textContent = RUNS[mom].d; clear(); });
+  $('momDesc').textContent = RUNS[mom].d;
+  $('predClear').addEventListener('click', clear);
+  $('predGo').addEventListener('click', () => {
+    let right = 0;
+    $('pred').querySelectorAll('label').forEach(l => {
+      const i = +l.dataset.i, ran = RUNS[mom].cells[i].length > 0, picked = l.querySelector('input').checked;
+      const ok = ran === picked; if (ok) right++;
+      l.className = ok ? 'right' : 'wrong';
+      l.querySelector('.why').innerHTML = ran ? `<b class="ok-text">ran</b>` : `<span class="muted">didn't run</span>`;
+    });
+    $('predRes').innerHTML = `<b>${right} / ${HOOKS.length}</b> right. Real log: <span class="mono">${RUNS[mom].log.join(' → ')}</span>`;
+  });
+})();
+</script>
+</body>
+</html>

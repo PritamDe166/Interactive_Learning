@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Template-driven forms</title>
+<meta name="description" content="Angular 22 template-driven forms on CareDesk's booking form: ngForm, ngModel, name, validators, and the valid/invalid, pristine/dirty, untouched/touched states, recorded from a real run.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .ng-left { display: grid; gap: 12px; min-width: 0; align-content: start; }
+  .fm .node rect { transition: stroke .2s, fill .2s; }
+  .fm .node.valid rect { stroke: var(--teal); } .fm .node.invalid rect { stroke: var(--red); }
+  .fm .node.hot rect { stroke-width: 3.5; }
+  .fm .tl { stroke: var(--line); stroke-width: 2; }
+  .fm .flag { font-family: var(--mono) !important; font-size: 10.5px; }
+  .fm .flag.on { fill: var(--fg); font-weight: 700; } .fm .flag.off { fill: var(--muted); }
+  .fm .flag.bad { fill: var(--bad-text); font-weight: 700; } .fm .flag.good { fill: var(--good-text); font-weight: 700; }
+  .fm .val { font-family: var(--mono) !important; font-size: 11px; fill: var(--cyan); }
+  .bf { display: grid; gap: 8px; max-width: 420px; }
+  .bf label { display: grid; gap: 4px; font-size: 14px; color: var(--fg-soft); }
+  .bf select, .bf input, .bf textarea { font: inherit; padding: 6px 10px; border-radius: 8px; border: 2px solid var(--line); background: var(--panel-2); color: var(--fg); }
+  .bf .ng-invalid.ng-touched { border-color: var(--red); }
+  .bf .ng-valid.ng-dirty { border-color: var(--teal); }
+  .bf .err { color: var(--bad-text); font-size: 13px; margin: 0; }
+  .bf .ok { color: var(--good-text); margin: 0; }
+  .bf .state { font-family: var(--mono); font-size: 12.5px; color: var(--fg-soft); margin: 0; }
+  .classes { font-family: var(--mono); font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+  .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; margin-top: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Angular roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Angular 22 · Part 4 · Forms &amp; data</div>
+    <h1>Template-driven forms</h1>
+    <ul class="lede">
+      <li>In a <b>template-driven</b> form the template is the source of truth: <span class="mono">ngModel</span> on each field, <span class="mono">#f="ngForm"</span> on the form.</li>
+      <li>Angular builds a <b>form model</b> behind it: one control per field (keyed by <span class="mono">name</span>), grouped under the form.</li>
+      <li>Each control tracks three pairs: <b>valid/invalid</b>, <b>pristine/dirty</b> (changed?), <b>untouched/touched</b> (visited?).</li>
+      <li>Validators are HTML attributes (<span class="mono">required</span>, <span class="mono">minlength</span>), and the states appear as CSS classes (<span class="mono">ng-invalid</span>, <span class="mono">ng-touched</span>).</li>
+      <li>Submit with <span class="mono">(ngSubmit)</span> on the form, not <span class="mono">(click)</span> on the button.</li>
+    </ul>
+    <div class="cd-trail" data-stage="13"></div>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: booking an appointment for Ravi</h2>
+    <div class="stage-kind">The tree is the form model Angular keeps · every state and class below was read from the real form</div>
+    <div class="story" id="fStory">
+      <div class="ng-left">
+        <div class="scroll"><svg class="diagram fm" id="fSvg" style="min-width:0" viewBox="0 0 660 300" role="img" aria-label="Form model: the form with three controls, doctor, date and reason, each showing its state"></svg></div>
+        <div id="fCard"></div>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">A working copy of the booking form. The form model and CSS classes update exactly as the real one did.</p>
+
+  <section aria-labelledby="labH">
+    <h2 class="stage-title" id="labH">Booking form lab</h2>
+    <div class="split">
+      <form class="bf" id="bf" novalidate>
+        <label>Doctor <select name="doctor" id="fDoctor"><option value="">Choose…</option><option>Dr Arjun</option><option>Dr Leela</option></select></label>
+        <p class="err" id="eDoctor" hidden>Pick a doctor</p>
+        <label>Date <input type="date" name="date" id="fDate"></label>
+        <p class="err" id="eDate" hidden>Pick a date</p>
+        <label>Reason <textarea name="reason" id="fReason" rows="2"></textarea></label>
+        <p class="err" id="eReason" hidden>At least 5 characters</p>
+        <button class="btn primary" type="submit" id="fBtn">Book appointment</button>
+        <p class="state" id="fState"></p>
+        <p class="ok" id="fOk" hidden></p>
+      </form>
+      <div>
+        <div class="scroll"><svg class="diagram fm" id="labSvg" viewBox="0 0 660 300" style="min-width:480px" role="img" aria-label="Live form model"></svg></div>
+        <div class="classes" id="fClasses"></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Set up</span><span class="arrow">→</span><span class="then"><span class="mono">FormsModule</span> in <span class="mono">imports</span>, <span class="mono">&lt;form #f="ngForm" (ngSubmit)="save(f)"&gt;</span></span></li>
+      <li><span class="if">A field</span><span class="arrow">→</span><span class="then"><span class="mono">name="x" [(ngModel)]="model.x"</span> (name is required inside a form)</span></li>
+      <li><span class="if">Read a field's state in the template</span><span class="arrow">→</span><span class="then"><span class="mono">#x="ngModel"</span> then <span class="mono">x.invalid</span>, <span class="mono">x.touched</span>, <span class="mono">x.errors?.['minlength']</span></span></li>
+      <li><span class="if">When to show an error</span><span class="arrow">→</span><span class="then"><span class="mono">invalid &amp;&amp; touched</span> (or after a submit attempt), not on page load</span></li>
+      <li><span class="if">Disable submit</span><span class="arrow">→</span><span class="then"><span class="mono">[disabled]="f.invalid"</span></span></li>
+      <li><span class="if">Clear after saving</span><span class="arrow">→</span><span class="then"><span class="mono">f.resetForm({...})</span>: values and states back to pristine/untouched</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: the six states</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>State</th><th>Means</th><th>CSS class</th><th>Becomes true when</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">valid / invalid</td><td>passes all validators?</td><td class="mono">ng-valid / ng-invalid</td><td>after every change</td></tr>
+          <tr><td class="mono">pristine / dirty</td><td>has the <b>user</b> changed the value?</td><td class="mono">ng-pristine / ng-dirty</td><td>dirty on the first user edit</td></tr>
+          <tr><td class="mono">untouched / touched</td><td>has the user <b>left</b> the field?</td><td class="mono">ng-untouched / ng-touched</td><td>touched on blur</td></tr>
+          <tr><td>form-level</td><td>valid if all controls valid; dirty/touched if any control is</td><td>on <span class="mono">&lt;form&gt;</span></td><td>derived from the controls</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cc-pair" style="margin-top:14px">
+      <div id="refTs"></div>
+      <div id="refHtml"></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>Submit with <span class="mono">(ngSubmit)</span>.</b> Your notes call the handler from <span class="mono">(click)</span> on the button. <span class="mono">(ngSubmit)</span> on the form also fires on Enter in a field (in the real run, pressing Enter in the date field booked the appointment), and marks the form as submitted.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Filling the empty notes.</b> Your "Form State - Validity" and "Visited" pages were empty. Validity is valid/invalid from validators; "visited" is touched/untouched, set on blur. In the real run, tabbing through the doctor field without choosing made it touched (and showed "Pick a doctor") while it stayed pristine.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Missing <span class="mono">name</span> inside a form</b> threw at runtime: <span class="mono">NG01352: If ngModel is used within a form tag, either the name attribute must be set or the form control must be defined as 'standalone' in ngModelOptions.</span> The opt-out is <span class="mono">[ngModelOptions]="{ standalone: true }"</span>, with square brackets.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>FormModel is the same idea in both styles.</b> Your notes are right that template-driven and reactive forms share the same model (FormGroup / FormControl). The difference is who creates it: the template here, the class on the next page.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Touched vs dirty?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Dirty</b>: the user changed the value. <b>Touched</b>: the user focused and left the field. You can be touched but pristine (visited, didn't change), as the doctor field was after tabbing through.</p></div></details>
+      <details><summary>Why show errors only when <span class="mono">touched</span>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Every required field starts invalid. Showing red on page load scolds the user before they did anything.</p></div></details>
+      <details><summary>What does <span class="mono">#doctor="ngModel"</span> give you?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>A template variable pointing at that field's <span class="mono">NgModel</span> directive, so you can read <span class="mono">doctor.invalid</span>, <span class="mono">doctor.touched</span>, <span class="mono">doctor.errors</span>.</p></div></details>
+      <details><summary>What's in <span class="mono">f.value</span> at submit?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>An object keyed by each field's <span class="mono">name</span>: <span class="mono">{"doctor":"Dr Arjun","date":"2026-11-03","reason":"ECG review"}</span> in the real run.</p></div></details>
+      <details><summary>After <span class="mono">resetForm()</span>, what are the states?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Pristine and untouched again (and invalid, since required fields are empty), so no error messages show.</p></div></details>
+      <details><summary>When would you pick reactive forms instead?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>For larger or dynamic forms, cross-field validation, or logic you want to unit-test without a template. That's the next page.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: your Obsidian notes "Forms Explained", "Form State - Value Changed", "FormModel", "FormGroup" and "FormControl"; angular.dev "Template-driven forms" and "Validating form input". States, classes, form values and the NG01352 message are from CareDesk (Angular CLI 22.2.5).</footer>
+</div>
+
+<script src="caredesk.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const TS = `export class BookingForm {
+  readonly patient = input.required<Patient>();
+  private readonly store = inject(AppointmentStore);
+
+  protected readonly doctors = ['Dr Arjun', 'Dr Leela'];
+  protected model = { doctor: '', date: '', reason: '' };
+  protected readonly booked = signal('');
+
+  book(form: NgForm) {
+    if (form.invalid) return;
+    this.store.add({ patientId: this.patient().id, ...this.model });
+    this.booked.set(\`\${this.model.doctor} on \${this.model.date}\`);
+    form.resetForm({ doctor: '', date: '', reason: '' });
+  }
+}`;
+  const HTML = `<form #f="ngForm" (ngSubmit)="book(f)">
+  <label>Doctor
+    <select name="doctor" [(ngModel)]="model.doctor" #doctor="ngModel" required>
+      <option value="">Choose…</option>
+      @for (d of doctors; track d) { <option [value]="d">{{ d }}</option> }
+    </select>
+  </label>
+  @if (doctor.invalid && doctor.touched) { <p class="err">Pick a doctor</p> }
+
+  <label>Date <input type="date" name="date" [(ngModel)]="model.date" #date="ngModel" required /></label>
+  @if (date.invalid && date.touched) { <p class="err">Pick a date</p> }
+
+  <label>Reason <textarea name="reason" [(ngModel)]="model.reason" #reason="ngModel" required minlength="5"></textarea></label>
+  @if (reason.errors?.['minlength'] && reason.touched) { <p class="err">At least 5 characters</p> }
+
+  <button type="submit" [disabled]="f.invalid">Book appointment</button>
+  <p class="state">form: {{ f.valid ? 'valid' : 'invalid' }} · {{ f.dirty ? 'dirty' : 'pristine' }} · {{ f.touched ? 'touched' : 'untouched' }}</p>
+</form>
+@if (booked()) { <p class="ok">Booked: {{ booked() }}</p> }`;
+  const STORE = `export interface Appointment {     // added to patient.ts
+  patientId: number;
+  doctor: string;
+  date: string;        // yyyy-mm-dd from <input type="date">
+  reason: string;
+}
+
+@Service()
+export class AppointmentStore {
+  private readonly list = signal<Appointment[]>([]);
+  readonly appointments = this.list.asReadonly();
+  add(a: Appointment) { this.list.update(all => [...all, a]); }
+}`;
+  K.codeCard($('refTs'), { file: 'booking-form.ts', lang: 'ts', code: TS });
+  K.codeCard($('refHtml'), { file: 'appointment-store.ts', lang: 'ts', code: STORE });
+
+  function modelTree(svg) {
+    const P = { form: [330, 45, 'NgForm  #f', 'FormGroup'], doctor: [110, 195, "'doctor'", 'FormControl'], date: [330, 195, "'date'", 'FormControl'], reason: [550, 195, "'reason'", 'FormControl'] };
+    ['doctor', 'date', 'reason'].forEach(k => K.el('line', { x1: 330, y1: 69 + 30, x2: P[k][0], y2: P[k][1] - 24, class: 'tl' }, svg));
+    const N = {};
+    for (const [k, [x, y, t, s]] of Object.entries(P)) {
+      const n = K.node(svg, x, y, 190, 48, t, s);
+      const f = [0, 1, 2].map(i => { const tx = K.text(svg, x - 85 + i * 62, y + 42, '', 'flag'); tx.style.textAnchor = 'start'; return tx; });
+      const v = K.text(svg, x, y + 60, '', 'val'); v.style.textAnchor = 'middle';
+      N[k] = { n, f, v, x, y };
+    }
+    return N;
+  }
+  function paint(N, st, hot) {
+    for (const k in N) {
+      const s = st[k], n = N[k];
+      n.n.g.setAttribute('class', 'node ' + (s.valid ? 'valid' : 'invalid') + (hot === k ? ' hot' : ''));
+      n.f[0].textContent = s.valid ? 'valid' : 'invalid'; n.f[0].setAttribute('class', 'flag ' + (s.valid ? 'good' : 'bad'));
+      n.f[1].textContent = s.dirty ? 'dirty' : 'pristine'; n.f[1].setAttribute('class', 'flag ' + (s.dirty ? 'on' : 'off'));
+      n.f[2].textContent = s.touched ? 'touched' : 'untouched'; n.f[2].setAttribute('class', 'flag ' + (s.touched ? 'on' : 'off'));
+      n.v.textContent = k === 'form' ? (s.value || '') : (s.err ? '⚠ ' + s.err : (s.value !== undefined ? JSON.stringify(s.value) : ''));
+    }
+  }
+  const N = modelTree($('fSvg'));
+  const c = (valid, dirty, touched, value, err) => ({ valid, dirty, touched, value, err });
+  const S = [
+    { st: { form: c(0, 0, 0), doctor: c(0, 0, 0, ''), date: c(0, 0, 0, ''), reason: c(0, 0, 0, '') }, marks: { 1: ['hot', 'the form model'], 3: ['hot', 'name = key'], 10: 'hot', 13: 'hot' }, out: ['form: invalid · pristine · untouched | button disabled', 'select: ng-untouched ng-pristine ng-invalid'] },
+    { st: { form: c(0, 0, 1), doctor: c(0, 0, 1, '', 'required'), date: c(0, 0, 0, ''), reason: c(0, 0, 0, '') }, hot: 'doctor', marks: { 8: ['bad', 'invalid && touched'] }, out: ['form: invalid · pristine · touched', 'select: ng-pristine ng-invalid ng-touched', 'errors shown: "Pick a doctor"'] },
+    { st: { form: c(0, 1, 1), doctor: c(1, 1, 1, 'Dr Arjun'), date: c(0, 0, 0, ''), reason: c(0, 0, 0, '') }, hot: 'doctor', marks: { 3: 'ok' }, out: ['form: invalid · dirty · touched', 'select: ng-touched ng-dirty ng-valid'] },
+    { st: { form: c(0, 1, 1), doctor: c(1, 1, 1, 'Dr Arjun'), date: c(1, 1, 0, '2026-11-03'), reason: c(0, 1, 1, 'ECG', 'minlength') }, hot: 'reason', marks: { 13: 'hot', 14: ['bad', "errors?.['minlength']"] }, out: ['form: invalid · dirty · touched', 'textarea: ng-invalid ng-touched ng-dirty', 'errors shown: "At least 5 characters"'] },
+    { st: { form: c(1, 1, 1), doctor: c(1, 1, 1, 'Dr Arjun'), date: c(1, 1, 0, '2026-11-03'), reason: c(1, 1, 1, 'ECG review') }, hot: 'form', marks: { 16: ['ok', 'enabled now'], 17: 'ok' }, out: ['form: valid · dirty · touched | button enabled'] },
+    { st: { form: c(0, 0, 0, '→ Booked: Dr Arjun on 2026-11-03'), doctor: c(0, 0, 0, ''), date: c(0, 0, 0, ''), reason: c(0, 0, 0, '') }, hot: 'form', file: 'ts', marks: { 9: 'hot', 10: 'hot', 11: 'ok', 13: ['hot', 'back to pristine'] }, out: ['form.value = {"doctor":"Dr Arjun","date":"2026-11-03","reason":"ECG review"} | valid = true', 'Booked: Dr Arjun on 2026-11-03', 'form: invalid · pristine · untouched (no errors shown)'] },
+    { st: { form: c(1, 1, 1), doctor: c(1, 1, 1, 'Dr Arjun'), date: c(1, 1, 1, '2026-11-03'), reason: c(1, 1, 1, 'ECG review') }, hot: 'form', marks: { 1: ['ok', '(ngSubmit) on the form'] }, out: ['Enter pressed in the date field → book() ran', 'Booked: Dr Arjun on 2026-11-03'] },
+    { st: { form: c(0, 0, 0), doctor: c(0, 0, 0, ''), date: c(0, 0, 0, ''), reason: c(0, 0, 0, '') }, hot: 'reason', code: `<textarea [(ngModel)]="model.reason" required minlength="5"></textarea>   <!-- no name -->`, marks: { 1: 'bad' }, out: ["NG01352: If ngModel is used within a form tag, either the name attribute must be set or the form control must be defined as 'standalone' in ngModelOptions."] }
+  ];
+  function show(i) {
+    const s = S[i]; paint(N, s.st, s.hot);
+    const isTs = s.file === 'ts';
+    K.codeCard($('fCard'), { file: s.code ? 'booking-form.html (experiment)' : isTs ? 'booking-form.ts' : 'booking-form.html', lang: isTs ? 'ts' : 'ng', code: s.code || (isTs ? TS : HTML), marks: s.marks, dim: true, out: s.out, outLabel: 'Real run' });
+  }
+  K.story({
+    root: $('fStory'), show, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'This step\'s feature: book an appointment', text: 'Ravi\'s page (step 11) gets a booking form: doctor, date and reason. With <span class="mono">FormsModule</span>, <span class="mono">#f="ngForm"</span> creates the form model and each <span class="mono">ngModel</span> with a <span class="mono">name</span> adds a control. Everything starts invalid, pristine and untouched.' },
+      { title: 'Visited but not changed', text: 'Tabbing into the doctor list and out again, without choosing, made it <b>touched</b> but still <b>pristine</b>. Touched + invalid is the moment to show "Pick a doctor". The form is touched because one of its controls is.' },
+      { title: 'A real change makes it dirty', text: 'Choosing Dr Arjun made the control <b>dirty</b> and <b>valid</b>; its classes became <span class="mono">ng-touched ng-dirty ng-valid</span>. The form is dirty too, but still invalid: two fields to go.' },
+      { title: 'Validators: required, minlength', text: 'A date, then "ECG" as the reason. <span class="mono">minlength="5"</span> puts <span class="mono">{ minlength: … }</span> in <span class="mono">reason.errors</span>, so the template shows "At least 5 characters". The red border comes from <span class="mono">.ng-invalid.ng-touched</span> in the CSS.' },
+      { title: 'All valid, button on', text: '"ECG review" passes. Every control is valid, so the form is valid and <span class="mono">[disabled]="f.invalid"</span> releases the button.' },
+      { title: 'Submit and reset', text: '<span class="mono">book(f)</span> received <span class="mono">f.value</span> keyed by the field names, saved it in the new <span class="mono">AppointmentStore</span>, and <span class="mono">resetForm()</span> returned everything to pristine and untouched, so no stale errors appear. Step 13 of CareDesk is done.' },
+      { title: 'ngSubmit, not click', text: 'Because the handler is on <span class="mono">(ngSubmit)</span>, pressing Enter in a field submits too, as it did in the real run. A <span class="mono">(click)</span> on the button would miss keyboard users.', tip: 'Form states are a favourite: be ready to explain pristine/dirty vs untouched/touched with an example.' },
+      { title: 'The name rule', text: 'Inside a <span class="mono">&lt;form&gt;</span>, a field without <span class="mono">name</span> can\'t be registered (the name is its key in the model), and Angular throws NG01352. Outside a form, as with step 4\'s search box, no name is needed.' }
+    ]
+  });
+
+  /* ===== lab: same state machine ===== */
+  const LN = modelTree($('labSvg'));
+  const F = { doctor: $('fDoctor'), date: $('fDate'), reason: $('fReason') };
+  let st;
+  function reset() { st = { doctor: { dirty: 0, touched: 0 }, date: { dirty: 0, touched: 0 }, reason: { dirty: 0, touched: 0 } }; for (const k in F) F[k].value = ''; update(); }
+  function errOf(k) { const v = F[k].value; if (!v) return 'required'; if (k === 'reason' && v.length < 5) return 'minlength'; return null; }
+  function update() {
+    const view = {}; let allValid = true, anyDirty = false, anyTouched = false;
+    for (const k in F) {
+      const e = errOf(k); const s = st[k];
+      view[k] = { valid: !e, dirty: s.dirty, touched: s.touched, value: F[k].value, err: e && s.touched ? e : null };
+      allValid = allValid && !e; anyDirty = anyDirty || s.dirty; anyTouched = anyTouched || s.touched;
+      F[k].className = `${s.touched ? 'ng-touched' : 'ng-untouched'} ${s.dirty ? 'ng-dirty' : 'ng-pristine'} ${e ? 'ng-invalid' : 'ng-valid'}`;
+    }
+    view.form = { valid: allValid, dirty: anyDirty, touched: anyTouched };
+    paint(LN, view);
+    $('eDoctor').hidden = !(errOf('doctor') && st.doctor.touched);
+    $('eDate').hidden = !(errOf('date') && st.date.touched);
+    $('eReason').hidden = !(errOf('reason') === 'minlength' && st.reason.touched);
+    $('fBtn').disabled = !allValid;
+    $('fState').textContent = `form: ${allValid ? 'valid' : 'invalid'} · ${anyDirty ? 'dirty' : 'pristine'} · ${anyTouched ? 'touched' : 'untouched'}`;
+    $('fClasses').innerHTML = Object.keys(F).map(k => `${k}: ${F[k].className}`).join('<br>');
+  }
+  for (const k in F) {
+    F[k].addEventListener('input', () => { st[k].dirty = 1; $('fOk').hidden = true; update(); });
+    F[k].addEventListener('change', () => { st[k].dirty = 1; update(); });
+    F[k].addEventListener('blur', () => { st[k].touched = 1; update(); });
+  }
+  $('bf').addEventListener('submit', e => { e.preventDefault(); if ($('fBtn').disabled) return; $('fOk').textContent = `Booked: ${F.doctor.value} on ${F.date.value}`; $('fOk').hidden = false; const ok = $('fOk').textContent; reset(); $('fOk').textContent = ok; $('fOk').hidden = false; });
+  reset();
+})();
+</script>
+</body>
+</html>

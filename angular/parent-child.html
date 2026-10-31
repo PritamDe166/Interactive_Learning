@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Parent ↔ child data flow</title>
+<meta name="description" content="Angular 22: CareDesk's PatientList hands a patient down to PatientCard with input(), the card reports back with output(), and a nurse's note syncs both ways with model(). Plus why mutating an object inside a signal does nothing.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .ng-left { display: grid; gap: 12px; min-width: 0; align-content: start; }
+  .story.ng-story { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); }
+  @media (max-width: 880px) { .story.ng-story { grid-template-columns: minmax(0, 1fr); } }
+  .app-sim { display: grid; gap: 12px; margin-top: 12px; }
+  .comp { border: 2px solid var(--line); border-radius: 14px; background: var(--panel); padding: 12px 14px; min-width: 0; }
+  .comp.child { margin-left: 28px; }
+  .comp-h { display: flex; justify-content: space-between; gap: 10px; font-weight: 700; margin-bottom: 8px; flex-wrap: wrap; }
+  .comp-h span { font-family: var(--mono); font-size: 12px; font-weight: 400; color: var(--muted); }
+  .comp .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 6px 0; }
+  .comp input[type=text] { font: inherit; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); width: 180px; max-width: 100%; }
+  .comp h4 { margin: 2px 0; font-size: 20px; }
+  .comp .btn { white-space: normal; text-align: left; }
+  .sync { overflow-wrap: anywhere; }
+  .comp .mono-v { font-family: var(--mono); font-size: 13px; color: var(--fg-soft); }
+  .comp.urgent-card { border-left: 6px solid var(--red); }
+  .comp.flash { border-color: var(--cyan); }
+  .comp.flash-up { border-color: var(--orange); }
+  .comp.flash-two { border-color: var(--violet); }
+  .wires { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-left: 28px; font-family: var(--mono); font-size: 12.5px; }
+  .wires span { padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); transition: all .25s; }
+  .wires span.wd.lit { border-color: var(--cyan); color: var(--cyan); }
+  .wires span.wu.lit { border-color: var(--orange); color: var(--orange); }
+  .wires span.wt.lit { border-color: var(--violet); color: var(--violet); }
+  .wires span.bad.lit { border-color: var(--red); color: var(--bad-text); }
+  .sync { font-size: 14px; margin: 0; }
+  .sim-log { font-family: var(--mono); font-size: 12.5px; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; min-height: 6.5em; color: var(--fg-soft); }
+  .bug-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 12px; margin-top: 12px; }
+  .bug { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); padding: 12px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+  .bug .codeblock { min-height: 0; font-size: 12.5px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .bug .q { margin: 0; font-size: 14px; color: var(--fg-soft); }
+  .bug .verdict { margin: 0; font-size: 14px; }
+  .bug .err { font-family: var(--mono); font-size: 12px; color: var(--bad-text); overflow-wrap: anywhere; display: block; margin-top: 4px; }
+  .bug .btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .bug.right { border-color: var(--teal); } .bug.wrong { border-color: var(--red); }
+  .score { font-size: 14px; color: var(--fg-soft); margin: 10px 0 0; }
+  .cc-pair.files { grid-template-columns: repeat(auto-fit, minmax(min(100%, 470px), 1fr)); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Angular roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Angular 22 · Part 2 · Data flow</div>
+    <h1>Parent ↔ child data flow</h1>
+    <ul class="lede">
+      <li>Data goes <b>down</b> through inputs: the card declares <span class="mono">patient = input.required&lt;Patient&gt;()</span>, the list binds <span class="mono">[patient]="patient()"</span>.</li>
+      <li>Events go <b>up</b> through outputs: the card calls <span class="mono">reviewed.emit(…)</span>, the list listens with <span class="mono">(reviewed)="onReviewed($event)"</span>.</li>
+      <li><b>Two-way</b> binding is both at once: <span class="mono">note = model('')</span> in the card, <span class="mono">[(note)]="note"</span> in the list.</li>
+      <li>Inputs are <b>read-only signals</b>: read them with <span class="mono">patient()</span>, derive with <span class="mono">computed</span>, react with <span class="mono">effect</span>.</li>
+      <li>A change means a <b>new object</b>. Changing a property of the same object is invisible to the child.</li>
+    </ul>
+    <p class="ng-legend" aria-label="Colour key"><span>data down: input / [property]</span><span class="lg-up">events up: output / (event)</span><span class="lg-two">two-way: model / [(banana-in-a-box)]</span></p>
+    <div class="cd-trail" data-stage="5"></div>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: PatientList and PatientCard talk</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time · console lines come from a real run of CareDesk</div>
+    <div class="story ng-story" id="pcStory">
+      <div class="ng-left">
+        <div class="scroll"><svg class="diagram" id="pcSvg" style="min-width:0" viewBox="0 0 640 372" role="img" aria-label="PatientList component above PatientCard component, connected by three wires: patient flowing down, reviewed flowing up, note in both directions"></svg></div>
+        <div id="pcCard"></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="codeH">
+    <h2 class="stage-title" id="codeH">CareDesk at step 5</h2>
+    <div class="stage-kind">The list and the card · built and run with Angular CLI 22.2</div>
+    <div class="cc-pair files">
+      <div id="fListTs"></div>
+      <div id="fListHtml"></div>
+      <div id="fCardTs"></div>
+      <div id="fCardHtml"></div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Drive the list and the card, then catch binding mistakes the way the compiler does.</p>
+
+  <section aria-labelledby="simH">
+    <h2 class="stage-title" id="simH">1. Play with the list and the card</h2>
+    <div class="stage-kind">Type, mutate, replace, emit · the console mirrors what the real app logged</div>
+    <div class="app-sim">
+      <div class="comp" id="cParent">
+        <div class="comp-h">PatientList <span>parent · owns the state</span></div>
+        <div class="row"><label for="sName" class="mono-v">fix the name</label><input type="text" id="sName" value="Asha" autocomplete="off"><button class="btn" type="button" id="sMutate">Mutate in place</button><button class="btn" type="button" id="sReplace">Replace (new object)</button></div>
+        <div class="row mono-v">Note: <b id="sPNote">''</b> · Last message: <b id="sPMsg">''</b></div>
+      </div>
+      <div class="wires" aria-label="Bindings"><span class="wd" id="wUser">[patient]="patient()"</span><span class="wt" id="wNote">[(note)]="note"</span><span class="wu" id="wSaved">(reviewed)="onReviewed($event)"</span></div>
+      <div class="comp child urgent-card" id="cChild">
+        <div class="comp-h">PatientCard <span>child · receives a patient, owns nothing</span></div>
+        <h4 id="sGreet">Asha · Cardiology</h4>
+        <div class="row"><label for="sNote" class="mono-v">note</label><input type="text" id="sNote" autocomplete="off" placeholder="Nurse's note"><button class="btn" type="button" id="sPing">Mark reviewed</button></div>
+      </div>
+      <p class="sync" id="sSync"></p>
+      <div class="card"><div class="label">Console</div><pre class="sim-log" id="sLog"></pre></div>
+      <div class="controls" style="justify-content:flex-start"><button class="btn" type="button" id="sReset">Reset</button></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="bugH">
+    <h2 class="stage-title" id="bugH">2. Will it build?</h2>
+    <div class="stage-kind">Each snippet changes one thing in PatientList's template · messages are the real compiler output (strict templates are on by default)</div>
+    <div class="bug-grid" id="bugs"></div>
+    <p class="score" id="bugScore"></p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Parent has data the child must show</span><span class="arrow">→</span><span class="then"><span class="mono">input()</span> in the child, <span class="mono">[name]="value()"</span> in the parent</span></li>
+      <li><span class="if">Child must tell the parent something happened</span><span class="arrow">→</span><span class="then"><span class="mono">output&lt;T&gt;()</span> + <span class="mono">.emit(value)</span>; parent handles <span class="mono">(name)="fn($event)"</span></span></li>
+      <li><span class="if">Child edits a value the parent owns (note, date picker, toggle)</span><span class="arrow">→</span><span class="then"><span class="mono">model()</span> + <span class="mono">[(name)]="signal"</span> (pass the signal, not its value)</span></li>
+      <li><span class="if">Square brackets <span class="mono">[x]</span></span><span class="arrow">→</span><span class="then">the right side is an <b>expression</b>; no brackets = a plain string</span></li>
+      <li><span class="if">Object inside a signal changed but the child didn't update</span><span class="arrow">→</span><span class="then">you mutated it. Use <span class="mono">update(p =&gt; ({ ...p, name }))</span></span></li>
+      <li><span class="if">Want a value derived from an input</span><span class="arrow">→</span><span class="then"><span class="mono">computed()</span>, not <span class="mono">effect()</span> or <span class="mono">ngOnChanges</span></span></li>
+      <li><span class="if">Two siblings, or components far apart, share state</span><span class="arrow">→</span><span class="then">a service with signals (step 10), not long input/output chains</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: decorators then, signal functions now</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Job</th><th>Older style (your notes)</th><th>Angular 22 style</th></tr></thead>
+        <tbody>
+          <tr><td>Receive a value</td><td><span class="mono">@Input() patient!: Patient;</span></td><td><span class="mono">patient = input.required&lt;Patient&gt;();</span> read as <span class="mono">patient()</span></td></tr>
+          <tr><td>Optional value with default</td><td><span class="mono">@Input() size = 'md';</span></td><td><span class="mono">size = input('md');</span></td></tr>
+          <tr><td>Rename / convert</td><td><span class="mono">@Input({ alias, transform })</span></td><td><span class="mono">input(false, { alias: 'compact', transform: booleanAttribute })</span></td></tr>
+          <tr><td>Send an event up</td><td><span class="mono">@Output() reviewed = new EventEmitter&lt;string&gt;();</span></td><td><span class="mono">reviewed = output&lt;string&gt;();</span> then <span class="mono">reviewed.emit(…)</span></td></tr>
+          <tr><td>Two-way binding</td><td><span class="mono">@Input() note</span> + <span class="mono">@Output() noteChange</span></td><td><span class="mono">note = model('');</span> then <span class="mono">note.set(…)</span></td></tr>
+          <tr><td>React to an input change</td><td><span class="mono">ngOnChanges(changes)</span></td><td><span class="mono">computed(() =&gt; …)</span> for values, <span class="mono">effect(() =&gt; …)</span> for side effects</td></tr>
+          <tr><td>Parent template</td><td colspan="2"><span class="mono">&lt;app-patient-card [patient]="patient()" [(note)]="note" (reviewed)="onReviewed($event)" /&gt;</span> (the same in both styles, except signals are called with <span class="mono">()</span>)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cc-pair" style="margin-top:14px">
+      <div><div class="label bad-text">Before: decorators and EventEmitter</div><div id="cmpBefore"></div></div>
+      <div><div class="label ok-text">After: signal-based functions</div><div id="cmpAfter"></div></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>The object trap, in today's terms.</b> Your notes found that changing <span class="mono">userData.name</span> didn't fire <span class="mono">ngOnChanges</span>, and fixed it with <span class="mono">{...this.userData}</span>. The cause is reference equality: Angular compares the bound value by identity. With signals it's stricter: a signal skips notification when the new value is the same object (<span class="mono">Object.is</span>), so mutating does <b>nothing</b> downstream. In the real run the list's textbox showed "Asha Rao" while the card still said "Asha R · Cardiology".</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>Writing to an input from the child.</b> The notes bind <span class="mono">[(ngModel)]="testStringfromParent"</span> inside the child, which quietly overwrites a value the parent owns. Signal inputs are read-only (<span class="mono">set</span> doesn't exist on <span class="mono">InputSignal</span>). If the child really should change it, make it a <span class="mono">model()</span> so the parent hears about it, as CareDesk does with the nurse's note.</p></div>
+      <div class="note"><span class="flag add">Updated</span><p><b>Why the old example still showed the new name.</b> Under the old default change detection, every component was re-checked on every event, so the child template re-read the mutated object and looked fine even though <span class="mono">ngOnChanges</span> stayed silent. Since v22, components are <b>OnPush by default</b> (the old behaviour is now called <span class="mono">Eager</span>), so a child only re-renders when its inputs or signals change. More on the Change detection page.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Signal inputs still trigger <span class="mono">ngOnChanges</span>.</b> In the verified run, <span class="mono">ngOnChanges</span> logged <span class="mono">patient,note</span> first, then <span class="mono">patient</span> on each new object, and <span class="mono">note</span> after the card wrote to its <span class="mono">model</span> (the list's new value came back down). You rarely need it now; <span class="mono">computed</span> and <span class="mono">effect</span> cover the same cases.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>An unknown output name is a DOM event.</b> <span class="mono">(review)</span> instead of <span class="mono">(reviewed)</span> doesn't fail as "no such output": Angular treats it as a native DOM event, so <span class="mono">$event</span> becomes an <span class="mono">Event</span> and the type check catches it. Strict templates (on by default) turn these slips into build errors.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Decorators still work.</b> <span class="mono">@Input</span> and <span class="mono">@Output</span> remain fully supported; the Angular docs recommend the function forms for new code. Expect both in interviews and in existing codebases.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Which way does data flow through <span class="mono">input()</span> and <span class="mono">output()</span>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Inputs carry <b>data down</b> from parent to child. Outputs carry <b>events up</b> from child to parent. Think from the child's point of view: what comes in, what goes out.</p></div></details>
+      <details><summary>PatientList runs <span class="mono">this.patient().name = 'Asha Rao'</span>. What does the card show?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>The <b>old</b> heading. The signal still holds the same object, so nothing is notified; <span class="mono">computed</span> and <span class="mono">effect</span> don't re-run and the OnPush card isn't refreshed. Replace the object: <span class="mono">patient.update(p =&gt; ({ ...p, name: 'Asha Rao' }))</span>.</p></div></details>
+      <details><summary>What does <span class="mono">[(note)]="note"</span> expand to?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">[note]="note()" (noteChange)="note.set($event)"</span>. <span class="mono">model()</span> creates the <span class="mono">noteChange</span> output for you. Pass the signal itself; <span class="mono">[(note)]="note()"</span> fails with NG5002.</p></div></details>
+      <details><summary>Can the card call <span class="mono">this.patient.set(…)</span> on its input?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>No: <span class="mono">Property 'set' does not exist on type 'InputSignal&lt;Patient&gt;'</span>. Inputs are read-only. Use <span class="mono">model()</span> for a value the child may change, or emit an event and let the parent change it.</p></div></details>
+      <details><summary>What's the difference between <span class="mono">patient="patient()"</span> and <span class="mono">[patient]="patient()"</span>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Without brackets the child receives the literal <b>string</b> "patient()". With brackets Angular evaluates the expression and passes the <span class="mono">Patient</span> object.</p></div></details>
+      <details><summary>When should you reach for a service instead of inputs and outputs?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>When components aren't parent and child (siblings, distant parts of the tree), or when you'd pass the same value through several layers just to reach one child. CareDesk moves its patients into a service on step 10.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: your Obsidian notes "@Input and @Output Operator", "@Input decorator", "@Output decorator", "ngOnChanges details" and the parent/child code pages; angular.dev guides "Accepting data with input properties", "Custom events with outputs" and "Two-way binding"; Angular blog, "Announcing Angular v22"; Ninja Squad, "What's new in Angular 22". Every snippet and console line was built and run in CareDesk with Angular CLI 22.2.5 (TypeScript 6.0, zoneless); console.log calls were added to each method and hook for the run.</footer>
+</div>
+
+<script src="caredesk.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  /* ===== CareDesk at step 5 (as built and run) ===== */
+  const LIST_TS = `import { Component, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { PatientCard } from '../patient-card/patient-card';
+import { PATIENTS, Patient } from '../patient';
+
+@Component({
+  imports: [FormsModule, PatientCard],
+  selector: 'app-patient-list',
+  templateUrl: './patient-list.html',
+})
+export class PatientList {
+  protected readonly search = signal('');
+  protected readonly patient = signal<Patient>(PATIENTS[0]);   // one card for now
+  protected readonly note = signal('');
+  protected readonly message = signal('');
+
+  rename(name: string) { this.patient.update(p => ({ ...p, name })); }
+  mutate() { this.patient().name = 'Asha Rao'; }
+  replace() { this.patient.update(p => ({ ...p, name: 'Asha Rao' })); }
+  onReviewed(text: string) { this.message.set(text); }
+}`;
+  const LIST_HTML = `<h2>Waiting room</h2>
+<input placeholder="Search patients" [(ngModel)]="search" />
+<p>Searching for: "{{ search() }}"</p>
+
+<p>
+  Fix the name: <input [value]="patient().name" (input)="rename($any($event.target).value)" />
+  <button (click)="mutate()">Mutate</button>
+  <button (click)="replace()">Replace</button>
+</p>
+<p>Note: {{ note() }} · Last message: {{ message() }}</p>
+
+<app-patient-card
+  [patient]="patient()"
+  [(note)]="note"
+  (reviewed)="onReviewed($event)" />`;
+  const CARD_TS = `import { Component, computed, effect, input, model, output, signal } from '@angular/core';
+import { Patient, label } from '../patient';
+
+@Component({
+  selector: 'app-patient-card',
+  templateUrl: './patient-card.html',
+})
+export class PatientCard {
+  patient = input.required<Patient>();   // list → card
+  note = model('');                      // two-way: [(note)]
+  reviewed = output<string>();           // card → list
+
+  protected readonly selected = signal(false);
+  protected readonly heading = computed(() => label(this.patient()));
+
+  constructor() {
+    effect(() => console.log('[card] effect: patient =', JSON.stringify(this.patient())));
+  }
+
+  toggle() { this.selected.update(v => !v); }
+  markReviewed() {
+    this.reviewed.emit(\`\${this.patient().name} reviewed\`);
+  }
+}`;
+  const CARD_HTML = `<article [class.urgent]="patient().triage === 'urgent'" [class.selected]="selected()">
+  <h3>{{ heading() }}</h3>
+  <p><span [style.font-weight]="patient().triage === 'urgent' ? 700 : 400">{{ patient().triage }}</span></p>
+  <input placeholder="Nurse's note" [value]="note()" (input)="note.set($any($event.target).value)" />
+  <button type="button" [attr.aria-pressed]="selected()" (click)="toggle()">
+    {{ selected() ? 'Selected' : 'Select' }}
+  </button>
+  <button type="button" (click)="markReviewed()">Mark reviewed</button>
+</article>`;
+  const FILES = { 'patient-list.ts': [LIST_TS, 'ts'], 'patient-list.html': [LIST_HTML, 'ng'], 'patient-card.ts': [CARD_TS, 'ts'], 'patient-card.html': [CARD_HTML, 'ng'] };
+  K.codeCard($('fListTs'), { file: 'patient-list/patient-list.ts · parent', lang: 'ts', code: LIST_TS, marks: { 13: 'hot', 14: 'two', 15: 'up' } });
+  K.codeCard($('fListHtml'), { file: 'patient-list/patient-list.html · parent template', lang: 'ng', code: LIST_HTML, marks: { 13: 'hot', 14: 'two', 15: 'up' } });
+  K.codeCard($('fCardTs'), { file: 'patient-card/patient-card.ts · child', lang: 'ts', code: CARD_TS, marks: { 9: 'hot', 10: 'two', 11: 'up' } });
+  K.codeCard($('fCardHtml'), { file: 'patient-card/patient-card.html · child template', lang: 'ng', code: CARD_HTML, caption: 'Step 4 bindings, now reading the input signal: <span class="mono">patient()</span> instead of a hard-coded patient' });
+
+  K.codeCard($('cmpBefore'), { file: 'patient-card.component.ts', lang: 'ts', code: `export class PatientCardComponent implements OnChanges {
+  @Input() patient!: Patient;
+  @Input() note = '';
+  @Output() noteChange = new EventEmitter<string>();
+  @Output() reviewed = new EventEmitter<string>();
+  heading = '';
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['patient']) this.heading = label(this.patient);
+  }
+}`, marks: { 2: 'hot', 4: 'two', 5: 'up', 8: 'dim', 9: 'dim' } });
+  K.codeCard($('cmpAfter'), { file: 'patient-card.ts', lang: 'ts', code: `export class PatientCard {
+  patient = input.required<Patient>();
+  note = model('');
+  reviewed = output<string>();
+
+  heading = computed(() => label(this.patient()));
+}`, marks: { 2: 'hot', 3: 'two', 4: 'up', 6: 'ok' }, caption: 'Same behaviour, no lifecycle hook, and <span class="mono">noteChange</span> comes free with <span class="mono">model()</span>' });
+
+  /* ===== Walkthrough ===== */
+  const sv = $('pcSvg');
+  const W = K.el('g', {}, sv), B = K.el('g', {}, sv), FX = K.el('g', {}, sv);
+  const par = K.compBox(B, 20, 10, 600, { name: 'PatientList', role: 'parent · patient-list.ts', rows: ['', '', ''] });
+  const chi = K.compBox(B, 20, 230, 600, { name: 'PatientCard', role: 'child · patient-card.ts', rows: ['', '', '', ''] });
+  const yTop = 10 + par.h, yBot = 230;
+  const wUser = K.ngWire(W, [140, yTop + 2], [140, yBot - 4], 'down', '[patient]');
+  const wNote = K.ngWire(W, [320, yTop + 6], [320, yBot - 6], 'two', '[(note)]');
+  const wSaved = K.ngWire(W, [500, yBot - 2], [500, yTop + 4], 'up', '(reviewed)');
+  const WIRES = { user: wUser, note: wNote, saved: wSaved };
+
+  const nm = n => `{ id: 1, name: '${n}', department: 'Cardiology', … }`;
+  const L0 = ['[card] ngOnChanges: patient,note', '[card] effect: patient = {"id":1,"name":"Asha","department":"Cardiology","triage":"urgent"}', '[card] computed heading'];
+  const S = [
+    { p: [nm('Asha'), "''", "''"], c: ['–', '–', "''", ''], wires: {}, card: ['patient-list.html', { 12: 'hot', 13: 'hot', 14: 'hot', 15: 'hot' }], pm: {}, cm: {} },
+    { p: [nm('Asha'), "''", "''"], c: ['(not set yet)', '–', "''", ''], wires: {}, card: ['patient-card.ts', { 9: ['hot', 'required: the list must bind it'] }], pm: {}, cm: { 0: 'hot' } },
+    { p: [nm('Asha'), "''", "''"], c: ["{ name: 'Asha', … }", "'Asha · Cardiology'", "''", ''], wires: { user: 'hot' }, card: ['patient-list.html', { 13: ['hot', 'evaluate patient() and pass it'] }], out: L0, pm: { 0: 'hot' }, cm: { 0: 'hot' } },
+    { p: [nm('Asha'), "''", "''"], c: ["{ name: 'Asha', … }", "'Asha · Cardiology'", "''", ''], wires: {}, card: ['patient-card.ts', { 14: ['ok', 'cached until patient() changes'], 17: ['hot', 'runs after a change'] }], out: L0, pm: {}, cm: { 1: 'hot' } },
+    { p: [nm('Asha R'), "''", "''"], c: ["{ name: 'Asha R', … }", "'Asha R · Cardiology'", "''", ''], wires: { user: 'hot' }, card: ['patient-list.ts', { 17: ['ok', 'new object'] }], out: ['[list] rename -> Asha R', '[card] ngOnChanges: patient', '[card] effect: patient = {"id":1,"name":"Asha R","department":"Cardiology","triage":"urgent"}', '[card] computed heading'], pm: { 0: 'hot' }, cm: { 0: 'hot', 1: 'hot' } },
+    { p: [nm('Asha Rao'), "''", "''"], c: ["{ name: 'Asha Rao', … }  same object", "'Asha R · Cardiology'  stale", "''", ''], wires: { user: 'bad' }, card: ['patient-list.ts', { 18: ['bad', 'same object: no notification'] }], out: ['[list] mutate: patient().name = "Asha Rao"'], pm: { 0: 'bad' }, cm: { 1: 'bad' } },
+    { p: [nm('Asha Rao'), "''", "''"], c: ["{ name: 'Asha Rao', … }", "'Asha Rao · Cardiology'", "''", ''], wires: { user: 'hot' }, card: ['patient-list.ts', { 19: ['ok', 'new object'] }], out: ['[list] replace with a new object', '[card] ngOnChanges: patient', '[card] effect: patient = {"id":1,"name":"Asha Rao","department":"Cardiology","triage":"urgent"}', '[card] computed heading'], pm: { 0: 'hot' }, cm: { 0: 'hot', 1: 'hot' } },
+    { p: [nm('Asha Rao'), "''", "'Asha Rao reviewed'"], c: ["{ name: 'Asha Rao', … }", "'Asha Rao · Cardiology'", "''", ''], wires: { saved: 'hot' }, card: ['patient-card.ts', { 11: 'up', 22: ['up', 'emit'] }], out: ['[card] emit reviewed', '[list] received: Asha Rao reviewed'], pm: { 2: 'up' }, cm: { 3: 'up' } },
+    { p: [nm('Asha Rao'), "'call back'", "'Asha Rao reviewed'"], c: ["{ name: 'Asha Rao', … }", "'Asha Rao · Cardiology'", "'call back'", ''], wires: { note: 'hot' }, card: ['patient-list.html', { 14: ['two', 'pass the signal itself'] }], out: ['[card] ngOnChanges: note'], pm: { 1: 'two' }, cm: { 2: 'two' } }
+  ];
+  const PROWS = ['patient = signal(', 'note    = signal(', 'message = signal('];
+  const CROWS = ['patient()  →  ', 'heading()  →  ', 'note()     →  ', 'reviewed   =  output<string>()'];
+  function show(i) {
+    const s = S[i];
+    s.p.forEach((v, r) => par.set(r, PROWS[r] + v + ')'));
+    s.c.forEach((v, r) => chi.set(r, r === 3 ? CROWS[3] : CROWS[r] + v));
+    par.rows.forEach((r, k) => { r.g.setAttribute('class', 'cb-row ' + (s.pm[k] || '')); });
+    chi.rows.forEach((r, k) => { r.g.setAttribute('class', 'cb-row ' + (s.cm[k] || '')); });
+    for (const [k, w] of Object.entries(WIRES)) {
+      const m = s.wires[k];
+      w.setAttribute('class', 'ngw-g ' + w.classList[1] + (m === 'hot' ? ' hot' : m === 'bad' ? '' : ' dim'));
+      w.querySelector('path').classList.toggle('bad', m === 'bad');
+      w.querySelector('path').setAttribute('marker-end', `url(#pcSvg-ng-${m === 'bad' ? 'bad' : k === 'user' ? 'down' : k === 'saved' ? 'up' : 'two'})`);
+    }
+    FX.textContent = '';
+    if (i === 0) K.text(FX, 320, 196, '<app-patient-card> sits in the list\'s template', 'mlabel muted halo');
+    if (i === 5) K.text(FX, 150, 202, '✗ nothing sent', 'mlabel bad halo').style.textAnchor = 'start';
+    const [file, marks] = s.card;
+    K.codeCard($('pcCard'), { file, lang: FILES[file][1], code: FILES[file][0], marks, dim: true, out: s.out || [], outLabel: 'Console (real run)' });
+  }
+  async function travel(run, label, from, to, cls) {
+    const p = K.pill(FX, label, cls);
+    await K.move(p, from, to, 900, run);
+    p.remove();
+  }
+  const DOWN = [[140, yTop + 14], [140, yBot - 14]], UP = [[500, yBot - 14], [500, yTop + 14]], TWO = [[320, yBot - 14], [320, yTop + 14]];
+  K.story({
+    root: $('pcStory'), show, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'Two components, one tree', text: 'Since step 3, PatientList uses PatientCard through <span class="mono">&lt;app-patient-card&gt;</span>. But the card still hard-codes Asha. Now the list <b>owns the state</b> as signals (the patient, a note, the last message) and the card will only receive it.', tip: '"Props down, events up": state lives in one place (the parent), the child gets the value and reports back through events. Data flow stays one-way and easy to trace.' },
+      { title: 'The card declares an input', text: '<span class="mono">patient = input.required&lt;Patient&gt;()</span> says "I need a Patient from whoever uses me". It returns a <b>read-only signal</b>, typed with the <span class="mono">Patient</span> interface from step 2. <span class="mono">.required</span> makes a missing binding a build error.' },
+      { title: 'The list binds it', text: 'In the list\'s template, <span class="mono">[patient]="patient()"</span> means: evaluate <span class="mono">patient()</span> (read the list\'s signal) and pass the result to the card\'s <span class="mono">patient</span> input. Square brackets = "this is an expression", data flows <b>down</b>.', play: async run => { await travel(run, "{ name: 'Asha' }", DOWN[0], DOWN[1], ''); } },
+      { title: 'Read it like any signal', text: 'The card derives its <span class="mono">heading</span> with <span class="mono">computed</span>, reusing <span class="mono">label()</span> from step 2: it runs once, caches the result, and re-runs only when <span class="mono">patient()</span> changes. <span class="mono">effect</span> is for side effects such as logging. The console shows the real first-render order.' },
+      { title: 'Parent changes, child follows', text: 'Typing "Asha R" in the list runs <span class="mono">patient.update(p =&gt; ({ ...p, name }))</span>. That creates a <b>new object</b>, so the signal notifies, the new value flows down, and the card\'s <span class="mono">effect</span> and <span class="mono">computed</span> re-run.', play: async run => { await travel(run, "{ name: 'Asha R' }", DOWN[0], DOWN[1], ''); } },
+      { title: 'The trap: mutating in place', text: '<span class="mono">this.patient().name = \'Asha Rao\'</span> edits the object the signal already holds. Same reference, so the signal sends <b>no notification</b>: the console shows only the list\'s own log. In the real app the list\'s textbox now said "Asha Rao" while the card still said "Asha R · Cardiology".', tip: 'Your notes hit this with ngOnChanges. Same root cause: Angular compares by reference. Treat objects in signals as immutable: replace, don\'t mutate.', play: async run => { const p = K.pill(FX, "name = 'Asha Rao'", 'bad'); await K.move(p, DOWN[0], [140, (yTop + yBot) / 2], 700, run); await K.sleep(500, run); p.remove(); } },
+      { title: 'Replace it, and it flows', text: '<span class="mono">patient.update(p =&gt; ({ ...p, name: \'Asha Rao\' }))</span> builds a new object with the spread operator. New reference, so the change reaches the card again.', play: async run => { await travel(run, "{ name: 'Asha Rao' }", DOWN[0], DOWN[1], ''); } },
+      { title: 'Events go up with output()', text: 'The card declares <span class="mono">reviewed = output&lt;string&gt;()</span> and its "Mark reviewed" button emits <span class="mono">\'Asha Rao reviewed\'</span>. The list listens with <span class="mono">(reviewed)="onReviewed($event)"</span>; <span class="mono">$event</span> is the emitted string. Round brackets = an event, data flows <b>up</b>.', play: async run => { await travel(run, "'Asha Rao reviewed'", UP[0], UP[1], 'up'); } },
+      { title: 'Two-way with model()', text: 'The nurse types a note on the card. <span class="mono">note = model(\'\')</span> is an input the card may write to: <span class="mono">note.set(\'call back\')</span> makes Angular emit <span class="mono">noteChange</span> and the list\'s signal updates; the value then comes back down (the <span class="mono">ngOnChanges: note</span> line). Step 5 of CareDesk is done.', tip: 'Use model() when the child edits a value the parent owns, such as this note or a date picker. Otherwise prefer input + output: it keeps ownership obvious.', play: async run => { await travel(run, "'call back'", TWO[0], TWO[1], 'two'); } }
+    ]
+  });
+
+  /* ===== Playground 1: simulator mirroring the real run ===== */
+  let pUser, cUser, greet, pNote, pMsg, lines;
+  const logEl = $('sLog');
+  const lbl = p => `${p.name} · ${p.department}`;
+  function out(...l) { lines.push(...l); if (lines.length > 14) lines = lines.slice(-14); logEl.textContent = lines.join('\n'); }
+  function flash(id, wireId, cls) {
+    const c = $(id); c.classList.add(cls); setTimeout(() => c.classList.remove(cls), 700);
+    if (wireId) { const w = $(wireId); w.classList.add('lit'); setTimeout(() => w.classList.remove('lit'), 900); }
+  }
+  function deliver() {
+    cUser = pUser;
+    out('[card] ngOnChanges: patient', '[card] effect: patient = ' + JSON.stringify(cUser));
+    greet = lbl(cUser); out('[card] computed heading');
+    flash('cChild', 'wUser', 'flash');
+  }
+  function paint() {
+    $('sGreet').textContent = greet;
+    $('sPNote').textContent = `'${pNote}'`; $('sPMsg').textContent = `'${pMsg}'`;
+    const stale = greet !== lbl(pUser);
+    $('sSync').innerHTML = stale
+      ? `<b class="bad-text">Out of sync.</b> The list's object now says <span class="mono">name: '${pUser.name}'</span>, but the card still shows "${greet}": same object, so no signal fired. Try <b>Mark reviewed</b>: <span class="mono">markReviewed()</span> reads <span class="mono">patient()</span> at click time and sends "${pUser.name} reviewed" (the real run did exactly that).`
+      : `<b class="ok-text">In sync.</b> The card's <span class="mono">patient()</span> is the list's current object.`;
+  }
+  function reset() {
+    pUser = { id: 1, name: 'Asha', department: 'Cardiology', triage: 'urgent' }; cUser = pUser; greet = lbl(pUser); pNote = ''; pMsg = ''; lines = [];
+    $('sName').value = 'Asha'; $('sNote').value = '';
+    out('// first render', ...L0); paint();
+  }
+  $('sName').addEventListener('input', e => { const name = e.target.value; out('[list] rename -> ' + name); pUser = { ...pUser, name }; deliver(); paint(); });
+  $('sMutate').addEventListener('click', () => { out('[list] mutate: patient().name = "Asha Rao"'); pUser.name = 'Asha Rao'; $('sName').value = 'Asha Rao'; const w = $('wUser'); w.classList.add('bad', 'lit'); setTimeout(() => w.classList.remove('bad', 'lit'), 900); flash('cParent', null, 'flash'); paint(); });
+  $('sReplace').addEventListener('click', () => { out('[list] replace with a new object'); pUser = { ...pUser, name: 'Asha Rao' }; $('sName').value = 'Asha Rao'; deliver(); paint(); });
+  $('sNote').addEventListener('input', e => { pNote = e.target.value; out('[card] ngOnChanges: note'); flash('cParent', 'wNote', 'flash-two'); paint(); });
+  $('sPing').addEventListener('click', () => { const t = `${cUser.name} reviewed`; out('[card] emit reviewed', '[list] received: ' + t); pMsg = t; flash('cParent', 'wSaved', 'flash-up'); paint(); });
+  $('sReset').addEventListener('click', reset);
+  reset();
+
+  /* ===== Playground 2: will it build? ===== */
+  const BUGS = [
+    { q: 'Pass the signal itself to the input', lang: 'ng', code: '<app-patient-card [patient]="patient" />', ok: false, err: "TS2739: Type 'WritableSignal<Patient>' is missing the following properties from type 'Patient': id, department, triage", why: 'The input wants a <span class="mono">Patient</span>, not the signal that holds one. Call it: <span class="mono">[patient]="patient()"</span>.' },
+    { q: 'Forget the square brackets', lang: 'ng', code: '<app-patient-card patient="patient()" />', ok: false, err: "TS2322: Type 'string' is not assignable to type 'Patient'.", why: 'Without brackets the value is the literal string "patient()".' },
+    { q: 'Call the signal in a two-way binding', lang: 'ng', code: '<app-patient-card [patient]="patient()" [(note)]="note()" />', ok: false, err: 'NG5002: Unsupported expression in a two-way binding', why: 'Two-way binding needs something it can write back to: the signal <span class="mono">note</span> (or a plain property), not the value <span class="mono">note()</span>.' },
+    { q: 'Leave out the required input', lang: 'ng', code: '<app-patient-card [(note)]="note" />', ok: false, err: "NG8008: Required input 'patient' from component PatientCard must be specified.", why: '<span class="mono">input.required</span> turns a forgotten binding into a build error instead of a runtime <span class="mono">undefined</span>.' },
+    { q: 'Typo in the output name', lang: 'ng', code: '<app-patient-card [patient]="patient()" (review)="onReviewed($event)" />', ok: false, err: "TS2345: Argument of type 'Event' is not assignable to parameter of type 'string'.", why: 'There is no <span class="mono">review</span> output, so Angular binds a native DOM event called "review" and <span class="mono">$event</span> is an <span class="mono">Event</span>.' },
+    { q: 'Set the list\'s signal straight from the event', lang: 'ng', code: '<app-patient-card [patient]="patient()" (reviewed)="message.set($event)" />', ok: true, why: 'Templates may call signal methods directly; a handler method is only needed when there\'s more logic.' }
+  ];
+  let answered = 0, right = 0;
+  const box = $('bugs');
+  BUGS.forEach((b, i) => {
+    const d = document.createElement('div'); d.className = 'bug';
+    d.innerHTML = `<p class="q"><b>${i + 1}.</b> ${b.q}</p><pre class="codeblock"></pre><div class="btns"><button class="btn" type="button" data-v="1">Builds</button><button class="btn" type="button" data-v="0">Build error</button></div><p class="verdict" hidden></p>`;
+    K.codeBlock(d.querySelector('pre'), b.code, b.lang);
+    d.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
+      const guess = btn.dataset.v === '1', good = guess === b.ok;
+      if (!d.dataset.done) { d.dataset.done = '1'; answered++; if (good) right++; }
+      d.classList.toggle('right', good); d.classList.toggle('wrong', !good);
+      const v = d.querySelector('.verdict'); v.hidden = false;
+      v.innerHTML = `<b class="${good ? 'ok-text' : 'bad-text'}">${good ? 'Right' : 'Not quite'}:</b> ${b.ok ? 'it builds.' : 'build error.'} ${b.why}${b.err ? `<span class="err">${b.err.replace(/</g, '&lt;')}</span>` : ''}`;
+      $('bugScore').textContent = `First answers: ${right} / ${answered} correct` + (answered === BUGS.length ? ' · all done' : '');
+    }));
+    box.appendChild(d);
+  });
+})();
+</script>
+</body>
+</html>

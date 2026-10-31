@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reactive forms & Signal Forms</title>
+<meta name="description" content="Angular 22 reactive forms on CareDesk's patient registration: a typed FormGroup built in the class, bound with formControlName, validated, previewed with valueChanges. Then the same form with the new Signal Forms API.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .ng-left { display: grid; gap: 12px; min-width: 0; align-content: start; }
+  .fm .node rect { transition: stroke .2s, fill .2s, opacity .3s; }
+  .fm .node.valid rect { stroke: var(--teal); } .fm .node.invalid rect { stroke: var(--red); }
+  .fm .node.hot rect { stroke-width: 3.5; }
+  .fm .node.gone { opacity: 0; }
+  .fm .tl { stroke: var(--line); stroke-width: 2; transition: opacity .3s; }
+  .fm .tl.gone { opacity: 0; }
+  .fm .flag { font-family: var(--mono) !important; font-size: 10.5px; }
+  .fm .flag.on { fill: var(--fg); font-weight: 700; } .fm .flag.off { fill: var(--muted); }
+  .fm .flag.bad { fill: var(--bad-text); font-weight: 700; } .fm .flag.good { fill: var(--good-text); font-weight: 700; }
+  .fm .val { font-family: var(--mono) !important; font-size: 11px; fill: var(--cyan); }
+  .fm .bind { font-family: var(--mono) !important; font-size: 10.5px; fill: var(--violet); }
+  .fm .side { font-family: var(--mono) !important; font-size: 11px; fill: var(--muted); }
+  .preview { font-family: var(--mono); font-size: 13px; padding: 8px 10px; border-radius: 8px; background: var(--panel-2); }
+  .cmp td:first-child { font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Angular roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Angular 22 · Part 4 · Forms &amp; data · added topic</div>
+    <h1>Reactive forms &amp; Signal Forms</h1>
+    <ul class="lede">
+      <li>In a <b>reactive</b> form you build the form model in the <b>class</b> (<span class="mono">FormGroup</span>, <span class="mono">FormControl</span>), then bind the template to it.</li>
+      <li>Validators are functions (<span class="mono">Validators.required</span>), so rules live in TypeScript where you can test them.</li>
+      <li>Forms are <b>typed</b>: <span class="mono">getRawValue()</span> returns <span class="mono">{ name: string; … }</span>.</li>
+      <li><span class="mono">valueChanges</span> is an Observable; <span class="mono">toSignal()</span> turns it into a signal for the template.</li>
+      <li>New: <b>Signal Forms</b> (<span class="mono">form()</span> + <span class="mono">[formField]</span>) wrap a signal you own; every state is a signal.</li>
+    </ul>
+    <div class="cd-trail" data-stage="14"></div>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: registering a new patient</h2>
+    <div class="stage-kind">Left of the tree: the class creates it · right: the template binds to it · states and messages from the real run</div>
+    <div class="story" id="rStory">
+      <div class="ng-left">
+        <div class="scroll"><svg class="diagram fm" id="rSvg" style="min-width:0" viewBox="0 0 700 300" role="img" aria-label="Reactive form model: a FormGroup with name, department, triage and phone controls"></svg></div>
+        <div class="preview" id="rPrev"></div>
+        <div id="rCard"></div>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Three ways to build the same form. Pick a concern and compare.</p>
+
+  <section aria-labelledby="cmpH">
+    <h2 class="stage-title" id="cmpH">Same form, three APIs</h2>
+    <div class="seg" id="cmpSeg" role="group" aria-label="Concern" style="flex-wrap:wrap">
+      <button type="button" data-v="model" aria-pressed="true">Where the model lives</button>
+      <button type="button" data-v="bind" aria-pressed="false">Binding a field</button>
+      <button type="button" data-v="valid" aria-pressed="false">Validation</button>
+      <button type="button" data-v="read" aria-pressed="false">Reading values</button>
+    </div>
+    <div class="cc-pair" style="margin-top:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))">
+      <div><div class="label">Template-driven (step 13)</div><div id="c1"></div></div>
+      <div><div class="label">Reactive (this step)</div><div id="c2"></div></div>
+      <div><div class="label">Signal Forms</div><div id="c3"></div></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Build a form in the class</span><span class="arrow">→</span><span class="then"><span class="mono">inject(NonNullableFormBuilder).group({ name: ['', Validators.required] })</span></span></li>
+      <li><span class="if">Bind it</span><span class="arrow">→</span><span class="then"><span class="mono">ReactiveFormsModule</span>, <span class="mono">&lt;form [formGroup]="form"&gt;</span>, <span class="mono">formControlName="name"</span></span></li>
+      <li><span class="if">Show all errors on submit</span><span class="arrow">→</span><span class="then"><span class="mono">form.markAllAsTouched()</span></span></li>
+      <li><span class="if">Typed, complete value</span><span class="arrow">→</span><span class="then"><span class="mono">form.getRawValue()</span> (<span class="mono">.value</span> skips disabled controls, so fields may be undefined)</span></li>
+      <li><span class="if">React to changes in the template</span><span class="arrow">→</span><span class="then"><span class="mono">toSignal(form.valueChanges, { initialValue: form.getRawValue() })</span></span></li>
+      <li><span class="if">Starting fresh, want signals end to end</span><span class="arrow">→</span><span class="then"><span class="mono">form(signal(model), p =&gt; { required(p.name) })</span> + <span class="mono">[formField]</span></span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: choosing a forms API</h2>
+    <div class="scroll card table-card">
+      <table class="cmp">
+        <thead><tr><th></th><th>Template-driven</th><th>Reactive</th><th>Signal Forms</th></tr></thead>
+        <tbody>
+          <tr><td>Model lives in</td><td>the template (ngModel)</td><td>the class (FormGroup)</td><td>a signal you own; <span class="mono">form()</span> wraps it</td></tr>
+          <tr><td>Validation</td><td>HTML attributes</td><td>validator functions</td><td>schema functions (<span class="mono">required(p.name)</span>)</td></tr>
+          <tr><td>Change tracking</td><td>events / ngModelChange</td><td>Observables (<span class="mono">valueChanges</span>)</td><td>signals (<span class="mono">reg.name().value()</span>)</td></tr>
+          <tr><td>Good for</td><td>small, simple forms</td><td>large, dynamic, testable forms; most existing code</td><td>new code in signal-based apps</td></tr>
+          <tr><td>Import</td><td class="mono">FormsModule</td><td class="mono">ReactiveFormsModule</td><td class="mono">FormField</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Updated</span><p><b>Typed forms.</b> Your notes' FormGroup / FormControl pages predate typed forms (v14+). In CareDesk, <span class="mono">const n: string = this.form.value.name</span> failed with <span class="mono">TS2322: Type 'string | undefined' is not assignable to type 'string'</span>, while <span class="mono">getRawValue()</span> is fully typed.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Signal Forms in Angular 22.</b> Introduced as experimental in v21 and promoted in v22 (see the v22 release notes), <span class="mono">@angular/forms/signals</span> exports <span class="mono">form</span>, <span class="mono">FormField</span>, <span class="mono">required</span>, <span class="mono">minLength</span>, <span class="mono">pattern</span> and <span class="mono">submit</span>. In the real run, errors came back as objects with a <span class="mono">kind</span> such as <span class="mono">'required'</span> or <span class="mono">'minLength'</span>, and submitting an empty form did <b>not</b> mark fields touched, so show errors on submit yourself.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Typos fail at runtime here.</b> <span class="mono">formControlName="phon"</span> built fine and threw when the page opened: <span class="mono">NG01055: Cannot find control with path: 'phon'. Controls that do exist at this level: name, department, triage, phone.</span></p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Biggest difference between template-driven and reactive?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Where the form model is created: implicitly by directives in the template, or explicitly in the class. Reactive forms put structure and rules in TypeScript, which is easier to test and to change dynamically.</p></div></details>
+      <details><summary>Why <span class="mono">NonNullableFormBuilder</span>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>With it, <span class="mono">reset()</span> returns controls to their initial value instead of <span class="mono">null</span>, so the types stay <span class="mono">string</span> rather than <span class="mono">string | null</span>.</p></div></details>
+      <details><summary><span class="mono">form.value</span> vs <span class="mono">form.getRawValue()</span>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">value</span> excludes disabled controls, so each field is typed as possibly undefined. <span class="mono">getRawValue()</span> includes everything with exact types.</p></div></details>
+      <details><summary>How did CareDesk show errors after clicking Register on an empty form?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">markAllAsTouched()</span> in <span class="mono">save()</span>, so "Name is required" and "Pick a department" appeared even for fields never visited.</p></div></details>
+      <details><summary>How does the live preview update?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">toSignal(this.form.valueChanges, …)</span> turns the Observable into a signal, which the template reads like any other signal.</p></div></details>
+      <details><summary>In Signal Forms, where's the data?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>In your own <span class="mono">signal&lt;NewPatient&gt;</span>. <span class="mono">form(model, schema)</span> doesn't copy it: typing "Kiran" updated <span class="mono">model()</span> directly.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: your Obsidian notes "FormControl", "FormGroup", "FormModel" and "Forms Explained"; angular.dev "Reactive forms", "Typed forms" and "Signal Forms"; Angular blog "Announcing Angular v22". All states, errors and navigation results were recorded in CareDesk (reactive version) and in a separate Angular 22.2 test app (Signal Forms version).</footer>
+</div>
+
+<script src="caredesk.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const TS = `export class RegisterPatient {
+  private readonly store = inject(PatientStore);
+  private readonly router = inject(Router);
+  private readonly fb = inject(NonNullableFormBuilder);
+
+  protected readonly departments = ['Cardiology', 'Orthopaedics', 'Dermatology', 'ENT'];
+  protected readonly form = this.fb.group({
+    name: ['', [Validators.required, Validators.minLength(2)]],
+    department: ['', Validators.required],
+    triage: this.fb.control<Triage>('routine'),
+    phone: ['', Validators.pattern(/^[0-9 ]{10,12}$/)],
+  });
+  protected readonly preview = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
+
+  save() {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    const { phone, ...rest } = this.form.getRawValue();
+    const id = this.store.admit(phone ? { ...rest, phone } : rest);
+    this.router.navigate(['/patients', id]);
+  }
+}`;
+  const HTML = `<form [formGroup]="form" (ngSubmit)="save()">
+  <label>Name <input formControlName="name" /></label>
+  @if (form.controls.name.touched && form.controls.name.invalid) {
+    <p class="err">{{ form.controls.name.errors?.['required'] ? 'Name is required' : 'At least 2 letters' }}</p>
+  }
+  <label>Department
+    <select formControlName="department"> ... </select>
+  </label>
+  <fieldset>
+    <label><input type="radio" formControlName="triage" value="routine" /> Routine</label>
+    <label><input type="radio" formControlName="triage" value="urgent" /> Urgent</label>
+  </fieldset>
+  <label>Phone (optional) <input formControlName="phone" /></label>
+  <button type="submit">Register</button>
+</form>
+<p class="preview">Preview: {{ preview().name || '…' }} · {{ preview().department || '…' }} · {{ preview().triage }}</p>`;
+  const SIGNAL = `import { form, FormField, required, minLength, pattern, submit } from '@angular/forms/signals';
+
+export class RegisterSignal {
+  protected readonly model = signal<NewPatient>({ name: '', department: '', triage: 'routine', phone: '' });
+  protected readonly reg = form(this.model, p => {
+    required(p.name);
+    minLength(p.name, 2);
+    required(p.department);
+    pattern(p.phone, /^([0-9 ]{10,12})?$/);
+  });
+}
+
+<!-- template -->
+<input [formField]="reg.name" />
+@if (reg.name().touched() && reg.name().invalid()) {
+  <p class="err">{{ reg.name().errors()[0].kind }}</p>
+}`;
+  /* tree */
+  const sv = $('rSvg');
+  const P = { form: [350, 40, 'form', 'FormGroup'], name: [95, 185, 'name', 'FormControl<string>'], department: [265, 185, 'department', 'FormControl<string>'], triage: [435, 185, 'triage', 'FormControl<Triage>'], phone: [605, 185, 'phone', 'FormControl<string>'] };
+  const lines = {}; ['name', 'department', 'triage', 'phone'].forEach(k => lines[k] = K.el('line', { x1: 350, y1: 64 + 28, x2: P[k][0], y2: P[k][1] - 24, class: 'tl' }, sv));
+  const N = {};
+  for (const [k, [x, y, t, s]] of Object.entries(P)) {
+    const n = K.node(sv, x, y, k === 'form' ? 190 : 158, 48, t, s);
+    const f = [0, 1].map(i => { const tx = K.text(sv, x - 66 + i * 64, y + 42, '', 'flag'); tx.style.textAnchor = 'start'; return tx; });
+    const v = K.text(sv, x, y + 58, '', 'val'); v.style.textAnchor = 'middle';
+    const b = K.text(sv, x, y - 32, '', 'bind'); b.style.textAnchor = 'middle';
+    N[k] = { n, f, v, b };
+  }
+  const sideL = K.text(sv, 8, 290, '', 'side'); sideL.style.textAnchor = 'start';
+  const st = (valid, touched, value, err) => ({ valid, touched, value, err });
+  function paint(s) {
+    for (const k in N) {
+      const x = s.nodes[k], n = N[k];
+      const show = s.shown.includes(k);
+      n.n.g.setAttribute('class', 'node ' + (show ? (x.valid ? 'valid' : 'invalid') : 'gone') + (s.hot === k ? ' hot' : ''));
+      if (lines[k]) lines[k].classList.toggle('gone', !show);
+      n.f[0].textContent = show ? (x.valid ? 'valid' : 'invalid') : ''; n.f[0].setAttribute('class', 'flag ' + (x.valid ? 'good' : 'bad'));
+      n.f[1].textContent = show ? (x.touched ? 'touched' : 'untouched') : ''; n.f[1].setAttribute('class', 'flag ' + (x.touched ? 'on' : 'off'));
+      n.v.textContent = show ? (x.err ? '⚠ ' + x.err : (x.value !== undefined ? JSON.stringify(x.value) : '')) : '';
+      n.b.textContent = show && s.bound && k !== 'form' ? `formControlName="${k}"` : (show && s.bound && k === 'form' ? '[formGroup]="form"' : '');
+    }
+    sideL.textContent = s.side || '';
+  }
+  const E = { name: st(0, 0, ''), department: st(0, 0, ''), triage: st(1, 0, 'routine'), phone: st(1, 0, '') };
+  const S = [
+    { shown: [], nodes: { form: st(0, 0), ...E }, prev: '', card: ['patient-list.html', 'ng', `<h2>Waiting room</h2>\n<a routerLink="/patients/new">+ Register patient</a>\n...\n\n// app.routes.ts (before 'patients/:id')\n{ path: 'patients/new', component: RegisterPatient, canActivate: [authGuard], title: 'Register · CareDesk' },`, { 2: 'hot', 6: ['hot', 'order matters: before :id'] }], out: ['click "+ Register patient" → /patients/new · title "Register · CareDesk"'] },
+    { shown: ['form', 'name', 'department', 'triage', 'phone'], nodes: { form: st(0, 0), ...E }, hot: 'form', side: 'built in the class, before any template exists', card: ['register-patient.ts', 'ts', TS, { 4: 'hot', 7: ['hot', 'the model'], 8: 'hot', 9: 'hot', 10: 'hot', 11: 'hot' }] },
+    { shown: ['form', 'name', 'department', 'triage', 'phone'], nodes: { form: st(0, 0), ...E }, bound: true, side: 'template binds by name', card: ['register-patient.html', 'ng', HTML, { 1: ['hot', 'ReactiveFormsModule'], 2: 'hot', 7: 'hot', 10: 'hot', 11: 'hot', 13: 'hot' }] },
+    { shown: ['form', 'name', 'department', 'triage', 'phone'], nodes: { form: st(0, 0), ...E }, bound: true, card: ['register-patient.ts (experiment)', 'ts', `const typedName: string = this.form.value.name;       // ✗
+const { name } = this.form.getRawValue();               // ✓ string`, { 1: 'bad', 2: 'ok' }], out: ["✘ [ERROR] TS2322: Type 'string | undefined' is not assignable to type 'string'."], outH: 'ng build' },
+    { shown: ['form', 'name', 'department', 'triage', 'phone'], nodes: { form: st(0, 1), name: st(0, 1, '', 'required'), department: st(0, 1, '', 'required'), triage: st(1, 1, 'routine'), phone: st(1, 1, '') }, bound: true, hot: 'form', card: ['register-patient.ts', 'ts', TS, { 16: 'hot', 17: ['hot', 'show every error'] }], out: ['errors: "Name is required", "Pick a department"', 'form classes: ng-pristine ng-invalid ng-touched ng-submitted', 'url stays /patients/new'] },
+    { shown: ['form', 'name', 'department', 'triage', 'phone'], nodes: { form: st(0, 1), name: st(1, 1, 'Kiran'), department: st(1, 1, 'ENT'), triage: st(1, 1, 'urgent'), phone: st(1, 1, '') }, bound: true, hot: 'name', prev: 'Preview: Kiran · ENT · urgent', card: ['register-patient.ts', 'ts', TS, { 8: ['hot', '"K" → minlength'], 13: ['ok', 'Observable → signal'] }], out: ['name "K" → "At least 2 letters"', 'name "Kiran", ENT, Urgent → Preview: Kiran · ENT · urgent'] },
+    { shown: ['form', 'name', 'department', 'triage', 'phone'], nodes: { form: st(0, 1), name: st(1, 1, 'Kiran'), department: st(1, 1, 'ENT'), triage: st(1, 1, 'urgent'), phone: st(0, 1, '98', 'pattern') }, bound: true, hot: 'phone', prev: 'Preview: Kiran · ENT · urgent', card: ['register-patient.ts', 'ts', TS, { 11: ['bad', 'optional, but if filled: 10–12 digits'] }], out: ['phone "98" → "10–12 digits"', 'phone cleared → valid again (form: ng-dirty ng-valid)'] },
+    { shown: ['form', 'name', 'department', 'triage', 'phone'], nodes: { form: st(1, 1), name: st(1, 1, 'Kiran'), department: st(1, 1, 'ENT'), triage: st(1, 1, 'urgent'), phone: st(1, 1, '') }, bound: true, hot: 'form', prev: 'Registered → /patients/4', card: ['register-patient.ts', 'ts', TS, { 20: 'ok', 21: ['ok', 'new id: 4'], 22: 'ok' }], out: ['Register → /patients/4 · h2 "Kiran"', 'header: 4 waiting · 2 urgent'] },
+    { shown: ['form', 'name', 'department', 'triage', 'phone'], nodes: { form: st(0, 0), ...E }, bound: true, hot: 'phone', card: ['register-patient.html (experiment)', 'ng', `<label>Phone (optional) <input formControlName="phon" /></label>`, { 1: 'bad' }], out: ["NG01055: Cannot find control with path: 'phon'. Controls that do exist at this level: name, department, triage, phone."] },
+    { shown: ['form', 'name', 'department', 'phone'], nodes: { form: st(0, 1), name: st(0, 1, 'K', 'minLength'), department: st(0, 0, ''), triage: st(1, 0, 'routine'), phone: st(1, 0, '') }, hot: 'name', side: 'Signal Forms: form() wraps your signal', card: ['register-signal.ts (test app)', 'ts', SIGNAL, { 4: ['two', 'you own the data'], 5: 'hot', 6: 'hot', 7: 'hot', 14: 'hot', 15: 'hot', 16: 'hot' }], out: ['submit while empty → touched=false, no errors shown', 'name "K" + Tab → errors()[0].kind = "minLength"', 'name "" + Tab → "required"', 'model(): {"name":"Kiran","department":"ENT","triage":"routine","phone":""}'] }
+  ];
+  function show(i) {
+    const s = S[i]; paint(s);
+    $('rPrev').textContent = s.prev || 'Preview: … · … · routine';
+    K.codeCard($('rCard'), { file: s.card[0], lang: s.card[1], code: s.card[2], marks: s.card[3], dim: Object.keys(s.card[3]).length > 0, out: s.out, outLabel: s.outH || 'Real run' });
+  }
+  K.story({
+    root: $('rStory'), show, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'This step\'s feature: register a patient', text: 'The waiting room gets a "+ Register patient" link to <span class="mono">/patients/new</span>, a guarded route placed <b>before</b> <span class="mono">patients/:id</span> (otherwise "new" would be read as an id).' },
+      { title: 'The model comes first, in the class', text: '<span class="mono">fb.group({...})</span> creates a FormGroup with four FormControls and their validators. The model exists before any HTML; the template will just point at it.' },
+      { title: 'The template binds by name', text: '<span class="mono">[formGroup]="form"</span> on the form and <span class="mono">formControlName</span> on each field connect DOM inputs to the existing controls. Radio buttons sharing <span class="mono">formControlName="triage"</span> drive one control.', tip: 'Template-driven: the template creates the model. Reactive: the class creates it, the template binds to it. That one sentence answers most "difference" questions.' },
+      { title: 'Typed all the way', text: '<span class="mono">NonNullableFormBuilder</span> infers each control\'s type from its initial value. <span class="mono">form.value.name</span> is <span class="mono">string | undefined</span> (disabled controls are left out of <span class="mono">value</span>), so the build rejected assigning it to a <span class="mono">string</span>. <span class="mono">getRawValue()</span> is exact.' },
+      { title: 'Submit while empty', text: 'Clicking Register on an empty form ran <span class="mono">save()</span>, which saw <span class="mono">form.invalid</span>, called <span class="mono">markAllAsTouched()</span> and stopped. Both required errors appeared at once.' },
+      { title: 'Validators and a live preview', text: '"K" broke <span class="mono">minLength(2)</span>; "Kiran" fixed it. The preview under the form reads <span class="mono">preview()</span>, a signal made with <span class="mono">toSignal(form.valueChanges)</span>: "Kiran · ENT · urgent".' },
+      { title: 'Optional but checked', text: 'Phone has no <span class="mono">required</span>, so empty is fine, but <span class="mono">Validators.pattern</span> still checks whatever is typed: "98" showed "10–12 digits", clearing it made the form valid again.' },
+      { title: 'Register', text: 'Valid form: <span class="mono">getRawValue()</span> goes to <span class="mono">store.admit()</span>, which returns the new id, and the router opens <span class="mono">/patients/4</span>. The header (step 10) already says "4 waiting · 2 urgent". Step 14 of CareDesk is done.' },
+      { title: 'A typo shows up at runtime', text: 'Unlike template-driven bindings, <span class="mono">formControlName</span> strings aren\'t checked by the compiler. "phon" built fine and threw NG01055 when the page opened, listing the names that do exist.' },
+      { title: 'The same form with Signal Forms', text: 'Signal Forms (<span class="mono">@angular/forms/signals</span>) start from a <span class="mono">signal</span> you own. <span class="mono">form(model, schema)</span> adds validation and state, all as signals: <span class="mono">reg.name().invalid()</span>. Tested in a separate Angular 22.2 app: errors carry a <span class="mono">kind</span>, and submitting didn\'t mark fields touched.' }
+    ]
+  });
+
+  /* compare */
+  const CMP = {
+    model: [[`model = { doctor: '', date: '', reason: '' };\n<form #f="ngForm">`, 'ts'], [`form = this.fb.group({\n  name: ['', Validators.required],\n});`, 'ts'], [`model = signal({ name: '' });\nreg = form(this.model, p => { ... });`, 'ts']],
+    bind: [[`<input name="reason" [(ngModel)]="model.reason" />`, 'ng'], [`<form [formGroup]="form">\n  <input formControlName="name" />`, 'ng'], [`<input [formField]="reg.name" />`, 'ng']],
+    valid: [[`<textarea required minlength="5"></textarea>`, 'ng'], [`name: ['', [Validators.required, Validators.minLength(2)]]`, 'ts'], [`required(p.name);\nminLength(p.name, 2);`, 'ts']],
+    read: [[`f.value          // { doctor, date, reason }\nreason.errors?.['minlength']`, 'ts'], [`form.getRawValue()\nform.controls.name.errors?.['required']`, 'ts'], [`this.model()\nreg.name().errors()[0].kind`, 'ts']]
+  };
+  K.seg($('cmpSeg'), v => { const c = CMP[v]; ['c1', 'c2', 'c3'].forEach((id, i) => K.codeCard($(id), { file: ['booking-form', 'register-patient', 'register-signal'][i], lang: c[i][1], code: c[i][0] })); });
+  $('cmpSeg').querySelector('button').click();
+})();
+</script>
+</body>
+</html>

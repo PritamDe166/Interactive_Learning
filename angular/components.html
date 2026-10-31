@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Components & templates</title>
+<meta name="description" content="Angular 22 components: split CareDesk into Header, PatientList and PatientCard. Selector, imports, template, scoped styles, and the component tree behind the page.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .ng-left { display: grid; gap: 12px; min-width: 0; align-content: start; }
+  .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 12px; }
+  /* rendered-page mock with component outlines */
+  .ui { display: grid; gap: 8px; }
+  .ui .rg { position: relative; border: 2px dashed transparent; border-radius: 10px; padding: 18px 10px 8px; transition: border-color .25s, background .25s, opacity .25s; cursor: pointer; }
+  .ui .rg > .rtag { position: absolute; top: 2px; left: 8px; font-family: var(--mono); font-size: 10.5px; color: var(--muted); }
+  .ui .rg.c-app { border-color: var(--line); }
+  .ui.show .rg.c-header { border-color: var(--teal); } .ui.show .rg.c-list { border-color: var(--blue); } .ui.show .rg.c-card { border-color: var(--violet); }
+  .ui .rg.hot { background: var(--teal-wash); }
+  .ui .rg.hidden { display: none; }
+  .ui h4 { margin: 0; font-size: 20px; } .ui .sub { margin: 0; color: var(--muted); font-size: 14px; }
+  .ui .h2 { font-weight: 700; margin: 0 0 4px; } .ui .h2.red { color: var(--red); }
+  .ui article { border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; }
+  .ui article b { display: block; } .ui article b.red { color: var(--red); }
+  .ui article span { color: var(--muted); font-size: 14px; }
+  .ctree .node rect { transition: stroke .25s, opacity .25s; }
+  .ctree .tl { stroke: var(--line); stroke-width: 2; transition: opacity .3s; }
+  .ctree .gone { opacity: 0; }
+  .ctree .k-header rect { stroke: var(--teal); } .ctree .k-list rect { stroke: var(--blue); } .ctree .k-card rect { stroke: var(--violet); }
+  .ctree .hot rect { stroke-width: 4; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← Angular roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Angular 22 · Part 1 · Foundations</div>
+    <h1>Components &amp; templates</h1>
+    <ul class="lede">
+      <li>A <b>component</b> is a class + a template + styles, glued together by <span class="mono">@Component</span>.</li>
+      <li>Its <b>selector</b> (<span class="mono">app-header</span>) is the tag you write in another template to use it.</li>
+      <li>A parent must list each child it uses in <span class="mono">imports</span>. There are no NgModule declarations.</li>
+      <li>Components nest into a <b>tree</b>; the page you see is that tree rendered.</li>
+      <li>Component styles are <b>scoped</b>: CSS in one component doesn't leak into another.</li>
+    </ul>
+    <div class="cd-trail" data-stage="3"></div>
+  </header>
+
+  <section aria-labelledby="storyH">
+    <h2 class="stage-title" id="storyH">Walkthrough: from one App to a component tree</h2>
+    <div class="stage-kind">Left: the component tree · right: the page it renders · DOM and CSS come from the real build</div>
+    <div class="story" id="cmpStory">
+      <div class="ng-left">
+        <div class="split">
+          <div class="scroll"><svg class="diagram ctree" id="treeSvg" style="min-width:0" viewBox="0 0 400 300" role="img" aria-label="Component tree: App with Header and PatientList, PatientList with PatientCard"></svg></div>
+          <div class="appwin"><div class="appwin-bar"><i></i><i></i><i></i><span class="appwin-url">localhost:4200</span></div><div class="appwin-body"><div class="ui" id="ui"></div></div></div>
+        </div>
+        <div id="cmpCard"></div>
+      </div>
+    </div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Inspect CareDesk like Angular DevTools does, then see where a style rule lands.</p>
+
+  <section aria-labelledby="inspH">
+    <h2 class="stage-title" id="inspH">1. Component inspector</h2>
+    <div class="stage-kind">Click a region of the page to see the component behind it</div>
+    <div class="split">
+      <div class="appwin"><div class="appwin-bar"><i></i><i></i><i></i><span class="appwin-url">localhost:4200</span></div><div class="appwin-body"><div class="ui show" id="ui2"></div></div></div>
+      <div><div class="tabs seg" id="inspTabs" role="group" aria-label="File"><button type="button" data-v="ts" aria-pressed="true">.ts</button><button type="button" data-v="html" aria-pressed="false">.html</button><button type="button" data-v="css" aria-pressed="false">.css</button></div><div id="inspCard"></div></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="cssH">
+    <h2 class="stage-title" id="cssH">2. Where does this CSS rule land?</h2>
+    <div class="stage-kind">Put <span class="mono">p { color: crimson; }</span> in one file · results from the real build</div>
+    <div class="seg" id="cssSeg" role="group" aria-label="File" style="flex-wrap:wrap"><button type="button" data-v="global" aria-pressed="true">src/styles.css (global)</button><button type="button" data-v="card" aria-pressed="false">patient-card.css</button><button type="button" data-v="list" aria-pressed="false">patient-list.css</button></div>
+    <div class="split" style="margin-top:10px">
+      <div class="appwin"><div class="appwin-bar"><i></i><i></i><i></i><span class="appwin-url">localhost:4200</span></div><div class="appwin-body" id="cssUi"></div></div>
+      <div class="card"><div class="label">Compiled CSS</div><pre class="err-out mono" id="cssOut" style="white-space:pre-wrap;overflow-wrap:anywhere;margin:0;font-size:12.5px"></pre><p class="status-line" id="cssWhy" style="margin:6px 0 0"></p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">New component</span><span class="arrow">→</span><span class="then"><span class="mono">ng g c patient-card</span> → folder with <span class="mono">.ts</span>, <span class="mono">.html</span>, <span class="mono">.css</span>, <span class="mono">.spec.ts</span></span></li>
+      <li><span class="if">Use a component in another one</span><span class="arrow">→</span><span class="then">write its selector in the template <b>and</b> add the class to <span class="mono">imports</span></span></li>
+      <li><span class="if">NG8001 "is not a known element"</span><span class="arrow">→</span><span class="then">you forgot the <span class="mono">imports</span> entry (or misspelled the selector)</span></li>
+      <li><span class="if">Small template</span><span class="arrow">→</span><span class="then"><span class="mono">template: `...`</span> inline; otherwise <span class="mono">templateUrl</span></span></li>
+      <li><span class="if">Style the component's own tag</span><span class="arrow">→</span><span class="then"><span class="mono">:host { display: block; }</span> (custom elements are inline by default)</span></li>
+      <li><span class="if">Style used everywhere</span><span class="arrow">→</span><span class="then"><span class="mono">src/styles.css</span>; component CSS stays inside its component</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference: @Component options you'll use</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Option</th><th>Meaning</th><th>CareDesk example</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">selector</td><td>tag name that places the component</td><td class="mono">'app-patient-card'</td></tr>
+          <tr><td class="mono">imports</td><td>components, directives and pipes this template uses</td><td class="mono">[PatientCard]</td></tr>
+          <tr><td class="mono">templateUrl / template</td><td>the HTML, in a file or inline</td><td class="mono">'./patient-card.html'</td></tr>
+          <tr><td class="mono">styleUrl / styles</td><td>scoped CSS (one file; <span class="mono">styleUrls</span> array still works)</td><td class="mono">'./patient-card.css'</td></tr>
+          <tr><td class="mono">changeDetection</td><td>OnPush is the default in v22; <span class="mono">Eager</span> is the old behaviour</td><td>(default)</td></tr>
+          <tr><td class="mono">encapsulation</td><td>how styles are scoped: <span class="mono">Emulated</span> (default), <span class="mono">ShadowDom</span>, <span class="mono">None</span></td><td>(default)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cc-pair" style="margin-top:14px">
+      <div><div class="label bad-text">Before: declare in a module (your notes)</div><div id="oldCmp"></div></div>
+      <div><div class="label ok-text">After: the parent imports the child</div><div id="newCmp"></div></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>Import path.</b> The notes say to import Component from "angular/JSON". It's <span class="mono">import { Component } from '@angular/core';</span>.</p></div>
+      <div class="note"><span class="flag add">Updated</span><p><b>No <span class="mono">declarations</span> array.</b> The notes register each component in <span class="mono">app.module.ts</span>. Standalone components (the default since v19) are used by importing them in the component whose template uses them.</p></div>
+      <div class="note"><span class="flag add">Updated</span><p><b>File names.</b> <span class="mono">ng g c patient-card</span> now creates <span class="mono">patient-card.ts</span> with <span class="mono">class PatientCard</span>. Your notes' <span class="mono">user.component.ts</span> / <span class="mono">UserComponent</span> naming is the pre-v20 style; both work.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>How scoping works.</b> Angular adds attributes such as <span class="mono">_ngcontent-ng-c3110745158</span> to each element of a component and rewrites its CSS to <span class="mono">article[_ngcontent-ng-c3110745158]</span>. That's why PatientList's <span class="mono">h3</span> rule didn't colour the card's name in the real build.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>What three things make up a component?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>A TypeScript class (data and behaviour), a template (HTML), and styles, connected by the <span class="mono">@Component</span> decorator with a selector.</p></div></details>
+      <details><summary>You add <span class="mono">&lt;app-patient-card /&gt;</span> to PatientList's template. What else must you do?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Add <span class="mono">PatientCard</span> to PatientList's <span class="mono">imports</span>. Otherwise: <span class="mono">NG8001: 'app-patient-card' is not a known element</span>.</p></div></details>
+      <details><summary>PatientList's CSS says <span class="mono">h3 { color: crimson }</span>. Is the card's name red?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>No. The rule is scoped to PatientList's own elements. The card's <span class="mono">h3</span> belongs to PatientCard. In the real build it stayed black.</p></div></details>
+      <details><summary>What is <span class="mono">:host</span>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>The component's own element, e.g. <span class="mono">&lt;app-header&gt;</span>. Use it to style the wrapper, often <span class="mono">display: block</span>.</p></div></details>
+      <details><summary>Do <span class="mono">&lt;app-…&gt;</span> tags stay in the final DOM?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Yes. The rendered DOM contains <span class="mono">&lt;app-header&gt;</span>, <span class="mono">&lt;app-patient-list&gt;</span> and so on, with the template's elements inside each.</p></div></details>
+      <details><summary>Why keep components small?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Same reasons as small classes: one job each (single responsibility), easier testing, reuse (PatientCard will be used once per patient), and clearer data flow between them.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: your Obsidian note "Components Explained" and "Navbar example"; angular.dev "Anatomy of a component", "Importing and using components" and "Styling components". CareDesk's files were generated with <span class="mono">ng g c</span> (Angular CLI 22.2.5); the DOM and compiled CSS shown are from the real build.</footer>
+</div>
+
+<script src="caredesk.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const FILES = {
+    app_ts: ['app.ts', 'ts', `import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { Header } from './header/header';
+import { PatientList } from './patient-list/patient-list';
+
+@Component({
+  imports: [RouterOutlet, Header, PatientList],
+  selector: 'app-root',
+  styleUrl: './app.css',
+  templateUrl: './app.html',
+})
+export class App {}`],
+    app_html: ['app.html', 'ng', `<app-header />
+<main>
+  <app-patient-list />
+</main>
+<router-outlet />`],
+    app_css: ['app.css', 'txt', `/* empty */`],
+    old_html: ['app.html (step 2)', 'ng', `<header>
+  <h1>{{ title() }}</h1>
+  <p>Clinic portal · {{ patients().length }} patients waiting</p>
+</header>
+<router-outlet />`],
+    gen: ['terminal', 'txt', `$ ng generate component header
+CREATE src/app/header/header.css (0 bytes)
+CREATE src/app/header/header.spec.ts (532 bytes)
+CREATE src/app/header/header.ts (185 bytes)
+CREATE src/app/header/header.html (21 bytes)
+$ ng g c patient-list
+$ ng g c patient-card`],
+    header_ts: ['header/header.ts', 'ts', `import { Component, signal } from '@angular/core';
+
+@Component({
+  imports: [],
+  selector: 'app-header',
+  styleUrl: './header.css',
+  templateUrl: './header.html',
+})
+export class Header {
+  protected readonly title = signal('CareDesk');
+}`],
+    header_html: ['header/header.html', 'ng', `<h1>{{ title() }}</h1>
+<p>Clinic portal</p>`],
+    header_css: ['header/header.css', 'txt', `:host { display: block; border-bottom: 2px solid teal; }
+h1 { margin: 0; }`],
+    list_ts: ['patient-list/patient-list.ts', 'ts', `import { Component } from '@angular/core';
+import { PatientCard } from '../patient-card/patient-card';
+
+@Component({
+  imports: [PatientCard],
+  selector: 'app-patient-list',
+  styleUrl: './patient-list.css',
+  templateUrl: './patient-list.html',
+})
+export class PatientList {}`],
+    list_html: ['patient-list/patient-list.html', 'ng', `<h2>Waiting room</h2>
+<app-patient-card />`],
+    list_css: ['patient-list/patient-list.css', 'txt', `h2, h3 { color: crimson; }`],
+    card_ts: ['patient-card/patient-card.ts', 'ts', `import { Component } from '@angular/core';
+import { PATIENTS } from '../patient';
+
+@Component({
+  imports: [],
+  selector: 'app-patient-card',
+  styleUrl: './patient-card.css',
+  templateUrl: './patient-card.html',
+})
+export class PatientCard {
+  protected readonly patient = PATIENTS[0];   // hard-coded for now
+}`],
+    card_html: ['patient-card/patient-card.html', 'ng', `<article>
+  <h3>{{ patient.name }}</h3>
+  <p>{{ patient.department }}</p>
+</article>`],
+    card_css: ['patient-card/patient-card.css', 'txt', `article { border: 1px solid #ccc; border-radius: 8px; padding: 8px 12px; }`],
+    compiled: ['compiled CSS + DOM (real build)', 'txt', `h2[_ngcontent-ng-c3223816692],
+h3[_ngcontent-ng-c3223816692] { color: crimson; }     ← patient-list.css
+
+<app-patient-list _nghost-ng-c3223816692>
+  <h2 _ngcontent-ng-c3223816692>Waiting room</h2>   ← red
+  <app-patient-card _nghost-ng-c3110745158>
+    <article _ngcontent-ng-c3110745158>
+      <h3 _ngcontent-ng-c3110745158>Asha</h3>        ← not red
+      ...`],
+    dom: ['DOM in the browser (real)', 'ng', `<app-root ng-version="22.2.4">
+  <app-header>
+    <h1>CareDesk</h1><p>Clinic portal</p>
+  </app-header>
+  <main>
+    <app-patient-list>
+      <h2>Waiting room</h2>
+      <app-patient-card>
+        <article><h3>Asha</h3><p>Cardiology</p></article>
+      </app-patient-card>
+    </app-patient-list>
+  </main>
+  <router-outlet></router-outlet>
+</app-root>`]
+  };
+
+  /* ===== tree ===== */
+  const sv = $('treeSvg');
+  const NODES = { app: [200, 40, 'App', 'app-root'], header: [95, 150, 'Header', 'app-header'], list: [300, 150, 'PatientList', 'app-patient-list'], card: [300, 255, 'PatientCard', 'app-patient-card'] };
+  const L = { header: K.el('line', { x1: 200, y1: 64, x2: 95, y2: 126, class: 'tl' }, sv), list: K.el('line', { x1: 200, y1: 64, x2: 300, y2: 126, class: 'tl' }, sv), card: K.el('line', { x1: 300, y1: 174, x2: 300, y2: 231, class: 'tl' }, sv) };
+  const N = {};
+  for (const [k, [x, y, t, s]] of Object.entries(NODES)) { N[k] = K.node(sv, x, y, 170, 48, t, s, 'k-' + k); N[k].g.dataset.k = k; }
+
+  /* ===== UI mock ===== */
+  function uiHtml(opts) {
+    const { red } = opts || {};
+    return `<div class="rg c-app" data-k="app"><span class="rtag">&lt;app-root&gt;</span>
+      <div class="rg c-header" data-k="header"><span class="rtag">&lt;app-header&gt;</span><h4>CareDesk</h4><p class="sub">Clinic portal<span class="one"> · 3 patients waiting</span></p></div>
+      <div class="rg c-list" data-k="list"><span class="rtag">&lt;app-patient-list&gt;</span><p class="h2 ${red ? 'red' : ''}">Waiting room</p>
+        <div class="rg c-card" data-k="card"><span class="rtag">&lt;app-patient-card&gt;</span><article><b>Asha</b><span>Cardiology</span></article></div></div></div>`;
+  }
+  $('ui').innerHTML = uiHtml();
+  const ui = $('ui');
+  const S = [
+    { tree: ['app'], file: 'old_html', marks: { 1: 'hot', 2: 'hot', 3: 'hot', 4: 'hot' }, ui: 'one', hot: 'app' },
+    { tree: ['app'], file: 'gen', marks: { 1: 'hot', 7: 'hot', 8: 'hot' }, ui: 'one', hot: null },
+    { tree: ['app', 'header'], file: 'header_ts', marks: { 4: ['hot', 'what Angular needs to know'], 5: ['hot', 'the tag to use'], 6: 'hot', 7: 'hot', 9: ['ok', 'data and behaviour'] }, ui: 'header', hot: 'header' },
+    { tree: ['app', 'header'], file: 'app_html', marks: { 1: ['hot', 'use it by its selector'] }, ui: 'header', hot: 'header', extra: 'app_ts' },
+    { tree: ['app', 'header', 'list', 'card'], file: 'list_ts', marks: { 2: 'hot', 5: ['hot', 'the child it uses'] }, ui: 'all', hot: 'list' },
+    { tree: ['app', 'header', 'list', 'card'], file: 'card_ts', marks: { 11: ['hot', 'step 5 passes this in'] }, ui: 'all', hot: 'card' },
+    { tree: ['app', 'header', 'list', 'card'], file: 'compiled', marks: { 1: 'hot', 2: 'hot', 5: ['hot', 'red'], 8: ['ok', 'different attribute'] }, ui: 'all', hot: 'list', red: true },
+    { tree: ['app', 'header', 'list', 'card'], file: 'header_css', marks: { 1: ['hot', 'styles <app-header> itself'] }, ui: 'all', hot: 'header' },
+    { tree: ['app', 'header', 'list', 'card'], file: 'dom', marks: { 2: 'hot', 7: 'hot', 8: 'hot' }, ui: 'all', hot: null }
+  ];
+  function show(i) {
+    const s = S[i];
+    for (const k in N) { N[k].g.classList.toggle('gone', !s.tree.includes(k)); N[k].g.classList.toggle('hot', s.hot === k); }
+    for (const k in L) L[k].classList.toggle('gone', !s.tree.includes(k));
+    ui.innerHTML = uiHtml({ red: s.red });
+    ui.classList.toggle('show', s.ui !== 'one');
+    ui.querySelectorAll('.one').forEach(e => e.hidden = s.ui !== 'one');
+    if (s.ui === 'one') ui.querySelectorAll('.rg').forEach(r => { if (r.dataset.k !== 'app') { r.style.borderColor = 'transparent'; r.querySelector(".rtag").hidden = true; } });
+    if (s.ui === 'header') ui.querySelectorAll('.c-list').forEach(r => r.classList.add('hidden'));
+    if (s.hot) ui.querySelectorAll(`.rg[data-k="${s.hot}"]`).forEach(r => r.classList.add('hot'));
+    const f = FILES[s.file];
+    K.codeCard($('cmpCard'), { file: f[0], lang: f[1], code: f[2], marks: s.marks, dim: true });
+  }
+  K.story({
+    root: $('cmpStory'), show, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'Where we left off: one big App', text: 'After step 2, everything CareDesk shows lives in <span class="mono">app.html</span>. Fine for a title, but a real portal has a header, a list, cards, forms… One template for all of it becomes hard to read, test and reuse.' },
+      { title: 'Generate a component', text: '<span class="mono">ng generate component header</span> (short: <span class="mono">ng g c</span>) creates a folder with the class, template, styles and a test. We also generate <span class="mono">patient-list</span> and <span class="mono">patient-card</span>.' },
+      { title: 'Anatomy of a component', text: 'The class holds data and behaviour. <span class="mono">@Component</span> tells Angular its <b>selector</b> (the tag), its template and styles, and what it <span class="mono">imports</span>. The header now owns the title.' },
+      { title: 'Use it by its selector', text: 'App\'s template writes <span class="mono">&lt;app-header /&gt;</span>, and App lists <span class="mono">Header</span> in its <span class="mono">imports</span>. Angular renders Header\'s template inside that tag. The tree gets its first child.', tip: 'Standalone components are self-describing: each one imports exactly what its template uses. Forgetting gives NG8001.' },
+      { title: 'Children can have children', text: '<span class="mono">PatientList</span> shows the "Waiting room" heading and uses <span class="mono">&lt;app-patient-card /&gt;</span>, so it imports <span class="mono">PatientCard</span>. The tree is now App → Header, PatientList → PatientCard.' },
+      { title: 'Each component owns its template data', text: 'PatientCard\'s template reads <span class="mono">patient.name</span> from its own class. For now the patient is hard-coded to Asha; on step 5 the list will hand each card its patient through an input.' },
+      { title: 'Styles stay inside the component', text: 'PatientList\'s CSS colours <span class="mono">h2</span> and <span class="mono">h3</span> red. Angular rewrote the rule with an attribute unique to PatientList, so "Waiting room" turned red but the card\'s <span class="mono">h3</span> ("Asha") did not. That\'s the real compiled CSS and DOM.' },
+      { title: ':host styles the component\'s own tag', text: 'The browser treats <span class="mono">&lt;app-header&gt;</span> as an unknown inline element. <span class="mono">:host</span> targets it from inside Header\'s CSS: here <span class="mono">display: block</span> and a teal line under the header.' },
+      { title: 'The page is the tree, rendered', text: 'In the browser\'s Elements panel you see each selector tag with its template inside. Step 3 of CareDesk is done: three components, each with one job.' }
+    ]
+  });
+
+  /* ===== inspector ===== */
+  const ui2 = $('ui2'); ui2.innerHTML = uiHtml({ red: true }); ui2.querySelector('.one').hidden = true;
+  let cur = 'card', tab = 'ts';
+  const KEY = { app: 'app', header: 'header', list: 'list', card: 'card' };
+  function insp() {
+    ui2.querySelectorAll('.rg').forEach(r => r.classList.toggle('hot', r.dataset.k === cur));
+    const f = FILES[KEY[cur] + '_' + tab] || ['', 'txt', '(none)'];
+    K.codeCard($('inspCard'), { file: f[0], lang: f[1], code: f[2] });
+  }
+  ui2.addEventListener('click', e => { const r = e.target.closest('.rg'); if (r) { cur = r.dataset.k; insp(); } });
+  K.seg($('inspTabs'), v => { tab = v; insp(); });
+  insp();
+
+  /* ===== css landing ===== */
+  const CSS = {
+    global: { out: 'p { color: crimson; }    (no attribute: applies everywhere)', red: ['sub', 'card'], why: 'Global styles reach every component: both "Clinic portal" (Header) and "Cardiology" (PatientCard) turned red.' },
+    card: { out: 'p[_ngcontent-ng-c3110745158] { color: crimson; }', red: ['card'], why: 'Only PatientCard\'s paragraphs: "Cardiology" is red, "Clinic portal" isn\'t.' },
+    list: { out: 'p[_ngcontent-ng-c3223816692] { color: crimson; }', red: [], why: 'PatientList has no <span class="mono">&lt;p&gt;</span> of its own, so nothing changes, not even inside its child card.' }
+  };
+  K.seg($('cssSeg'), v => {
+    const c = CSS[v];
+    $('cssUi').innerHTML = `<div class="ui show">${uiHtml()}</div>`;
+    $('cssUi').querySelector('.one').hidden = true;
+    if (c.red.includes('sub')) $('cssUi').querySelector('.sub').style.color = 'var(--red)';
+    if (c.red.includes('card')) $('cssUi').querySelector('article span').style.color = 'var(--red)';
+    $('cssOut').textContent = c.out; $('cssWhy').innerHTML = c.why;
+  });
+  $('cssSeg').querySelector('button').click();
+
+  K.codeCard($('oldCmp'), { file: 'app.module.ts', lang: 'ts', code: `@NgModule({
+  declarations: [AppComponent, HeaderComponent,
+                 PatientListComponent, PatientCardComponent],
+  imports: [BrowserModule],
+  bootstrap: [AppComponent]
+})
+export class AppModule {}`, marks: { 2: 'bad', 3: 'bad' } });
+  K.codeCard($('newCmp'), { file: 'patient-list.ts', lang: 'ts', code: `@Component({
+  imports: [PatientCard],        // only what this template uses
+  selector: 'app-patient-list',
+  templateUrl: './patient-list.html',
+})
+export class PatientList {}`, marks: { 2: 'ok' } });
+})();
+</script>
+</body>
+</html>
