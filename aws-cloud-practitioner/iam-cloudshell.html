@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AWS CloudShell</title>
+<meta name="description" content="AWS Cloud Practitioner: AWS CloudShell, a browser terminal with the AWS CLI preinstalled that runs as your console identity, with per-Region storage.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .term { background: var(--code-bg); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; font-family: var(--mono); font-size: 13px; color: var(--fg-soft); min-height: 120px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .term .p { color: var(--good-text); } .term .e { color: var(--bad-text); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · IAM · lab tool (out of exam scope)</div>
+    <h1>AWS CloudShell</h1>
+    <ul class="lede">
+      <li><b>CloudShell</b> is a terminal inside the AWS console, with the <b>AWS CLI already installed</b>.</li>
+      <li>It runs as <b>the identity you signed in with</b>: no access keys to set up, and no extra permissions either.</li>
+      <li>It is <b>Region-aware</b>: commands default to the console's Region, and your <b>1 GB home folder is separate per Region</b>.</li>
+      <li>Handy for labs and quick checks. The CLF-C02 exam guide lists it as <b>out of scope</b>.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: a terminal that borrows your sign-in</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="Browser console opens CloudShell in a Region; commands go through IAM as the signed-in user"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>Browser-based shell, opened from the console toolbar; <b>AWS CLI v2 preinstalled</b>.</li>
+      <li>Uses your <b>console identity's credentials</b>; IAM permissions still apply. <code>aws sts get-caller-identity</code> shows who you are.</li>
+      <li><b>Region-aware</b>: starts in the console's Region; use <code>--region</code> for others. Not available in every Region.</li>
+      <li><b>1 GB persistent <code>$HOME</code> per Region</b>, kept for <b>120 days</b> after last use. Files outside <code>$HOME</code> don't persist; VPC environments have no persistent storage.</li>
+      <li>Upload and download files from the <b>Actions</b> menu; tabs and split panes are supported.</li>
+      <li>Limits: about 10 concurrent shells per Region, sessions end after inactivity and after about 12 hours. Not for production jobs or secrets.</li>
+      <li>Exam: <b>out of scope</b> for CLF-C02 (listed with developer tools). Learn it as a lab convenience.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <section aria-labelledby="pgH">
+    <h2 class="stage-title" id="pgH">Where did my file go?</h2>
+    <div class="stage-kind">A simulated CloudShell · switch Regions and run commands</div>
+    <div class="controls">
+      <div class="seg" id="regSeg" role="group" aria-label="Region">
+        <button type="button" data-v="ap-south-1" aria-pressed="true">ap-south-1</button>
+        <button type="button" data-v="us-east-1" aria-pressed="false">us-east-1</button>
+      </div>
+      <button class="btn" data-cmd="who" type="button">aws sts get-caller-identity</button>
+      <button class="btn" data-cmd="save" type="button">echo "notes" &gt; demo.txt</button>
+      <button class="btn" data-cmd="ls" type="button">ls</button>
+      <button class="btn" data-cmd="users" type="button">aws iam list-users</button>
+      <label class="toggle" for="noPerm"><input type="checkbox" id="noPerm"> Remove my IAM read permission</label>
+    </div>
+    <div class="term" id="term"></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Run CLI commands without installing anything</span><span class="arrow">→</span><span class="then">CloudShell</span></li>
+      <li><span class="if">Whose permissions does CloudShell use?</span><span class="arrow">→</span><span class="then">Your signed-in console identity</span></li>
+      <li><span class="if">File missing after switching Region</span><span class="arrow">→</span><span class="then">Home storage is per Region</span></li>
+      <li><span class="if">On the CLF-C02 exam?</span><span class="arrow">→</span><span class="then">Out of scope</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <div class="quiz">
+      <details><summary>Do you need access keys to use the CLI in CloudShell?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> It uses your console session's identity.</p></div></details>
+      <details><summary>Can CloudShell do something your IAM user isn't allowed to do?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> It's just another way to call the same APIs.</p></div></details>
+      <details><summary>You saved a script in CloudShell in Mumbai. Is it there in N. Virginia?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> Home storage is separate per Region.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Terminal output is simulated. Sources: IAM note "AWS CloudShell", "IAM: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/cloudshell/latest/userguide/limits.html">CloudShell quotas</a>.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'r1', x: 360, y: 20, w: 280, h: 380, kind: 'region', label: 'ap-south-1' }, { id: 'r2', x: 690, y: 20, w: 290, h: 380, kind: 'region', label: 'us-east-1' }],
+    nodes: {
+      me: { x: 90, y: 110, icon: 'laptop', kind: 'user', label: 'You, signed in', sub: 'IAM user Pritam' },
+      cs: { x: 500, y: 110, icon: 'terminal', kind: 'mgmt', label: 'CloudShell', sub: 'CLI preinstalled' },
+      home1: { x: 500, y: 300, icon: 'folder', kind: 'storage', label: '$HOME (1 GB)', sub: 'demo.txt' },
+      iam: { x: 260, y: 300, icon: 'shield', kind: 'sec', label: 'IAM', sub: 'same rules' },
+      cs2: { x: 835, y: 110, icon: 'terminal', kind: 'mgmt', label: 'CloudShell', sub: 'other Region' },
+      home2: { x: 835, y: 300, icon: 'folder', kind: 'storage', label: '$HOME (1 GB)', sub: 'empty' }
+    },
+    links: [{ a: 'me', b: 'cs', label: 'opens from the console' }, { a: 'cs', b: 'home1', kind: 'priv' }, { a: 'cs', b: 'iam', via: [[420, 110], [420, 230], [260, 230]], label: 'aws iam list-users', at: [330, 222] }, { a: 'me', b: 'cs2', via: [[90, 40], [835, 40]] }, { a: 'cs2', b: 'home2', kind: 'priv' }]
+  });
+  function base(i) {
+    net.reset();
+    net.focus([['me', 'cs'], ['me', 'cs', 'iam'], ['me', 'cs', 'iam'], ['cs', 'home1'], ['me', 'cs2', 'home2', 'home1']][i]);
+    if (i === 1) net.badge('cs', 'runs as Pritam', 'info');
+    if (i === 2) { net.badge('iam', 'AccessDenied', 'bad'); }
+    if (i === 3) net.badge('home1', 'persists 120 days', 'ok');
+    if (i === 4) net.badge('home2', 'demo.txt not here', 'bad');
+  }
+  const STEPS = [
+    { title: 'A terminal inside the console',
+      text: 'Click the CloudShell icon in the console toolbar and a Linux terminal opens in your browser, with the <b>AWS CLI v2</b> and common tools ready. Nothing to install on your laptop.',
+      play: async run => { base(0); await net.send(['me', 'cs'], { run }); } },
+    { title: 'It runs as you',
+      text: 'CloudShell signs its CLI calls with <b>your console session</b>. Run <code>aws sts get-caller-identity</code> and you see your own IAM user. No access keys are created or stored.',
+      play: async run => { base(1); await net.send(['cs', 'iam'], { run, label: 'list-users', tone: 'green' }); } },
+    { title: 'IAM still decides',
+      text: 'If your user loses <code>iam:ListUsers</code>, the same command fails with <b>AccessDenied</b>. CloudShell is just another door to the same APIs, with the same gate.',
+      play: async run => { base(2); await net.send(['cs', 'iam'], { run, label: 'list-users', tone: 'red' }); } },
+    { title: 'Your home folder persists',
+      text: 'Files you save in <code>$HOME</code> stay between sessions: <b>1 GB</b>, kept for 120 days after your last visit. Anything outside <code>$HOME</code> is wiped.' },
+    { title: '…but only in that Region',
+      text: 'Switch the console to <b>us-east-1</b> and you get a different CloudShell with a <b>different, empty home folder</b>. Storage is per Region; so are default CLI calls (use <code>--region</code>).',
+      tip: 'CloudShell is out of scope for CLF-C02. It is here because the course uses it in labs.',
+      play: async run => { base(4); await net.send(['me', 'cs2'], { run }); } }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base, tipLabel: 'Note' });
+
+  /* simulated terminal */
+  const files = { 'ap-south-1': [], 'us-east-1': [] };
+  let reg = 'ap-south-1';
+  const term = $('term');
+  const out = (cmd, res, err) => { term.innerHTML += `<span class="p">[cloudshell-user@${reg} ~]$</span> ${cmd}\n${err ? `<span class="e">${res}</span>` : res}\n`; term.scrollTop = term.scrollHeight; };
+  K.seg($('regSeg'), v => { reg = v; term.innerHTML += `\n— switched console to ${v}: new CloudShell environment —\n`; });
+  document.querySelectorAll('[data-cmd]').forEach(b => b.addEventListener('click', () => {
+    const c = b.dataset.cmd;
+    if (c === 'who') out('aws sts get-caller-identity', '{\n  "UserId": "AIDA…EXAMPLE",\n  "Account": "123456789012",\n  "Arn": "arn:aws:iam::123456789012:user/Pritam"\n}');
+    if (c === 'save') { if (!files[reg].includes('demo.txt')) files[reg].push('demo.txt'); out('echo "notes" > demo.txt', ''); }
+    if (c === 'ls') out('ls', files[reg].join('  ') || '(nothing here: this Region\'s home folder is separate)');
+    if (c === 'users') $('noPerm').checked ? out('aws iam list-users', 'An error occurred (AccessDenied) when calling the ListUsers operation: User: arn:aws:iam::123456789012:user/Pritam is not authorized to perform: iam:ListUsers', true) : out('aws iam list-users', '{ "Users": [ { "UserName": "Pritam" }, { "UserName": "CI-Bot" } ] }');
+  }));
+  term.innerHTML = '<span class="p">Welcome to AWS CloudShell</span>\n';
+})();
+</script>
+</body>
+</html>

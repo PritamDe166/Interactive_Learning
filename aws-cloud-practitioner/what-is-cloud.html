@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>What is cloud computing</title>
+<meta name="description" content="AWS Cloud Practitioner: what cloud computing is, its five characteristics, the six advantages AWS lists, and private, public and hybrid cloud.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .wc-chart .dem { fill: none; stroke: var(--fg); stroke-width: 2.5; }
+  .wc-chart .cap { fill: none; stroke: var(--teal); stroke-width: 3; }
+  .wc-chart .idle { fill: color-mix(in srgb, var(--yellow) 30%, transparent); }
+  .wc-chart .drop { fill: color-mix(in srgb, var(--red) 45%, transparent); }
+  .wc-chart .ax { stroke: var(--line); }
+  .wc-chart text { fill: var(--muted); font-family: var(--mono); font-size: 11px; text-anchor: middle; }
+  .pick { display: grid; gap: 10px; }
+  .pick .q { font-size: 16px; color: var(--fg); }
+  .pick .opts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pick .fb { min-height: 1.5em; color: var(--fg-soft); }
+  .pick .count { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .btn.right { border-color: var(--teal); color: var(--good-text); }
+  .btn.wrong { border-color: var(--red); color: var(--bad-text); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · Cloud &amp; AWS overview · Domain 1 Cloud Concepts</div>
+    <h1>What is cloud computing</h1>
+    <ul class="lede">
+      <li><b>Cloud computing</b> = on-demand delivery of compute, storage, databases and other IT resources <b>over the internet</b>, with <b>pay-as-you-go</b> pricing.</li>
+      <li>The provider (AWS) owns and runs the hardware; you <b>ask for what you need</b> through a website or API and get it in minutes.</li>
+      <li>Five characteristics: <b>on-demand self-service, broad network access, resource pooling, rapid elasticity, measured service</b>.</li>
+      <li>Three deployment models: <b>private</b>, <b>public</b> (AWS) and <b>hybrid</b> (some on-premises, some in the cloud).</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: the same website, now on AWS</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 560" aria-label="Patients reach web servers in an AWS Region; your IT team asks the AWS API for servers; a bill meter counts usage"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li><b>Cloud computing</b> = on-demand delivery of compute, storage, databases and other IT over the internet, with <b>pay-as-you-go</b> pricing.</li>
+      <li>The provider owns and runs the hardware; you provision through a <b>web console or API</b> in minutes.</li>
+      <li><b>Five characteristics</b>: on-demand self-service, broad network access, resource pooling (multi-tenancy), rapid elasticity and scalability, measured service.</li>
+      <li><b>Six advantages</b> (quoted on the exam): trade CAPEX for OPEX, economies of scale, stop guessing capacity, speed and agility, stop spending money running data centres, go global in minutes.</li>
+      <li><b>Deployment models</b>: private (one organisation), public (AWS, shared over the internet), hybrid (some on-premises, some cloud, connected).</li>
+      <li><b>Elasticity</b> = scale up <i>and down</i> automatically with demand; <b>scalability</b> = able to handle more load.</li>
+      <li>Cloud also makes <b>high availability</b> and <b>fault tolerance</b> easier by spreading across data centres.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Feel the difference elasticity makes, then test yourself on the vocabulary the exam uses.</p>
+
+  <section aria-labelledby="dayH">
+    <h2 class="stage-title" id="dayH">One day at the clinic: fixed or elastic?</h2>
+    <div class="stage-kind">24 hours of bookings · illustrative units</div>
+    <div class="controls">
+      <div class="seg" id="daySeg" role="group" aria-label="Capacity">
+        <button type="button" data-v="fixed" aria-pressed="true">Fixed: 4 servers all day</button>
+        <button type="button" data-v="elastic" aria-pressed="false">Elastic: add and remove servers</button>
+      </div>
+      <button class="btn primary" id="dayPlay" type="button">Play the day</button>
+    </div>
+    <div class="scroll"><svg class="diagram wc-chart" id="daySvg" viewBox="0 0 1000 280" aria-label="Demand over 24 hours against server capacity"></svg></div>
+    <div class="kpis">
+      <div class="kpi accent"><b id="kHours">–</b><span>Server-hours you pay for</span></div>
+      <div class="kpi bad"><b id="kDrop">–</b><span>Bookings turned away</span></div>
+      <div class="kpi"><b id="kPeak">–</b><span>Servers at the busiest hour</span></div>
+    </div>
+    <p class="hint" id="dayHint"></p>
+  </section>
+
+  <section aria-labelledby="depH">
+    <h2 class="stage-title" id="depH">Private, public or hybrid?</h2>
+    <div class="stage-kind">Pick the deployment model for each organisation</div>
+    <div class="card pick" id="dep"></div>
+  </section>
+
+  <section aria-labelledby="advH">
+    <h2 class="stage-title" id="advH">Which advantage is it?</h2>
+    <div class="stage-kind">AWS lists six advantages of cloud computing · the exam quotes them</div>
+    <div class="card pick" id="adv"></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Get resources yourself, no ticket to a vendor</span><span class="arrow">→</span><span class="then">On-demand self-service</span></li>
+      <li><span class="if">Reachable over the network from many device types</span><span class="arrow">→</span><span class="then">Broad network access</span></li>
+      <li><span class="if">Many customers share the same physical hardware, isolated</span><span class="arrow">→</span><span class="then">Resource pooling · multi-tenancy</span></li>
+      <li><span class="if">Grow and shrink quickly with demand</span><span class="arrow">→</span><span class="then">Rapid elasticity</span></li>
+      <li><span class="if">Usage is metered; pay for what you used</span><span class="arrow">→</span><span class="then">Measured service</span></li>
+      <li><span class="if">Upfront hardware purchase becomes a monthly bill</span><span class="arrow">→</span><span class="then">CAPEX → OPEX (trade fixed for variable expense)</span></li>
+      <li><span class="if">Keep some servers on-premises, extend into AWS</span><span class="arrow">→</span><span class="then">Hybrid cloud</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Deployment model</th><th>Who owns the hardware</th><th>Typical reason</th></tr></thead>
+        <tbody>
+          <tr><td>Private cloud</td><td>One organisation, used only by it</td><td>Full control, specific security or regulatory needs</td></tr>
+          <tr><td>Public cloud</td><td>A provider such as AWS, shared by many customers, used over the internet</td><td>Speed, scale, no hardware to buy</td></tr>
+          <tr><td>Hybrid cloud</td><td>Some on-premises, some at the provider, connected</td><td>Keep sensitive or legacy systems in-house, use the cloud for the rest</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="cards" style="margin-top:14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))">
+      <div class="card"><h3>1 · Trade CAPEX for OPEX</h3><p>Pay monthly for what you use instead of buying hardware up front.</p></div>
+      <div class="card"><h3>2 · Economies of scale</h3><p>AWS buys at huge scale, so usage prices are lower than you could get alone.</p></div>
+      <div class="card"><h3>3 · Stop guessing capacity</h3><p>Scale with measured demand instead of forecasting years ahead.</p></div>
+      <div class="card"><h3>4 · Speed and agility</h3><p>New resources in minutes, so trying things is cheap.</p></div>
+      <div class="card"><h3>5 · Stop running data centres</h3><p>No racking, power or cooling; spend effort on your app.</p></div>
+      <div class="card"><h3>6 · Go global in minutes</h3><p>Deploy close to users in Regions around the world.</p></div>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>The problems cloud computing solves</b> are the ones from the previous topic: no data-centre rent, power or cooling to pay, no weeks of waiting for hardware, capacity that follows demand, and AWS's team (not yours) replacing failed hardware. Cloud also makes <b>high availability</b> and <b>fault tolerance</b> easier, because you can spread an app across several data centres.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Everyday examples</b> from the course: Gmail (email), Dropbox and Google Drive (storage), Netflix (built on AWS) and Google Photos. You use cloud services daily without thinking about the servers behind them.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Give the one-sentence definition of cloud computing.<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>On-demand delivery of compute, storage, databases and other IT resources over the internet, with pay-as-you-go pricing.</b></p></div></details>
+      <details><summary>Many customers' virtual machines run on the same physical server, isolated from each other. Which characteristic?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Resource pooling (multi-tenancy).</b> It is also why economies of scale work.</p></div></details>
+      <details><summary>"Elasticity" vs "scalability": what's the difference?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Scalability</b> is being able to handle more load by adding resources. <b>Elasticity</b> is doing that automatically, up and down, to match demand so you don't pay for idle capacity.</p></div></details>
+      <details><summary>A bank keeps its core ledger in its own data centre and runs its mobile app's backend on AWS. Which model?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Hybrid cloud.</b></p></div></details>
+      <details><summary>"We no longer have to buy servers for next year's growth." Which advantage?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Stop guessing capacity.</b> (If the sentence stresses the upfront money instead, the answer is "trade CAPEX for OPEX".)</p></div></details>
+      <details><summary>Who owns and maintains the hardware in the public cloud?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>The cloud provider (AWS).</b> You use it through a web console or API.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Server counts, launch times and bills are illustrative. Source: Overview note "What is cloud computing" (definition, deployment models, five characteristics, six advantages).</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const safe = p => p.catch(e => { if (!(e instanceof K.Stop)) throw e; });
+
+  /* ================= walkthrough ================= */
+  const net = K.net($('stSvg'), {
+    zones: [
+      { id: 'reg', x: 410, y: 30, w: 570, h: 500, kind: 'region', label: 'AWS Region ap-south-1 (Mumbai)' },
+      { id: 'host', x: 560, y: 48, w: 400, h: 160, kind: 'aws', label: 'one physical host, shared' },
+      { id: 'office', x: 20, y: 400, w: 340, h: 140, kind: 'onprem', label: 'YOUR OFFICE' }
+    ],
+    nodes: {
+      phone: { x: 90, y: 110, icon: 'phone', kind: 'user', label: 'Patient', sub: 'phone' },
+      laptop: { x: 90, y: 280, icon: 'laptop', kind: 'user', label: 'Patient', sub: 'laptop' },
+      inet: { x: 290, y: 200, icon: 'globe', kind: 'plain', label: 'Internet' },
+      front: { x: 490, y: 300, icon: 'lb', label: 'Front door', sub: 'spreads traffic' },
+      s1: { x: 650, y: 140, icon: 'server', kind: 'compute', label: 'Web server 1', sub: 'yours' },
+      other: { x: 860, y: 140, icon: 'server', kind: 'plain', label: 'Another company', sub: 'isolated from you' },
+      s2: { x: 650, y: 300, icon: 'server', kind: 'compute', label: 'Web server 2' },
+      s3: { x: 800, y: 300, icon: 'server', kind: 'compute', label: 'Web server 3' },
+      s4: { x: 920, y: 300, icon: 'server', kind: 'compute', label: 'Web server 4' },
+      api: { x: 560, y: 460, icon: 'code', kind: 'mgmt', label: 'AWS console / API', sub: 'self-service' },
+      bill: { x: 860, y: 460, icon: 'dollar', kind: 'plain', label: 'Usage meter', sub: '' },
+      admin: { x: 110, y: 470, icon: 'user', kind: 'user', label: 'You (IT team)' },
+      own: { x: 270, y: 470, icon: 'server', kind: 'plain', label: 'Own servers', sub: 'kept in-house' }
+    },
+    links: [
+      { a: 'phone', b: 'inet' }, { a: 'laptop', b: 'inet' }, { a: 'inet', b: 'front', via: [[490, 200]] },
+      { a: 'front', b: 's1', via: [[560, 300], [560, 140]] }, { a: 'front', b: 's2' }, { a: 'front', b: 's3', via: [[560, 300], [560, 250], [800, 250]] }, { a: 'front', b: 's4', via: [[560, 300], [560, 250], [920, 250]] },
+      { a: 'admin', b: 'api', via: [[110, 380], [560, 380]], label: 'Launch 2 servers', at: [330, 372] },
+      { a: 'own', b: 'api', kind: 'dash', label: 'private link (hybrid)', at: [415, 452] }
+    ]
+  });
+  const HID = n => net.nodes[n].g.style.display = 'none', SHOW = n => net.nodes[n].g.style.display = '';
+  const LINKS = { s3: ['front', 's3'], s4: ['front', 's4'] };
+  function servers(list) {
+    ['s1', 's2', 's3', 's4'].forEach(s => { list.includes(s) ? SHOW(s) : HID(s); if (LINKS[s]) net.link(...LINKS[s], list.includes(s) ? '' : 'hide'); });
+  }
+  function shown(n) { return net.nodes[n].g.style.display !== 'none'; }
+  function base(i) {
+    net.reset(); net.clearDots();
+    const office = i >= 6;
+    net.zones.office.style.display = office ? '' : 'none'; office ? SHOW('own') : HID('own'); net.link('own', 'api', office ? '' : 'hide');
+    i === 4 ? (SHOW('other'), net.zones.host.style.display = '') : (HID('other'), net.zones.host.style.display = 'none');
+    servers(i === 0 ? ['s1'] : i === 3 ? ['s1', 's2', 's3', 's4'] : ['s1', 's2']);
+    const focus = [
+      ['phone', 'inet', 'front', 's1'],
+      ['admin', 'api', 's1', 's2', 'bill'],
+      ['phone', 'laptop', 'inet', 'front', 's1', 's2'],
+      ['phone', 'laptop', 'inet', 'front', 's1', 's2', 's3', 's4', 'bill'],
+      ['s1', 'other', 's2'],
+      ['bill', 's1', 's2', 'api'],
+      ['own', 'api', 'admin', 's1', 's2', 'front'],
+      null
+    ][i];
+    net.focus(focus);
+    net.nodes.bill.sub(['', '2 servers × ₹4/hr', '', '4 servers × ₹4/hr', '', '₹4/hr each, per second', '', ''][i] || 'pay per use');
+    if (i === 0) net.badge('s1', 'AWS owns this hardware', 'info');
+    if (i === 1) { net.badge('s1', 'ready in ~1 min', 'ok'); net.badge('s2', 'ready in ~1 min', 'ok'); }
+    if (i === 3) { net.badge('s3', 'added', 'ok'); net.badge('s4', 'added', 'ok'); }
+    if (i === 4) { net.badge('s1', 'your VM', 'info'); net.badge('other', 'their VM', ''); }
+    if (i === 5) net.badge('bill', 'only what you used', 'ok');
+    if (i === 6) net.badge('own', 'stays on-premises', 'info');
+  }
+  const STEPS = [
+    { title: 'Same website, but AWS owns the building',
+      text: 'The patient\'s request still crosses the internet to a web server. The difference: the server sits in an <b>AWS Region</b>. AWS owns the building, power, cooling, network and hardware; you rent what you need. That\'s <b>cloud computing</b>: IT resources delivered over the internet, paid for as you use them.',
+      play: async run => { base(0); await net.send(['phone', 'inet', 'front', 's1'], { run, label: 'GET /book' }); } },
+    { title: 'On-demand self-service',
+      text: 'Need two servers? You don\'t raise a purchase order and wait six weeks. You ask the <b>AWS console or API</b> yourself, and they\'re running in about a minute. No phone call to a vendor, no hardware delivery.',
+      tip: 'Characteristic 1: on-demand self-service.',
+      play: async run => { base(1); HID('s2'); await net.send(['admin', 'api'], { run, label: 'Launch 2 servers' }); SHOW('s2'); net.badge('s1', 'ready in ~1 min', 'ok'); net.badge('s2', 'ready in ~1 min', 'ok'); await K.sleep(500, run); } },
+    { title: 'Broad network access',
+      text: 'Patients reach the app from a phone, a laptop or a clinic tablet, from anywhere with an internet connection. The resources are available <b>over the network</b> to many kinds of device.',
+      tip: 'Characteristic 2: broad network access.',
+      play: async run => { base(2); await Promise.all([safe(net.send(['phone', 'inet', 'front', 's1'], { run })), (async () => { await K.sleep(250, run); await safe(net.send(['laptop', 'inet', 'front', 's2'], { run })); })()]); } },
+    { title: 'Rapid elasticity',
+      text: 'A health-camp announcement doubles the traffic. Two more servers are added in minutes, and in the evening they are removed again. Capacity <b>follows demand</b> both ways, so you stop guessing.',
+      tip: 'Characteristic 4: rapid elasticity and scalability.',
+      play: async run => { base(2); const ps = []; for (let k = 0; k < 4; k++) { ps.push(safe(net.send(['laptop', 'inet', 'front', k % 2 ? 's2' : 's1'], { run }))); await K.sleep(150, run); } servers(['s1', 's2', 's3', 's4']); net.focus(['phone', 'laptop', 'inet', 'front', 's1', 's2', 's3', 's4', 'bill']); net.badge('s3', 'added', 'ok'); net.badge('s4', 'added', 'ok'); for (let k = 0; k < 4; k++) { ps.push(safe(net.send(['phone', 'inet', 'front', ['s1', 's2', 's3', 's4'][k]], { run }))); await K.sleep(150, run); } await Promise.all(ps); } },
+    { title: 'Resource pooling (multi-tenancy)',
+      text: 'Your server is a <b>virtual machine</b>. The physical host underneath may also run other companies\' virtual machines, fully isolated from yours. Sharing hardware across many customers is what makes AWS cheap at scale.',
+      tip: 'Characteristic 3: resource pooling. It is the reason for the "economies of scale" advantage.' },
+    { title: 'Measured service: pay for what you used',
+      text: 'AWS <b>meters</b> everything: server time per second, gigabytes stored, data sent out. Your bill follows usage. Remove two servers at 7 pm and they stop costing money at 7 pm. That turns a big upfront purchase (<b>CAPEX</b>) into a monthly running cost (<b>OPEX</b>).',
+      tip: 'Characteristic 5: measured service / pay-as-you-go.' },
+    { title: 'Private, public or hybrid',
+      text: '<b>Public cloud</b> is what we just saw: AWS\'s hardware, shared, used over the internet. A <b>private cloud</b> is used by one organisation only. <b>Hybrid</b> mixes both: here the clinic keeps old records on its own servers and connects them privately to its app on AWS.',
+      play: async run => { base(6); await net.send(['own', 'api'], { run, label: 'records sync', tone: 'cyan' }); } },
+    { title: 'Why companies move: six advantages',
+      text: 'AWS sums it up as six advantages: <b>trade CAPEX for OPEX</b>, <b>economies of scale</b>, <b>stop guessing capacity</b>, <b>speed and agility</b>, <b>stop running data centres</b>, and <b>go global in minutes</b>. Each one answers a problem from traditional IT.',
+      tip: 'The exam often quotes one of these six phrases word for word.' }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ================= one day: fixed vs elastic ================= */
+  const H = [8, 6, 5, 5, 6, 9, 16, 28, 46, 62, 70, 66, 52, 48, 50, 54, 60, 72, 76, 58, 38, 24, 14, 10]; // bookings per minute (illustrative)
+  const PER = 20, sv = $('daySvg'), X0 = 50, X1 = 980, Y0 = 240, Y1 = 20, VM = 100;
+  const x = h => X0 + h / 24 * (X1 - X0), y = v => Y0 - v / VM * (Y0 - Y1);
+  let mode = 'fixed';
+  const capAt = h => mode === 'fixed' ? 4 * PER : Math.max(1, Math.ceil(H[h] * 1.15 / PER)) * PER;
+  function draw(upto = 24) {
+    sv.textContent = '';
+    K.el('line', { x1: X0, y1: Y0, x2: X1, y2: Y0, class: 'ax' }, sv);
+    for (let h = 0; h <= 24; h += 3) K.text(sv, x(h), Y0 + 18, h === 24 ? '24:00' : String(h).padStart(2, '0') + ':00', '');
+    let hours = 0, drop = 0, tot = 0, peak = 0, dP = '', cP = '';
+    for (let h = 0; h < Math.min(24, upto); h++) {
+      const c = capAt(h), d = H[h], n = c / PER;
+      hours += n; peak = Math.max(peak, n); tot += d;
+      if (d > c) { K.el('rect', { x: x(h), y: y(d), width: x(1) - X0, height: y(c) - y(d), class: 'drop' }, sv); drop += d - c; }
+      else K.el('rect', { x: x(h), y: y(c), width: x(1) - X0, height: y(d) - y(c), class: 'idle' }, sv);
+      dP += (h ? 'L' : 'M') + x(h) + ' ' + y(d) + ' L' + x(h + 1) + ' ' + y(d);
+      cP += (h ? 'L' : 'M') + x(h) + ' ' + y(c) + ' L' + x(h + 1) + ' ' + y(c);
+    }
+    K.el('path', { d: cP, class: 'cap' }, sv); K.el('path', { d: dP, class: 'dem' }, sv);
+    $('kHours').textContent = hours; $('kDrop').textContent = tot ? Math.round(drop / tot * 100) + '%' : '–'; $('kPeak').textContent = peak || '–';
+    $('dayHint').innerHTML = mode === 'fixed'
+      ? 'Four servers all day: <b>96 server-hours</b>. At night most of them idle (yellow), and the evening rush still overflows (red).'
+      : 'Servers are added before each rush and removed afterwards. Fewer server-hours, nobody turned away: that is <b>elasticity</b>, and with <b>measured service</b> you only pay for the teal line.';
+  }
+  async function play() { const run = K.newRun('day'); try { for (let h = 0; h <= 24; h++) { draw(h); await K.sleep(110, run); } } catch (e) { if (!(e instanceof K.Stop)) throw e; } }
+  K.seg($('daySeg'), v => { mode = v; K.cancel('day'); draw(); });
+  $('dayPlay').addEventListener('click', play);
+  draw();
+
+  /* ================= pick games ================= */
+  function quiz(el, items, opts) {
+    let i = 0, score = 0, answered = false;
+    function render() {
+      const it = items[i];
+      el.innerHTML = `<div class="count">${i + 1} of ${items.length} · score ${score}</div><div class="q">${it.q}</div>
+        <div class="opts">${opts.map(o => `<button class="btn" type="button" data-o="${o}">${o}</button>`).join('')}</div><p class="fb"></p>
+        <div><button class="btn primary" type="button" data-next hidden>${i === items.length - 1 ? 'Start again' : 'Next ▶'}</button></div>`;
+      answered = false;
+    }
+    el.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.next !== undefined) { i = (i + 1) % items.length; if (i === 0) score = 0; render(); return; }
+      if (answered) return; answered = true;
+      const it = items[i], ok = b.dataset.o === it.a;
+      if (ok) score++;
+      b.classList.add(ok ? 'right' : 'wrong');
+      el.querySelector(`[data-o="${it.a}"]`).classList.add('right');
+      el.querySelector('.fb').innerHTML = (ok ? '<span class="ok-text">Right.</span> ' : `<span class="bad-text">It's ${it.a}.</span> `) + it.why;
+      el.querySelector('.count').textContent = `${i + 1} of ${items.length} · score ${score}`;
+      el.querySelector('[data-next]').hidden = false;
+    });
+    render();
+  }
+  quiz($('dep'), [
+    { q: 'A start-up builds its booking app entirely on AWS. No servers of its own.', a: 'Public', why: 'Everything runs on the provider\'s shared hardware over the internet.' },
+    { q: 'A defence research lab runs its own cloud platform in its own building, used only by its staff.', a: 'Private', why: 'One organisation, its own hardware, full control.' },
+    { q: 'A hospital keeps patient records on servers in its basement, and runs its appointment website on AWS, connected by a private link.', a: 'Hybrid', why: 'Part on-premises, part in the cloud, connected.' },
+    { q: 'A bank moves its marketing site to AWS but must keep the core ledger in its own data centre for now.', a: 'Hybrid', why: 'Some workloads stay in-house while others move to the cloud.' },
+    { q: 'A company uses Gmail, Dropbox and Zoom, all from their vendors, and runs nothing itself.', a: 'Public', why: 'These are services from public cloud providers, shared by many customers.' }
+  ], ['Private', 'Public', 'Hybrid']);
+  quiz($('adv'), [
+    { q: '"We stopped spending ₹40 lakh on servers every two years; now we get a monthly bill."', a: 'CAPEX → OPEX', why: 'Upfront capital spending becomes variable operating expense.' },
+    { q: '"Because AWS buys hardware for millions of customers, our per-hour price keeps going down."', a: 'Economies of scale', why: 'Massive shared purchasing lowers the price for everyone.' },
+    { q: '"We no longer forecast next year\'s traffic before buying servers."', a: 'Stop guessing capacity', why: 'You scale with actual demand instead.' },
+    { q: '"A new test environment takes ten minutes instead of six weeks."', a: 'Speed and agility', why: 'Fast provisioning makes experiments cheap.' },
+    { q: '"Our team stopped worrying about the UPS batteries and air conditioning."', a: 'Stop running data centres', why: 'AWS runs the facilities; you focus on the app.' },
+    { q: '"We launched in Frankfurt for our European patients in an afternoon."', a: 'Go global in minutes', why: 'Deploy in any Region close to your users.' }
+  ], ['CAPEX → OPEX', 'Economies of scale', 'Stop guessing capacity', 'Speed and agility', 'Stop running data centres', 'Go global in minutes']);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Console, CLI, SDK and access keys</title>
+<meta name="description" content="AWS Cloud Practitioner: the three ways to reach AWS (Management Console, CLI, SDKs), access keys, long-term versus temporary credentials, and why every route goes through the same IAM check.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .tl { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 3px; margin-top: 8px; }
+  .tl i { height: 26px; border-radius: 4px; background: var(--track); display: grid; place-items: center; font-style: normal; font-family: var(--mono); font-size: 10.5px; color: var(--muted); }
+  .tl i.bad { background: var(--red); color: var(--on-accent); }
+  .tl i.ok { background: var(--teal); color: var(--on-accent); }
+  .tl-lab { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11.5px; color: var(--muted); margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · IAM · Domain 3 Technology (Task 3.1) &amp; Domain 2 (Task 2.3)</div>
+    <h1>Console, CLI, SDK &amp; access keys</h1>
+    <ul class="lede">
+      <li>Three ways in: the <b>Management Console</b> (browser), the <b>AWS CLI</b> (terminal) and the <b>AWS SDKs</b> (your code). All three call the same <b>AWS APIs</b>.</li>
+      <li>The console uses a <b>password + MFA</b>. The CLI and SDK use <b>access keys</b>: an access key ID (like a username) and a <b>secret access key</b> (like a password).</li>
+      <li>Every route passes the <b>same IAM check</b>. The CLI and SDK don't bypass anything.</li>
+      <li>Long-term keys never expire on their own; <b>temporary credentials</b> (roles, IAM Identity Center) do, so prefer them.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you already know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest idea you already know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Management Console</span><span class="like">IIS Manager or Server Manager: a GUI admin tool</span><span>Runs in the browser, for every service.</span></div>
+      <div class="row"><span class="aws">AWS CLI</span><span class="like">PowerShell cmdlets for your servers</span><span>Commands start with <span class="mono">aws</span>, e.g. <span class="mono">aws s3 ls</span>.</span></div>
+      <div class="row"><span class="aws">AWS SDK for .NET</span><span class="like">A NuGet client library, like HttpClient for AWS</span><span>Signs each API call with your credentials.</span></div>
+      <div class="row"><span class="aws">Access key</span><span class="like">A service account's username + password in a config file</span><span>Must never be committed to Git.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: three doors, one gate</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 500" aria-label="Console, CLI and SDK all send API calls through IAM to AWS services"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li><b>Console</b> = browser, for people; protected by <b>password + MFA</b>. <b>CLI</b> = terminal commands and scripts. <b>SDK</b> = libraries for application code (.NET, Python, Java, JavaScript, Go…).</li>
+      <li>All three call the same <b>AWS APIs</b>, and IAM evaluates every call the same way. <b>AccessDenied</b> in the CLI means a missing permission.</li>
+      <li>An <b>access key</b> = <b>access key ID</b> (starts with <code>AKIA</code>) + <b>secret access key</b>. Temporary credentials add a <b>session token</b>.</li>
+      <li>A user can have <b>console access, access keys, both or neither</b>. Up to <b>two</b> access keys per user (to rotate without downtime).</li>
+      <li><b>Never</b> share keys, commit them to Git, paste them in tickets or chat, or hard-code them in code. <b>Never create root access keys.</b></li>
+      <li><b>Long-term keys</b> work until you delete them. <b>Temporary credentials</b> (IAM roles, IAM Identity Center, <code>aws configure sso</code>) expire automatically: prefer them.</li>
+      <li>Code running on AWS (EC2, Lambda, ECS) should use an <b>IAM role</b>, not stored keys. The SDK finds role credentials automatically.</li>
+      <li><code>aws configure</code> stores keys in <code>~/.aws/credentials</code> and Region/output in <code>~/.aws/config</code>. <b>Profiles</b> (<code>--profile</code>) keep several accounts apart.</li>
+      <li><code>aws sts get-caller-identity</code> shows <b>which identity</b> the CLI is using: the first command to run when something is denied.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+
+  <section aria-labelledby="lkH">
+    <h2 class="stage-title" id="lkH">A key leaks: long-term vs temporary</h2>
+    <div class="stage-kind">The attacker tries the stolen credential every hour for 12 hours</div>
+    <div class="controls">
+      <div class="seg" id="lkSeg" role="group" aria-label="Credential type">
+        <button type="button" data-v="long" aria-pressed="true">Long-term access key</button>
+        <button type="button" data-v="temp" aria-pressed="false">Temporary credentials (1 hour)</button>
+      </div>
+      <button class="btn primary" id="lkGo" type="button">Run the 12 hours</button>
+    </div>
+    <div class="card">
+      <div class="tl" id="tl"></div>
+      <div class="tl-lab"><span>leak (hour 0)</span><span>you notice (hour 9)</span><span>hour 12</span></div>
+      <p class="nf-cap" id="lkCap"></p>
+    </div>
+  </section>
+
+  <section aria-labelledby="chH">
+    <h2 class="stage-title" id="chH">Which way in, which credential?</h2>
+    <div class="stage-kind">Pick the best option for each scenario</div>
+    <div class="card" id="ch"></div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console and terminal</h2>
+    <details class="console-steps"><summary>Set up the CLI (from the course hands-on)</summary>
+      <ol>
+        <li>Install AWS CLI <b>v2</b>; check with <code>aws --version</code>.</li>
+        <li>In IAM, open your user → <b>Security credentials → Create access key</b> (choose "CLI"). Copy the secret now; it's shown only once. <i>(For a learning account only; at work prefer IAM Identity Center.)</i></li>
+        <li>Run <code>aws configure</code>: access key ID, secret access key, default Region (e.g. <code>ap-south-1</code>), output format (<code>json</code>, <code>table</code>, <code>text</code>, <code>yaml</code>).</li>
+        <li>Check who you are: <code>aws sts get-caller-identity</code>. List users: <code>aws iam list-users</code>.</li>
+        <li>Remove your user from the admin group and run it again: <code>AccessDenied … iam:ListUsers</code>. Same rule as the console.</li>
+        <li>Better for real work: <code>aws configure sso</code> (IAM Identity Center) or <code>aws login</code> (CLI 2.32+), both give <b>temporary</b> credentials.</li>
+        <li>Delete course access keys when you're done.</li>
+      </ol>
+      <p class="res">Troubleshooting: "Unable to locate credentials" → configure or pick a profile. "AccessDenied" → check identity, then policies. Resource "missing" → wrong Region (<code>--region</code>).</p>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Run AWS commands from a terminal</span><span class="arrow">→</span><span class="then">AWS CLI</span></li>
+      <li><span class="if">Call AWS from application code</span><span class="arrow">→</span><span class="then">AWS SDK</span></li>
+      <li><span class="if">Programmatic credential with a secret</span><span class="arrow">→</span><span class="then">Access key</span></li>
+      <li><span class="if">App on EC2 needs AWS access</span><span class="arrow">→</span><span class="then">IAM role, not access keys</span></li>
+      <li><span class="if">Keys committed to a public repo</span><span class="arrow">→</span><span class="then">Deactivate/delete immediately, then rotate</span></li>
+      <li><span class="if">Benefit of temporary credentials</span><span class="arrow">→</span><span class="then">They expire automatically</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Which two parts make up an access key?<span class="go">Show answer</span></summary><div class="ans"><p><b>Access key ID</b> and <b>secret access key</b> (plus a session token for temporary credentials).</p></div></details>
+      <details><summary>Does the CLI get more permissions than the console for the same user?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> Both call the same APIs and IAM evaluates them identically.</p></div></details>
+      <details><summary>How do you see which identity your CLI is using?<span class="go">Show answer</span></summary><div class="ans"><p><code>aws sts get-caller-identity</code></p></div></details>
+      <details><summary>Why can a user have two access keys?<span class="go">Show answer</span></summary><div class="ans"><p><b>Rotation</b>: create the new key, switch apps over, then delete the old one.</p></div></details>
+      <details><summary>Where does <code>aws configure</code> store the keys?<span class="go">Show answer</span></summary><div class="ans"><p>In <code>~/.aws/credentials</code> (Region and output in <code>~/.aws/config</code>).</p></div></details>
+      <details><summary>Your .NET app runs on EC2 and reads S3. Where should its credentials come from?<span class="go">Show answer</span></summary><div class="ans"><p><b>An IAM role attached to the instance.</b> The SDK picks up temporary credentials automatically; no keys in appsettings.json.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Timeline is illustrative. Sources: IAM notes "AWS Access Keys, Console, CLI, and SDK", "IAM: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sign-in.html">AWS CLI sign-in with console credentials</a>; <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html">IAM best practices</a>.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'aws', x: 470, y: 20, w: 510, h: 460, kind: 'aws', label: 'AWS' }],
+    nodes: {
+      con: { x: 90, y: 90, icon: 'laptop', kind: 'user', label: 'Management Console', sub: 'password + MFA' },
+      cli: { x: 90, y: 250, icon: 'terminal', kind: 'user', label: 'AWS CLI', sub: 'access key' },
+      sdk: { x: 90, y: 410, icon: 'code', kind: 'user', label: 'AWS SDK (.NET app)', sub: 'access key or role' },
+      api: { x: 330, y: 250, icon: 'globe', kind: 'plain', label: 'AWS APIs', sub: 'HTTPS, signed' },
+      iam: { x: 580, y: 250, icon: 'shield', kind: 'sec', label: 'IAM', sub: 'same check for all' },
+      s3: { x: 860, y: 110, icon: 'bucket', kind: 'storage', label: 'S3' },
+      iams: { x: 860, y: 250, icon: 'users', kind: 'sec', label: 'IAM users list' },
+      ec2: { x: 860, y: 390, icon: 'chip', kind: 'compute', label: 'EC2' },
+      git: { x: 330, y: 450, icon: 'branch', kind: 'plain', label: 'Public repo' }
+    },
+    links: [{ a: 'con', b: 'api', via: [[210, 90], [210, 250]] }, { a: 'cli', b: 'api' }, { a: 'sdk', b: 'api', via: [[210, 410], [210, 250]] }, { a: 'api', b: 'iam' },
+      { a: 'iam', b: 's3', via: [[720, 250], [720, 110]] }, { a: 'iam', b: 'iams' }, { a: 'iam', b: 'ec2', via: [[720, 250], [720, 390]] }, { a: 'sdk', b: 'git', kind: 'dash', label: 'key in code!' }]
+  });
+  function base(i) {
+    net.reset(); net.nodes.git.g.style.display = i === 5 ? '' : 'none'; net.link('sdk', 'git', i === 5 ? '' : 'hide');
+    const F = [null, ['con', 'api', 'iam', 's3', 'iams', 'ec2'], ['cli', 'api', 'iam', 'iams'], ['sdk', 'api', 'iam', 's3'], ['con', 'cli', 'sdk', 'api', 'iam', 'iams'], ['sdk', 'git', 'api', 'iam'], ['sdk', 'api', 'iam', 's3']][i];
+    net.focus(F);
+    if (i === 2) { net.badge('cli', 'AKIA… + secret', 'info'); }
+    if (i === 4) { ['con', 'cli', 'sdk'].forEach(n => net.badge(n, 'AccessDenied', 'bad')); }
+    if (i === 5) { net.badge('git', 'leaked key', 'bad'); }
+    if (i === 6) { net.badge('sdk', 'role · expires 1 h', 'ok'); net.nodes.sdk.sub('temporary credentials'); } else net.nodes.sdk.sub('access key or role');
+  }
+  const STEPS = [
+    { title: 'Three doors into AWS',
+      text: 'You can reach AWS from the <b>Management Console</b> in a browser, the <b>AWS CLI</b> in a terminal, or an <b>AWS SDK</b> inside your application. Behind every button and command is an <b>API call</b> over HTTPS.' },
+    { title: 'Console: password and MFA',
+      text: 'People use the console: sign in with an account ID or alias, user name, <b>password</b> and an <b>MFA</b> code. Every click becomes an API call that IAM checks.',
+      play: async run => { base(1); await net.send(['con', 'api', 'iam', 's3'], { run, label: 'ListBuckets' }); } },
+    { title: 'CLI: access keys',
+      text: 'The CLI can\'t type a password, so it signs requests with an <b>access key</b>: an <b>access key ID</b> (like a user name, starts with AKIA) and a <b>secret access key</b> (like a password, shown once). <code>aws iam list-users</code> calls the same API the console used.',
+      play: async run => { base(2); await net.send(['cli', 'api', 'iam', 'iams'], { run, label: 'aws iam list-users' }); } },
+    { title: 'SDK: the same calls from code',
+      text: 'An SDK, such as the AWS SDK for .NET, is a library your code uses: <span class="mono">s3.PutObjectAsync(...)</span>. It finds credentials through a <b>provider chain</b> (environment variables, profile files, or a role on EC2/Lambda) so you never hard-code them.',
+      play: async run => { base(3); await net.send(['sdk', 'api', 'iam', 's3'], { run, label: 'PutObject' }); } },
+    { title: 'One gate: IAM decides for all three',
+      text: 'Remove a permission and all three doors fail together: the console shows an authorization error, the CLI prints <b>AccessDenied</b>, the SDK throws an exception. No route bypasses IAM.',
+      play: async run => { base(0); net.focus(['con', 'cli', 'sdk', 'api', 'iam', 'iams']); await Promise.all(['con', 'cli', 'sdk'].map(s => net.send([s, 'api', 'iam'], { run, tone: 'red' }).catch(() => {}))); base(4); } },
+    { title: 'Danger: long-term keys leak',
+      text: 'A developer hard-codes the key in the app and pushes it to a public repo. Long-term keys <b>never expire</b>: whoever finds it can use it until you notice and delete it. Never commit keys; rotate them; delete unused ones.',
+      play: async run => { base(5); await net.send(['sdk', 'git'], { run, tone: 'red', label: 'AKIA…' }); } },
+    { title: 'Better: temporary credentials',
+      text: 'Give the app an <b>IAM role</b> instead (next topics). It receives <b>temporary credentials</b> that rotate automatically and expire within hours. People should use IAM Identity Center or <code>aws configure sso</code>, which also issue temporary credentials.',
+      tip: 'Exam answer for "application on EC2 needs AWS access": an IAM role, never stored access keys.' }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ================= leaked key timeline ================= */
+  let mode = 'long';
+  function tlDraw(upto = -1) {
+    $('tl').innerHTML = Array.from({ length: 12 }, (_, h) => {
+      if (h > upto) return `<i>${h + 1}h</i>`;
+      const works = mode === 'long' ? h < 9 : h < 1;
+      return `<i class="${works ? 'bad' : 'ok'}">${works ? 'in' : 'no'}</i>`;
+    }).join('');
+  }
+  K.seg($('lkSeg'), v => { mode = v; K.cancel('lk'); tlDraw(); $('lkCap').textContent = ''; });
+  $('lkGo').addEventListener('click', async () => {
+    const run = K.newRun('lk');
+    try { for (let h = 0; h < 12; h++) { tlDraw(h); await K.sleep(220, run); } } catch (e) { if (!(e instanceof K.Stop)) return; }
+    $('lkCap').innerHTML = mode === 'long' ? '<span class="bad-text">9 hours of access.</span> The long-term key worked until someone noticed and deleted it. Without monitoring it could have been months.' : '<span class="ok-text">1 hour at most.</span> The temporary credentials expired on their own, even before anyone noticed.';
+  });
+  tlDraw();
+
+  K.pick($('ch'), [
+    { q: 'A new team member wants to look around S3 in a browser.', a: 'Console + MFA', why: 'People use the console with a password and MFA.' },
+    { q: 'You want a nightly script on your laptop to list EC2 instances.', a: 'CLI + temporary credentials', why: 'Use the CLI with SSO/Identity Center credentials rather than long-term keys.' },
+    { q: 'A .NET API running on EC2 must write files to S3.', a: 'SDK + IAM role', why: 'Code on AWS uses an IAM role; the SDK picks up its temporary credentials.' },
+    { q: 'A Lambda function reads from DynamoDB.', a: 'SDK + IAM role', why: 'Lambda uses an execution role.' },
+    { q: 'An old third-party tool on-premises only accepts an access key ID and secret.', a: 'CLI/SDK + long-term key', why: 'Only when nothing else works: a dedicated IAM user\'s key, least privilege, rotated regularly.' }
+  ], ['Console + MFA', 'CLI + temporary credentials', 'SDK + IAM role', 'CLI/SDK + long-term key']);
+})();
+</script>
+</body>
+</html>

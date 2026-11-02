@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EBS snapshots</title>
+<meta name="description" content="AWS Cloud Practitioner: EBS snapshots are incremental point-in-time backups used to restore volumes in another AZ, copy across Regions, archive cheaply and recover from the Recycle Bin.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .blk { display: grid; grid-template-columns: repeat(8, 30px); gap: 6px; margin: 6px 0 14px; }
+  .blk span { width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel-2); display: grid; place-items: center; font: 600 11px var(--mono); color: var(--muted); }
+  .blk span.w { background: var(--teal-wash); color: var(--fg); border-color: var(--teal); }
+  .blk span.ch { background: var(--orange); color: var(--on-accent); border-color: var(--orange); }
+  .lab-ctl { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+  .vt .btn { padding: 4px 10px; font-size: 13px; margin: 2px 4px 2px 0; }
+  .tier { font-family: var(--mono); font-size: 12px; }
+  .lbl { font-size: 13px; color: var(--muted); }
+  .sw { display: inline-flex; gap: 8px; align-items: center; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · EC2 instance storage · 2</div>
+    <h1>EBS snapshots</h1>
+    <ul class="lede">
+      <li>A <b>snapshot</b> is a point-in-time <b>backup of one EBS volume</b>, stored by AWS (in S3, behind the scenes).</li>
+      <li>Snapshots are <b>incremental</b>: after the first, only changed blocks are saved.</li>
+      <li>Restore a snapshot as a new volume in <b>any AZ</b>, or <b>copy it to another Region</b> for disaster recovery.</li>
+      <li><b>Archive tier</b> cuts storage cost up to 75%; the <b>Recycle Bin</b> catches accidental deletes.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>Snapshot idea</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Snapshot</span><span class="like">A SQL Server full + differential backup</span><span>First snapshot is full, later ones store only changed blocks, and AWS keeps them in S3 for you.</span></div>
+      <div class="row"><span class="aws">Copy to another Region</span><span class="like">Shipping backup tapes to a second data centre</span><span>One click, no courier.</span></div>
+      <div class="row"><span class="aws">Recycle Bin</span><span class="like">Windows Recycle Bin</span><span>Only for EBS snapshots, volumes and AMIs, and only if you created a retention rule first.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: one snapshot, five uses</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="A volume in AZ a is snapshotted; the snapshot is restored in AZ b, copied to another Region, archived, or deleted into the Recycle Bin and recovered"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>A snapshot is a <b>backup of an EBS volume at a point in time</b>. You don't have to detach the volume, but it's recommended for consistency.</li>
+      <li>Snapshots are stored by AWS (in S3, not in a bucket you can see) and are <b>Region-level</b>: they are not tied to an AZ.</li>
+      <li><b>Incremental</b>: the first snapshot copies all written blocks; later ones store only the blocks changed since the last one.</li>
+      <li><b>Move a volume to another AZ</b>: snapshot → <b>Create volume from snapshot</b> in the target AZ. The new volume is a copy, not kept in sync.</li>
+      <li><b>Copy a snapshot to another Region</b> for disaster recovery or to launch there.</li>
+      <li><b>EBS Snapshot Archive</b>: up to <b>75% cheaper</b> storage, but restoring takes <b>24 to 72 hours</b>. Use for backups kept 90+ days and rarely needed.</li>
+      <li><b>Recycle Bin</b>: with a <b>retention rule</b>, deleted snapshots (and AMIs, volumes) are kept for a period you choose (snapshots: 1 day to 1 year) and can be <b>recovered</b>. Without a rule, delete is permanent.</li>
+      <li>A <b>locked</b> retention rule can't be edited or deleted until it is unlocked and a delay of 7 to 30 days passes: protection against someone deleting your safety net.</li>
+      <li>When restoring you can change the volume <b>type, size</b> (bigger), and turn on <b>encryption</b>.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+
+  <section aria-labelledby="labH">
+    <h2 class="stage-title" id="labH">Incremental snapshot lab</h2>
+    <div class="stage-kind">Write data, take snapshots, archive one, delete one</div>
+    <div class="card">
+      <div class="lbl">Volume blocks (16 × 1 GiB). The number = how many times a block was written; orange = changed since the last snapshot.</div>
+      <div class="blk" id="blk"></div>
+      <div class="lab-ctl">
+        <button class="btn" id="wr" type="button">Write data</button>
+        <button class="btn primary" id="sn" type="button">Take snapshot</button>
+        <label class="sw"><input type="checkbox" id="rb"> Recycle Bin rule (7 days)</label>
+        <button class="btn" id="rs" type="button">Reset</button>
+      </div>
+      <div class="scroll table-card">
+        <table class="vt"><thead><tr><th>Snapshot</th><th>Blocks stored</th><th>Tier</th><th>Actions</th></tr></thead><tbody id="snaps"></tbody></table>
+      </div>
+      <p class="nf-cap" id="labCap">Press <b>Write data</b>, then <b>Take snapshot</b>.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">Which snapshot feature?</h2>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Snapshot, restore, archive and recover (from the course hands-on)</summary>
+      <ol>
+        <li>EC2 → <b>Volumes</b> → select the volume → <b>Actions → Create snapshot</b>, add a description (e.g. <code>DemoSnapshots</code>).</li>
+        <li><b>Snapshots</b> page: wait for status <b>Completed</b>.</li>
+        <li><b>Actions → Copy snapshot</b>: pick a destination Region (for DR).</li>
+        <li><b>Actions → Create volume from snapshot</b>: choose type, size and a <b>different AZ</b>; optionally encrypt and tag. Check it under Volumes.</li>
+        <li><b>Recycle Bin → Create retention rule</b>: resource type <b>EBS Snapshots</b>, all resources, retention 1 day, leave <b>Rule lock</b> off for the demo.</li>
+        <li>Select the snapshot → <b>Archive snapshot</b> (storage tier changes from Standard to Archive).</li>
+        <li><b>Delete snapshot</b>. It vanishes from Snapshots but appears in <b>Recycle Bin → Resources</b>; select it → <b>Recover</b>. It's back in Snapshots.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Back up an EBS volume</span><span class="arrow">→</span><span class="then">EBS snapshot</span></li>
+      <li><span class="if">Same data in another AZ</span><span class="arrow">→</span><span class="then">Create volume from snapshot in that AZ</span></li>
+      <li><span class="if">Disaster recovery in another Region</span><span class="arrow">→</span><span class="then">Copy snapshot to that Region</span></li>
+      <li><span class="if">Keep for years, rarely restore, cheapest</span><span class="arrow">→</span><span class="then">EBS Snapshot Archive (24–72 h restore)</span></li>
+      <li><span class="if">Protect against accidental deletion</span><span class="arrow">→</span><span class="then">Recycle Bin retention rule</span></li>
+      <li><span class="if">Automate snapshot schedules</span><span class="arrow">→</span><span class="then">Data Lifecycle Manager / AWS Backup</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Feature</th><th>What it does</th><th>Trade-off</th></tr></thead>
+        <tbody>
+          <tr><td>Standard tier</td><td>Incremental snapshots, restore any time</td><td>Normal price</td></tr>
+          <tr><td>Archive tier</td><td>Full copy of the snapshot, up to 75% cheaper</td><td>24–72 h to restore; billed for at least 90 days</td></tr>
+          <tr><td>Recycle Bin</td><td>Keeps deleted snapshots/AMIs (1–365 days) and volumes (1–7 days)</td><td>Only with a rule created before the delete</td></tr>
+          <tr><td>Copy snapshot</td><td>Duplicate into another Region (or account)</td><td>Storage billed in both Regions</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Updated</span><p><b>Recycle Bin now also protects EBS volumes</b> (retention 1–7 days), not only snapshots and AMIs (AWS Recycle Bin documentation).</p></div>
+      <div class="note"><span class="flag add">Added</span><p>Archive converts the snapshot into a <b>full</b> copy (not incremental), and is billed for a minimum of <b>90 days</b>. Retention ranges and the 7–30 day unlock delay for locked rules come from the AWS docs.</p></div>
+      <div class="note"><span class="flag add">Added</span><p>The course's "Amazon EBS Snapshots" note repeats the hands-on note; both are merged into this page.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <div class="quiz">
+      <details><summary>Is a snapshot tied to an AZ?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> It is stored at the Region level, which is why it can be restored into any AZ of that Region.</p></div></details>
+      <details><summary>Why is the second snapshot much smaller than the first?<span class="go">Show answer</span></summary><div class="ans"><p>Snapshots are <b>incremental</b>: only blocks changed since the last snapshot are stored.</p></div></details>
+      <details><summary>A restore is needed within an hour. Is the Archive tier OK?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> Archived snapshots take 24–72 hours to restore.</p></div></details>
+      <details><summary>You deleted a snapshot and no rule existed. Can the Recycle Bin help?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> The rule must exist before the deletion.</p></div></details>
+      <details><summary>How do you get an EBS volume's data into another Region?<span class="go">Show answer</span></summary><div class="ans"><p>Snapshot it, <b>copy the snapshot</b> to that Region, create a volume there.</p></div></details>
+      <details><summary>Does a restored volume stay in sync with the original?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> It is an independent copy from that moment. For a shared live file system, use EFS.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: EC2 storage notes "Amazon EBS Snapshots" and "EBS Snapshots Hands-on"; <a href="https://docs.aws.amazon.com/ebs/latest/userguide/snapshot-archive.html">AWS: Archive EBS snapshots</a>; <a href="https://docs.aws.amazon.com/ebs/latest/userguide/recycle-bin.html">AWS: Recycle Bin</a>. The lab's block counts are illustrative.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'r1', x: 20, y: 20, w: 680, h: 385, kind: 'region', label: 'ap-south-1' }, { id: 'a', x: 50, y: 70, w: 170, h: 180, kind: 'az', label: 'AZ a' }, { id: 'b', x: 490, y: 70, w: 180, h: 180, kind: 'az', label: 'AZ b' }, { id: 'r2', x: 730, y: 20, w: 250, h: 385, kind: 'region', label: 'eu-west-1' }],
+    nodes: {
+      vol: { x: 150, y: 150, icon: 'disk', kind: 'storage', label: 'Volume', sub: '100 GiB' },
+      snap: { x: 360, y: 150, icon: 'camera', kind: 'storage', label: 'Snapshot', sub: 'Region level' },
+      volb: { x: 570, y: 150, icon: 'disk', kind: 'storage', label: 'New volume', sub: 'from snapshot' },
+      snap2: { x: 855, y: 150, icon: 'camera', kind: 'storage', label: 'Snapshot copy', sub: 'DR Region' },
+      arch: { x: 250, y: 330, icon: 'archive', kind: 'storage', label: 'Archive tier', sub: 'up to 75% cheaper' },
+      bin: { x: 470, y: 330, icon: 'trash', kind: 'mgmt', label: 'Recycle Bin', sub: 'retention rule' }
+    },
+    links: [
+      { a: 'vol', b: 'snap', label: 'create snapshot', at: [280, 140] },
+      { a: 'snap', b: 'volb', label: 'restore', at: [442, 140] },
+      { a: 'snap', b: 'snap2', via: [[360, 46], [855, 46]], label: 'copy to Region', at: [600, 38] },
+      { a: 'snap', b: 'arch', via: [[360, 260], [250, 260]], kind: 'dash' },
+      { a: 'snap', b: 'bin', via: [[360, 260], [470, 260]], kind: 'dash' }
+    ]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['vol', 'snap'], ['vol', 'snap'], ['vol', 'snap', 'volb'], ['vol', 'snap', 'snap2'], ['vol', 'snap', 'arch'], ['vol', 'snap', 'bin'], null];
+    net.focus(F[i]);
+    if (i === 1) net.badge('snap', 'only changes', 'info');
+    if (i === 2) net.badge('volb', 'AZ b', 'ok');
+    if (i === 3) net.badge('snap2', 'ready for DR', 'ok');
+    if (i === 4) net.badge('arch', 'restore 24–72 h', 'info');
+    if (i === 5) net.badge('bin', 'recoverable', 'ok');
+  }
+  const STEPS = [
+    { title: 'Take a snapshot',
+      text: 'Select the volume and <b>Create snapshot</b>. AWS copies the volume\'s blocks into storage it manages (S3 behind the scenes). The volume can stay attached, though detaching or stopping first gives the most consistent copy.',
+      play: async run => { base(0); await net.send(['vol', 'snap'], { run, label: 'all blocks' }); } },
+    { title: 'Next ones are incremental',
+      text: 'The first snapshot copies every written block. The next one stores only the blocks that <b>changed since the last snapshot</b>, so daily snapshots stay small and cheap. Each snapshot can still restore the full volume.',
+      play: async run => { base(1); await net.send(['vol', 'snap'], { run, label: 'changed blocks' }); } },
+    { title: 'Restore into another AZ',
+      text: 'The snapshot is not tied to an AZ. <b>Create volume from snapshot</b> in AZ b: you get an independent copy there, attachable to instances in AZ b. This is <b>how an EBS volume "moves" across AZs</b>.',
+      tip: 'Exam: EBS is AZ-bound; snapshots are how you get the data to another AZ.',
+      play: async run => { base(2); await net.send(['snap', 'volb'], { run, tone: 'green', label: 'create volume' }); } },
+    { title: 'Copy to another Region',
+      text: '<b>Copy snapshot</b> to eu-west-1. If ap-south-1 has a disaster, you create volumes (or launch from AMIs) in eu-west-1 from the copy.',
+      play: async run => { base(3); await net.send(['snap', 'snap2'], { run, tone: 'cyan', label: 'copy' }); } },
+    { title: 'Archive old snapshots',
+      text: 'Moving a snapshot to the <b>Archive tier</b> stores it up to <b>75% cheaper</b>. The catch: restoring it takes <b>24 to 72 hours</b>. Good for monthly or yearly compliance backups you rarely touch.',
+      play: async run => { base(4); await net.send(['snap', 'arch'], { run, tone: 'yellow', label: 'archive' }); } },
+    { title: 'Recycle Bin for accidents',
+      text: 'Create a <b>retention rule</b> first (e.g. keep deleted snapshots 7 days). Then a deleted snapshot goes to the <b>Recycle Bin</b> instead of vanishing, and you can <b>Recover</b> it until the period ends. No rule, no rescue.',
+      play: async run => { base(5); await net.send(['snap', 'bin'], { run, tone: 'red', label: 'delete' }); await net.send(['bin', 'snap'], { run, tone: 'green', label: 'recover' }); } },
+    { title: 'The whole picture',
+      text: 'Snapshot = <b>backup of one volume</b>, <b>incremental</b>, <b>Region-level</b>. From it you <b>restore in any AZ</b>, <b>copy to another Region</b>, <b>archive</b> cheaply, and with a rule, <b>recover</b> after deletion. AMIs (next) are built from snapshots.' }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ---------- Incremental lab ---------- */
+  let ver, last, snaps, bin, sid;
+  const say = h => $('labCap').innerHTML = h;
+  function init() { ver = Array(16).fill(0); last = Array(16).fill(0); snaps = []; bin = []; sid = 0; draw(); say('Press <b>Write data</b>, then <b>Take snapshot</b>.'); }
+  function draw() {
+    $('blk').innerHTML = ver.map((v, i) => `<span class="${v === 0 ? '' : v !== last[i] ? 'ch' : 'w'}">${v || ''}</span>`).join('');
+    const rows = snaps.map((s, i) => `<tr><td>snap-${s.id}</td><td>${s.blocks} GiB</td><td class="tier">${s.tier}</td><td>${s.tier === 'Standard' ? `<button class="btn" data-a="arch" data-i="${i}" type="button">Archive</button>` : ''}<button class="btn" data-a="del" data-i="${i}" type="button">Delete</button></td></tr>`);
+    const brow = bin.map((s, i) => `<tr><td>snap-${s.id}</td><td>${s.blocks} GiB</td><td class="tier">Recycle Bin</td><td><button class="btn" data-a="rec" data-i="${i}" type="button">Recover</button></td></tr>`);
+    $('snaps').innerHTML = rows.concat(brow).join('') || '<tr><td colspan="4" class="muted">No snapshots yet</td></tr>';
+  }
+  $('wr').addEventListener('click', () => {
+    const fresh = ver.every(v => v === 0);
+    const k = fresh ? 10 : 3, idx = [...Array(16).keys()].sort(() => Math.random() - .5).slice(0, k);
+    idx.forEach(i => ver[i]++); draw();
+    say(`Wrote to ${k} blocks (orange). ${fresh ? 'The volume now holds 10 GiB of data.' : 'Only these will go into the next snapshot.'}`);
+  });
+  $('sn').addEventListener('click', () => {
+    const changed = ver.filter((v, i) => v !== last[i]).length;
+    if (!ver.some(v => v)) return say('The volume is empty. Write data first.');
+    const s = { id: ++sid, blocks: changed, tier: 'Standard' }; snaps.push(s); last = ver.slice(); draw();
+    say(s.id === 1 ? `<b>snap-1</b> stored <b>${changed} GiB</b>: every written block (the first snapshot is effectively full).` : `<b>snap-${s.id}</b> stored only <b>${changed} GiB</b>: the blocks changed since the last snapshot. ${changed === 0 ? 'Nothing changed, so it is almost free.' : 'Incremental.'}`);
+  });
+  $('snaps').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const i = +b.dataset.i, a = b.dataset.a;
+    if (a === 'arch') { const s = snaps[i]; s.tier = 'Archive'; s.blocks = ver.filter(v => v).length; say(`snap-${s.id} archived: it becomes a <b>full</b> copy (${s.blocks} GiB) but costs up to 75% less per GiB. Restoring it would take <b>24–72 hours</b>.`); }
+    if (a === 'del') { const [s] = snaps.splice(i, 1); if ($('rb').checked) { bin.push(s); say(`snap-${s.id} deleted, but the retention rule caught it: it's in the <b>Recycle Bin</b> for 7 days.`); } else say(`<span class="bad-text">snap-${s.id} deleted permanently.</span> No Recycle Bin rule. (Later snapshots still restore fully: AWS keeps any blocks they need.)`); }
+    if (a === 'rec') { const [s] = bin.splice(i, 1); snaps.push(s); snaps.sort((x, y) => x.id - y.id); say(`<span class="ok-text">snap-${s.id} recovered</span> from the Recycle Bin.`); }
+    draw();
+  });
+  $('rs').addEventListener('click', init);
+  init();
+
+  K.pick($('pick'), [
+    { q: 'Run the same data on an instance in another AZ of the same Region.', a: 'Restore in another AZ', why: 'Create volume from snapshot, choosing the target AZ.' },
+    { q: 'Be able to rebuild in Frankfurt if Mumbai goes down.', a: 'Copy to another Region', why: 'Copy the snapshot to the DR Region.' },
+    { q: 'Keep yearly backups for 7 years as cheaply as possible; restores are rare.', a: 'Archive tier', why: 'Up to 75% cheaper; a 24–72 h restore is acceptable.' },
+    { q: 'An engineer sometimes deletes the wrong snapshot.', a: 'Recycle Bin', why: 'A retention rule keeps deleted snapshots recoverable.' },
+    { q: 'Need the restore to be possible within minutes.', a: 'Restore in another AZ', why: 'Standard-tier snapshots restore immediately; archived ones don\'t.' }
+  ], ['Restore in another AZ', 'Copy to another Region', 'Archive tier', 'Recycle Bin']);
+})();
+</script>
+</body>
+</html>

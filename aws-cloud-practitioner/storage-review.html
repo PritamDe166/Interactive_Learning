@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EC2 storage review</title>
+<meta name="description" content="AWS Cloud Practitioner: EC2 instance storage section review with a one-path recap, section summary, commonly confused pairs, a drill and 20 exam-style questions.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 10px; }
+  .topic-links a { display: block; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--fg); text-decoration: none; }
+  .topic-links a:hover { border-color: var(--orange); }
+  .topic-links a span { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · EC2 instance storage · Section review</div>
+    <h1>EC2 instance storage: review</h1>
+    <ul class="lede">
+      <li><b>EBS</b> is the network disk of one instance in one AZ; <b>snapshots</b> back it up and move it.</li>
+      <li><b>AMIs</b> are launch templates built on snapshots; <b>EC2 Image Builder</b> automates them.</li>
+      <li><b>Instance store</b> is the fastest disk but disappears on stop/terminate.</li>
+      <li>Shared file storage: <b>EFS</b> (Linux), <b>FSx for Windows</b> (SMB/AD), <b>FSx for Lustre</b> (HPC).</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="recapH">
+    <h2 class="stage-title" id="recapH">The whole section on one path</h2>
+    <div class="stage-kind">Press play · each hop is one topic</div>
+    <div class="controls"><button class="btn primary" id="recapPlay" type="button">Play the story</button></div>
+    <div class="scroll"><svg class="diagram nf-canvas" id="recapSvg" viewBox="0 0 1000 430" aria-label="Image Builder makes an AMI, the instance launches from it with an EBS root, a cache on instance store and shared files on EFS; the EBS volume is snapshotted and copied to another Region"></svg></div>
+    <p class="nf-cap" id="recapCap">Press <b>Play the story</b>.</p>
+  </section>
+
+  <section aria-labelledby="sumH">
+    <h2 id="sumH">Section summary</h2>
+    <div class="sum-grid">
+      <div class="card"><h3>EBS volumes</h3><ul><li>Network drive, one instance at a time, one AZ.</li><li>Persistent; provision GiB and IOPS, billed even unattached.</li><li>Delete on termination: root Yes, extra No.</li><li>gp3/gp2 general · io2/io1 IOPS · st1/sc1 HDD.</li></ul></div>
+      <div class="card"><h3>Snapshots</h3><ul><li>Incremental backup of a volume, Region-level.</li><li>Restore in any AZ; copy to another Region.</li><li>Archive tier: up to 75% cheaper, 24–72 h restore.</li><li>Recycle Bin rule recovers deleted snapshots/AMIs.</li></ul></div>
+      <div class="card"><h3>AMIs &amp; Image Builder</h3><ul><li>AMI = template: OS, software, config (snapshots + metadata).</li><li>Public, custom, Marketplace; Region-scoped, copyable.</li><li>Custom AMI → faster boot. Immutable.</li><li>Image Builder: build → test → distribute; free service.</li></ul></div>
+      <div class="card"><h3>Instance store</h3><ul><li>Disk on the physical host; highest IOPS.</li><li>Lost on stop, terminate, hardware failure; survives reboot.</li><li>Cache, buffers, scratch; backups are yours.</li></ul></div>
+      <div class="card"><h3>EFS</h3><ul><li>Managed NFS, Linux only, hundreds of instances, multi-AZ.</li><li>Pay per use, ~3× gp2 price.</li><li>Lifecycle → EFS-IA (up to 95% cheaper) / Archive.</li></ul></div>
+      <div class="card"><h3>FSx &amp; responsibility</h3><ul><li>FSx for Windows: SMB, NTFS, AD, Multi-AZ. FSx for Lustre: HPC, S3-linked.</li><li>AWS: infrastructure, replication, hardware. You: backups, encryption, data, instance store risk.</li></ul></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="topH">
+    <h2 id="topH">Topics in this section</h2>
+    <div class="topic-links">
+      <a href="ebs.html">EBS volumes<span>Network disk, AZ-bound</span></a>
+      <a href="ebs-snapshots.html">EBS snapshots<span>Backup, move, archive, recover</span></a>
+      <a href="ami.html">AMIs<span>Bake once, launch many</span></a>
+      <a href="ec2-image-builder.html">EC2 Image Builder<span>Automated AMI pipeline</span></a>
+      <a href="instance-store.html">Instance store<span>Fast but ephemeral</span></a>
+      <a href="efs.html">EFS &amp; EFS-IA<span>Shared Linux files</span></a>
+      <a href="fsx.html">Amazon FSx<span>Windows and Lustre</span></a>
+      <a href="ec2-storage-choices.html">Choosing EC2 storage<span>Decision tree, responsibility</span></a>
+    </div>
+  </section>
+
+  <section aria-labelledby="pairH">
+    <h2 id="pairH">Commonly confused pairs</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Pair</th><th>The difference</th></tr></thead>
+        <tbody>
+          <tr><td>EBS vs instance store</td><td>Network, persistent vs on the host, fastest, lost on stop/terminate</td></tr>
+          <tr><td>EBS vs EFS</td><td>One instance in one AZ, provisioned vs shared by many across AZs, pay per use, Linux only</td></tr>
+          <tr><td>EFS vs FSx for Windows</td><td>NFS for Linux vs SMB for Windows with Active Directory</td></tr>
+          <tr><td>FSx for Windows vs FSx for Lustre</td><td>Windows file shares vs HPC/ML storage linked to S3</td></tr>
+          <tr><td>Snapshot vs AMI</td><td>Backup of one volume's data vs template you can launch instances from</td></tr>
+          <tr><td>Copy snapshot vs create volume from snapshot</td><td>To another Region (DR) vs a new volume in any AZ of the Region</td></tr>
+          <tr><td>Snapshot Standard vs Archive</td><td>Restore any time vs up to 75% cheaper, 24–72 h restore</td></tr>
+          <tr><td>Recycle Bin vs Archive</td><td>Recover deleted snapshots/AMIs vs store old snapshots cheaply</td></tr>
+          <tr><td>Create image vs EC2 Image Builder</td><td>One-off manual AMI vs scheduled build-test-distribute pipeline</td></tr>
+          <tr><td>EFS Standard vs EFS-IA</td><td>Frequently used files vs cold files moved by lifecycle policy, up to 95% cheaper</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="drillH">
+    <h2 class="stage-title" id="drillH">Mixed drill: name it</h2>
+    <div class="card" id="drill"></div>
+  </section>
+
+  <section aria-labelledby="exH">
+    <h2 id="exH">Exam-style questions</h2>
+    <p class="sub">Twenty original questions in the style of CLF-C02 and common practice sets. Pick an answer (two for "Select TWO") to see why.</p>
+    <div id="mcq"></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Section cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Persistent disk for one instance</span><span class="arrow">→</span><span class="then">EBS</span></li>
+      <li><span class="if">EBS data to another AZ</span><span class="arrow">→</span><span class="then">Snapshot → create volume there</span></li>
+      <li><span class="if">Backup for DR in another Region</span><span class="arrow">→</span><span class="then">Copy snapshot / copy AMI</span></li>
+      <li><span class="if">Cheapest long-term snapshot storage</span><span class="arrow">→</span><span class="then">EBS Snapshot Archive</span></li>
+      <li><span class="if">Undo accidental snapshot/AMI deletion</span><span class="arrow">→</span><span class="then">Recycle Bin</span></li>
+      <li><span class="if">Faster, consistent launches</span><span class="arrow">→</span><span class="then">Custom AMI</span></li>
+      <li><span class="if">Automate AMI patching and testing</span><span class="arrow">→</span><span class="then">EC2 Image Builder</span></li>
+      <li><span class="if">Highest I/O, temporary data</span><span class="arrow">→</span><span class="then">Instance store</span></li>
+      <li><span class="if">Shared Linux files across AZs</span><span class="arrow">→</span><span class="then">EFS (+ EFS-IA)</span></li>
+      <li><span class="if">Windows SMB share with AD</span><span class="arrow">→</span><span class="then">FSx for Windows File Server</span></li>
+      <li><span class="if">High performance computing</span><span class="arrow">→</span><span class="then">FSx for Lustre</span></li>
+    </ul>
+  </section>
+
+  <footer>Questions are original, written to the official exam guide (Task 3.3: storage services; Task 2.1: shared responsibility) and the scenario patterns of public practice sets: <a href="https://docs.aws.amazon.com/aws-certification/latest/examguides/cloud-practitioner-02.html">AWS CLF-C02 exam guide</a>, <a href="https://training.resources.awscloud.com/associate-certification-articles/updated-cloud-practitioner-exam-prep-course">AWS official practice question set</a>, <a href="https://www.educative.io/blog/aws-cloud-practitioner-exam-questions-clf-c02">Educative</a>, <a href="https://www.sailor.sh/blog/aws-cloud-practitioner-practice-questions">Sailor.sh</a>. Section notes: EC2 Instance Storage 1–14.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('recapSvg'), {
+    zones: [{ id: 'r1', x: 20, y: 20, w: 800, h: 390, kind: 'region', label: 'ap-south-1' }, { id: 'az', x: 200, y: 140, w: 400, h: 255, kind: 'az', label: 'AZ a' }, { id: 'r2', x: 840, y: 20, w: 140, h: 390, kind: 'region', label: 'DR' }],
+    nodes: {
+      ib: { x: 100, y: 95, icon: 'gear', kind: 'mgmt', label: 'Image Builder' },
+      ami: { x: 100, y: 255, icon: 'layers', kind: 'compute', label: 'AMI', sub: 'web-v7' },
+      ec2: { x: 300, y: 230, icon: 'chip', kind: 'compute', label: 'Web server' },
+      is: { x: 300, y: 345, icon: 'bolt', kind: 'storage', label: 'Instance store', sub: 'cache' },
+      ebs: { x: 500, y: 345, icon: 'disk', kind: 'storage', label: 'EBS root', sub: 'gp3' },
+      efs: { x: 500, y: 85, icon: 'folder', kind: 'storage', label: 'EFS', sub: 'shared uploads' },
+      snap: { x: 710, y: 345, icon: 'camera', kind: 'storage', label: 'Snapshot', sub: 'nightly' },
+      snap2: { x: 910, y: 345, icon: 'camera', kind: 'storage', label: 'Copy' }
+    },
+    links: [
+      { a: 'ib', b: 'ami' }, { a: 'ami', b: 'ec2', via: [[100, 230]] },
+      { a: 'ec2', b: 'is', kind: 'priv' }, { a: 'ec2', b: 'ebs', via: [[500, 230]], kind: 'priv' },
+      { a: 'ec2', b: 'efs', via: [[300, 85]] },
+      { a: 'ebs', b: 'snap' }, { a: 'snap', b: 'snap2' }
+    ]
+  });
+  $('recapPlay').addEventListener('click', async () => {
+    const run = K.newRun('r'); net.reset(); const say = h => $('recapCap').innerHTML = h;
+    try {
+      say('<b>EC2 Image Builder</b> patches, tests and publishes a fresh <b>AMI</b> every week.'); await net.send(['ib', 'ami'], { run, label: 'build' });
+      say('The web server launches from the <b>custom AMI</b>: software is pre-installed, so it boots fast.'); await net.send(['ami', 'ec2'], { run, label: 'launch' }); net.badge('ec2', 'running', 'ok');
+      say('Its <b>root EBS volume</b> is a network disk in AZ a (Delete on termination: Yes).'); await net.send(['ec2', 'ebs'], { run, tone: 'cyan' });
+      say('Thumbnails are cached on the <b>instance store</b>: fastest, but gone if the instance stops.'); await net.send(['ec2', 'is'], { run, tone: 'yellow', label: 'cache' });
+      say('Uploads go to <b>EFS</b>, shared by every web server in every AZ (Windows would use <b>FSx for Windows</b>; HPC, <b>FSx for Lustre</b>).'); await net.send(['ec2', 'efs'], { run, tone: 'green', label: 'photo.jpg' });
+      say('Each night a <b>snapshot</b> backs up the volume and is <b>copied to the DR Region</b>; old ones go to the <b>Archive</b> tier, and a <b>Recycle Bin</b> rule guards against mistakes.'); await net.send(['ebs', 'snap', 'snap2'], { run, tone: 'cyan', label: 'backup' });
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  });
+
+  K.pick($('drill'), [
+    { q: 'Network block storage for one EC2 instance.', a: 'EBS', why: 'Elastic Block Store.' },
+    { q: 'Point-in-time incremental backup of a volume.', a: 'Snapshot', why: 'Restorable in any AZ, copyable across Regions.' },
+    { q: 'Template you launch instances from.', a: 'AMI', why: 'Amazon Machine Image.' },
+    { q: 'Automates build, test and distribution of AMIs.', a: 'EC2 Image Builder', why: 'Free service; pay for EC2 + storage.' },
+    { q: 'Disk on the physical host; lost on stop.', a: 'Instance store', why: 'Ephemeral, highest I/O.' },
+    { q: 'NFS file system shared by Linux instances across AZs.', a: 'EFS', why: 'Elastic File System.' },
+    { q: 'Windows SMB file share with Active Directory.', a: 'FSx for Windows', why: 'FSx for Windows File Server.' },
+    { q: 'File system for high performance computing.', a: 'FSx for Lustre', why: 'Linux + cluster.' },
+    { q: 'Recover a deleted snapshot.', a: 'Recycle Bin', why: 'Needs a retention rule in place first.' },
+    { q: 'Cheaper storage class for cold EFS files.', a: 'EFS-IA', why: 'Via a lifecycle policy.' }
+  ], ['EBS', 'Snapshot', 'AMI', 'EC2 Image Builder', 'Instance store', 'EFS', 'FSx for Windows', 'FSx for Lustre', 'Recycle Bin', 'EFS-IA']);
+
+  K.mcq($('mcq'), [
+    { q: 'Which AWS service provides persistent block storage volumes for Amazon EC2 instances?', o: ['Amazon S3', 'Amazon EBS', 'Amazon EFS', 'EC2 instance store'], a: [1], why: 'EBS volumes are persistent block storage attached over the network.' },
+    { q: 'An EBS volume is created in us-east-1a. Which instances can it be attached to directly?', o: ['Any instance in us-east-1', 'Instances in us-east-1a only', 'Any instance in any Region', 'Only instances launched from the same AMI'], a: [1], why: 'EBS volumes are bound to their Availability Zone.' },
+    { q: 'How can a company make the data on an EBS volume in us-east-1a available to an instance in us-east-1b?', o: ['Detach and attach it to the instance in us-east-1b', 'Create a snapshot and create a new volume from it in us-east-1b', 'Enable Multi-AZ on the volume', 'Move it with AWS DataSync'], a: [1], why: 'Snapshots are Region-level and can be restored into any AZ.' },
+    { q: 'An instance with a root volume and one additional EBS volume is terminated. Default settings were kept. What happens?', o: ['Both volumes are deleted', 'Both volumes are kept', 'The root volume is deleted; the additional volume is kept', 'The root volume is kept; the additional volume is deleted'], a: [2], why: 'Delete on termination defaults to Yes for the root and No for additional volumes.' },
+    { q: 'Which statements about EC2 instance store are correct? (Select TWO.)', o: ['It provides very high I/O performance', 'Data persists after the instance is stopped', 'Data is lost if the instance is terminated', 'It can be attached to several instances', 'It is replicated across AZs by AWS'], a: [0, 2], why: 'Instance store is physically attached and fast, but ephemeral.' },
+    { q: 'A company needs a file system that hundreds of Linux EC2 instances in several AZs can mount at the same time. Which service fits?', o: ['Amazon EBS', 'Amazon EFS', 'EC2 instance store', 'FSx for Windows File Server'], a: [1], why: 'EFS is a managed NFS shared across AZs.' },
+    { q: 'A company wants to move its Windows file shares, secured with Active Directory, to AWS. Which service should it use?', o: ['Amazon EFS', 'Amazon FSx for Lustre', 'Amazon FSx for Windows File Server', 'Amazon S3'], a: [2], why: 'SMB + NTFS + AD integration.' },
+    { q: 'Which service provides a file system for high performance computing workloads?', o: ['Amazon FSx for Lustre', 'Amazon EFS-IA', 'AWS Storage Gateway', 'Amazon EBS sc1'], a: [0], why: '"HPC" → FSx for Lustre.' },
+    { q: 'How can a company lower EFS costs for files that are rarely accessed, without changing the application?', o: ['Move the files to EBS', 'Enable a lifecycle policy to move them to EFS Infrequent Access', 'Use an instance store', 'Create EBS snapshots'], a: [1], why: 'Lifecycle management moves cold files to EFS-IA transparently.' },
+    { q: 'Which service automates the creation, testing and distribution of AMIs?', o: ['AWS CloudFormation', 'EC2 Image Builder', 'AWS Backup', 'Amazon Inspector'], a: [1], why: 'Image Builder runs build → test → distribute pipelines.' },
+    { q: 'What is the main benefit of launching instances from a custom AMI with software pre-installed?', o: ['Lower EBS storage cost', 'Faster boot and consistent configuration', 'Automatic Multi-AZ replication', 'Free licences'], a: [1], why: 'Software is baked in, so instances are ready sooner and identical.' },
+    { q: 'A custom AMI exists in us-east-1. What must be done to launch it in eu-west-1?', o: ['Nothing, AMIs are global', 'Copy the AMI to eu-west-1', 'Share it with the eu-west-1 account', 'Create a snapshot in eu-west-1 and launch from the snapshot'], a: [1], why: 'AMIs are Region-scoped; copy them to other Regions.' },
+    { q: 'Which feature allows recovery of EBS snapshots that were deleted by mistake?', o: ['EBS Snapshot Archive', 'Recycle Bin with a retention rule', 'EBS Multi-Attach', 'Amazon S3 Versioning'], a: [1], why: 'Recycle Bin retains deleted snapshots and AMIs for the rule\'s period.' },
+    { q: 'Snapshots must be kept for 7 years for compliance and will rarely be restored. What is the MOST cost-effective option?', o: ['Keep them in the standard tier', 'Move them to EBS Snapshot Archive', 'Store them on instance store', 'Copy them to EFS'], a: [1], why: 'Archive tier is up to 75% cheaper; 24–72 h restore is acceptable here.' },
+    { q: 'Under the shared responsibility model, which are the customer\'s responsibilities for EC2 storage? (Select TWO.)', o: ['Setting up snapshot and backup procedures', 'Replacing faulty storage hardware', 'Enabling encryption of EBS volumes', 'Replicating EBS data within the AZ', 'Preventing AWS staff from accessing data'], a: [0, 2], why: 'Customers own backups, encryption and their data; AWS owns hardware and replication.' },
+    { q: 'Which EC2 storage is described as ephemeral?', o: ['EBS gp3', 'EC2 instance store', 'Amazon EFS', 'Amazon FSx'], a: [1], why: 'Its data does not survive stop or terminate.' },
+    { q: 'How is Amazon EFS storage billed?', o: ['By provisioned capacity, set in advance', 'Per GB actually stored', 'Per instance mounting it', 'It is free with EC2'], a: [1], why: 'EFS is pay-per-use with no capacity planning.' },
+    { q: 'What is required to launch a new EC2 instance with the exact OS and software of an existing server?', o: ['An EBS snapshot only', 'An AMI created from the server', 'An EFS file system', 'An instance store volume'], a: [1], why: 'You launch from AMIs, not directly from snapshots.' },
+    { q: 'A database on one EC2 instance needs consistently high IOPS. Which storage should it use?', o: ['EBS Provisioned IOPS SSD (io2)', 'EBS Cold HDD (sc1)', 'Amazon EFS-IA', 'Amazon S3 Glacier'], a: [0], why: 'io2/io1 volumes deliver provisioned IOPS for databases.' },
+    { q: 'Which statements about EBS snapshots are correct? (Select TWO.)', o: ['They are incremental', 'They can only be restored in the same AZ', 'They can be copied to other Regions', 'They are stored on the instance store', 'They cannot be encrypted'], a: [0, 2], why: 'Snapshots store changed blocks and can be copied across Regions; restores work in any AZ.' }
+  ]);
+})();
+</script>
+</body>
+</html>

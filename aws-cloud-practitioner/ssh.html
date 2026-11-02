@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SSH into EC2</title>
+<meta name="description" content="AWS Cloud Practitioner: connect to a Linux EC2 instance with SSH on port 22 using a key pair; the .pem private key, chmod 400, ec2-user, PuTTY and .ppk, RDP for Windows, and the common errors.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .term { background: var(--code-bg); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; font-family: var(--mono); font-size: 13px; color: var(--fg-soft); min-height: 110px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .term .p { color: var(--good-text); } .term .e { color: var(--bad-text); } .term .h { color: var(--accent-text); }
+  .faults { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 6px 16px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · EC2 · hands-on skill</div>
+    <h1>SSH into EC2</h1>
+    <ul class="lede">
+      <li><b>SSH</b> (Secure Shell) opens a remote terminal on a <b>Linux</b> instance over <b>port 22</b>.</li>
+      <li>It uses a <b>key pair</b>: AWS puts the <b>public key</b> on the instance; you keep the <b>private key</b> (<span class="mono">.pem</span>, or <span class="mono">.ppk</span> for PuTTY). AWS can't give it to you again.</li>
+      <li>Command: <span class="mono">ssh -i key.pem ec2-user@&lt;public-ip&gt;</span>. On macOS/Linux, first run <span class="mono">chmod 400 key.pem</span>.</li>
+      <li>Windows instances use <b>RDP on 3389</b> instead. No terminal at all? Use <b>EC2 Instance Connect</b> in the browser (next topic).</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: from your laptop to a shell on the instance</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="Your laptop with a private key connects over the internet and through the security group on port 22 to the instance, which holds the matching public key"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li><b>SSH = port 22</b>, for Linux. <b>RDP = port 3389</b>, for Windows.</li>
+      <li>Clients: the <code>ssh</code> command (macOS, Linux, Windows 10+), <b>PuTTY</b> (Windows, uses <code>.ppk</code>), or <b>EC2 Instance Connect</b> (browser).</li>
+      <li><b>Key pair</b>: public key on the instance (<code>~/.ssh/authorized_keys</code>), private key on your machine. Download it at creation; it can't be retrieved later.</li>
+      <li><code>chmod 400 key.pem</code>: SSH refuses keys that other users can read ("unprotected private key file").</li>
+      <li>Amazon Linux user name: <b><code>ec2-user</code></b> (Ubuntu uses <code>ubuntu</code>).</li>
+      <li>Use the <b>current public IP</b>; it changes after stop/start.</li>
+      <li><b>Timeout</b> → security group doesn't allow 22 from your IP (or wrong IP, instance stopped). <b>Permission denied (publickey)</b> → wrong key or user.</li>
+      <li>Exit with <code>exit</code>. Commands you run now execute on the instance, not your laptop.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+
+  <section aria-labelledby="tsH">
+    <h2 class="stage-title" id="tsH">SSH troubleshooter</h2>
+    <div class="stage-kind">Break something, run the command, read the error</div>
+    <div class="card">
+      <div class="faults">
+        <label class="toggle" for="fSg"><input type="checkbox" id="fSg"> Security group has no SSH 22 rule</label>
+        <label class="toggle" for="fPerm"><input type="checkbox" id="fPerm"> Forgot <code>chmod 400</code></label>
+        <label class="toggle" for="fUser"><input type="checkbox" id="fUser"> Used <code>root@</code> instead of <code>ec2-user@</code></label>
+        <label class="toggle" for="fIp"><input type="checkbox" id="fIp"> Instance was restarted (old IP)</label>
+        <label class="toggle" for="fKey"><input type="checkbox" id="fKey"> Wrong .pem file</label>
+      </div>
+      <div class="controls" style="justify-content:flex-start"><button class="btn primary" id="tsRun" type="button">Run ssh</button><button class="btn" id="tsClear" type="button">Clear</button></div>
+      <div class="term" id="term"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the terminal</h2>
+    <details class="console-steps"><summary>SSH from macOS (from the course hands-on)</summary>
+      <ol>
+        <li>Put <code>EC2Tutorial.pem</code> in a folder without spaces in its name; <code>cd</code> there and <code>ls</code> to confirm.</li>
+        <li><code>chmod 0400 EC2Tutorial.pem</code> (once).</li>
+        <li><code>ssh -i EC2Tutorial.pem ec2-user@&lt;public-ipv4&gt;</code>; type <code>yes</code> to trust the host key the first time.</li>
+        <li><code>whoami</code> → <code>ec2-user</code>. You are on the instance. <code>ping</code> to test outbound; Ctrl+C to stop.</li>
+        <li><code>exit</code> to leave. After a stop/start, look up the new public IP before reconnecting.</li>
+        <li>Windows: Windows 10+ has the same <code>ssh</code> command; otherwise PuTTY with a <code>.ppk</code> key (PuTTYgen converts).</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Connect to Linux EC2 from a terminal</span><span class="arrow">→</span><span class="then">SSH, port 22, key pair</span></li>
+      <li><span class="if">Connect to Windows EC2</span><span class="arrow">→</span><span class="then">RDP, port 3389</span></li>
+      <li><span class="if">PuTTY key format</span><span class="arrow">→</span><span class="then">.ppk</span></li>
+      <li><span class="if">SSH hangs then times out</span><span class="arrow">→</span><span class="then">Security group rule for 22</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <div class="quiz">
+      <details><summary>You lost the .pem file. Can AWS send it again?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> AWS only keeps the public key. Use another access method (Instance Connect, Session Manager) or create a new key pair.</p></div></details>
+      <details><summary>What does <code>chmod 400</code> fix?<span class="go">Show answer</span></summary><div class="ans"><p>SSH's "<b>unprotected private key file</b>" error: only you may read the key.</p></div></details>
+      <details><summary>Which user name for Amazon Linux?<span class="go">Show answer</span></summary><div class="ans"><p><code>ec2-user</code></p></div></details>
+    </div>
+  </section>
+
+  <footer>IPs use documentation ranges; terminal output is simulated. Sources: EC2 notes "SSH Overview", "SSH into EC2 from macOS".</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 420, y: 20, w: 560, h: 380, kind: 'region', label: 'ap-south-1' }],
+    nodes: {
+      me: { x: 90, y: 150, icon: 'terminal', kind: 'user', label: 'Your laptop', sub: 'EC2Tutorial.pem (private)' },
+      inet: { x: 290, y: 150, icon: 'globe', kind: 'plain', label: 'Internet' },
+      sg: { x: 520, y: 150, icon: 'shield', kind: 'sec', label: 'Security group', sub: 'SSH 22 from my IP' },
+      ec2: { x: 820, y: 150, icon: 'chip', kind: 'compute', label: 'Linux instance', sub: 'sshd on :22' },
+      pub: { x: 820, y: 320, icon: 'key', kind: 'mgmt', label: 'authorized_keys', sub: 'public key' },
+      win: { x: 90, y: 330, icon: 'laptop', kind: 'user', label: 'Windows instance?', sub: 'RDP 3389 instead' }
+    },
+    links: [{ a: 'me', b: 'inet' }, { a: 'inet', b: 'sg' }, { a: 'sg', b: 'ec2' }, { a: 'ec2', b: 'pub', kind: 'dash' }]
+  });
+  function base(i) {
+    net.reset(); net.nodes.win.g.style.display = i === 5 ? '' : 'none';
+    net.focus([['me', 'ec2', 'pub'], ['me', 'inet', 'sg'], ['me', 'inet', 'sg', 'ec2'], ['ec2', 'pub', 'me'], ['me', 'ec2'], ['win'], null][i]);
+    if (i === 0) { net.badge('me', 'private key', 'info'); net.badge('pub', 'public key', 'info'); }
+    if (i === 3) net.badge('pub', 'key matches', 'ok');
+    if (i === 4) net.badge('ec2', 'ec2-user $', 'ok');
+  }
+  const STEPS = [
+    { title: 'A key pair, split in two',
+      text: 'When you created the instance you chose a <b>key pair</b>. AWS placed the <b>public key</b> on the instance and you downloaded the <b>private key</b> (<span class="mono">.pem</span>). It\'s like a lock (public) and its only key (private).' },
+    { title: 'Through the security group on port 22',
+      text: 'You run <span class="mono">ssh -i EC2Tutorial.pem ec2-user@203.0.113.40</span>. The connection crosses the internet to the public IP and must pass the <b>security group</b>: SSH, TCP <b>22</b>, from your IP.',
+      play: async run => { base(1); await net.send(['me', 'inet', 'sg'], { run, label: 'TCP :22' }); net.badge('sg', 'allowed', 'ok'); } },
+    { title: 'sshd answers',
+      text: 'The SSH server (<span class="mono">sshd</span>) on the instance answers. On the first connection your client shows the host\'s fingerprint; type <b>yes</b> to trust it.',
+      play: async run => { base(2); await net.send(['me', 'inet', 'sg', 'ec2'], { run, label: 'SSH hello' }); } },
+    { title: 'The key proves who you are',
+      text: 'The instance challenges your client; only the matching private key can answer. No password crosses the network. If the key or the user name is wrong you get <b>Permission denied (publickey)</b>.',
+      play: async run => { base(3); await net.send(['ec2', 'pub'], { run, tone: 'cyan', label: 'check key' }); } },
+    { title: 'You have a shell on the instance',
+      text: 'You\'re in: <span class="mono">whoami</span> prints <b>ec2-user</b>. Every command now runs on the instance. Type <span class="mono">exit</span> to leave.',
+      play: async run => { base(4); await net.send(['ec2', 'sg', 'inet', 'me'], { run, tone: 'green', label: 'ec2-user $' }); } },
+    { title: 'Windows is different',
+      text: 'Windows instances are managed with <b>Remote Desktop (RDP) on port 3389</b>. Open 3389 (to your IP only) and decrypt the Administrator password with your key pair in the console.' }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  const term = $('term');
+  const P = '<span class="p">mac:~/aws $</span> ';
+  function run() {
+    const ip = $('fIp').checked ? '203.0.113.40' : '203.0.113.77', user = $('fUser').checked ? 'root' : 'ec2-user', key = $('fKey').checked ? 'Old.pem' : 'EC2Tutorial.pem';
+    let out = P + `ssh -i ${key} ${user}@${ip}\n`;
+    if ($('fSg').checked || $('fIp').checked) out += `<span class="e">ssh: connect to host ${ip} port 22: Operation timed out</span>\n<span class="h">→ ${$('fIp').checked ? 'This is the old public IP: the instance got a new one after the restart.' : 'Security group: no inbound rule for SSH 22 from your IP.'}</span>\n`;
+    else if ($('fPerm').checked) out += `<span class="e">WARNING: UNPROTECTED PRIVATE KEY FILE!\nPermissions 0644 for '${key}' are too open.\nLoad key "${key}": bad permissions\n${user}@${ip}: Permission denied (publickey).</span>\n<span class="h">→ Run: chmod 400 ${key}</span>\n`;
+    else if ($('fKey').checked || $('fUser').checked) out += `<span class="e">${user}@${ip}: Permission denied (publickey).</span>\n<span class="h">→ ${$('fUser').checked ? 'Amazon Linux expects the user ec2-user.' : 'This key does not match the instance\'s key pair.'}</span>\n`;
+    else out += `   ,     #_\n   ~\\_  ####_        Amazon Linux 2023\n<span class="p">[ec2-user@ip-172-31-20-5 ~]$</span> whoami\nec2-user\n`;
+    term.innerHTML += out + '\n'; term.scrollTop = term.scrollHeight;
+  }
+  $('tsRun').addEventListener('click', run);
+  $('tsClear').addEventListener('click', () => term.innerHTML = '');
+})();
+</script>
+</body>
+</html>

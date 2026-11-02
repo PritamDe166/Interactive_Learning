@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EC2 Instance Connect</title>
+<meta name="description" content="AWS Cloud Practitioner: EC2 Instance Connect opens an SSH session in the browser by pushing a one-time key; it still needs port 22 open to AWS's Instance Connect addresses.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .ck { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 12px; }
+  .ck label.f { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+  .ck select { font: inherit; color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · EC2 · hands-on skill</div>
+    <h1>EC2 Instance Connect</h1>
+    <ul class="lede">
+      <li><b>EC2 Instance Connect</b> opens an SSH terminal <b>in your browser</b> from the EC2 console: no local terminal, no PuTTY, no <span class="mono">.pem</span> to manage.</li>
+      <li>Behind the scenes AWS <b>pushes a one-time public key</b> to the instance (valid for about 60 seconds) and connects over <b>SSH, port 22</b>.</li>
+      <li>So the <b>security group must still allow SSH 22</b>, from the Instance Connect service's addresses (in the lab: anywhere).</li>
+      <li>Works on supported AMIs like <b>Amazon Linux</b> and Ubuntu; user <span class="mono">ec2-user</span>.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: SSH without a key file</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="Browser console asks the Instance Connect service to push a temporary key, then SSH from AWS reaches the instance through the security group"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>Browser-based SSH from the console: <b>Instance → Connect → EC2 Instance Connect → Connect</b>, user <code>ec2-user</code>.</li>
+      <li>AWS generates and pushes a <b>temporary SSH key</b> for the session (about 60 seconds to use it). You don't download or store a key.</li>
+      <li>It is still <b>SSH on port 22</b>: the security group must allow it. A rule for <b>"My IP" only won't work</b>, because the browser session connects from AWS's Instance Connect address range.</li>
+      <li>The instance needs a <b>public IP</b> (for this basic mode) and a supported AMI with Instance Connect installed (Amazon Linux 2/2023, Ubuntu).</li>
+      <li>Your IAM identity needs permission to use it (<code>ec2-instance-connect:SendSSHPublicKey</code>); AdministratorAccess covers it.</li>
+      <li>Test with <code>whoami</code> → <code>ec2-user</code>. Commands run on the instance, like normal SSH.</li>
+      <li>Later: <b>Systems Manager Session Manager</b> gives shell access with <b>no port 22 at all</b> (Deployment section).</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+
+  <section aria-labelledby="ckH">
+    <h2 class="stage-title" id="ckH">Will Instance Connect work?</h2>
+    <div class="stage-kind">Choose the setup, then press Connect</div>
+    <div class="card ck">
+      <label class="f">Security group SSH rule<select id="cSg"><option value="none">No SSH rule</option><option value="my">SSH 22 from My IP only</option><option value="eic">SSH 22 from the Instance Connect range</option><option value="any" selected>SSH 22 from anywhere (lab)</option></select></label>
+      <label class="f">AMI<select id="cAmi"><option value="al">Amazon Linux 2023</option><option value="win">Windows Server</option></select></label>
+      <label class="f">Public IPv4<select id="cIp"><option value="yes">Has a public IP</option><option value="no">Private IP only</option></select></label>
+    </div>
+    <div class="controls"><button class="btn primary" id="cGo" type="button">Connect</button></div>
+    <div class="scroll"><svg class="diagram nf-canvas" id="cSvg" viewBox="0 0 1000 220" aria-label="Browser, Instance Connect service, security group, instance"></svg></div>
+    <p class="nf-cap" id="cCap">Pick a setup and press Connect.</p>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Connect from the browser (from the course hands-on)</summary>
+      <ol>
+        <li>EC2 → <b>Instances</b> → select the running instance → <b>Connect</b>.</li>
+        <li>Tab <b>EC2 Instance Connect</b>; check the public IPv4; user name <code>ec2-user</code>; <b>Connect</b>.</li>
+        <li>A terminal opens in a new tab. Run <code>whoami</code>, <code>ping google.com</code> (Ctrl+C to stop).</li>
+        <li>If it fails: open the security group → <b>Edit inbound rules</b> → add SSH 22 (IPv4, and IPv6 if your setup uses it) → retry.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">SSH from the browser, no key file</span><span class="arrow">→</span><span class="then">EC2 Instance Connect</span></li>
+      <li><span class="if">Instance Connect fails with a timeout</span><span class="arrow">→</span><span class="then">Allow SSH 22 in the security group</span></li>
+      <li><span class="if">Shell access with no inbound port open</span><span class="arrow">→</span><span class="then">SSM Session Manager</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <div class="quiz">
+      <details><summary>Does Instance Connect need port 22?<span class="go">Show answer</span></summary><div class="ans"><p><b>Yes.</b> It is SSH under the hood.</p></div></details>
+      <details><summary>Why can't you keep using your own .pem here?<span class="go">Show answer</span></summary><div class="ans"><p>You don't need to: AWS pushes a <b>temporary key</b> for each session.</p></div></details>
+      <details><summary>The SG allows SSH from "My IP" only. Does browser Instance Connect work?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> The connection comes from AWS's Instance Connect IP range, not your laptop.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: EC2 notes "EC2 Instance Connect", "SSH Overview"; AWS EC2 Instance Connect documentation.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'aws', x: 240, y: 20, w: 740, h: 380, kind: 'aws', label: 'AWS' }],
+    nodes: {
+      me: { x: 90, y: 140, icon: 'laptop', kind: 'user', label: 'Browser', sub: 'EC2 console' },
+      eic: { x: 380, y: 140, icon: 'terminal', kind: 'mgmt', label: 'Instance Connect', sub: 'AWS service' },
+      iam: { x: 380, y: 320, icon: 'shield', kind: 'sec', label: 'IAM', sub: 'may you connect?' },
+      sg: { x: 620, y: 140, icon: 'shield', kind: 'sec', label: 'Security group', sub: 'SSH 22' },
+      ec2: { x: 860, y: 140, icon: 'chip', kind: 'compute', label: 'Amazon Linux', sub: 'ec2-user' },
+      md: { x: 860, y: 320, icon: 'key', kind: 'mgmt', label: 'Temporary key', sub: 'valid ~60 s' }
+    },
+    links: [{ a: 'me', b: 'eic' }, { a: 'eic', b: 'iam', kind: 'dash' }, { a: 'eic', b: 'md', via: [[500, 320]], label: 'push public key', at: [640, 312] }, { a: 'md', b: 'ec2', kind: 'dash' }, { a: 'eic', b: 'sg', label: 'SSH :22' }, { a: 'sg', b: 'ec2' }]
+  });
+  function base(i) {
+    net.reset();
+    net.focus([['me', 'eic'], ['eic', 'iam'], ['eic', 'md', 'ec2'], ['eic', 'sg', 'ec2'], ['me', 'eic', 'sg', 'ec2'], null][i]);
+    if (i === 2) net.badge('md', 'expires in 60 s', 'info');
+    if (i === 4) net.badge('ec2', 'ec2-user $', 'ok');
+  }
+  const STEPS = [
+    { title: 'Click Connect in the console',
+      text: 'Select the instance, choose <b>Connect → EC2 Instance Connect</b>, keep user <b>ec2-user</b>, click Connect. Your browser talks to the <b>Instance Connect</b> service; no terminal or key file on your laptop.',
+      play: async run => { base(0); await net.send(['me', 'eic'], { run, label: 'Connect' }); } },
+    { title: 'IAM checks you may connect',
+      text: 'Your IAM identity needs permission to push a key to that instance (<code>ec2-instance-connect:SendSSHPublicKey</code>). Admins have it.',
+      play: async run => { base(1); await net.send(['eic', 'iam'], { run, tone: 'cyan' }); net.badge('iam', 'allowed', 'ok'); } },
+    { title: 'A one-time key is pushed',
+      text: 'The service generates a key pair for this session and <b>pushes the public half</b> to the instance\'s metadata, where SSH will accept it for about <b>60 seconds</b>. Nothing permanent is left behind.',
+      play: async run => { base(2); await net.send(['eic', 'md'], { run, label: 'public key' }); } },
+    { title: 'Then it is plain SSH on port 22',
+      text: 'The service opens an <b>SSH</b> connection to the instance\'s public IP. It must pass the <b>security group on port 22</b>, and it comes from <b>AWS\'s Instance Connect address range</b>, not from your laptop\'s IP.',
+      tip: 'A security group allowing only "My IP" blocks browser Instance Connect.',
+      play: async run => { base(3); await net.send(['eic', 'sg', 'ec2'], { run, label: 'SSH :22' }); } },
+    { title: 'A terminal in your browser',
+      text: 'A new tab shows a shell: <code>whoami</code> → <b>ec2-user</b>. Same as SSH, minus the key management.',
+      play: async run => { base(4); await net.send(['ec2', 'sg', 'eic', 'me'], { run, tone: 'green', label: 'shell' }); } },
+    { title: 'Three ways to get a shell',
+      text: '<b>SSH / PuTTY</b> with your own key, <b>EC2 Instance Connect</b> in the browser (still port 22), and later <b>Session Manager</b> (no port 22 at all). One working method is enough.' }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  const c = K.net($('cSvg'), {
+    nodes: { me: { x: 80, y: 100, icon: 'laptop', kind: 'user', label: 'Browser' }, eic: { x: 320, y: 100, icon: 'terminal', kind: 'mgmt', label: 'Instance Connect' }, sg: { x: 590, y: 100, icon: 'shield', kind: 'sec', label: 'Security group' }, ec2: { x: 860, y: 100, icon: 'chip', kind: 'compute', label: 'Instance' } },
+    links: [{ a: 'me', b: 'eic' }, { a: 'eic', b: 'sg' }, { a: 'sg', b: 'ec2' }]
+  });
+  $('cGo').addEventListener('click', async () => {
+    const run = K.newRun('c'); c.reset();
+    const sg = $('cSg').value, ami = $('cAmi').value, ip = $('cIp').value;
+    try {
+      await c.send(['me', 'eic'], { run });
+      if (ami === 'win') { c.badge('eic', 'not supported', 'bad'); $('cCap').innerHTML = '<span class="bad-text">No Instance Connect for Windows.</span> Use RDP on port 3389 (or Fleet Manager / Session Manager).'; return; }
+      if (ip === 'no') { c.badge('eic', 'no public IP', 'bad'); $('cCap').innerHTML = '<span class="bad-text">Can\'t reach it.</span> Basic browser Instance Connect needs a public IPv4 (private instances need an Instance Connect Endpoint or Session Manager).'; return; }
+      const ok = sg === 'eic' || sg === 'any';
+      await c.send(['eic', 'sg'], { run, label: 'SSH :22', tone: ok ? 'orange' : 'red' });
+      if (!ok) { c.badge('sg', 'dropped', 'bad'); $('cCap').innerHTML = sg === 'my' ? '<span class="bad-text">Timeout.</span> The rule allows only <b>your laptop\'s IP</b>, but the SSH connection comes from AWS\'s Instance Connect range.' : '<span class="bad-text">Timeout.</span> No inbound SSH 22 rule.'; return; }
+      await c.send(['sg', 'ec2'], { run }); c.badge('ec2', 'ec2-user $', 'ok');
+      $('cCap').innerHTML = `<span class="ok-text">Connected.</span> ${sg === 'any' ? 'Fine for a lab; in production narrow the source to the Instance Connect range.' : 'Tightest rule that still works.'}`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  });
+})();
+</script>
+</body>
+</html>

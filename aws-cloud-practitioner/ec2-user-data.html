@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EC2 user data and instance lifecycle</title>
+<meta name="description" content="AWS Cloud Practitioner: bootstrap an EC2 web server with user data (runs once, as root, at first launch) and follow it through pending, running, stop, start and terminate: public IP, EBS and billing at each state.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>.life-btns { display: flex; flex-wrap: wrap; gap: 8px; }</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · EC2 · Domain 3 Technology</div>
+    <h1>Launching a web server with user data</h1>
+    <ul class="lede">
+      <li><b>User data</b> is a script you paste at launch. It runs <b>once</b>, at the <b>first boot</b>, as <b>root</b>: perfect for installing a web server.</li>
+      <li>An instance moves through states: <b>pending → running → stopping → stopped</b>, and <b>shutting-down → terminated</b>.</li>
+      <li><b>Stop</b>: compute billing ends, the EBS disk is kept, and the <b>public IP is released</b> (you get a new one on start).</li>
+      <li><b>Terminate</b> is permanent: the instance and (by default) its root volume are deleted.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: the life of an instance</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 460" aria-label="Instance states from launch to terminated, with user data running on first boot"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li><b>User data</b> = bootstrap script in "Advanced details" at launch. Runs <b>only once</b>, at <b>first start</b>, with <b>root</b> privileges.</li>
+      <li>Typical uses: install updates, install software (<code>httpd</code>), download files, write config. The more it does, the longer first boot takes.</li>
+      <li>"Running" in the console doesn't mean user data has finished: give it a minute before testing the website.</li>
+      <li><b>Stop</b> → no instance (compute) charge; <b>EBS still billed</b>; RAM is lost; <b>public IPv4 released</b>; <b>private IP kept</b>.</li>
+      <li><b>Start</b> after stop → usually a <b>new public IPv4</b>; user data does <b>not</b> run again.</li>
+      <li>Want a public IP that never changes? Attach an <b>Elastic IP</b> (billed hourly, like all public IPv4).</li>
+      <li><b>Terminate</b> = permanent. Root volume deleted when "delete on termination" is on (default for the root volume); extra volumes and Elastic IPs remain and keep billing.</li>
+      <li>Website troubleshooting: instance running? user data finished? <b>HTTP 80</b> allowed? using <b>http://</b> not https? current public IP?</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+
+  <section aria-labelledby="lifeH">
+    <h2 class="stage-title" id="lifeH">Launch, stop, start, terminate</h2>
+    <div class="stage-kind">Watch user data, the public IP and the bill</div>
+    <div class="controls">
+      <div class="life-btns">
+        <button class="btn primary" type="button" id="bLaunch">Launch</button>
+        <button class="btn" type="button" id="bStop">Stop</button>
+        <button class="btn" type="button" id="bStart">Start</button>
+        <button class="btn" type="button" id="bTerm">Terminate</button>
+      </div>
+      <label class="toggle" for="eip"><input type="checkbox" id="eip"> Attach an Elastic IP</label>
+    </div>
+    <div class="pair">
+      <div><div class="label">User data (runs as root, first boot only)</div>
+<pre class="codeblock" id="ud"><span class="ln"><span class="c">#!/bin/bash</span></span><span class="ln">dnf update -y</span><span class="ln">dnf install -y httpd</span><span class="ln">systemctl enable --now httpd</span><span class="ln">echo <span class="s">"Hello from $(hostname -f)"</span> &gt; /var/www/html/index.html</span></pre>
+      </div>
+      <div class="kpis" id="lifeKpis" style="margin-top:0;align-content:start"></div>
+    </div>
+    <div class="card" style="margin-top:14px"><div class="label">Event log</div><ul class="log" id="lifeLog" aria-live="polite"><li>Press Launch.</li></ul></div>
+  </section>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">Stop or terminate?</h2>
+    <div class="card" id="pk"></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Configure instances automatically at first launch</span><span class="arrow">→</span><span class="then">EC2 user data</span></li>
+      <li><span class="if">User data runs as…</span><span class="arrow">→</span><span class="then">root, once</span></li>
+      <li><span class="if">Public IP changed after restart</span><span class="arrow">→</span><span class="then">Normal; use an Elastic IP to keep one</span></li>
+      <li><span class="if">Stopped instance still costs money</span><span class="arrow">→</span><span class="then">EBS storage (and Elastic IP)</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <div class="quiz">
+      <details><summary>You stop and start an instance. Does user data run again?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> It runs only at the first launch.</p></div></details>
+      <details><summary>Why did your bookmark stop working after a restart?<span class="go">Show answer</span></summary><div class="ans"><p>The <b>public IPv4 changed</b>. The private IP stays; use an Elastic IP or DNS name for a stable address.</p></div></details>
+      <details><summary>What happens to the root EBS volume when you terminate?<span class="go">Show answer</span></summary><div class="ans"><p><b>Deleted</b>, if "delete on termination" is enabled (the default for root volumes).</p></div></details>
+    </div>
+  </section>
+
+  <footer>IPs use documentation ranges. Sources: EC2 notes "Amazon EC2 Basics", "Create an EC2 Web Server with User Data".</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('stSvg'), {
+    nodes: {
+      api: { x: 80, y: 110, icon: 'code', kind: 'user', label: 'Launch', sub: 'RunInstances' },
+      pend: { x: 280, y: 110, icon: 'clock', kind: 'plain', label: 'pending' },
+      run: { x: 500, y: 110, icon: 'chip', kind: 'compute', label: 'running', sub: 'billed per second' },
+      ud: { x: 500, y: 300, icon: 'code', kind: 'mgmt', label: 'User data', sub: 'first boot only, as root' },
+      stopping: { x: 720, y: 110, icon: 'clock', kind: 'plain', label: 'stopping' },
+      stopped: { x: 920, y: 110, icon: 'lock', kind: 'plain', label: 'stopped', sub: 'EBS kept · no compute' },
+      shut: { x: 720, y: 390, icon: 'clock', kind: 'plain', label: 'shutting-down' },
+      term: { x: 920, y: 390, icon: 'bug', kind: 'sec', label: 'terminated', sub: 'gone for good' },
+      web: { x: 280, y: 300, icon: 'users', kind: 'user', label: 'Visitors' }
+    },
+    links: [{ a: 'api', b: 'pend' }, { a: 'pend', b: 'run' }, { a: 'run', b: 'ud', kind: 'dash' }, { a: 'run', b: 'stopping' }, { a: 'stopping', b: 'stopped' },
+      { a: 'stopped', b: 'pend', via: [[920, 40], [280, 40]], label: 'start', at: [600, 32] }, { a: 'run', b: 'shut', via: [[600, 110], [600, 390]] }, { a: 'shut', b: 'term' }, { a: 'stopped', b: 'shut', via: [[920, 250], [720, 250]], label: 'terminate', at: [820, 242] }, { a: 'web', b: 'run', via: [[280, 220], [440, 220], [440, 110]], label: 'http://public-ip', at: [360, 212] }]
+  });
+  function base(i) {
+    net.reset();
+    net.focus([['api', 'pend'], ['pend', 'run', 'ud'], ['run', 'ud', 'web'], ['run', 'stopping', 'stopped'], ['stopped', 'pend', 'run', 'ud'], ['run', 'shut', 'term'], null][i]);
+    if (i === 1) net.badge('ud', 'running now', 'info');
+    if (i === 2) { net.badge('run', '203.0.113.40', 'ok'); net.badge('ud', 'done', 'ok'); }
+    if (i === 3) net.badge('stopped', 'public IP released', 'bad');
+    if (i === 4) { net.badge('run', '203.0.113.77 (new!)', 'info'); net.badge('ud', 'not run again', ''); }
+    if (i === 5) net.badge('term', 'root EBS deleted', 'bad');
+  }
+  const STEPS = [
+    { title: 'Launch → pending',
+      text: 'You press Launch (an API call, <code>RunInstances</code>). AWS finds a host in the AZ, attaches the EBS root volume from the AMI, and the instance enters <b>pending</b>.',
+      play: async run => { base(0); await net.send(['api', 'pend'], { run, label: 'RunInstances' }); } },
+    { title: 'Running, and user data starts',
+      text: 'The instance turns <b>running</b>; billing starts, per second. On this <b>first boot</b> the OS runs your <b>user data</b> script <b>as root</b>: update packages, install <code>httpd</code>, write <code>index.html</code>.',
+      play: async run => { base(1); await net.send(['pend', 'run'], { run }); await net.send(['run', 'ud'], { run, tone: 'cyan', label: 'bootstrap' }); } },
+    { title: 'The website answers',
+      text: 'After a minute or two the script has finished and visitors get the page at <code>http://&lt;public IPv4&gt;</code>. Use <b>http</b>, not https: nothing listens on 443 yet.',
+      tip: 'The console says "running" before user data has finished. Be patient before declaring it broken.',
+      play: async run => { base(2); await net.send(['web', 'run'], { run, label: 'GET /' }); await net.send(['run', 'web'], { run, tone: 'green', label: 'Hello' }); } },
+    { title: 'Stop: compute off, disk kept',
+      text: '<b>Stop</b> shuts the OS down. Compute billing ends, the <b>EBS volume and its data stay</b> (and keep billing), memory is lost, and the <b>public IPv4 is released</b>. The private IP stays.',
+      play: async run => { base(3); await net.send(['run', 'stopping', 'stopped'], { run, label: 'StopInstances' }); } },
+    { title: 'Start: new public IP, no user data',
+      text: '<b>Start</b> brings it back through pending to running, often on different hardware, with a <b>new public IPv4</b>. Old links break. User data <b>does not run again</b>; the software is already on the disk.',
+      tip: 'Need a fixed public address? Use an Elastic IP (or better, a DNS name in front).',
+      play: async run => { base(4); await net.send(['stopped', 'pend', 'run'], { run, label: 'StartInstances' }); } },
+    { title: 'Terminate: permanent',
+      text: '<b>Terminate</b> deletes the instance. Its root EBS volume goes too when <b>delete on termination</b> is on (the default for root volumes). There is no undo. Extra volumes and Elastic IPs stay behind and keep billing.',
+      play: async run => { base(5); await net.send(['run', 'shut', 'term'], { run, label: 'TerminateInstances', tone: 'red' }); } },
+    { title: 'The whole map',
+      text: 'pending → running ⇄ stopping → stopped → (start) pending… and running/stopped → shutting-down → terminated. Billing for compute only happens in <b>running</b>; storage bills until it is deleted.' }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* lifecycle playground */
+  const S = { state: 'not launched', pub: '–', priv: '–', runs: 0, bill: 'nothing', ebs: '–' };
+  const lines = [...document.querySelectorAll('#ud .ln')];
+  const log = $('lifeLog');
+  let pubN = 40;
+  function nextPub() { pubN = pubN === 40 ? 77 : pubN === 77 ? 129 : 40; return '203.0.113.' + pubN; }
+  function paint() {
+    const k = [['State', S.state, S.state === 'running' ? 'good' : S.state === 'terminated' ? 'bad' : ''], ['Public IPv4', S.pub, $('eip').checked && S.pub !== '–' ? 'accent' : ''], ['Private IPv4', S.priv, ''], ['User data runs', String(S.runs), ''], ['Billed for', S.bill, ''], ['Root EBS (8 GiB gp3)', S.ebs, S.ebs === 'deleted' ? 'bad' : '']];
+    $('lifeKpis').innerHTML = k.map(([l, v, c]) => `<div class="kpi ${c}"><b style="font-size:17px">${v}</b><span>${l}</span></div>`).join('');
+    $('bLaunch').disabled = S.state !== 'not launched' && S.state !== 'terminated';
+    $('bStop').disabled = S.state !== 'running';
+    $('bStart').disabled = S.state !== 'stopped';
+    $('bTerm').disabled = !(S.state === 'running' || S.state === 'stopped');
+  }
+  function busy() { ['bLaunch', 'bStop', 'bStart', 'bTerm'].forEach(id => $(id).disabled = true); }
+  async function launch() {
+    const run = K.newRun('life'); busy(); K.resetLog(log, 'Launching from the Amazon Linux 2023 AMI…');
+    Object.assign(S, { state: 'pending', pub: '…', priv: '172.31.20.5', bill: 'compute + EBS', ebs: 'attached', runs: 0 });
+    lines.forEach(l => l.classList.remove('on', 'done')); paint();
+    try {
+      await K.sleep(600, run);
+      S.pub = $('eip').checked ? '198.51.100.20 (EIP)' : nextPub(); S.state = 'running'; paint();
+      K.log(log, 'Instance running. First boot, so <b>user data starts</b> (as root).');
+      for (const l of lines) { l.classList.add('on'); await K.sleep(650, run); l.classList.remove('on'); l.classList.add('done'); }
+      S.runs = 1; paint();
+      K.log(log, `Website up at <span class="mono">http://${S.pub.split(' ')[0]}</span>. Note: the instance showed "running" before the script finished.`);
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+    paint();
+  }
+  async function stop() {
+    const run = K.newRun('life'); busy(); S.state = 'stopping'; paint();
+    try {
+      await K.sleep(600, run);
+      Object.assign(S, { state: 'stopped', pub: $('eip').checked ? S.pub : '–', bill: 'EBS only' + ($('eip').checked ? ' + Elastic IP' : '') });
+      K.log(log, $('eip').checked ? 'Stopped. The Elastic IP stays yours (billed hourly, like every public IPv4). EBS data kept.' : 'Stopped. Public IP released; root EBS volume and its data kept; no compute charge.');
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+    paint();
+  }
+  async function start() {
+    const run = K.newRun('life'); busy(); S.state = 'pending'; paint();
+    try {
+      await K.sleep(600, run);
+      Object.assign(S, { state: 'running', pub: $('eip').checked ? '198.51.100.20 (EIP)' : nextPub(), bill: 'compute + EBS' });
+      K.log(log, $('eip').checked ? 'Running again on the <b>same Elastic IP</b>. User data did <b>not</b> run again.' : `Running again with a <b>new public IP</b> (${S.pub}); old bookmarks break. Private IP unchanged. User data did <b>not</b> run again.`);
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+    paint();
+  }
+  async function term() {
+    const run = K.newRun('life'); busy(); S.state = 'shutting-down'; paint();
+    try {
+      await K.sleep(700, run);
+      Object.assign(S, { state: 'terminated', pub: '–', priv: '–', bill: 'nothing', ebs: 'deleted' });
+      K.log(log, 'Terminated: permanent. "Delete on termination" removed the root volume. Extra volumes and Elastic IPs would remain (and bill).');
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+    paint();
+  }
+  $('bLaunch').addEventListener('click', launch); $('bStop').addEventListener('click', stop); $('bStart').addEventListener('click', start); $('bTerm').addEventListener('click', term);
+  $('eip').addEventListener('change', () => { if (S.state === 'running' || S.state === 'stopped') { S.pub = $('eip').checked ? '198.51.100.20 (EIP)' : (S.state === 'running' ? nextPub() : '–'); K.log(log, $('eip').checked ? 'Elastic IP associated: a static public IPv4 that survives stop/start.' : 'Elastic IP released.'); paint(); } });
+  paint();
+
+  K.pick($('pk'), [
+    { q: 'You\'re done for the evening and will continue the lab tomorrow.', a: 'Stop', why: 'Stop keeps the disk; you pay only for EBS overnight.' },
+    { q: 'The lab is finished and you never need this server again.', a: 'Terminate', why: 'Terminate to stop all charges for the instance and its root volume.' },
+    { q: 'You need to change the instance type to a bigger size.', a: 'Stop', why: 'Stop, change the type, start again.' },
+    { q: 'A test server was compromised and should be destroyed.', a: 'Terminate', why: 'Get rid of it completely (after keeping any evidence you need).' }
+  ], ['Stop', 'Terminate']);
+})();
+</script>
+</body>
+</html>

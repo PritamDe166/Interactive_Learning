@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IAM policies</title>
+<meta name="description" content="AWS Cloud Practitioner: the parts of an IAM policy (Version, Statement, Effect, Action, Resource, Principal, Condition) and how AWS evaluates a request: default deny, explicit deny, allow.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .pol-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+  @media (max-width: 880px) { .pol-grid { grid-template-columns: minmax(0, 1fr); } }
+  .json { margin: 0; background: var(--code-bg); border: 1px solid var(--line); border-radius: 12px; padding: 12px 0; font-family: var(--mono); font-size: 12.5px; line-height: 1.55; overflow-x: auto; }
+  .json span.l { display: block; padding: 0 14px; white-space: pre; color: var(--fg-soft); border-left: 3px solid transparent; transition: background .25s, opacity .25s, border-color .25s; }
+  .json.focus span.l { opacity: .35; }
+  .json.focus span.l.on { opacity: 1; background: color-mix(in srgb, var(--orange) 14%, transparent); border-left-color: var(--orange); }
+  .json.focus span.l.deny { opacity: 1; background: color-mix(in srgb, var(--red) 16%, transparent); border-left-color: var(--red); }
+  .json.focus span.l.allow { opacity: 1; background: color-mix(in srgb, var(--teal) 16%, transparent); border-left-color: var(--teal); }
+  .json .k { color: var(--cyan); } .json .s { color: var(--code-fg); }
+  .pv-box { display: grid; gap: 10px; }
+  .pv-row { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+  .pv-row label.toggle { margin: 0; }
+  .pv-row select { font: inherit; color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; }
+  .pv-log { font-family: var(--mono); font-size: 13px; color: var(--fg-soft); overflow-wrap: anywhere; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · IAM · Domain 2 Security &amp; Compliance (Task 2.3)</div>
+    <h1>IAM policies</h1>
+    <ul class="lede">
+      <li>A <b>policy</b> is a JSON document: <b>Effect</b> (Allow / Deny) + <b>Action</b> (API calls) + <b>Resource</b> (which things), optionally a <b>Condition</b>.</li>
+      <li>For every request AWS gathers <b>all</b> policies that apply and decides: <b>explicit Deny wins</b>, otherwise an <b>Allow</b> lets it through, otherwise it's <b>denied by default</b>.</li>
+      <li>Policies on users, groups and roles are <b>identity-based</b> (no Principal). Policies on resources, like S3 bucket policies, are <b>resource-based</b> and name a <b>Principal</b>.</li>
+      <li><b>AWS managed</b> policies (AdministratorAccess, IAMReadOnlyAccess) are maintained by AWS; <b>customer managed</b> ones are yours; <b>inline</b> ones are embedded in one identity.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: read a policy, then watch AWS evaluate requests</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="pol-grid">
+        <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 640 520" style="min-width:520px" aria-label="Policy evaluation: gather policies, check for an explicit deny, check for an allow, then allow or deny"></svg></div>
+        <pre class="json" id="json" aria-label="Example policy"></pre>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>Policies are <b>JSON</b>. <code>Version</code> is the policy-language version, normally <code>"2012-10-17"</code> (not your revision number).</li>
+      <li><code>Statement</code> holds one or more statements. Each has <code>Effect</code> (<b>Allow</b> or <b>Deny</b>), <code>Action</code> (API calls like <code>s3:GetObject</code>) and <code>Resource</code> (ARNs). <code>Sid</code> (a label) and <code>Condition</code> are optional.</li>
+      <li><code>Principal</code> says <b>who</b>: used in <b>resource-based</b> policies (S3 bucket policy, role trust policy). Identity-based policies don't need it; the identity is where it's attached.</li>
+      <li>Evaluation order: <b>default deny → any explicit Deny? → any Allow?</b> An explicit <b>Deny always wins</b>, no matter how many Allows.</li>
+      <li>Permissions from every source <b>add up</b>: group policies + directly attached policies + inline policies.</li>
+      <li>Wildcards: <code>"Action": "*", "Resource": "*"</code> with Allow = <b>full admin</b> (AdministratorAccess). <code>iam:Get*</code> and <code>iam:List*</code> = read-only (IAMReadOnlyAccess).</li>
+      <li><code>Condition</code> limits <b>when</b>: require MFA, a source IP range, a Region, a tag, or your AWS Organization.</li>
+      <li>Kinds: <b>AWS managed</b> (reusable, AWS updates them), <b>customer managed</b> (reusable, yours), <b>inline</b> (embedded in one user/group/role; harder to audit).</li>
+      <li><b>SCPs</b> (Organizations) and <b>permission boundaries</b> only set a <b>maximum</b>. They never grant anything on their own.</li>
+      <li>The same evaluation applies whether the call comes from the console, CLI or SDK. <b>AccessDenied</b> names the missing action, such as <code>iam:ListUsers</code>.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+
+  <section aria-labelledby="pvH">
+    <h2 class="stage-title" id="pvH">Policy evaluator</h2>
+    <div class="stage-kind">Attach policies to a user · pick a request · evaluate</div>
+    <div class="card pv-box">
+      <div class="pv-row" id="pvPolicies"></div>
+      <div class="pv-row">
+        <label class="toggle" for="pvMfa"><input type="checkbox" id="pvMfa"> Signed in with MFA</label>
+        <select id="pvAct" aria-label="Action"></select>
+        <button class="btn primary" id="pvGo" type="button">Evaluate request</button>
+      </div>
+    </div>
+    <div class="scroll" style="margin-top:12px"><svg class="diagram nf-canvas" id="pvSvg" viewBox="0 0 1000 250" aria-label="Evaluation path for the selected request"></svg></div>
+    <p class="nf-cap pv-log" id="pvCap"></p>
+  </section>
+
+  <section aria-labelledby="elH">
+    <h2 class="stage-title" id="elH">Which element?</h2>
+    <div class="stage-kind">Match the job to the policy element</div>
+    <div class="card" id="el"></div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>See permissions change (from the course hands-on)</summary>
+      <ol>
+        <li>Start with your IAM user in the <code>admin</code> group (AdministratorAccess inherited).</li>
+        <li>As root, <b>remove the user from the admin group</b>. Refresh as the user: <b>Access denied</b>, missing <code>iam:ListUsers</code>. The permission came only from the group.</li>
+        <li>Attach <code>IAMReadOnlyAccess</code> <b>directly</b> to the user. Listing users works again; creating a group is denied (read-only).</li>
+        <li>Create a temporary <code>developers</code> group, add the user, attach a harmless policy. Add the user back to <code>admin</code>. The user now shows three permission sources: two groups + one direct.</li>
+        <li>Open <b>Policies → AdministratorAccess → JSON</b>: <code>"Effect": "Allow", "Action": "*", "Resource": "*"</code>.</li>
+        <li>Open <b>IAMReadOnlyAccess</b>: actions like <code>iam:Get*</code> and <code>iam:List*</code>.</li>
+        <li><b>Create policy</b> with the visual editor: IAM, allow <code>ListUsers</code> and <code>GetUser</code>, all resources. Name it <code>MyIAMPermissions</code> and compare the generated JSON.</li>
+        <li>Clean up: delete the temporary group, remove direct policies, keep the user in <code>admin</code>.</li>
+      </ol>
+      <p class="res">The <a href="https://awspolicygen.s3.amazonaws.com/policygen.html">AWS Policy Generator</a> builds policy JSON from a form.</p>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Element that lists API calls</span><span class="arrow">→</span><span class="then">Action</span></li>
+      <li><span class="if">Element that says who (in a bucket policy)</span><span class="arrow">→</span><span class="then">Principal</span></li>
+      <li><span class="if">Restrict by IP, MFA, Region, tag</span><span class="arrow">→</span><span class="then">Condition</span></li>
+      <li><span class="if">Allow s3:* plus Deny s3:DeleteObject, then a delete</span><span class="arrow">→</span><span class="then">Denied (explicit Deny wins)</span></li>
+      <li><span class="if">No policy mentions the action</span><span class="arrow">→</span><span class="then">Denied (implicit deny)</span></li>
+      <li><span class="if">"Action": "*", "Resource": "*"</span><span class="arrow">→</span><span class="then">Administrator access</span></li>
+      <li><span class="if">SCP allows it but no IAM policy does</span><span class="arrow">→</span><span class="then">Denied (SCPs grant nothing)</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Element</th><th>Required?</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>Version</code></td><td>Include it</td><td>Policy language version: <code>2012-10-17</code></td></tr>
+          <tr><td><code>Id</code></td><td>Optional</td><td>Identifier for the whole policy</td></tr>
+          <tr><td><code>Statement</code></td><td>Yes</td><td>One or more permission statements</td></tr>
+          <tr><td><code>Sid</code></td><td>Optional</td><td>Label for a statement</td></tr>
+          <tr><td><code>Effect</code></td><td>Yes</td><td><code>Allow</code> or <code>Deny</code></td></tr>
+          <tr><td><code>Principal</code></td><td>Resource-based policies</td><td>Account, user, role or service the policy applies to</td></tr>
+          <tr><td><code>Action</code></td><td>Yes</td><td>API actions, <code>service:Operation</code>; wildcards allowed</td></tr>
+          <tr><td><code>Resource</code></td><td>Most policies</td><td>ARNs of the resources, or <code>*</code></td></tr>
+          <tr><td><code>Condition</code></td><td>Optional</td><td>When the statement applies</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>SCPs and permission boundaries</b> limit the maximum permissions; on their own they grant nothing. If an SCP allows a service but no IAM policy allows the action, the request is denied.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>What does <code>"Version": "2012-10-17"</code> mean?<span class="go">Show answer</span></summary><div class="ans"><p><b>The policy language version</b>, not the date you wrote the policy.</p></div></details>
+      <details><summary>A user has AdministratorAccess and one policy that denies <code>ec2:TerminateInstances</code>. Can they terminate an instance?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> The explicit Deny overrides the Allow.</p></div></details>
+      <details><summary>Why does an S3 bucket policy have a Principal but a group policy doesn't?<span class="go">Show answer</span></summary><div class="ans"><p>A bucket policy is <b>resource-based</b>, so it must say who is allowed. A group policy is <b>identity-based</b>: the "who" is whoever it's attached to.</p></div></details>
+      <details><summary>What does <code>iam:List*</code> allow?<span class="go">Show answer</span></summary><div class="ans"><p><b>Every IAM action starting with List</b>: ListUsers, ListGroups, ListRoles…</p></div></details>
+      <details><summary>Which element would you use to require MFA?<span class="go">Show answer</span></summary><div class="ans"><p><b>Condition</b>, for example <code>"Bool": {"aws:MultiFactorAuthPresent": "true"}</code>.</p></div></details>
+      <details><summary>Inline vs managed policy: which is easier to reuse and audit?<span class="go">Show answer</span></summary><div class="ans"><p><b>Managed</b> (AWS or customer). Inline policies are embedded in one identity.</p></div></details>
+    </div>
+  </section>
+
+  <footer>The policies on this page are examples. Sources: IAM notes "IAM Policy Structure", "IAM Policies Hands-On", "IAM: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html">IAM policy evaluation logic</a>.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  /* ================= JSON panel ================= */
+  const LINES = [
+    ['top', '{'], ['ver', '  "Version": "2012-10-17",'], ['stmt', '  "Statement": ['],
+    ['s1', '    {'], ['s1 sid', '      "Sid": "ReadScans",'], ['s1 eff', '      "Effect": "Allow",'], ['s1 act', '      "Action": ["s3:GetObject", "s3:ListBucket"],'], ['s1 res', '      "Resource": "arn:aws:s3:::clinic-scans/*"'], ['s1', '    },'],
+    ['s2', '    {'], ['s2 sid', '      "Sid": "NoDeletes",'], ['s2 eff', '      "Effect": "Deny",'], ['s2 act', '      "Action": "s3:DeleteObject",'], ['s2 res', '      "Resource": "arn:aws:s3:::clinic-scans/*"'], ['s2', '    },'],
+    ['s3', '    {'], ['s3 sid', '      "Sid": "UploadOnlyWithMfa",'], ['s3 eff', '      "Effect": "Allow",'], ['s3 act', '      "Action": "s3:PutObject",'], ['s3 res', '      "Resource": "arn:aws:s3:::clinic-scans/*",'], ['s3 cond', '      "Condition": { "Bool": { "aws:MultiFactorAuthPresent": "true" } }'], ['s3', '    }'],
+    ['stmt', '  ]'], ['top', '}']
+  ];
+  const hl = t => t.replace(/("[^"]*")(\s*:)/g, '<span class="k">$1</span>$2').replace(/(:\s*|\[|, )("[^"]*")/g, '$1<span class="s">$2</span>');
+  const js = $('json');
+  js.innerHTML = LINES.map(([c, t]) => `<span class="l" data-c="${c}">${hl(t)}</span>`).join('');
+  function mark(sel, cls = 'on') { js.classList.toggle('focus', !!sel); js.querySelectorAll('.l').forEach(l => { l.classList.remove('on', 'deny', 'allow'); const c = l.dataset.c.split(' '); if (sel && sel.some(s => s.split(' ').every(p => c.includes(p)))) l.classList.add(cls); }); }
+
+  /* ================= flow ================= */
+  const net = K.net($('stSvg'), {
+    nodes: {
+      req: { x: 80, y: 90, icon: 'user', kind: 'user', label: 'Charles', sub: 'request' },
+      gather: { x: 270, y: 90, icon: 'doc', kind: 'mgmt', label: 'Gather policies', sub: 'user + groups' },
+      deny: { x: 460, y: 90, icon: 'shield', kind: 'sec', label: 'Explicit Deny?' },
+      allow: { x: 460, y: 290, icon: 'doc', kind: 'storage', label: 'Any Allow?' },
+      s3: { x: 270, y: 420, icon: 'bucket', kind: 'storage', label: 'S3 clinic-scans' },
+      no: { x: 580, y: 420, icon: 'lock', kind: 'sec', label: 'AccessDenied' }
+    },
+    links: [{ a: 'req', b: 'gather' }, { a: 'gather', b: 'deny' }, { a: 'deny', b: 'no', via: [[580, 90]], label: 'yes → deny', at: [580, 200] }, { a: 'deny', b: 'allow', label: 'no', at: [480, 190] },
+      { a: 'allow', b: 's3', via: [[270, 290]], label: 'yes → allow', at: [350, 280] }, { a: 'allow', b: 'no', via: [[460, 420]], label: 'no → implicit deny', at: [430, 470] }]
+  });
+  function base(i) {
+    net.reset(); mark(null);
+    if (i === 0) mark(['top', 'ver', 'stmt', 's1', 's2', 's3']);
+    if (i === 1) mark(['ver', 'stmt']);
+    if (i === 2) mark(['s1 eff', 's1 act', 's1 res', 's1 sid']);
+    if (i === 3) mark(['s3 cond']);
+    if (i === 4) { mark(['s1'], 'allow'); net.badge('s3', '200 OK', 'ok'); net.nodes.req.sub('s3:GetObject'); }
+    if (i === 5) { mark(['s2'], 'deny'); net.badge('no', 'explicit deny', 'bad'); net.nodes.req.sub('s3:DeleteObject'); }
+    if (i === 6) { net.badge('no', 'implicit deny', 'bad'); net.nodes.req.sub('ec2:TerminateInstances'); }
+    if (i === 7) { mark(['s3'], 'allow'); net.nodes.req.sub('s3:PutObject + MFA'); net.badge('s3', '200 OK', 'ok'); }
+    net.focus(i <= 3 ? [] : null);
+  }
+  async function run3(run, act, path, tone) { net.nodes.req.sub(act); await net.send(path, { run, label: act, tone }); }
+  const STEPS = [
+    { title: 'A policy is a JSON permission document',
+      text: 'This is a <b>customer managed policy</b> attached to the Developers group. It has three statements: read scans, never delete scans, and upload scans only when signed in with MFA. AWS reads it for every request a member makes.' },
+    { title: 'Version and Statement',
+      text: '<code>Version</code> is the <b>policy language version</b>; use <code>"2012-10-17"</code>. <code>Statement</code> is a list: each item is one rule. Many statements can live in one policy.',
+      tip: 'Version is not the date you edited the policy.' },
+    { title: 'Effect + Action + Resource',
+      text: 'Each statement says <b>Effect</b>: Allow or Deny; <b>Action</b>: which API calls (<code>s3:GetObject</code> = download a file); <b>Resource</b>: which things, by ARN (all objects in the <code>clinic-scans</code> bucket). <code>Sid</code> is just a label.' },
+    { title: 'Condition: only when…',
+      text: 'The third statement allows uploads <b>only if</b> the caller signed in with MFA. Conditions can also require a source IP range, a Region, a tag or your AWS Organization.' },
+    { title: 'Request 1: download a scan',
+      text: 'Charles downloads a scan. AWS <b>gathers every policy</b> that applies to him (all his groups, anything attached directly), finds <b>no Deny</b> for this action, finds the <b>ReadScans Allow</b>, and lets it through.',
+      play: async run => { base(4); net.badge('s3', ''); await run3(run, 's3:GetObject', ['req', 'gather', 'deny', 'allow', 's3'], 'green'); net.badge('s3', '200 OK', 'ok'); } },
+    { title: 'Request 2: delete a scan',
+      text: 'Charles tries to delete a scan. The <b>NoDeletes</b> statement is an <b>explicit Deny</b>. Evaluation stops there: denied. Even if another policy (say AdministratorAccess) allowed it, the Deny would still win.',
+      tip: 'Explicit Deny always overrides Allow.',
+      play: async run => { base(5); net.badge('no', ''); await run3(run, 's3:DeleteObject', ['req', 'gather', 'deny', 'no'], 'red'); net.badge('no', 'explicit deny', 'bad'); } },
+    { title: 'Request 3: something nobody mentioned',
+      text: 'Charles tries to terminate an EC2 instance. No statement denies it, but <b>no statement allows it</b> either, so it is denied by default. This is the <b>implicit deny</b>, the starting point for every request.',
+      play: async run => { base(6); net.badge('no', ''); await run3(run, 'ec2:TerminateInstances', ['req', 'gather', 'deny', 'allow', 'no'], 'red'); net.badge('no', 'implicit deny', 'bad'); } },
+    { title: 'Request 4: upload with MFA',
+      text: 'Charles signs in with MFA and uploads a scan. The <b>UploadOnlyWithMfa</b> statement matches because its Condition is true. Without MFA the same request would fall through to the implicit deny.',
+      play: async run => { base(7); net.badge('s3', ''); await run3(run, 's3:PutObject + MFA', ['req', 'gather', 'deny', 'allow', 's3'], 'green'); net.badge('s3', '200 OK', 'ok'); } }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ================= evaluator ================= */
+  const POL = {
+    admin: { name: 'AdministratorAccess', st: [{ e: 'Allow', a: ['*'] }] },
+    iamro: { name: 'IAMReadOnlyAccess', st: [{ e: 'Allow', a: ['iam:Get*', 'iam:List*'] }] },
+    scans: { name: 'ClinicScansAccess (above)', st: [{ e: 'Allow', a: ['s3:GetObject', 's3:ListBucket'] }, { e: 'Deny', a: ['s3:DeleteObject'] }, { e: 'Allow', a: ['s3:PutObject'], mfa: true }] },
+    nodel: { name: 'DenyTerminate', st: [{ e: 'Deny', a: ['ec2:TerminateInstances'] }] }
+  };
+  const ACTS = ['iam:ListUsers', 'iam:CreateGroup', 's3:GetObject', 's3:DeleteObject', 's3:PutObject', 'ec2:TerminateInstances', 'ec2:DescribeInstances'];
+  $('pvPolicies').innerHTML = Object.entries(POL).map(([k, p]) => `<label class="toggle" for="pv-${k}"><input type="checkbox" id="pv-${k}" data-k="${k}" ${k === 'scans' ? 'checked' : ''}> ${p.name}</label>`).join('');
+  $('pvAct').innerHTML = ACTS.map(a => `<option>${a}</option>`).join('');
+  const match = (pat, act) => pat === '*' || (pat.endsWith('*') ? act.startsWith(pat.slice(0, -1)) : pat === act);
+  const pv = K.net($('pvSvg'), {
+    nodes: { req: { x: 70, y: 110, icon: 'user', kind: 'user', label: 'Request' }, gather: { x: 240, y: 110, icon: 'doc', kind: 'mgmt', label: 'Gather', sub: '' },
+      deny: { x: 430, y: 110, icon: 'shield', kind: 'sec', label: 'Explicit Deny?' }, allow: { x: 640, y: 110, icon: 'doc', kind: 'storage', label: 'Any Allow?' },
+      ok: { x: 880, y: 60, icon: 'chip', kind: 'compute', label: 'ALLOWED' }, no: { x: 880, y: 180, icon: 'lock', kind: 'sec', label: 'DENIED' } },
+    links: [{ a: 'req', b: 'gather' }, { a: 'gather', b: 'deny' }, { a: 'deny', b: 'allow', label: 'no' }, { a: 'deny', b: 'no', via: [[430, 215], [880, 215]], label: 'yes', at: [520, 207] }, { a: 'allow', b: 'ok', via: [[760, 110], [760, 60]], label: 'yes', at: [760, 80] }, { a: 'allow', b: 'no', via: [[760, 110], [760, 180]], label: 'no', at: [760, 150] }]
+  });
+  $('pvGo').addEventListener('click', async () => {
+    const run = K.newRun('pv'); pv.reset();
+    const act = $('pvAct').value, mfa = $('pvMfa').checked;
+    const on = Object.keys(POL).filter(k => $('pv-' + k).checked);
+    const sts = on.flatMap(k => POL[k].st.map(s => ({ ...s, p: POL[k].name })));
+    const den = sts.find(s => s.e === 'Deny' && s.a.some(p => match(p, act)));
+    const alw = sts.find(s => s.e === 'Allow' && s.a.some(p => match(p, act)) && (!s.mfa || mfa));
+    const almost = sts.find(s => s.e === 'Allow' && s.mfa && !mfa && s.a.some(p => match(p, act)));
+    pv.nodes.gather.sub(on.length + ' polic' + (on.length === 1 ? 'y' : 'ies'));
+    try {
+      if (den) { await pv.send(['req', 'gather', 'deny', 'no'], { run, label: act, tone: 'red' }); pv.badge('no', 'explicit deny', 'bad'); $('pvCap').innerHTML = `<span class="bad-text">Denied by an explicit Deny</span> in <b>${den.p}</b>. ${alw ? `It doesn't matter that <b>${alw.p}</b> allows it.` : ''}`; return; }
+      if (alw) { await pv.send(['req', 'gather', 'deny', 'allow', 'ok'], { run, label: act, tone: 'green' }); pv.badge('ok', 'via ' + alw.p.split(' ')[0], 'ok'); $('pvCap').innerHTML = `<span class="ok-text">Allowed</span> by <b>${alw.p}</b> (${alw.a.join(', ')}). No Deny matched.`; return; }
+      await pv.send(['req', 'gather', 'deny', 'allow', 'no'], { run, label: act, tone: 'red' }); pv.badge('no', 'implicit deny', 'bad');
+      $('pvCap').innerHTML = almost ? '<span class="bad-text">Implicit deny.</span> The upload statement needs <b>MFA</b>, and this session has none. Tick "Signed in with MFA".' : `<span class="bad-text">Implicit deny.</span> No attached policy allows <b>${act}</b>.${on.length ? '' : ' (No policies are attached at all.)'}`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  });
+  $('pvCap').innerHTML = 'Try: delete with AdministratorAccess + ClinicScansAccess; terminate with Admin + DenyTerminate; upload with and without MFA.';
+
+  K.pick($('el'), [
+    { q: 'Which element lists the API calls, like s3:GetObject?', a: 'Action', why: 'Action holds service:Operation names.' },
+    { q: 'Which element says whether the statement grants or blocks?', a: 'Effect', why: 'Effect is Allow or Deny.' },
+    { q: 'Which element names who may access a bucket in a bucket policy?', a: 'Principal', why: 'Resource-based policies must name the Principal.' },
+    { q: 'Which element limits access to requests from the office IP range?', a: 'Condition', why: 'Conditions such as aws:SourceIp narrow when a statement applies.' },
+    { q: 'Which element identifies the bucket or objects affected?', a: 'Resource', why: 'Resources are ARNs, like arn:aws:s3:::clinic-scans/*.' },
+    { q: 'Which element is the policy language version?', a: 'Version', why: 'Always "2012-10-17" for modern policies.' }
+  ], ['Version', 'Effect', 'Principal', 'Action', 'Resource', 'Condition']);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EBS volumes</title>
+<meta name="description" content="AWS Cloud Practitioner: Amazon EBS volumes are network drives for EC2, locked to one Availability Zone, persistent, detachable, with Delete on termination rules.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .lab-ctl { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+  .lab-ctl select { font: inherit; color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; }
+  .vt td { vertical-align: middle; }
+  .vt .btn { padding: 4px 10px; font-size: 13px; margin: 2px 4px 2px 0; }
+  .st { font-family: var(--mono); font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); white-space: nowrap; }
+  .st.in-use { color: var(--good-text); border-color: var(--good-text); }
+  .st.available { color: var(--cyan); border-color: var(--cyan); }
+  .st.creating { color: var(--yellow); border-color: var(--yellow); }
+  .st.deleted { color: var(--muted); text-decoration: line-through; }
+  .inst { font-size: 14px; color: var(--fg-soft); margin: 0 0 10px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · EC2 instance storage · 1</div>
+    <h1>EBS volumes</h1>
+    <ul class="lede">
+      <li><b>Amazon EBS</b> (Elastic Block Store) is the disk of an EC2 instance, but it is a <b>network drive</b>, not a disk inside the server.</li>
+      <li>It is <b>persistent</b>: data stays when the instance stops, and can stay after it is terminated.</li>
+      <li>A volume lives in <b>one Availability Zone</b> and attaches only to instances in that AZ.</li>
+      <li>You <b>provision</b> size (GiB) and performance (IOPS) up front and pay for what you provision.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>EBS idea</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">EBS volume</span><span class="like">A LUN on a SAN, mapped to one server</span><span>Same idea: block storage over the network. AWS runs the SAN; you click to create one.</span></div>
+      <div class="row"><span class="aws">Detach / attach</span><span class="like">Moving a USB drive to another PC</span><span>No cable: it moves over the network, but only to a server in the same AZ (the same building).</span></div>
+      <div class="row"><span class="aws">Provisioned IOPS</span><span class="like">Choosing SSD vs HDD and RAID level</span><span>You type the number of IOPS you want and pay for it, even if unused.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: a volume's life next to an instance</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="An EC2 instance in AZ a uses a root and a data EBS volume over the network; the data volume moves to a replacement instance; an instance in AZ b cannot attach it"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li><b>EBS = network drive</b> for EC2. Data travels over the AWS network, so there is a little latency, but the drive can move between instances.</li>
+      <li><b>Persistent</b>: survives stop/start, and survives termination unless <b>Delete on termination</b> is on.</li>
+      <li><b>Bound to one AZ.</b> A volume in <code>us-east-1a</code> can't attach to an instance in <code>us-east-1b</code>. To move it: <b>snapshot → new volume in the other AZ</b>.</li>
+      <li>One instance can have <b>many volumes</b>; a volume is normally attached to <b>one instance at a time</b> (Multi-Attach exists only for io1/io2, out of exam scope).</li>
+      <li>You <b>provision capacity (GiB) and performance (IOPS, throughput)</b> and are billed for what you provision, attached or not. Both can be increased later.</li>
+      <li><b>Delete on termination</b> defaults: <b>root volume = Yes</b> (deleted), <b>extra volumes = No</b> (kept). Turn it off on the root to keep it.</li>
+      <li>States: <code>creating</code> → <code>available</code> (not attached) → <code>in-use</code> (attached).</li>
+      <li>Attaching is not the end: the OS still has to <b>format and mount</b> a new data volume.</li>
+      <li>Volume families: <b>gp3/gp2</b> general SSD, <b>io2/io1</b> provisioned-IOPS SSD (databases), <b>st1</b> throughput HDD, <b>sc1</b> cold HDD. Only SSD types can be a boot volume.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+
+  <section aria-labelledby="labH">
+    <h2 class="stage-title" id="labH">Volume lab</h2>
+    <div class="stage-kind">Create, attach, detach, delete, then terminate the instance and see what survives</div>
+    <div class="card">
+      <p class="inst" id="inst"></p>
+      <div class="lab-ctl">
+        <label>New 2 GiB gp3 volume in <select id="newAz"><option value="a">us-east-1a</option><option value="b">us-east-1b</option></select></label>
+        <button class="btn" id="mk" type="button">Create volume</button>
+        <button class="btn" id="term" type="button">Terminate instance</button>
+        <button class="btn" id="rst" type="button">Reset</button>
+      </div>
+      <div class="scroll table-card">
+        <table class="vt"><thead><tr><th>Volume</th><th>State</th><th>Delete on term.</th><th>Actions</th></tr></thead><tbody id="vols"></tbody></table>
+      </div>
+      <p class="nf-cap" id="labCap">The instance runs in <b>us-east-1a</b> with its 8 GiB root volume.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">Kept or deleted?</h2>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Create, attach and clean up a volume (from the course hands-on)</summary>
+      <ol>
+        <li>EC2 → select the instance → <b>Storage</b> tab: the root device is an 8 GiB EBS volume. Note the instance's AZ under <b>Networking</b> (e.g. <code>eu-west-1b</code>).</li>
+        <li>Left menu <b>Elastic Block Store → Volumes → Create volume</b>: type gp3 (or gp2), size 2 GiB, <b>same AZ as the instance</b>.</li>
+        <li>Refresh until the state is <code>available</code>. Then <b>Actions → Attach volume</b>, choose the instance. State becomes <code>in-use</code>; the Storage tab now lists two block devices.</li>
+        <li>Create another volume in a <b>different AZ</b>: it becomes available, but the instance doesn't appear in the Attach list.</li>
+        <li>Delete the test volume: <b>Actions → Delete volume</b> (only when it is <code>available</code>).</li>
+        <li>In the launch wizard, <b>Storage → Advanced</b> shows <b>Delete on termination</b> per volume. Terminate the instance: the root volume disappears, the extra volume stays <code>available</code>.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Persistent disk for one EC2 instance</span><span class="arrow">→</span><span class="then">EBS volume</span></li>
+      <li><span class="if">Move a volume to another AZ</span><span class="arrow">→</span><span class="then">Snapshot, then create a volume in that AZ</span></li>
+      <li><span class="if">Keep the root disk after terminate</span><span class="arrow">→</span><span class="then">Delete on termination = No</span></li>
+      <li><span class="if">"Network USB stick", "AZ-locked"</span><span class="arrow">→</span><span class="then">EBS</span></li>
+      <li><span class="if">Database needing guaranteed high IOPS</span><span class="arrow">→</span><span class="then">EBS io2 / io1 (Provisioned IOPS)</span></li>
+      <li><span class="if">Cheapest general SSD</span><span class="arrow">→</span><span class="then">gp3</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Type</th><th>Kind</th><th>Good for</th><th>Boot volume?</th></tr></thead>
+        <tbody>
+          <tr><td>gp3</td><td>General purpose SSD</td><td>Most workloads; 3,000 IOPS baseline at any size, up to 80,000</td><td>Yes</td></tr>
+          <tr><td>gp2</td><td>General purpose SSD (older)</td><td>IOPS grow with size, up to 16,000</td><td>Yes</td></tr>
+          <tr><td>io2 / io1</td><td>Provisioned IOPS SSD</td><td>Databases needing steady, high IOPS</td><td>Yes</td></tr>
+          <tr><td>st1</td><td>Throughput HDD</td><td>Big sequential reads: logs, data warehouses</td><td>No</td></tr>
+          <tr><td>sc1</td><td>Cold HDD</td><td>Rarely read data, lowest cost</td><td>No</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>gp2 tops out at 16,000 IOPS</b>, not 32,000 as the Instance Store note says. gp3 now reaches 80,000 IOPS and 64 TiB per volume (AWS EBS product page).</p></div>
+      <div class="note"><span class="flag add">Added</span><p>Volume types table. The exam rarely asks for numbers, but it does ask "which EBS type for a database" (io2) and "cheapest storage for infrequent data" (sc1).</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <div class="quiz">
+      <details><summary>Why is EBS called a network drive?<span class="go">Show answer</span></summary><div class="ans"><p>It isn't inside the host server; the instance reaches it over the AWS network. That's why it can be detached and attached to another instance.</p></div></details>
+      <details><summary>Can a volume in us-east-1a attach to an instance in us-east-1b?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> Take a snapshot and create a new volume from it in us-east-1b.</p></div></details>
+      <details><summary>You terminate an instance with a root and an extra volume, defaults unchanged. What's left?<span class="go">Show answer</span></summary><div class="ans"><p>The <b>extra volume</b>, now <code>available</code>. The root volume is deleted.</p></div></details>
+      <details><summary>Does an unattached volume cost money?<span class="go">Show answer</span></summary><div class="ans"><p><b>Yes.</b> You pay for provisioned GiB (and IOPS) whether it's attached or not.</p></div></details>
+      <details><summary>The instance is stopped. Is the EBS data still there?<span class="go">Show answer</span></summary><div class="ans"><p><b>Yes.</b> Stop keeps EBS volumes (unlike instance store).</p></div></details>
+      <details><summary>You attached a new volume but don't see it in Linux. Why?<span class="go">Show answer</span></summary><div class="ans"><p>The OS must <b>format and mount</b> it first; attaching only connects the device.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: EC2 storage notes "Amazon EBS Overview" and "Amazon EBS Hands-on"; <a href="https://aws.amazon.com/ebs/general-purpose/">AWS EBS general purpose volumes</a>; AWS EBS volume types documentation. IOPS figures are AWS maximums at the time of writing.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 20, y: 20, w: 960, h: 385, kind: 'region', label: 'us-east-1' }, { id: 'a', x: 50, y: 60, w: 540, h: 330, kind: 'az', label: 'us-east-1a' }, { id: 'b', x: 620, y: 60, w: 340, h: 330, kind: 'az', label: 'us-east-1b' }],
+    nodes: {
+      ec2: { x: 190, y: 150, icon: 'chip', kind: 'compute', label: 'Web server', sub: 't3.micro' },
+      ec2n: { x: 450, y: 150, icon: 'chip', kind: 'compute', label: 'Replacement', sub: 'new instance' },
+      root: { x: 190, y: 310, icon: 'disk', kind: 'storage', label: 'Root volume', sub: '8 GiB gp3' },
+      data: { x: 450, y: 310, icon: 'disk', kind: 'storage', label: 'Data volume', sub: '2 GiB gp3' },
+      ec2b: { x: 790, y: 150, icon: 'chip', kind: 'compute', label: 'Instance', sub: 'in AZ b' }
+    },
+    links: [
+      { a: 'ec2', b: 'root', kind: 'priv', label: 'network', at: [228, 236] },
+      { a: 'ec2', b: 'data', kind: 'priv' },
+      { a: 'ec2n', b: 'data', kind: 'priv' },
+      { a: 'data', b: 'ec2b', via: [[790, 310]], kind: 'dash' }
+    ]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['ec2', 'root'], ['ec2', 'root', 'data'], ['ec2', 'ec2n', 'root', 'data'], ['ec2', 'root', 'data', 'ec2b'], ['ec2', 'root', 'data'], ['ec2', 'root', 'data'], null];
+    net.focus(F[i]);
+    if (i !== 2) net.link('ec2n', 'data', 'hide');
+    if (i !== 3) net.link('data', 'ec2b', 'hide');
+    if (i < 2) net.link('ec2', 'data', 'hide');
+    if (i === 0) net.badge('root', 'in-use', 'ok');
+    if (i === 1) { net.badge('root', 'in-use', 'ok'); net.badge('data', 'in-use', 'ok'); }
+    if (i === 2) { net.state('ec2', 'down'); net.link('ec2', 'data', 'cut'); net.badge('data', 'reattached', 'ok'); }
+    if (i === 3) { net.link('data', 'ec2b', 'cut'); net.badge('ec2b', 'other AZ', 'bad'); }
+    if (i === 4) { net.badge('root', '3,000 IOPS', 'info'); net.badge('data', '+ size', 'info'); }
+    if (i === 5) { net.state('ec2', 'down'); net.state('root', 'down'); net.badge('root', 'deleted', 'bad'); net.badge('data', 'available', 'ok'); net.link('ec2', 'root', 'cut'); net.link('ec2', 'data', 'cut'); }
+  }
+  const STEPS = [
+    { title: 'The disk is across the network',
+      text: 'Every instance launched from an EBS-backed AMI boots from a <b>root EBS volume</b>. It is not a disk inside the physical server: reads and writes go <b>over the AWS network</b> to the storage system, inside the same AZ.',
+      tip: 'Think "network USB stick": you can unplug it and plug it into another machine.',
+      play: async run => { base(0); await net.send(['ec2', 'root'], { run, label: 'write' }); await net.send(['root', 'ec2'], { run, tone: 'green', label: 'read' }); } },
+    { title: 'Add more volumes',
+      text: 'One instance can have <b>several volumes</b>: the root for the OS and a <b>data volume</b> for the app\'s files. Here a 2 GiB gp3 volume is created in the <b>same AZ</b> and attached. Its state changes from <code>available</code> to <code>in-use</code>.',
+      play: async run => { base(1); net.link('ec2', 'data', ''); await net.send(['ec2', 'data'], { run, label: 'attach' }); } },
+    { title: 'The instance dies; the data doesn\'t',
+      text: 'The web server fails. Because the data volume is a separate network resource, you <b>detach</b> it and <b>attach it to a replacement</b> instance in the same AZ in a few seconds. No disk is carried anywhere.',
+      play: async run => { base(2); net.link('ec2n', 'data', ''); await net.send(['data', 'ec2n'], { run, tone: 'green', label: 'attach' }); } },
+    { title: 'But it is locked to its AZ',
+      text: 'An instance in <b>us-east-1b</b> can\'t use a volume in <b>us-east-1a</b>; the console won\'t even list it. To move the data, take a <b>snapshot</b> and create a new volume from it in the other AZ (next topic). That makes a copy, not a shared disk.',
+      tip: 'Exam: "EBS volumes are bound to an Availability Zone."',
+      play: async run => { base(3); net.link('data', 'ec2b', ''); await net.send(['data', 'ec2b'], { run, tone: 'red', label: 'attach?' }); net.link('data', 'ec2b', 'cut'); net.badge('ec2b', 'other AZ', 'bad'); } },
+    { title: 'You provision size and speed',
+      text: 'When you create a volume you choose its <b>size in GiB</b> and, for some types, its <b>IOPS</b> (input/output operations per second) and throughput. gp3 gives 3,000 IOPS at any size. You pay for what you provision, even when nothing is attached. You can grow it later.' },
+    { title: 'Delete on termination',
+      text: 'When the instance is <b>terminated</b>: the <b>root volume</b> has Delete on termination <b>on</b> by default, so it is deleted. The <b>extra volume</b> has it <b>off</b>, so it is detached and stays <code>available</code> (and keeps billing).',
+      tip: 'Need the root disk after termination? Set Delete on termination to No at launch.',
+      play: async run => { base(4); await K.sleep(500, run); base(5); } },
+    { title: 'The whole picture',
+      text: 'EBS: <b>network block storage</b>, <b>one AZ</b>, <b>one instance at a time</b>, <b>persistent</b>, <b>provisioned and billed by size/IOPS</b>, root deleted on terminate by default. Snapshots (next) back it up and move it.' }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ---------- Volume lab ---------- */
+  let inst, vols, n;
+  function init() { inst = { az: 'a', state: 'running' }; vols = [{ id: 'vol-root', size: 8, az: 'a', state: 'in-use', root: true, dot: true }]; n = 1; draw(); $('labCap').innerHTML = 'The instance runs in <b>us-east-1a</b> with its 8 GiB root volume.'; }
+  const say = h => $('labCap').innerHTML = h;
+  function draw() {
+    $('inst').innerHTML = `Instance <b>i-0web</b> in <b>us-east-1${inst.az}</b>: <span class="st ${inst.state === 'running' ? 'in-use' : 'deleted'}">${inst.state}</span>`;
+    $('vols').innerHTML = vols.map((v, i) => {
+      const acts = [];
+      if (v.state === 'available') { acts.push(`<button class="btn" data-a="attach" data-i="${i}" type="button">Attach</button>`); acts.push(`<button class="btn" data-a="delete" data-i="${i}" type="button">Delete</button>`); }
+      if (v.state === 'in-use' && !v.root) acts.push(`<button class="btn" data-a="detach" data-i="${i}" type="button">Detach</button>`);
+      const dot = v.state === 'in-use' ? `<button class="btn" data-a="dot" data-i="${i}" type="button">${v.dot ? 'Yes' : 'No'}</button>` : '<span class="muted">n/a</span>';
+      return `<tr><td>${v.id}${v.root ? ' (root)' : ''}<br><span class="muted">${v.size} GiB · us-east-1${v.az}</span></td><td><span class="st ${v.state}">${v.state}</span></td><td>${dot}</td><td>${acts.join('') || '<span class="muted">none</span>'}</td></tr>`;
+    }).join('');
+  }
+  $('mk').addEventListener('click', () => {
+    const v = { id: 'vol-' + (++n), size: 2, az: $('newAz').value, state: 'creating', root: false, dot: false };
+    vols.push(v); draw(); say('Creating <b>' + v.id + '</b>…');
+    setTimeout(() => { if (v.state === 'creating') { v.state = 'available'; draw(); say(`<b>${v.id}</b> is <b>available</b>: it exists and is billed, but nothing uses it yet.`); } }, 700);
+  });
+  $('vols').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const v = vols[+b.dataset.i], a = b.dataset.a;
+    if (a === 'attach') {
+      if (inst.state !== 'running') return say('<span class="bad-text">No instance to attach to.</span> It was terminated; the volume waits as <b>available</b>.');
+      if (v.az !== inst.az) return say(`<span class="bad-text">Can't attach.</span> ${v.id} is in <b>us-east-1${v.az}</b>, the instance in <b>us-east-1${inst.az}</b>. Snapshot it and create a new volume in us-east-1${inst.az}.`);
+      v.state = 'in-use'; say(`<span class="ok-text">Attached.</span> ${v.id} is <b>in-use</b>. Delete on termination is <b>No</b> by default for extra volumes. (In Linux you'd still format and mount it.)`);
+    } else if (a === 'detach') { v.state = 'available'; say(`${v.id} detached: <b>available</b>, data intact, still billed.`); }
+    else if (a === 'delete') { v.state = 'deleted'; say(`<span class="bad-text">${v.id} deleted.</span> Its data is gone unless you had a snapshot.`); }
+    else if (a === 'dot') { v.dot = !v.dot; say(`Delete on termination for ${v.id}: <b>${v.dot ? 'Yes' : 'No'}</b>.`); }
+    draw();
+  });
+  $('term').addEventListener('click', () => {
+    if (inst.state !== 'running') return say('Already terminated. Press Reset to start again.');
+    inst.state = 'terminated';
+    const gone = [], kept = [];
+    vols.forEach(v => { if (v.state === 'in-use') { if (v.dot) { v.state = 'deleted'; gone.push(v.id); } else { v.state = 'available'; kept.push(v.id); } } });
+    draw();
+    say(`Instance terminated. Deleted: <b>${gone.join(', ') || 'none'}</b>. Kept as available: <b>${kept.join(', ') || 'none'}</b>.`);
+  });
+  $('rst').addEventListener('click', init);
+  init();
+
+  K.pick($('pick'), [
+    { q: 'Instance terminated. Root volume, default settings.', a: 'Deleted', why: 'Root Delete on termination defaults to Yes.' },
+    { q: 'Instance terminated. Extra data volume, default settings.', a: 'Kept', why: 'Extra volumes default to No: they become available.' },
+    { q: 'Instance stopped. Root volume.', a: 'Kept', why: 'Stopping never deletes EBS volumes.' },
+    { q: 'Instance terminated. Root volume with Delete on termination set to No.', a: 'Kept', why: 'You switched it off, so it survives.' },
+    { q: 'You choose Delete volume on an available volume, no snapshot.', a: 'Deleted', why: 'Gone for good: deleting a volume is destructive.' }
+  ], ['Kept', 'Deleted']);
+})();
+</script>
+</body>
+</html>

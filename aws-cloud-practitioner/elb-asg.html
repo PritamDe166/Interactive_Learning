@@ -56,15 +56,15 @@
   </header>
 
   <section aria-labelledby="whatH">
-    <h2 id="whatH">In .NET / Azure terms</h2>
-    <p class="sub">You've probably put IIS servers behind a load balancer or used Azure scale sets. Same ideas, AWS names.</p>
+    <h2 id="whatH">In terms you already know</h2>
+    <p class="sub">You've probably put IIS servers behind a load balancer. Same ideas, AWS names.</p>
     <div class="card analogy">
-      <div class="row head"><span>AWS</span><span>Closest .NET / Azure idea</span><span>The difference</span></div>
-      <div class="row"><span class="aws">Elastic Load Balancer (ALB)</span><span class="like">Azure Application Gateway / IIS ARR</span><span>Managed, scales itself; one DNS name, health checks.</span></div>
-      <div class="row"><span class="aws">Network Load Balancer</span><span class="like">Azure Load Balancer</span><span>Layer 4 TCP/UDP, static IP, very high throughput.</span></div>
-      <div class="row"><span class="aws">Auto Scaling group</span><span class="like">VM Scale Set</span><span>Keeps min/desired/max instances, replaces failed ones.</span></div>
-      <div class="row"><span class="aws">Scaling policy</span><span class="like">Autoscale rule</span><span>Target tracking, step, scheduled or predictive.</span></div>
-      <div class="row"><span class="aws">Target group</span><span class="like">Backend pool</span><span>The set of instances (or IPs, Lambdas) the ALB sends to.</span></div>
+      <div class="row head"><span>AWS</span><span>Closest idea you already know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Elastic Load Balancer (ALB)</span><span class="like">IIS ARR / a hardware load balancer in front of your web farm</span><span>Managed, scales itself; one DNS name, health checks.</span></div>
+      <div class="row"><span class="aws">Network Load Balancer</span><span class="like">A TCP-level load balancer (layer 4)</span><span>Layer 4 TCP/UDP, static IP, very high throughput.</span></div>
+      <div class="row"><span class="aws">Auto Scaling group</span><span class="like">A web farm that adds and removes servers by itself</span><span>Keeps min/desired/max instances, replaces failed ones.</span></div>
+      <div class="row"><span class="aws">Scaling policy</span><span class="like">Your rule for "add a server when CPU stays above 70%"</span><span>Target tracking, step, scheduled or predictive.</span></div>
+      <div class="row"><span class="aws">Target group</span><span class="like">The list of servers in the web farm</span><span>The set of instances (or IPs, Lambdas) the ALB sends to.</span></div>
     </div>
   </section>
 

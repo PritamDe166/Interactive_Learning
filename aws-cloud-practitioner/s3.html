@@ -58,16 +58,16 @@
   </header>
 
   <section aria-labelledby="whatH">
-    <h2 id="whatH">In .NET / Azure terms</h2>
-    <p class="sub">S3 is closest to Azure Blob Storage: files in containers, reached over HTTPS.</p>
+    <h2 id="whatH">In terms you already know</h2>
+    <p class="sub">S3 is like a file share with unlimited space, reached over HTTPS instead of SMB.</p>
     <div class="card analogy">
-      <div class="row head"><span>AWS</span><span>Closest .NET / Azure idea</span><span>The difference</span></div>
-      <div class="row"><span class="aws">Bucket</span><span class="like">Blob container (inside a storage account)</span><span>Lives in one Region; name unique across all of AWS.</span></div>
-      <div class="row"><span class="aws">Object + key</span><span class="like">Blob + blob name</span><span>Folders are just prefixes in the key.</span></div>
-      <div class="row"><span class="aws">Bucket policy</span><span class="like">Container access policy / SAS rules</span><span>JSON resource policy; can grant other accounts or public.</span></div>
-      <div class="row"><span class="aws">Storage classes</span><span class="like">Hot / Cool / Archive tiers</span><span>Eight classes; lifecycle rules move data automatically.</span></div>
-      <div class="row"><span class="aws">Pre-signed URL</span><span class="like">SAS token</span><span>Time-limited access to a private object.</span></div>
-      <div class="row"><span class="aws">Versioning</span><span class="like">Blob versioning / soft delete</span><span>Delete adds a marker; old versions kept and billed.</span></div>
+      <div class="row head"><span>AWS</span><span>Closest idea you already know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Bucket</span><span class="like">A top-level shared folder</span><span>Lives in one Region; name unique across all of AWS.</span></div>
+      <div class="row"><span class="aws">Object + key</span><span class="like">A file and its full path</span><span>Folders are just prefixes in the key.</span></div>
+      <div class="row"><span class="aws">Bucket policy</span><span class="like">Folder permissions (ACLs), written as JSON</span><span>JSON resource policy; can grant other accounts or public.</span></div>
+      <div class="row"><span class="aws">Storage classes</span><span class="like">Fast disk vs cheap archive tapes</span><span>Eight classes; lifecycle rules move data automatically.</span></div>
+      <div class="row"><span class="aws">Pre-signed URL</span><span class="like">A download link that expires</span><span>Time-limited access to a private object.</span></div>
+      <div class="row"><span class="aws">Versioning</span><span class="like">Windows "Previous versions" for every file</span><span>Delete adds a marker; old versions kept and billed.</span></div>
     </div>
   </section>
 

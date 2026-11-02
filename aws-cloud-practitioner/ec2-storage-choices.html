@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Choosing EC2 storage</title>
+<meta name="description" content="AWS Cloud Practitioner: choose between EBS, instance store, EFS, FSx for Windows and FSx for Lustre with a decision walker, and see who is responsible for what in EC2 storage.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .wk .q { font-size: 17px; font-weight: 600; margin: 4px 0 12px; }
+  .wk .opts { display: flex; flex-wrap: wrap; gap: 10px; }
+  .wk .path { font: 13px var(--mono); color: var(--muted); margin-top: 12px; }
+  .wk .ans { margin-top: 12px; padding: 12px 14px; border: 1px solid var(--teal); border-radius: 12px; background: var(--teal-wash); }
+  .resp { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 12px; }
+  .resp h3 { margin: 0 0 6px; font-size: 15px; }
+  .resp ul { margin: 0; padding-left: 18px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · EC2 instance storage · 8</div>
+    <h1>Choosing EC2 storage</h1>
+    <ul class="lede">
+      <li>Two questions pick the answer: <b>is it shared by many instances?</b> and <b>what kind of workload?</b></li>
+      <li>One instance: <b>EBS</b> (persistent) or <b>instance store</b> (fastest, temporary).</li>
+      <li>Shared: <b>EFS</b> (Linux), <b>FSx for Windows</b> (SMB/AD), <b>FSx for Lustre</b> (HPC).</li>
+      <li>Shared responsibility: AWS runs and replicates the storage; <b>you</b> own backups, encryption and your data.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: five workloads through one decision tree</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="Decision tree: shared or not, then speed and durability for single-instance storage, or workload type for shared storage, leading to instance store, EBS, FSx for Windows, FSx for Lustre or EFS"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li><b>EBS</b>: network drive, <b>one instance, one AZ</b>, persistent; snapshots back it up or move it.</li>
+      <li><b>Instance store</b>: hardware disk on the host, <b>highest I/O</b>, <b>lost on stop/terminate</b>.</li>
+      <li><b>EFS</b>: managed <b>NFS for Linux</b>, shared by hundreds of instances across AZs, pay per use; EFS-IA/Archive for cold files.</li>
+      <li><b>FSx for Windows File Server</b>: SMB/NTFS share with Active Directory.</li>
+      <li><b>FSx for Lustre</b>: Linux file system for <b>HPC</b>, can be backed by S3.</li>
+      <li><b>AMI</b> is not storage you mount: it's the <b>launch template</b> (built on snapshots); <b>EC2 Image Builder</b> automates it.</li>
+      <li><b>S3</b> is object storage used <i>with</i> EC2 (backups, static files), not a disk the OS mounts. Its own section comes later.</li>
+      <li>Shared responsibility: <b>AWS</b> = infrastructure, replication of EBS/EFS data, replacing faulty hardware, keeping its staff out of your data. <b>You</b> = backup/snapshot procedures, encryption, the data itself, and understanding the risk of instance store.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+
+  <section aria-labelledby="wkH">
+    <h2 class="stage-title" id="wkH">Storage decision walker</h2>
+    <div class="stage-kind">Answer for your own workload</div>
+    <div class="card wk" id="wk"></div>
+  </section>
+
+  <section aria-labelledby="srH">
+    <h2 class="stage-title" id="srH">AWS or you?</h2>
+    <div class="stage-kind">Shared responsibility for EC2 storage</div>
+    <div class="card" id="sr"></div>
+  </section>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">Scenario drill</h2>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="resH">
+    <h2 id="resH">Shared responsibility for storage</h2>
+    <div class="resp">
+      <div class="card"><h3>AWS</h3><ul><li>The storage infrastructure</li><li>Replicating data for EBS volumes and EFS drives</li><li>Replacing faulty hardware</li><li>Making sure AWS employees can't access your data</li></ul></div>
+      <div class="card"><h3>You</h3><ul><li>Setting up backup / snapshot procedures</li><li>Setting up data encryption</li><li>Whatever data you put on the drives</li><li>Understanding the risk of using instance store</li></ul></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">One instance, persistent</span><span class="arrow">→</span><span class="then">EBS</span></li>
+      <li><span class="if">One instance, fastest, disposable</span><span class="arrow">→</span><span class="then">Instance store</span></li>
+      <li><span class="if">Shared, Linux, general</span><span class="arrow">→</span><span class="then">EFS</span></li>
+      <li><span class="if">Shared, Windows / SMB / AD</span><span class="arrow">→</span><span class="then">FSx for Windows File Server</span></li>
+      <li><span class="if">Shared, HPC / ML</span><span class="arrow">→</span><span class="then">FSx for Lustre</span></li>
+      <li><span class="if">Template to launch servers</span><span class="arrow">→</span><span class="then">AMI</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Option</th><th>Kind</th><th>Scope</th><th>Persistent?</th><th>Shared?</th><th>Typical use</th></tr></thead>
+        <tbody>
+          <tr><td>EBS</td><td>Block</td><td>One AZ</td><td>Yes</td><td>No (one instance)</td><td>Root volumes, databases</td></tr>
+          <tr><td>Instance store</td><td>Block</td><td>The host</td><td>No</td><td>No</td><td>Cache, buffers, scratch</td></tr>
+          <tr><td>EFS</td><td>File (NFS)</td><td>Region, many AZs</td><td>Yes</td><td>Yes, Linux</td><td>Shared content, web farms</td></tr>
+          <tr><td>FSx for Windows</td><td>File (SMB)</td><td>1 or 2 AZs</td><td>Yes</td><td>Yes, Windows</td><td>Windows shares with AD</td></tr>
+          <tr><td>FSx for Lustre</td><td>File (Lustre)</td><td>One AZ</td><td>Scratch or persistent</td><td>Yes, Linux</td><td>HPC, ML, with S3</td></tr>
+          <tr><td>AMI</td><td>Image</td><td>Region (copyable)</td><td>Yes (immutable)</td><td>n/a</td><td>Launching instances</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p>The section summary describes FSx as "Region-wide, spans AZs". <b>FSx for Windows</b> can span <b>two AZs</b> (Multi-AZ), but <b>FSx for Lustre</b> lives in <b>one AZ</b>. Only EFS (Regional) spans all AZs of a Region.</p></div>
+      <div class="note"><span class="flag add">Added</span><p>The notes "EC2 Storage Types", "Shared responsibility model – EC2 Storage" and "EC2 Storage Section Summary" are merged into this page.</p></div>
+    </div>
+  </section>
+
+  <footer>Sources: EC2 storage notes "EC2 Storage Types", "Shared responsibility model - EC2 Storage", "EC2 Storage Section Summary"; AWS EBS, EFS and FSx documentation.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('stSvg'), {
+    nodes: {
+      q1: { x: 500, y: 55, w: 300, label: 'Shared by many instances?', kind: 'plain' },
+      q2: { x: 230, y: 175, w: 330, label: 'Fastest I/O and OK to lose data?', kind: 'plain' },
+      q3: { x: 760, y: 175, w: 230, label: 'Which workload?', kind: 'plain' },
+      is: { x: 110, y: 320, icon: 'bolt', kind: 'storage', label: 'Instance store', sub: 'cache, scratch' },
+      ebs: { x: 340, y: 320, icon: 'disk', kind: 'storage', label: 'EBS', sub: 'one instance, one AZ' },
+      fw: { x: 590, y: 320, icon: 'folder', kind: 'storage', label: 'FSx for Windows', sub: 'SMB + AD' },
+      lu: { x: 760, y: 320, icon: 'bolt', kind: 'storage', label: 'FSx for Lustre', sub: 'HPC' },
+      efs: { x: 920, y: 320, icon: 'folder', kind: 'storage', label: 'EFS', sub: 'Linux NFS' }
+    },
+    links: [
+      { a: 'q1', b: 'q2', via: [[230, 55]], label: 'No', at: [310, 47] },
+      { a: 'q1', b: 'q3', via: [[760, 55]], label: 'Yes', at: [690, 47] },
+      { a: 'q2', b: 'is', via: [[110, 175]], label: 'Yes', at: [80, 230] },
+      { a: 'q2', b: 'ebs', via: [[340, 175]], label: 'No', at: [370, 230] },
+      { a: 'q3', b: 'fw', via: [[590, 175]], label: 'Windows', at: [560, 230] },
+      { a: 'q3', b: 'lu', label: 'HPC', at: [785, 255] },
+      { a: 'q3', b: 'efs', via: [[920, 175]], label: 'Linux', at: [950, 230] }
+    ]
+  });
+  const TREE = ['q1', 'q2', 'q3', 'is', 'ebs', 'fw', 'lu', 'efs'];
+  const CASES = [
+    null,
+    { route: ['q1', 'q2', 'ebs'], name: 'MySQL on one EC2 instance', leaf: 'ebs' },
+    { route: ['q1', 'q2', 'is'], name: 'Video transcoding scratch space', leaf: 'is' },
+    { route: ['q1', 'q3', 'efs'], name: 'Linux web farm sharing uploads', leaf: 'efs' },
+    { route: ['q1', 'q3', 'fw'], name: 'Windows app with AD-secured share', leaf: 'fw' },
+    { route: ['q1', 'q3', 'lu'], name: 'ML training on a GPU cluster', leaf: 'lu' },
+    null
+  ];
+  function base(i) {
+    net.reset();
+    const c = CASES[i];
+    net.focus(c ? c.route : null);
+    if (c) { net.badge(c.leaf, 'pick', 'ok'); for (let k = 0; k < c.route.length - 1; k++) net.link(c.route[k], c.route[k + 1], 'hot'); }
+  }
+  const go = i => async run => { base(i); const c = CASES[i]; await net.send(c.route, { run, label: c.name }); };
+  const STEPS = [
+    { title: 'Two questions decide it',
+      text: 'First: will <b>many instances share</b> the data? If not, it\'s a disk for one instance: do you need <b>maximum speed</b> and can you <b>afford to lose</b> the data? If shared: what <b>kind of workload</b> (Windows, HPC, general Linux)?' },
+    { title: 'A database on one server',
+      text: 'One MySQL server; the data must survive restarts. Not shared, durability matters → <b>EBS</b> (gp3, or io2 for heavy IOPS). Back it up with snapshots.',
+      play: go(1) },
+    { title: 'Scratch space for transcoding',
+      text: 'Temporary frames while converting video; speed is everything and the source file lives elsewhere. Not shared, disposable → <b>instance store</b>.',
+      play: go(2) },
+    { title: 'Linux web farm with uploads',
+      text: 'Six Linux web servers across 3 AZs must see the same uploaded files. Shared, Linux → <b>EFS</b> (with a lifecycle policy to EFS-IA).',
+      play: go(3) },
+    { title: 'Windows share for an AD shop',
+      text: 'A .NET app on Windows servers plus office PCs need a common share with AD group permissions. Shared, Windows → <b>FSx for Windows File Server</b>.',
+      play: go(4) },
+    { title: 'HPC / machine learning',
+      text: 'A training job on dozens of instances reads terabytes from S3 at very high throughput. Shared, HPC → <b>FSx for Lustre</b> linked to the S3 bucket.',
+      play: go(5) },
+    { title: 'Whoever you pick, you own the data',
+      text: 'AWS keeps EBS and EFS replicated and replaces broken hardware. <b>You</b> schedule snapshots/backups, turn on encryption, and accept that instance store data can vanish.' }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ---------- Decision walker ---------- */
+  const W = {
+    q1: { q: 'Will many instances read and write the same data?', o: [['No, one instance', 'q2'], ['Yes, shared', 'q3']] },
+    q2: { q: 'Do you need the very highest disk I/O, and can you lose the data on stop/terminate?', o: [['Yes, it\'s temporary', 'is'], ['No, it must persist', 'ebs']] },
+    q3: { q: 'What kind of workload?', o: [['Linux, general', 'efs'], ['Windows / SMB / Active Directory', 'fw'], ['High performance computing / ML', 'lu']] },
+    is: { a: '<b>EC2 instance store</b>. Fastest, free with the instance type, gone on stop/terminate. Keep the real data elsewhere.' },
+    ebs: { a: '<b>EBS volume</b> (gp3 for most, io2 for demanding databases). Snapshot it on a schedule; Delete on termination off if it must outlive the instance.' },
+    efs: { a: '<b>Amazon EFS</b>. Mount on every Linux instance in every AZ; add a lifecycle policy to EFS-IA for cold files.' },
+    fw: { a: '<b>FSx for Windows File Server</b>. SMB share joined to Active Directory; Multi-AZ for HA.' },
+    lu: { a: '<b>FSx for Lustre</b>. Link it to the S3 bucket holding the data set.' }
+  };
+  const path = [];
+  function walk(id) {
+    const n = W[id], el = $('wk');
+    if (n.a) { el.innerHTML = `<div class="ans">${n.a}</div><div class="path">${path.join(' → ')}</div><div class="controls"><button class="btn" type="button" data-r>Start again</button></div>`; return; }
+    el.innerHTML = `<div class="q">${n.q}</div><div class="opts">${n.o.map(o => `<button class="btn" type="button" data-n="${o[1]}">${o[0]}</button>`).join('')}</div><div class="path">${path.join(' → ') || '&nbsp;'}</div>`;
+  }
+  $('wk').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.hasAttribute('data-r')) { path.length = 0; return walk('q1'); }
+    path.push(b.textContent); walk(b.dataset.n);
+  });
+  walk('q1');
+
+  K.pick($('sr'), [
+    { q: 'Replicating EBS volume data within the AZ.', a: 'AWS', why: 'AWS replicates EBS and EFS data for durability.' },
+    { q: 'Taking snapshots on a schedule.', a: 'You', why: 'Backup procedures are the customer\'s job.' },
+    { q: 'Replacing a failed disk in the storage hardware.', a: 'AWS', why: 'Physical infrastructure.' },
+    { q: 'Encrypting the EBS volumes.', a: 'You', why: 'You choose and turn on encryption (AWS makes it easy).' },
+    { q: 'Data lost from an instance store after a stop.', a: 'You', why: 'Understanding instance store risk is your responsibility.' },
+    { q: 'Preventing AWS employees from reading your volumes.', a: 'AWS', why: 'AWS controls its own staff access.' }
+  ], ['AWS', 'You']);
+
+  K.pick($('pick'), [
+    { q: 'Windows file share for 300 employees, permissions from Active Directory.', a: 'FSx for Windows', why: 'SMB + AD.' },
+    { q: 'Highest-performance temporary storage for a single instance.', a: 'Instance store', why: 'Local NVMe, ephemeral.' },
+    { q: 'Shared file system for Linux instances in three AZs.', a: 'EFS', why: 'Regional NFS.' },
+    { q: 'Boot volume that keeps data when the instance stops.', a: 'EBS', why: 'Persistent block storage.' },
+    { q: 'Genomics pipeline on a large compute cluster, data in S3.', a: 'FSx for Lustre', why: 'HPC + S3 integration.' },
+    { q: 'A data disk for one app server, backed up nightly with snapshots.', a: 'EBS', why: 'Persistent block storage for one instance; snapshots are its backups.' }
+  ], ['EBS', 'Instance store', 'EFS', 'FSx for Windows', 'FSx for Lustre']);
+})();
+</script>
+</body>
+</html>

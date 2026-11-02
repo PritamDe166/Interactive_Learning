@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IAM roles for EC2</title>
+<meta name="description" content="AWS Cloud Practitioner: give an EC2 instance AWS permissions by attaching an IAM role (instance profile). The CLI picks up temporary credentials automatically; never run aws configure with personal keys on an instance.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .term { background: var(--code-bg); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; font-family: var(--mono); font-size: 13px; color: var(--fg-soft); min-height: 120px; max-height: 300px; overflow-y: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .term .p { color: var(--good-text); } .term .e { color: var(--bad-text); } .term .h { color: var(--accent-text); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · EC2 · Domain 2 Security (Task 2.3)</div>
+    <h1>IAM roles for EC2</h1>
+    <ul class="lede">
+      <li>Software on an instance that calls AWS (CLI, SDK) needs credentials. The right way: <b>attach an IAM role</b> to the instance.</li>
+      <li>The role reaches the instance through an <b>instance profile</b>; the CLI and SDK fetch its <b>temporary credentials</b> automatically, so <b>no <span class="mono">aws configure</span></b>.</li>
+      <li><b>Never</b> type your personal access keys into an instance: anyone who gets onto the box can copy them.</li>
+      <li>The role can do only what its <b>permissions policy</b> allows. Remove the policy and the same command gets <b>AccessDenied</b>.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: from "Unable to locate credentials" to a working command</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 440" aria-label="An instance gets temporary credentials from its attached role via instance metadata, then calls IAM"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>Workloads on EC2 get AWS permissions from an <b>IAM role</b> attached to the instance, never from stored access keys.</li>
+      <li>The role is wrapped in an <b>instance profile</b>; the console creates it for you when you attach the role.</li>
+      <li>On the instance, the CLI/SDK read <b>temporary credentials</b> from the <b>instance metadata service</b> and refresh them automatically.</li>
+      <li>The role needs a <b>trust policy</b> for <code>ec2.amazonaws.com</code> and <b>permissions policies</b> (course: <code>IAMReadOnlyAccess</code> on <code>DemoRoleForEC2</code>).</li>
+      <li>Attach: <b>Instance → Actions → Security → Modify IAM role</b>. One role per instance at a time; you can change it while it runs.</li>
+      <li>Remove the policy → <b>AccessDenied</b>; add it back → may take a few seconds to <b>propagate</b>.</li>
+      <li>Anyone who can run commands on the instance can use its role: keep the OS patched and the role <b>least-privilege</b>.</li>
+      <li>Never put keys in <b>user data</b>, scripts, code or config files on the instance.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+
+  <section aria-labelledby="lbH">
+    <h2 class="stage-title" id="lbH">The course lab, in a simulated terminal</h2>
+    <div class="stage-kind">Change the console settings · run the command on the instance</div>
+    <div class="controls">
+      <label class="toggle" for="lRole"><input type="checkbox" id="lRole"> Role DemoRoleForEC2 attached</label>
+      <label class="toggle" for="lPol"><input type="checkbox" id="lPol" checked> Role has IAMReadOnlyAccess</label>
+      <button class="btn primary" id="lRun" type="button">aws iam list-users</button>
+      <button class="btn" id="lWho" type="button">aws sts get-caller-identity</button>
+      <button class="btn" id="lConf" type="button">aws configure (with my keys)</button>
+    </div>
+    <div class="term" id="term"></div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Attach the role (from the course hands-on)</summary>
+      <ol>
+        <li>Connect to the instance (EC2 Instance Connect). <code>aws --version</code>: the CLI is preinstalled on Amazon Linux.</li>
+        <li><code>aws iam list-users</code> → <b>Unable to locate credentials</b>. Don't fix it with <code>aws configure</code>.</li>
+        <li>EC2 → select instance → <b>Actions → Security → Modify IAM role</b> → choose <code>DemoRoleForEC2</code> → Save. Check the instance's <b>IAM role</b> field.</li>
+        <li>Run <code>aws iam list-users</code> again: the users are listed. No keys were configured.</li>
+        <li>In IAM, detach <code>IAMReadOnlyAccess</code> from the role → the command returns <b>AccessDenied</b>. Re-attach; wait a moment; it works again.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">App on EC2 needs to call AWS</span><span class="arrow">→</span><span class="then">Attach an IAM role</span></li>
+      <li><span class="if">"Store access keys on the instance"</span><span class="arrow">→</span><span class="then">Wrong answer, always</span></li>
+      <li><span class="if">How the role reaches the instance</span><span class="arrow">→</span><span class="then">Instance profile + temporary credentials</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <div class="quiz">
+      <details><summary>The CLI on an instance says "Unable to locate credentials". Correct fix?<span class="go">Show answer</span></summary><div class="ans"><p><b>Attach an IAM role</b> to the instance (not <code>aws configure</code> with your keys).</p></div></details>
+      <details><summary>A role is attached but the command returns AccessDenied. Why?<span class="go">Show answer</span></summary><div class="ans"><p>The role's <b>permissions policy</b> doesn't allow that action (or a change hasn't propagated yet).</p></div></details>
+      <details><summary>What is an instance profile?<span class="go">Show answer</span></summary><div class="ans"><p>The <b>container that attaches an IAM role to an EC2 instance</b>; the console creates it automatically.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Terminal output is simulated. Sources: EC2 note "IAM Roles for EC2 Instances"; IAM note "IAM Roles for AWS Services". The concept in depth: <a href="iam-roles.html">IAM roles</a>.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 20, y: 20, w: 560, h: 400, kind: 'region', label: 'ap-south-1' }],
+    nodes: {
+      ec2: { x: 140, y: 120, icon: 'chip', kind: 'compute', label: 'EC2 instance', sub: 'aws iam list-users' },
+      imds: { x: 140, y: 320, icon: 'key', kind: 'mgmt', label: 'Instance metadata', sub: 'temp credentials' },
+      prof: { x: 420, y: 320, icon: 'idcard', kind: 'sec', label: 'Instance profile', sub: 'DemoRoleForEC2' },
+      pol: { x: 420, y: 120, icon: 'doc', kind: 'mgmt', label: 'IAMReadOnlyAccess' },
+      iam: { x: 720, y: 120, icon: 'shield', kind: 'sec', label: 'IAM', sub: 'evaluates the role' },
+      api: { x: 900, y: 120, icon: 'users', kind: 'sec', label: 'IAM users list' },
+      keys: { x: 720, y: 330, icon: 'bug', kind: 'sec', label: 'Your access keys', sub: 'never on the instance' }
+    },
+    links: [{ a: 'ec2', b: 'imds', kind: 'dash', label: 'ask for creds', at: [70, 220] }, { a: 'imds', b: 'prof', kind: 'dash' }, { a: 'prof', b: 'pol', kind: 'dash' }, { a: 'ec2', b: 'iam', via: [[280, 120], [280, 40], [720, 40]] }, { a: 'iam', b: 'api' }, { a: 'keys', b: 'ec2', kind: 'dash', via: [[720, 400], [280, 400], [280, 160]] }]
+  });
+  function base(i) {
+    net.reset();
+    const role = i >= 3, keys = i === 2;
+    ['prof', 'pol'].forEach(n => net.nodes[n].g.style.display = role ? '' : 'none');
+    net.link('imds', 'prof', role ? '' : 'hide'); net.link('prof', 'pol', role ? '' : 'hide');
+    net.nodes.keys.g.style.display = keys ? '' : 'none'; net.link('keys', 'ec2', keys ? '' : 'hide');
+    net.focus([['ec2', 'iam'], ['ec2', 'imds'], ['keys', 'ec2'], ['ec2', 'imds', 'prof', 'pol'], ['ec2', 'imds', 'prof'], ['ec2', 'iam', 'api', 'pol'], ['ec2', 'iam', 'pol'], null][i]);
+    if (i === 0 || i === 1) net.badge('ec2', 'Unable to locate credentials', 'bad');
+    if (i === 2) net.badge('keys', 'don\'t!', 'bad');
+    if (i === 3) net.badge('prof', 'attached', 'ok');
+    if (i === 5) net.badge('api', 'users listed', 'ok');
+    if (i === 6) { net.state('pol', 'down'); net.badge('iam', 'AccessDenied', 'bad'); }
+  }
+  const STEPS = [
+    { title: 'The instance has no credentials',
+      text: 'On the instance, <code>aws iam list-users</code> fails: <b>Unable to locate credentials</b>. The CLI is installed, but nothing tells AWS who is calling.',
+      play: async run => { base(0); await net.send(['ec2', 'iam'], { run, tone: 'red', label: 'no creds' }); } },
+    { title: 'It looks in instance metadata…',
+      text: 'The CLI checks environment variables, config files, and the <b>instance metadata service</b>, a local endpoint every instance has. With no role attached, metadata has no credentials to give.',
+      play: async run => { base(1); await net.send(['ec2', 'imds'], { run, tone: 'cyan', label: 'creds?' }); net.badge('imds', 'none', 'bad'); } },
+    { title: 'Tempting, and wrong: aws configure',
+      text: 'The CLI suggests <code>aws configure</code>. Typing <b>your own access keys</b> here would work, but they\'d sit on disk where any intruder, script or backup can copy them, valid until you notice. <b>Never do it.</b>' },
+    { title: 'Attach the role',
+      text: 'In the console: <b>Actions → Security → Modify IAM role → DemoRoleForEC2</b>. The role (trusted by EC2, with <b>IAMReadOnlyAccess</b>) reaches the instance through an <b>instance profile</b>.' },
+    { title: 'Metadata now hands out temporary credentials',
+      text: 'The CLI asks metadata again and receives <b>temporary credentials</b> for the role, which refresh automatically before they expire. Nothing was typed or stored by you.',
+      play: async run => { base(4); await net.send(['ec2', 'imds', 'prof'], { run, tone: 'cyan' }); await net.send(['prof', 'imds', 'ec2'], { run, tone: 'green', label: 'temp creds' }); } },
+    { title: 'The command works',
+      text: '<code>aws iam list-users</code> now succeeds. IAM evaluates the call <b>as the role</b> and IAMReadOnlyAccess allows it.',
+      play: async run => { base(5); await net.send(['ec2', 'iam', 'api'], { run, label: 'ListUsers' }); } },
+    { title: 'Permissions come from the role\'s policy',
+      text: 'Detach IAMReadOnlyAccess from the role and run it again: <b>AccessDenied</b>. The role only carries the permissions you give it. Re-attach and wait a moment for it to propagate.',
+      play: async run => { base(6); await net.send(['ec2', 'iam'], { run, tone: 'red', label: 'ListUsers' }); } },
+    { title: 'The rule for the exam',
+      text: '<b>Applications on EC2 use IAM roles</b>. Stored access keys on an instance, in user data, or in code are always the wrong answer. Keep the role least-privilege: anyone on the box can use it.' }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  const term = $('term'), P = '<span class="p">[ec2-user@ip-172-31-20-5 ~]$</span> ';
+  let conf = false;
+  const out = (c, r) => { term.innerHTML += P + c + '\n' + r + '\n\n'; term.scrollTop = term.scrollHeight; };
+  $('lRun').addEventListener('click', () => {
+    const role = $('lRole').checked, pol = $('lPol').checked;
+    if (conf) return out('aws iam list-users', '{ "Users": [ … ] }\n<span class="e">⚠ Works, but as YOU: keys in ~/.aws/credentials take precedence over the instance role, and anyone on this box can copy them.</span>');
+    if (!role) return out('aws iam list-users', '<span class="e">Unable to locate credentials. You can configure credentials by running "aws configure".</span>\n<span class="h">→ Attach an IAM role to the instance instead.</span>');
+    if (!pol) return out('aws iam list-users', '<span class="e">An error occurred (AccessDenied) when calling the ListUsers operation: User: arn:aws:sts::123456789012:assumed-role/DemoRoleForEC2/i-0abc123 is not authorized to perform: iam:ListUsers</span>');
+    out('aws iam list-users', '{\n  "Users": [\n    { "UserName": "Pritam", "Arn": "arn:aws:iam::123456789012:user/Pritam" }\n  ]\n}');
+  });
+  $('lWho').addEventListener('click', () => {
+    if (conf) return out('aws sts get-caller-identity', '{\n  "Arn": "arn:aws:iam::123456789012:user/Pritam"\n}\n<span class="e">→ The instance is acting as YOU (the credentials file beats the role). Anyone on this box now holds your keys.</span>');
+    if ($('lRole').checked) return out('aws sts get-caller-identity', '{\n  "Account": "123456789012",\n  "Arn": "arn:aws:sts::123456789012:assumed-role/DemoRoleForEC2/i-0abc123"\n}\n<span class="h">→ The instance is acting as the role (assumed-role), with temporary credentials.</span>');
+    out('aws sts get-caller-identity', '<span class="e">Unable to locate credentials.</span>');
+  });
+  $('lConf').addEventListener('click', () => { conf = !conf; out('aws configure', conf ? 'AWS Access Key ID: AKIA****************\nAWS Secret Access Key: ****************\n<span class="e">Saved to ~/.aws/credentials. Bad practice: remove them and use a role.</span>' : 'Credentials file removed. Good.'); $('lConf').textContent = conf ? 'Remove my keys from the instance' : 'aws configure (with my keys)'; });
+  term.innerHTML = 'Connected with EC2 Instance Connect.\n\n';
+})();
+</script>
+</body>
+</html>

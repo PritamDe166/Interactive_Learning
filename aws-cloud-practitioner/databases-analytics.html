@@ -51,16 +51,16 @@
   </header>
 
   <section aria-labelledby="whatH">
-    <h2 id="whatH">In .NET / Azure terms</h2>
-    <p class="sub">Mostly the same databases you know from SQL Server and Azure, with AWS doing the operations.</p>
+    <h2 id="whatH">In terms you already know</h2>
+    <p class="sub">Mostly the same databases you know from SQL Server, with AWS doing the operations.</p>
     <div class="card analogy">
-      <div class="row head"><span>AWS</span><span>Closest .NET / Azure idea</span><span>The difference</span></div>
-      <div class="row"><span class="aws">RDS</span><span class="like">Azure SQL Database / SQL Server you'd host</span><span>Managed MySQL, PostgreSQL, SQL Server, Oracle…; no OS access.</span></div>
+      <div class="row head"><span>AWS</span><span>Closest idea you already know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">RDS</span><span class="like">SQL Server you install and patch yourself, minus the installing and patching</span><span>Managed MySQL, PostgreSQL, SQL Server, Oracle…; no OS access.</span></div>
       <div class="row"><span class="aws">Multi-AZ</span><span class="like">SQL Server Always On (sync replica)</span><span>Automatic failover to a standby in another AZ.</span></div>
       <div class="row"><span class="aws">Read replica</span><span class="like">Readable secondary</span><span>Async copy for reporting; manual promotion.</span></div>
-      <div class="row"><span class="aws">DynamoDB</span><span class="like">Azure Cosmos DB</span><span>Serverless NoSQL key-value, ms latency at any scale.</span></div>
-      <div class="row"><span class="aws">ElastiCache</span><span class="like">Azure Cache for Redis</span><span>In-memory cache in front of a database.</span></div>
-      <div class="row"><span class="aws">Redshift</span><span class="like">Azure Synapse dedicated SQL pool</span><span>Columnar data warehouse for analytics (OLAP).</span></div>
+      <div class="row"><span class="aws">DynamoDB</span><span class="like">A huge Dictionary&lt;key, item&gt; you reach over HTTPS</span><span>Serverless NoSQL key-value, ms latency at any scale.</span></div>
+      <div class="row"><span class="aws">ElastiCache</span><span class="like">Redis, or IMemoryCache shared by every server</span><span>In-memory cache in front of a database.</span></div>
+      <div class="row"><span class="aws">Redshift</span><span class="like">A SQL Server reporting warehouse (OLAP cubes, star schema)</span><span>Columnar data warehouse for analytics (OLAP).</span></div>
     </div>
   </section>
 

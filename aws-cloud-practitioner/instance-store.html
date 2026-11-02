@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EC2 instance store</title>
+<meta name="description" content="AWS Cloud Practitioner: EC2 instance store is a disk physically attached to the host, very fast but ephemeral: data is lost on stop, terminate or hardware failure.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .stores { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 12px; margin-bottom: 12px; }
+  .store { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; background: var(--panel-2); }
+  .store h3 { margin: 0 0 4px; font-size: 15px; }
+  .store .f { font: 13px var(--mono); color: var(--muted); }
+  .store .s { margin-top: 8px; font-weight: 600; }
+  .store.lost { border-color: var(--red); }
+  .store.lost .s { color: var(--bad-text); }
+  .store.kept .s { color: var(--good-text); }
+  .lab-ctl { display: flex; flex-wrap: wrap; gap: 10px; }
+  .iops { display: grid; gap: 10px; }
+  .iops .r { display: grid; grid-template-columns: 170px 1fr; gap: 10px; align-items: center; font-size: 13px; }
+  .iops .b { height: 18px; border-radius: 6px; background: var(--teal); min-width: 4px; }
+  .iops .b.hot { background: var(--orange); }
+  .iops .n { font: 12px var(--mono); color: var(--muted); }
+  @media (max-width: 520px) { .iops .r { grid-template-columns: 1fr; gap: 4px; } }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · EC2 instance storage · 5</div>
+    <h1>EC2 instance store</h1>
+    <ul class="lede">
+      <li>An <b>instance store</b> is a disk <b>physically inside the host server</b> your instance runs on, not a network drive.</li>
+      <li>No network in the way, so it is <b>extremely fast</b> (millions of IOPS on storage-optimized types like I3).</li>
+      <li>It is <b>ephemeral</b>: data is <b>lost on stop, terminate or host failure</b> (it survives a reboot).</li>
+      <li>Use it for <b>cache, buffers, scratch data</b>; backups and replication are <b>your job</b>.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>Idea</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Instance store</span><span class="like">The local SSD in a server vs the SAN</span><span>When you stop the VM, AWS may start it on a <b>different</b> physical server, so the local SSD contents are gone.</span></div>
+      <div class="row"><span class="aws">Good use</span><span class="like">The SQL Server <code>tempdb</code> or an IIS output cache</span><span>Data you can rebuild. Never the only copy of anything.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: fast, until the instance moves</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="An instance uses a local instance store on physical host 1 and an EBS volume over the network; after stop and start it runs on host 2 with an empty instance store but the same EBS volume"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li><b>Instance store = hardware disk attached to the physical host</b>. EBS = network drive.</li>
+      <li>Only <b>some instance types</b> have it (e.g. the storage-optimized <b>I</b> family, types with a "d" like m5d); size is fixed by the type and it's included in the price.</li>
+      <li><b>Very high IOPS and throughput</b>, much more than EBS, because there's no network hop.</li>
+      <li><b>Ephemeral</b>: lost on <b>stop</b>, <b>hibernate</b>, <b>terminate</b> and <b>underlying hardware failure</b>. <b>Survives a reboot.</b></li>
+      <li>Good for <b>buffers, caches, scratch/temporary data</b>, or data already <b>replicated</b> across several instances.</li>
+      <li><b>Backups and replication are your responsibility</b> (shared responsibility model).</li>
+      <li>Exam trigger: "<b>very high-performance, hardware-attached / local</b> storage" → instance store. "Persistent" → EBS.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+
+  <section aria-labelledby="labH">
+    <h2 class="stage-title" id="labH">What survives?</h2>
+    <div class="stage-kind">An i3 instance keeps orders on EBS and a cache on the instance store</div>
+    <div class="card">
+      <div class="stores">
+        <div class="store" id="sE"><h3>EBS volume</h3><div class="f">/data/orders.db</div><div class="s" id="sEs">Data present</div></div>
+        <div class="store" id="sI"><h3>Instance store</h3><div class="f">/cache/thumbnails/</div><div class="s" id="sIs">Data present</div></div>
+      </div>
+      <div class="lab-ctl">
+        <button class="btn" data-ev="reboot" type="button">Reboot</button>
+        <button class="btn" data-ev="stop" type="button">Stop, then start</button>
+        <button class="btn" data-ev="term" type="button">Terminate</button>
+        <button class="btn" data-ev="hw" type="button">Host hardware fails</button>
+      </div>
+      <p class="nf-cap" id="labCap">Pick an event.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="ioH">
+    <h2 class="stage-title" id="ioH">How much faster?</h2>
+    <div class="stage-kind">Maximum IOPS per volume or device (AWS figures, linear scale)</div>
+    <div class="card iops">
+      <div class="r"><span>Instance store (i3.16xlarge, read)</span><div><div class="b hot" style="width:100%"></div><div class="n">~3,300,000</div></div></div>
+      <div class="r"><span>EBS io2 Block Express</span><div><div class="b" style="width:7.8%"></div><div class="n">256,000</div></div></div>
+      <div class="r"><span>EBS gp3</span><div><div class="b" style="width:2.4%"></div><div class="n">80,000</div></div></div>
+      <div class="r"><span>EBS gp2</span><div><div class="b" style="width:0.5%"></div><div class="n">16,000</div></div></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">EBS or instance store?</h2>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Where you'd see it (no course lab)</summary>
+      <ol>
+        <li>In the launch wizard, pick a type with local storage (e.g. <b>i3.large</b> or <b>m5d.large</b>); the type details show "Instance storage: 1 x 475 GB NVMe SSD".</li>
+        <li><b>Storage</b> section of the wizard: the instance store volume appears next to the EBS root, without a Delete-on-termination option (it always disappears).</li>
+        <li>Don't run it for long: I3 types are expensive. Terminate after looking.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Highest disk I/O for one instance</span><span class="arrow">→</span><span class="then">Instance store</span></li>
+      <li><span class="if">Cache, buffer, scratch, temp files</span><span class="arrow">→</span><span class="then">Instance store</span></li>
+      <li><span class="if">Data must survive stop/terminate</span><span class="arrow">→</span><span class="then">EBS (or EFS)</span></li>
+      <li><span class="if">Who backs up instance store data?</span><span class="arrow">→</span><span class="then">The customer</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Event</th><th>EBS volume</th><th>Instance store</th></tr></thead>
+        <tbody>
+          <tr><td>Reboot</td><td>Kept</td><td>Kept</td></tr>
+          <tr><td>Stop / hibernate, then start</td><td>Kept</td><td>Lost</td></tr>
+          <tr><td>Terminate</td><td>Root deleted by default; extra kept by default</td><td>Lost</td></tr>
+          <tr><td>Host hardware failure</td><td>Kept (stored off-host, replicated in the AZ)</td><td>Lost</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>gp2 maximum is 16,000 IOPS</b>, not 32,000 as the note says (AWS EBS product page).</p></div>
+      <div class="note"><span class="flag add">Added</span><p>Instance store <b>survives a reboot</b> and is lost on <b>hibernate</b> too. The "EC2 Storage Types" note mentions the reboot case.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <div class="quiz">
+      <details><summary>Why is instance store faster than EBS?<span class="go">Show answer</span></summary><div class="ans"><p>It is a disk <b>in the host server</b>; there is no network between the instance and the disk.</p></div></details>
+      <details><summary>You stop and start an i3 instance. What happens to the instance store data?<span class="go">Show answer</span></summary><div class="ans"><p><b>Lost.</b> The instance may start on a different host with a fresh, empty instance store.</p></div></details>
+      <details><summary>Is instance store a good place for a database's only copy?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> Use EBS, or replicate the data to other instances if you need instance-store speed.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: EC2 storage notes "EC2 Instance Store" and "EC2 Storage Types"; AWS EC2 instance store documentation; <a href="https://aws.amazon.com/ebs/general-purpose/">AWS EBS general purpose volumes</a>. IOPS are AWS-published maximums; real workloads vary.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'az', x: 20, y: 20, w: 960, h: 385, kind: 'az', label: 'us-east-1a' }, { id: 'h1', x: 50, y: 60, w: 380, h: 200, kind: 'onprem', label: 'Physical host 1' }, { id: 'h2', x: 570, y: 60, w: 380, h: 200, kind: 'onprem', label: 'Physical host 2' }],
+    nodes: {
+      ec2: { x: 150, y: 160, icon: 'chip', kind: 'compute', label: 'i3.large', sub: 'running' },
+      is1: { x: 330, y: 160, icon: 'bolt', kind: 'storage', label: 'Instance store', sub: 'local NVMe' },
+      ebs: { x: 500, y: 335, icon: 'disk', kind: 'storage', label: 'EBS volume', sub: 'network storage' },
+      ec2b: { x: 670, y: 160, icon: 'chip', kind: 'compute', label: 'Same instance', sub: 'after start' },
+      is2: { x: 850, y: 160, icon: 'bolt', kind: 'storage', label: 'Instance store', sub: 'empty' }
+    },
+    links: [
+      { a: 'ec2', b: 'is1', kind: 'priv', label: 'local', at: [240, 150] },
+      { a: 'ec2', b: 'ebs', via: [[150, 335]], label: 'network', at: [300, 327] },
+      { a: 'ec2b', b: 'is2', kind: 'priv', label: 'local', at: [760, 150] },
+      { a: 'ec2b', b: 'ebs', via: [[670, 335]] }
+    ]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['ec2', 'is1', 'ebs'], ['ec2', 'is1', 'ebs'], ['ec2', 'is1', 'ebs'], ['ec2', 'is1', 'ebs', 'ec2b', 'is2'], ['ec2', 'is1', 'ebs'], ['ec2', 'is1', 'ebs'], null];
+    net.focus(F[i]);
+    net.node('ec2').sub(i === 3 ? 'stopped' : i === 4 ? 'terminated' : 'running');
+    if (i !== 3 && i !== 6) { net.link('ec2b', 'is2', 'hide'); net.link('ec2b', 'ebs', 'hide'); }
+    if (i === 1) { net.badge('is1', 'millions IOPS', 'ok'); net.badge('ebs', 'up to 80k', 'info'); }
+    if (i === 2) { net.badge('is1', 'kept', 'ok'); net.badge('ebs', 'kept', 'ok'); }
+    if (i === 3) { net.state('ec2', 'dim'); net.state('is1', 'down'); net.badge('is1', 'wiped', 'bad'); net.link('ec2', 'is1', 'cut'); net.link('ec2', 'ebs', 'hide'); net.badge('ebs', 'kept', 'ok'); net.badge('is2', 'empty', 'info'); }
+    if (i === 4) { net.state('ec2', 'down'); net.state('is1', 'down'); net.badge('is1', 'lost', 'bad'); net.badge('ebs', 'safe', 'ok'); net.link('ec2', 'is1', 'cut'); }
+    if (i === 5) { net.badge('is1', 'cache only', 'info'); net.badge('ebs', 'orders.db', 'ok'); }
+  }
+  const STEPS = [
+    { title: 'Two disks, two paths',
+      text: 'This <b>i3</b> instance has an <b>EBS volume</b>, reached over the network, and an <b>instance store</b>: an NVMe SSD <b>inside the same physical server</b>. The instance store is wired straight to the host.',
+      play: async run => { base(0); await Promise.all([net.send(['ec2', 'is1'], { run, label: 'local' }), net.send(['ec2', 'ebs'], { run, tone: 'cyan', label: 'network' })]); } },
+    { title: 'Why bother: speed',
+      text: 'No network hop means <b>very high IOPS and throughput</b>: an i3 instance store can do millions of read IOPS, while a single EBS gp3 volume tops out at 80,000.',
+      play: async run => { base(1); for (let k = 0; k < 3; k++) await net.send(['ec2', 'is1'], { run, speed: 3 }); } },
+    { title: 'Reboot: everything stays',
+      text: 'A <b>reboot</b> restarts the OS on the <b>same host</b>, so the instance store and EBS both keep their data.' },
+    { title: 'Stop and start: the instance moves',
+      text: 'After a <b>stop</b>, the next <b>start</b> usually places the instance on a <b>different physical host</b>. EBS follows it over the network. The old local disk is <b>wiped</b>, and the new host gives an <b>empty</b> instance store.',
+      tip: 'Exam: instance store data is lost when the instance is stopped or terminated.',
+      play: async run => { base(3); net.link('ec2b', 'ebs', ''); await net.send(['ebs', 'ec2b'], { run, tone: 'green', label: 'same EBS' }); } },
+    { title: 'Terminate or hardware failure: gone',
+      text: 'On <b>terminate</b>, or if the <b>host hardware fails</b>, the instance store is lost too. AWS doesn\'t replicate it. That is why it\'s called <b>ephemeral storage</b>.' },
+    { title: 'Use it for data you can rebuild',
+      text: 'Keep the <b>orders database on EBS</b> and the <b>thumbnail cache, buffers and scratch files</b> on the instance store. If you must keep instance-store data, <b>you</b> back it up or replicate it (e.g. a cluster that copies data across nodes).' },
+    { title: 'The whole picture',
+      text: 'Instance store: <b>physically attached</b>, <b>fastest</b>, <b>ephemeral</b> (survives reboot only), <b>your</b> backups. EBS: network, persistent, AZ-bound.' }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  const R = {
+    reboot: [true, true, 'Reboot keeps both: same host, same disks.'],
+    stop: [true, false, 'Stop/start moved the instance to another host: the <b>instance store is empty</b>; the EBS volume reattached with all orders.'],
+    term: [true, false, 'Terminated: the instance store is gone. This extra EBS volume is kept (Delete on termination defaults to No for extra volumes) and can attach to a new instance.'],
+    hw: [true, false, 'The host died: the local disk died with it. EBS lives off-host and is replicated in the AZ; AWS restarts the instance elsewhere (if recovery is set up).']
+  };
+  document.querySelectorAll('[data-ev]').forEach(b => b.addEventListener('click', () => {
+    const [e, i, t] = R[b.dataset.ev];
+    $('sE').className = 'store ' + (e ? 'kept' : 'lost'); $('sEs').textContent = e ? 'Data present' : 'Data lost';
+    $('sI').className = 'store ' + (i ? 'kept' : 'lost'); $('sIs').textContent = i ? 'Data present' : 'Data lost (cache must be rebuilt)';
+    $('labCap').innerHTML = t;
+  }));
+
+  K.pick($('pick'), [
+    { q: 'Temporary video-transcoding scratch files; need maximum disk speed.', a: 'Instance store', why: 'Scratch data + highest IOPS.' },
+    { q: 'The only copy of customer orders.', a: 'EBS', why: 'Must persist through stop/terminate.' },
+    { q: 'A Cassandra node whose data is replicated to 2 other nodes; wants top I/O.', a: 'Instance store', why: 'Data is replicated elsewhere, so losing one node\'s disk is OK.' },
+    { q: 'Root volume you can stop and start every night.', a: 'EBS', why: 'Instance store would be wiped each stop.' },
+    { q: 'A page cache that can be rebuilt from the database.', a: 'Instance store', why: 'Fast and disposable.' }
+  ], ['EBS', 'Instance store']);
+})();
+</script>
+</body>
+</html>

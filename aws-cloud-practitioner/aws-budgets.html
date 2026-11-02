@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AWS Budgets and billing alerts</title>
+<meta name="description" content="AWS Cloud Practitioner: set up billing access, read the bill by service, watch Free Tier usage and create zero-spend and monthly cost budgets that email you before a lab gets expensive.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .bud .ax { stroke: var(--line); }
+  .bud .act { fill: none; stroke: var(--fg); stroke-width: 2.5; }
+  .bud .fc { fill: none; stroke: var(--fg-soft); stroke-width: 2; stroke-dasharray: 6 5; }
+  .bud .lim { stroke: var(--orange); stroke-width: 2; }
+  .bud .thr { stroke: var(--yellow); stroke-width: 1.5; stroke-dasharray: 4 4; }
+  .bud text { fill: var(--muted); font-family: var(--mono); font-size: 11px; }
+  .bud .al circle { fill: var(--red); } .bud .al text { fill: var(--bad-text); }
+  .bud-row { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+  .bud-row label { display: flex; gap: 8px; align-items: center; font-size: 14px; color: var(--muted); }
+  .bud-row input[type=range] { accent-color: var(--orange); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · EC2 · Domain 4 Billing, Pricing &amp; Support</div>
+    <h1>AWS Budgets &amp; billing alerts</h1>
+    <ul class="lede">
+      <li>Before launching anything, create a <b>budget</b> so AWS <b>emails you</b> when spending crosses a threshold.</li>
+      <li>IAM users can't see billing until the <b>root user activates IAM access to billing</b> (a root-only task).</li>
+      <li>The <b>Bills</b> page shows <b>charges by service</b>; the <b>Free Tier</b> page shows usage against free limits.</li>
+      <li>EC2 costs are not just the instance: <b>EBS volumes, Elastic IPs, NAT Gateways, load balancers and snapshots</b> bill too.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: where the money goes, and who tells you</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 500" aria-label="Resources in a Region send usage to the bill; a budget watches the bill and emails you"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li><b>AWS Budgets</b> tracks <b>cost or usage</b> and sends <b>alerts by email</b> (or SNS) when <b>actual</b> or <b>forecasted</b> spend crosses a threshold.</li>
+      <li><b>Zero-spend budget</b>: alerts as soon as you spend anything. <b>Monthly cost budget</b>: e.g. $10 with alerts at 85% and 100% actual, and 100% forecasted.</li>
+      <li>IAM users see <b>Access denied</b> in Billing until the <b>root user</b> enables <b>"IAM user and role access to Billing information"</b> (Account page). They still need IAM permissions.</li>
+      <li><b>Bills → Charges by service</b> tells you what caused a charge. <b>Free Tier</b> shows current and forecasted usage against free limits.</li>
+      <li>"Free Tier" doesn't mean everything is free. Common EC2-related surprises: <b>NAT Gateway</b>, <b>public IPv4 / Elastic IP</b>, <b>EBS volumes and snapshots</b>, <b>load balancers</b>.</li>
+      <li>Stopping an instance stops compute charges, but <b>EBS keeps billing</b>. Terminate and delete when done.</li>
+      <li>Resources are <b>regional</b>: check every Region you used when hunting a charge.</li>
+      <li>Budgets <b>alert</b>; they don't stop resources by themselves (unless you configure budget actions).</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+
+  <section aria-labelledby="budH">
+    <h2 class="stage-title" id="budH">A month with a forgotten NAT Gateway</h2>
+    <div class="stage-kind">Set your budget · play the month · see which alerts fire · amounts illustrative</div>
+    <div class="card">
+      <div class="bud-row">
+        <label>Monthly budget <input type="range" id="bAmt" min="5" max="60" step="5" value="10"> <b id="bAmtV">$10</b></label>
+        <label class="toggle" for="bNat"><input type="checkbox" id="bNat" checked> NAT Gateway left running from day 8</label>
+        <label class="toggle" for="bKill"><input type="checkbox" id="bKill"> I delete it when the first alert arrives</label>
+        <button class="btn primary" id="bPlay" type="button">Play the month</button>
+      </div>
+      <div class="scroll" style="margin-top:10px"><svg class="diagram bud" id="bSvg" viewBox="0 0 1000 280" aria-label="Spend over 30 days against the budget line, with alert markers"></svg></div>
+      <ul class="log" id="bLog" style="margin-top:8px"><li>Press Play the month.</li></ul>
+    </div>
+  </section>
+
+  <section aria-labelledby="whH">
+    <h2 class="stage-title" id="whH">Is it costing money?</h2>
+    <div class="card" id="wh"></div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Set up billing access and two budgets (from the course hands-on)</summary>
+      <ol>
+        <li>Sign in as <b>root</b> → account menu → <b>Account</b> → <b>IAM user and role access to Billing information</b> → Edit → <b>Activate IAM access</b>. Sign out of root.</li>
+        <li>As your IAM admin user open <b>Billing and Cost Management</b>: month-to-date cost, forecast, last month.</li>
+        <li><b>Bills</b> → pick a month → <b>Charges by service</b> → expand EC2 to see instance, EBS, Elastic IP, NAT Gateway lines.</li>
+        <li><b>Free Tier</b>: check current vs forecasted usage.</li>
+        <li><b>Budgets → Create budget → Use a template → Zero spend budget</b>, enter your email.</li>
+        <li>Create another: <b>Monthly cost budget</b>, amount <code>10 USD</code>, email; alerts at 85% and 100% actual, 100% forecasted.</li>
+        <li>When an alert email arrives: Bills → charges by service → find the resource → stop or delete it, in every Region.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Alert when cost or usage passes a threshold</span><span class="arrow">→</span><span class="then">AWS Budgets</span></li>
+      <li><span class="if">Alert before the month ends, based on trend</span><span class="arrow">→</span><span class="then">Forecasted budget alert</span></li>
+      <li><span class="if">IAM admin gets Access denied on Billing</span><span class="arrow">→</span><span class="then">Root must activate IAM billing access</span></li>
+      <li><span class="if">Which service caused this charge?</span><span class="arrow">→</span><span class="then">Bills → charges by service</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <div class="quiz">
+      <details><summary>An IAM user with AdministratorAccess can't open the Billing console. Why?<span class="go">Show answer</span></summary><div class="ans"><p><b>IAM access to billing hasn't been activated by the root user.</b> It's a root-only setting.</p></div></details>
+      <details><summary>Your instance is stopped. Can you still be charged?<span class="go">Show answer</span></summary><div class="ans"><p><b>Yes:</b> its EBS volumes (and any Elastic IP) keep billing.</p></div></details>
+      <details><summary>What's the difference between an actual and a forecasted alert?<span class="go">Show answer</span></summary><div class="ans"><p><b>Actual</b> fires when real spend crosses the threshold; <b>forecasted</b> fires when AWS predicts you will cross it by month end.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Amounts are illustrative, not current prices. Sources: EC2 note "AWS Budget Setup"; AWS Budgets documentation. Billing tools (Cost Explorer, Pricing Calculator) return in the Billing section.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 20, y: 20, w: 420, h: 460, kind: 'region', label: 'ap-south-1 (your lab)' }],
+    nodes: {
+      ec2: { x: 120, y: 100, icon: 'chip', kind: 'compute', label: 'EC2 instance', sub: 'per second' },
+      ebs: { x: 320, y: 100, icon: 'disk', kind: 'storage', label: 'EBS volume', sub: 'per GB-month' },
+      eip: { x: 120, y: 270, icon: 'globe', kind: 'plain', label: 'Public IPv4 / EIP', sub: 'per hour' },
+      nat: { x: 320, y: 270, icon: 'router', label: 'NAT Gateway', sub: 'per hour + GB' },
+      snap: { x: 220, y: 410, icon: 'doc', kind: 'storage', label: 'Snapshots' },
+      bill: { x: 610, y: 240, icon: 'dollar', kind: 'plain', label: 'Your bill', sub: 'by service' },
+      bud: { x: 800, y: 110, icon: 'chart', kind: 'mgmt', label: 'AWS Budget', sub: '$10 / month' },
+      you: { x: 900, y: 360, icon: 'user', kind: 'user', label: 'You', sub: 'IAM user' },
+      root: { x: 610, y: 420, icon: 'crown', kind: 'sec', label: 'Root user' }
+    },
+    links: [{ a: 'ec2', b: 'bill', via: [[480, 100], [480, 240]] }, { a: 'ebs', b: 'bill', via: [[480, 100], [480, 240]] }, { a: 'eip', b: 'bill', via: [[480, 270], [480, 240]] }, { a: 'nat', b: 'bill', via: [[480, 270], [480, 240]] }, { a: 'snap', b: 'bill', via: [[480, 410], [480, 240]] },
+      { a: 'bill', b: 'bud', via: [[610, 110]] }, { a: 'bud', b: 'you', via: [[900, 110]], label: 'email alert', at: [900, 220] }, { a: 'you', b: 'bill', via: [[900, 240]], label: 'open Bills', at: [760, 232] }, { a: 'root', b: 'bill', kind: 'dash', label: 'activate IAM access', at: [610, 360] }]
+  });
+  const RES = ['ec2', 'ebs', 'eip', 'nat', 'snap'];
+  function base(i) {
+    net.reset();
+    net.focus([['you', 'bill', 'root'], ['root', 'bill', 'you'], [...RES, 'bill'], [...RES, 'bill'], ['bill', 'bud'], ['bill', 'bud', 'you'], ['you', 'bill', ...RES], null][i]);
+    if (i === 0) net.badge('you', 'Access denied', 'bad');
+    if (i === 1) net.badge('you', 'can see Billing', 'ok');
+    if (i === 3) { net.badge('nat', 'not free!', 'bad'); net.badge('eip', 'hourly', ''); }
+    if (i === 4) net.badge('bud', '85% · 100% · forecast', 'info');
+    if (i === 5) net.badge('you', 'alert: 85% of $10', 'bad');
+    if (i === 6) { net.state('nat', 'down'); net.badge('nat', 'deleted', 'ok'); }
+  }
+  const STEPS = [
+    { title: 'Your admin user can\'t see the bill',
+      text: 'Open <b>Billing and Cost Management</b> as an IAM user, even one with AdministratorAccess, and you may get <b>Access denied</b>. Billing visibility for IAM is switched off until the account owner allows it.',
+      play: async run => { base(0); await net.send(['you', 'bill'], { run, tone: 'red' }); } },
+    { title: 'Root switches on IAM billing access',
+      text: 'Sign in as <b>root</b> once, open <b>Account</b>, and activate <b>IAM user and role access to Billing information</b>. This is one of the root-only tasks. Then sign out and go back to your IAM user.',
+      play: async run => { base(1); await net.send(['root', 'bill'], { run, tone: 'cyan' }); await net.send(['you', 'bill'], { run, tone: 'green' }); } },
+    { title: 'Every resource feeds the bill',
+      text: 'An EC2 lab creates more than an instance: the <b>EBS volume</b> (per GB-month), a <b>public IPv4 address</b> (per hour), maybe a <b>NAT Gateway</b> or snapshots. Each sends usage to your bill, listed <b>by service</b>.',
+      play: async run => { base(2); await Promise.all(RES.map((r, k) => (async () => { await K.sleep(k * 150, run); await net.send([r, 'bill'], { run, tone: 'yellow' }); })().catch(() => {}))); } },
+    { title: 'Free Tier ≠ free everything',
+      text: 'The Free Tier covers some usage of some services. A <b>NAT Gateway</b> is not free and bills every hour it exists. In the course, a forgotten NAT Gateway was most of the EC2 bill. Check the <b>Free Tier</b> page for current and forecasted usage.' },
+    { title: 'A budget watches the bill',
+      text: 'Create a <b>monthly cost budget</b> of, say, $10. AWS Budgets compares actual spend and the <b>forecast</b> against it, with alerts at <b>85%</b> and <b>100% actual</b> and <b>100% forecasted</b>. A <b>zero-spend</b> budget alerts on the very first cent.',
+      play: async run => { base(4); await net.send(['bill', 'bud'], { run, tone: 'cyan' }); } },
+    { title: 'You get an email',
+      text: 'When spend crosses a threshold, Budgets <b>emails you</b>. It doesn\'t stop anything on its own; it makes sure you notice in days, not at the end of the month.',
+      play: async run => { base(5); await net.send(['bud', 'you'], { run, label: 'budget alert', tone: 'red' }); } },
+    { title: 'Find it and delete it',
+      text: 'Open <b>Bills → Charges by service</b>, find the culprit (the NAT Gateway), and delete it. Also look for unattached EBS volumes, idle Elastic IPs and old snapshots, <b>in every Region</b> you used.',
+      play: async run => { base(6); await net.send(['you', 'bill'], { run, label: 'charges by service' }); } }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* budget simulator */
+  const sv = $('bSvg'), X0 = 50, X1 = 970, Y0 = 245, Y1 = 20;
+  let amt = 10;
+  $('bAmt').addEventListener('input', e => { amt = +e.target.value; $('bAmtV').textContent = '$' + amt; draw(30, []); });
+  function spendSeries() {
+    const nat = $('bNat').checked, kill = $('bKill').checked; const s = []; let c = 0, killed = false;
+    for (let d = 1; d <= 30; d++) {
+      c += 0.12;                               // instance + EBS + IPv4, illustrative
+      if (nat && d >= 8 && !killed) c += 1.1;  // NAT Gateway per day, illustrative
+      s.push(+c.toFixed(2));
+      if (kill && nat && c >= amt * 0.85) killed = true;
+    }
+    return s;
+  }
+  function draw(upto, alerts) {
+    const s = spendSeries(), vmax = Math.max(amt * 1.6, s[29] * 1.1);
+    const x = d => X0 + (d - 1) / 29 * (X1 - X0), y = v => Y0 - v / vmax * (Y0 - Y1);
+    sv.textContent = '';
+    K.el('line', { x1: X0, y1: Y0, x2: X1, y2: Y0, class: 'ax' }, sv);
+    [1, 8, 15, 22, 30].forEach(d => K.text(sv, x(d), Y0 + 18, 'day ' + d, '').style.textAnchor = 'middle');
+    K.el('line', { x1: X0, y1: y(amt), x2: X1, y2: y(amt), class: 'lim' }, sv); K.text(sv, X0 + 4, y(amt) - 6, `budget $${amt}`, '');
+    K.el('line', { x1: X0, y1: y(amt * 0.85), x2: X1, y2: y(amt * 0.85), class: 'thr' }, sv); K.text(sv, X1 - 70, y(amt * 0.85) - 6, '85%', '');
+    let p = ''; for (let d = 1; d <= upto; d++) p += (d > 1 ? 'L' : 'M') + x(d) + ' ' + y(s[d - 1]);
+    K.el('path', { d: p, class: 'act' }, sv);
+    if (upto >= 3 && upto < 30) { const rate = (s[upto - 1] - s[Math.max(0, upto - 4)]) / Math.min(3, upto - 1); const fc = s[upto - 1] + rate * (30 - upto); K.el('path', { d: `M${x(upto)} ${y(s[upto - 1])} L${x(30)} ${y(fc)}`, class: 'fc' }, sv); }
+    alerts.forEach(a => { const g = K.el('g', { class: 'al' }, sv); K.el('circle', { cx: x(a.d), cy: y(s[a.d - 1]), r: 6 }, g); K.text(g, x(a.d) + 8, y(s[a.d - 1]) - 8, a.t, ''); });
+    return s;
+  }
+  $('bPlay').addEventListener('click', async () => {
+    const run = K.newRun('bud'); K.resetLog($('bLog'), 'Month started.');
+    const fired = {}, alerts = [];
+    try {
+      for (let d = 1; d <= 30; d++) {
+        const s = spendSeries(), c = s[d - 1];
+        if (d >= 3) { const rate = (c - s[Math.max(0, d - 4)]) / Math.min(3, d - 1); const fc = c + rate * (30 - d); if (fc >= amt && !fired.f) { fired.f = 1; alerts.push({ d, t: 'forecast' }); K.log($('bLog'), `Day ${d}: <b>forecasted</b> to exceed $${amt} (≈$${fc.toFixed(2)}). Email sent.`); } }
+        if (c >= amt * 0.85 && !fired.a) { fired.a = 1; alerts.push({ d, t: '85%' }); K.log($('bLog'), `Day ${d}: actual spend $${c.toFixed(2)} passed <b>85%</b>. Email sent.${$('bKill').checked && $('bNat').checked ? ' You delete the NAT Gateway.' : ''}`); }
+        if (c >= amt && !fired.b) { fired.b = 1; alerts.push({ d, t: '100%' }); K.log($('bLog'), `Day ${d}: actual spend passed <b>100%</b> ($${c.toFixed(2)}).`); }
+        draw(d, alerts); await K.sleep(90, run);
+      }
+      const end = spendSeries()[29];
+      K.log($('bLog'), `Month end: <b>$${end.toFixed(2)}</b>. ${!$('bNat').checked ? 'Without the NAT Gateway the lab stays cheap.' : $('bKill').checked ? 'Acting on the first alert kept the damage small.' : 'Alerts fired, but nobody acted: budgets only warn.'}`);
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  });
+  ['bNat', 'bKill'].forEach(id => $(id).addEventListener('change', () => { K.cancel('bud'); draw(30, []); }));
+  draw(30, []);
+
+  K.pick($('wh'), [
+    { q: 'A stopped EC2 instance\'s 8 GiB root volume.', a: 'Yes, it bills', why: 'EBS is charged per GB-month while it exists, running or not.' },
+    { q: 'A terminated instance whose root volume had "delete on termination".', a: 'No', why: 'Both the instance and its root volume are gone.' },
+    { q: 'A NAT Gateway nobody uses.', a: 'Yes, it bills', why: 'NAT Gateways charge per hour plus per GB processed.' },
+    { q: 'An IAM user with no resources.', a: 'No', why: 'IAM has no charge.' },
+    { q: 'A public IPv4 / Elastic IP address.', a: 'Yes, it bills', why: 'Public IPv4 addresses are charged per hour.' },
+    { q: 'Data uploaded into AWS.', a: 'No', why: 'Inbound data transfer is generally free.' }
+  ], ['Yes, it bills', 'No']);
+})();
+</script>
+</body>
+</html>

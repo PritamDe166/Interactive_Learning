@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EC2 instance types</title>
+<meta name="description" content="AWS Cloud Practitioner: EC2 instance families (general purpose, compute, memory, storage optimized, accelerated) and how to read a name like m5.2xlarge.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .slot rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; }
+  .slot.on rect { stroke: var(--cyan); fill: var(--teal-wash); }
+  .slot .cap { fill: var(--muted); font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-anchor: middle; }
+  .slot .val { fill: var(--fg); font-size: 15px; font-weight: 600; text-anchor: middle; }
+  .bigname { fill: var(--fg); font-family: var(--mono); font-size: 40px; font-weight: 700; }
+  .bigname tspan.f { fill: var(--accent-text); } .bigname tspan.g { fill: var(--cyan); } .bigname tspan.a { fill: var(--good-text); } .bigname tspan.s { fill: var(--fg); }
+  .fam.on { border-color: var(--cyan); box-shadow: 0 0 0 1px var(--cyan) inset; }
+  .fam .letters { font-family: var(--mono); color: var(--accent-text); font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · EC2 · Domain 3 Technology (Task 3.3)</div>
+    <h1>EC2 instance types</h1>
+    <ul class="lede">
+      <li>Instance types are tuned for different <b>bottlenecks</b>: balanced, CPU, memory, local storage, or GPUs.</li>
+      <li><b>General purpose</b> (T, M) · <b>Compute optimized</b> (C) · <b>Memory optimized</b> (R, X) · <b>Storage optimized</b> (I, D, H) · <b>Accelerated</b> (P, G).</li>
+      <li>A name like <span class="mono">m5.2xlarge</span> reads: <b>family</b> m, <b>generation</b> 5, <b>size</b> 2xlarge.</li>
+      <li>Bigger size = more vCPUs, memory, network and <b>cost</b>. Pick the family for the bottleneck, then the size.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: send each workload to the right family</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 520" aria-label="Workloads on the left are routed to the instance family that suits them"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li><b>Name</b>: <code>m5.2xlarge</code> = family <b>m</b> · generation <b>5</b> · size <b>2xlarge</b>. Extra letters after the generation are attributes (<code>g</code> Graviton/Arm, <code>i</code> Intel, <code>a</code> AMD, <code>d</code> local NVMe…).</li>
+      <li><b>General purpose (T, M)</b>: balanced; web servers, code repositories, dev/test. <code>t2.micro</code>/<code>t3.micro</code> are the Free Tier examples. T = burstable.</li>
+      <li><b>Compute optimized (C)</b>: high CPU; batch processing, media transcoding, high-performance web servers, HPC, scientific modelling and ML, dedicated game servers.</li>
+      <li><b>Memory optimized (R, X, z)</b>: large data sets in RAM; high-performance relational/NoSQL databases, in-memory caches, web-scale caches, real-time big data, BI.</li>
+      <li><b>Storage optimized (I, D, H)</b>: very fast local storage; high-frequency OLTP, relational and NoSQL databases, Redis-style caches, data warehouses, distributed file systems.</li>
+      <li><b>Accelerated computing (P, G, Inf, Trn)</b>: GPUs or AWS ML chips for training, inference and graphics.</li>
+      <li>Same vCPU count ≠ same use: <code>c5.4xlarge</code> has 16 vCPU and 32 GiB; <code>r5.4xlarge</code> 16 vCPU and 128 GiB.</li>
+      <li>Compare vCPU, memory, network, EBS bandwidth, local storage and <b>price per Region</b> (AWS instance types page; ec2instances.info is a handy comparison site).</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+
+  <section aria-labelledby="decH">
+    <h2 class="stage-title" id="decH">Read an instance type name</h2>
+    <div class="stage-kind">Pick a name · the parts fly into place</div>
+    <div class="chips" id="typeChips"></div>
+    <div class="scroll"><svg class="diagram narrow" id="dec" viewBox="0 0 1000 250" aria-label="An instance type name split into family, generation, attributes and size"></svg></div>
+    <p class="status-line" id="decStatus"></p>
+    <div class="label" style="margin-top:18px">Which family fits the workload?</div>
+    <div class="chips" id="workChips"></div>
+    <div class="cards" id="famCards" style="margin-top:12px"></div>
+  </section>
+
+  <section aria-labelledby="fmH">
+    <h2 class="stage-title" id="fmH">Name the family</h2>
+    <div class="card" id="fm"></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Balanced web server, dev box</span><span class="arrow">→</span><span class="then">General purpose (T, M)</span></li>
+      <li><span class="if">Batch, transcoding, HPC, gaming servers</span><span class="arrow">→</span><span class="then">Compute optimized (C)</span></li>
+      <li><span class="if">In-memory database, big cache, real-time analytics</span><span class="arrow">→</span><span class="then">Memory optimized (R)</span></li>
+      <li><span class="if">High-IOPS OLTP on local disk, data warehouse</span><span class="arrow">→</span><span class="then">Storage optimized (I, D, H)</span></li>
+      <li><span class="if">ML training, GPUs</span><span class="arrow">→</span><span class="then">Accelerated computing (P, G)</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Instance</th><th>vCPU</th><th>Memory</th><th>Family</th></tr></thead>
+        <tbody>
+          <tr><td>t2.micro</td><td>1</td><td>1 GiB</td><td>General purpose</td></tr>
+          <tr><td>c5.4xlarge</td><td>16</td><td>32 GiB</td><td>Compute optimized</td></tr>
+          <tr><td>r5.16xlarge</td><td>64</td><td>512 GiB</td><td>Memory optimized</td></tr>
+          <tr><td>m5.2xlarge</td><td>8</td><td>32 GiB</td><td>General purpose</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>r5.16xlarge has 64 vCPUs, not 16.</b> The notes' table lists 16 vCPU / 512 GiB; AWS lists 64 vCPU / 512 GiB (8 GiB per vCPU, the memory-optimized ratio).</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Accelerated computing</b> (P, G, Inf, Trn) is a fifth family the course mentions only briefly; it appears in exam scenarios about machine learning.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <div class="quiz">
+      <details><summary>What do the parts of <code>c7g.4xlarge</code> mean?<span class="go">Show answer</span></summary><div class="ans"><p><b>c</b> compute optimized, <b>7</b> generation, <b>g</b> Graviton (Arm) processor, <b>4xlarge</b> size.</p></div></details>
+      <details><summary>A Redis cache holding 300 GB in memory: which family?<span class="go">Show answer</span></summary><div class="ans"><p><b>Memory optimized (R).</b></p></div></details>
+      <details><summary>A video transcoding farm: which family?<span class="go">Show answer</span></summary><div class="ans"><p><b>Compute optimized (C).</b></p></div></details>
+    </div>
+  </section>
+
+  <footer>Specs from AWS's instance type pages; availability and prices vary by Region and change over time. Source: EC2 note "EC2 Instance Types Basics".</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const WL = [['web', 'Clinic website', 'laptop'], ['enc', 'Video transcoding', 'pipe'], ['cache', 'In-memory cache', 'bolt'], ['oltp', 'High-IOPS database', 'db'], ['ml', 'ML model training', 'cpu']];
+  const FM = [['gp', 'General purpose', 'T · M', 'compute'], ['co', 'Compute optimized', 'C', 'compute'], ['mo', 'Memory optimized', 'R · X', 'db'], ['so', 'Storage optimized', 'I · D · H', 'storage'], ['ac', 'Accelerated', 'P · G', 'mgmt']];
+  const nodes = {};
+  WL.forEach(([k, l, ic], i) => nodes[k] = { x: 110, y: 60 + i * 100, icon: ic, kind: 'user', label: l });
+  FM.forEach(([k, l, s, kind], i) => nodes[k] = { x: 820, y: 60 + i * 100, icon: 'chip', kind, label: l, sub: s });
+  nodes.pick = { x: 470, y: 260, icon: 'eye', kind: 'plain', label: 'What is the bottleneck?' };
+  const links = WL.map(([k]) => ({ a: k, b: 'pick', via: [[300, nodes[k].y], [300, 260]] })).concat(FM.map(([k]) => ({ a: 'pick', b: k, via: [[640, 260], [640, nodes[k].y]] })));
+  const net = K.net($('stSvg'), { nodes, links });
+  const PAIR = [['web', 'gp'], ['enc', 'co'], ['cache', 'mo'], ['oltp', 'so'], ['ml', 'ac']];
+  function base(i) {
+    net.reset();
+    if (i === 0) net.focus(null);
+    else if (i <= 5) { const [w, f] = PAIR[i - 1]; net.focus([w, 'pick', f]); net.badge(f, ['balanced', 'lots of CPU', 'lots of RAM', 'fast local disk', 'GPUs'][i - 1], 'ok'); }
+    else net.focus(null);
+  }
+  const STEPS = [
+    { title: 'Start from the bottleneck',
+      text: 'Every workload runs out of something first: CPU, memory, disk speed, or GPU. AWS groups instance types into <b>families</b> tuned for each bottleneck. Choose the family, then the size.' },
+    { title: 'Balanced: general purpose',
+      text: 'The clinic website needs a bit of everything. <b>General purpose</b> (T, M) gives a balance of compute, memory and network: web servers, code repositories, dev and test. <span class="mono">t3.micro</span> is the free-tier example; T instances are burstable.',
+      play: async run => { base(1); await net.send(['web', 'pick', 'gp'], { run }); } },
+    { title: 'CPU-bound: compute optimized',
+      text: 'Transcoding videos keeps every core busy. <b>Compute optimized</b> (C) has the most CPU per GiB: batch processing, media transcoding, high-performance web servers, HPC, scientific modelling, game servers.',
+      play: async run => { base(2); await net.send(['enc', 'pick', 'co'], { run }); } },
+    { title: 'Memory-bound: memory optimized',
+      text: 'A cache or in-memory database must hold its whole data set in RAM. <b>Memory optimized</b> (R for RAM, X, z) gives lots of memory per vCPU: high-performance databases, distributed caches, BI, real-time big data.',
+      play: async run => { base(3); await net.send(['cache', 'pick', 'mo'], { run }); } },
+    { title: 'Disk-bound: storage optimized',
+      text: 'A database doing huge numbers of small reads and writes needs fast <b>local</b> storage. <b>Storage optimized</b> (I, D, H) has local NVMe or dense disks: high-frequency OLTP, NoSQL, data warehouses, distributed file systems.',
+      play: async run => { base(4); await net.send(['oltp', 'pick', 'so'], { run }); } },
+    { title: 'GPU-bound: accelerated computing',
+      text: 'Training a model needs GPUs or AWS\'s ML chips. <b>Accelerated computing</b> (P, G, Inf, Trn) instances provide them.',
+      play: async run => { base(5); await net.send(['ml', 'pick', 'ac'], { run }); } },
+    { title: 'Then pick the size',
+      text: 'Inside a family, <b>sizes</b> go micro, small, medium, large, xlarge, 2xlarge… each step roughly doubles vCPUs, memory and price. Start small, watch the metrics, resize (stop → change type → start) when needed.',
+      tip: 'In m5.2xlarge: m = family, 5 = generation, 2xlarge = size.' }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* decoder (from the course's naming convention) */
+  const FAM = {
+    gp: { t: 'General purpose', l: 'T · M', d: 'Balanced CPU and memory. Web servers, dev environments, small apps. T = burstable (CPU credits).', w: ['Company website', 'Dev / test box'] },
+    co: { t: 'Compute optimized', l: 'C', d: 'High CPU per GiB. Batch jobs, media transcoding, high-traffic web servers, HPC, game servers.', w: ['Video transcoding', 'Game server'] },
+    mo: { t: 'Memory optimized', l: 'R · X · z', d: 'Lots of RAM. In-memory databases and caches, large relational DBs, real-time analytics.', w: ['In-memory cache', 'Large SQL database'] },
+    so: { t: 'Storage optimized', l: 'I · D · H', d: 'Fast local NVMe or dense HDD. High-rate OLTP, NoSQL, data warehouses, distributed file systems.', w: ['High-IOPS NoSQL on local disk'] },
+    ac: { t: 'Accelerated computing', l: 'P · G · Inf · Trn', d: 'GPUs or AWS ML chips. Model training and inference, graphics rendering.', w: ['ML model training'] }
+  };
+  const TYPES = [
+    { n: 't3.micro', f: 't', g: '3', a: '', s: 'micro', fam: 'gp', spec: '2 vCPU · 1 GiB', note: 'Burstable general purpose; a typical free-tier type.' },
+    { n: 'm5.2xlarge', f: 'm', g: '5', a: '', s: '2xlarge', fam: 'gp', spec: '8 vCPU · 32 GiB', note: 'The course\'s naming example.' },
+    { n: 'c7g.4xlarge', f: 'c', g: '7', a: 'g', s: '4xlarge', fam: 'co', spec: '16 vCPU · 32 GiB', note: '"g" = AWS Graviton (Arm) processor: cheaper per vCPU.' },
+    { n: 'r5.16xlarge', f: 'r', g: '5', a: '', s: '16xlarge', fam: 'mo', spec: '64 vCPU · 512 GiB', note: '8 GiB of RAM per vCPU: the memory-optimized ratio.' },
+    { n: 'i4i.xlarge', f: 'i', g: '4', a: 'i', s: 'xlarge', fam: 'so', spec: '4 vCPU · 32 GiB · 937 GB NVMe', note: 'Local NVMe instance store for very high IOPS.' },
+    { n: 'g5.xlarge', f: 'g', g: '5', a: '', s: 'xlarge', fam: 'ac', spec: '4 vCPU · 16 GiB · 1 GPU', note: 'NVIDIA GPU for inference and graphics.' }
+  ];
+  $('typeChips').innerHTML = TYPES.map((t, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${t.n}</button>`).join('');
+  $('famCards').innerHTML = Object.entries(FAM).map(([k, f]) => `<div class="card fam" data-f="${k}"><h3>${f.t}</h3><div class="letters">${f.l}</div><p>${f.d}</p></div>`).join('');
+  const WORK = Object.entries(FAM).flatMap(([k, f]) => f.w.map(w => ({ w, k })));
+  $('workChips').innerHTML = WORK.map((x, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${x.w}</button>`).join('');
+  function lightFam(k) { document.querySelectorAll('#famCards .fam').forEach(c => c.classList.toggle('on', c.dataset.f === k)); }
+  $('workChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('workChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    const x = WORK[+b.dataset.i]; lightFam(x.k); $('decStatus').innerHTML = `<b>${x.w}</b> → ${FAM[x.k].t} (${FAM[x.k].l}).`;
+  }));
+  const dec = $('dec');
+  const nameT = K.el('text', { x: 500, y: 60, class: 'bigname' }, dec); nameT.style.textAnchor = 'middle';
+  const SLOTS = [['f', 'FAMILY', 155], ['g', 'GENERATION', 385], ['a', 'ATTRIBUTES', 615], ['s', 'SIZE', 845]];
+  const slotEls = {};
+  SLOTS.forEach(([k, cap, x]) => { const g = K.el('g', { class: 'slot' }, dec); K.el('rect', { x: x - 105, y: 150, width: 210, height: 80, rx: 12 }, g); K.text(g, x, 172, cap, 'cap'); slotEls[k] = { g, x, v: K.text(g, x, 210, '', 'val') }; });
+  const decP = K.el('g', {}, dec);
+  const ATTR = { i: 'Intel CPU', g: 'Graviton (Arm)', a: 'AMD CPU', '': 'none (default)' };
+  async function decode(t) {
+    const run = K.newRun('dec'); decP.textContent = '';
+    nameT.innerHTML = `<tspan class="f">${t.f}</tspan><tspan class="g">${t.g}</tspan><tspan class="a">${t.a}</tspan><tspan class="s">.${t.s}</tspan>`;
+    for (const k in slotEls) { slotEls[k].v.textContent = ''; slotEls[k].g.classList.remove('on'); }
+    lightFam(t.fam);
+    const vals = { f: `${t.f.toUpperCase()} · ${FAM[t.fam].t.split(' ')[0]}`, g: `generation ${t.g}`, a: ATTR[t.a], s: t.s };
+    try {
+      for (const [k] of SLOTS) {
+        const label = k === 'f' ? t.f : k === 'g' ? t.g : k === 'a' ? (t.a || '–') : t.s;
+        const p = K.pill(decP, label, k === 's' ? '' : 'alt');
+        await K.move(p, [500, 95], [slotEls[k].x, 130], 500, run); p.remove();
+        slotEls[k].g.classList.add('on'); slotEls[k].v.textContent = vals[k];
+        await K.sleep(250, run);
+      }
+      $('decStatus').innerHTML = `<b>${t.n}</b>: ${t.spec}. ${t.note}`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('typeChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { $('typeChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); decode(TYPES[+b.dataset.i]); }));
+  nameT.innerHTML = '<tspan class="f">m</tspan><tspan class="g">5</tspan><tspan class="s">.2xlarge</tspan>';
+  $('decStatus').textContent = 'Family letter, generation number, optional attribute letters, then the size after the dot.';
+
+  K.pick($('fm'), [
+    { q: 'A multiplayer game server that needs fast CPUs.', a: 'Compute optimized', why: 'Dedicated gaming servers are a listed C use case.' },
+    { q: 'A business-intelligence tool analysing large data sets in memory.', a: 'Memory optimized', why: 'In-memory processing of large data sets.' },
+    { q: 'A small company website with modest traffic.', a: 'General purpose', why: 'Balanced needs.' },
+    { q: 'A distributed file system on local disks.', a: 'Storage optimized', why: 'Listed I/D/H use case.' },
+    { q: 'Batch processing of millions of records overnight.', a: 'Compute optimized', why: 'CPU-heavy batch jobs.' },
+    { q: 'High-frequency online transaction processing (OLTP) needing very high local IOPS.', a: 'Storage optimized', why: 'Storage optimized handles high local I/O.' }
+  ], ['General purpose', 'Compute optimized', 'Memory optimized', 'Storage optimized']);
+})();
+</script>
+</body>
+</html>

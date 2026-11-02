@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Regions, AZs and edge locations</title>
+<meta name="description" content="AWS Cloud Practitioner: AWS global infrastructure. Regions, Availability Zones, data centres, edge locations and points of presence, global vs regional services, and how to choose a Region.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .chooser { display: grid; gap: 12px; }
+  .chooser label { display: grid; gap: 4px; font-size: 14px; color: var(--muted); }
+  .chooser select { font: inherit; color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; }
+  .chooser .row3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px; }
+  .chooser .out { border-left: 4px solid var(--orange); padding: 8px 12px; background: var(--panel-2); border-radius: 8px; color: var(--fg-soft); }
+  .chooser .out b { color: var(--fg); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · Cloud &amp; AWS overview · Domain 3 Technology</div>
+    <h1>Regions, AZs &amp; edge locations</h1>
+    <ul class="lede">
+      <li>A <b>Region</b> is a geographic area (such as <span class="mono">ap-south-1</span>, Mumbai). Most services are <b>regional</b>: you pick the Region for each resource.</li>
+      <li>Each Region has <b>3 or more Availability Zones</b>. An AZ is one or more <b>data centres</b> with its own power and network, isolated from the others.</li>
+      <li>Spreading your app <b>across AZs</b> keeps it running when one AZ fails.</li>
+      <li><b>Edge locations</b> (points of presence) sit in many more cities. You don't run servers there; services like <b>CloudFront</b> cache content there, close to users.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: from a Region down to a data centre, and out to the edge</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 560" aria-label="Patients in Mumbai and London reach an app in the Mumbai Region, which has three Availability Zones; a London edge location caches content"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>A <b>Region</b> is a geographic area with a code (us-east-1, ap-south-1). Most services are <b>regional</b>: resources live in the Region you choose.</li>
+      <li>Each Region has <b>three or more Availability Zones</b>. An AZ = <b>one or more discrete data centres</b> with redundant power, networking and connectivity, isolated from other AZs and linked by low-latency networking.</li>
+      <li><b>Multi-AZ</b> deployment = high availability inside a Region. Multi-Region = protection against a whole-Region disaster.</li>
+      <li><b>Edge locations</b> (points of presence) sit close to users and serve <b>CloudFront</b> caching; you don't run EC2 there.</li>
+      <li>Choose a Region by <b>compliance</b> (data residency) first, then <b>latency</b>, <b>service availability</b> and <b>price</b>.</li>
+      <li><b>Global</b> services: IAM, Route 53, CloudFront, WAF. Regional: EC2, Lambda, RDS, Elastic Beanstalk, S3 buckets.</li>
+      <li>Local Zones, Wavelength Zones and Outposts run AWS closer to users or on-premises (exam guide Task 3.2).</li>
+      <li>The exam tests the structure, not the counts (39 Regions and 124 AZs in October 2026).</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Break an Availability Zone, warm up an edge cache, then pick a Region.</p>
+
+  <section aria-labelledby="azH">
+    <h2 class="stage-title" id="azH">Survive an AZ outage</h2>
+    <div class="stage-kind">Choose how many AZs the app uses, then take one down</div>
+    <div class="controls">
+      <label class="toggle" for="multiAz"><input type="checkbox" id="multiAz" checked> App in two AZs</label>
+      <label class="toggle" for="azDown"><input type="checkbox" id="azDown"> AZ a has an outage</label>
+      <button class="btn primary" id="azSend" type="button">Send 4 requests</button>
+    </div>
+    <div class="scroll"><svg class="diagram nf-canvas" id="azSvg" viewBox="0 0 1000 380" aria-label="A Region with three AZs and a load balancer"></svg></div>
+    <p class="nf-cap" id="azCap"></p>
+  </section>
+
+  <section aria-labelledby="edH">
+    <h2 class="stage-title" id="edH">Warm up an edge cache</h2>
+    <div class="stage-kind">London patient, app in Mumbai · latencies are illustrative</div>
+    <div class="controls">
+      <button class="btn primary" id="edSend" type="button">London patient opens logo.png</button>
+      <button class="btn" id="edEmpty" type="button">Empty the edge cache</button>
+      <label class="toggle" for="edOff"><input type="checkbox" id="edOff"> No CloudFront (go straight to Mumbai)</label>
+    </div>
+    <div class="scroll"><svg class="diagram nf-canvas" id="edSvg" viewBox="0 0 1000 300" aria-label="London user, London edge location and the Mumbai Region"></svg></div>
+    <p class="nf-cap" id="edCap"></p>
+  </section>
+
+  <section aria-labelledby="chH">
+    <h2 class="stage-title" id="chH">Pick a Region</h2>
+    <div class="stage-kind">Compliance first, then latency, services and price</div>
+    <div class="card chooser">
+      <div class="row3">
+        <label>Must the data stay in a country?<select id="cLaw"><option value="none">No legal requirement</option><option value="IN">Yes, in India</option><option value="DE">Yes, in Germany</option></select></label>
+        <label>Where are most users?<select id="cUsers"><option value="IN">India</option><option value="EU">Europe</option><option value="US">United States</option></select></label>
+        <label>Do you need a brand-new service?<select id="cNew"><option value="no">No, common services only</option><option value="yes">Yes, a service launched last month</option></select></label>
+      </div>
+      <div class="out" id="cOut"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Geographic area, you choose it per resource</span><span class="arrow">→</span><span class="then">Region</span></li>
+      <li><span class="if">One or more isolated data centres inside a Region</span><span class="arrow">→</span><span class="then">Availability Zone</span></li>
+      <li><span class="if">Survive a data-centre failure</span><span class="arrow">→</span><span class="then">Deploy across multiple AZs</span></li>
+      <li><span class="if">Survive a whole-Region disaster</span><span class="arrow">→</span><span class="then">Deploy in multiple Regions</span></li>
+      <li><span class="if">Cache content close to users</span><span class="arrow">→</span><span class="then">Edge locations (CloudFront)</span></li>
+      <li><span class="if">Data must stay in a country</span><span class="arrow">→</span><span class="then">Choose that Region (compliance first)</span></li>
+      <li><span class="if">Can I run EC2 at an edge location?</span><span class="arrow">→</span><span class="then">No (look at Local Zones / Wavelength)</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Term</th><th>What it is</th><th>Memory trick</th></tr></thead>
+        <tbody>
+          <tr><td>Region</td><td>A separate geographic area with multiple AZs, named by code (us-east-1, eu-west-3, ap-southeast-2)</td><td>Where you <b>run</b> your app</td></tr>
+          <tr><td>Availability Zone</td><td>One or more discrete data centres with redundant power, networking and connectivity, isolated from other AZs, linked by low-latency networking</td><td>How you <b>isolate</b> failures</td></tr>
+          <tr><td>Edge location</td><td>Infrastructure close to users, used by CloudFront and other edge services</td><td>Brings content <b>closer</b> to users</td></tr>
+          <tr><td>Point of presence (PoP)</td><td>General term for AWS's network/edge presence in a location; edge locations are a type of PoP</td><td>AWS's network <b>presence</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="scroll card table-card" style="margin-top:14px">
+      <table>
+        <thead><tr><th>Scope</th><th>Examples</th><th>What it means</th></tr></thead>
+        <tbody>
+          <tr><td>Global</td><td>IAM, Route 53, CloudFront, WAF (for CloudFront)</td><td>Configured once, not per Region</td></tr>
+          <tr><td>Regional</td><td>EC2, Elastic Beanstalk, Lambda, Rekognition, RDS, S3 buckets</td><td>Pick a Region; a resource doesn't appear in another Region unless you create or replicate it there</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="scroll card table-card" style="margin-top:14px">
+      <table>
+        <thead><tr><th>Year</th><th>AWS milestone (simplified, from the course)</th></tr></thead>
+        <tbody>
+          <tr><td>2002</td><td>Amazon starts offering its internal IT capabilities externally</td></tr>
+          <tr><td>2004</td><td>Amazon SQS, the first public AWS service</td></tr>
+          <tr><td>2006</td><td>Relaunch with SQS, S3 and EC2</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="kpis" style="margin-top:14px">
+      <div class="kpi"><b>39</b><span>Regions</span></div>
+      <div class="kpi"><b>124</b><span>Availability Zones</span></div>
+      <div class="kpi"><b>750+</b><span>CloudFront points of presence</span></div>
+      <div class="kpi"><b>≥ 3</b><span>AZs per Region</span></div>
+    </div>
+    <p class="sub" style="margin-top:8px">Counts from AWS's global infrastructure page, October 2026. They grow every year; the exam tests the structure, not the numbers.</p>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>An edge location is not an Availability Zone.</b> Your EC2 instances run in a Region's AZs. CloudFront caches and serves copies at the edge while the origin stays in the Region.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Other places AWS can run your workload</b> (exam guide task 3.2): <b>Local Zones</b> (a Region extension in a large city for single-digit-millisecond latency), <b>Wavelength Zones</b> (inside 5G telecom networks) and <b>Outposts</b> (AWS racks in your own data centre).</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>An AZ is not necessarily one building.</b> It can be several data centres; AWS doesn't expose the physical detail.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>What is an Availability Zone, in one sentence?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>One or more discrete data centres inside a Region</b>, with independent power and networking, isolated from the other AZs and linked to them by low-latency networking.</p></div></details>
+      <details><summary>How do you keep an app running if one data centre floods?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Run it in at least two Availability Zones</b> behind a load balancer.</p></div></details>
+      <details><summary>Patient data must legally stay in India. Which Region factor decides first?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Compliance / data residency.</b> Latency, available services and price only matter among Regions that are allowed.</p></div></details>
+      <details><summary>Is an edge location a place to run your EC2 instances near users?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>No.</b> Edge locations serve CloudFront and other edge services. For compute near users, look at Local Zones or Wavelength.</p></div></details>
+      <details><summary>You create an EC2 instance in ap-south-1. Can you see it while the console is set to eu-west-1?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>No.</b> EC2 is regional. Switch the console to ap-south-1.</p></div></details>
+      <details><summary>Name three global services.<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Any three of <b>IAM, Route 53, CloudFront, WAF</b>.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Latencies are illustrative. Infrastructure counts from aws.amazon.com/about-aws/global-infrastructure (checked October 2026). Sources: Overview notes "AWS Cloud Overview" and "AWS Edge Locations &amp; Points of Presence (PoPs)".</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const safe = p => p.catch(e => { if (!(e instanceof K.Stop)) throw e; });
+
+  /* ================= walkthrough ================= */
+  const net = K.net($('stSvg'), {
+    zones: [
+      { id: 'reg', x: 400, y: 20, w: 585, h: 525, kind: 'region', label: 'Region ap-south-1 (Mumbai)' },
+      { id: 'a', x: 415, y: 175, w: 180, h: 355, kind: 'az', label: 'AZ ap-south-1a' },
+      { id: 'b', x: 605, y: 175, w: 180, h: 355, kind: 'az', label: 'AZ ap-south-1b' },
+      { id: 'c', x: 795, y: 175, w: 180, h: 355, kind: 'az', label: 'AZ ap-south-1c' }
+    ],
+    nodes: {
+      mum: { x: 90, y: 100, icon: 'user', kind: 'user', label: 'Patient', sub: 'Mumbai' },
+      lon: { x: 90, y: 430, icon: 'user', kind: 'user', label: 'Patient', sub: 'London' },
+      edge: { x: 275, y: 430, icon: 'edge', label: 'Edge location', sub: 'London' },
+      lb: { x: 695, y: 95, icon: 'lb', label: 'Load balancer', sub: 'spans the AZs' },
+      w1: { x: 505, y: 280, icon: 'server', kind: 'compute', label: 'App server', sub: 'data centre 1' },
+      w2: { x: 695, y: 280, icon: 'server', kind: 'compute', label: 'App server', sub: 'data centre 3' },
+      dc1: { x: 505, y: 440, icon: 'building', kind: 'plain', label: 'Data centre 2' },
+      dc2: { x: 695, y: 440, icon: 'building', kind: 'plain', label: 'Data centre 4' },
+      dc3: { x: 885, y: 280, icon: 'building', kind: 'plain', label: 'Data centre 5' },
+      dc4: { x: 885, y: 440, icon: 'building', kind: 'plain', label: 'Data centre 6' }
+    },
+    links: [
+      { a: 'mum', b: 'lb', via: [[260, 100], [260, 95]], label: '~20 ms', at: [170, 88] },
+      { a: 'lb', b: 'w1', via: [[505, 95]] }, { a: 'lb', b: 'w2' },
+      { a: 'lon', b: 'edge', label: '~10 ms' },
+      { a: 'edge', b: 'lb', via: [[340, 430], [340, 130], [630, 130]], kind: 'aws', label: 'AWS network', at: [340, 330] },
+      { a: 'lon', b: 'lb', kind: 'dash', via: [[175, 430], [175, 160], [655, 160]], label: 'public internet', at: [175, 260] },
+      { a: 'w1', b: 'w2', kind: 'priv', via: [[600, 340]] }
+    ]
+  });
+  const AZS = ['a', 'b', 'c'], DCS = ['dc1', 'dc2', 'dc3', 'dc4'];
+  function base(i) {
+    net.reset();
+    AZS.forEach(z => net.zones[z].classList.remove('down', 'nf-off'));
+    net.zones.reg.classList.remove('nf-off');
+    const F = [
+      ['mum', 'lb', 'w1', 'w2', ...DCS],
+      ['w1', 'w2', ...DCS],
+      ['mum', 'lb', 'w1'],
+      ['mum', 'lb', 'w1', 'w2'],
+      ['mum', 'lb', 'w1', 'w2'],
+      ['lon', 'lb', 'w1', 'w2'],
+      ['lon', 'edge', 'lb', 'w1', 'w2'],
+      ['lon', 'edge'],
+      null
+    ][i];
+    net.focus(F);
+    if (i === 1) { net.badge('w1', 'own power + network', 'info'); net.badge('w2', 'own power + network', 'info'); }
+    if (i === 2) { net.state('w2', ''); net.badge('w1', 'only copy', ''); }
+    if (i === 4) { net.zones.a.classList.add('down'); net.state('w1', 'down'); net.badge('w2', 'takes all traffic', 'ok'); }
+    if (i === 5) net.badge('lon', '~300 ms round trip', 'bad');
+    if (i === 6) net.badge('edge', 'cached: logo.png', 'ok');
+    if (i === 7) { net.badge('edge', 'HIT', 'ok'); net.badge('lon', '~20 ms', 'ok'); }
+    if (i === 8) { net.badge('edge', 'CloudFront · global', 'info'); net.badge('w1', 'EC2 · regional', ''); net.badge('lb', 'regional', ''); }
+    if (i !== 5) net.link('lon', 'lb', i === 8 ? 'dim' : 'hide');
+    if (i === 2 || i === 0) { net.link('w1', 'w2', 'dim'); }
+  }
+  const STEPS = [
+    { title: 'A Region: where your app lives',
+      text: 'AWS is split into <b>Regions</b>, each a geographic area with a name and a code. This clinic chose <b>ap-south-1 (Mumbai)</b> because its patients and its data must be in India. Most services are <b>regional</b>: what you create here doesn\'t exist in Frankfurt unless you put it there.',
+      tip: 'Region names you will see: us-east-1 (N. Virginia), eu-west-1 (Ireland), ap-south-1 (Mumbai).' },
+    { title: 'Inside: three or more Availability Zones',
+      text: 'Each Region has <b>at least three Availability Zones</b>. An AZ is <b>one or more data centres</b> with its own power, cooling and network, far enough from the others that a flood or fire hits only one, and close enough for fast private links between them.',
+      tip: 'AZ ≠ one building. An AZ can hold several data centres.' },
+    { title: 'A request lands in one AZ',
+      text: 'A Mumbai patient\'s request reaches the <b>load balancer</b>, which sends it to the app server in <b>AZ a</b>. Right now that is the only copy of the app.',
+      play: async run => { base(2); await net.send(['mum', 'lb', 'w1'], { run, label: 'GET /book' }); } },
+    { title: 'Run in two AZs',
+      text: 'Put a second copy of the app in <b>AZ b</b>. The load balancer spreads requests across both. The two AZs are independent, so they are very unlikely to fail at the same time.',
+      tip: 'Multi-AZ = high availability inside one Region.',
+      play: async run => { base(3); for (const t of ['w1', 'w2', 'w1']) await net.send(['mum', 'lb', t], { run }); } },
+    { title: 'AZ a goes down; patients don\'t notice',
+      text: 'A power failure takes out <b>AZ a</b>. The load balancer\'s health checks see it and send everything to <b>AZ b</b>. Bookings keep working. With only one AZ, the clinic would be offline.',
+      play: async run => { base(4); for (let k = 0; k < 2; k++) await net.send(['mum', 'lb', 'w2'], { run }); } },
+    { title: 'Far-away patients wait longer',
+      text: 'A patient in <b>London</b> going straight to Mumbai crosses many public-internet hops: about <b>300 ms</b> for each round trip. Every image, every script, every page pays that price.',
+      play: async run => { base(5); await net.send(['lon', 'lb', 'w1'], { run, tone: 'red', label: 'GET /logo.png' }); } },
+    { title: 'Edge location: first request (cache miss)',
+      text: 'AWS has <b>edge locations</b> in hundreds of cities, London included. With <b>CloudFront</b>, the London patient talks to the nearby edge. The first time, the edge doesn\'t have the file, so it fetches it from Mumbai over AWS\'s own network and <b>keeps a copy</b>.',
+      play: async run => { base(6); net.badge('edge', 'MISS', ''); await net.send(['lon', 'edge', 'lb', 'w1'], { run, label: 'logo.png?' }); await net.send(['w1', 'lb', 'edge'], { run, tone: 'cyan', label: 'logo.png' }); net.badge('edge', 'cached: logo.png', 'ok'); await net.send(['edge', 'lon'], { run, tone: 'green' }); } },
+    { title: 'Next request: served from the edge (cache hit)',
+      text: 'The next London patient asks for the same file. The edge has it, so it answers in about <b>20 ms</b> and the request never travels to Mumbai. You never run servers at the edge; your app stays in the Region.',
+      play: async run => { base(7); net.badge('edge', 'HIT', 'ok'); await net.send(['lon', 'edge'], { run, label: 'logo.png?' }); await net.send(['edge', 'lon'], { run, tone: 'green', label: 'from cache' }); } },
+    { title: 'Global or regional?',
+      text: 'A few services are <b>global</b>: IAM, Route 53, CloudFront, WAF. Most are <b>regional</b>: EC2, load balancers, databases, Lambda and S3 buckets live in the Region you pick. Choose that Region by <b>compliance</b>, <b>latency</b>, <b>service availability</b> and <b>price</b>.' }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ================= AZ outage ================= */
+  const az = K.net($('azSvg'), {
+    zones: [
+      { id: 'reg', x: 260, y: 15, w: 725, h: 350, kind: 'region', label: 'Region ap-south-1' },
+      { id: 'a', x: 280, y: 160, w: 220, h: 190, kind: 'az', label: 'AZ a' },
+      { id: 'b', x: 520, y: 160, w: 220, h: 190, kind: 'az', label: 'AZ b' },
+      { id: 'c', x: 760, y: 160, w: 210, h: 190, kind: 'az', label: 'AZ c' }
+    ],
+    nodes: {
+      user: { x: 100, y: 90, icon: 'users', kind: 'user', label: 'Patients' },
+      lb: { x: 620, y: 80, icon: 'lb', label: 'Load balancer' },
+      w1: { x: 390, y: 260, icon: 'server', kind: 'compute', label: 'App copy 1' },
+      w2: { x: 630, y: 260, icon: 'server', kind: 'compute', label: 'App copy 2' },
+      dc: { x: 865, y: 260, icon: 'building', kind: 'plain', label: 'unused' }
+    },
+    links: [{ a: 'user', b: 'lb', via: [[400, 90], [400, 80]] }, { a: 'lb', b: 'w1', via: [[390, 80]] }, { a: 'lb', b: 'w2', via: [[630, 80]] }]
+  });
+  function azDraw() {
+    az.reset();
+    const multi = $('multiAz').checked, down = $('azDown').checked;
+    az.zones.a.classList.toggle('down', down);
+    az.nodes.w2.g.style.display = multi ? '' : 'none'; az.link('lb', 'w2', multi ? '' : 'hide');
+    if (down) { az.state('w1', 'down'); az.link('lb', 'w1', 'cut'); }
+    $('azCap').innerHTML = !multi && down ? '<span class="bad-text">One AZ, and it is down: the whole app is offline.</span> Press send to see it.'
+      : multi && down ? 'AZ a is down. The load balancer sends everything to AZ b; patients notice nothing.'
+      : multi ? 'Two copies in separate AZs. Tick "AZ a has an outage" to test it.' : 'Only one copy, in AZ a. One power failure there takes the app down.';
+  }
+  async function azSend() {
+    const run = K.newRun('az'); azDraw();
+    const multi = $('multiAz').checked, down = $('azDown').checked;
+    const alive = [!down && 'w1', multi && 'w2'].filter(Boolean);
+    let ok = 0, fail = 0;
+    try {
+      for (let r = 0; r < 4; r++) {
+        if (!alive.length) { await az.send(['user', 'lb'], { run, tone: 'red' }); az.badge('lb', '503 · no healthy target', 'bad'); fail++; continue; }
+        const t = alive[r % alive.length];
+        await az.send(['user', 'lb', t], { run, label: 'req ' + (r + 1) }); ok++;
+      }
+      $('azCap').innerHTML += `<br>Result: <span class="ok-text">${ok} served</span>${fail ? `, <span class="bad-text">${fail} failed</span>` : ''}.`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  ['multiAz', 'azDown'].forEach(id => $(id).addEventListener('change', () => { K.cancel('az'); azDraw(); }));
+  $('azSend').addEventListener('click', azSend);
+  azDraw();
+
+  /* ================= edge cache ================= */
+  const ed = K.net($('edSvg'), {
+    zones: [{ id: 'reg', x: 690, y: 40, w: 290, h: 220, kind: 'region', label: 'Region ap-south-1' }],
+    nodes: {
+      lon: { x: 80, y: 150, icon: 'user', kind: 'user', label: 'Patient', sub: 'London' },
+      edge: { x: 380, y: 150, icon: 'edge', label: 'Edge location', sub: 'London' },
+      org: { x: 835, y: 150, icon: 'server', kind: 'compute', label: 'Origin', sub: 'app in Mumbai' }
+    },
+    links: [{ a: 'lon', b: 'edge', label: '~10 ms' }, { a: 'edge', b: 'org', kind: 'aws', label: '~130 ms each way' }, { a: 'lon', b: 'org', kind: 'dash', via: [[80, 270], [835, 270]], label: 'straight over the public internet', at: [460, 262] }]
+  });
+  let cached = false;
+  function edDraw() {
+    ed.reset();
+    const off = $('edOff').checked;
+    ed.nodes.edge.g.style.display = off ? 'none' : '';
+    ed.link('lon', 'edge', off ? 'hide' : ''); ed.link('edge', 'org', off ? 'hide' : ''); ed.link('lon', 'org', off ? '' : 'hide');
+    if (!off) ed.nodes.edge.sub(cached ? 'cache: logo.png' : 'cache: empty');
+    $('edCap').innerHTML = off ? 'Without CloudFront, every request crosses the public internet to Mumbai.' : cached ? 'The edge has a copy now. Send it again.' : 'The edge cache is empty. The first request will be a <b>miss</b>.';
+  }
+  async function edSend() {
+    const run = K.newRun('ed'); edDraw();
+    try {
+      if ($('edOff').checked) { await ed.send(['lon', 'org'], { run, label: 'logo.png?', tone: 'red' }); await ed.send(['org', 'lon'], { run, tone: 'green' }); ed.badge('lon', '~300 ms', 'bad'); $('edCap').innerHTML = '<span class="bad-text">About 300 ms</span>, every time, for every patient in Europe.'; return; }
+      await ed.send(['lon', 'edge'], { run, label: 'logo.png?' });
+      if (cached) { ed.badge('edge', 'HIT', 'ok'); await ed.send(['edge', 'lon'], { run, tone: 'green' }); ed.badge('lon', '~20 ms', 'ok'); $('edCap').innerHTML = '<span class="ok-text">Cache hit: about 20 ms.</span> Mumbai never saw the request.'; return; }
+      ed.badge('edge', 'MISS', ''); await ed.send(['edge', 'org'], { run }); await ed.send(['org', 'edge'], { run, tone: 'cyan', label: 'logo.png' });
+      cached = true; ed.nodes.edge.sub('cache: logo.png'); ed.badge('edge', 'stored', 'ok');
+      await ed.send(['edge', 'lon'], { run, tone: 'green' }); ed.badge('lon', '~280 ms', '');
+      $('edCap').innerHTML = '<span class="accent">Cache miss: about 280 ms.</span> The edge fetched the file from Mumbai and kept a copy. Send it again.';
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('edSend').addEventListener('click', edSend);
+  $('edEmpty').addEventListener('click', () => { K.cancel('ed'); cached = false; edDraw(); });
+  $('edOff').addEventListener('change', () => { K.cancel('ed'); edDraw(); });
+  edDraw();
+
+  /* ================= Region chooser ================= */
+  const REG = { IN: ['ap-south-1', 'Mumbai'], EU: ['eu-central-1', 'Frankfurt'], DE: ['eu-central-1', 'Frankfurt'], US: ['us-east-1', 'N. Virginia'] };
+  function choose() {
+    const law = $('cLaw').value, users = $('cUsers').value, nw = $('cNew').value;
+    let r, why = [];
+    if (law !== 'none') { r = REG[law]; why.push(`<b>Compliance decides first:</b> the data must stay in ${law === 'IN' ? 'India' : 'Germany'}, so only Regions there are allowed.`); if (law !== (users === 'EU' ? 'DE' : users)) why.push('Your users are elsewhere, so put <b>CloudFront</b> in front to keep latency low.'); }
+    else { r = REG[users]; why.push(`<b>No legal constraint</b>, so pick for <b>latency</b>: be close to users in ${users === 'IN' ? 'India' : users === 'EU' ? 'Europe' : 'the US'}.`); }
+    if (nw === 'yes') why.push('New services usually launch in a few Regions first (often us-east-1). <b>Check the Region\'s service list</b> before committing; if it is missing, wait or redesign.');
+    why.push('Then compare <b>price</b>: the same instance can cost a little more or less per hour in different Regions.');
+    $('cOut').innerHTML = `Suggested Region: <b>${r[0]}</b> (${r[1]}).<br>` + why.join('<br>');
+  }
+  ['cLaw', 'cUsers', 'cNew'].forEach(id => $(id).addEventListener('change', choose));
+  choose();
+})();
+</script>
+</body>
+</html>

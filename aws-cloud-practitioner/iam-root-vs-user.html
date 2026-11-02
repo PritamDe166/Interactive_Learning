@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Root account vs IAM user</title>
+<meta name="description" content="AWS Cloud Practitioner: what an AWS account is, the root user versus IAM users, tasks only the root user can perform, and why separate identities contain a leak.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · IAM · Domain 2 Security &amp; Compliance (Task 2.3)</div>
+    <h1>Root account vs IAM user</h1>
+    <ul class="lede">
+      <li>An <b>AWS account</b> is the container: a 12-digit ID, its own resources and <b>one bill</b>.</li>
+      <li>Every account has <b>exactly one root user</b>, created with it, with full and unrestricted access.</li>
+      <li><b>IAM users</b> are identities inside one account, with only the permissions you grant. An account can have many; a user never spans accounts.</li>
+      <li>A handful of tasks <b>only the root user</b> can do. Everything else should be done by IAM identities.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In everyday terms: the house and its keys</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>House version</span><span>Why it matters</span></div>
+      <div class="row"><span class="aws">AWS account</span><span class="like">The house (address = account ID)</span><span>Holds every room (service) and gets one electricity bill.</span></div>
+      <div class="row"><span class="aws">Root user</span><span class="like">The owner, with the master key and the deeds</span><span>Can sell the house (close the account). Keep that key in a safe.</span></div>
+      <div class="row"><span class="aws">IAM user</span><span class="like">A person with a key to certain rooms</span><span>Lose one key, change that lock only.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: one account, many identities</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 560" aria-label="An AWS account with a root user and two IAM users; a leaked key is revoked without affecting the others"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>An <b>AWS account</b> = billing and resource container with a <b>12-digit account ID</b>.</li>
+      <li><b>Exactly one root user</b> per account, created automatically (it signs in with the account email). It has full access that policies can't restrict.</li>
+      <li>Use root <b>only for root-only tasks</b>. Protect it with <b>MFA</b> (AWS now enforces MFA for root sign-in) and <b>don't create root access keys</b>.</li>
+      <li><b>Root-only tasks</b> to know: change the account email, root password or root access keys; <b>close the account</b>; <b>restore permissions</b> when the only IAM admin locked themselves out; activate IAM access to the <b>Billing</b> console; register as a seller in the <b>Reserved Instance Marketplace</b>; configure <b>S3 MFA Delete</b>; edit a bucket policy that denies everyone; sign up for GovCloud.</li>
+      <li><b>Not</b> root-only: launching EC2, creating IAM users, changing contact info or the account name. These are distractors in exam questions.</li>
+      <li><b>IAM users</b>: many per account, each with only the permissions granted. A user belongs to <b>one account only</b>.</li>
+      <li>Separate identities <b>contain damage</b>: revoke one leaked user and the account, root and other users are untouched.</li>
+      <li>Root sign-in shows only the account ID in the console menu; an IAM user shows <b>user @ account</b>.</li>
+      <li>Companies use <b>several accounts</b> (dev, test, prod) for full isolation of resources and billing (AWS Organizations, later).</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+
+  <section aria-labelledby="leakH">
+    <h2 class="stage-title" id="leakH">Contain a leaked key</h2>
+    <div class="stage-kind">The CI bot's access key is in a public repo · choose what it is, then respond</div>
+    <div class="controls">
+      <div class="seg" id="leakSeg" role="group" aria-label="Whose key leaked">
+        <button type="button" data-v="bot" aria-pressed="true">CI bot's own IAM user key</button>
+        <button type="button" data-v="root" aria-pressed="false">Root user key (bad practice)</button>
+      </div>
+      <button class="btn primary" id="leakGo" type="button">Attacker uses the key</button>
+      <button class="btn" id="leakFix" type="button">Deactivate the key</button>
+    </div>
+    <div class="scroll"><svg class="diagram nf-canvas" id="lkSvg" viewBox="0 0 1000 330" aria-label="An attacker uses a leaked key against the account"></svg></div>
+    <p class="nf-cap" id="lkCap"></p>
+  </section>
+
+  <section aria-labelledby="rtH">
+    <h2 class="stage-title" id="rtH">Root user or IAM user?</h2>
+    <div class="stage-kind">Which identity should do this task?</div>
+    <div class="card" id="rt"></div>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>Root user</th><th>IAM user</th></tr></thead>
+        <tbody>
+          <tr><td>Created</td><td>Automatically, with the account</td><td>By an administrator</td></tr>
+          <tr><td>How many</td><td>Exactly one</td><td>Many</td></tr>
+          <tr><td>Access</td><td>Full, cannot be limited by IAM policies</td><td>Only what policies grant</td></tr>
+          <tr><td>Use for</td><td>Root-only tasks and emergencies</td><td>Everyday work</td></tr>
+          <tr><td>Share it?</td><td>Never</td><td>Never: one identity per person or workload</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="scroll card table-card" style="margin-top:14px">
+      <table>
+        <thead><tr><th>Area</th><th>Tasks that need the root user</th></tr></thead>
+        <tbody>
+          <tr><td>Account</td><td>Change account email, root password or root access keys; close a standalone account; restore IAM permissions when the only admin is locked out</td></tr>
+          <tr><td>Billing</td><td>Activate IAM user access to the Billing and Cost Management console; view certain tax invoices</td></tr>
+          <tr><td>EC2</td><td>Register as a seller in the Reserved Instance Marketplace</td></tr>
+          <tr><td>S3 / SQS</td><td>Configure S3 MFA Delete; edit or delete a bucket (or queue) policy that denies all principals</td></tr>
+          <tr><td>Other</td><td>Sign up for AWS GovCloud (US); recover an unmanageable KMS key through Support</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Updated</span><p><b>MFA for root is now enforced</b> on all account types: you are prompted to register a device. Older material says "enable MFA on root"; the idea is the same.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Root-only task list</b> comes from the AWS IAM user guide; the exam guide (Task 2.3) asks you to recognise these tasks.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Full, unrestricted access, created with the account</span><span class="arrow">→</span><span class="then">Root user</span></li>
+      <li><span class="if">Close the account / change root email</span><span class="arrow">→</span><span class="then">Root-only task</span></li>
+      <li><span class="if">Only IAM admin locked themselves out</span><span class="arrow">→</span><span class="then">Root restores permissions</span></li>
+      <li><span class="if">First thing to do after creating an account</span><span class="arrow">→</span><span class="then">Secure root with MFA, create an admin identity</span></li>
+      <li><span class="if">Root access keys?</span><span class="arrow">→</span><span class="then">Don't create them</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>How many root users does an AWS account have?<span class="go">Show answer</span></summary><div class="ans"><p><b>Exactly one.</b></p></div></details>
+      <details><summary>Can an IAM user belong to two AWS accounts?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> An IAM user lives in exactly one account. (Cross-account access uses roles.)</p></div></details>
+      <details><summary>Name two tasks that require the root user.<span class="go">Show answer</span></summary><div class="ans"><p>Any two of: <b>close the account, change the account email or root password, restore a locked-out admin's permissions, enable IAM access to billing, S3 MFA Delete, RI Marketplace seller</b>.</p></div></details>
+      <details><summary>Launching an EC2 instance: root or IAM user?<span class="go">Show answer</span></summary><div class="ans"><p><b>IAM user</b> (or role). It's an everyday task.</p></div></details>
+      <details><summary>The CI bot's key leaked. What stays unaffected when you revoke it?<span class="go">Show answer</span></summary><div class="ans"><p><b>The account, the root user and every other IAM user.</b></p></div></details>
+      <details><summary>Why do companies use several AWS accounts?<span class="go">Show answer</span></summary><div class="ans"><p><b>Isolation:</b> separate resources, permissions and bills for dev, test and prod or per team.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Account IDs are examples. Sources: IAM notes "AWS Account vs IAM User", "IAM Introduction", "IAM: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/root-user-tasks.html">Tasks that require root user credentials</a>.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  /* ================= walkthrough ================= */
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'acct', x: 20, y: 20, w: 680, h: 520, kind: 'aws', label: 'AWS account 123456789012 (dev)' }, { id: 'prod', x: 730, y: 20, w: 250, h: 210, kind: 'aws', label: 'Another account (prod)' }],
+    nodes: {
+      root: { x: 100, y: 110, icon: 'crown', kind: 'sec', label: 'Root user', sub: 'owner@clinic.test' },
+      me: { x: 100, y: 270, icon: 'user', kind: 'user', label: 'IAM user: Pritam', sub: 'console + CLI' },
+      bot: { x: 100, y: 430, icon: 'terminal', kind: 'user', label: 'IAM user: CI-Bot', sub: 'access key only' },
+      iam: { x: 320, y: 270, icon: 'shield', kind: 'sec', label: 'IAM', sub: 'checks identity' },
+      ec2: { x: 560, y: 120, icon: 'chip', kind: 'compute', label: 'EC2' },
+      s3: { x: 560, y: 270, icon: 'bucket', kind: 'storage', label: 'S3' },
+      bill: { x: 560, y: 420, icon: 'dollar', kind: 'plain', label: 'Billing & account', sub: 'one bill' },
+      prodx: { x: 855, y: 125, icon: 'cloud', kind: 'plain', label: 'Separate resources', sub: 'and bill' },
+      repo: { x: 820, y: 430, icon: 'branch', kind: 'plain', label: 'Public Git repo' },
+      atk: { x: 920, y: 300, icon: 'bug', kind: 'sec', label: 'Attacker' }
+    },
+    links: [
+      { a: 'root', b: 'iam', via: [[320, 110]] }, { a: 'me', b: 'iam' }, { a: 'bot', b: 'iam', via: [[320, 430]] },
+      { a: 'iam', b: 'ec2', via: [[440, 270], [440, 120]] }, { a: 'iam', b: 's3' }, { a: 'iam', b: 'bill', via: [[440, 270], [440, 420]] },
+      { a: 'bot', b: 'repo', kind: 'dash', via: [[100, 505], [820, 505]], label: 'key committed by mistake', at: [460, 497] },
+      { a: 'atk', b: 'iam', kind: 'pub', via: [[720, 300], [720, 340], [380, 340], [380, 270]] }
+    ]
+  });
+  const OUT = ['repo', 'atk'];
+  function base(i) {
+    net.reset(); net.zones.prod.style.opacity = i === 7 ? 1 : 0.15;
+    OUT.forEach(n => net.nodes[n].g.style.display = (i === 4 || i === 5) ? '' : 'none');
+    net.link('bot', 'repo', i === 4 || i === 5 ? '' : 'hide'); net.link('atk', 'iam', i === 4 || i === 5 ? '' : 'hide');
+    net.nodes.prodx.g.style.display = i === 7 ? '' : 'none';
+    const F = [['ec2', 's3', 'bill'], ['root', 'iam', 'ec2', 's3', 'bill'], ['root', 'me', 'bot', 'iam'], ['me', 'iam', 'ec2', 's3'], ['bot', 'repo', 'atk', 'iam', 's3'], ['bot', 'repo', 'atk', 'iam', 's3', 'me', 'root', 'ec2'], ['root', 'iam', 'bill'], ['me', 'bot', 'root', 'prodx']][i];
+    net.focus(F);
+    if (i === 0) net.badge('bill', 'one bill', 'info');
+    if (i === 1) net.badge('root', 'full access', 'bad');
+    if (i === 2) { net.badge('me', 'only what\'s granted', 'info'); net.badge('bot', 'only what\'s granted', 'info'); }
+    if (i === 5) { net.state('bot', 'down'); net.badge('bot', 'key deactivated', 'bad'); net.badge('me', 'still works', 'ok'); net.badge('root', 'untouched', 'ok'); net.badge('atk', 'denied', 'bad'); }
+    if (i === 6) { net.badge('root', 'MFA required', 'info'); net.badge('bill', 'close account · change email', ''); }
+    if (i === 7) { net.badge('me', 'one account only', ''); }
+  }
+  const STEPS = [
+    { title: 'The account is the container',
+      text: 'An <b>AWS account</b> holds everything: EC2 servers, S3 buckets, IAM itself, and one <b>bill</b>. It has a unique <b>12-digit ID</b> (here 123456789012). Think of it as the house; services are the rooms.' },
+    { title: 'Exactly one root user',
+      text: 'Signing up creates the <b>root user</b>, the email address used for the account. It has <b>full, unrestricted access</b> that IAM policies cannot limit. There is always exactly one, and it should almost never be used.',
+      tip: '"Created automatically, full access, use only for account-level tasks" = root user.' },
+    { title: 'IAM users for everyone else',
+      text: 'Inside the account you create <b>IAM users</b>: Pritam (console and CLI) and <b>CI-Bot</b>, a user for the deployment script with an access key only. Each has <b>only the permissions granted</b> to it.' },
+    { title: 'Everyone works as themselves',
+      text: 'Pritam signs in with his own user and launches an EC2 instance. IAM checks his permissions, not the root user\'s. Every action in the logs is tied to <b>Pritam</b>.',
+      play: async run => { base(3); await net.send(['me', 'iam', 'ec2'], { run, label: 'RunInstances' }); net.badge('ec2', 'by Pritam', 'ok'); } },
+    { title: 'A key leaks',
+      text: 'CI-Bot\'s access key is committed to a public Git repository by mistake. An attacker finds it within minutes and starts calling AWS with it, here reading S3.',
+      play: async run => { base(4); await net.send(['bot', 'repo'], { run, tone: 'red', label: 'AKIA…' }); await net.send(['repo', 'atk'], { run, tone: 'red' }); await net.send(['atk', 'iam', 's3'], { run, tone: 'red', label: 'as CI-Bot' }); net.badge('s3', 'data read!', 'bad'); } },
+    { title: 'Revoke one user, nothing else breaks',
+      text: 'Deactivate and delete <b>CI-Bot\'s key</b>. The attacker is locked out. Pritam, the root user and the account keep working. That containment is the reason for separate identities. If it had been the <b>root key</b>, the attacker would have owned the whole account.',
+      play: async run => { base(5); await net.send(['atk', 'iam'], { run, tone: 'red', label: 'as CI-Bot' }); net.badge('iam', 'key invalid', 'bad'); } },
+    { title: 'What only root can do',
+      text: 'A few tasks need the root user: <b>closing the account</b>, changing the <b>account email or root password</b>, <b>restoring an IAM admin</b> who locked themselves out, enabling IAM access to <b>billing</b>, <b>S3 MFA Delete</b>. For these, sign in as root with MFA, do the task, sign out.',
+      play: async run => { base(6); await net.send(['root', 'iam', 'bill'], { run, label: 'close account' }); } },
+    { title: 'More accounts for isolation',
+      text: 'An IAM user belongs to <b>exactly one account</b>. Companies often run several accounts (dev, test, prod) so a mistake in dev can never touch prod resources, and each has its own bill. AWS Organizations, later in the course, manages them together.' }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ================= leaked key ================= */
+  const lk = K.net($('lkSvg'), {
+    zones: [{ id: 'acct', x: 290, y: 20, w: 690, h: 290, kind: 'aws', label: 'AWS account' }],
+    nodes: { atk: { x: 90, y: 160, icon: 'bug', kind: 'sec', label: 'Attacker', sub: 'has the key' }, iam: { x: 400, y: 160, icon: 'shield', kind: 'sec', label: 'IAM' },
+      s3: { x: 620, y: 80, icon: 'bucket', kind: 'storage', label: 'Patient files' }, ec2: { x: 620, y: 240, icon: 'chip', kind: 'compute', label: 'EC2' }, bill: { x: 870, y: 80, icon: 'dollar', kind: 'plain', label: 'Billing' }, close: { x: 870, y: 240, icon: 'crown', kind: 'sec', label: 'Close account' } },
+    links: [{ a: 'atk', b: 'iam' }, { a: 'iam', b: 's3', via: [[510, 160], [510, 80]] }, { a: 'iam', b: 'ec2', via: [[510, 160], [510, 240]] }, { a: 'iam', b: 'bill', via: [[510, 160], [510, 40], [870, 40]] }, { a: 'iam', b: 'close', via: [[510, 160], [510, 290], [870, 290]] }]
+  });
+  let who = 'bot', dead = false;
+  function lkDraw() { lk.reset(); dead = false; $('lkCap').innerHTML = who === 'bot' ? 'The leaked key belongs to <b>CI-Bot</b>, which may only read the deployment bucket. Press <b>Attacker uses the key</b>.' : 'The leaked key belongs to the <b>root user</b>. Press <b>Attacker uses the key</b>.'; }
+  K.seg($('leakSeg'), v => { who = v; K.cancel('lk'); lkDraw(); });
+  $('leakGo').addEventListener('click', async () => {
+    const run = K.newRun('lk'); lk.reset();
+    try {
+      if (dead) { await lk.send(['atk', 'iam'], { run, tone: 'red' }); lk.badge('iam', 'key deactivated', 'bad'); $('lkCap').innerHTML = '<span class="ok-text">Blocked.</span> The key no longer works. Nothing else in the account was affected.'; return; }
+      const tgt = who === 'bot' ? ['s3'] : ['s3', 'ec2', 'bill', 'close'];
+      for (const t of tgt) { await lk.send(['atk', 'iam', t], { run, tone: 'red' }); lk.badge(t, who === 'bot' ? 'read' : 'controlled', 'bad'); }
+      if (who === 'bot') { await lk.send(['atk', 'iam'], { run, tone: 'red', label: 'ec2:Terminate?' }); lk.badge('iam', 'denied: not granted', 'ok'); }
+      $('lkCap').innerHTML = who === 'bot' ? '<span class="accent">Limited damage:</span> CI-Bot could only read one bucket, so that is all the attacker gets (least privilege). Now deactivate the key.' : '<span class="bad-text">Total loss.</span> Root keys can\'t be limited by policies: the attacker can read data, run servers on your bill and even close the account. This is why you never create root access keys.';
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  });
+  $('leakFix').addEventListener('click', () => { K.cancel('lk'); lk.reset(); dead = true; $('lkCap').innerHTML = `Key deactivated${who === 'root' ? ' (as root: you must sign in as root with MFA to do this)' : ''}. Send the attacker again.`; });
+  lkDraw();
+
+  K.pick($('rt'), [
+    { q: 'Close the company\'s AWS account.', a: 'Root user', why: 'Closing a standalone account is a root-only task.' },
+    { q: 'Launch an EC2 instance for a test.', a: 'IAM user', why: 'Everyday work; never use root for it.' },
+    { q: 'Create an IAM user for a new developer.', a: 'IAM user', why: 'An admin IAM user (or Identity Center) can do this.' },
+    { q: 'The only IAM administrator removed their own permissions and is locked out.', a: 'Root user', why: 'Restoring IAM permissions in that situation needs root.' },
+    { q: 'Let IAM users see the Billing and Cost Management console.', a: 'Root user', why: 'Activating IAM access to billing is root-only.' },
+    { q: 'Change the email address of the account.', a: 'Root user', why: 'Account email changes require root.' },
+    { q: 'Turn on MFA Delete for an S3 bucket.', a: 'Root user', why: 'S3 MFA Delete can only be configured by the root user.' },
+    { q: 'Update the account\'s alternate contact information.', a: 'IAM user', why: 'Not root-only; an IAM identity with the right permission can do it.' }
+  ], ['Root user', 'IAM user']);
+})();
+</script>
+</body>
+</html>

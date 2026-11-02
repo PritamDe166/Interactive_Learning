@@ -42,6 +42,12 @@
    Kit.ngWire(svg, a, b, 'down'|'up'|'two', label, bends) draws a data-flow wire
      (down = inputs, cyan · up = outputs, orange · two = model(), violet).
 
+   Exam-style questions: Kit.mcq(el, [{ q, o: [...], a: [index, ...], why }]).
+   Quick-fire drill: Kit.pick(el, [{ q, a, why, opts? }], options).
+   Request-path diagrams (AWS style): Kit.net(svg, { zones, nodes, links }) → node/state/link/badge/focus,
+     await net.send(['user','edge','app'], { run, label, tone }) moves a glowing dot along the path.
+     Icon tiles come from Kit.ICONS (users, globe, accel, dns, edge, lb, server, chip, db, bucket, …).
+
    Edit-and-run box (real Python via Pyodide, loaded on first Run):
      Kit.pyRunner(el, { starters: [{ label, code, inputs? }] })
        Run shows output; Step through renders Kit.trace from the same tracer
@@ -604,6 +610,226 @@
       go(0, false);
       return { go };
     }
+  };
+
+  /* ---------- exam-style multiple choice ----------
+     Kit.mcq(el, [{ q, o: ['A text', 'B text', ...], a: [0] or [1, 3], why }])
+     Click an option (or two for "select TWO") to lock in; shows right/wrong and the reason. */
+  K.mcq = function (el, qs) {
+    el.classList.add('mcq');
+    let score = 0, done = 0;
+    el.innerHTML = qs.map((x, i) => `<div class="mcq-q" data-i="${i}"><p class="mcq-t"><span class="mcq-n">Q${i + 1}</span> ${x.q}${x.a.length > 1 ? ` <em>(Select ${['', '', 'TWO', 'THREE'][x.a.length]}.)</em>` : ''}</p>
+      <ol class="mcq-o" type="A">${x.o.map((t, j) => `<li><button type="button" data-j="${j}">${t}</button></li>`).join('')}</ol><p class="mcq-why" hidden></p></div>`).join('')
+      + `<p class="mcq-score">Answered 0 of ${qs.length}</p>`;
+    const picked = {};
+    el.addEventListener('click', e => {
+      const b = e.target.closest('button[data-j]'); if (!b) return;
+      const box = b.closest('.mcq-q'), i = +box.dataset.i, x = qs[i];
+      if (box.classList.contains('done')) return;
+      const set = picked[i] = picked[i] || new Set();
+      const j = +b.dataset.j;
+      set.has(j) ? set.delete(j) : set.add(j); b.classList.toggle('sel', set.has(j));
+      if (set.size < x.a.length) return;
+      box.classList.add('done');
+      const ok = x.a.every(k => set.has(k)) && set.size === x.a.length;
+      box.querySelectorAll('button[data-j]').forEach(btn => { const k = +btn.dataset.j; if (x.a.includes(k)) btn.classList.add('right'); else if (set.has(k)) btn.classList.add('wrong'); });
+      const w = box.querySelector('.mcq-why'); w.hidden = false;
+      w.innerHTML = (ok ? '<span class="ok-text">Correct.</span> ' : `<span class="bad-text">Answer: ${x.a.map(k => 'ABCDE'[k]).join(', ')}.</span> `) + x.why;
+      done++; if (ok) score++;
+      el.querySelector('.mcq-score').textContent = `Answered ${done} of ${qs.length} · ${score} correct`;
+    });
+  };
+
+  /* ---------- quick-fire choice drill ----------
+     Kit.pick(el, [{ q, a, why }], ['Option A', 'Option B', ...])
+     One question at a time, buttons for every option, score, explanation, Next. */
+  K.pick = function (el, items, opts) {
+    el.classList.add('pick');
+    let i = 0, score = 0, answered = false;
+    const optsOf = it => it.opts || opts;
+    function render() {
+      const it = items[i];
+      el.innerHTML = `<div class="count">${i + 1} of ${items.length} · score ${score}</div><div class="q">${it.q}</div>
+        <div class="opts">${optsOf(it).map(o => `<button class="btn" type="button" data-o="${o.replace(/"/g, '&quot;')}">${o}</button>`).join('')}</div><p class="fb"></p>
+        <div><button class="btn primary" type="button" data-next hidden>${i === items.length - 1 ? 'Start again' : 'Next ▶'}</button></div>`;
+      answered = false;
+    }
+    el.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.next !== undefined) { i = (i + 1) % items.length; if (i === 0) score = 0; render(); return; }
+      if (answered) return; answered = true;
+      const it = items[i], ok = b.dataset.o === it.a; if (ok) score++;
+      b.classList.add(ok ? 'right' : 'wrong');
+      [...el.querySelectorAll('[data-o]')].find(x => x.dataset.o === it.a).classList.add('right');
+      el.querySelector('.fb').innerHTML = (ok ? '<span class="ok-text">Right.</span> ' : `<span class="bad-text">It's ${it.a}.</span> `) + it.why;
+      el.querySelector('.count').textContent = `${i + 1} of ${items.length} · score ${score}`;
+      el.querySelector('[data-next]').hidden = false;
+    });
+    render();
+  };
+
+  /* ---------- request-path diagrams (AWS-style network flows) ----------
+     const net = Kit.net(svg, {
+       zones: [{ id, x, y, w, h, label, kind: 'region'|'az'|'aws'|'vpc'|'onprem'|'net' }],
+       nodes: { id: { x, y, icon, label, sub, kind: 'net'|'compute'|'storage'|'db'|'sec'|'mgmt'|'user'|'plain', badge: 'right'? } },
+       links: [{ a, b, via: [[x,y]], kind: 'pub'|'aws'|'priv'|'dash', label }]
+     });
+     net.node(id) → { g, label(t), sub(t) }      net.state(id, 'on'|'down'|'dim'|'ok'|'')
+     net.link(a, b, 'hot'|'cut'|'dim'|'hide'|'')       net.badge(id, text, 'ok'|'bad'|'') / net.badge(id) clears
+     await net.send(['user','dns','edge'], { run, label, tone: 'orange'|'cyan'|'green'|'red', speed })
+       a glowing dot travels the links in order (constant speed, follows Kit speed / pause / step mode).
+     net.focus(ids|null) dims every node, zone and link not listed.  Icons: see Kit.ICONS. */
+  K.ICONS = {
+    users: '<circle cx="9" cy="8" r="3"/><path d="M3.5 19c0-3.2 2.4-5.5 5.5-5.5s5.5 2.3 5.5 5.5"/><circle cx="16.5" cy="9" r="2.4"/><path d="M15 13.8c3 0 5.5 2 5.5 5"/>',
+    user: '<circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.9 3.1-6.5 7-6.5s7 2.6 7 6.5"/>',
+    laptop: '<rect x="5" y="5" width="14" height="10" rx="1.5"/><path d="M3 18.5h18"/>',
+    globe: '<circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.4 2.3 3.5 5 3.5 8s-1.1 5.7-3.5 8c-2.4-2.3-3.5-5-3.5-8s1.1-5.7 3.5-8z"/>',
+    accel: '<circle cx="12" cy="10" r="6.5"/><path d="M5.5 10h13M12 3.5c1.9 1.8 2.7 4 2.7 6.5s-.8 4.7-2.7 6.5c-1.9-1.8-2.7-4-2.7-6.5s.8-4.7 2.7-6.5zM12 16.5v3M7 21h10"/><circle cx="7" cy="21" r=".8"/><circle cx="17" cy="21" r=".8"/>',
+    dns: '<path d="M12 3v18M6 6h11l2.5 2.5L17 11H6zM18 13H7l-2.5 2.5L7 18h11z"/>',
+    edge: '<rect x="4.5" y="6.5" width="15" height="11" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M4.5 12H2M22 12h-2.5"/>',
+    lb: '<circle cx="12" cy="5.5" r="2.3"/><circle cx="5" cy="18.5" r="2.3"/><circle cx="12" cy="18.5" r="2.3"/><circle cx="19" cy="18.5" r="2.3"/><path d="M12 7.8v8.4M10.5 7.3 6.2 16.4M13.5 7.3l4.3 9.1"/>',
+    server: '<rect x="4.5" y="4" width="15" height="5.5" rx="1.2"/><rect x="4.5" y="11" width="15" height="5.5" rx="1.2"/><path d="M8 6.8h.01M8 13.8h.01M7 20h10"/>',
+    chip: '<rect x="7" y="7" width="10" height="10" rx="1.5"/><path d="M10 7V4M14 7V4M10 20v-3M14 20v-3M7 10H4M7 14H4M20 10h-3M20 14h-3"/>',
+    db: '<ellipse cx="12" cy="6" rx="7" ry="2.6"/><path d="M5 6v12c0 1.4 3.1 2.6 7 2.6s7-1.2 7-2.6V6M5 12c0 1.4 3.1 2.6 7 2.6s7-1.2 7-2.6"/>',
+    bucket: '<path d="M4.5 6.5h15l-1.8 12.2c-.2 1.2-2.7 2-5.7 2s-5.5-.8-5.7-2z"/><ellipse cx="12" cy="6.5" rx="7.5" ry="2.2"/>',
+    disk: '<rect x="5" y="4" width="14" height="16" rx="2"/><circle cx="12" cy="11" r="3.2"/><path d="M8 17.5h8"/>',
+    folder: '<path d="M3.5 7.5c0-1 .8-1.8 1.8-1.8h4.2l2 2h7.2c1 0 1.8.8 1.8 1.8v8c0 1-.8 1.8-1.8 1.8H5.3c-1 0-1.8-.8-1.8-1.8z"/>',
+    lambda: '<path d="M6 20 11.2 9.5 9 4.5H6.5M11.2 9.5 15.5 19.5H19"/>',
+    box: '<path d="m12 3 8 4.5v9L12 21l-8-4.5v-9z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/>',
+    shield: '<path d="M12 3 19 6v5.5c0 4.5-3 8-7 9.5-4-1.5-7-5-7-9.5V6z"/>',
+    lock: '<rect x="5.5" y="10.5" width="13" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/>',
+    key: '<circle cx="8" cy="12" r="3.5"/><path d="M11.5 12H20M17 12v3M20 12v2"/>',
+    idcard: '<rect x="3.5" y="5.5" width="17" height="13" rx="2"/><circle cx="9" cy="11" r="2.2"/><path d="M5.8 16c.5-1.6 1.7-2.4 3.2-2.4s2.7.8 3.2 2.4M14.5 10h3.5M14.5 13.5h3.5"/>',
+    cloud: '<path d="M7 18.5a4.5 4.5 0 0 1-.6-9 6 6 0 0 1 11.5 1.6A3.8 3.8 0 0 1 17.2 18.5z"/>',
+    building: '<path d="M5 21V4.5h9V21M14 9h5v12M3 21h18M8 8h3M8 11.5h3M8 15h3"/>',
+    router: '<circle cx="12" cy="12" r="8"/><path d="M12 6v5M9.8 8.2 12 6l2.2 2.2M12 18v-5M9.8 15.8 12 18l2.2-2.2M6 12h5M18 12h-5"/>',
+    switch: '<rect x="3" y="8" width="18" height="8" rx="1.5"/><path d="M6.5 12h.01M9.5 12h.01M12.5 12h.01M15.5 12h.01M18 12h.01"/>',
+    gear: '<circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"/>',
+    chart: '<path d="M4 20h16M7 16.5V11M11 16.5V6.5M15 16.5v-4M19 16.5V9"/>',
+    bolt: '<path d="M13 3 5.5 13.5H12L11 21l7.5-10.5H12z"/>',
+    flag: '<path d="M6 21V4M6 4.5h11l-2 3.5 2 3.5H6"/>',
+    code: '<path d="m8.5 7.5-5 4.5 5 4.5M15.5 7.5l5 4.5-5 4.5M13.5 5l-3 14"/>',
+    branch: '<circle cx="6.5" cy="5.5" r="2"/><circle cx="6.5" cy="18.5" r="2"/><circle cx="17.5" cy="8.5" r="2"/><path d="M6.5 7.5v9M17.5 10.5c0 4-5 3-9.5 6.5"/>',
+    pipe: '<rect x="2.5" y="9" width="5" height="6" rx="1"/><rect x="9.5" y="9" width="5" height="6" rx="1"/><rect x="16.5" y="9" width="5" height="6" rx="1"/><path d="M7.5 12h2M14.5 12h2"/>',
+    dollar: '<circle cx="12" cy="12" r="8.5"/><path d="M14.8 9c-.5-1-1.5-1.6-2.8-1.6-1.6 0-2.8.9-2.8 2.2 0 3 5.8 1.6 5.8 4.6 0 1.3-1.3 2.2-3 2.2-1.4 0-2.5-.6-3-1.7M12 5.8v1.6M12 16.6v1.6"/>',
+    eye: '<path d="M2.5 12S6 6 12 6s9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z"/><circle cx="12" cy="12" r="2.6"/>',
+    cpu: '<rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx=".8"/><path d="M9.5 6V3.5M14.5 6V3.5M9.5 20.5V18M14.5 20.5V18M6 9.5H3.5M6 14.5H3.5M20.5 9.5H18M20.5 14.5H18"/>',
+    ram: '<rect x="3" y="7.5" width="18" height="8" rx="1.2"/><path d="M6.5 10.5v2M10 10.5v2M14 10.5v2M17.5 10.5v2M5 15.5v2M19 15.5v2"/>',
+    phone: '<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/>',
+    doc: '<path d="M6.5 3.5h7.5l4 4v13h-11.5z"/><path d="M14 3.5v4h4M9 11.5h6M9 14.5h6M9 17.5h4"/>',
+    terminal: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m7 10 3 2-3 2M12.5 15h4"/>',
+    crown: '<path d="M4 17.5 3 8l5 4 4-6 4 6 5-4-1 9.5z"/><path d="M4.5 20.5h15"/>',
+    ticket: '<path d="M4 7.5h16v3a1.8 1.8 0 0 0 0 3.5v3H4v-3a1.8 1.8 0 0 0 0-3.5z"/><path d="M14 8v8" stroke-dasharray="1.5 2"/>',
+    clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/>',
+    bug: '<rect x="8" y="8" width="8" height="11" rx="4"/><path d="M12 8V6M9.5 5.5l1.5 1.5M14.5 5.5 13 7M8 12H4.5M19.5 12H16M8 16H5M19 16h-3M8.5 9 6 6.5M15.5 9 18 6.5"/>',
+    camera: '<path d="M4 8.5h3.5L9 6h6l1.5 2.5H20v10H4z"/><circle cx="12" cy="13" r="3.4"/>',
+    trash: '<path d="M5 7h14M9.5 7V4.5h5V7M7 7l1 13h8l1-13M10.5 10.5v6.5M13.5 10.5v6.5"/>',
+    archive: '<rect x="3.5" y="4.5" width="17" height="4.5" rx="1"/><path d="M5 9v10.5h14V9M10 12.5h4"/>',
+    layers: '<path d="M12 4 3.5 8.5 12 13l8.5-4.5zM3.5 12.5 12 17l8.5-4.5M3.5 16.5 12 21l8.5-4.5"/>',
+  };
+  const NET_SPEED = 0.32;                         // px per ms of animation time at 1×
+  K.net = function (svg, spec) {
+    const zl = K.el('g', { class: 'nf-zones' }, svg), ll = K.el('g', { class: 'nf-links' }, svg);
+    const nl = K.el('g', { class: 'nf-nodes' }, svg), dl = K.el('g', { class: 'nf-dots' }, svg);
+    const Z = {}, N = {}, L = [];
+    (spec.zones || []).forEach(z => {
+      const g = K.el('g', { class: 'nf-zone ' + (z.kind || 'region') }, zl);
+      K.el('rect', { x: z.x, y: z.y, width: z.w, height: z.h, rx: 12 }, g);
+      if (z.label) {
+        const flag = z.kind === 'region' || z.kind === 'az';
+        if (flag) { K.el('rect', { x: z.x, y: z.y, width: 26, height: 26, rx: 0, class: 'nf-ztab' }, g); const ic = K.el('g', { class: 'nf-zic', transform: `translate(${z.x + 4},${z.y + 4}) scale(.75)` }, g); ic.innerHTML = K.ICONS.flag; }
+        const t = K.text(g, z.x + (flag ? 34 : 12), z.y + 18, z.label, 'nf-zlabel'); t.style.textAnchor = 'start';
+      }
+      Z[z.id || z.label] = g;
+    });
+    const TILE = 52;
+    for (const id in spec.nodes) {
+      const n = spec.nodes[id], g = K.el('g', { class: 'nf-node k-' + (n.kind || 'net') }, nl);
+      g.dataset.id = id;
+      if (n.icon) {
+        K.el('rect', { x: n.x - TILE / 2, y: n.y - TILE / 2, width: TILE, height: TILE, rx: 11, class: 'nf-tile' }, g);
+        const ic = K.el('g', { class: 'nf-ic', transform: `translate(${n.x - 15},${n.y - 15}) scale(1.25)` }, g);
+        ic.innerHTML = K.ICONS[n.icon] || '';
+      } else {
+        K.el('rect', { x: n.x - (n.w || 110) / 2, y: n.y - 20, width: n.w || 110, height: 40, rx: 10, class: 'nf-chip' }, g);
+      }
+      const ly = n.icon ? n.y + TILE / 2 + 18 : n.y + 5;
+      const lab = K.text(g, n.x, ly, n.label || '', 'nf-label');
+      const sub = K.text(g, n.x, ly + 16, n.sub || '', 'nf-sub');
+      const x = K.el('g', { class: 'nf-x', transform: `translate(${n.x + TILE / 2 - 4},${n.y - TILE / 2 + 4})` }, g);
+      K.el('circle', { r: 11 }, x); K.el('path', { d: 'M-5-5 5 5M5-5-5 5' }, x);
+      const badge = K.el('g', { class: 'nf-badge', transform: `translate(${n.x},${n.y - TILE / 2 - 14})` }, g);
+      K.el('rect', { x: -30, y: -11, width: 60, height: 22, rx: 11 }, badge); K.text(badge, 0, 4, '', '');
+      N[id] = { g, x: n.x, y: n.y, r: n.icon ? TILE / 2 : (n.w || 110) / 2, badge, side: n.badge === 'right',
+        label(t) { lab.textContent = t; }, sub(t) { sub.textContent = t; } };
+    }
+    (spec.links || []).forEach(l => {
+      const a = N[l.a], b = N[l.b];
+      const pts = [[a.x, a.y], ...(l.via || []), [b.x, b.y]];
+      const d = 'M' + pts.map(p => p.join(' ')).join(' L');
+      const g = K.el('g', { class: 'nf-link ' + (l.kind || 'pub') }, ll);
+      const p = K.el('path', { d }, g);
+      if (l.label) {
+        const m = l.at || [(pts[0][0] + pts[1][0]) / 2, (pts[0][1] + pts[1][1]) / 2 - 8];
+        K.text(g, m[0], m[1], l.label, 'nf-llabel');
+      }
+      L.push({ a: l.a, b: l.b, g, p, len: 0 });
+    });
+    const findLink = (a, b) => L.find(l => (l.a === a && l.b === b) || (l.a === b && l.b === a));
+    const api = {
+      nodes: N, zones: Z,
+      node: id => N[id],
+      state(id, s) { const n = N[id]; ['on', 'down', 'dim', 'ok'].forEach(c => n.g.classList.toggle(c, c === s)); },
+      link(a, b, s) { const l = findLink(a, b); if (!l) return; ['hot', 'cut', 'dim', 'hide'].forEach(c => l.g.classList.toggle(c, c === s)); },
+      badge(id, text, cls) {
+        const bg = N[id].badge; bg.setAttribute('class', 'nf-badge' + (text ? ' show ' + (cls || '') : ''));
+        if (text) { bg.querySelector('text').textContent = text; const w = Math.max(44, text.length * 7.4 + 18); const r = bg.querySelector('rect'); r.setAttribute('x', -w / 2); r.setAttribute('width', w);
+          const n = N[id]; if (n.side) bg.setAttribute('transform', `translate(${n.x + n.r + 8 + w / 2},${n.y})`); }
+      },
+      focus(ids) {
+        const on = ids ? new Set(ids) : null;
+        for (const id in N) N[id].g.classList.toggle('nf-off', !!on && !on.has(id));
+        L.forEach(l => l.g.classList.toggle('nf-off', !!on && !(on.has(l.a) && on.has(l.b))));
+      },
+      reset() { for (const id in N) { api.state(id, ''); api.badge(id); N[id].g.classList.remove('nf-off'); } L.forEach(l => l.g.setAttribute('class', l.g.getAttribute('class').replace(/ (hot|cut|dim|hide|nf-off)/g, ''))); dl.textContent = ''; },
+      clearDots() { dl.textContent = ''; },
+      /** dot travels node → node along the links; trims the part hidden under the tiles */
+      async send(route, o = {}) {
+        const run = o.run, tone = o.tone || 'orange', speed = (o.speed || 1) * NET_SPEED;
+        const dot = K.el('g', { class: 'nf-dot ' + tone }, dl);
+        K.el('circle', { r: 15, class: 'halo' }, dot); K.el('circle', { r: 7, class: 'core' }, dot);
+        let tag = null;
+        if (o.label) { tag = K.el('g', { class: 'nf-dtag', transform: 'translate(0,-22)' }, dot); const w = o.label.length * 7 + 16; K.el('rect', { x: -w / 2, y: -10, width: w, height: 20, rx: 10 }, tag); K.text(tag, 0, 4, o.label, ''); }
+        dot.setAttribute('transform', 'translate(-99,-99)');
+        try {
+          await K.gate(run);
+          for (let i = 0; i < route.length - 1; i++) {
+            const l = findLink(route[i], route[i + 1]);
+            if (!l) throw new Error('Kit.net: no link ' + route[i] + '→' + route[i + 1]);
+            const fwd = l.a === route[i], len = l.p.getTotalLength();
+            const r0 = N[route[i]].r * (i === 0 ? 0.55 : 0.55), r1 = N[route[i + 1]].r * 0.55;
+            const s0 = Math.min(r0, len / 3), s1 = Math.max(len - r1, len * 2 / 3);
+            const span = s1 - s0, ms = (K.reduce ? 1 : span / speed);
+            l.g.classList.add('live');
+            await new Promise((res, rej) => {
+              let k = 0, last = performance.now();
+              (function f(t) {
+                if (!K.alive(run)) return rej(new Stop());
+                k = Math.min(1, k + K.tick(Math.max(0, t - last)) / ms); last = t;
+                const at = fwd ? s0 + span * k : len - (s0 + span * k);
+                const pt = l.p.getPointAtLength(at);
+                dot.setAttribute('transform', `translate(${pt.x.toFixed(1)},${pt.y.toFixed(1)})`);
+                k < 1 ? requestAnimationFrame(f) : res();
+              })(last);
+            });
+            l.g.classList.remove('live');
+            if (o.onHop) o.onHop(route[i + 1], i + 1);
+          }
+        } finally { if (!o.keep) dot.remove(); L.forEach(l => l.g.classList.remove('live')); }
+        return dot;
+      }
+    };
+    return api;
   };
 
   /* ---------- playback control bar ---------- */

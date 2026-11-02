@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Security groups and classic ports</title>
+<meta name="description" content="AWS Cloud Practitioner: EC2 security groups as a stateful, allow-only firewall in front of instances; inbound vs outbound, CIDR and security-group sources, timeout vs connection refused, and the classic ports 21, 22, 80, 443, 3389.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .wall { fill: var(--teal-wash); stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 6 5; }
+  .wall-label { fill: var(--cyan); font-family: var(--mono); font-size: 12px; text-anchor: middle; }
+  .src rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; }
+  .src text { fill: var(--fg); font-size: 13px; font-weight: 600; text-anchor: middle; }
+  .src .sm { fill: var(--muted); font-family: var(--mono); font-size: 10.5px; font-weight: 400; }
+  .src.on rect { stroke: var(--cyan); }
+  .rules { display: grid; gap: 8px; }
+  .rules .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .rules code { font-size: 11.5px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · EC2 · Domain 2 Security &amp; Domain 3 Technology</div>
+    <h1>Security groups &amp; classic ports</h1>
+    <ul class="lede">
+      <li>A <b>security group</b> is a virtual firewall around EC2 instances, with <b>inbound</b> and <b>outbound</b> rules.</li>
+      <li>It has <b>allow rules only</b>. Inbound is <b>blocked by default</b>; outbound is <b>allowed by default</b>. Replies to allowed traffic flow back automatically (<b>stateful</b>).</li>
+      <li>A rule = protocol + <b>port</b> + <b>source</b>: an IP range (<span class="mono">0.0.0.0/0</span>, <span class="mono">203.0.113.10/32</span>) or <b>another security group</b>.</li>
+      <li><b>Timeout</b> = blocked by the security group. <b>Connection refused</b> = it got through, but nothing is listening.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: who gets through the firewall?</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 520" aria-label="Several sources send traffic to a security group in front of an EC2 instance; some are allowed, some blocked"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>Security group = <b>virtual firewall</b> for EC2 (and other resources like RDS), outside the instance. Blocked traffic never reaches the OS.</li>
+      <li>Rules are <b>allow-only</b>: there is no "deny" rule. Anything not allowed is dropped.</li>
+      <li><b>Default</b>: all <b>inbound blocked</b>, all <b>outbound allowed</b>.</li>
+      <li><b>Stateful</b>: if a request is allowed in, its reply goes out automatically (and vice versa).</li>
+      <li>Rule = type/protocol, <b>port</b> (or range), <b>source</b>: CIDR (<code>0.0.0.0/0</code> = all IPv4, <code>x.x.x.x/32</code> = one IP), IPv6 range, or <b>another security group</b>.</li>
+      <li>Referencing a security group keeps working when instances' IPs change, which suits app tiers and load balancers.</li>
+      <li>Many-to-many: one group on many instances; one instance with several groups (rules combine). Groups are tied to a <b>Region and VPC</b>.</li>
+      <li>Keep <b>SSH in its own group</b>, open only to your IP. Opening 443 isn't enough for HTTPS; the server also needs a certificate.</li>
+      <li><b>Ports</b>: <b>21</b> FTP · <b>22</b> SSH and SFTP · <b>80</b> HTTP · <b>443</b> HTTPS · <b>3389</b> RDP (Windows).</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+
+  <section aria-labelledby="sgH">
+    <h2 class="stage-title" id="sgH">Security group: who gets through?</h2>
+    <div class="stage-kind">Change the rules, then send traffic</div>
+    <div class="two">
+      <div class="card">
+        <div class="label">Web-SG rules (allow rules only)</div>
+        <div class="rules">
+          <label class="toggle" for="r1"><input type="checkbox" id="r1" checked> In: SSH <code>22</code> from <code>203.0.113.10/32</code> (your IP)</label>
+          <label class="toggle" for="r2"><input type="checkbox" id="r2"> In: SSH <code>22</code> from <code>0.0.0.0/0</code> (anywhere)</label>
+          <label class="toggle" for="r3"><input type="checkbox" id="r3" checked> In: HTTP <code>80</code> from <code>0.0.0.0/0</code></label>
+          <label class="toggle" for="r4"><input type="checkbox" id="r4"> In: HTTPS <code>443</code> from <code>0.0.0.0/0</code></label>
+          <label class="toggle" for="r5"><input type="checkbox" id="r5" checked> In: TCP <code>8080</code> from <code>App-SG</code> (another security group)</label>
+          <label class="toggle" for="r6"><input type="checkbox" id="r6" checked> Out: all traffic to <code>0.0.0.0/0</code> (default)</label>
+          <label class="toggle" for="httpd"><input type="checkbox" id="httpd" checked> Web server (httpd) running on the instance</label>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">Send traffic</div>
+        <div class="chips" id="sgChips"></div>
+        <p class="status-line" id="sgStatus" style="text-align:left;margin-top:12px">Pick a request.</p>
+      </div>
+    </div>
+    <div class="scroll"><svg class="diagram" id="sg" viewBox="0 0 1000 380" aria-label="Sources on the left, a security group wall in the middle, the EC2 instance on the right"></svg></div>
+  </section>
+
+  <section aria-labelledby="ptH">
+    <h2 class="stage-title" id="ptH">Which port?</h2>
+    <div class="card" id="pt"></div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Break and fix a rule (from the course hands-on)</summary>
+      <ol>
+        <li>EC2 → your instance → <b>Security</b> tab: see the attached group (e.g. <code>launch-wizard-1</code>) and its rules. Or <b>Network &amp; Security → Security Groups</b>.</li>
+        <li>Inbound rules: SSH 22 and HTTP 80 from <b>Anywhere IPv4</b> (<code>0.0.0.0/0</code>).</li>
+        <li><b>Edit inbound rules</b> → delete HTTP 80 → save. Refresh the website: it hangs, then <b>times out</b>.</li>
+        <li>Add HTTP 80 back → save → refresh: the page loads again.</li>
+        <li>Explore sources: Anywhere, <b>My IP</b> (breaks if your IP changes), a custom CIDR, another security group, a prefix list.</li>
+        <li>Outbound rules: one default rule allowing all traffic.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Instance-level firewall, stateful, allow only</span><span class="arrow">→</span><span class="then">Security group</span></li>
+      <li><span class="if">Connection times out</span><span class="arrow">→</span><span class="then">Security group (inbound rule missing)</span></li>
+      <li><span class="if">Connection refused</span><span class="arrow">→</span><span class="then">Application not running / not listening</span></li>
+      <li><span class="if">Linux admin / Windows admin</span><span class="arrow">→</span><span class="then">SSH 22 / RDP 3389</span></li>
+      <li><span class="if">Who configures security group rules?</span><span class="arrow">→</span><span class="then">The customer</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Port</th><th>Protocol</th><th>Used for</th></tr></thead>
+        <tbody>
+          <tr><td>21</td><td>FTP</td><td>File transfer (unencrypted)</td></tr>
+          <tr><td>22</td><td>SSH / SFTP</td><td>Log in to Linux instances; secure file transfer</td></tr>
+          <tr><td>80</td><td>HTTP</td><td>Unsecured websites</td></tr>
+          <tr><td>443</td><td>HTTPS</td><td>Secured websites</td></tr>
+          <tr><td>3389</td><td>RDP</td><td>Log in to Windows instances</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>Stateful vs stateless:</b> security groups are stateful (replies allowed automatically). Network ACLs, at the subnet level, are stateless and can have deny rules; they come in the VPC section.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <div class="quiz">
+      <details><summary>Can a security group rule deny a specific IP?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> Security groups have allow rules only. (Network ACLs can deny.)</p></div></details>
+      <details><summary>What does <code>0.0.0.0/0</code> mean as a source?<span class="go">Show answer</span></summary><div class="ans"><p><b>Any IPv4 address</b>: the whole internet.</p></div></details>
+      <details><summary>Your SSH command hangs and then times out. Where do you look first?<span class="go">Show answer</span></summary><div class="ans"><p><b>The security group</b>: is port 22 allowed from your IP?</p></div></details>
+      <details><summary>Why reference App-SG instead of the app server's IP?<span class="go">Show answer</span></summary><div class="ans"><p>The rule follows <b>whatever instances carry App-SG</b>, even as IPs change or instances scale out.</p></div></details>
+    </div>
+  </section>
+
+  <footer>IPs use documentation ranges. Sources: EC2 notes "EC2 Security Groups and Classic Ports", "Security Groups Hands-On".</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'sgz', x: 560, y: 40, w: 420, h: 400, kind: 'vpc', label: 'Web-SG' }],
+    nodes: {
+      you: { x: 90, y: 60, icon: 'laptop', kind: 'user', label: 'You', sub: '203.0.113.10' },
+      oth: { x: 90, y: 170, icon: 'bug', kind: 'user', label: 'Unknown laptop', sub: '198.51.100.7' },
+      vis: { x: 90, y: 280, icon: 'users', kind: 'user', label: 'Website visitors', sub: 'any IP' },
+      app: { x: 90, y: 390, icon: 'server', kind: 'compute', label: 'App server', sub: 'has App-SG' },
+      gate: { x: 560, y: 240, icon: 'shield', kind: 'sec', label: 'Inbound rules' },
+      ec2: { x: 800, y: 240, icon: 'chip', kind: 'compute', label: 'EC2 web server' },
+      repo: { x: 800, y: 470, icon: 'globe', kind: 'plain', label: 'Package repo', sub: 'internet' }
+    },
+    links: [['you', 60], ['oth', 170], ['vis', 280], ['app', 390]].map(([n, y]) => ({ a: n, b: 'gate', via: [[330, y], [330, 240]] })).concat([{ a: 'gate', b: 'ec2' }, { a: 'ec2', b: 'repo', label: 'outbound', at: [850, 380] }])
+  });
+  const RULES = ['(no inbound rules)', 'HTTP 80 · 0.0.0.0/0', 'HTTP 80 · 0.0.0.0/0, SSH 22 · 203.0.113.10/32', 'HTTP 80, SSH 22 /32', 'HTTP 80, SSH 22 /32, 8080 · App-SG'];
+  function base(i) {
+    net.reset();
+    net.focus([['gate', 'ec2'], ['vis', 'gate', 'ec2'], ['vis', 'gate', 'ec2'], ['you', 'oth', 'gate', 'ec2'], ['ec2', 'repo'], ['app', 'gate', 'ec2'], ['vis', 'gate', 'ec2'], null][i]);
+    net.nodes.gate.sub(RULES[Math.min(i <= 1 ? 0 : i === 2 ? 1 : i === 3 ? 2 : i >= 5 ? 4 : 3, 4)]);
+    if (i === 0) net.badge('gate', 'allow rules only', 'info');
+  }
+  const atk = async (run, src, ok, label) => { await net.send([src, 'gate'], { run, label, tone: ok ? 'orange' : 'red' }); if (!ok) { net.badge('gate', 'dropped → timeout', 'bad'); return; } net.badge('gate', 'allowed', 'ok'); await net.send(['gate', 'ec2'], { run }); };
+  const STEPS = [
+    { title: 'A firewall outside the instance',
+      text: 'A <b>security group</b> sits in front of the instance, outside the operating system. It has <b>inbound</b> rules (traffic coming in) and <b>outbound</b> rules (traffic the instance starts). Rules can only <b>allow</b>.' },
+    { title: 'Default: inbound blocked',
+      text: 'A new group with no inbound rules drops everything. A visitor\'s browser sends a request to port 80, the packet is silently dropped, and after a while the browser shows a <b>timeout</b>.',
+      play: async run => { base(1); await atk(run, 'vis', false, 'HTTP :80'); } },
+    { title: 'Allow HTTP 80 from anywhere',
+      text: 'Add an inbound rule: <b>HTTP, TCP 80, source 0.0.0.0/0</b> (every IPv4 address). Now visitors reach the web server and its reply flows back.',
+      play: async run => { base(2); await atk(run, 'vis', true, 'HTTP :80'); await net.send(['ec2', 'gate', 'vis'], { run, tone: 'green', label: '200 OK' }); } },
+    { title: 'SSH only from your IP',
+      text: 'Add <b>SSH, TCP 22, source 203.0.113.10/32</b>: your IP and nothing else. You get in; an unknown laptop scanning port 22 is dropped. Keep admin ports narrow.',
+      tip: '/32 = exactly one IPv4 address.',
+      play: async run => { base(3); await atk(run, 'you', true, 'SSH :22'); await atk(run, 'oth', false, 'SSH :22'); } },
+    { title: 'Outbound open, replies automatic',
+      text: 'By default all <b>outbound</b> traffic is allowed, so the instance can download updates. The reply comes back in without any inbound rule because security groups are <b>stateful</b>: they remember allowed connections.',
+      play: async run => { base(4); await net.send(['ec2', 'repo'], { run, label: 'dnf update' }); await net.send(['repo', 'ec2'], { run, tone: 'green', label: 'packages' }); } },
+    { title: 'Allow another security group',
+      text: 'Instead of an IP, a rule can name <b>another security group</b>: "TCP 8080 from App-SG". Any instance carrying App-SG gets in, even when its IP changes or new app servers are added.',
+      play: async run => { base(5); await atk(run, 'app', true, ':8080'); } },
+    { title: 'Timeout vs connection refused',
+      text: '<b>Timeout</b>: the packet was dropped before reaching the instance, so check the security group first. <b>Connection refused</b>: it arrived, but no application is listening on that port, so check the app (is httpd running?).',
+      play: async run => { base(6); await atk(run, 'vis', true, 'HTTP :80'); net.badge('ec2', 'httpd stopped', 'bad'); await net.send(['ec2', 'gate', 'vis'], { run, tone: 'red', label: 'refused' }); } },
+    { title: 'Scope and attachment',
+      text: 'One group can protect many instances; one instance can have several groups (their rules add up). A group belongs to one <b>Region and VPC</b>. Configuring these rules is <b>your</b> side of shared responsibility.' }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* playground (sources → wall → instance) */
+  const sg = $('sg');
+  const SRC = [{ k: 'you', t: 'You', s: '203.0.113.10', y: 55 }, { k: 'other', t: 'Other laptop', s: '198.51.100.7', y: 125 }, { k: 'web', t: 'Website visitor', s: 'any IP', y: 195 }, { k: 'app', t: 'App server', s: 'has App-SG', y: 265 }, { k: 'repo', t: 'Package repo', s: 'internet', y: 335 }];
+  const srcEls = {};
+  SRC.forEach(s => { const g = K.el('g', { class: 'src' }, sg); K.el('rect', { x: 30, y: s.y - 27, width: 170, height: 54, rx: 10 }, g); K.text(g, 115, s.y - 4, s.t, ''); K.text(g, 115, s.y + 14, s.s, 'sm'); srcEls[s.k] = g; });
+  K.el('rect', { x: 500, y: 20, width: 40, height: 345, rx: 8, class: 'wall' }, sg);
+  K.text(sg, 520, 14, 'Web-SG', 'wall-label');
+  const inst = K.node(sg, 820, 195, 230, 150, 'EC2 web server', '172.31.20.5'); inst.g.classList.add('solid');
+  const portsT = K.text(sg, 820, 245, '', 'mlabel muted'); portsT.style.textAnchor = 'middle';
+  const sgP = K.el('g', {}, sg);
+  function listening() { return { 22: true, 80: $('httpd').checked, 443: false, 8080: true }; }
+  function paintPorts() { const L = listening(); portsT.textContent = 'listening: ' + Object.keys(L).filter(p => L[p]).join(', '); }
+  paintPorts(); $('httpd').addEventListener('change', paintPorts);
+  const REQ = [{ k: 'you22', src: 'you', port: 22, lbl: 'You → SSH 22' }, { k: 'oth22', src: 'other', port: 22, lbl: 'Other laptop → SSH 22' }, { k: 'web80', src: 'web', port: 80, lbl: 'Visitor → HTTP 80' }, { k: 'web443', src: 'web', port: 443, lbl: 'Visitor → HTTPS 443' }, { k: 'app8080', src: 'app', port: 8080, lbl: 'App server → 8080' }, { k: 'out', src: 'repo', port: 443, lbl: 'Instance → dnf update (outbound)', out: true }];
+  $('sgChips').innerHTML = REQ.map(r => `<button class="chip-btn" type="button" data-k="${r.k}" aria-pressed="false">${r.lbl}</button>`).join('');
+  function allowedIn(r) { if (r.port === 22) return (r.src === 'you' && $('r1').checked) || $('r2').checked; if (r.port === 80) return $('r3').checked; if (r.port === 443) return $('r4').checked; if (r.port === 8080) return r.src === 'app' && $('r5').checked; return false; }
+  async function send(r) {
+    const run = K.newRun('sg'); sgP.textContent = '';
+    Object.values(srcEls).forEach(g => g.classList.remove('on')); inst.g.classList.remove('ok', 'bad'); srcEls[r.src].classList.add('on');
+    const st = $('sgStatus'), y = SRC.find(s => s.k === r.src).y;
+    try {
+      if (r.out) {
+        const ok = $('r6').checked; const p = K.pill(sgP, 'GET packages :443');
+        await K.move(p, [705, 195], [560, y], 500, run);
+        if (!ok) { p.remove(); K.text(sgP, 520, y + 6, '✕', 'xmark'); st.innerHTML = '<span class="bad-text">Timeout.</span> Outbound rule removed, so the instance can\'t reach the internet (no updates).'; return; }
+        await K.move(p, [560, y], [200, y], 500, run); p.remove();
+        const back = K.pill(sgP, 'reply: packages', 'ok'); await K.move(back, [200, y], [705, 195], 800, run); back.remove();
+        inst.g.classList.add('ok'); st.innerHTML = '<span class="ok-text">Allowed out, reply allowed back in</span> with no inbound rule for it: security groups are <b>stateful</b>.'; return;
+      }
+      const p = K.pill(sgP, `TCP :${r.port}`); await K.move(p, [200, y], [495, y], 550, run);
+      if (!allowedIn(r)) { p.remove(); K.text(sgP, 520, y + 6, '✕', 'xmark'); await K.sleep(600, run); st.innerHTML = `<span class="bad-text">Timeout.</span> No inbound rule allows port ${r.port} from ${SRC.find(s => s.k === r.src).s}; the packet is silently dropped.`; return; }
+      await K.move(p, [545, y], [705, 195], 500, run); p.remove();
+      if (!listening()[r.port]) {
+        inst.g.classList.add('bad'); const rp = K.pill(sgP, 'RST · refused', 'bad'); await K.move(rp, [705, 195], [200, y], 700, run); rp.remove();
+        st.innerHTML = r.port === 443 ? '<span class="bad-text">Connection refused.</span> The rule let it in, but nothing serves HTTPS: opening 443 isn\'t enough, you also need TLS and a certificate.' : '<span class="bad-text">Connection refused.</span> The security group allowed it, but the web server is stopped. Check the app, not the firewall.'; return;
+      }
+      inst.g.classList.add('ok'); const reply = { 22: 'SSH session', 80: '200 OK', 8080: '200 OK (API)' }[r.port];
+      const rp = K.pill(sgP, reply, 'ok'); await K.move(rp, [705, 195], [200, y], 700, run); rp.remove();
+      st.innerHTML = `<span class="ok-text">Allowed.</span> ${r.port === 8080 ? 'The rule trusts App-SG itself, so it keeps working when the app server\'s IP changes.' : r.port === 22 && $('r2').checked && r.src === 'other' ? 'Port 22 is open to the whole internet: fine for a lab, risky in production.' : 'An inbound rule matches, and the reply flows back automatically.'}`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('sgChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { $('sgChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); send(REQ.find(r => r.k === b.dataset.k)); }));
+
+  K.pick($('pt'), [
+    { q: 'Log in to a Linux instance.', a: '22', why: 'SSH.' },
+    { q: 'Log in to a Windows instance with Remote Desktop.', a: '3389', why: 'RDP.' },
+    { q: 'A secure website.', a: '443', why: 'HTTPS.' },
+    { q: 'An unsecured website.', a: '80', why: 'HTTP.' },
+    { q: 'Old-style file transfer, unencrypted.', a: '21', why: 'FTP.' },
+    { q: 'Secure file transfer over SSH (SFTP).', a: '22', why: 'SFTP rides on SSH.' }
+  ], ['21', '22', '80', '443', '3389']);
+})();
+</script>
+</body>
+</html>

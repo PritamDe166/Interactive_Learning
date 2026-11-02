@@ -26,7 +26,7 @@ Interactive_explainations/
 │   │   └── client-server-dns.html … (one file per explainer)
 │   └── lld/                        # low-level design
 │       └── index.html              # LLD topics, added as they're learned
-├── aws-cloud-practitioner/         # CLF-C02 sections
+├── aws-cloud-practitioner/         # CLF-C02, one page per topic (topics.js holds the map)
 ├── python-fundamentals/            # Python topics (code stepper + edit-and-run)
 └── angular/                        # Modern Angular (v22): data flow and control flow, 15 topics
 ```
@@ -36,6 +36,7 @@ Interactive_explainations/
 - **Colours live only in `theme.css`.** Pages and other CSS files use tokens such as `var(--fg)`, `var(--cyan)`, `var(--accent-text)`, so both themes work automatically.
 - **Shared look and helpers go in `assets/`; page-specific animation code stays in the page.** Explainers load `theme.js` and `explainer-kit.js`.
 - **Links point at files explicitly** (`folder/index.html`, not `folder/`), so pages work from disk, GitHub Pages and S3/CloudFront alike.
+- **AWS pages** are one page per topic, in the same order as the course notes. `aws-cloud-practitioner/topics.js` lists every section and topic (`live: true` once built); the roadmap and the per-page strip (`<div class="aws-trail"></div>`) are drawn from it. Walkthroughs use `Kit.net`, a request-path diagram: icon tiles, dashed Region/AZ boxes and a glowing dot that travels the path (`net.send([...])`), with failures shown as a red ✕ and re-routing. Every topic page has a **Points to remember** list (`.remember`) and folds the course hands-on into an **In the console** box (`.console-steps`); every section ends with a review page holding a section summary (`.sum-grid`) and original exam-style questions (`Kit.mcq`). `Kit.pick` runs quick-fire drills.
 - **Angular pages** use the same colour key everywhere: cyan = data down (`input()`, `[prop]`), orange = events up (`output()`, `(event)`), violet = two-way (`model()`, `[(x)]`). Kit helpers: `codeCard`, `compBox`, `ngWire`, `tsHighlight`, `ngHighlight`. All 15 pages build one running example, **CareDesk** (a clinic portal); `angular/caredesk.js` holds the step list and draws the "Building CareDesk" strip (`<div class="cd-trail" data-stage="N">`). Every snippet is built and run in a real Angular project before it goes on a page.
 - Pages one folder deep reference assets as `../assets/...`; pages two deep (`system-design/hld/`, `system-design/lld/`) use `../../assets/...`; the root hub uses `assets/...`.
 

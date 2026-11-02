@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AMIs</title>
+<meta name="description" content="AWS Cloud Practitioner: an Amazon Machine Image is a template for launching EC2 instances, built on EBS snapshots, usable across AZs and copyable to other Regions.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .race { display: grid; gap: 14px; }
+  .lane .t { font-size: 14px; margin-bottom: 6px; }
+  .lane .t b { color: var(--fg); }
+  .bar { display: flex; height: 26px; border-radius: 8px; overflow: hidden; background: var(--track); border: 1px solid var(--line); }
+  .bar span { display: block; height: 100%; width: 0; font: 600 11px var(--mono); color: var(--on-accent); line-height: 26px; padding-left: 6px; white-space: nowrap; overflow: hidden; }
+  .bar .boot { background: var(--cyan); }
+  .bar .inst { background: var(--orange); }
+  .bar .cfg { background: var(--teal); }
+  .lane .res { font: 13px var(--mono); color: var(--muted); margin-top: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · EC2 instance storage · 3</div>
+    <h1>AMIs: Amazon Machine Images</h1>
+    <ul class="lede">
+      <li>An <b>AMI</b> is the <b>template</b> an EC2 instance is launched from: OS, installed software, configuration.</li>
+      <li>Sources: <b>public</b> (e.g. Amazon Linux from AWS), <b>your own custom</b> AMIs, or <b>AWS Marketplace</b> (vendors, sometimes paid).</li>
+      <li>A custom AMI = <b>EBS snapshots</b> of the instance's volumes + launch metadata. Software baked in means <b>faster boots</b>.</li>
+      <li>An AMI belongs to <b>one Region</b>: use it in any AZ there; <b>copy</b> it to use in another Region.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AMI idea</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Custom AMI</span><span class="like">A sysprepped "golden image" of Windows Server with IIS and your agents</span><span>Same idea. AWS stores it and launches new servers from it in seconds.</span></div>
+      <div class="row"><span class="aws">Snapshot vs AMI</span><span class="like">A disk backup vs a VM template</span><span>A backup has the data; a template also says how to boot it (architecture, volumes, permissions).</span></div>
+      <div class="row"><span class="aws">Marketplace AMI</span><span class="like">Buying a pre-built appliance VM from a vendor</span><span>Licence cost is added to the hourly EC2 bill.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: bake once, launch many</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="An instance launched from a public AMI is customised and turned into a custom AMI backed by snapshots, which launches fast instances in another AZ and is copied to another Region"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li><b>AMI = Amazon Machine Image</b>: a reusable template for launching EC2 instances.</li>
+      <li>Three sources: <b>Public</b> (AWS, e.g. Amazon Linux 2023), <b>Custom</b> (you make and maintain it), <b>AWS Marketplace</b> (vendor-built, may cost extra).</li>
+      <li>Why custom: <b>faster boot and setup</b> (software pre-installed), <b>consistent</b> servers, repeatable deployments (Auto Scaling launches from an AMI).</li>
+      <li>Process: launch → customise → (ideally) <b>stop</b> for data integrity → <b>Create image</b> → status <code>pending</code> → <code>available</code> → launch from <b>My AMIs</b>.</li>
+      <li>Creating an AMI <b>also creates EBS snapshots</b> of every volume attached to the instance. Deleting those snapshots breaks the AMI.</li>
+      <li>An AMI is <b>Region-scoped</b>: launch in any AZ of that Region; <b>copy the AMI</b> to use it in another Region.</li>
+      <li>AMIs are <b>immutable</b>: to change one, launch from it, change the instance, create a <b>new</b> AMI.</li>
+      <li>You pay for the AMI's <b>storage</b> (its snapshots), in every Region you copy it to.</li>
+      <li><b>Snapshot vs AMI</b>: you <b>can't launch an instance from a snapshot</b>; you need an AMI. Snapshot = the data; AMI = data + how to boot it.</li>
+      <li>User data still works with a custom AMI, for small per-instance tweaks (e.g. write a config file).</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+
+  <section aria-labelledby="raceH">
+    <h2 class="stage-title" id="raceH">Boot race: public AMI vs custom AMI</h2>
+    <div class="stage-kind">Both servers must end up serving the web page</div>
+    <div class="card">
+      <div class="race">
+        <div class="lane"><div class="t"><b>A.</b> Public Amazon Linux AMI + user data that installs Apache</div><div class="bar"><span class="boot" id="a1">boot</span><span class="inst" id="a2">install httpd</span><span class="cfg" id="a3">page</span></div><div class="res" id="aR">–</div></div>
+        <div class="lane"><div class="t"><b>B.</b> Custom AMI with Apache baked in + user data that only writes the page</div><div class="bar"><span class="boot" id="b1">boot</span><span class="cfg" id="b3">page</span></div><div class="res" id="bR">–</div></div>
+      </div>
+      <div class="controls"><button class="btn primary" id="go" type="button">Launch both</button></div>
+      <p class="nf-cap" id="raceCap">Times are illustrative. Imagine an Auto Scaling group adding 10 servers in a traffic spike.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">Snapshot or AMI?</h2>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Bake and launch a custom AMI (from the course hands-on)</summary>
+      <ol>
+        <li>Launch an instance: <b>Amazon Linux</b>, t2.micro/t3.micro, the security group that allows HTTP. In <b>User data</b>, paste the script that installs and starts <code>httpd</code> but <b>leave out</b> the line that writes <code>index.html</code>.</li>
+        <li>Wait 1–2 minutes (running ≠ ready). Open <code>http://&lt;public IP&gt;</code>: the Apache test page appears.</li>
+        <li>Select the instance → <b>Actions → Image and templates → Create image</b>, name it <code>demo image</code> → Create.</li>
+        <li><b>AMIs</b> page: status <code>pending</code>, then <code>available</code>.</li>
+        <li>Select the AMI → <b>Launch instance from AMI</b> (or in the wizard: <b>My AMIs</b>). In User data paste only the line that writes "Hello World" to <code>index.html</code>.</li>
+        <li>The new page appears almost at once: Apache was already in the image.</li>
+        <li>Clean up: terminate both instances (and deregister the AMI and delete its snapshot if you don't need them).</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Pre-installed software, faster launch</span><span class="arrow">→</span><span class="then">Custom AMI</span></li>
+      <li><span class="if">Ready-made commercial software image</span><span class="arrow">→</span><span class="then">AWS Marketplace AMI</span></li>
+      <li><span class="if">Launch the same server in another Region</span><span class="arrow">→</span><span class="then">Copy the AMI to that Region</span></li>
+      <li><span class="if">Launch in another AZ of the same Region</span><span class="arrow">→</span><span class="then">Just launch from the AMI</span></li>
+      <li><span class="if">Automate building and testing AMIs</span><span class="arrow">→</span><span class="then">EC2 Image Builder</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>EBS snapshot</th><th>AMI</th></tr></thead>
+        <tbody>
+          <tr><td>What it holds</td><td>Blocks of <b>one</b> volume</td><td>Snapshot(s) of <b>all</b> volumes + architecture, block-device mapping, launch permissions</td></tr>
+          <tr><td>Can launch an instance?</td><td>No</td><td>Yes</td></tr>
+          <tr><td>Scope</td><td>Region (restore in any AZ)</td><td>Region (launch in any AZ)</td></tr>
+          <tr><td>Other Region</td><td>Copy snapshot</td><td>Copy AMI</td></tr>
+          <tr><td>Use it for</td><td>Back up / move a data disk</td><td>Golden images, Auto Scaling, DR of a whole server</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p>Four AMI notes ("Amazon Machine Images", "AMI vs EBS Snapshot", "AMI Overview (Extended)", "AMI Hands-on") are merged into this page. The extended note's point about multi-volume instances is kept: an AMI from the <b>instance</b> includes every attached volume; an AMI from <b>one snapshot</b> includes only that volume.</p></div>
+      <div class="note"><span class="flag add">Added</span><p>Stopping before Create image is recommended, not required: by default AWS reboots the instance to get a consistent image (you can choose "no reboot").</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <div class="quiz">
+      <details><summary>Can you launch an EC2 instance directly from an EBS snapshot?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> You need an AMI (which can be created from the snapshot).</p></div></details>
+      <details><summary>An AMI made in us-east-1. Can you launch it in us-east-1b?<span class="go">Show answer</span></summary><div class="ans"><p><b>Yes.</b> AMIs work across all AZs of their Region.</p></div></details>
+      <details><summary>…and in eu-west-1?<span class="go">Show answer</span></summary><div class="ans"><p>Only after you <b>copy the AMI</b> to eu-west-1.</p></div></details>
+      <details><summary>You need to update the software in an AMI. How?<span class="go">Show answer</span></summary><div class="ans"><p>AMIs are immutable: launch from it, update the instance, create a <b>new AMI</b> (or automate with EC2 Image Builder).</p></div></details>
+      <details><summary>Why does a custom AMI shorten scale-out time?<span class="go">Show answer</span></summary><div class="ans"><p>The software is already installed, so new instances only boot and run small user data.</p></div></details>
+      <details><summary>Who maintains a custom AMI?<span class="go">Show answer</span></summary><div class="ans"><p><b>You</b> (patching, rebuilding). It's your OS and software.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: EC2 storage notes "Amazon Machine Images (AMIs)", "AMI vs EBS Snapshot", "AMI Overview (Extended)", "AMI Hands-on"; AWS EC2 AMI documentation. Boot-race timings are illustrative.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'r1', x: 20, y: 20, w: 680, h: 385, kind: 'region', label: 'us-east-1' }, { id: 'a', x: 50, y: 200, w: 250, h: 190, kind: 'az', label: 'AZ a' }, { id: 'b', x: 420, y: 200, w: 250, h: 190, kind: 'az', label: 'AZ b' }, { id: 'r2', x: 730, y: 20, w: 250, h: 385, kind: 'region', label: 'eu-west-1' }],
+    nodes: {
+      pub: { x: 120, y: 110, icon: 'layers', kind: 'plain', label: 'Public AMI', sub: 'Amazon Linux' },
+      ami: { x: 360, y: 110, icon: 'layers', kind: 'compute', label: 'Custom AMI', sub: 'web-v1' },
+      inst: { x: 175, y: 290, icon: 'chip', kind: 'compute', label: 'Source instance', sub: 'httpd installed' },
+      snaps: { x: 360, y: 290, icon: 'camera', kind: 'storage', label: 'Snapshots', sub: 'root + data' },
+      neu: { x: 545, y: 290, icon: 'chip', kind: 'compute', label: 'New instances', sub: 'boot fast' },
+      ami2: { x: 855, y: 110, icon: 'layers', kind: 'compute', label: 'AMI copy', sub: 'web-v1' },
+      inst2: { x: 855, y: 290, icon: 'chip', kind: 'compute', label: 'Instance', sub: 'DR Region' }
+    },
+    links: [
+      { a: 'pub', b: 'inst', label: 'launch', at: [178, 222] },
+      { a: 'inst', b: 'ami', label: 'create image', at: [215, 192] },
+      { a: 'ami', b: 'snaps', kind: 'dash' },
+      { a: 'ami', b: 'neu', via: [[545, 110]], label: 'launch', at: [480, 100] },
+      { a: 'ami', b: 'ami2', via: [[360, 50], [855, 50]], label: 'copy AMI', at: [610, 42] },
+      { a: 'ami2', b: 'inst2' }
+    ]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['pub', 'inst'], ['inst', 'ami'], ['inst', 'ami', 'snaps'], ['ami', 'snaps', 'neu'], ['ami', 'ami2', 'inst2'], ['pub', 'ami', 'ami2'], null];
+    net.focus(F[i]);
+    if (i === 0) net.badge('inst', '~2 min setup', 'info');
+    if (i === 1) { net.state('inst', 'dim'); net.badge('ami', 'available', 'ok'); }
+    if (i === 2) net.badge('snaps', 'billed', 'info');
+    if (i === 3) net.badge('neu', 'ready in seconds', 'ok');
+    if (i === 4) net.badge('inst2', 'same server', 'ok');
+    if (i === 5) { net.badge('pub', 'public', 'info'); net.badge('ami', 'custom', 'ok'); }
+  }
+  const STEPS = [
+    { title: 'Start from a public AMI',
+      text: 'You launch an instance from a <b>public AMI</b> (Amazon Linux, provided by AWS) in AZ a. <b>User data</b> installs and starts Apache. "Running" appears quickly, but the install takes a minute or two more.',
+      play: async run => { base(0); await net.send(['pub', 'inst'], { run, label: 'launch' }); } },
+    { title: 'Create an image',
+      text: 'With the server configured, <b>Actions → Image and templates → Create image</b> (stopping first keeps the disk consistent). The new <b>custom AMI</b> shows <code>pending</code>, then <code>available</code>.',
+      play: async run => { base(1); await net.send(['inst', 'ami'], { run, label: 'create image' }); } },
+    { title: 'Behind it: EBS snapshots',
+      text: 'The AMI is <b>EBS snapshots of every attached volume</b> plus metadata: architecture, which snapshot maps to which device, who may launch it. You pay for that snapshot storage; delete the snapshots and the AMI breaks.',
+      tip: 'Snapshot = the data. AMI = the data + the recipe to boot it.',
+      play: async run => { base(2); await net.send(['ami', 'snaps'], { run, tone: 'cyan' }); } },
+    { title: 'Launch copies anywhere in the Region',
+      text: 'Launch from <b>My AMIs</b> in <b>AZ b</b> (any AZ of the Region works). Apache is already installed, so instances are <b>ready in seconds</b>: exactly what Auto Scaling needs during a spike.',
+      play: async run => { base(3); await net.send(['ami', 'neu'], { run, tone: 'green', label: 'launch' }); } },
+    { title: 'Another Region? Copy it',
+      text: 'The AMI belongs to <b>us-east-1</b>. To launch the same server in <b>eu-west-1</b>, <b>copy the AMI</b> there first (its snapshots are copied too and billed there).',
+      play: async run => { base(4); await net.send(['ami', 'ami2'], { run, tone: 'cyan', label: 'copy' }); await net.send(['ami2', 'inst2'], { run, tone: 'green', label: 'launch' }); } },
+    { title: 'Three kinds of AMI',
+      text: '<b>Public</b>: published by AWS or others (Amazon Linux, Ubuntu, Windows). <b>Custom</b>: yours, which you maintain and patch. <b>AWS Marketplace</b>: built by vendors (firewalls, databases), sometimes with a licence fee. AMIs are <b>immutable</b>: a change means a new AMI.' },
+    { title: 'The whole picture',
+      text: 'Bake once (custom AMI = snapshots + metadata), launch many in <b>any AZ</b>, <b>copy</b> to other Regions. To automate the baking and testing, use <b>EC2 Image Builder</b> (next).' }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ---------- Boot race ---------- */
+  const W = 1 / 200; // % per illustrative second
+  async function grow(el, sec, run) { const steps = 20; for (let s = 1; s <= steps; s++) { el.style.width = (sec * W * 100 * s / steps) + '%'; await K.sleep(sec * 25 / steps, run); } }
+  $('go').addEventListener('click', async () => {
+    const run = K.newRun('race');
+    ['a1', 'a2', 'a3', 'b1', 'b3'].forEach(id => $(id).style.width = '0');
+    $('aR').textContent = '–'; $('bR').textContent = '–';
+    try {
+      const A = (async () => { await grow($('a1'), 30, run); await grow($('a2'), 100, run); await grow($('a3'), 5, run); $('aR').textContent = 'serving after ~135 s'; })();
+      const B = (async () => { await grow($('b1'), 30, run); await grow($('b3'), 5, run); $('bR').textContent = 'serving after ~35 s'; })();
+      await Promise.all([A, B]);
+      $('raceCap').innerHTML = '<span class="ok-text">Custom AMI wins.</span> The install happened once, when you baked the image. Every new instance skips it: faster scale-out and identical servers.';
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  });
+
+  K.pick($('pick'), [
+    { q: 'Back up the data disk of a database server every night.', a: 'Snapshot', why: 'Backing up one volume\'s data is what snapshots do.' },
+    { q: 'Auto Scaling must launch identical web servers with everything installed.', a: 'AMI', why: 'Instances are launched from AMIs, not snapshots.' },
+    { q: 'Attach last week\'s data disk to a new instance.', a: 'Snapshot', why: 'Create a volume from the snapshot and attach it.' },
+    { q: 'Rebuild the whole server (OS + app) in another Region.', a: 'AMI', why: 'Copy the AMI to that Region and launch.' },
+    { q: 'Move a data volume from AZ a to AZ b.', a: 'Snapshot', why: 'Snapshot, then create a volume in AZ b.' },
+    { q: 'An instance has two volumes; you want both captured for relaunch.', a: 'AMI', why: 'An AMI created from the instance includes snapshots of every attached volume.' }
+  ], ['Snapshot', 'AMI']);
+})();
+</script>
+</body>
+</html>

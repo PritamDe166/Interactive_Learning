@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EFS and EFS-IA</title>
+<meta name="description" content="AWS Cloud Practitioner: Amazon EFS is a managed NFS file system shared by many Linux instances across AZs, pay per use, with Infrequent Access and Archive storage classes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .pl { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px; margin-bottom: 12px; }
+  .pl label.f { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+  .pl select { font: inherit; color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; }
+  .stack { display: flex; height: 34px; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); }
+  .stack span { display: block; height: 100%; transition: width .4s; font: 600 11px/34px var(--mono); color: var(--on-accent); padding-left: 6px; white-space: nowrap; overflow: hidden; }
+  .stack .s { background: var(--orange); } .stack .i { background: var(--cyan); } .stack .a { background: var(--violet); }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 12px; }
+  .kpis div { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--panel-2); }
+  .kpis b { display: block; font-size: 22px; } .kpis span { font-size: 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · EC2 instance storage · 6</div>
+    <h1>EFS and EFS-IA</h1>
+    <ul class="lede">
+      <li><b>Amazon EFS</b> (Elastic File System) is a managed <b>NFS network file system</b>: one shared folder for many instances.</li>
+      <li><b>Hundreds of Linux instances</b> in <b>different AZs</b> mount it at once and see the same files.</li>
+      <li><b>No capacity planning</b>: it grows and shrinks, and you pay per GB actually stored (pricier per GB than EBS).</li>
+      <li>A <b>lifecycle policy</b> moves cold files to <b>EFS-IA</b> (up to 95% cheaper) and <b>Archive</b>, invisibly to apps.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>EFS idea</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">EFS</span><span class="like">A network share (\\fileserver\uploads) mapped on every web server in a farm</span><span>Linux NFS instead of Windows SMB, and no file server for you to run or grow.</span></div>
+      <div class="row"><span class="aws">EFS-IA lifecycle</span><span class="like">Moving old files to cheaper archive disks</span><span>Automatic, per file, and the path never changes for the app.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: one folder, three AZs</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="Linux instances in three AZs reach one EFS file system through a mount target in each AZ; cold files move to EFS-IA and Archive"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li><b>EFS = managed NFS</b> (network file system) that can be mounted on <b>hundreds of EC2 instances at the same time</b>.</li>
+      <li>Works <b>across multiple AZs</b> in a Region (Regional file system), through one <b>mount target</b> per AZ protected by a <b>security group</b> (NFS port 2049).</li>
+      <li><b>Linux instances only</b> (POSIX/NFS). Windows file shares → <b>FSx for Windows File Server</b>.</li>
+      <li><b>Highly available, scalable</b>, <b>pay per use</b>: no capacity to provision; 20 GB stored = 20 GB billed.</li>
+      <li>Costs roughly <b>3× an EBS gp2 volume</b> per GB, the price of being shared and multi-AZ.</li>
+      <li><b>EFS vs EBS</b>: EBS = one instance, one AZ; moving it across AZs makes a <b>copy</b> via snapshot. EFS = <b>shared, live</b>, already in every AZ.</li>
+      <li>Storage classes: <b>Standard</b> (frequent), <b>Infrequent Access (EFS-IA)</b> up to <b>95% cheaper</b>, <b>Archive</b> up to 50% cheaper than IA (rarely read).</li>
+      <li>A <b>lifecycle policy</b> (e.g. "not accessed for 60 days → IA") moves files automatically and moves them back on access. <b>Transparent to applications</b>; IA/Archive charge per GB read.</li>
+      <li><b>One Zone</b> classes also exist: cheaper, data in a single AZ (dev/test, or data you can recreate).</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+
+  <section aria-labelledby="lcH">
+    <h2 class="stage-title" id="lcH">Lifecycle policy calculator</h2>
+    <div class="stage-kind">1,000 GB of shared files; most are rarely opened after a month</div>
+    <div class="card">
+      <div class="pl">
+        <label class="f">Move to EFS-IA after<select id="toIa"><option value="0">Never (all Standard)</option><option value="7">7 days</option><option value="30" selected>30 days</option><option value="60">60 days</option><option value="90">90 days</option></select></label>
+        <label class="f">Move to Archive after<select id="toAr"><option value="0" selected>Never</option><option value="90">90 days</option><option value="180">180 days</option></select></label>
+      </div>
+      <div class="stack"><span class="s" id="bS"></span><span class="i" id="bI"></span><span class="a" id="bA"></span></div>
+      <div class="kpis">
+        <div><b id="kS">–</b><span>GB in Standard</span></div>
+        <div><b id="kI">–</b><span>GB in IA</span></div>
+        <div><b id="kA">–</b><span>GB in Archive</span></div>
+        <div><b id="kC">–</b><span>storage per month</span></div>
+      </div>
+      <p class="nf-cap" id="lcCap"></p>
+    </div>
+  </section>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">EFS or EBS?</h2>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Create and mount a file system (outline)</summary>
+      <ol>
+        <li>EFS → <b>Create file system</b>, name it, choose the VPC. "Regional" keeps data across AZs (One Zone is the cheaper single-AZ option).</li>
+        <li><b>Customize</b>: lifecycle management (e.g. to IA after 30 days, to Archive after 90), throughput mode <b>Elastic</b>.</li>
+        <li><b>Network</b>: one <b>mount target per AZ</b>, each with a security group that allows <b>NFS (2049)</b> from the instances' security group.</li>
+        <li>Launch Linux instances in two AZs; in the launch wizard's <b>File systems</b> section, add the EFS (it mounts at e.g. <code>/mnt/efs/fs1</code>).</li>
+        <li>Create a file on one instance, <code>ls</code> on the other: it's there. Clean up instances and the file system.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Shared file system for many Linux instances</span><span class="arrow">→</span><span class="then">EFS</span></li>
+      <li><span class="if">Shared across AZs, no capacity planning</span><span class="arrow">→</span><span class="then">EFS</span></li>
+      <li><span class="if">Cut cost of rarely used files in EFS</span><span class="arrow">→</span><span class="then">EFS-IA via lifecycle policy</span></li>
+      <li><span class="if">Shared file system for Windows</span><span class="arrow">→</span><span class="then">FSx for Windows File Server</span></li>
+      <li><span class="if">Disk for a single instance</span><span class="arrow">→</span><span class="then">EBS</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>EBS</th><th>EFS</th></tr></thead>
+        <tbody>
+          <tr><td>Type</td><td>Block storage (a disk)</td><td>File storage (NFS share)</td></tr>
+          <tr><td>Attached to</td><td>One instance at a time</td><td>Hundreds at once</td></tr>
+          <tr><td>Scope</td><td>One AZ</td><td>Many AZs (Regional)</td></tr>
+          <tr><td>Capacity</td><td>Provisioned in advance</td><td>Grows automatically, pay per use</td></tr>
+          <tr><td>OS</td><td>Linux and Windows</td><td>Linux only</td></tr>
+          <tr><td>Price per GB</td><td>Lower</td><td>Higher (≈3× gp2), lower with IA/Archive</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Updated</span><p><b>EFS-IA is now "up to 95%" cheaper</b> than Standard (the course says 92%, an older figure). Source: AWS EFS storage classes page.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>EFS Archive</b> (since Nov 2023): for files read a few times a year, up to 50% cheaper than IA; Regional file systems only. And <b>One Zone</b> storage classes.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <div class="quiz">
+      <details><summary>Can a Windows EC2 instance mount EFS?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> EFS is NFS for Linux. Use FSx for Windows File Server.</p></div></details>
+      <details><summary>Do you choose a size when creating EFS?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> It grows and shrinks; you pay for what is stored.</p></div></details>
+      <details><summary>Does an app need changes when its files move to EFS-IA?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> Same path; the lifecycle policy is transparent (reads from IA just cost a little per GB).</p></div></details>
+      <details><summary>Web servers in 3 AZs must share uploaded images. EBS or EFS?<span class="go">Show answer</span></summary><div class="ans"><p><b>EFS</b>: shared and multi-AZ. EBS is one instance in one AZ.</p></div></details>
+      <details><summary>What does each AZ need to reach EFS?<span class="go">Show answer</span></summary><div class="ans"><p>A <b>mount target</b>, with a security group allowing NFS (2049).</p></div></details>
+      <details><summary>Why is EFS more expensive per GB than EBS?<span class="go">Show answer</span></summary><div class="ans"><p>It is shared, highly available across AZs, and elastic; you pay for that convenience (IA and Archive offset it).</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: EC2 storage note "EFS (Elastic File System) Overview"; <a href="https://aws.amazon.com/efs/storage-classes/">AWS EFS storage classes</a>; <a href="https://aws.amazon.com/about-aws/whats-new/2023/11/amazon-efs-archive-storage-class">EFS Archive announcement</a>. Calculator prices ($0.30, $0.016, $0.008 per GB-month) are illustrative and exclude read/transition charges.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 20, y: 20, w: 960, h: 385, kind: 'region', label: 'us-east-1' }, { id: 'a', x: 45, y: 55, w: 290, h: 195, kind: 'az', label: 'AZ a' }, { id: 'b', x: 355, y: 55, w: 290, h: 195, kind: 'az', label: 'AZ b' }, { id: 'c', x: 665, y: 55, w: 290, h: 195, kind: 'az', label: 'AZ c' }],
+    nodes: {
+      ea: { x: 130, y: 145, icon: 'chip', kind: 'compute', label: 'Web server', sub: 'Linux' },
+      ma: { x: 260, y: 145, icon: 'router', kind: 'net', label: 'Mount target' },
+      eb: { x: 440, y: 145, icon: 'chip', kind: 'compute', label: 'Web server', sub: 'Linux' },
+      mb: { x: 570, y: 145, icon: 'router', kind: 'net', label: 'Mount target' },
+      ec: { x: 750, y: 145, icon: 'chip', kind: 'compute', label: 'Worker', sub: 'Linux' },
+      mc: { x: 880, y: 145, icon: 'router', kind: 'net', label: 'Mount target' },
+      efs: { x: 300, y: 335, icon: 'folder', kind: 'storage', label: 'EFS file system', sub: 'Standard' },
+      ia: { x: 560, y: 335, icon: 'folder', kind: 'storage', label: 'EFS-IA', sub: 'up to 95% cheaper' },
+      ar: { x: 800, y: 335, icon: 'archive', kind: 'storage', label: 'Archive', sub: 'rarely read' }
+    },
+    links: [
+      { a: 'ea', b: 'ma', kind: 'priv' }, { a: 'eb', b: 'mb', kind: 'priv' }, { a: 'ec', b: 'mc', kind: 'priv' },
+      { a: 'ma', b: 'efs', via: [[260, 275], [300, 275]], label: 'NFS', at: [230, 290] },
+      { a: 'mb', b: 'efs', via: [[570, 275], [300, 275]] },
+      { a: 'mc', b: 'efs', via: [[880, 275], [300, 275]] },
+      { a: 'efs', b: 'ia', kind: 'dash', label: 'lifecycle', at: [430, 326] },
+      { a: 'ia', b: 'ar', kind: 'dash' }
+    ]
+  });
+  const ALL = ['ea', 'ma', 'eb', 'mb', 'ec', 'mc', 'efs'];
+  function base(i) {
+    net.reset();
+    const F = [ALL, ['ea', 'ma', 'efs', 'ec', 'mc'], ALL, ['efs'], ALL, ['efs', 'ia', 'ar'], null];
+    net.focus(F[i]);
+    if (i === 1) { net.badge('ea', 'writes photo.jpg', 'info'); net.badge('ec', 'sees photo.jpg', 'ok'); }
+    if (i === 2) ['ma', 'mb', 'mc'].forEach(m => net.badge(m, 'SG :2049', 'info'));
+    if (i === 3) net.badge('efs', '20 GB → $ for 20 GB', 'info');
+    if (i === 4) net.badge('efs', 'Linux only', 'info');
+    if (i === 5) { net.badge('ia', 'after 30 days', 'ok'); net.badge('ar', 'after 90 days', 'ok'); }
+  }
+  const STEPS = [
+    { title: 'One file system, many instances',
+      text: 'EFS is a <b>Regional</b> file system. Each AZ gets a <b>mount target</b> (a network endpoint), and every Linux instance mounts the same EFS, e.g. at <code>/mnt/shared</code>. Unlike EBS, it isn\'t tied to one instance or one AZ.',
+      play: async run => { base(0); await Promise.all([['ea', 'ma', 'efs'], ['eb', 'mb', 'efs'], ['ec', 'mc', 'efs']].map(r => net.send(r, { run, label: 'mount' }))); } },
+    { title: 'Write in AZ a, read in AZ c',
+      text: 'A user uploads a photo to the web server in AZ a; it writes <code>photo.jpg</code> to EFS. A worker in AZ c immediately <b>sees the same file</b> and makes a thumbnail. No copying, no sync job.',
+      play: async run => { base(1); await net.send(['ea', 'ma', 'efs'], { run, label: 'photo.jpg' }); await net.send(['efs', 'mc', 'ec'], { run, tone: 'green', label: 'photo.jpg' }); } },
+    { title: 'Guarded by security groups',
+      text: 'Each mount target has a <b>security group</b>. It must allow <b>NFS on port 2049</b> from the instances. Same firewall idea as EC2, applied to the file system\'s network endpoints.' },
+    { title: 'No size to choose',
+      text: 'You never provision capacity. EFS <b>grows and shrinks</b> with your files and you pay <b>per GB stored</b>. The trade-off: per GB it costs about <b>3× an EBS gp2 volume</b>, the price of being shared and multi-AZ.' },
+    { title: 'Linux only',
+      text: 'EFS speaks <b>NFS</b> and is for <b>Linux</b> instances. A Windows server farm that needs a shared drive uses <b>FSx for Windows File Server</b> (SMB) instead.' },
+    { title: 'Cold files get cheaper on their own',
+      text: 'Set a <b>lifecycle policy</b>: files not read for, say, 30 days move to <b>EFS-IA</b> (up to <b>95% cheaper</b>); after 90 days to <b>Archive</b>. When a file is read again it moves back to Standard. The path doesn\'t change, so apps don\'t notice.',
+      play: async run => { base(5); await net.send(['efs', 'ia', 'ar'], { run, tone: 'cyan', label: 'old files' }); await net.send(['ia', 'efs'], { run, tone: 'orange', label: 'read again' }); } },
+    { title: 'The whole picture',
+      text: 'EFS: <b>shared NFS</b>, <b>Linux</b>, <b>multi-AZ</b>, <b>hundreds of instances</b>, <b>pay per use</b>, <b>IA/Archive</b> via lifecycle. EBS: one instance, one AZ, provisioned.' }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ---------- Lifecycle calculator ---------- */
+  const B = [[0, 100], [7, 50], [14, 100], [30, 150], [60, 100], [90, 200], [180, 300]]; // [min age days, GB]
+  const P = { s: 0.30, i: 0.016, a: 0.008 };
+  function calc() {
+    const ia = +$('toIa').value, ar = +$('toAr').value;
+    let s = 0, i = 0, a = 0;
+    B.forEach(([age, gb]) => { if (ar && age >= ar && (ia === 0 || ar >= ia)) a += gb; else if (ia && age >= ia) i += gb; else s += gb; });
+    const cost = s * P.s + i * P.i + a * P.a, all = 1000 * P.s;
+    [['bS', s], ['bI', i], ['bA', a]].forEach(([id, v]) => { $(id).style.width = (v / 10) + '%'; $(id).textContent = v ? (id === 'bS' ? 'Standard ' : id === 'bI' ? 'IA ' : 'Archive ') + v : ''; });
+    $('kS').textContent = s; $('kI').textContent = i; $('kA').textContent = a; $('kC').textContent = '$' + cost.toFixed(0);
+    $('lcCap').innerHTML = ia === 0 && ar === 0 ? 'Everything in Standard: <b>$' + all.toFixed(0) + '/month</b>. Turn on a lifecycle policy.' : `<span class="ok-text">${Math.round((1 - cost / all) * 100)}% cheaper</span> than keeping everything in Standard ($${all.toFixed(0)}). Apps still use the same paths; reads from IA/Archive add a small per-GB charge.`;
+  }
+  $('toIa').addEventListener('change', calc); $('toAr').addEventListener('change', calc); calc();
+
+  K.pick($('pick'), [
+    { q: 'Ten Linux web servers in 3 AZs serve the same uploaded files.', a: 'EFS', why: 'Shared, multi-AZ file system.' },
+    { q: 'The boot disk of one instance.', a: 'EBS', why: 'Root volumes are EBS.' },
+    { q: 'A MySQL database on a single EC2 instance needing steady IOPS.', a: 'EBS', why: 'Block storage for one instance; io2/gp3.' },
+    { q: 'Shared home directories for a team of Linux developers\' instances.', a: 'EFS', why: 'NFS share mounted everywhere.' },
+    { q: 'Don\'t want to guess capacity; the folder grows over time.', a: 'EFS', why: 'Elastic: pay for what you store.' }
+  ], ['EFS', 'EBS']);
+})();
+</script>
+</body>
+</html>

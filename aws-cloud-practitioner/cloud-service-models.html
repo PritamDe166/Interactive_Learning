@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IaaS, PaaS, SaaS and pricing</title>
+<meta name="description" content="AWS Cloud Practitioner: who manages which layer in on-premises, IaaS, PaaS and SaaS, with AWS examples, and the three things cloud pricing charges for.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .sm-split { stroke: var(--red); stroke-width: 2.5; stroke-dasharray: 7 6; }
+  .sm-tag { font-family: var(--mono); font-size: 12.5px; }
+  .sm-tag.you { fill: var(--orange); } .sm-tag.aws { fill: var(--violet); }
+  .sm-ex { fill: var(--fg-soft); font-size: 15px; text-anchor: middle; }
+  .sm-ex b { font-weight: 700; }
+  .sm-legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .sm-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+  .pick { display: grid; gap: 10px; }
+  .pick .q { font-size: 16px; color: var(--fg); }
+  .pick .opts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pick .fb { min-height: 1.5em; color: var(--fg-soft); }
+  .pick .count { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .btn.right { border-color: var(--teal); color: var(--good-text); }
+  .btn.wrong { border-color: var(--red); color: var(--bad-text); }
+  .bill-lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-family: var(--mono); font-size: 13px; }
+  .bill-lines li { display: flex; justify-content: space-between; gap: 10px; padding: 6px 10px; border-radius: 8px; background: var(--panel-2); }
+  .bill-lines li.free { color: var(--good-text); }
+  .bill-lines li.tot { background: none; border-top: 1px solid var(--line); border-radius: 0; font-weight: 600; color: var(--fg); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · Cloud &amp; AWS overview · Domain 1 Cloud Concepts</div>
+    <h1>IaaS, PaaS, SaaS &amp; pricing</h1>
+    <ul class="lede">
+      <li>Every app runs on a <b>stack of layers</b>, from networking up to your data. The models differ in <b>who manages which layers</b>.</li>
+      <li><b>IaaS</b> (Amazon EC2): AWS runs the hardware and virtualisation; <b>you manage the OS and up</b>.</li>
+      <li><b>PaaS</b> (AWS Elastic Beanstalk): you bring <b>code and data</b>; the platform runs everything else.</li>
+      <li><b>SaaS</b> (Gmail, Zoom): you just <b>use the finished app</b>, but your users, settings and data are still yours.</li>
+      <li>Cloud pricing charges for <b>compute</b>, <b>storage</b> and <b>data transfer out</b>; data coming <b>in</b> is generally free.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In everyday terms: pizza as a service</h2>
+    <p class="sub">A widely used way to picture the four models. The more you buy as a service, the less you do yourself.</p>
+    <div class="card analogy">
+      <div class="row head"><span>Model</span><span>Pizza version</span><span>What you still do</span></div>
+      <div class="row"><span class="aws">On-premises</span><span class="like">Make it at home</span><span>Everything: oven, gas, dough, toppings, table.</span></div>
+      <div class="row"><span class="aws">IaaS</span><span class="like">Take-and-bake</span><span>The kitchen is rented; you still bake, serve and clean.</span></div>
+      <div class="row"><span class="aws">PaaS</span><span class="like">Home delivery</span><span>Only the table and drinks are yours.</span></div>
+      <div class="row"><span class="aws">SaaS</span><span class="like">Eat at the restaurant</span><span>You just order and eat (and decide who comes with you).</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: one request passes every layer</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1100 330" aria-label="A request passes through nine layers; a red line shows where the provider's part ends and yours begins"></svg></div>
+      <div class="sm-legend"><span><i style="background:var(--orange)"></i>You manage</span><span><i style="background:var(--teal)"></i>Shared: you configure</span><span><i style="background:var(--violet)"></i>Provider (AWS) manages</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>Nine layers: networking, storage, servers, virtualisation, OS, middleware, runtime, application, data. The models differ in <b>who manages which</b>.</li>
+      <li><b>IaaS</b>: provider runs hardware and virtualisation; you manage OS and up. AWS example: <b>EC2</b>. Most control; easiest lift-and-shift.</li>
+      <li><b>PaaS</b>: provider also runs OS, middleware and runtime; you bring code and data. AWS example: <b>Elastic Beanstalk</b>.</li>
+      <li><b>SaaS</b>: a finished app (Gmail, Zoom, Dropbox). You still manage users, access, settings and the data you put in.</li>
+      <li>Most AWS services are managed <b>building blocks</b>, not SaaS.</li>
+      <li>Pricing: you pay for <b>compute</b> (time/capacity), <b>storage</b> (GB-month + requests) and <b>data transfer out</b>. Data <b>in</b> is generally free.</li>
+      <li>Savings aren't automatic: idle resources and data transfer out still cost money.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Move the line yourself, classify real services, then build a small bill.</p>
+
+  <section aria-labelledby="pgH">
+    <h2 class="stage-title" id="pgH">Who manages what?</h2>
+    <div class="stage-kind">Pick a model · the layers recolour and the line moves</div>
+    <div class="controls">
+      <div class="seg" id="modelSeg" role="group" aria-label="Service model">
+        <button type="button" data-v="onprem" aria-pressed="false">On-premises</button>
+        <button type="button" data-v="iaas" aria-pressed="true">IaaS</button>
+        <button type="button" data-v="paas" aria-pressed="false">PaaS</button>
+        <button type="button" data-v="saas" aria-pressed="false">SaaS</button>
+      </div>
+      <button class="btn primary" id="pgSend" type="button">Send a request through it</button>
+    </div>
+    <div class="scroll"><svg class="diagram nf-canvas" id="pgSvg" viewBox="0 0 1100 330" aria-label="Nine layers coloured by who manages them"></svg></div>
+    <div class="info-grid">
+      <div class="card facts">
+        <div><div class="label">You manage</div><p id="mYou"></p></div>
+        <div><div class="label">AWS example</div><p id="mAws"></p></div>
+      </div>
+      <div class="card facts">
+        <div><div class="label k-strength">You gain</div><p id="mGain"></p></div>
+        <div><div class="label k-weak">You give up</div><p id="mLose"></p></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="clH">
+    <h2 class="stage-title" id="clH">IaaS, PaaS or SaaS?</h2>
+    <div class="stage-kind">Classify the service</div>
+    <div class="card pick" id="cls"></div>
+  </section>
+
+  <section aria-labelledby="billH">
+    <h2 class="stage-title" id="billH">Where does the bill come from?</h2>
+    <div class="stage-kind">Click the events · watch which ones cost money · prices are illustrative</div>
+    <div class="controls">
+      <button class="btn" id="bUp" type="button">Patient uploads a 50 MB scan</button>
+      <button class="btn" id="bRun" type="button">Server runs for a month</button>
+      <button class="btn" id="bStore" type="button">Store 100 GB for a month</button>
+      <button class="btn" id="bDown" type="button">Doctors download 200 GB</button>
+      <button class="btn" id="bReset" type="button">Reset</button>
+    </div>
+    <div class="scroll"><svg class="diagram nf-canvas" id="billSvg" viewBox="0 0 1000 300" aria-label="Data moving into and out of an AWS Region, with a bill"></svg></div>
+    <div class="card" style="margin-top:12px"><ul class="bill-lines" id="billLines"></ul></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Rent virtual servers, choose and patch the OS</span><span class="arrow">→</span><span class="then">IaaS · Amazon EC2</span></li>
+      <li><span class="if">Upload code, no servers or patching</span><span class="arrow">→</span><span class="then">PaaS · AWS Elastic Beanstalk</span></li>
+      <li><span class="if">Finished product, users just log in</span><span class="arrow">→</span><span class="then">SaaS</span></li>
+      <li><span class="if">Most control / easiest lift-and-shift from on-prem</span><span class="arrow">→</span><span class="then">IaaS</span></li>
+      <li><span class="if">Data going into AWS</span><span class="arrow">→</span><span class="then">Generally free</span></li>
+      <li><span class="if">Data going out to the internet</span><span class="arrow">→</span><span class="then">Charged per GB</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Layer</th><th>On-premises</th><th>IaaS</th><th>PaaS</th><th>SaaS</th></tr></thead>
+        <tbody>
+          <tr><td>Applications</td><td>You</td><td>You</td><td>You</td><td>Provider</td></tr>
+          <tr><td>Data</td><td>You</td><td>You</td><td>You</td><td>Shared (you configure)</td></tr>
+          <tr><td>Runtime</td><td>You</td><td>You</td><td>Provider</td><td>Provider</td></tr>
+          <tr><td>Middleware</td><td>You</td><td>You</td><td>Provider</td><td>Provider</td></tr>
+          <tr><td>Operating system</td><td>You</td><td>You</td><td>Provider</td><td>Provider</td></tr>
+          <tr><td>Virtualisation</td><td>You</td><td>Provider</td><td>Provider</td><td>Provider</td></tr>
+          <tr><td>Servers</td><td>You</td><td>Provider</td><td>Provider</td><td>Provider</td></tr>
+          <tr><td>Storage</td><td>You</td><td>Provider</td><td>Provider</td><td>Provider</td></tr>
+          <tr><td>Networking</td><td>You</td><td>Provider</td><td>Provider</td><td>Provider</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="scroll card table-card" style="margin-top:14px">
+      <table>
+        <thead><tr><th>Cost area</th><th>What you pay for</th></tr></thead>
+        <tbody>
+          <tr><td>Compute</td><td>The compute time or capacity you use (per second or hour, depending on the service)</td></tr>
+          <tr><td>Storage</td><td>The data you store (per GB-month), plus requests and retrievals for some services</td></tr>
+          <tr><td>Data transfer</td><td>Data going <b>out</b> of AWS (and between Regions). Data coming <b>in</b> is generally free</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>In SaaS, data is not purely the provider's job.</b> The notes' layer diagram colours SaaS "Data" as provider-managed, while their own table says shared. The table is right: the provider runs the app, but you decide who has access, what you store and how it's configured.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Not every managed AWS service is SaaS.</b> Most AWS services (RDS, Lambda, S3) are managed <i>building blocks</i> you use to build your own app. SaaS means a complete end-user application. Amazon Connect, a ready-to-use contact centre, is an AWS example closer to SaaS.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Savings are not automatic.</b> Idle resources you forget to switch off, data transfer out and the wrong pricing option can make the cloud expensive. Pay-as-you-go rewards switching things off.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Who patches the operating system on an EC2 instance?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>You.</b> EC2 is IaaS: AWS manages up to the virtualisation layer; the OS and everything above is yours.</p></div></details>
+      <details><summary>A team uploads a .NET app and never touches servers. Which model and which AWS service?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>PaaS, AWS Elastic Beanstalk.</b></p></div></details>
+      <details><summary>Which model gives you the most control, and why is that also its downside?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>IaaS</b> (in the cloud). More control means more to manage: OS patches, runtimes, middleware.</p></div></details>
+      <details><summary>With SaaS, is everything the provider's responsibility?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>No.</b> You still manage users, access, settings and what data you put in.</p></div></details>
+      <details><summary>Name the three things cloud pricing charges for.<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Compute, storage and data transfer (out).</b></p></div></details>
+      <details><summary>Uploading 1 TB of backups into AWS: does the transfer itself cost money?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Generally no:</b> data in is free. You pay to store it, and you'd pay to transfer it back out.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Prices in the bill builder are illustrative round numbers, not current AWS prices; check the AWS Pricing Calculator for real figures. Sources: Overview note "Types of cloud computing" (layers table, examples, pricing fundamentals); the pizza-as-a-service analogy is a common teaching device.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const LAY = [['net', 'Networking', 'router'], ['sto', 'Storage', 'disk'], ['srv', 'Servers', 'server'], ['vir', 'Virtualisation', 'box'], ['os', 'OS', 'cpu'], ['mid', 'Middleware', 'pipe'], ['run', 'Runtime', 'gear'], ['app', 'App', 'code'], ['data', 'Data', 'db']];
+  // first index that is yours (layers from the left are the provider's)
+  const M = {
+    onprem: { split: 0, name: 'On-premises', ex: 'Your own data centre', you: 'All nine layers, from networking to data.', aws: 'None: it is your own hardware.', gain: 'Total control of everything.', lose: 'Upfront cost, slow growth, you replace and patch everything.' },
+    iaas: { split: 4, name: 'IaaS', ex: 'Amazon EC2', you: 'Operating system, middleware, runtime, app and data.', aws: 'Amazon EC2 (with EBS storage and VPC networking).', gain: 'Control close to on-premises with no hardware to buy; the easiest lift-and-shift.', lose: 'You still patch the OS and install runtimes.' },
+    paas: { split: 7, name: 'PaaS', ex: 'AWS Elastic Beanstalk', you: 'Your application code and its data.', aws: 'AWS Elastic Beanstalk (like publishing to IIS without owning the server).', gain: 'Focus on code; no servers, no OS patching.', lose: 'Less control over the platform; some lock-in.' },
+    saas: { split: 8, name: 'SaaS', ex: 'Gmail, Zoom, Dropbox', you: 'Users, access, settings and the data you put in.', aws: 'Amazon Connect is close. Most AWS services are building blocks, not SaaS.', gain: 'Nothing to build or run.', lose: 'Least control: you get the features the vendor ships.' }
+  };
+  function build(svg) {
+    const nodes = { user: { x: 50, y: 140, icon: 'user', kind: 'user', label: 'Request' } };
+    LAY.forEach(([id, l, ic], i) => nodes[id] = { x: 160 + i * 108, y: 140, icon: ic, label: l, sub: '' });
+    const links = [{ a: 'user', b: 'net' }];
+    LAY.slice(1).forEach(([id], i) => links.push({ a: LAY[i][0], b: id }));
+    const net = K.net(svg, { nodes, links });
+    const split = K.el('line', { y1: 70, y2: 225, class: 'sm-split' }, svg);
+    const tA = K.text(svg, 0, 62, '← AWS manages', 'sm-tag aws'); tA.style.textAnchor = 'end';
+    const tY = K.text(svg, 0, 62, 'you manage →', 'sm-tag you'); tY.style.textAnchor = 'start';
+    const ex = K.text(svg, 550, 300, '', 'sm-ex');
+    function set(model) {
+      const m = M[model];
+      LAY.forEach(([id], i) => {
+        const g = net.nodes[id].g, mine = i >= m.split, shared = model === 'saas' && id === 'data';
+        g.setAttribute('class', 'nf-node ' + (shared ? 'k-storage' : mine ? 'k-compute' : 'k-net'));
+        net.nodes[id].sub(shared ? 'SHARED' : mine ? 'YOU' : 'AWS');
+      });
+      const x = m.split === 0 ? 106 : 160 + (m.split - 0.5) * 108;
+      split.setAttribute('x1', x); split.setAttribute('x2', x);
+      tA.setAttribute('x', x - 8); tY.setAttribute('x', x + 8);
+      tA.style.display = m.split === 0 ? 'none' : ''; tY.style.display = '';
+      ex.innerHTML = `<tspan font-weight="700">${m.name}</tspan> · e.g. ${m.ex}`;
+    }
+    return { net, set, route: ['user', ...LAY.map(l => l[0])] };
+  }
+
+  /* ================= walkthrough ================= */
+  const W = build($('stSvg'));
+  const ORDER = [null, 'onprem', 'iaas', 'paas', 'saas', 'saas'];
+  function show(i) { W.net.reset(); W.set(ORDER[i] || 'iaas'); if (i === 0) { LAY.forEach(([id]) => { W.net.nodes[id].g.setAttribute('class', 'nf-node k-plain'); W.net.nodes[id].sub(''); }); } if (i === 5) { W.net.focus(['user', 'data', 'app']); W.net.badge('data', 'still yours to secure', 'bad'); } }
+  const STEPS = [
+    { title: 'Every request passes nine layers',
+      text: 'When a patient opens the booking page, the request goes through <b>networking</b>, onto <b>storage</b> and a physical <b>server</b>, through the <b>virtualisation</b> layer into an <b>operating system</b>, through <b>middleware</b> and a <b>runtime</b> (such as .NET) into your <b>app</b>, which reads your <b>data</b>. Someone has to manage each layer.',
+      play: async run => { show(0); await W.net.send(W.route, { run, label: 'GET /book' }); } },
+    { title: 'On-premises: every layer is yours',
+      text: 'In your own data centre you buy the network gear and servers, run the hypervisor, patch Windows Server, install IIS and .NET, deploy the app and back up the database. All nine layers are <b>orange</b>.',
+      play: async run => { show(1); await W.net.send(W.route, { run }); } },
+    { title: 'IaaS: rent the building blocks (EC2)',
+      text: '<b>Infrastructure as a Service.</b> AWS runs networking, storage, physical servers and virtualisation. You get a virtual machine and manage the <b>OS and everything above it</b>. Amazon EC2 is the AWS example; it is the closest thing to your own servers, which makes it the easiest lift-and-shift.',
+      tip: 'IaaS = most control in the cloud. AWS example: EC2.',
+      play: async run => { show(2); await W.net.send(W.route, { run }); } },
+    { title: 'PaaS: bring only code and data (Elastic Beanstalk)',
+      text: '<b>Platform as a Service.</b> The provider also runs the OS, middleware and runtime. You upload your app; it handles servers, patching and scaling. On AWS that is <b>Elastic Beanstalk</b>: like publishing to IIS without owning or patching the server.',
+      tip: 'PaaS = "just deploy the code". AWS example: Elastic Beanstalk.',
+      play: async run => { show(3); await W.net.send(W.route, { run }); } },
+    { title: 'SaaS: use a finished application',
+      text: '<b>Software as a Service.</b> The whole app is the provider\'s: Gmail, Zoom, Dropbox. You sign in and use it. The line has moved almost all the way to the right.',
+      play: async run => { show(4); await W.net.send(W.route, { run }); } },
+    { title: 'But some things are always yours',
+      text: 'Even with SaaS you decide <b>who has access</b>, <b>how it is configured</b> and <b>what data you put in</b>. A leaked password or a document shared with "anyone with the link" is your problem, not the provider\'s. This idea returns as the <b>shared responsibility model</b>.',
+      tip: 'The provider never takes over your identities, access settings or data choices.' }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show });
+
+  /* ================= who manages what (playground) ================= */
+  const P = build($('pgSvg'));
+  let cur = 'iaas';
+  function model(v) { cur = v; K.cancel('pg'); P.net.reset(); P.set(v); const m = M[v]; $('mYou').textContent = m.you; $('mAws').textContent = m.aws; $('mGain').textContent = m.gain; $('mLose').textContent = m.lose; }
+  K.seg($('modelSeg'), model);
+  $('pgSend').addEventListener('click', async () => {
+    const run = K.newRun('pg'); P.net.reset(); P.set(cur);
+    const split = M[cur].split;
+    try { await P.net.send(P.route, { run, onHop: (n, i) => { if (i >= 1) { const sh = cur === 'saas' && n === 'data'; P.net.badge(n, sh ? 'shared' : i - 1 >= split ? 'you' : 'AWS', sh ? 'ok' : i - 1 >= split ? '' : 'info'); } } }); }
+    catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  });
+  model('iaas');
+
+  /* ================= classify ================= */
+  function quiz(el, items, opts) {
+    let i = 0, score = 0, answered = false;
+    function render() {
+      const it = items[i];
+      el.innerHTML = `<div class="count">${i + 1} of ${items.length} · score ${score}</div><div class="q">${it.q}</div>
+        <div class="opts">${opts.map(o => `<button class="btn" type="button" data-o="${o}">${o}</button>`).join('')}</div><p class="fb"></p>
+        <div><button class="btn primary" type="button" data-next hidden>${i === items.length - 1 ? 'Start again' : 'Next ▶'}</button></div>`;
+      answered = false;
+    }
+    el.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.next !== undefined) { i = (i + 1) % items.length; if (i === 0) score = 0; render(); return; }
+      if (answered) return; answered = true;
+      const it = items[i], ok = b.dataset.o === it.a; if (ok) score++;
+      b.classList.add(ok ? 'right' : 'wrong'); el.querySelector(`[data-o="${it.a}"]`).classList.add('right');
+      el.querySelector('.fb').innerHTML = (ok ? '<span class="ok-text">Right.</span> ' : `<span class="bad-text">It's ${it.a}.</span> `) + it.why;
+      el.querySelector('.count').textContent = `${i + 1} of ${items.length} · score ${score}`;
+      el.querySelector('[data-next]').hidden = false;
+    });
+    render();
+  }
+  quiz($('cls'), [
+    { q: 'Amazon EC2: you choose Windows Server 2022, then install IIS yourself.', a: 'IaaS', why: 'A rented virtual machine; the OS and above are yours.' },
+    { q: 'AWS Elastic Beanstalk: you upload a zip of your web app.', a: 'PaaS', why: 'The platform provisions and patches the servers.' },
+    { q: 'Gmail for your clinic\'s email.', a: 'SaaS', why: 'A finished application; you only manage users and settings.' },
+    { q: 'Renting a virtual private server (VPS) from a hosting company.', a: 'IaaS', why: 'You get a raw virtual machine to manage.' },
+    { q: 'Heroku or Google App Engine: git push and the app is live.', a: 'PaaS', why: 'Code goes on a managed platform.' },
+    { q: 'Zoom for doctor–patient video calls.', a: 'SaaS', why: 'Complete product used over the internet.' },
+    { q: 'Dropbox to share scan reports.', a: 'SaaS', why: 'A finished storage app for end users.' }
+  ], ['IaaS', 'PaaS', 'SaaS']);
+
+  /* ================= bill builder ================= */
+  const bn = K.net($('billSvg'), {
+    zones: [{ id: 'reg', x: 360, y: 30, w: 610, h: 250, kind: 'region', label: 'AWS Region' }],
+    nodes: {
+      pat: { x: 80, y: 90, icon: 'user', kind: 'user', label: 'Patient' },
+      doc: { x: 80, y: 220, icon: 'users', kind: 'user', label: 'Doctors' },
+      inet: { x: 240, y: 155, icon: 'globe', kind: 'plain', label: 'Internet' },
+      web: { x: 480, y: 155, icon: 'server', kind: 'compute', label: 'Web server', sub: 'compute' },
+      store: { x: 720, y: 155, icon: 'bucket', kind: 'storage', label: 'Storage', sub: 'GB-months' },
+      bill: { x: 900, y: 95, icon: 'dollar', kind: 'plain', label: 'Bill' }
+    },
+    links: [{ a: 'pat', b: 'inet' }, { a: 'doc', b: 'inet' }, { a: 'inet', b: 'web', label: 'data in / out', at: [300, 140] }, { a: 'web', b: 'store', kind: 'priv' }]
+  });
+  const RATE = { compute: 10, storage: 0.025, out: 0.09 };   // illustrative USD
+  let lines = [];
+  function renderBill() {
+    const ul = $('billLines'); const tot = lines.reduce((s, l) => s + l.c, 0);
+    ul.innerHTML = (lines.length ? lines.map(l => `<li class="${l.c ? '' : 'free'}"><span>${l.t}</span><span>${l.c ? '$' + l.c.toFixed(2) : 'free'}</span></li>`).join('') : '<li><span>No usage yet. Click an event above.</span><span></span></li>')
+      + `<li class="tot"><span>Total (illustrative)</span><span>$${tot.toFixed(2)}</span></li>`;
+    bn.nodes.bill.sub('$' + tot.toFixed(2));
+  }
+  async function ev(kind) {
+    const run = K.newRun('bill');
+    try {
+      if (kind === 'up') { await bn.send(['pat', 'inet', 'web', 'store'], { run, label: '50 MB in', tone: 'green' }); bn.badge('web', 'data in: free', 'ok'); lines.push({ t: 'Data in: 50 MB upload', c: 0 }); }
+      if (kind === 'run') { bn.state('web', 'on'); bn.badge('web', '730 hours', 'info'); await K.sleep(400, run); lines.push({ t: 'Compute: 1 small server × 730 h', c: RATE.compute }); }
+      if (kind === 'store') { bn.badge('store', '100 GB × 1 month', 'info'); await K.sleep(400, run); lines.push({ t: 'Storage: 100 GB-month', c: 100 * RATE.storage }); }
+      if (kind === 'down') { await bn.send(['store', 'web', 'inet', 'doc'], { run, label: '200 GB out' }); bn.badge('web', 'data out: charged', 'bad'); lines.push({ t: 'Data out to internet: 200 GB', c: 200 * RATE.out }); }
+      renderBill();
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('bUp').addEventListener('click', () => ev('up'));
+  $('bRun').addEventListener('click', () => ev('run'));
+  $('bStore').addEventListener('click', () => ev('store'));
+  $('bDown').addEventListener('click', () => ev('down'));
+  $('bReset').addEventListener('click', () => { K.cancel('bill'); lines = []; bn.reset(); renderBill(); });
+  renderBill();
+})();
+</script>
+</body>
+</html>

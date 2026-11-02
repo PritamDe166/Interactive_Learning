@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Traditional IT</title>
+<meta name="description" content="AWS Cloud Practitioner: how a website is served from your own data centre (DNS, router, switch, server, database) and why running it yourself is hard.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .ti-bars rect.dem { fill: var(--fg-soft); }
+  .ti-bars rect.drop { fill: var(--red); }
+  .ti-bars rect.idle { fill: color-mix(in srgb, var(--yellow) 35%, transparent); }
+  .ti-bars line.cap { stroke: var(--teal); stroke-width: 3; }
+  .ti-bars text { fill: var(--muted); font-family: var(--mono); font-size: 11px; text-anchor: middle; }
+  .ti-bars text.capl { fill: var(--teal-text); text-anchor: start; }
+  .ti-legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--muted); margin-top: 6px; }
+  .ti-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · Cloud &amp; AWS overview · Domain 1 Cloud Concepts</div>
+    <h1>Traditional IT: how a website is served</h1>
+    <ul class="lede">
+      <li>A <b>server</b> is a computer with <b>CPU</b> (compute), <b>RAM</b> (memory) and <b>storage</b>, usually backed by a <b>database</b>.</li>
+      <li>To open a website, the browser asks <b>DNS</b> for the server's <b>IP address</b>, then the request travels the <b>internet → router → switch → server</b>.</li>
+      <li>In traditional IT you <b>buy, rack, power, cool and staff</b> every one of those boxes yourself.</li>
+      <li>Its limits (big upfront cost, slow to grow, one failure takes you down) are <b>why cloud computing exists</b>.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: follow one request to your own data centre</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 540" aria-label="A browser, a DNS server, the internet, and a data centre with a router, switch, web server and database"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>A <b>server</b> = <b>CPU</b> (compute) + <b>RAM</b> (memory) + <b>storage</b>; data usually lives in a <b>database</b>.</li>
+      <li>Computers find each other by <b>IP address</b>. <b>DNS</b> turns a name like caredesk.test into an IP.</li>
+      <li>A <b>router</b> connects networks (your data centre to the internet); a <b>switch</b> connects machines inside one network.</li>
+      <li>A request goes browser → DNS → internet → router → switch → server → database, and the answer comes back the same way.</li>
+      <li>Traditional IT means you <b>own every box</b>: rent, power, cooling, maintenance, hardware replacement and a team on call 24/7.</li>
+      <li>Capacity is <b>fixed by what you bought</b>; new servers take weeks. You either turn users away at peaks or pay for idle machines.</li>
+      <li>Everything in <b>one place</b> means one disaster (power cut, fire, flood) takes the whole site down.</li>
+      <li>These problems are exactly what <b>cloud computing</b> answers (next topic).</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Break one box at a time and watch where the request stops.</p>
+
+  <section aria-labelledby="pgH">
+    <h2 class="stage-title" id="pgH">Where does it break?</h2>
+    <div class="stage-kind">Tick a failure, then send a request</div>
+    <div class="controls">
+      <label class="toggle" for="fDns"><input type="checkbox" id="fDns"> DNS server down</label>
+      <label class="toggle" for="fRouter"><input type="checkbox" id="fRouter"> Router fails</label>
+      <label class="toggle" for="fServer"><input type="checkbox" id="fServer"> Web server crashes</label>
+      <label class="toggle" for="fDb"><input type="checkbox" id="fDb"> Database down</label>
+      <button class="btn primary" id="pgSend" type="button">Open caredesk.test</button>
+    </div>
+    <div class="scroll"><svg class="diagram nf-canvas" id="pgSvg" viewBox="0 0 1000 400" aria-label="Request path with failure switches"></svg></div>
+    <p class="nf-cap" id="pgCap">Nothing is broken. Press <b>Open caredesk.test</b>.</p>
+  </section>
+
+  <section aria-labelledby="capH">
+    <h2 class="stage-title" id="capH">How many servers should you buy?</h2>
+    <div class="stage-kind">One year of a clinic booking site · illustrative numbers</div>
+    <div class="controls">
+      <div class="seg" id="capSeg" role="group" aria-label="Servers bought">
+        <button type="button" data-v="2" aria-pressed="false">2 servers</button>
+        <button type="button" data-v="3" aria-pressed="true">3 servers</button>
+        <button type="button" data-v="5" aria-pressed="false">5 servers</button>
+        <button type="button" data-v="7" aria-pressed="false">7 servers</button>
+      </div>
+    </div>
+    <div class="scroll"><svg class="diagram ti-bars" id="capSvg" viewBox="0 0 1000 300" aria-label="Monthly demand bars against a fixed capacity line"></svg></div>
+    <div class="ti-legend"><span><i style="background:var(--fg-soft)"></i>Demand you served</span><span><i style="background:var(--red)"></i>Demand you had to turn away</span><span><i style="background:color-mix(in srgb,var(--yellow) 35%,transparent)"></i>Capacity paid for but idle</span><span><i style="background:var(--teal)"></i>Your fixed capacity</span></div>
+    <div class="kpis">
+      <div class="kpi bad"><b id="kDrop">–</b><span>Requests turned away</span></div>
+      <div class="kpi accent"><b id="kIdle">–</b><span>Capacity sitting idle</span></div>
+      <div class="kpi"><b id="kCost">–</b><span>Bought up front</span></div>
+    </div>
+    <p class="hint" id="capHint"></p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Name → IP address</span><span class="arrow">→</span><span class="then">DNS</span></li>
+      <li><span class="if">Connects your network to other networks (the internet)</span><span class="arrow">→</span><span class="then">Router</span></li>
+      <li><span class="if">Connects machines inside one network</span><span class="arrow">→</span><span class="then">Switch</span></li>
+      <li><span class="if">Does the work, holds data while working, keeps data</span><span class="arrow">→</span><span class="then">CPU · RAM · storage</span></li>
+      <li><span class="if">Buy hardware up front, wait weeks, guess capacity</span><span class="arrow">→</span><span class="then">Traditional IT (the problem the cloud solves)</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Part of a server</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td>Compute (CPU)</td><td>Runs the code: works out the answer to each request.</td></tr>
+          <tr><td>Memory (RAM)</td><td>Fast, temporary working space while the code runs.</td></tr>
+          <tr><td>Storage</td><td>Keeps files and data after the power goes off.</td></tr>
+          <tr><td>Database</td><td>Stores data in a structured way so it can be searched and updated.</td></tr>
+          <tr><td>Network</td><td>Routers, switches and DNS servers that let machines find and reach each other.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="scroll card table-card" style="margin-top:14px">
+      <table>
+        <thead><tr><th>Network term</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td>Client</td><td>The machine that asks (a browser, a phone app).</td></tr>
+          <tr><td>Server</td><td>The machine that answers.</td></tr>
+          <tr><td>IP address</td><td>The number used to reach a machine on a network, such as 203.0.113.10.</td></tr>
+          <tr><td>DNS</td><td>The phone book that turns a name (caredesk.test) into an IP address.</td></tr>
+          <tr><td>Router</td><td>Moves traffic between networks, such as from the internet into your office network.</td></tr>
+          <tr><td>Switch</td><td>Moves traffic between machines on the same network.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>The problems with running it yourself</b>, as the course lists them: you pay rent for the data centre, power, cooling and maintenance; adding or replacing hardware takes time; scaling is limited by what you bought; you need a team watching the infrastructure 24/7; and a disaster (earthquake, power outage, fire) can take everything down. Cloud computing answers each of these.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>What does the browser need before it can send a request to caredesk.test?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>The server's IP address</b>, which it gets by asking a DNS server.</p></div></details>
+      <details><summary>Router or switch: which one connects your office network to the internet?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>The router.</b> The switch connects machines inside the same network.</p></div></details>
+      <details><summary>The web server is fine but the database is down. What does the user usually see?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>An error page from the server</b> (often HTTP 500). The request reached the server; the server couldn't finish the work.</p></div></details>
+      <details><summary>Name three costs of running your own data centre besides the servers.<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Any three of: <b>rent, power, cooling, maintenance, and staff watching it 24/7</b>.</p></div></details>
+      <details><summary>Why do you end up either turning users away or paying for idle servers?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Because <b>capacity is fixed by what you bought</b>, while demand goes up and down. Buy for the average and peaks overflow; buy for the peak and most of the year it sits idle.</p></div></details>
+      <details><summary>What single event can take a one-data-centre website offline completely?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>A disaster at that site</b>: power outage, fire, flood or earthquake. Everything is in one place.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Capacity numbers, prices and lead times are illustrative. IP addresses use the 203.0.113.0/24 documentation range. Source: Overview note "Traditional IT overview" and its diagrams (server components, network path).</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const safe = p => p.catch(e => { if (!(e instanceof K.Stop)) throw e; });
+
+  /* ================= walkthrough ================= */
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'dc', x: 430, y: 30, w: 550, h: 490, kind: 'onprem', label: 'YOUR DATA CENTRE (you own everything here)' }],
+    nodes: {
+      user: { x: 90, y: 150, icon: 'laptop', kind: 'user', label: 'Browser', sub: 'patient at home' },
+      dns: { x: 90, y: 400, icon: 'dns', kind: 'mgmt', label: 'DNS server', sub: 'name → IP' },
+      inet: { x: 300, y: 150, icon: 'globe', kind: 'plain', label: 'Internet' },
+      router: { x: 520, y: 150, icon: 'router', label: 'Router', sub: 'joins networks' },
+      sw: { x: 690, y: 150, icon: 'switch', label: 'Switch', sub: 'joins machines' },
+      web: { x: 880, y: 150, icon: 'server', kind: 'compute', label: 'Web server', sub: 'CPU · RAM · disk' },
+      db: { x: 880, y: 360, icon: 'db', kind: 'db', label: 'Database', sub: 'appointments' },
+      power: { x: 520, y: 360, icon: 'bolt', kind: 'plain', label: 'Power & UPS', sub: 'you pay' },
+      cool: { x: 690, y: 360, icon: 'gear', kind: 'plain', label: 'Cooling', sub: 'you pay' },
+      staff: { x: 605, y: 450, icon: 'users', kind: 'plain', label: 'On-call team', sub: '24/7' }
+    },
+    links: [
+      { a: 'user', b: 'dns', label: 'caredesk.test ?' },
+      { a: 'user', b: 'inet' }, { a: 'inet', b: 'router' }, { a: 'router', b: 'sw' }, { a: 'sw', b: 'web' },
+      { a: 'web', b: 'db', kind: 'priv' }
+    ]
+  });
+  const PATH = ['user', 'inet', 'router', 'sw', 'web'];
+  const OWN = ['power', 'cool', 'staff'];
+  const ALLN = Object.keys(net.nodes);
+  function base(i) {
+    net.reset();
+    const f = [
+      ['web', 'db'], ['user', 'dns'], [...PATH], [...PATH], [...PATH, 'db'], [...PATH, 'db'],
+      [...PATH, 'db', ...OWN], [...PATH, 'db'], ['user', 'inet', 'router', 'sw', 'web', 'db', 'power']
+    ][i];
+    net.focus(f);
+    if (i >= 1) net.badge('user', '203.0.113.10', 'info');
+    if (i === 0) { net.badge('web', 'the website lives here', 'info'); }
+    if (i === 5) net.badge('user', '200 OK · page shown', 'ok');
+    if (i === 6) { OWN.forEach(n => net.badge(n, 'your bill', '')); net.badge('web', 'bought up front', ''); }
+    if (i === 7) { net.state('web', 'down'); net.badge('web', 'CPU 100%', 'bad'); net.badge('user', 'too slow', 'bad'); }
+    if (i === 8) { net.zones.dc.classList.add('down'); ['router', 'sw', 'web', 'db'].forEach(n => net.state(n, 'down')); net.badge('power', 'power cut', 'bad'); net.badge('user', 'site offline', 'bad'); }
+    else net.zones.dc.classList.remove('down');
+  }
+  const STEPS = [
+    { title: 'A website lives on a server',
+      text: 'A <b>server</b> is just a computer that answers requests. It has <b>CPU</b> to do the work, <b>RAM</b> to hold data while working and <b>storage</b> to keep files. Most sites also have a <b>database</b> that keeps data in a structured way, here the clinic\'s appointments.' },
+    { title: 'Step 1: ask DNS for the address',
+      text: 'The patient types <b>caredesk.test</b>. Computers find each other by <b>IP address</b>, not name, so the browser first asks a <b>DNS server</b>: "what is the IP for caredesk.test?" It answers <span class="mono">203.0.113.10</span>.',
+      play: async run => { base(0); net.focus(['user', 'dns']); await net.send(['user', 'dns'], { run, label: 'caredesk.test ?' }); await net.send(['dns', 'user'], { run, label: '203.0.113.10', tone: 'cyan' }); } },
+    { title: 'Step 2: across the internet to your router',
+      text: 'Now the request travels the public <b>internet</b> to that IP. It arrives at your <b>router</b>, the box that connects your data centre\'s network to the outside world.',
+      play: async run => { base(1); net.focus(PATH); await net.send(['user', 'inet', 'router'], { run, label: 'GET /book' }); } },
+    { title: 'Step 3: the switch delivers it to the server',
+      text: 'Inside the data centre, a <b>switch</b> connects the machines on the same network. It hands the request to the <b>web server</b>.',
+      play: async run => { base(2); await net.send(['router', 'sw', 'web'], { run, label: 'GET /book' }); } },
+    { title: 'Step 4: the server does the work',
+      text: 'The web server\'s CPU runs the booking code. It asks the <b>database</b> for free appointment slots, gets them back, and builds the page.',
+      play: async run => { base(3); net.focus([...PATH, 'db']); await net.send(['web', 'db'], { run, label: 'free slots?' }); await net.send(['db', 'web'], { run, label: '3 slots', tone: 'cyan' }); } },
+    { title: 'Step 5: the answer goes back the same way',
+      text: 'The page travels back: server → switch → router → internet → browser. The patient sees the booking page. Every hop on this path is a box someone has to buy and look after.',
+      play: async run => { base(4); await net.send(['web', 'sw', 'router', 'inet', 'user'], { run, label: '200 OK', tone: 'green' }); } },
+    { title: 'You own all of it',
+      text: 'In traditional IT the hardware is yours: you <b>buy it up front</b>, pay <b>rent, power and cooling</b>, wait weeks for new servers, and keep a <b>team on call 24/7</b> to replace failed parts and apply patches.' },
+    { title: 'Problem 1: a busy day overwhelms you',
+      text: 'A health camp announcement sends ten times the usual visitors. The one server hits <b>100% CPU</b> and pages time out. You can order more servers, but they arrive in <b>weeks</b>, long after the rush is over.',
+      play: async run => { base(4); const all = []; for (let k = 0; k < 6; k++) { all.push(safe(net.send(PATH, { run, tone: k > 3 ? 'red' : 'orange' }))); await K.sleep(160, run); } await Promise.all(all); } },
+    { title: 'Problem 2: one site, one failure, all down',
+      text: 'Everything sits in <b>one building</b>. A power cut, fire or flood there takes the router, servers and database down together, and the website is gone until it\'s fixed. This list of problems is exactly what <b>cloud computing</b> was built to solve.',
+      play: async run => { base(4); net.focus([...PATH, 'db', 'power']); net.zones.dc.classList.add('down'); net.badge('power', 'power cut', 'bad'); await net.send(['user', 'inet', 'router'], { run, tone: 'red', label: 'GET /book' }); } }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: i => base(i), tipLabel: 'Tip' });
+
+  /* ================= where does it break ================= */
+  const pg = K.net($('pgSvg'), {
+    zones: [{ id: 'dc', x: 430, y: 30, w: 550, h: 350, kind: 'onprem', label: 'YOUR DATA CENTRE' }],
+    nodes: {
+      user: { x: 90, y: 120, icon: 'laptop', kind: 'user', label: 'Browser' },
+      dns: { x: 90, y: 300, icon: 'dns', kind: 'mgmt', label: 'DNS server' },
+      inet: { x: 300, y: 120, icon: 'globe', kind: 'plain', label: 'Internet' },
+      router: { x: 520, y: 120, icon: 'router', label: 'Router' },
+      sw: { x: 690, y: 120, icon: 'switch', label: 'Switch' },
+      web: { x: 880, y: 120, icon: 'server', kind: 'compute', label: 'Web server' },
+      db: { x: 880, y: 300, icon: 'db', kind: 'db', label: 'Database' }
+    },
+    links: [{ a: 'user', b: 'dns' }, { a: 'user', b: 'inet' }, { a: 'inet', b: 'router' }, { a: 'router', b: 'sw' }, { a: 'sw', b: 'web' }, { a: 'web', b: 'db', kind: 'priv' }]
+  });
+  const F = { dns: 'fDns', router: 'fRouter', web: 'fServer', db: 'fDb' };
+  const cap = $('pgCap');
+  function pgDraw() {
+    pg.reset();
+    for (const n in F) if ($(F[n]).checked) { pg.state(n, 'down'); }
+    const any = Object.values(F).some(id => $(id).checked);
+    cap.innerHTML = any ? 'Failure set. Press <b>Open caredesk.test</b> to see what the patient gets.' : 'Nothing is broken. Press <b>Open caredesk.test</b>.';
+  }
+  async function pgSend() {
+    const run = K.newRun('pg'); pgDraw();
+    const down = n => $(F[n]).checked;
+    try {
+      await pg.send(['user', 'dns'], { run, label: 'caredesk.test ?', tone: down('dns') ? 'red' : 'orange' });
+      if (down('dns')) { pg.badge('dns', 'no answer', 'bad'); pg.badge('user', 'site can\'t be reached', 'bad'); cap.innerHTML = '<span class="bad-text">Stopped at DNS.</span> The browser never learned the IP, so it shows "This site can\'t be reached". The servers were fine, but nobody could find them.'; return; }
+      pg.badge('user', '203.0.113.10', 'info');
+      if (down('router')) { await pg.send(['user', 'inet', 'router'], { run, tone: 'red' }); pg.badge('router', 'no route', 'bad'); pg.badge('user', 'timed out', 'bad'); cap.innerHTML = '<span class="bad-text">Stopped at the router.</span> Nothing gets into the data centre, so the browser waits and then shows a <b>connection timed out</b> error.'; return; }
+      if (down('web')) { await pg.send(['user', 'inet', 'router', 'sw', 'web'], { run, tone: 'red' }); pg.badge('web', 'not responding', 'bad'); pg.badge('user', 'timed out', 'bad'); cap.innerHTML = '<span class="bad-text">Stopped at the web server.</span> The network delivered the request but nothing answered. With only one server there is <b>no other machine to take over</b>.'; return; }
+      await pg.send(['user', 'inet', 'router', 'sw', 'web'], { run, label: 'GET /book' });
+      if (down('db')) { await pg.send(['web', 'db'], { run, tone: 'red' }); pg.badge('db', 'down', 'bad'); await pg.send(['web', 'sw', 'router', 'inet', 'user'], { run, tone: 'red', label: '500' }); pg.badge('user', 'HTTP 500 error page', 'bad'); cap.innerHTML = '<span class="bad-text">The server answered with an error.</span> It reached the server, but the server couldn\'t read the appointments, so it returned <b>HTTP 500</b>.'; return; }
+      await pg.send(['web', 'db'], { run }); await pg.send(['db', 'web'], { run, tone: 'cyan' });
+      await pg.send(['web', 'sw', 'router', 'inet', 'user'], { run, label: '200 OK', tone: 'green' });
+      pg.badge('user', 'page shown', 'ok');
+      cap.innerHTML = '<span class="ok-text">Page shown.</span> Every box on the path worked. Now tick a failure and try again: each one is a single point of failure you have to own.';
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  Object.values(F).forEach(id => $(id).addEventListener('change', () => { K.cancel('pg'); pgDraw(); }));
+  $('pgSend').addEventListener('click', pgSend);
+  pgDraw();
+
+  /* ================= capacity planner ================= */
+  const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const DEM = [210, 220, 240, 230, 250, 270, 300, 290, 320, 560, 640, 330];   // peak requests per second (illustrative)
+  const PER = 100;                                                            // one server handles 100 req/s
+  const PRICE = 4.5;                                                          // lakh ₹ per server incl. setup (illustrative)
+  const sv = $('capSvg'), X0 = 60, X1 = 980, Y0 = 260, Y1 = 20, VMAX = 720;
+  const y = v => Y0 - v / VMAX * (Y0 - Y1);
+  function draw(n) {
+    sv.textContent = '';
+    const capv = n * PER, bw = (X1 - X0) / 12;
+    let served = 0, dropped = 0, idle = 0, total = 0;
+    DEM.forEach((d, i) => {
+      const x = X0 + i * bw + 8, w = bw - 16, s = Math.min(d, capv);
+      K.el('rect', { x, y: y(s), width: w, height: Y0 - y(s), class: 'dem' }, sv);
+      if (d > capv) K.el('rect', { x, y: y(d), width: w, height: y(capv) - y(d), class: 'drop' }, sv);
+      else K.el('rect', { x, y: y(capv), width: w, height: y(d) - y(capv), class: 'idle' }, sv);
+      K.text(sv, x + w / 2, Y0 + 18, MON[i], '');
+      served += s; dropped += Math.max(0, d - capv); idle += Math.max(0, capv - d); total += d;
+    });
+    K.el('line', { x1: X0, y1: y(capv), x2: X1, y2: y(capv), class: 'cap' }, sv);
+    K.text(sv, X0 + 4, y(capv) - 8, `${n} servers = ${capv} req/s`, 'capl');
+    K.text(sv, X0 + 9.5 * bw + 8, Y1 + 8, 'festive season', '');
+    $('kDrop').textContent = Math.round(dropped / total * 100) + '%';
+    $('kIdle').textContent = Math.round(idle / (capv * 12) * 100) + '%';
+    $('kCost').textContent = '₹' + (n * PRICE).toFixed(1) + ' lakh';
+    $('capHint').innerHTML = n <= 3
+      ? 'Sized for a normal month. The <b>festive-season rush overflows</b> and patients can\'t book. New servers take weeks to arrive, so you can\'t react in time.'
+      : n >= 7 ? 'Sized for the busiest month. Nobody is turned away, but for most of the year <b>more than half of what you paid for sits idle</b>.'
+      : 'A compromise: the very top of the rush still overflows, and the quiet months still waste capacity. With fixed hardware, <b>there is no right answer</b>.';
+  }
+  K.seg($('capSeg'), v => draw(+v));
+  draw(3);
+})();
+</script>
+</body>
+</html>

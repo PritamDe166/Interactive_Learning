@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cloud overview review</title>
+<meta name="description" content="AWS Cloud Practitioner: review of the cloud and AWS overview section, with a mixed scenario drill, cheat-sheet and quiz.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .pick { display: grid; gap: 10px; }
+  .pick .q { font-size: 16px; color: var(--fg); }
+  .pick .opts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pick .fb { min-height: 1.5em; color: var(--fg-soft); }
+  .pick .count { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .btn.right { border-color: var(--teal); color: var(--good-text); }
+  .btn.wrong { border-color: var(--red); color: var(--bad-text); }
+  .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 10px; }
+  .topic-links a { display: block; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--fg); text-decoration: none; }
+  .topic-links a:hover { border-color: var(--orange); }
+  .topic-links a span { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · Cloud &amp; AWS overview · Section review</div>
+    <h1>Cloud &amp; AWS overview: review</h1>
+    <ul class="lede">
+      <li>Traditional IT means owning every box on the request path; <b>cloud computing</b> rents it on demand.</li>
+      <li>The service model decides <b>how much of the stack you manage</b>: IaaS, PaaS, SaaS.</li>
+      <li>AWS runs in <b>Regions</b> made of <b>Availability Zones</b>, plus <b>edge locations</b> near users.</li>
+      <li>Security is split: <b>AWS secures the cloud, you secure what you put in it</b>.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="recapH">
+    <h2 class="stage-title" id="recapH">The whole section on one path</h2>
+    <div class="stage-kind">Press play · each hop is one topic from this section</div>
+    <div class="controls"><button class="btn primary" id="recapPlay" type="button">Play the request</button></div>
+    <div class="scroll"><svg class="diagram nf-canvas" id="recapSvg" viewBox="0 0 1000 420" aria-label="A patient request through an edge location to a Region with two AZs, labelled with the section's ideas"></svg></div>
+    <p class="nf-cap" id="recapCap">Press <b>Play the request</b>.</p>
+  </section>
+
+  <section aria-labelledby="sumH">
+    <h2 id="sumH">Section summary</h2>
+    <p class="sub">Everything from the five topics on one screen. Read it before the questions.</p>
+    <div class="sum-grid">
+      <div class="card"><h3>Traditional IT</h3><ul>
+        <li>A server = CPU, RAM, storage (+ database, network).</li>
+        <li>Browser asks <b>DNS</b> for the IP, then internet → router → switch → server.</li>
+        <li>Owning it means rent, power, cooling, staff 24/7, slow growth, and one site that can fail.</li></ul></div>
+      <div class="card"><h3>Cloud computing</h3><ul>
+        <li>On-demand IT over the internet, <b>pay as you go</b>.</li>
+        <li>5 characteristics: on-demand self-service, broad network access, resource pooling, rapid elasticity, measured service.</li>
+        <li>6 advantages: CAPEX→OPEX, economies of scale, stop guessing capacity, speed &amp; agility, no data centres to run, global in minutes.</li>
+        <li>Deployment: private, public, hybrid.</li></ul></div>
+      <div class="card"><h3>IaaS, PaaS, SaaS &amp; pricing</h3><ul>
+        <li><b>IaaS</b> (EC2): you manage OS and up. <b>PaaS</b> (Elastic Beanstalk): code and data. <b>SaaS</b>: use the app.</li>
+        <li>Data, users and access settings are always yours.</li>
+        <li>You pay for compute, storage and <b>data transfer out</b>; data in is generally free.</li></ul></div>
+      <div class="card"><h3>Regions, AZs &amp; edge</h3><ul>
+        <li><b>Region</b> = geographic area; most services are regional.</li>
+        <li>Each Region has <b>≥ 3 AZs</b>; an AZ = one or more isolated data centres.</li>
+        <li>Multi-AZ = high availability. Edge locations cache content near users (CloudFront).</li>
+        <li>Pick a Region by compliance, latency, service availability, price.</li>
+        <li>Global services: IAM, Route 53, CloudFront, WAF.</li></ul></div>
+      <div class="card"><h3>Shared responsibility</h3><ul>
+        <li>AWS: security <b>of</b> the cloud (facilities, hardware, network, hypervisor).</li>
+        <li>You: security <b>in</b> the cloud (data, IAM, security groups, guest OS on EC2, encryption).</li>
+        <li>The split shifts by service: on RDS and Lambda AWS also patches the OS/runtime.</li>
+        <li>Shared controls: patching, configuration management, awareness &amp; training.</li></ul></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="topH">
+    <h2 id="topH">Topics in this section</h2>
+    <div class="topic-links">
+      <a href="traditional-it.html">Traditional IT<span>DNS, router, switch, server; why owning it hurts</span></a>
+      <a href="what-is-cloud.html">What is cloud computing<span>5 characteristics, 6 advantages, deployment models</span></a>
+      <a href="cloud-service-models.html">IaaS, PaaS, SaaS &amp; pricing<span>Who manages which layer; what you pay for</span></a>
+      <a href="regions-azs-edge.html">Regions, AZs &amp; edge<span>Global infrastructure, choosing a Region</span></a>
+      <a href="shared-responsibility.html">Shared responsibility<span>Security of vs in the cloud</span></a>
+    </div>
+  </section>
+
+  <section aria-labelledby="drillH">
+    <h2 class="stage-title" id="drillH">Mixed drill: name the concept</h2>
+    <div class="stage-kind">Ten exam-style scenarios from across the section</div>
+    <div class="card pick" id="drill"></div>
+  </section>
+
+  <section aria-labelledby="exH">
+    <h2 id="exH">Exam-style questions</h2>
+    <p class="sub">Original questions written in the style of the CLF-C02 exam and the common practice sets. Pick an answer to see why.</p>
+    <div id="mcq"></div>
+    <p class="sub" style="margin-top:10px">Question topics follow the official exam guide (Domain 1 Cloud Concepts, Task 2.1 shared responsibility, Task 3.2 global infrastructure) and the scenario patterns used by public practice sets such as AWS Skill Builder's official practice question set, Educative and Sailor.sh. No question is copied from them.</p>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Section cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Upfront hardware → monthly bill</span><span class="arrow">→</span><span class="then">CAPEX → OPEX</span></li>
+      <li><span class="if">Capacity follows demand automatically</span><span class="arrow">→</span><span class="then">Elasticity</span></li>
+      <li><span class="if">Choose and patch the OS yourself</span><span class="arrow">→</span><span class="then">IaaS (EC2)</span></li>
+      <li><span class="if">Just upload code</span><span class="arrow">→</span><span class="then">PaaS (Elastic Beanstalk)</span></li>
+      <li><span class="if">Some workloads on-premises, some on AWS</span><span class="arrow">→</span><span class="then">Hybrid cloud</span></li>
+      <li><span class="if">Survive a data-centre failure</span><span class="arrow">→</span><span class="then">Multiple Availability Zones</span></li>
+      <li><span class="if">Data must stay in a country</span><span class="arrow">→</span><span class="then">Pick that Region (compliance first)</span></li>
+      <li><span class="if">Cache near users</span><span class="arrow">→</span><span class="then">Edge locations (CloudFront)</span></li>
+      <li><span class="if">Physical security, hypervisor</span><span class="arrow">→</span><span class="then">AWS (security OF the cloud)</span></li>
+      <li><span class="if">Data, IAM, security groups, guest OS on EC2</span><span class="arrow">→</span><span class="then">You (security IN the cloud)</span></li>
+      <li><span class="if">Data transfer into AWS</span><span class="arrow">→</span><span class="then">Generally free; data out is charged</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Which characteristic lets many customers share the same physical servers?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Resource pooling (multi-tenancy).</b></p></div></details>
+      <details><summary>Elastic Beanstalk, EC2, Gmail: match each to IaaS, PaaS or SaaS.<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Elastic Beanstalk = PaaS, EC2 = IaaS, Gmail = SaaS.</b></p></div></details>
+      <details><summary>How many Availability Zones does a Region have, at minimum?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Three</b> (a few older Regions have historically had two; the exam answer is three or more).</p></div></details>
+      <details><summary>Who patches the database engine on Amazon RDS? And the OS on EC2?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>RDS engine: AWS. EC2 guest OS: you.</b></p></div></details>
+      <details><summary>Name the four factors for choosing a Region, in the order that usually decides.<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Compliance, latency, service availability, price.</b></p></div></details>
+      <details><summary>Which advantage: "launch in Europe this afternoon"?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Go global in minutes.</b></p></div></details>
+    </div>
+  </section>
+
+  <footer>Summary of the five Overview topic pages. Latencies are illustrative. Question sources: <a href="https://docs.aws.amazon.com/aws-certification/latest/examguides/cloud-practitioner-02.html">AWS CLF-C02 exam guide</a>, <a href="https://training.resources.awscloud.com/associate-certification-articles/updated-cloud-practitioner-exam-prep-course">AWS official practice question set</a>, <a href="https://www.educative.io/blog/aws-cloud-practitioner-exam-questions-clf-c02">Educative</a>, <a href="https://www.sailor.sh/blog/aws-cloud-practitioner-practice-questions">Sailor.sh</a> (topics and patterns only; questions are original).</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('recapSvg'), {
+    zones: [
+      { id: 'reg', x: 390, y: 20, w: 595, h: 385, kind: 'region', label: 'Region (pick by compliance, latency, services, price)' },
+      { id: 'a', x: 410, y: 190, w: 270, h: 200, kind: 'az', label: 'AZ a' },
+      { id: 'b', x: 700, y: 190, w: 270, h: 200, kind: 'az', label: 'AZ b' }
+    ],
+    nodes: {
+      user: { x: 70, y: 120, icon: 'phone', kind: 'user', label: 'Patient' },
+      dns: { x: 70, y: 320, icon: 'dns', kind: 'mgmt', label: 'DNS' },
+      edge: { x: 260, y: 120, icon: 'edge', label: 'Edge location' },
+      lb: { x: 690, y: 100, icon: 'lb', label: 'Load balancer' },
+      w1: { x: 545, y: 290, icon: 'server', kind: 'compute', label: 'EC2 (IaaS)' },
+      w2: { x: 835, y: 290, icon: 'server', kind: 'compute', label: 'EC2 (IaaS)' }
+    },
+    links: [{ a: 'user', b: 'dns' }, { a: 'user', b: 'edge' }, { a: 'edge', b: 'lb', kind: 'aws', via: [[260, 100]] }, { a: 'lb', b: 'w1', via: [[545, 100]] }, { a: 'lb', b: 'w2', via: [[835, 100]] }]
+  });
+  const cap = $('recapCap');
+  $('recapPlay').addEventListener('click', async () => {
+    const run = K.newRun('recap'); net.reset(); net.zones.a.classList.remove('down');
+    const say = h => cap.innerHTML = h;
+    try {
+      say('<b>DNS</b> turns the name into an address (traditional IT basics).'); await net.send(['user', 'dns'], { run, label: 'name?' }); net.badge('user', 'IP', 'info');
+      say('The request goes to the nearest <b>edge location</b>; static files may be cached there.'); await net.send(['user', 'edge'], { run });
+      say('Over AWS\'s network into the <b>Region</b>; the <b>load balancer</b> spreads requests.'); await net.send(['edge', 'lb'], { run });
+      say('The app runs on <b>EC2</b> in two <b>Availability Zones</b>, rented on demand and paid per second (cloud computing, IaaS).'); await net.send(['lb', 'w1'], { run });
+      net.zones.a.classList.add('down'); net.state('w1', 'down');
+      say('AZ a fails, so traffic goes to AZ b (<b>multi-AZ high availability</b>).'); await net.send(['user', 'edge', 'lb', 'w2'], { run });
+      net.badge('w2', 'you patch the OS', ''); net.badge('lb', 'AWS runs the hardware', 'info');
+      say('<b>Shared responsibility:</b> AWS secures the data centres and hardware; you patch the EC2 OS and protect the data.');
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  });
+
+
+  K.mcq($('mcq'), [
+    { q: 'A company wants to stop buying servers up front and pay only for the computing it uses each month. Which advantage of cloud computing is this?', o: ['Go global in minutes', 'Trade fixed (capital) expense for variable expense', 'Increase speed and agility', 'Benefit from economies of scale'], a: [1], why: 'Moving from upfront purchases to paying per use is "trade capital expense for variable expense" (CAPEX → OPEX).' },
+    { q: 'Which cloud characteristic means resources grow automatically during a sale and shrink afterwards?', o: ['Resource pooling', 'Broad network access', 'Rapid elasticity', 'Measured service'], a: [2], why: 'Elasticity is scaling up and down automatically with demand.' },
+    { q: 'Many customers\' workloads run on the same physical AWS hardware, isolated from each other. Which characteristic does this describe?', o: ['Multi-tenancy (resource pooling)', 'High availability', 'Fault tolerance', 'Hybrid cloud'], a: [0], why: 'Sharing hardware between isolated customers is resource pooling, also called multi-tenancy.' },
+    { q: 'A team wants to deploy a web application without managing servers, operating systems or patching. Which model fits best?', o: ['On-premises', 'Infrastructure as a Service', 'Platform as a Service', 'Colocation'], a: [2], why: 'PaaS (for example AWS Elastic Beanstalk) runs the platform; the team brings code and data.' },
+    { q: 'A company keeps some systems in its own data centre and connects them to workloads running on AWS. Which deployment model is this?', o: ['Public cloud', 'Private cloud', 'Hybrid cloud', 'Multi-Region'], a: [2], why: 'Part on-premises, part in the cloud, connected: hybrid.' },
+    { q: 'What is an Availability Zone?', o: ['A single server rack in a Region', 'One or more discrete data centres with redundant power and networking in a Region', 'A city where CloudFront caches content', 'A group of Regions on one continent'], a: [1], why: 'An AZ is one or more isolated data centres inside a Region.' },
+    { q: 'How should an application be deployed to stay available if one data centre fails?', o: ['In one AZ on a larger instance', 'Across multiple Availability Zones', 'In an edge location', 'On a Dedicated Host'], a: [1], why: 'AZs are isolated from each other, so spreading across them gives high availability.' },
+    { q: 'Which factors should a company consider when choosing an AWS Region?', o: ['Data residency and compliance requirements', 'The number of IAM users', 'Latency to its customers', 'The AWS account ID', 'Whether the console is in English'], a: [0, 2], why: 'Compliance, latency, service availability and price drive the choice; IAM users and account IDs are not Region-related.' },
+    { q: 'What do AWS edge locations mainly provide?', o: ['A place to run EC2 instances near users', 'Caching of content close to users, for services like CloudFront', 'Extra Availability Zones for a Region', 'Offline backups of S3 data'], a: [1], why: 'Edge locations serve and cache content near users; you do not run EC2 there.' },
+    { q: 'Which of these is a global AWS service rather than a regional one?', o: ['Amazon EC2', 'AWS Lambda', 'AWS Identity and Access Management (IAM)', 'Amazon RDS'], a: [2], why: 'IAM (like Route 53 and CloudFront) is global; EC2, Lambda and RDS are regional.' },
+    { q: 'Under the shared responsibility model, which task is AWS responsible for?', o: ['Patching the guest operating system on EC2', 'Configuring security group rules', 'Physical security of data centres', 'Encrypting customer data'], a: [2], why: 'Physical security is security OF the cloud; the other three are the customer\'s.' },
+    { q: 'Which TWO tasks are the customer\'s responsibility when using Amazon EC2?', o: ['Patching the hypervisor', 'Patching the guest operating system', 'Replacing failed disks', 'Managing who can access the instance (IAM, security groups)', 'Cooling the data centre'], a: [1, 3], why: 'On EC2 you own the guest OS and access configuration; AWS owns the hypervisor, hardware and facilities.' },
+    { q: 'A company moves its database from EC2 to Amazon RDS. Which responsibility moves from the customer to AWS?', o: ['Managing database users', 'Patching the database engine and operating system', 'Classifying the data', 'Setting network access rules'], a: [1], why: 'With RDS, AWS patches the OS and database engine; users, data and network rules stay yours.' },
+    { q: 'Which costs are the main drivers of an AWS bill?', o: ['Data transferred out of AWS', 'Data transferred into AWS', 'Compute time used', 'Number of IAM users', 'Number of Regions viewed in the console'], a: [0, 2], why: 'You pay for compute, storage and data transfer out; inbound transfer and IAM are free.' },
+    { q: 'A company wants to deploy in a new country this afternoon for lower latency. Which advantage of the cloud is this?', o: ['Stop guessing capacity', 'Go global in minutes', 'Economies of scale', 'Stop spending money on data centres'], a: [1], why: 'Deploying in another Region quickly is "go global in minutes".' }
+  ]);
+
+  const items = [
+    { q: 'Servers bought every two years are replaced by a monthly usage bill.', a: 'CAPEX → OPEX', why: 'Capital expense becomes operating expense.' },
+    { q: 'The app adds servers at 9 am and removes them at 9 pm automatically.', a: 'Elasticity', why: 'Capacity follows demand both ways.' },
+    { q: 'Many customers\' VMs share one physical host, isolated from each other.', a: 'Resource pooling', why: 'Multi-tenancy; the reason for economies of scale.' },
+    { q: 'You choose Windows Server and patch it monthly.', a: 'IaaS', why: 'EC2: the OS and above are yours.' },
+    { q: 'You upload a zip and the platform runs it.', a: 'PaaS', why: 'Elastic Beanstalk.' },
+    { q: 'The hospital keeps records in its basement and runs bookings on AWS.', a: 'Hybrid cloud', why: 'Part on-premises, part cloud, connected.' },
+    { q: 'The app must keep running if one data centre floods.', a: 'Multi-AZ', why: 'Spread across Availability Zones.' },
+    { q: 'Images should load fast for patients in London; the app is in Mumbai.', a: 'Edge location', why: 'CloudFront caches at the edge.' },
+    { q: 'Who is responsible for the security guards at the data centre?', a: 'AWS', why: 'Security OF the cloud.' },
+    { q: 'Who is responsible when a bucket is shared publicly by mistake?', a: 'Customer', why: 'Configuration and data are security IN the cloud.' }
+  ];
+  const opts = ['CAPEX → OPEX', 'Elasticity', 'Resource pooling', 'IaaS', 'PaaS', 'Hybrid cloud', 'Multi-AZ', 'Edge location', 'AWS', 'Customer'];
+  const el = $('drill'); let i = 0, score = 0, answered = false;
+  function render() {
+    const it = items[i];
+    el.innerHTML = `<div class="count">${i + 1} of ${items.length} · score ${score}</div><div class="q">${it.q}</div>
+      <div class="opts">${opts.map(o => `<button class="btn" type="button" data-o="${o}">${o}</button>`).join('')}</div><p class="fb"></p>
+      <div><button class="btn primary" type="button" data-next hidden>${i === items.length - 1 ? 'Start again' : 'Next ▶'}</button></div>`;
+    answered = false;
+  }
+  el.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.next !== undefined) { i = (i + 1) % items.length; if (i === 0) score = 0; render(); return; }
+    if (answered) return; answered = true;
+    const it = items[i], ok = b.dataset.o === it.a; if (ok) score++;
+    b.classList.add(ok ? 'right' : 'wrong'); el.querySelector(`[data-o="${it.a}"]`).classList.add('right');
+    el.querySelector('.fb').innerHTML = (ok ? '<span class="ok-text">Right.</span> ' : `<span class="bad-text">It's ${it.a}.</span> `) + it.why;
+    el.querySelector('.count').textContent = `${i + 1} of ${items.length} · score ${score}`;
+    el.querySelector('[data-next]').hidden = false;
+  });
+  render();
+})();
+</script>
+</body>
+</html>

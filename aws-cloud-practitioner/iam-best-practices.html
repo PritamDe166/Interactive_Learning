@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IAM best practices</title>
+<meta name="description" content="AWS Cloud Practitioner: IAM guidelines and best practices (root protection, MFA, password policy, groups, roles, key hygiene, audits) and the shared responsibility model for IAM.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .hard { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 8px 16px; }
+  .atk-res { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; font-size: 14.5px; }
+  .atk-res li { padding: 7px 10px; border-radius: 8px; background: var(--panel-2); display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .atk-res li b.ok { color: var(--good-text); } .atk-res li b.bad { color: var(--bad-text); }
+  .pw { display: grid; gap: 10px; }
+  .pw input[type=text] { font: inherit; font-family: var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%; box-sizing: border-box; }
+  .pw-rules { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 14px; }
+  .pw-rules li::before { content: '✕ '; color: var(--bad-text); }
+  .pw-rules li.ok::before { content: '✓ '; color: var(--good-text); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · IAM · Domain 2 Security &amp; Compliance (Tasks 2.1, 2.3)</div>
+    <h1>IAM best practices &amp; shared responsibility</h1>
+    <ul class="lede">
+      <li>Lock the <b>root user</b> away (MFA, no access keys). Give <b>each person their own identity</b>; never share.</li>
+      <li>Manage permissions through <b>groups</b> with <b>least privilege</b>; use <b>roles</b> for AWS services.</li>
+      <li>Enforce a <b>password policy</b> and <b>MFA</b>; keep <b>access keys</b> secret and rotated, or avoid them.</li>
+      <li><b>Audit</b> with the credential report and Access Advisor. AWS runs IAM; <b>configuring it well is your responsibility</b>.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: each practice stops an attack</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 520" aria-label="An attacker tries several routes into an AWS account; each best practice blocks one"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li><b>Don't use the root user</b> for daily work. MFA on root, <b>no root access keys</b>, credentials stored safely.</li>
+      <li><b>One identity per person.</b> Never share users, passwords, keys or MFA devices. (At company scale AWS recommends <b>IAM Identity Center</b> for people.)</li>
+      <li><b>Groups</b> for permissions; <b>least privilege</b>; review and remove what's unused.</li>
+      <li><b>Password policy</b>: minimum length, upper/lower case, numbers, symbols, expiry (1–1,095 days), prevent reuse (last 1–24). Default: 8–128 characters, 3 of 4 character types. It <b>doesn't apply to root or to access keys</b>, and there's <b>no lockout</b> setting.</li>
+      <li><b>MFA</b> = password (something you know) + device (something you have). Types: <b>passkeys / FIDO security keys</b> (phishing-resistant, preferred), <b>virtual authenticator apps</b>, <b>hardware TOTP tokens</b>. Up to <b>8</b> devices per user. SMS MFA is no longer offered.</li>
+      <li><b>Roles</b> for AWS services (EC2, Lambda, CloudFormation): no keys on servers.</li>
+      <li><b>Access keys</b>: secret like a password; never commit or share; rotate; delete unused. Prefer temporary credentials.</li>
+      <li><b>Audit</b>: credential report (account credentials) and Access Advisor (unused permissions).</li>
+      <li>Store app secrets in <b>AWS Secrets Manager</b> or <b>Systems Manager Parameter Store</b>, never in code.</li>
+      <li><b>Shared responsibility for IAM</b>: AWS runs the IAM service and its infrastructure; <b>you</b> create users, groups, roles and policies, enable MFA, rotate keys, review access and apply least privilege.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+
+  <section aria-labelledby="hdH">
+    <h2 class="stage-title" id="hdH">Harden the account, then attack it</h2>
+    <div class="stage-kind">Tick the practices you apply · run five real-world attacks</div>
+    <div class="card">
+      <div class="hard" id="hard"></div>
+      <div class="controls" style="justify-content:flex-start;margin-top:10px"><button class="btn primary" id="atkGo" type="button">Run the attacks</button></div>
+      <ul class="atk-res" id="atkRes"></ul>
+    </div>
+  </section>
+
+  <section aria-labelledby="pwH">
+    <h2 class="stage-title" id="pwH">Test a password against your policy</h2>
+    <div class="stage-kind">Turn rules on and off · type a password (it never leaves this page)</div>
+    <div class="card pw">
+      <div class="hard" id="pwOpts"></div>
+      <input type="text" id="pwIn" value="clinic2026" aria-label="Password to test" autocomplete="off" spellcheck="false">
+      <ul class="pw-rules" id="pwRules"></ul>
+    </div>
+  </section>
+
+  <section aria-labelledby="srH">
+    <h2 class="stage-title" id="srH">AWS or you?</h2>
+    <div class="stage-kind">Shared responsibility for IAM</div>
+    <div class="card" id="sr"></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Enforce strong passwords</span><span class="arrow">→</span><span class="then">Password policy</span></li>
+      <li><span class="if">Extra sign-in factor</span><span class="arrow">→</span><span class="then">MFA (passkey / security key preferred)</span></li>
+      <li><span class="if">Give AWS services permissions</span><span class="arrow">→</span><span class="then">IAM roles</span></li>
+      <li><span class="if">Store database passwords securely</span><span class="arrow">→</span><span class="then">AWS Secrets Manager</span></li>
+      <li><span class="if">Who enables MFA and reviews permissions?</span><span class="arrow">→</span><span class="then">The customer</span></li>
+      <li><span class="if">Who runs the IAM service itself?</span><span class="arrow">→</span><span class="then">AWS</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Area</th><th>AWS's job</th><th>Your job</th></tr></thead>
+        <tbody>
+          <tr><td>IAM service</td><td>Run it, keep it available, enforce policies</td><td>Configure it correctly</td></tr>
+          <tr><td>Users, groups, roles</td><td>Provide the features</td><td>Create and manage them</td></tr>
+          <tr><td>Policies</td><td>Provide the policy engine</td><td>Write, attach and review them (least privilege)</td></tr>
+          <tr><td>MFA</td><td>Support MFA devices</td><td>Enable and enforce MFA</td></tr>
+          <tr><td>Access keys</td><td>Issue keys</td><td>Protect, rotate and delete them</td></tr>
+          <tr><td>Audit tools</td><td>Provide credential report, Access Advisor</td><td>Use them regularly</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Updated</span><p><b>For people, AWS now recommends federation / IAM Identity Center</b> with temporary credentials, and IAM users only where that isn't possible. The course's "one IAM user per person" is still the right exam framing when Identity Center isn't an option.</p></div>
+      <div class="note"><span class="flag add">Updated</span><p><b>SMS MFA</b> appears in older material; AWS no longer offers it for new devices.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <div class="quiz">
+      <details><summary>Does the IAM password policy apply to the root user?<span class="go">Show answer</span></summary><div class="ans"><p><b>No</b>, and it doesn't apply to access keys either.</p></div></details>
+      <details><summary>What are the two "factors" in MFA?<span class="go">Show answer</span></summary><div class="ans"><p><b>Something you know</b> (password) and <b>something you have</b> (a device or key).</p></div></details>
+      <details><summary>A friend needs to look at your AWS account. Share your login?<span class="go">Show answer</span></summary><div class="ans"><p><b>Never.</b> Create a separate identity with only the access they need.</p></div></details>
+      <details><summary>Who is responsible for enabling MFA on IAM users?<span class="go">Show answer</span></summary><div class="ans"><p><b>The customer.</b> AWS provides the feature.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Attack scenarios are simplified. Sources: IAM notes "IAM Guidelines and Best Practices", "Shared Responsibility Model for IAM", "IAM: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html">Security best practices in IAM</a>; <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_passwords_account-policy.html">IAM password policy</a>; <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa.html">MFA in IAM</a>.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'acct', x: 700, y: 20, w: 280, h: 480, kind: 'aws', label: 'Your AWS account' }],
+    nodes: {
+      atk: { x: 80, y: 235, icon: 'bug', kind: 'sec', label: 'Attacker' },
+      mfa: { x: 400, y: 50, icon: 'lock', kind: 'mgmt', label: 'MFA', sub: 'root + every user', badge: 'right' },
+      pwp: { x: 400, y: 150, icon: 'key', kind: 'mgmt', label: 'Password policy', badge: 'right' },
+      own: { x: 400, y: 250, icon: 'user', kind: 'mgmt', label: 'One user per person', badge: 'right' },
+      lp: { x: 400, y: 350, icon: 'users', kind: 'mgmt', label: 'Groups + least privilege', badge: 'right' },
+      role: { x: 400, y: 440, icon: 'idcard', kind: 'mgmt', label: 'Roles, not keys', badge: 'right' },
+      acct: { x: 840, y: 235, icon: 'cloud', kind: 'plain', label: 'Resources', sub: 'data · servers · bill' },
+      audit: { x: 840, y: 400, icon: 'eye', kind: 'plain', label: 'Monthly audit', sub: 'report + Advisor' }
+    },
+    links: ['mfa', 'pwp', 'own', 'lp', 'role'].flatMap(d => { const y = { mfa: 50, pwp: 150, own: 250, lp: 350, role: 440 }[d]; return [{ a: 'atk', b: d, via: [[220, 235], [220, y]] }, { a: d, b: 'acct', via: [[620, y], [620, 235]] }]; }).concat([{ a: 'audit', b: 'acct', kind: 'dash' }])
+  });
+  const D = ['mfa', 'pwp', 'own', 'lp', 'role'];
+  function base(i) {
+    net.reset();
+    const f = [null, ['atk', 'mfa', 'acct'], ['atk', 'pwp', 'acct'], ['atk', 'own', 'acct'], ['atk', 'lp', 'acct'], ['atk', 'role', 'acct'], ['audit', 'acct'], null][i];
+    net.focus(f);
+    if (i >= 1 && i <= 5) { const d = D[i - 1]; net.state(d, 'ok'); net.badge(d, ['stolen password useless', 'guessing fails', 'traceable, revocable', 'damage limited', 'nothing to steal'][i - 1], 'ok'); }
+    if (i === 6) net.badge('audit', 'finds what slipped', 'info');
+    if (i === 7) D.forEach(d => net.state(d, 'ok'));
+  }
+  const atkTo = async (run, d, label) => { await net.send(['atk', d], { run, tone: 'red', label }); net.badge(d, 'blocked', 'ok'); };
+  const STEPS = [
+    { title: 'Five ways in, five practices',
+      text: 'Attackers don\'t break AWS\'s data centres; they go after <b>your configuration</b>: stolen passwords, weak passwords, shared logins, over-powered users, and keys left on servers. Each IAM best practice closes one door.' },
+    { title: 'MFA: a stolen password isn\'t enough',
+      text: 'A phishing email captures the root password. With <b>MFA</b> the attacker also needs your passkey, security key or authenticator code, which they don\'t have. Root MFA is enforced by AWS; turn it on for every IAM user too.',
+      play: async run => { base(1); await atkTo(run, 'mfa', 'root password'); } },
+    { title: 'Password policy: guessing fails',
+      text: 'A <b>password policy</b> forces length, character types, expiry and no reuse, so "clinic2026" is rejected. (It doesn\'t cover the root password or access keys.)',
+      play: async run => { base(2); await atkTo(run, 'pwp', 'guess'); } },
+    { title: 'One identity per person',
+      text: 'If the team shares one login, a leak can\'t be traced or revoked without locking everyone out. With <b>one user per person</b> you see exactly who did what and disable only that user.',
+      play: async run => { base(3); await atkTo(run, 'own', 'shared login'); } },
+    { title: 'Groups and least privilege',
+      text: 'A developer\'s account is compromised. Because the Developers group can only read EC2 and S3, the attacker can\'t delete databases, create users or run up a bill. <b>Least privilege limits the blast radius.</b>',
+      play: async run => { base(4); await atkTo(run, 'lp', 'dev account'); } },
+    { title: 'Roles, not keys',
+      text: 'A web server is hacked. It uses an <b>IAM role</b>, so there are no long-term keys on disk to steal, only temporary credentials that expire. Keep any access keys you must have out of code and Git, and rotate them.',
+      play: async run => { base(5); await atkTo(run, 'role', 'server files'); } },
+    { title: 'Audit what slipped through',
+      text: 'Every month, download the <b>credential report</b> (MFA, old keys, stale users) and check <b>Access Advisor</b> (unused permissions). Store app secrets in <b>Secrets Manager</b>, not code.' },
+    { title: 'Whose job is all this?',
+      text: 'Under the <b>shared responsibility model</b>, AWS runs IAM itself, securely and reliably. Everything you just saw (users, groups, policies, MFA, keys, reviews) is <b>security in the cloud</b>: the customer\'s job.',
+      tip: '"Who is responsible for IAM configuration / enabling MFA?" → the customer.' }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* harden + attack */
+  const P = [['mfa', 'MFA on root and all users'], ['pwp', 'Strong password policy'], ['own', 'One identity per person'], ['lp', 'Groups with least privilege'], ['role', 'Roles on servers, no stored keys'], ['audit', 'Monthly credential report + Access Advisor']];
+  $('hard').innerHTML = P.map(([k, t]) => `<label class="toggle" for="h-${k}"><input type="checkbox" id="h-${k}"> ${t}</label>`).join('');
+  const A = [
+    { t: 'Phishing captures an admin\'s password', need: ['mfa'], hit: 'Attacker signs in as admin.' },
+    { t: 'Password-guessing against IAM users', need: ['pwp', 'mfa'], any: true, hit: 'A weak password is guessed.' },
+    { t: 'Ex-employee still knows the shared team login', need: ['own'], hit: 'Old login still works; nobody can tell who used it.' },
+    { t: 'A developer\'s laptop is compromised', need: ['lp'], hit: 'Attacker has admin rights through the developer.' },
+    { t: 'Web server breached, attacker reads config files', need: ['role'], hit: 'Long-term keys copied from appsettings.json.' }
+  ];
+  $('atkGo').addEventListener('click', () => {
+    const on = k => $('h-' + k).checked;
+    $('atkRes').innerHTML = A.map(a => { const ok = a.any ? a.need.some(on) : a.need.every(on); return `<li><span>${a.t}</span><b class="${ok ? 'ok' : 'bad'}">${ok ? 'Blocked' : a.hit}</b></li>`; }).join('')
+      + `<li><span>Anything that slipped through gets noticed?</span><b class="${on('audit') ? 'ok' : 'bad'}">${on('audit') ? 'Yes, at the next audit' : 'No audits: it can go unnoticed for months'}</b></li>`;
+  });
+
+  /* password policy tester */
+  const R = [['len', 'At least 14 characters', p => p.length >= 14], ['up', 'An uppercase letter', p => /[A-Z]/.test(p)], ['low', 'A lowercase letter', p => /[a-z]/.test(p)], ['num', 'A number', p => /[0-9]/.test(p)], ['sym', 'A symbol (!@#$%^&*…)', p => /[^A-Za-z0-9]/.test(p)]];
+  $('pwOpts').innerHTML = R.map(([k, t]) => `<label class="toggle" for="r-${k}"><input type="checkbox" id="r-${k}" checked> ${t}</label>`).join('');
+  function pw() {
+    const p = $('pwIn').value, act = R.filter(([k]) => $('r-' + k).checked);
+    const res = act.map(([, t, f]) => `<li class="${f(p) ? 'ok' : ''}">${t}</li>`);
+    const pass = act.every(([, , f]) => f(p));
+    $('pwRules').innerHTML = res.join('') + `<li class="${pass ? 'ok' : ''}"><b>${pass ? 'Accepted by this policy' : 'Rejected by this policy'}</b></li>`;
+  }
+  $('pwIn').addEventListener('input', pw); $('pwOpts').addEventListener('change', pw); pw();
+
+  K.pick($('sr'), [
+    { q: 'Keep the IAM service available and enforce policy decisions.', a: 'AWS', why: 'Running the service is security OF the cloud.' },
+    { q: 'Enable MFA for the IAM users in your account.', a: 'Customer', why: 'Configuration of IAM is yours.' },
+    { q: 'Decide which users get AdministratorAccess.', a: 'Customer', why: 'You decide the permissions model.' },
+    { q: 'Rotate an IAM user\'s access keys.', a: 'Customer', why: 'Key hygiene is yours.' },
+    { q: 'Physically protect the servers that run IAM.', a: 'AWS', why: 'Infrastructure and facilities are AWS\'s.' },
+    { q: 'Run the credential report and act on it.', a: 'Customer', why: 'AWS provides the tool; using it is your job.' }
+  ], ['AWS', 'Customer']);
+})();
+</script>
+</body>
+</html>

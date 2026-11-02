@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IAM review</title>
+<meta name="description" content="AWS Cloud Practitioner: IAM section review with a one-path recap, section summary, commonly confused pairs, a mixed drill and 20 exam-style questions.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 10px; }
+  .topic-links a { display: block; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--fg); text-decoration: none; }
+  .topic-links a:hover { border-color: var(--orange); }
+  .topic-links a span { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · IAM · Section review</div>
+    <h1>IAM: review</h1>
+    <ul class="lede">
+      <li>IAM decides <b>who</b> gets in and <b>what</b> they can do, for every console click, CLI command and SDK call.</li>
+      <li>Identities: <b>root user</b> (one, locked away), <b>IAM users</b> (people), <b>groups</b> (sets of users), <b>roles</b> (assumed, temporary).</li>
+      <li>Permissions come from <b>JSON policies</b>: default deny, explicit Deny wins, Allow grants.</li>
+      <li>Keep it safe: <b>MFA</b>, password policy, least privilege, roles instead of keys, regular <b>audits</b>. That configuration is <b>your</b> responsibility.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="recapH">
+    <h2 class="stage-title" id="recapH">The whole section on one path</h2>
+    <div class="stage-kind">Press play · each hop is one topic</div>
+    <div class="controls"><button class="btn primary" id="recapPlay" type="button">Play the request</button></div>
+    <div class="scroll"><svg class="diagram nf-canvas" id="recapSvg" viewBox="0 0 1000 420" aria-label="A user and an EC2 role send requests through IAM to AWS services"></svg></div>
+    <p class="nf-cap" id="recapCap">Press <b>Play the request</b>.</p>
+  </section>
+
+  <section aria-labelledby="sumH">
+    <h2 id="sumH">Section summary</h2>
+    <div class="sum-grid">
+      <div class="card"><h3>Users &amp; groups</h3><ul><li>IAM is global; authentication + authorization.</li><li>One user per person; groups contain users only, no nesting; a user can be in many groups.</li><li>Policies on groups are inherited; default deny; least privilege.</li></ul></div>
+      <div class="card"><h3>Root vs IAM user</h3><ul><li>Exactly one root user, full access, MFA, no access keys.</li><li>Root-only: close account, change account email/root password, restore locked-out admin, IAM billing access, S3 MFA Delete, RI Marketplace seller.</li><li>IAM users belong to one account.</li></ul></div>
+      <div class="card"><h3>Policies</h3><ul><li>Version 2012-10-17; Statement: Effect, Action, Resource, optional Sid, Condition.</li><li>Principal in resource-based policies.</li><li>Default deny → explicit Deny wins → Allow. Permissions add up.</li><li>AWS managed / customer managed / inline. SCPs and boundaries only limit.</li></ul></div>
+      <div class="card"><h3>Access methods</h3><ul><li>Console (password + MFA), CLI, SDK: same APIs, same IAM check.</li><li>Access key = key ID + secret; never commit; max two per user; rotate.</li><li>Prefer temporary credentials; <code>aws sts get-caller-identity</code>.</li><li>CloudShell: browser CLI as your identity, per-Region storage (out of exam scope).</li></ul></div>
+      <div class="card"><h3>Roles</h3><ul><li>No long-term credentials; assumed for temporary credentials from STS.</li><li>Trust policy (who) + permissions policy (what).</li><li>EC2 instance role, Lambda execution role, CloudFormation, cross-account, federation.</li></ul></div>
+      <div class="card"><h3>Tools &amp; best practices</h3><ul><li>Credential report: account-wide CSV of credential status.</li><li>Access Advisor: services used and when, per user/group/role/policy.</li><li>MFA, password policy, roles, key hygiene, Secrets Manager.</li><li>AWS runs IAM; you configure it.</li></ul></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="topH">
+    <h2 id="topH">Topics in this section</h2>
+    <div class="topic-links">
+      <a href="iam-users-groups.html">IAM users &amp; groups<span>Who, what, least privilege</span></a>
+      <a href="iam-root-vs-user.html">Root account vs IAM user<span>Root-only tasks</span></a>
+      <a href="iam-policies.html">IAM policies<span>JSON and evaluation</span></a>
+      <a href="iam-access-methods.html">Console, CLI, SDK &amp; keys<span>Three doors, one gate</span></a>
+      <a href="iam-cloudshell.html">AWS CloudShell<span>Browser terminal</span></a>
+      <a href="iam-roles.html">IAM roles<span>Temporary credentials for services</span></a>
+      <a href="iam-security-tools.html">IAM security tools<span>Credential report, Access Advisor</span></a>
+      <a href="iam-best-practices.html">Best practices<span>And shared responsibility</span></a>
+    </div>
+  </section>
+
+  <section aria-labelledby="pairH">
+    <h2 id="pairH">Commonly confused pairs</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Pair</th><th>The difference</th></tr></thead>
+        <tbody>
+          <tr><td>IAM user vs IAM role</td><td>Long-term credentials for one identity vs assumed, temporary credentials</td></tr>
+          <tr><td>Group vs role</td><td>A set of users vs an identity that users, services or accounts assume</td></tr>
+          <tr><td>Identity-based vs resource-based policy</td><td>Attached to a user/group/role, no Principal vs attached to a resource, names a Principal</td></tr>
+          <tr><td>AWS managed vs customer managed vs inline</td><td>Maintained by AWS vs yours and reusable vs embedded in one identity</td></tr>
+          <tr><td>Trust policy vs permissions policy</td><td>Who can assume the role vs what it can do</td></tr>
+          <tr><td>Credential report vs Access Advisor</td><td>Credential status for the account vs service usage for one entity</td></tr>
+          <tr><td>IAM vs IAM Identity Center</td><td>Identities in one account vs single sign-on for people across accounts</td></tr>
+          <tr><td>SCP vs IAM policy</td><td>A guardrail that grants nothing vs a policy that grants permissions</td></tr>
+          <tr><td>Root user vs admin IAM user</td><td>Unrestricted account owner vs day-to-day administrator</td></tr>
+          <tr><td>Access key vs password</td><td>Programmatic credential (CLI/SDK) vs console credential</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="drillH">
+    <h2 class="stage-title" id="drillH">Mixed drill: name it</h2>
+    <div class="stage-kind">Ten quick scenarios</div>
+    <div class="card" id="drill"></div>
+  </section>
+
+  <section aria-labelledby="exH">
+    <h2 id="exH">Exam-style questions</h2>
+    <p class="sub">Twenty original questions in the style of CLF-C02 and common practice sets. Pick an answer (two for "Select TWO") to see why.</p>
+    <div id="mcq"></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Section cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Who can do what in AWS</span><span class="arrow">→</span><span class="then">IAM</span></li>
+      <li><span class="if">Account owner, full access, use rarely</span><span class="arrow">→</span><span class="then">Root user</span></li>
+      <li><span class="if">Collection of IAM users</span><span class="arrow">→</span><span class="then">IAM group</span></li>
+      <li><span class="if">JSON document of permissions</span><span class="arrow">→</span><span class="then">IAM policy</span></li>
+      <li><span class="if">EC2 / Lambda needs AWS permissions</span><span class="arrow">→</span><span class="then">IAM role</span></li>
+      <li><span class="if">Access another account's resources</span><span class="arrow">→</span><span class="then">Cross-account role</span></li>
+      <li><span class="if">Single sign-on for the workforce across accounts</span><span class="arrow">→</span><span class="then">IAM Identity Center</span></li>
+      <li><span class="if">Extra factor after the password</span><span class="arrow">→</span><span class="then">MFA</span></li>
+      <li><span class="if">Enforce strong passwords</span><span class="arrow">→</span><span class="then">Password policy</span></li>
+      <li><span class="if">Run commands in a terminal / call AWS from code</span><span class="arrow">→</span><span class="then">AWS CLI / AWS SDK</span></li>
+      <li><span class="if">Users without MFA, old keys</span><span class="arrow">→</span><span class="then">Credential report</span></li>
+      <li><span class="if">Services a user last used</span><span class="arrow">→</span><span class="then">Access Advisor</span></li>
+      <li><span class="if">Store database passwords</span><span class="arrow">→</span><span class="then">Secrets Manager</span></li>
+      <li><span class="if">Explicit Deny vs Allow</span><span class="arrow">→</span><span class="then">Deny wins</span></li>
+      <li><span class="if">Who configures IAM and enables MFA</span><span class="arrow">→</span><span class="then">The customer</span></li>
+    </ul>
+  </section>
+
+  <footer>Questions are original, written to the official exam guide (Task 2.1, Task 2.3, Task 3.1) and the scenario patterns used by public practice sets: <a href="https://docs.aws.amazon.com/aws-certification/latest/examguides/cloud-practitioner-02.html">AWS CLF-C02 exam guide</a>, <a href="https://training.resources.awscloud.com/associate-certification-articles/updated-cloud-practitioner-exam-prep-course">AWS official practice question set</a>, <a href="https://www.sailor.sh/blog/aws-cloud-practitioner-practice-questions">Sailor.sh</a>, <a href="https://sailor.sh/blog/aws-cloud-practitioner-security-compliance/">Sailor.sh security &amp; compliance</a>. Section notes: "IAM Section Summary", "IAM: CLF-C02 Exam Summary".</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('recapSvg'), {
+    zones: [{ id: 'acct', x: 250, y: 20, w: 735, h: 385, kind: 'aws', label: 'AWS account · IAM is global' }],
+    nodes: {
+      me: { x: 80, y: 100, icon: 'user', kind: 'user', label: 'Developer', sub: 'console + MFA' },
+      cli: { x: 80, y: 300, icon: 'terminal', kind: 'user', label: 'CLI / SDK', sub: 'access key' },
+      grp: { x: 340, y: 100, icon: 'users', kind: 'plain', label: 'Developers group' },
+      pol: { x: 340, y: 300, icon: 'doc', kind: 'mgmt', label: 'Policy (JSON)' },
+      iam: { x: 560, y: 200, icon: 'shield', kind: 'sec', label: 'IAM', sub: 'deny? allow?' },
+      ec2: { x: 780, y: 100, icon: 'chip', kind: 'compute', label: 'EC2 + role' },
+      s3: { x: 900, y: 300, icon: 'bucket', kind: 'storage', label: 'S3' },
+      rep: { x: 680, y: 345, icon: 'eye', kind: 'plain', label: 'Audits' }
+    },
+    links: [{ a: 'me', b: 'grp' }, { a: 'grp', b: 'pol', kind: 'dash' }, { a: 'me', b: 'iam', via: [[200, 100], [200, 200]] }, { a: 'cli', b: 'iam', via: [[200, 300], [200, 200]] }, { a: 'iam', b: 'ec2', via: [[780, 200]] }, { a: 'ec2', b: 's3', via: [[900, 100]] }, { a: 'iam', b: 's3', via: [[560, 300]] }, { a: 'rep', b: 'iam', kind: 'dash', via: [[680, 250]] }]
+  });
+  $('recapPlay').addEventListener('click', async () => {
+    const run = K.newRun('r'); net.reset(); const say = h => $('recapCap').innerHTML = h;
+    try {
+      say('A developer signs in to the console with a password and <b>MFA</b>. He is an <b>IAM user</b> in the <b>Developers group</b>.'); await net.send(['me', 'grp'], { run });
+      say('The group\'s <b>JSON policy</b> is inherited by every member.'); await net.send(['pol', 'grp'], { run, tone: 'cyan' });
+      say('Every request passes <b>IAM</b>: explicit Deny? Allow? Otherwise deny.'); await net.send(['me', 'iam', 'ec2'], { run, label: 'RunInstances' }); net.badge('ec2', 'allowed', 'ok');
+      say('The instance uses an <b>IAM role</b>, getting temporary credentials, never stored keys.'); await net.send(['ec2', 's3'], { run, tone: 'green', label: 'role' });
+      say('A script with a long-term <b>access key</b> tries to delete. A Deny statement wins.'); await net.send(['cli', 'iam'], { run, tone: 'red', label: 's3:DeleteObject' }); net.badge('iam', 'explicit deny', 'bad');
+      say('The <b>credential report</b> and <b>Access Advisor</b> catch weak credentials and unused permissions. Configuring all of this is <b>your</b> side of shared responsibility.'); await net.send(['rep', 'iam'], { run, tone: 'cyan' });
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  });
+
+  K.pick($('drill'), [
+    { q: 'Created automatically with the account, unrestricted access.', a: 'Root user', why: 'Exactly one per account.' },
+    { q: 'A collection of IAM users sharing permissions.', a: 'Group', why: 'Groups contain users only.' },
+    { q: 'Assumed by an EC2 instance to get temporary credentials.', a: 'Role', why: 'Instance role.' },
+    { q: 'JSON with Effect, Action and Resource.', a: 'Policy', why: 'Identity- or resource-based.' },
+    { q: 'Something you have, on top of your password.', a: 'MFA', why: 'Passkey, security key or authenticator app.' },
+    { q: 'CSV listing every user\'s MFA and key status.', a: 'Credential report', why: 'Account-level audit.' },
+    { q: 'Shows when a user last used each service.', a: 'Access Advisor', why: 'Last accessed information.' },
+    { q: 'Programmatic credential: ID + secret.', a: 'Access key', why: 'For CLI and SDK.' },
+    { q: 'Grant only what is needed.', a: 'Least privilege', why: 'Core IAM principle.' },
+    { q: 'Single sign-on for people across many accounts.', a: 'IAM Identity Center', why: 'Workforce identity, temporary credentials.' }
+  ], ['Root user', 'Group', 'Role', 'Policy', 'MFA', 'Credential report', 'Access Advisor', 'Access key', 'Least privilege', 'IAM Identity Center']);
+
+  K.mcq($('mcq'), [
+    { q: 'Which identity should be used only for a few account-level tasks and protected with MFA?', o: ['An IAM user with AdministratorAccess', 'An IAM role', 'The AWS account root user', 'An IAM group'], a: [2], why: 'The root user has complete access; use it only for root-only tasks.' },
+    { q: 'An application on an EC2 instance needs to read objects from an S3 bucket. What is the MOST secure way to give it access?', o: ['Store an IAM user\'s access keys in the application config', 'Attach an IAM role to the instance', 'Make the bucket public', 'Use the root user\'s access keys'], a: [1], why: 'A role provides temporary credentials that rotate automatically; nothing long-term is stored.' },
+    { q: 'Which TWO tasks require the AWS account root user?', o: ['Create an IAM user', 'Close a standalone AWS account', 'Launch an EC2 instance', 'Restore permissions when the only IAM administrator has locked themselves out', 'Create an S3 bucket'], a: [1, 3], why: 'Closing the account and restoring a locked-out admin are root-only; the rest are everyday tasks.' },
+    { q: 'A company wants to give 20 developers the same permissions with the least administrative effort. What should it do?', o: ['Attach the policy to each user', 'Add the developers to an IAM group and attach the policy to the group', 'Create one shared IAM user', 'Give them the root user credentials'], a: [1], why: 'Groups let one policy apply to many users.' },
+    { q: 'Which statement about IAM groups is correct?', o: ['Groups can contain other groups', 'A user can belong to multiple groups', 'Groups have their own access keys', 'Groups can sign in to the console'], a: [1], why: 'Users can be in several groups; groups don\'t nest, have no credentials and can\'t sign in.' },
+    { q: 'A user has a policy allowing s3:* and another policy denying s3:DeleteObject. What happens when the user tries to delete an object?', o: ['The delete is allowed', 'The delete is denied', 'It is allowed only with MFA', 'It depends on the Region'], a: [1], why: 'An explicit Deny always overrides an Allow.' },
+    { q: 'Which IAM policy element specifies the API calls that are allowed or denied?', o: ['Principal', 'Effect', 'Action', 'Resource'], a: [2], why: 'Action lists service:Operation names.' },
+    { q: 'Which element must a resource-based policy, such as an S3 bucket policy, include to say who is granted access?', o: ['Sid', 'Principal', 'Version', 'Condition'], a: [1], why: 'Resource-based policies name the Principal.' },
+    { q: 'Which IAM feature lists all users in the account and the status of their passwords, MFA devices and access keys?', o: ['IAM Access Advisor', 'IAM credential report', 'AWS CloudTrail', 'Amazon Inspector'], a: [1], why: 'The credential report is an account-level CSV of credential status.' },
+    { q: 'A security engineer wants to see which services an IAM role has used recently so unused permissions can be removed. Which feature helps?', o: ['IAM credential report', 'IAM Access Advisor', 'AWS Artifact', 'IAM password policy'], a: [1], why: 'Access Advisor shows last accessed information for users, groups, roles and policies.' },
+    { q: 'A developer accidentally pushed IAM access keys to a public code repository. What should be done FIRST?', o: ['Nothing; keys are encrypted', 'Deactivate and delete the exposed keys', 'Make the repository private', 'Enable S3 versioning'], a: [1], why: 'Invalidate the leaked keys immediately, then issue new ones if needed and review activity.' },
+    { q: 'What is a benefit of temporary credentials over long-term access keys?', o: ['They never expire', 'They expire automatically, limiting exposure if leaked', 'They cost less', 'They bypass IAM policies'], a: [1], why: 'Temporary credentials stop working on their own.' },
+    { q: 'Which are valid MFA options for IAM users?', o: ['Passkey or FIDO security key', 'Virtual authenticator app', 'A security question', 'An email code', 'Knowing the account ID'], a: [0, 1], why: 'Passkeys/security keys, virtual authenticator apps and hardware TOTP tokens are supported.' },
+    { q: 'Which tool lets you manage AWS services by running commands in a terminal?', o: ['AWS SDK', 'AWS CLI', 'AWS Artifact', 'AWS Management Console'], a: [1], why: 'The AWS CLI is the command-line tool.' },
+    { q: 'A team wants its Python application to call AWS services. What should it use?', o: ['AWS CLI', 'AWS SDK', 'AWS Management Console', 'AWS CloudShell'], a: [1], why: 'SDKs are language libraries for application code.' },
+    { q: 'Under the shared responsibility model, which is the customer\'s responsibility for IAM?', o: ['Physical security of the data centres running IAM', 'Deciding which users get which permissions and enabling MFA', 'Patching the IAM service', 'Replacing failed hardware'], a: [1], why: 'AWS runs the service; customers configure identities, permissions and MFA.' },
+    { q: 'A company with many AWS accounts wants employees to sign in once and access the accounts they need. Which service?', o: ['IAM users in every account', 'AWS IAM Identity Center', 'The root user of each account', 'AWS CloudShell'], a: [1], why: 'IAM Identity Center provides workforce single sign-on across accounts.' },
+    { q: 'Which service stores and rotates database credentials so they are not hard-coded in applications?', o: ['AWS Secrets Manager', 'AWS Artifact', 'Amazon Macie', 'AWS Shield'], a: [0], why: 'Secrets Manager stores and rotates secrets.' },
+    { q: 'A service control policy (SCP) allows Amazon S3, but no IAM policy attached to a user allows any S3 action. What happens when the user calls S3?', o: ['Allowed, because the SCP allows it', 'Denied, because SCPs don\'t grant permissions', 'Allowed only for administrators', 'Allowed in one Region'], a: [1], why: 'SCPs set the maximum; an IAM (or resource) policy must still grant the action.' },
+    { q: 'Which statement describes an IAM role?', o: ['It has a password and long-term access keys', 'It is assumed to obtain temporary security credentials', 'It is a collection of IAM users', 'It can only be used by the root user'], a: [1], why: 'Roles have no long-term credentials; they are assumed for temporary credentials.' }
+  ]);
+})();
+</script>
+</body>
+</html>

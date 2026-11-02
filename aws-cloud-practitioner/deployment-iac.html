@@ -42,16 +42,16 @@
   </header>
 
   <section aria-labelledby="whatH">
-    <h2 id="whatH">In .NET / Azure terms</h2>
-    <p class="sub">These tools mirror what you use around Azure and .NET today.</p>
+    <h2 id="whatH">In terms you already know</h2>
+    <p class="sub">These tools do jobs you already do around .NET builds and servers.</p>
     <div class="card analogy">
-      <div class="row head"><span>AWS</span><span>Closest .NET / Azure idea</span><span>The difference</span></div>
-      <div class="row"><span class="aws">CloudFormation</span><span class="like">ARM / Bicep templates</span><span>Declarative template → a stack of resources.</span></div>
-      <div class="row"><span class="aws">CDK</span><span class="like">Pulumi / Bicep with real code</span><span>C#, TypeScript… that compiles to CloudFormation.</span></div>
-      <div class="row"><span class="aws">Elastic Beanstalk</span><span class="like">Azure App Service</span><span>PaaS: upload code, AWS runs the servers.</span></div>
-      <div class="row"><span class="aws">CodePipeline + CodeBuild + CodeDeploy</span><span class="like">Azure DevOps Pipelines</span><span>Orchestrate build, test and deploy.</span></div>
-      <div class="row"><span class="aws">CodeArtifact</span><span class="like">Azure Artifacts / a private NuGet feed</span><span>Package repository.</span></div>
-      <div class="row"><span class="aws">Systems Manager</span><span class="like">Azure Arc / Automation + Bastion</span><span>Patch, run commands, shell without SSH.</span></div>
+      <div class="row head"><span>AWS</span><span>Closest idea you already know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">CloudFormation</span><span class="like">A SQL deployment script, but for infrastructure: run it again and you get the same result</span><span>Declarative template → a stack of resources.</span></div>
+      <div class="row"><span class="aws">CDK</span><span class="like">Writing that script in C# instead of JSON/YAML</span><span>C#, TypeScript… that compiles to CloudFormation.</span></div>
+      <div class="row"><span class="aws">Elastic Beanstalk</span><span class="like">Publishing to IIS, with AWS running the servers</span><span>PaaS: upload code, AWS runs the servers.</span></div>
+      <div class="row"><span class="aws">CodePipeline + CodeBuild + CodeDeploy</span><span class="like">Your build server: build, test, deploy (Jenkins, TeamCity, GitHub Actions)</span><span>Orchestrate build, test and deploy.</span></div>
+      <div class="row"><span class="aws">CodeArtifact</span><span class="like">A private NuGet feed</span><span>Package repository.</span></div>
+      <div class="row"><span class="aws">Systems Manager</span><span class="like">Remote Desktop + WSUS + PowerShell across all servers</span><span>Patch, run commands, shell without SSH.</span></div>
     </div>
   </section>
 
@@ -228,11 +228,11 @@
       { title: 'CDK: write the infrastructure in C#',
         text: 'Prefer real code to YAML? The <b>AWS CDK</b> lets you define infrastructure in C#, TypeScript, Python or Java with loops and classes. <span class="mono">cdk synth</span> turns it into a CloudFormation template, and CloudFormation still does the deploying.' },
       { title: 'Elastic Beanstalk: just upload your code',
-        text: '<b>Elastic Beanstalk</b> is <b>PaaS</b> (like Azure App Service). Upload your app; it creates and manages the load balancer, Auto Scaling group, instances and health monitoring. Beanstalk itself is free; you pay for what it creates.',
+        text: '<b>Elastic Beanstalk</b> is <b>PaaS</b> (like publishing to IIS, with AWS running the servers). Upload your app; it creates and manages the load balancer, Auto Scaling group, instances and health monitoring. Beanstalk itself is free; you pay for what it creates.',
         tip: '"Developer just wants to deploy code, least effort" → Elastic Beanstalk.',
         play: async run => { show(4); await build(run); } },
       { title: 'CI/CD: from commit to production',
-        text: '<b>CodePipeline</b> orchestrates the stages (like Azure DevOps Pipelines): code in <b>CodeCommit</b> (or GitHub) → <b>CodeBuild</b> compiles and runs tests → <b>CodeDeploy</b> updates EC2 and even on-prem servers. <b>CodeArtifact</b> hosts NuGet/npm packages.',
+        text: '<b>CodePipeline</b> orchestrates the stages (like your build server): code in <b>CodeCommit</b> (or GitHub) → <b>CodeBuild</b> compiles and runs tests → <b>CodeDeploy</b> updates EC2 and even on-prem servers. <b>CodeArtifact</b> hosts NuGet/npm packages.',
         play: async run => { show(5); const p = K.pill(P, 'commit', 'alt'); for (let j = 0; j < 3; j++) await K.move(p, [98 + j * 168, 335], [98 + (j + 1) * 168, 335], 450, run); p.remove(); } },
       { title: 'Systems Manager: run the whole fleet',
         text: '<b>Systems Manager</b> manages EC2 and on-prem servers through an agent: run a command or patch everything at once, open a shell with <b>Session Manager</b> (no SSH keys, no port 22), and store config and secrets in <b>Parameter Store</b>.',

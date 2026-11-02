@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EC2 Image Builder</title>
+<meta name="description" content="AWS Cloud Practitioner: EC2 Image Builder automates building, testing and distributing AMIs on a schedule; the service is free, you pay for the instances and storage it uses.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .pl { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px; margin-bottom: 8px; }
+  .pl label.f { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+  .pl select { font: inherit; color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; }
+  .bill { margin: 10px 0 0; padding: 0; list-style: none; font: 13px var(--mono); }
+  .bill li { display: flex; justify-content: space-between; border-bottom: 1px dashed var(--line); padding: 5px 0; color: var(--fg-soft); }
+  .bill li.tot { color: var(--fg); font-weight: 600; border-bottom: 0; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · EC2 instance storage · 4</div>
+    <h1>EC2 Image Builder</h1>
+    <ul class="lede">
+      <li><b>EC2 Image Builder</b> automates making AMIs: <b>build → test → distribute</b>, on a <b>schedule</b> or when packages update.</li>
+      <li>It launches a temporary <b>builder instance</b>, installs your <b>components</b>, and creates the AMI.</li>
+      <li>It can launch a <b>test instance</b> from the new AMI and run your tests, then copy the AMI to <b>several Regions</b>.</li>
+      <li>The service is <b>free</b>; you pay for the EC2 instances it runs and the AMI storage.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>Image Builder idea</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Pipeline</span><span class="like">A nightly build job that produces your server image</span><span>Its output is a tested AMI, not a .zip; AWS runs the build machines for you.</span></div>
+      <div class="row"><span class="aws">Components</span><span class="like">Build steps / PowerShell DSC scripts</span><span>Reusable install steps (AWS gives ready ones, e.g. "update Linux", "install CloudWatch agent").</span></div>
+      <div class="row"><span class="aws">Distribution</span><span class="like">Deploying a release to every data centre</span><span>The AMI is copied to each Region you list.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: a weekly golden-image pipeline</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="A schedule triggers a builder instance that installs components and becomes an AMI; a test instance validates it; the AMI is distributed to three Regions"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>EC2 Image Builder <b>automates the creation, maintenance, validation and testing</b> of AMIs (and container images).</li>
+      <li><b>Build</b>: a <b>builder EC2 instance</b> is launched and your <b>components</b> run on it (install Java, update the CLI, patch the OS, install a firewall…). Then an <b>AMI</b> is created from it.</li>
+      <li><b>Test</b> (optional): a <b>test EC2 instance</b> is launched from the new AMI and your tests run (does it boot, is the app up, is it secure).</li>
+      <li><b>Distribute</b>: the AMI is copied to <b>multiple Regions</b>, so apps everywhere use the same image.</li>
+      <li>Runs on a <b>schedule</b> (e.g. weekly), <b>when package updates</b> are available, or <b>manually</b>.</li>
+      <li>Pricing: the <b>service is free</b>; you pay for the <b>builder/test instances</b> while they run and <b>AMI storage</b> in each Region.</li>
+      <li>Exam trigger: "automate the creation / patching of AMIs" → <b>EC2 Image Builder</b>.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+
+  <section aria-labelledby="plH">
+    <h2 class="stage-title" id="plH">Run the pipeline</h2>
+    <div class="stage-kind">Choose how testing goes and where to distribute, then Run</div>
+    <div class="card">
+      <div class="pl">
+        <label class="f">Test stage<select id="pTest"><option value="pass">Tests pass</option><option value="fail">A test fails (app doesn't start)</option><option value="skip">Skip tests</option></select></label>
+        <label class="f">Distribute to<select id="pReg"><option value="1">1 Region</option><option value="3" selected>3 Regions</option><option value="5">5 Regions</option></select></label>
+      </div>
+      <div class="controls"><button class="btn primary" id="pGo" type="button">Run pipeline</button></div>
+      <div class="scroll"><svg class="diagram nf-canvas" id="pSvg" viewBox="0 0 1000 200" aria-label="Trigger, builder instance, AMI, test instance, Regions"></svg></div>
+      <p class="nf-cap" id="pCap">Press <b>Run pipeline</b>.</p>
+      <ul class="bill" id="bill"></ul>
+    </div>
+  </section>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">Which tool?</h2>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Create a pipeline (outline; the course shows it, no lab required)</summary>
+      <ol>
+        <li>EC2 Image Builder → <b>Create image pipeline</b>, name it, set the <b>build schedule</b> (manual, cron, or when dependency updates are available).</li>
+        <li><b>Recipe</b>: output type AMI, base image (e.g. Amazon Linux 2023), add <b>build components</b> (e.g. <code>aws-cli-version-2-linux</code>, <code>amazon-corretto-11</code>) and optional <b>test components</b>.</li>
+        <li><b>Infrastructure configuration</b>: instance type for the builder and an <b>IAM role</b> with <code>EC2InstanceProfileForImageBuilder</code> and <code>AmazonSSMManagedInstanceCore</code>.</li>
+        <li><b>Distribution settings</b>: the Regions (and accounts) to copy the AMI to.</li>
+        <li>Run it. Watch the builder and test instances appear in EC2, then the AMI appear under AMIs. Clean up the AMI and pipeline afterwards.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Automate building / patching AMIs</span><span class="arrow">→</span><span class="then">EC2 Image Builder</span></li>
+      <li><span class="if">Test a new AMI before use</span><span class="arrow">→</span><span class="then">Image Builder test stage</span></li>
+      <li><span class="if">Same golden AMI in many Regions</span><span class="arrow">→</span><span class="then">Image Builder distribution</span></li>
+      <li><span class="if">What does Image Builder cost?</span><span class="arrow">→</span><span class="then">Free; pay for EC2 + storage used</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Stage</th><th>What runs</th><th>You pay for</th></tr></thead>
+        <tbody>
+          <tr><td>Build</td><td>Builder EC2 instance + components → AMI</td><td>Builder instance time</td></tr>
+          <tr><td>Test (optional)</td><td>Test EC2 instance from the AMI + tests</td><td>Test instance time</td></tr>
+          <tr><td>Distribute</td><td>AMI copied to chosen Regions</td><td>AMI (snapshot) storage in each Region</td></tr>
+          <tr><td>Orchestration</td><td>The Image Builder service</td><td>Nothing</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p>The builder needs an <b>IAM role</b> (instance profile) so it can be managed by Systems Manager and write logs. This is the same "role for EC2" idea from the EC2 section.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <div class="quiz">
+      <details><summary>What are the three stages of an Image Builder pipeline?<span class="go">Show answer</span></summary><div class="ans"><p><b>Build → Test → Distribute.</b></p></div></details>
+      <details><summary>Is the test stage mandatory?<span class="go">Show answer</span></summary><div class="ans"><p><b>No</b>, it's optional (but recommended).</p></div></details>
+      <details><summary>How much does EC2 Image Builder cost?<span class="go">Show answer</span></summary><div class="ans"><p>The service is <b>free</b>. You pay for the builder and test instances and for storing the AMIs.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: EC2 storage note "EC2 Image Builder"; AWS EC2 Image Builder documentation and pricing page. The pipeline bill uses illustrative prices.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'r1', x: 20, y: 20, w: 660, h: 385, kind: 'region', label: 'us-east-1' }, { id: 'e', x: 720, y: 20, w: 260, h: 120, kind: 'region', label: 'eu-west-1' }, { id: 'p', x: 720, y: 152, w: 260, h: 120, kind: 'region', label: 'ap-south-1' }, { id: 'u', x: 720, y: 284, w: 260, h: 121, kind: 'region', label: 'us-west-2' }],
+    nodes: {
+      trig: { x: 100, y: 130, icon: 'clock', kind: 'mgmt', label: 'Schedule', sub: 'weekly' },
+      build: { x: 290, y: 130, icon: 'chip', kind: 'compute', label: 'Builder instance', sub: 'runs components' },
+      ami: { x: 480, y: 130, icon: 'layers', kind: 'compute', label: 'New AMI', sub: 'golden-v42' },
+      test: { x: 480, y: 310, icon: 'chip', kind: 'compute', label: 'Test instance', sub: 'from the AMI' },
+      e: { x: 870, y: 85, icon: 'layers', kind: 'compute', label: 'AMI' },
+      p: { x: 870, y: 217, icon: 'layers', kind: 'compute', label: 'AMI' },
+      u: { x: 870, y: 349, icon: 'layers', kind: 'compute', label: 'AMI' }
+    },
+    links: [
+      { a: 'trig', b: 'build', label: 'start', at: [195, 120] },
+      { a: 'build', b: 'ami', label: 'create AMI', at: [385, 120] },
+      { a: 'ami', b: 'test', kind: 'dash', label: 'launch', at: [512, 225] },
+      { a: 'ami', b: 'e', via: [[640, 130], [640, 85]] },
+      { a: 'ami', b: 'p', via: [[640, 130], [640, 217]] },
+      { a: 'ami', b: 'u', via: [[640, 130], [640, 349]] }
+    ]
+  });
+  function base(i) {
+    net.reset();
+    const F = [null, ['trig', 'build'], ['trig', 'build'], ['build', 'ami'], ['ami', 'test'], ['ami', 'e', 'p', 'u'], null];
+    net.focus(F[i]);
+    if (i === 1) net.badge('trig', 'every Sunday', 'info');
+    if (i === 2) net.badge('build', 'install Java', 'info');
+    if (i === 3) { net.state('build', 'dim'); net.badge('ami', 'available', 'ok'); }
+    if (i === 4) net.badge('test', 'tests pass', 'ok');
+    if (i === 5) ['e', 'p', 'u'].forEach(r => net.badge(r, 'ready', 'ok'));
+    if (i === 6) { net.badge('trig', 'free', 'ok'); net.badge('build', '$ EC2', 'info'); net.badge('test', '$ EC2', 'info'); ['e', 'p', 'u'].forEach(r => net.badge(r, '$ storage', 'info')); }
+  }
+  const STEPS = [
+    { title: 'Why automate AMIs?',
+      text: 'A custom AMI goes stale: every week there are OS patches and new versions. Rebuilding it by hand (launch, install, create image, copy to Regions) is slow and error-prone. <b>EC2 Image Builder</b> runs that whole routine as a <b>pipeline</b>.' },
+    { title: 'Trigger',
+      text: 'The pipeline starts on a <b>schedule</b> (e.g. weekly), automatically <b>when updated packages</b> are available, or <b>manually</b>.',
+      play: async run => { base(1); await net.send(['trig', 'build'], { run, tone: 'cyan', label: 'start' }); } },
+    { title: 'Build: a temporary builder instance',
+      text: 'Image Builder launches a <b>builder EC2 instance</b> from your base image and applies the <b>components</b> you chose: install Java, update the AWS CLI, apply security patches, install your app or a firewall.',
+      play: async run => { base(2); for (const c of ['patch OS', 'install Java', 'update CLI']) { net.badge('build', c, 'info'); await K.sleep(700, run); } } },
+    { title: 'Create the AMI',
+      text: 'When the components finish, an <b>AMI is created</b> from the builder instance, and the builder is terminated. Same as "Create image", but automatic.',
+      play: async run => { base(3); await net.send(['build', 'ami'], { run, label: 'create AMI' }); } },
+    { title: 'Test it (optional)',
+      text: 'A <b>test instance</b> is launched <b>from the new AMI</b> and your tests run: does it boot, does the app start, are ports closed. A failure stops the pipeline, so a broken image is never shipped.',
+      play: async run => { base(4); await net.send(['ami', 'test'], { run, tone: 'cyan', label: 'launch' }); net.badge('test', 'tests pass', 'ok'); } },
+    { title: 'Distribute to Regions',
+      text: 'The tested AMI is <b>copied to every Region</b> in the distribution settings, so Auto Scaling groups around the world launch the same golden image.',
+      play: async run => { base(5); await Promise.all(['e', 'p', 'u'].map(r => net.send(['ami', r], { run, tone: 'green' }))); } },
+    { title: 'Who pays for what',
+      text: 'Image Builder itself is <b>free</b>. You pay for the <b>builder and test instances</b> while they run, and for the <b>AMI storage</b> in every Region it is distributed to.' }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ---------- Pipeline runner ---------- */
+  const p = K.net($('pSvg'), {
+    nodes: { trig: { x: 80, y: 90, icon: 'clock', kind: 'mgmt', label: 'Trigger' }, build: { x: 290, y: 90, icon: 'chip', kind: 'compute', label: 'Builder' }, ami: { x: 500, y: 90, icon: 'layers', kind: 'compute', label: 'AMI' }, test: { x: 710, y: 90, icon: 'chip', kind: 'compute', label: 'Test' }, dist: { x: 920, y: 90, icon: 'globe', kind: 'net', label: 'Regions' } },
+    links: [{ a: 'trig', b: 'build' }, { a: 'build', b: 'ami' }, { a: 'ami', b: 'test' }, { a: 'test', b: 'dist' }]
+  });
+  const RATE = 0.05, STORE = 0.4; // illustrative $: per builder/test run, per Region-month of AMI storage
+  $('pGo').addEventListener('click', async () => {
+    const run = K.newRun('pl'); p.reset(); $('bill').innerHTML = '';
+    const t = $('pTest').value, n = +$('pReg').value, say = h => $('pCap').innerHTML = h;
+    const bill = [['Image Builder service', 0], ['Builder instance (~30 min)', RATE]];
+    try {
+      say('Building…'); await p.send(['trig', 'build', 'ami'], { run }); p.badge('ami', 'created', 'ok');
+      if (t === 'skip') { p.link('ami', 'test', 'dim'); p.state('test', 'dim'); }
+      else {
+        await p.send(['ami', 'test'], { run, tone: 'cyan' }); bill.push(['Test instance (~15 min)', RATE / 2]);
+        if (t === 'fail') { p.badge('test', 'test failed', 'bad'); p.link('test', 'dist', 'cut'); bill.push(['AMI storage (kept for debugging, 1 Region)', STORE]); say('<span class="bad-text">Pipeline stopped.</span> The app didn\'t start on the test instance, so the AMI is <b>not distributed</b>. Fix the component and run again.'); return show(bill); }
+        p.badge('test', 'passed', 'ok');
+      }
+      await p.send(t === 'skip' ? ['ami', 'test', 'dist'] : ['test', 'dist'], { run, tone: 'green' }); p.badge('dist', n + ' Regions', 'ok');
+      bill.push([`AMI storage × ${n} Region${n > 1 ? 's' : ''} (per month)`, STORE * n]);
+      say(t === 'skip' ? '<span class="ok-text">Distributed</span>, but <b>untested</b>: faster and cheaper, riskier.' : `<span class="ok-text">Tested AMI distributed</span> to ${n} Region${n > 1 ? 's' : ''}.`);
+      show(bill);
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  });
+  function show(bill) {
+    const tot = bill.reduce((s, b) => s + b[1], 0);
+    $('bill').innerHTML = bill.map(b => `<li><span>${b[0]}</span><span>${b[1] ? '$' + b[1].toFixed(2) : 'free'}</span></li>`).join('') + `<li class="tot"><span>Total (illustrative)</span><span>$${tot.toFixed(2)}</span></li>`;
+  }
+
+  K.pick($('pick'), [
+    { q: 'Rebuild the company AMI every week with the latest patches, test it, copy it to 3 Regions.', a: 'EC2 Image Builder', why: 'Scheduled build → test → distribute pipeline.' },
+    { q: 'Once, turn the server you just configured into an image.', a: 'Create image', why: 'A one-off manual AMI is just Actions → Create image.' },
+    { q: 'Write a different config file on each instance when it boots.', a: 'User data', why: 'Per-instance tweaks at first boot belong in user data.' },
+    { q: 'Validate that a new AMI boots and the app starts before anyone uses it.', a: 'EC2 Image Builder', why: 'Its test stage launches a test instance from the AMI.' }
+  ], ['EC2 Image Builder', 'Create image', 'User data']);
+})();
+</script>
+</body>
+</html>

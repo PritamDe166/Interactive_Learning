@@ -43,8 +43,8 @@ const SUBJECTS = [
    blurb:"Two tracks. HLD: 119-day roadmap of networking, scaling, caching, databases, distributed systems and reliability. LLD: SOLID and object-oriented design, more as you learn.",
    done:13, total:119, unit:"HLD days", pages:17},
   {name:"AWS", path:"aws-cloud-practitioner/index.html", accent:"var(--orange)", icon:"cloud",
-   blurb:"Cloud Practitioner (CLF-C02): core services, pricing models, shared responsibility, Well-Architected.",
-   done:12, total:19, unit:"sections", pages:12},
+   blurb:"Cloud Practitioner (CLF-C02), one page per topic: follow each request as it travels through Regions, AZs, edge locations and services. Being rebuilt section by section.",
+   done:30, total:85, unit:"topics rebuilt", pages:43},
   {name:"Python", path:"python-fundamentals/index.html", accent:"var(--blue)", icon:"code",
    blurb:"Fundamentals stepped line by line, with edit-and-run boxes: objects, collections, functions, files, classes, then generators, decorators, type hints and APIs.",
    done:20, total:20, unit:"topics", pages:20},
@@ -56,12 +56,12 @@ const SUBJECTS = [
    done:0, total:null, unit:"topics"}
 ];
 const RECENT = [
-  {subject:"Angular", title:"HTTP, resource & RxJS basics", note:"Step 15", href:"angular/http.html"},
-  {subject:"Angular", title:"Reactive forms & Signal Forms", note:"Step 14", href:"angular/reactive-forms.html"},
-  {subject:"Angular", title:"Template-driven forms", note:"Step 13", href:"angular/template-forms.html"},
-  {subject:"Angular", title:"Route guards & login flow", note:"Step 12", href:"angular/guards-login.html"},
-  {subject:"Angular", title:"Routing", note:"Step 11", href:"angular/routing.html"},
-  {subject:"Angular", title:"How an Angular app boots", note:"Start here", href:"angular/app-boot.html"}
+  {subject:"AWS", title:"EC2 storage review: summary & 20 exam-style questions", note:"Storage review", href:"aws-cloud-practitioner/storage-review.html"},
+  {subject:"AWS", title:"Choosing EC2 storage: decision walker", note:"Storage 8", href:"aws-cloud-practitioner/ec2-storage-choices.html"},
+  {subject:"AWS", title:"EFS & EFS-IA: shared Linux files", note:"Storage 6", href:"aws-cloud-practitioner/efs.html"},
+  {subject:"AWS", title:"EBS snapshots: backup, archive, recycle bin", note:"Storage 2", href:"aws-cloud-practitioner/ebs-snapshots.html"},
+  {subject:"AWS", title:"EBS volumes: the network disk", note:"Storage 1", href:"aws-cloud-practitioner/ebs.html"},
+  {subject:"AWS", title:"EC2 review: summary & 20 exam-style questions", note:"EC2 review", href:"aws-cloud-practitioner/ec2-review.html"}
 ];
 
 /* ===== Render ===== */

@@ -46,16 +46,17 @@
   </div>
 
   <header>
-    <div class="eyebrow">AWS CLF-C02 · Section 2 · Domain 2 Security &amp; Compliance (Task 2.1)</div>
-    <h1>Shared Responsibility Model</h1>
+    <div class="eyebrow">AWS CLF-C02 · Cloud &amp; AWS overview · Domain 2 Security &amp; Compliance (Task 2.1)</div>
+    <h1>Shared responsibility model</h1>
     <ul class="lede"><li><b>AWS: security <i>of</i> the cloud</b>. Data centres, hardware, network, and the software running its services.</li><li><b>You: security <i>in</i> the cloud</b>. Your data, who can access it, and how you configure each service.</li><li>The line <b>moves with the service</b>: the more AWS manages, the less you do.</li></ul>
   </header>
+  <div class="aws-trail"></div>
 
   <section aria-labelledby="whatH">
     <h2 id="whatH">In everyday terms</h2>
     <p class="sub">Think of renting a flat in a managed building.</p>
     <div class="card analogy">
-      <div class="row head"><span>AWS</span><span>Closest .NET / Azure idea</span><span>The difference</span></div>
+      <div class="row head"><span>AWS</span><span>Closest idea you already know</span><span>The difference</span></div>
       <div class="row"><span class="aws">AWS: security OF the cloud</span><span class="like">The building owner</span><span>Walls, locks on the main door, lifts, power, guards.</span></div>
       <div class="row"><span class="aws">You: security IN the cloud</span><span class="like">The tenant</span><span>Who gets a key to your flat and what you leave unlocked.</span></div>
       <div class="row"><span class="aws">EC2 (IaaS)</span><span class="like">Unfurnished flat</span><span>You maintain almost everything inside.</span></div>
@@ -65,11 +66,23 @@
   </section>
 
   <section aria-labelledby="srStoryH">
-    <h2 class="stage-title" id="srStoryH">Walkthrough: where AWS stops and you start</h2>
+    <h2 class="stage-title" id="srStoryH">Walkthrough: follow a request through both sides</h2>
     <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
-    <div class="story" id="srStory">
-      <div class="scroll"><svg class="diagram" id="srStorySvg" style="min-width:0" viewBox="0 0 700 440" aria-label="Eight security layers from data centre to your data, with a line showing where AWS&#x27;s responsibility ends"></svg></div>
+    <div class="story wide" id="srStory">
+      <div class="scroll"><svg class="diagram nf-canvas" id="srStorySvg" viewBox="0 0 1100 330" aria-label="A request passes eight layers from the AWS network to patient data; a red line shows where AWS's responsibility ends and yours begins"></svg></div>
     </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li><b>AWS: security OF the cloud</b>: data centres, hardware, global network, the hypervisor and the software that runs its managed services.</li>
+      <li><b>You: security IN the cloud</b>: your data, IAM (users, permissions, MFA), security group and network configuration, guest OS patching on EC2, encryption choices.</li>
+      <li>The line <b>moves with the service</b>: on <b>EC2</b> you patch the OS; on <b>RDS</b> AWS patches the OS and database engine; on <b>Lambda</b> there is no OS or runtime for you to patch.</li>
+      <li><b>Data and access are always yours</b>, whatever the service. A public bucket or a weak password is the customer's fault.</li>
+      <li><b>Shared controls</b>: patch management, configuration management, awareness and training. <b>Inherited</b> controls: physical and environmental (you rely on AWS's audits via AWS Artifact).</li>
+      <li>Exam wording (Task 2.1): responsibilities shift depending on the service used.</li>
+    </ol></div>
   </section>
 
   <h2 class="part-title">Try it yourself</h2>
@@ -156,65 +169,82 @@
   <footer>Duty assignments simplify AWS's published model for exam use; exact details vary by feature. Sources: "Shared Responsibility Model diagram", "Shared Responsibility Model for IAM", "Shared Responsibility model for EC2", "Shared responsibility model – EC2 Storage", "Shared Responsibility Model – S3", and the IAM and Databases CLF-C02 exam summaries.</footer>
 </div>
 
+<script src="topics.js"></script>
 <script>
 (function () {
   const K = Kit, $ = K.$;
 
   /* ========== 0. Guided walkthrough ========== */
   (function () {
+    const LAY = [['net', 'AWS network', 'globe'], ['dc', 'Data centre', 'building'], ['hw', 'Hardware', 'server'], ['hyp', 'Hypervisor', 'box'], ['sg', 'Security group', 'shield'], ['os', 'Guest OS', 'cpu'], ['app', 'Your app', 'code'], ['data', 'Patient data', 'db']];
+    const nodes = { user: { x: 55, y: 150, icon: 'user', kind: 'user', label: 'Request' } };
+    LAY.forEach(([id, l, ic], i) => nodes[id] = { x: 170 + i * 120, y: 150, icon: ic, label: l, sub: '' });
+    const links = [{ a: 'user', b: 'net' }];
+    LAY.slice(1).forEach(([id], i) => links.push({ a: LAY[i][0], b: id }));
+    const net = K.net($('srStorySvg'), { nodes, links });
     const sv = $('srStorySvg');
-    const LAY = ['Your data & who can access it (IAM)', 'Application / function code', 'Network & firewall config (security groups)', 'Database engine / runtime patching', 'Guest operating system patching', 'Virtualisation (hypervisor)', 'Servers, storage & network hardware', 'Data centres: buildings, power, guards'];
-    const L = LAY.map((n, j) => {
-      const g = K.el('g', { class: 'lay aws' }, sv);
-      K.el('rect', { x: 120, y: 14 + j * 52, width: 460, height: 44, rx: 9 }, g);
-      const t = K.text(g, 140, 41 + j * 52, n, 'mlabel'); t.style.textAnchor = 'start';
-      const w = K.text(g, 565, 41 + j * 52, '', 'mlabel'); w.style.textAnchor = 'end';
-      return { g, w };
-    });
-    const youL = K.text(sv, 60, 30, 'YOU', 'side you'); const awsL = K.text(sv, 60, 420, 'AWS', 'side aws');
-    const line = K.el('line', { x1: 110, x2: 590, y1: 0, y2: 0, class: 'divider' }, sv);
-    const tag = K.text(sv, 640, 0, '', 'mlabel accent');
-    tag.style.textAnchor = 'middle';
-    // how many top layers are yours per scenario
-    const SC = [
-      { you: 0, label: '' },
-      { you: 0, label: 'AWS: OF the cloud' },
-      { you: 3, label: 'You: IN the cloud' },
-      { you: 5, label: 'EC2' },
-      { you: 3, label: 'RDS' },
-      { you: 2, label: 'Lambda' },
-      { you: 1, label: 'S3' },
-      { you: 3, label: 'shared' }
-    ];
-    function setLine(n) { const y = 14 + n * 52 - 4; line.setAttribute('y1', y); line.setAttribute('y2', y); tag.setAttribute('y', y + 4); }
+    const split = K.el('line', { y1: 70, y2: 235, class: 'divider' }, sv);
+    const tA = K.text(sv, 0, 62, '← security OF the cloud (AWS)', 'side aws'); tA.style.textAnchor = 'end'; tA.style.fontSize = '12.5px';
+    const tY = K.text(sv, 0, 62, 'security IN the cloud (you) →', 'side you'); tY.style.textAnchor = 'start'; tY.style.fontSize = '12.5px';
+    const svc = K.text(sv, 550, 300, '', 'mlabel'); svc.style.fontSize = '15px';
+    const ROUTE = ['user', ...LAY.map(l => l[0])];
+    // who owns each layer: a = AWS, y = you, b = both (shared control)
+    const OWN = { ec2: 'aaaayyyy', rds: 'aaaayayy', lambda: 'aaaayayy', shared: 'aaaabbyy' };
+    function paint(model) {
+      const o = OWN[model];
+      LAY.forEach(([id], i) => {
+        const c = o[i];
+        net.nodes[id].g.setAttribute('class', 'nf-node ' + (c === 'b' ? 'k-storage' : c === 'y' ? 'k-compute' : 'k-net'));
+        net.nodes[id].sub(c === 'b' ? 'BOTH' : c === 'y' ? 'YOU' : 'AWS');
+      });
+      const line = model === 'ec2';
+      const x = 170 + 3.5 * 120;
+      split.setAttribute('x1', x); split.setAttribute('x2', x); tA.setAttribute('x', x - 8); tY.setAttribute('x', x + 8);
+      split.style.opacity = line ? 1 : 0; tA.style.opacity = tY.style.opacity = line ? 1 : 0;
+    }
+    const MODEL = ['ec2', 'ec2', 'ec2', 'ec2', 'ec2', 'rds', 'lambda', 'shared'];
+    const LABEL = ['', 'Amazon EC2', 'Amazon EC2', 'Amazon EC2', 'Amazon EC2', 'Amazon RDS: AWS patches the OS and database engine; network rules, users and data stay yours', 'AWS Lambda: no OS or runtime to patch; your code, permissions and data stay yours', 'Shared controls: patching and configuration have an AWS half and a customer half'];
     function show(i) {
-      const s = SC[i];
-      L.forEach((l, j) => { const you = j < s.you; l.g.setAttribute('class', 'lay ' + (you ? 'you' : 'aws') + (i === 7 && (j === 2 || j === 4 || j === 0) ? ' shared' : '')); l.w.textContent = i === 0 ? '' : you ? 'you' : 'AWS'; });
-      if (i === 7) { L[4].w.textContent = 'both (patching)'; L[2].w.textContent = 'both (config)'; L[0].w.textContent = 'both (training)'; }
-      line.style.opacity = i === 0 || i === 1 || i === 7 ? 0 : 1;
-      setLine(s.you); tag.textContent = s.label && i > 2 && i < 7 ? s.label : '';
+      net.reset(); paint(MODEL[i]);
+      svc.textContent = LABEL[i];
+      if (i === 0) LAY.forEach(([id]) => { net.nodes[id].g.setAttribute('class', 'nf-node k-plain'); net.nodes[id].sub(''); });
+      if (i === 0) { split.style.opacity = 0; tA.style.opacity = tY.style.opacity = 0; }
+      if (i === 1) net.focus(['user', 'net', 'dc', 'hw', 'hyp']);
+      if (i === 2) net.focus(['sg', 'os', 'app', 'data']);
+      if (i === 3) { net.badge('sg', 'port 22 closed', 'ok'); }
+      if (i === 4) { net.state('data', 'down'); net.badge('sg', '0.0.0.0/0 open', 'bad'); net.badge('os', 'unpatched', 'bad'); net.badge('data', 'leaked', 'bad'); }
+      net.nodes.os.label(i === 5 ? 'OS + DB engine' : i === 6 ? 'Runtime' : 'Guest OS');
+      net.nodes.sg.label(i === 6 ? 'IAM role' : 'Security group');
+      net.nodes.app.label(i === 5 ? 'DB users' : i === 6 ? 'Your code' : 'Your app');
+      if (i === 5) net.badge('os', 'AWS patches', 'info');
+      if (i === 6) net.badge('os', 'AWS runs it', 'info');
+      if (i === 7) { net.badge('os', 'patching', 'ok'); net.badge('sg', 'configuration', 'ok'); }
     }
     const STEPS = [
-      { title: 'Security has many layers',
-        text: 'From the building down the road to who can read a patient file, a cloud app has many layers of security. AWS and you split them. The <b>Shared Responsibility Model</b> says exactly where the split is.' },
+      { title: 'A request crosses many guarded layers',
+        text: 'Before a request reaches a patient record it passes the network, a data-centre building, physical hardware, the hypervisor, a firewall, an operating system and your app. Each layer needs securing. The <b>shared responsibility model</b> says who secures which one.',
+        play: async run => { show(0); await net.send(ROUTE, { run, label: 'GET /records' }); } },
       { title: 'AWS: security OF the cloud',
-        text: 'AWS always owns the bottom: <b>data centres</b> (guards, power, cooling), the <b>hardware</b> and global network, and the <b>virtualisation</b> layer that keeps customers apart. You can\'t touch these, and you never need to.',
-        tip: 'AWS proves it with audits; download the reports from AWS Artifact.' },
+        text: 'AWS owns everything up to the <b>hypervisor</b>: the global network, data-centre buildings (guards, power, cooling), the servers, disks and switches, and the virtualisation layer that keeps customers apart. You can\'t touch these and never need to.',
+        tip: 'AWS proves it with third-party audits; you download the reports from AWS Artifact.',
+        play: async run => { show(1); await net.send(['user', 'net', 'dc', 'hw', 'hyp'], { run, onHop: n => net.badge(n, 'AWS', 'info') }); } },
       { title: 'You: security IN the cloud',
-        text: 'You always own the top: <b>your data</b>, <b>who can access it</b> (IAM users, roles, MFA), how you <b>configure</b> each service (security groups, bucket policies) and whether you turn on <b>encryption</b>.',
-        tip: 'A public S3 bucket or a weak password is always the customer\'s fault.' },
-      { title: 'With EC2 (IaaS), you do a lot',
-        text: 'An EC2 instance is your server: you patch the <b>guest operating system</b>, install and update the runtime, run the app and set the firewall. AWS stops at the hypervisor.',
-        play: async run => { for (let n = 3; n <= 5; n++) { show(2); SC[3].you = n; show(3); await K.sleep(250, run); } } },
-      { title: 'With RDS (managed), AWS takes more',
-        text: 'Move the database to <b>RDS</b> and the line slides up: AWS patches the <b>OS and the database engine</b> and runs backups. You still own the data, users, network access and whether it\'s encrypted.' },
-      { title: 'With Lambda (serverless), even more',
-        text: 'With <b>Lambda</b> there is no OS or runtime to patch. You own your <b>code</b>, its <b>IAM role</b> and the data it touches.' },
-      { title: 'With S3, mostly your data and access',
-        text: 'With <b>S3</b> AWS runs everything underneath; your job is the <b>data</b>, <b>bucket policies</b>, Block Public Access, encryption and versioning choices.',
-        tip: 'The more managed the service, the higher the line, but data and access are always yours.' },
+        text: 'On EC2, everything from the <b>security group</b> up is yours: firewall rules, patching the <b>guest OS</b>, your <b>app</b>, and your <b>data</b>: who can access it (IAM) and whether it is encrypted.',
+        tip: 'Data, identities and access are ALWAYS the customer\'s, whatever the service.',
+        play: async run => { show(2); await net.send(['hyp', 'sg', 'os', 'app', 'data'], { run, onHop: n => net.badge(n, 'you', '') }); } },
+      { title: 'Your rule stops an attacker',
+        text: 'An attacker scans for SSH on port 22. Your <b>security group</b> only allows HTTPS from the internet, so the probe is dropped. That rule was your job, and you did it.',
+        play: async run => { show(2); net.focus(null); await net.send(['user', 'net', 'dc', 'hw', 'hyp', 'sg'], { run, tone: 'red', label: 'port 22?' }); net.badge('sg', 'port 22 closed', 'ok'); } },
+      { title: 'A breach that is your fault',
+        text: 'Now the security group allows everything from anywhere and the OS hasn\'t been patched for a year. The attacker walks in and reads patient data. AWS\'s layers all worked; the gaps were <b>in the cloud</b>, so this one is on the customer.',
+        play: async run => { show(3); net.badge('sg', '0.0.0.0/0 open', 'bad'); net.badge('os', 'unpatched', 'bad'); await net.send(ROUTE, { run, tone: 'red', label: 'exploit' }); net.state('data', 'down'); net.badge('data', 'leaked', 'bad'); } },
+      { title: 'RDS: AWS takes the OS and engine',
+        text: 'Move the database to <b>Amazon RDS</b> and AWS also patches the <b>operating system and database engine</b> and runs backups. You still own the <b>security group</b> rules, the <b>database users</b>, the data and whether it is encrypted. The split is no longer one straight line.',
+        tip: 'Classic exam contrast: EC2 = you patch the OS; RDS = AWS patches the OS and engine.' },
+      { title: 'Lambda: even further',
+        text: 'With <b>AWS Lambda</b> there is no server or runtime for you to patch. You own your <b>code</b>, its <b>IAM permissions</b> and the <b>data</b> it touches. The more managed the service, the further the line moves, but data and access stay yours.' },
       { title: 'Some controls are shared',
-        text: '<b>Patch management</b> (AWS patches the infrastructure, you patch your OS and apps), <b>configuration management</b> (AWS configures its devices, you configure your resources) and <b>awareness &amp; training</b> (each trains its own people) belong to both sides.' }
+        text: '<b>Patch management</b>: AWS patches its infrastructure, you patch your guest OS and apps. <b>Configuration management</b>: AWS configures its devices, you configure your resources. <b>Awareness and training</b>: each side trains its own people.' }
     ];
     K.story({ root: $('srStory'), steps: STEPS, show });
   })();

@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IAM users and groups</title>
+<meta name="description" content="AWS Cloud Practitioner: what IAM is, the root user, IAM users, IAM groups, policies attached to groups, and least privilege, shown as a request passing through IAM.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .mx { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .mx th, .mx td { padding: 7px 8px; border-bottom: 1px solid var(--line); text-align: center; }
+  .mx th:first-child, .mx td:first-child { text-align: left; }
+  .mx th { font-family: var(--mono); font-size: 12px; color: var(--muted); font-weight: 500; }
+  .mx input { width: 17px; height: 17px; accent-color: var(--orange); }
+  .eval-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin-top: 12px; }
+  .eval-row label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+  .eval-row select { font: inherit; color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; }
+  .perm-list { font-family: var(--mono); font-size: 13px; color: var(--fg-soft); }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · IAM · Domain 2 Security &amp; Compliance (Task 2.3)</div>
+    <h1>IAM users &amp; groups</h1>
+    <ul class="lede">
+      <li><b>IAM</b> (Identity and Access Management) decides <b>who</b> can get into your AWS account and <b>what</b> they can do. It is a <b>global</b> service.</li>
+      <li>The <b>root user</b> is created with the account and can do everything; don't use it for daily work.</li>
+      <li>An <b>IAM user</b> is one person or workload. A <b>group</b> is a set of users; groups can't contain groups.</li>
+      <li><b>Policies</b> (JSON permission documents) are attached to groups, and every member inherits them. Give only what's needed: <b>least privilege</b>.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you already know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>IAM</span><span>Closest idea you already know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">IAM user</span><span class="like">An Active Directory user account</span><span>Lives inside one AWS account, not a domain.</span></div>
+      <div class="row"><span class="aws">IAM group</span><span class="like">An AD security group</span><span>No nesting: a group can't contain another group.</span></div>
+      <div class="row"><span class="aws">IAM policy</span><span class="like">NTFS / share permissions, written as JSON</span><span>Grants API actions on AWS resources.</span></div>
+      <div class="row"><span class="aws">Root user</span><span class="like">The built-in domain Administrator</span><span>Even more powerful: owns billing and can close the account.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: how a request gets through IAM</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 640" aria-label="Users, groups and policies inside an AWS account; requests pass through IAM to EC2, S3 and billing"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li><b>IAM = authentication + authorization</b>: who you are, and what you're allowed to do.</li>
+      <li>IAM is <b>global</b>: users, groups, roles and policies are not created in a Region.</li>
+      <li>The <b>root user</b> is created automatically with the account and has full access. Use it only for root-only tasks; protect it with MFA.</li>
+      <li><b>One IAM user = one person</b> (or one workload). Never share users or credentials.</li>
+      <li><b>Groups contain users only</b>, never other groups. A user can be in <b>several groups</b>, or in none.</li>
+      <li>Permissions come from <b>policies</b>, JSON documents attached to users, groups or roles. A user gets the <b>union</b> of everything attached to them and their groups.</li>
+      <li><b>Default is deny</b>: with no policy allowing an action, the request fails.</li>
+      <li><b>Least privilege</b>: grant only what each job needs. "Give everyone AdministratorAccess" is the wrong answer.</li>
+      <li>Prefer attaching policies to <b>groups</b> over attaching them to individual users.</li>
+      <li>For real organisations AWS recommends <b>IAM Identity Center</b> (single sign-on) for people; IAM users are fine for learning.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change group membership, then send requests and see who gets in.</p>
+
+  <section aria-labelledby="mxH">
+    <h2 class="stage-title" id="mxH">Build the groups, test a request</h2>
+    <div class="stage-kind">Tick memberships · pick a user and an action · Send</div>
+    <div class="card">
+      <div class="scroll"><table class="mx" id="mx"></table></div>
+      <div class="eval-row">
+        <label>User<select id="eUser"></select></label>
+        <label>Action<select id="eAct"></select></label>
+        <button class="btn primary" id="eSend" type="button">Send request</button>
+      </div>
+    </div>
+    <div class="scroll" style="margin-top:12px"><svg class="diagram nf-canvas" id="evSvg" viewBox="0 0 1000 260" aria-label="A request from a user through IAM to an AWS service"></svg></div>
+    <p class="nf-cap" id="evCap"></p>
+    <div class="info-grid">
+      <div class="card"><div class="label">Group policies (illustrative)</div><div class="perm-list" id="gp"></div></div>
+      <div class="card"><div class="label">This user's effective permissions</div><div class="perm-list" id="up"></div></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="ruH">
+    <h2 class="stage-title" id="ruH">Group rules: true or false?</h2>
+    <div class="stage-kind">The exam loves these</div>
+    <div class="card" id="rules"></div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Create an admin user in a group (from the course hands-on)</summary>
+      <ol>
+        <li>Open <b>IAM</b> (search "IAM"). The Region selector shows <b>Global</b>: IAM isn't regional.</li>
+        <li>Check the top-right menu: only an account ID means you're signed in as <b>root</b>.</li>
+        <li><b>Users → Create user</b>, give a name, tick console access, and choose a password (for someone else: autogenerated + reset at first sign-in).</li>
+        <li>On permissions, <b>add the user to a group</b>: create group <code>admin</code> and attach <code>AdministratorAccess</code>. (Fine for your own learning account; too broad for real users.)</li>
+        <li>Optional <b>tags</b>, such as <code>Department = Engineering</code>, help with ownership and reporting.</li>
+        <li>Open the group and check the user is listed; open the user and see the policy shown as <b>inherited from the group</b>.</li>
+        <li>Set an <b>account alias</b> so the sign-in URL is <code>https://&lt;alias&gt;.signin.aws.amazon.com/console</code> (alias must be globally unique).</li>
+        <li>Sign in as the new user in a private window. The top-right now shows <b>user @ account</b>. Use this user, with MFA, for daily work.</li>
+      </ol>
+      <p class="res">Common mistakes: using root daily, giving everyone AdministratorAccess, attaching policies user by user, unclear group names like <code>test</code>.</p>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Who can do what in AWS</span><span class="arrow">→</span><span class="then">IAM</span></li>
+      <li><span class="if">Account owner, full access, use rarely</span><span class="arrow">→</span><span class="then">Root user</span></li>
+      <li><span class="if">Collection of users</span><span class="arrow">→</span><span class="then">IAM group</span></li>
+      <li><span class="if">JSON document of permissions</span><span class="arrow">→</span><span class="then">IAM policy</span></li>
+      <li><span class="if">Give only the permissions needed</span><span class="arrow">→</span><span class="then">Least privilege</span></li>
+      <li><span class="if">Can a group contain a group?</span><span class="arrow">→</span><span class="then">No</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Is IAM a regional or a global service?<span class="go">Show answer</span></summary><div class="ans"><p><b>Global.</b> Users, groups and policies apply to the whole account.</p></div></details>
+      <details><summary>Charles is in Developers and Audit. Which permissions does he get?<span class="go">Show answer</span></summary><div class="ans"><p><b>Both groups' permissions combined</b> (plus anything attached to him directly).</p></div></details>
+      <details><summary>Fred is in no group and has no policies. Can he list EC2 instances?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> The default is deny; nothing allows it.</p></div></details>
+      <details><summary>Can you put the "Developers" group inside an "Engineering" group?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> IAM groups contain users only.</p></div></details>
+      <details><summary>Ten developers need the same access. What's the least effort, most maintainable way?<span class="go">Show answer</span></summary><div class="ans"><p><b>Create a group, attach the policy to it, add the ten users.</b></p></div></details>
+      <details><summary>Why shouldn't two people share one IAM user?<span class="go">Show answer</span></summary><div class="ans"><p><b>Accountability and control:</b> you can't tell who did what, and removing one person's access locks out the other.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Group policies are illustrative. Sources: IAM notes "IAM Introduction", "IAM Users and Groups Hands-On", "IAM: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html">Security best practices in IAM</a>.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const USERS = ['Alice', 'Bob', 'Charles', 'David', 'Edward', 'Fred'];
+
+  /* ================= walkthrough ================= */
+  const nodes = {
+    root: { x: 90, y: 75, icon: 'crown', kind: 'sec', label: 'Root user', sub: 'full access' },
+    iam: { x: 720, y: 330, icon: 'shield', kind: 'sec', label: 'IAM', sub: 'who? · what?' },
+    ec2: { x: 905, y: 180, icon: 'chip', kind: 'compute', label: 'EC2' },
+    s3: { x: 905, y: 330, icon: 'bucket', kind: 'storage', label: 'S3' },
+    bill: { x: 905, y: 480, icon: 'dollar', kind: 'plain', label: 'Billing' },
+    dev: { x: 320, y: 215, icon: 'users', kind: 'plain', label: 'Developers' },
+    ops: { x: 320, y: 395, icon: 'users', kind: 'plain', label: 'Operations' },
+    aud: { x: 320, y: 545, icon: 'users', kind: 'plain', label: 'Audit' },
+    pdev: { x: 520, y: 215, icon: 'doc', kind: 'mgmt', label: 'Dev policy', sub: 'EC2 read · S3 read' },
+    pops: { x: 520, y: 395, icon: 'doc', kind: 'mgmt', label: 'Ops policy', sub: 'EC2 full' },
+    paud: { x: 520, y: 545, icon: 'doc', kind: 'mgmt', label: 'Audit policy', sub: 'billing read' }
+  };
+  USERS.forEach((u, i) => nodes[u] = { x: 90, y: 175 + i * 82, icon: 'user', kind: 'user', label: u, badge: 'right' });
+  const MEM = [['Alice', 'dev'], ['Bob', 'dev'], ['Charles', 'dev'], ['Charles', 'aud'], ['David', 'ops'], ['David', 'aud'], ['Edward', 'ops']];
+  const links = MEM.map(([u, g]) => ({ a: u, b: g }));
+  links.push({ a: 'dev', b: 'pdev', kind: 'dash' }, { a: 'ops', b: 'pops', kind: 'dash' }, { a: 'aud', b: 'paud', kind: 'dash' });
+  links.push({ a: 'Charles', b: 'iam', via: [[170, 339], [170, 620], [640, 620], [640, 330]], kind: 'pub' });
+  links.push({ a: 'Fred', b: 'iam', via: [[150, 585], [150, 605], [660, 605], [660, 330]], kind: 'pub' });
+  links.push({ a: 'iam', b: 'ec2', via: [[800, 330], [800, 180]] }, { a: 'iam', b: 's3' }, { a: 'iam', b: 'bill', via: [[800, 330], [800, 480]] });
+  const net = K.net($('stSvg'), { zones: [{ id: 'acct', x: 20, y: 20, w: 960, h: 610, kind: 'aws', label: 'AWS account 123456789012 · IAM is global' }], nodes, links });
+  const G = ['dev', 'ops', 'aud'], P = ['pdev', 'pops', 'paud'], SV = ['ec2', 's3', 'bill'];
+  const show = (ids, on) => ids.forEach(n => net.nodes[n].g.style.display = on ? '' : 'none');
+  function vis(i) {
+    show(USERS, i >= 2); show(G, i >= 3); show(P, i >= 4);
+    MEM.forEach(([u, g]) => net.link(u, g, i >= 3 ? '' : 'hide'));
+    G.forEach((g, k) => net.link(g, P[k], i >= 4 ? '' : 'hide'));
+    net.link('Charles', 'iam', i >= 5 && i <= 6 ? '' : 'hide'); net.link('Fred', 'iam', i === 7 ? '' : 'hide');
+  }
+  function base(i) {
+    net.reset(); vis(i);
+    const F = [['iam', 'ec2', 's3', 'bill'], ['root', 'iam', 'ec2', 's3', 'bill'], [...USERS], [...USERS, ...G], [...USERS, ...G, ...P], ['Charles', 'dev', 'aud', 'pdev', 'paud', 'iam', 'ec2', 's3', 'bill'], ['Charles', 'dev', 'aud', 'pdev', 'paud', 'iam', 'ec2', 's3', 'bill'], ['Fred', 'iam', 'ec2', 's3', 'bill'], null][i];
+    net.focus(F);
+    if (i === 0) net.badge('iam', 'global service', 'info');
+    if (i === 1) { net.state('root', 'on'); net.badge('root', 'MFA · rarely used', 'bad'); }
+    if (i === 3) { net.badge('Charles', '2 groups', 'info'); net.badge('David', '2 groups', 'info'); net.badge('Fred', 'no group', ''); }
+    if (i === 5) { net.badge('ec2', 'ALLOWED', 'ok'); }
+    if (i === 6) { net.badge('bill', 'ALLOWED', 'ok'); net.badge('s3', 'ALLOWED', 'ok'); }
+    if (i === 7) { net.badge('iam', 'implicit deny', 'bad'); net.badge('Fred', 'AccessDenied', 'bad'); }
+    if (i === 8) { net.badge('Edward', 'needs EC2 full?', ''); net.badge('pops', 'only what Ops needs', 'ok'); }
+  }
+  const STEPS = [
+    { title: 'IAM sits between every request and AWS',
+      text: 'Every call to AWS, from the console, the CLI or code, passes <b>IAM</b>. IAM answers two questions: <b>who are you?</b> (authentication) and <b>what are you allowed to do?</b> (authorization). IAM is <b>global</b>: you set it up once per account, not per Region.' },
+    { title: 'The root user: owner of the account',
+      text: 'Creating an AWS account creates a <b>root user</b> (the sign-up email) with complete, unrestricted access, including billing and closing the account. It cannot be limited by policies. Lock it with <b>MFA</b> and use it only for the few tasks that need it.',
+      tip: '"Use the root user only for tasks that require it" is the exam\'s standard wording.' },
+    { title: 'IAM users: one per person',
+      text: 'Create an <b>IAM user</b> for each person (or workload): Alice, Bob, Charles, David, Edward, Fred. Each has their own sign-in and credentials, so every action can be traced to one identity. A new user starts with <b>no permissions</b>.' },
+    { title: 'Groups: users with the same job',
+      text: '<b>Groups</b> collect users: Developers, Operations, Audit. Charles and David are in <b>two groups</b>; Fred is in <b>none</b>. Groups hold users only. You cannot put a group inside another group.',
+      tip: 'Groups cannot be nested; a user can belong to several groups.' },
+    { title: 'Policies attach to groups, members inherit',
+      text: 'A <b>policy</b> is a JSON document listing allowed (or denied) actions. Attach it to a group and <b>every member inherits it</b>. Add someone to Operations and they get Ops permissions; remove them and the permissions go.',
+      play: async run => { base(4); await Promise.all(P.map((p, k) => net.send([p, G[k]], { run, tone: 'cyan' }).catch(() => {}))); } },
+    { title: 'Charles asks EC2 for a list of instances',
+      text: 'Charles calls <span class="mono">ec2:DescribeInstances</span>. IAM identifies him, gathers every policy from <b>both his groups</b>, finds that the Dev policy allows EC2 read actions, and lets the request through.',
+      play: async run => { base(5); net.badge('ec2', ''); await net.send(['Charles', 'iam'], { run, label: 'ec2:DescribeInstances' }); net.state('iam', 'on'); await net.send(['iam', 'ec2'], { run, tone: 'green' }); net.badge('ec2', 'ALLOWED', 'ok'); } },
+    { title: 'Permissions from several groups add up',
+      text: 'Charles also opens the billing page. That isn\'t in the Dev policy, but it is in the <b>Audit</b> policy, so it\'s allowed too. A user\'s permissions are the <b>union</b> of everything attached to them and their groups.',
+      play: async run => { base(6); net.badge('bill', ''); net.badge('s3', ''); await net.send(['Charles', 'iam'], { run, label: 'view billing' }); await net.send(['iam', 'bill'], { run, tone: 'green' }); net.badge('bill', 'ALLOWED', 'ok'); } },
+    { title: 'Fred has no group: denied by default',
+      text: 'Fred tries the same call. Nothing attached to him allows it, so IAM refuses: <b>AccessDenied</b>. In AWS the starting point is always <b>deny</b>; access only exists when a policy grants it.',
+      play: async run => { base(7); net.badge('iam', ''); net.badge('Fred', ''); await net.send(['Fred', 'iam'], { run, label: 'ec2:DescribeInstances', tone: 'red' }); net.badge('iam', 'implicit deny', 'bad'); net.badge('Fred', 'AccessDenied', 'bad'); } },
+    { title: 'Least privilege',
+      text: 'Give each group <b>only what that job needs</b>. If Developers only read EC2, don\'t give them EC2 full access, and certainly not AdministratorAccess. Less access means less damage when a password leaks or someone makes a mistake, and fewer surprise costs.',
+      tip: '"Least privilege" answers narrow permissions; broad admin access is almost never the right option.' }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ================= membership matrix ================= */
+  const GROUPS = { Developers: ['ec2:DescribeInstances', 's3:GetObject'], Operations: ['ec2:DescribeInstances', 'ec2:StartInstances', 'ec2:TerminateInstances'], Audit: ['billing:ViewBilling', 'cloudtrail:LookupEvents'] };
+  const ACTIONS = ['ec2:DescribeInstances', 'ec2:TerminateInstances', 's3:GetObject', 'billing:ViewBilling', 'iam:CreateUser'];
+  const SVC = { ec2: 'ec2', s3: 's3', billing: 'bill', cloudtrail: 'bill', iam: 'iamsvc' };
+  const mem = { Alice: ['Developers'], Bob: ['Developers'], Charles: ['Developers', 'Audit'], David: ['Operations', 'Audit'], Edward: ['Operations'], Fred: [] };
+  const gn = Object.keys(GROUPS);
+  function renderMx() {
+    $('mx').innerHTML = `<thead><tr><th>User</th>${gn.map(g => `<th>${g}</th>`).join('')}</tr></thead><tbody>` +
+      USERS.map(u => `<tr><td>${u}</td>${gn.map(g => `<td><input type="checkbox" data-u="${u}" data-g="${g}" ${mem[u].includes(g) ? 'checked' : ''} aria-label="${u} in ${g}"></td>`).join('')}</tr>`).join('') + '</tbody>';
+  }
+  $('mx').addEventListener('change', e => { const c = e.target; if (!c.dataset.u) return; const l = mem[c.dataset.u]; c.checked ? l.push(c.dataset.g) : l.splice(l.indexOf(c.dataset.g), 1); perms(); });
+  $('eUser').innerHTML = USERS.map(u => `<option>${u}</option>`).join('');
+  $('eAct').innerHTML = ACTIONS.map(a => `<option>${a}</option>`).join('');
+  $('gp').innerHTML = gn.map(g => `<b>${g}</b>: ${GROUPS[g].join(', ')}`).join('<br>');
+  const eff = u => [...new Set(mem[u].flatMap(g => GROUPS[g]))];
+  function perms() { const u = $('eUser').value, e = eff(u); $('up').innerHTML = e.length ? `<b>${u}</b> (${mem[u].join(' + ')}): ${e.join(', ')}` : `<b>${u}</b> is in no group: no permissions (everything is denied).`; }
+  $('eUser').addEventListener('change', () => { perms(); evDraw(); });
+  renderMx(); perms();
+  const ev = K.net($('evSvg'), {
+    nodes: { user: { x: 90, y: 120, icon: 'user', kind: 'user', label: 'User' }, iam: { x: 430, y: 120, icon: 'shield', kind: 'sec', label: 'IAM', sub: 'checks policies' },
+      ec2: { x: 800, y: 50, icon: 'chip', kind: 'compute', label: 'EC2' }, s3: { x: 690, y: 175, icon: 'bucket', kind: 'storage', label: 'S3' }, bill: { x: 910, y: 175, icon: 'dollar', kind: 'plain', label: 'Billing' }, iamsvc: { x: 800, y: 175, icon: 'users', kind: 'sec', label: 'IAM API' } },
+    links: [{ a: 'user', b: 'iam' }, { a: 'iam', b: 'ec2', via: [[600, 120], [600, 50]] }, { a: 'iam', b: 's3', via: [[600, 120], [600, 175]] }, { a: 'iam', b: 'iamsvc', via: [[600, 120], [600, 230], [800, 230]] }, { a: 'iam', b: 'bill', via: [[600, 120], [600, 240], [910, 240]] }]
+  });
+  function evDraw() { ev.reset(); ev.nodes.user.label($('eUser').value); $('evCap').innerHTML = 'Pick a user and an action, then <b>Send request</b>.'; }
+  $('eSend').addEventListener('click', async () => {
+    const run = K.newRun('ev'); evDraw();
+    const u = $('eUser').value, a = $('eAct').value, ok = eff(u).includes(a), svc = SVC[a.split(':')[0]];
+    try {
+      await ev.send(['user', 'iam'], { run, label: a });
+      if (!ok) { ev.badge('iam', 'DENIED', 'bad'); $('evCap').innerHTML = `<span class="bad-text">AccessDenied.</span> No policy attached to ${u} or ${u}'s groups allows <span class="mono">${a}</span>. Default deny wins.`; return; }
+      ev.badge('iam', 'ALLOWED', 'ok'); await ev.send(['iam', svc], { run, tone: 'green' }); ev.badge(svc, '200 OK', 'ok');
+      const from = mem[u].filter(g => GROUPS[g].includes(a));
+      $('evCap').innerHTML = `<span class="ok-text">Allowed</span>, granted by the <b>${from.join(' and ')}</b> group policy.`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  });
+  evDraw();
+
+  K.pick($('rules'), [
+    { q: 'A group can contain other groups.', a: 'False', why: 'IAM groups contain users only; there is no nesting.' },
+    { q: 'A user can belong to more than one group.', a: 'True', why: 'Charles is in Developers and Audit and gets both sets of permissions.' },
+    { q: 'Every user must belong to at least one group.', a: 'False', why: 'Membership is optional, though using groups makes management easier.' },
+    { q: 'A new IAM user with no policies can read S3 by default.', a: 'False', why: 'Default is deny; a new user has no permissions.' },
+    { q: 'IAM users and groups are created in a specific Region.', a: 'False', why: 'IAM is a global service.' },
+    { q: 'Policies can be attached to groups, users and roles.', a: 'True', why: 'Group attachment is the recommended way for people.' }
+  ], ['True', 'False']);
+})();
+</script>
+</body>
+</html>

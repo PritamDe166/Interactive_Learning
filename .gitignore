@@ -4,3 +4,11 @@
 # editors
 .vscode/
 .idea/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log

@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IAM roles</title>
+<meta name="description" content="AWS Cloud Practitioner: IAM roles. An EC2 instance or Lambda function assumes a role, gets temporary credentials from STS, and calls AWS without stored keys. Trust policy, permissions policy, cross-account and federation.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · IAM · Domain 2 Security &amp; Compliance (Task 2.3)</div>
+    <h1>IAM roles for AWS services</h1>
+    <ul class="lede">
+      <li>An <b>IAM role</b> is an identity with permissions but <b>no password and no long-term keys</b>. Something <b>assumes</b> it and gets <b>temporary credentials</b>.</li>
+      <li>AWS services use roles to act on your behalf: an <b>EC2 instance</b> reading S3, a <b>Lambda</b> function writing to DynamoDB, <b>CloudFormation</b> creating resources.</li>
+      <li>A role has two policies: a <b>trust policy</b> (who may assume it) and <b>permissions policies</b> (what it may do).</li>
+      <li>Roles also give <b>another AWS account</b> or <b>federated users</b> (company directory, IAM Identity Center) access without creating IAM users.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you already know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest idea you already know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">IAM role on EC2</span><span class="like">An IIS app pool running as a managed service account (gMSA)</span><span>No password to store; credentials rotate automatically.</span></div>
+      <div class="row"><span class="aws">Assuming a role</span><span class="like">"Run as" a different account for a while</span><span>Credentials expire after minutes to hours.</span></div>
+      <div class="row"><span class="aws">Trust policy</span><span class="like">Who is allowed to log on as that service account</span><span>Written as JSON with a Principal (e.g. ec2.amazonaws.com).</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: an EC2 app gets into S3 without keys</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 560" aria-label="An EC2 instance assumes a role through STS, receives temporary credentials and calls S3 through IAM"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>A <b>role</b> = permissions without long-term credentials. Whoever <b>assumes</b> it receives <b>temporary credentials</b> (key ID + secret + session token) from <b>AWS STS</b> that expire automatically.</li>
+      <li><b>User vs role</b>: a user is one person/workload with long-term credentials; a role is <b>assumed</b> by whoever is trusted, for a session.</li>
+      <li><b>Trust policy</b> = who can assume (the "trusted entity": an AWS service, another account, a federated user). <b>Permissions policy</b> = what the role can do. A role needs <b>both</b>.</li>
+      <li>Common service roles: <b>EC2 instance role</b> (attached via an instance profile), <b>Lambda execution role</b>, <b>CloudFormation</b> service role.</li>
+      <li><b>Exam pattern</b>: "an app on EC2 needs to access S3/DynamoDB" → attach an <b>IAM role</b>. Never store access keys on the instance.</li>
+      <li><b>Cross-account access</b>: create a role in the account that owns the resources and let the other account assume it.</li>
+      <li><b>Federation / IAM Identity Center</b>: people from a corporate directory sign in once and assume roles; no IAM users needed.</li>
+      <li><b>Service-linked roles</b> are created and owned by an AWS service; you can view but not edit their permissions.</li>
+      <li>Course hands-on: role <code>DemoRoleForEC2</code>, trusted entity <b>AWS service → EC2</b>, permissions <code>IAMReadOnlyAccess</code>. It's used later in the EC2 section.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+
+  <section aria-labelledby="pgH">
+    <h2 class="stage-title" id="pgH">Keys on the server vs a role</h2>
+    <div class="stage-kind">The instance gets hacked · what can the attacker take, and for how long?</div>
+    <div class="controls">
+      <div class="seg" id="kSeg" role="group" aria-label="How the app authenticates">
+        <button type="button" data-v="keys" aria-pressed="true">Access keys in appsettings.json</button>
+        <button type="button" data-v="role" aria-pressed="false">IAM role on the instance</button>
+      </div>
+      <button class="btn primary" id="kGo" type="button">Attacker steals credentials</button>
+    </div>
+    <div class="scroll"><svg class="diagram nf-canvas" id="kSvg" viewBox="0 0 1000 300" aria-label="An attacker copies credentials from an EC2 instance and tries to use them"></svg></div>
+    <p class="nf-cap" id="kCap"></p>
+  </section>
+
+  <section aria-labelledby="wH">
+    <h2 class="stage-title" id="wH">User, group or role?</h2>
+    <div class="stage-kind">Pick the right IAM identity</div>
+    <div class="card" id="w"></div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Create DemoRoleForEC2 (from the course hands-on)</summary>
+      <ol>
+        <li>IAM → <b>Roles → Create role</b>.</li>
+        <li>Trusted entity type: <b>AWS service</b>; service / use case: <b>EC2</b>. This writes the trust policy (Principal <code>ec2.amazonaws.com</code>).</li>
+        <li>Attach permissions: <code>IAMReadOnlyAccess</code>.</li>
+        <li>Name it <code>DemoRoleForEC2</code>, review the trusted entity and permissions, <b>Create role</b>.</li>
+        <li>The role does nothing yet. It becomes useful when attached to an EC2 instance (EC2 section): then <code>aws iam list-users</code> works on the instance <b>without any <code>aws configure</code></b>.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">EC2 / Lambda needs to call AWS, no keys</span><span class="arrow">→</span><span class="then">IAM role</span></li>
+      <li><span class="if">Another AWS account needs access</span><span class="arrow">→</span><span class="then">Cross-account role</span></li>
+      <li><span class="if">Corporate directory users sign in to AWS</span><span class="arrow">→</span><span class="then">Federation / IAM Identity Center (roles)</span></li>
+      <li><span class="if">Who may assume the role</span><span class="arrow">→</span><span class="then">Trust policy</span></li>
+      <li><span class="if">Role credentials</span><span class="arrow">→</span><span class="then">Temporary, from STS, expire automatically</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Can you sign in to the console "as a role" with a password?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> Roles have no password or long-term keys; they're assumed (for example by switching role from a signed-in user, or through SSO).</p></div></details>
+      <details><summary>What are the two policies every role has?<span class="go">Show answer</span></summary><div class="ans"><p><b>Trust policy</b> (who can assume it) and <b>permissions policy</b> (what it can do).</p></div></details>
+      <details><summary>Which service hands out the temporary credentials?<span class="go">Show answer</span></summary><div class="ans"><p><b>AWS STS</b> (Security Token Service).</p></div></details>
+      <details><summary>Why is a role safer than keys on an EC2 instance?<span class="go">Show answer</span></summary><div class="ans"><p>Nothing long-term is stored; credentials <b>rotate automatically and expire</b>, so a stolen copy soon stops working.</p></div></details>
+      <details><summary>Name three AWS services that commonly use roles.<span class="go">Show answer</span></summary><div class="ans"><p><b>EC2, Lambda, CloudFormation</b> (also ECS tasks and many others).</p></div></details>
+      <details><summary>A partner company's AWS account must read one of your buckets. Create them IAM users?<span class="go">Show answer</span></summary><div class="ans"><p><b>No:</b> create a <b>cross-account role</b> they can assume (or use a bucket policy naming their account).</p></div></details>
+    </div>
+  </section>
+
+  <footer>Credential lifetimes are illustrative. Sources: IAM notes "IAM Roles for AWS Services", "IAM Guidelines and Best Practices", "IAM: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html">IAM roles</a>.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 20, y: 20, w: 960, h: 410, kind: 'aws', label: 'Your AWS account' }],
+    nodes: {
+      ec2: { x: 120, y: 150, icon: 'chip', kind: 'compute', label: 'EC2: booking API', sub: '.NET app' },
+      role: { x: 330, y: 150, icon: 'idcard', kind: 'sec', label: 'DemoRoleForEC2', sub: 'trust: ec2.amazonaws.com' },
+      perm: { x: 330, y: 330, icon: 'doc', kind: 'mgmt', label: 'Permissions policy', sub: 's3:GetObject on scans' },
+      sts: { x: 500, y: 150, icon: 'ticket', kind: 'sec', label: 'AWS STS', sub: 'issues credentials' },
+      iam: { x: 700, y: 330, icon: 'shield', kind: 'sec', label: 'IAM', sub: 'checks the role' },
+      s3: { x: 900, y: 330, icon: 'bucket', kind: 'storage', label: 'S3 clinic-scans' },
+      dyn: { x: 900, y: 150, icon: 'db', kind: 'db', label: 'DynamoDB' },
+      lam: { x: 120, y: 360, icon: 'lambda', kind: 'compute', label: 'Lambda function', sub: 'execution role' },
+      other: { x: 700, y: 490, icon: 'cloud', kind: 'plain', label: 'Partner\'s AWS account', sub: 'assumes a cross-account role', badge: 'right' }
+    },
+    links: [{ a: 'ec2', b: 'role', label: 'attached' }, { a: 'role', b: 'sts', label: 'assume', at: [415, 140] }, { a: 'role', b: 'perm', kind: 'dash' },
+      { a: 'ec2', b: 'iam', via: [[120, 260], [600, 260], [600, 330]], label: 'call with temp credentials', at: [360, 252] }, { a: 'iam', b: 's3' }, { a: 'iam', b: 'dyn', via: [[780, 330], [780, 150]] },
+      { a: 'lam', b: 'iam', via: [[600, 360], [600, 330]] }, { a: 'other', b: 'iam', kind: 'dash' }]
+  });
+  function base(i) {
+    net.reset();
+    const extra = i >= 6;
+    ['lam', 'other'].forEach(n => net.nodes[n].g.style.display = extra ? '' : 'none');
+    net.link('lam', 'iam', extra ? '' : 'hide'); net.link('other', 'iam', extra ? '' : 'hide');
+    net.focus([['ec2', 's3'], ['ec2', 'role', 'perm'], ['ec2', 'role', 'sts'], ['ec2', 'iam', 's3', 'role', 'perm'], ['ec2', 'iam', 'dyn', 'perm'], ['ec2', 'sts', 'role'], ['lam', 'other', 'iam', 's3', 'dyn'], null][i]);
+    if (i === 0) net.badge('ec2', 'needs S3 access', 'info');
+    if (i === 2) net.badge('ec2', 'temp creds · 1 h', 'ok');
+    if (i === 3) net.badge('s3', '200 OK', 'ok');
+    if (i === 4) net.badge('dyn', 'denied: not in policy', 'bad');
+    if (i === 5) { net.badge('ec2', 'new creds', 'ok'); net.badge('sts', 'auto-rotated', 'info'); }
+  }
+  const STEPS = [
+    { title: 'The app on EC2 needs S3',
+      text: 'The clinic\'s .NET booking API runs on an <b>EC2 instance</b> and must read scans from S3. Like any caller, it needs credentials and permissions. The tempting shortcut: paste an IAM user\'s access keys into <span class="mono">appsettings.json</span>. Don\'t.' },
+    { title: 'Create a role and attach it',
+      text: 'Create an <b>IAM role</b>. Its <b>trust policy</b> says "the EC2 service may assume me" (the console calls this the <b>trusted entity</b>). Its <b>permissions policy</b> allows <code>s3:GetObject</code> on the scans bucket. Attach the role to the instance.',
+      tip: 'A role needs both: a trust policy and permissions.' },
+    { title: 'The instance assumes the role',
+      text: 'On the instance, the SDK asks for credentials. EC2 assumes the role through <b>AWS STS</b>, which returns <b>temporary credentials</b>: access key ID, secret and a <b>session token</b>, valid for a limited time. Nothing is stored in your code or config.',
+      play: async run => { base(2); await net.send(['ec2', 'role', 'sts'], { run, label: 'AssumeRole' }); await net.send(['sts', 'role', 'ec2'], { run, tone: 'cyan', label: 'temp creds' }); net.badge('ec2', 'temp creds · 1 h', 'ok'); } },
+    { title: 'Calls go through IAM as the role',
+      text: 'The app calls S3 with the temporary credentials. IAM evaluates the request <b>as DemoRoleForEC2</b>: the permissions policy allows <code>s3:GetObject</code>, so it succeeds.',
+      play: async run => { base(3); net.badge('s3', ''); await net.send(['ec2', 'iam', 's3'], { run, label: 'GetObject' }); net.badge('s3', '200 OK', 'ok'); } },
+    { title: 'Only what the role allows',
+      text: 'The same app tries to write to DynamoDB. The role\'s policy doesn\'t allow it: <b>AccessDenied</b>. Roles follow least privilege exactly like users.',
+      play: async run => { base(4); net.badge('dyn', ''); await net.send(['ec2', 'iam', 'dyn'], { run, label: 'PutItem', tone: 'red' }); net.badge('dyn', 'denied: not in policy', 'bad'); } },
+    { title: 'Credentials rotate on their own',
+      text: 'Before they expire, the instance automatically gets fresh credentials. Nobody rotates keys by hand, and a stolen copy is useless within hours.',
+      play: async run => { base(5); await net.send(['sts', 'role', 'ec2'], { run, tone: 'cyan', label: 'refresh' }); } },
+    { title: 'Not just EC2',
+      text: '<b>Lambda</b> functions run with an <b>execution role</b>. A <b>partner\'s AWS account</b> can assume a <b>cross-account role</b> instead of getting IAM users. Staff signing in through <b>IAM Identity Center</b> (or your corporate directory) also end up in roles.',
+      play: async run => { base(6); await Promise.all([net.send(['lam', 'iam', 'dyn'], { run, tone: 'green' }).catch(() => {}), net.send(['other', 'iam', 's3'], { run, tone: 'cyan' }).catch(() => {})]); } },
+    { title: 'User vs role in one line',
+      text: 'An <b>IAM user</b> is a named identity with long-term credentials (password, access keys). A <b>role</b> is a set of permissions that trusted callers <b>borrow for a session</b>. For anything that runs on AWS, the answer is a role.' }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* keys vs role */
+  const k = K.net($('kSvg'), {
+    zones: [{ id: 'reg', x: 20, y: 20, w: 330, h: 260, kind: 'region', label: 'Region' }],
+    nodes: { ec2: { x: 180, y: 150, icon: 'chip', kind: 'compute', label: 'EC2 instance', sub: '' }, atk: { x: 500, y: 150, icon: 'bug', kind: 'sec', label: 'Attacker', sub: 'outside AWS' }, iam: { x: 700, y: 150, icon: 'shield', kind: 'sec', label: 'IAM' }, s3: { x: 900, y: 150, icon: 'bucket', kind: 'storage', label: 'S3 scans' } },
+    links: [{ a: 'ec2', b: 'atk', kind: 'dash', label: 'copies credentials' }, { a: 'atk', b: 'iam' }, { a: 'iam', b: 's3' }]
+  });
+  let mode = 'keys';
+  function kDraw() { k.reset(); k.nodes.ec2.sub(mode === 'keys' ? 'AKIA… in config file' : 'role: temp creds'); $('kCap').innerHTML = 'Press <b>Attacker steals credentials</b>.'; }
+  K.seg($('kSeg'), v => { mode = v; K.cancel('k'); kDraw(); });
+  $('kGo').addEventListener('click', async () => {
+    const run = K.newRun('k'); kDraw();
+    try {
+      await k.send(['ec2', 'atk'], { run, tone: 'red', label: 'stolen' });
+      await k.send(['atk', 'iam', 's3'], { run, tone: 'red', label: 'today' }); k.badge('s3', 'data read', 'bad');
+      await K.sleep(500, run);
+      if (mode === 'keys') { await k.send(['atk', 'iam', 's3'], { run, tone: 'red', label: 'next month' }); k.badge('iam', 'still valid', 'bad'); $('kCap').innerHTML = '<span class="bad-text">The keys keep working</span> from anywhere, for months, until someone finds and deletes them. And they sit in config files, backups and Git history.'; }
+      else { await k.send(['atk', 'iam'], { run, tone: 'red', label: 'tomorrow' }); k.badge('iam', 'expired', 'ok'); $('kCap').innerHTML = '<span class="ok-text">The stolen credentials expired</span> within hours, and there was never a key in a file to leak in the first place. Fix the instance and the risk is over.'; }
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  });
+  kDraw();
+
+  K.pick($('w'), [
+    { q: 'A new developer joins and needs console access.', a: 'User (in a group)', why: 'A person: an IAM user added to a group (or IAM Identity Center at larger companies).' },
+    { q: 'Ten developers need identical permissions.', a: 'Group', why: 'Attach the policy once to a group.' },
+    { q: 'A Lambda function must write to DynamoDB.', a: 'Role', why: 'Lambda execution role.' },
+    { q: 'An EC2 instance must read from S3.', a: 'Role', why: 'Instance role via an instance profile; no stored keys.' },
+    { q: 'An auditor from another AWS account needs read-only access for a week.', a: 'Role', why: 'Cross-account role they assume; nothing to clean up in your user list.' },
+    { q: 'CloudFormation must create resources on your behalf.', a: 'Role', why: 'A service role for CloudFormation.' }
+  ], ['User (in a group)', 'Group', 'Role']);
+})();
+</script>
+</body>
+</html>

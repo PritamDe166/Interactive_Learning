@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Amazon FSx</title>
+<meta name="description" content="AWS Cloud Practitioner: Amazon FSx runs managed third-party file systems: FSx for Windows File Server (SMB, NTFS, Active Directory) and FSx for Lustre (high performance computing), plus NetApp ONTAP and OpenZFS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · EC2 instance storage · 7</div>
+    <h1>Amazon FSx</h1>
+    <ul class="lede">
+      <li><b>Amazon FSx</b> runs well-known <b>third-party file systems</b> as a managed service, for when EFS or S3 don't fit.</li>
+      <li><b>FSx for Windows File Server</b>: a Windows share (<b>SMB</b>, NTFS) joined to <b>Active Directory</b>, reachable from AWS and on-premises.</li>
+      <li><b>FSx for Lustre</b> (Linux + cluster): file storage for <b>high performance computing</b>, ML and analytics, often backed by <b>S3</b>.</li>
+      <li>Also <b>FSx for NetApp ONTAP</b> and <b>FSx for OpenZFS</b> for teams moving those systems to AWS.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>FSx</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">FSx for Windows File Server</span><span class="like">Your Windows file server with DFS shares and NTFS ACLs for AD groups</span><span>Same SMB share and AD permissions; AWS patches, backs up and fails it over.</span></div>
+      <div class="row"><span class="aws">FSx for Lustre</span><span class="like">A cluster's parallel scratch file system</span><span>Created in minutes, can load data straight from an S3 bucket and write results back.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: two very different file systems</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="Office PCs and Windows EC2 instances use FSx for Windows File Server with Active Directory; an HPC cluster uses FSx for Lustre backed by S3"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li><b>FSx = managed third-party, high-performance file systems</b>. Four flavours; the exam focuses on <b>Windows File Server</b> and <b>Lustre</b>.</li>
+      <li><b>FSx for Windows File Server</b>: Windows-native shared file system, <b>SMB protocol</b> and <b>NTFS</b>, integrated with <b>Microsoft Active Directory</b> for user security.</li>
+      <li>It can be deployed across <b>two AZs</b> (Multi-AZ) for high availability.</li>
+      <li>Reachable from <b>Windows EC2 instances</b> and from <b>on-premises</b> machines (over VPN or Direct Connect).</li>
+      <li><b>FSx for Lustre</b>: "Lustre" = <b>Linux + cluster</b>. Fully managed, scalable storage for <b>HPC</b>: machine learning, analytics, video processing, financial modelling.</li>
+      <li>Lustre performance: <b>hundreds of GB/s</b>, <b>millions of IOPS</b>, <b>sub-millisecond latency</b>.</li>
+      <li>FSx for Lustre can <b>link to an S3 bucket</b>: S3 objects appear as files; results can be written back to S3.</li>
+      <li>Exam triggers: "<b>Windows</b> file share / SMB / AD" → FSx for Windows. "<b>HPC</b> / high-performance computing" → FSx for Lustre. "Linux NFS share" → EFS.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">Which file system?</h2>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Where to find it (no course lab; FSx is not free-tier)</summary>
+      <ol>
+        <li>Amazon FSx → <b>Create file system</b>: choose Windows File Server, Lustre, NetApp ONTAP or OpenZFS.</li>
+        <li>Windows: pick <b>Multi-AZ</b> or Single-AZ, storage size, and the <b>Active Directory</b> (AWS Managed Microsoft AD or your own).</li>
+        <li>Lustre: pick a deployment type (scratch for short jobs, persistent for longer), and optionally a <b>data repository association</b> with an S3 bucket.</li>
+        <li>Look only; delete anything you create. FSx bills per GB-month and throughput.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Windows file share, SMB, NTFS, Active Directory</span><span class="arrow">→</span><span class="then">FSx for Windows File Server</span></li>
+      <li><span class="if">High performance computing, ML training, S3-backed files</span><span class="arrow">→</span><span class="then">FSx for Lustre</span></li>
+      <li><span class="if">Shared Linux NFS, general purpose</span><span class="arrow">→</span><span class="then">EFS</span></li>
+      <li><span class="if">Moving NetApp storage to AWS as-is</span><span class="arrow">→</span><span class="then">FSx for NetApp ONTAP</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Service</th><th>Protocol / OS</th><th>Best for</th></tr></thead>
+        <tbody>
+          <tr><td>FSx for Windows File Server</td><td>SMB, NTFS · Windows (also Linux SMB clients)</td><td>Windows apps, home drives, AD-secured shares</td></tr>
+          <tr><td>FSx for Lustre</td><td>Lustre · Linux</td><td>HPC, ML, big data, with S3 data</td></tr>
+          <tr><td>FSx for NetApp ONTAP</td><td>NFS, SMB, iSCSI</td><td>Lift-and-shift of NetApp workloads</td></tr>
+          <tr><td>FSx for OpenZFS</td><td>NFS · Linux</td><td>Lift-and-shift of ZFS workloads</td></tr>
+          <tr><td>EFS (for contrast)</td><td>NFS · Linux</td><td>General shared Linux storage</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>FSx for OpenZFS</b> is a fourth offering the note doesn't list. Like ONTAP, it is out of focus for the exam.</p></div>
+      <div class="note"><span class="flag add">Added</span><p>On-premises access to FSx goes over a private connection (Site-to-Site VPN or Direct Connect), covered later in the networking section.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <div class="quiz">
+      <details><summary>Which protocol does FSx for Windows File Server use?<span class="go">Show answer</span></summary><div class="ans"><p><b>SMB</b> (with NTFS permissions).</p></div></details>
+      <details><summary>What does "Lustre" stand for?<span class="go">Show answer</span></summary><div class="ans"><p><b>Linux + cluster.</b></p></div></details>
+      <details><summary>Where can FSx for Lustre read its data from?<span class="go">Show answer</span></summary><div class="ans"><p>From an <b>S3 bucket</b> linked to it (objects appear as files), and it can write results back.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: EC2 storage note "Amazon FSx Overview"; AWS FSx product pages for Windows File Server, Lustre, NetApp ONTAP and OpenZFS.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'dc', x: 20, y: 20, w: 220, h: 385, kind: 'onprem', label: 'Corporate data center' }, { id: 'reg', x: 270, y: 20, w: 710, h: 385, kind: 'region', label: 'eu-west-1' }],
+    nodes: {
+      pc: { x: 130, y: 130, icon: 'laptop', kind: 'user', label: 'Office PCs', sub: 'Windows' },
+      ad: { x: 130, y: 320, icon: 'idcard', kind: 'sec', label: 'Active Directory', sub: 'users & groups' },
+      wec2: { x: 400, y: 130, icon: 'chip', kind: 'compute', label: 'Windows EC2', sub: 'IIS / .NET app' },
+      fw: { x: 640, y: 130, icon: 'folder', kind: 'storage', label: 'FSx for Windows', sub: 'SMB · NTFS · Multi-AZ' },
+      oz: { x: 870, y: 130, icon: 'folder', kind: 'plain', label: 'ONTAP / OpenZFS', sub: 'also available' },
+      hpc: { x: 400, y: 320, icon: 'cpu', kind: 'compute', label: 'HPC cluster', sub: 'Linux EC2' },
+      lu: { x: 640, y: 320, icon: 'bolt', kind: 'storage', label: 'FSx for Lustre', sub: 'HPC file system' },
+      s3: { x: 870, y: 320, icon: 'bucket', kind: 'storage', label: 'S3 bucket', sub: 'training data' }
+    },
+    links: [
+      { a: 'pc', b: 'fw', via: [[130, 60], [640, 60]], label: 'SMB over VPN / Direct Connect', at: [520, 52] },
+      { a: 'wec2', b: 'fw', label: 'SMB', at: [520, 120] },
+      { a: 'fw', b: 'ad', via: [[735, 130], [735, 228], [130, 228]], kind: 'dash', label: 'who may open what?', at: [460, 220] },
+      { a: 'hpc', b: 'lu', label: 'Lustre', at: [520, 310] },
+      { a: 'lu', b: 's3', label: 'linked', at: [755, 310] }
+    ]
+  });
+  function base(i) {
+    net.reset();
+    const F = [null, ['wec2', 'fw'], ['wec2', 'fw', 'ad'], ['pc', 'fw', 'ad'], ['fw'], ['hpc', 'lu'], ['hpc', 'lu', 's3'], null];
+    net.focus(F[i]);
+    if (i === 1) net.badge('wec2', 'Z:\\reports', 'info');
+    if (i === 2) net.badge('ad', 'Finance group', 'ok');
+    if (i === 4) net.badge('fw', 'AZ a + AZ b', 'ok');
+    if (i === 5) net.badge('lu', '100s GB/s', 'ok');
+    if (i === 6) net.badge('s3', 'objects = files', 'info');
+  }
+  const STEPS = [
+    { title: 'Why FSx exists',
+      text: 'EFS is Linux NFS; S3 is object storage. Many companies already run <b>Windows file servers</b>, <b>Lustre clusters</b>, <b>NetApp</b> or <b>ZFS</b>. FSx gives you <b>those exact file systems</b>, fully managed: AWS handles hardware, patching, backups and failover.' },
+    { title: 'Windows File Server: an SMB share',
+      text: 'A Windows EC2 instance running your .NET app maps the share as a drive (e.g. <code>Z:\\reports</code>) over <b>SMB</b>. Files keep <b>NTFS</b> permissions, exactly like your on-prem file server.',
+      play: async run => { base(1); await net.send(['wec2', 'fw'], { run, label: 'SMB' }); await net.send(['fw', 'wec2'], { run, tone: 'green', label: 'report.xlsx' }); } },
+    { title: 'Secured by Active Directory',
+      text: 'The file system joins your <b>Microsoft Active Directory</b>. NTFS permissions use AD users and groups, so "only the Finance group can open /finance" works as before.',
+      play: async run => { base(2); await net.send(['fw', 'ad'], { run, tone: 'cyan', label: 'check user' }); } },
+    { title: 'Reachable from the office',
+      text: 'Office PCs on-premises can mount the same share over a private link (<b>VPN or Direct Connect</b>). One share for cloud servers and staff.',
+      play: async run => { base(3); await net.send(['pc', 'fw'], { run, label: 'SMB' }); } },
+    { title: 'Multi-AZ for high availability',
+      text: 'Deploy it <b>Multi-AZ</b>: a standby in a second AZ takes over automatically if the preferred one fails. Daily backups are built in.' },
+    { title: 'Lustre: storage for HPC',
+      text: '<b>FSx for Lustre</b> (Linux + cluster) feeds hundreds of compute nodes at once: <b>hundreds of GB/s</b>, <b>millions of IOPS</b>, <b>sub-millisecond</b> latency. Used for ML training, video rendering, genomics, financial risk models.',
+      play: async run => { base(5); for (let k = 0; k < 3; k++) await net.send(['lu', 'hpc'], { run, speed: 3, tone: 'green' }); } },
+    { title: 'Lustre + S3',
+      text: 'Link it to an <b>S3 bucket</b>: objects appear as files the cluster can read at Lustre speed, and results are <b>exported back to S3</b> when the job ends. Short-lived "scratch" file systems keep cost down.',
+      play: async run => { base(6); await net.send(['s3', 'lu', 'hpc'], { run, tone: 'cyan', label: 'data' }); await net.send(['hpc', 'lu', 's3'], { run, tone: 'green', label: 'results' }); } },
+    { title: 'The whole picture',
+      text: 'Windows + SMB + AD → <b>FSx for Windows File Server</b>. HPC / ML → <b>FSx for Lustre</b>. NetApp or ZFS migrations → <b>FSx for ONTAP / OpenZFS</b>. General Linux sharing → <b>EFS</b>.' }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  K.pick($('pick'), [
+    { q: 'Move the company\'s Windows file shares (SMB, AD permissions) to AWS.', a: 'FSx for Windows', why: 'Windows-native SMB share integrated with Active Directory.' },
+    { q: 'Machine learning training reading petabytes from S3 at very high throughput.', a: 'FSx for Lustre', why: 'HPC file system linked to S3.' },
+    { q: 'Shared folder for a fleet of Linux web servers.', a: 'EFS', why: 'General-purpose managed NFS for Linux.' },
+    { q: 'IIS servers on Windows EC2 need a common content share.', a: 'FSx for Windows', why: 'EFS doesn\'t support Windows; FSx for Windows does.' },
+    { q: 'Financial risk simulations on a 500-node cluster need sub-millisecond file access.', a: 'FSx for Lustre', why: '"High performance computing" → Lustre.' }
+  ], ['FSx for Windows', 'FSx for Lustre', 'EFS']);
+})();
+</script>
+</body>
+</html>

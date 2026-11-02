@@ -49,7 +49,7 @@
   </div>
 
   <header>
-    <div class="eyebrow">AWS CLF-C02 · Section 5 · Domains 3 &amp; 4 (Tasks 3.3, 4.1)</div>
+    <div class="eyebrow">AWS CLF-C02 · EC2 · Domain 4 Billing &amp; Domain 3 Technology</div>
     <h1>EC2 Purchasing Options</h1>
     <ul class="lede">
       <li>Same instance, different <b>price models</b>: you trade flexibility for discount.</li>
@@ -59,16 +59,17 @@
       <li><b>Dedicated</b> and <b>Capacity Reservations</b> solve isolation and capacity, not price.</li>
     </ul>
   </header>
+  <div class="aws-trail"></div>
 
   <section aria-labelledby="whatH">
     <h2 id="whatH">In everyday terms</h2>
     <p class="sub">The same choices you make for a car or a hotel room, applied to servers.</p>
     <div class="card analogy">
-      <div class="row head"><span>AWS</span><span>Closest .NET / Azure idea</span><span>The difference</span></div>
-      <div class="row"><span class="aws">On-Demand</span><span class="like">Taxi meter / Azure pay-as-you-go</span><span>Full price, stop any time.</span></div>
-      <div class="row"><span class="aws">Reserved Instance</span><span class="like">1–3 year lease / Azure Reserved VM</span><span>Big discount for a fixed instance type; paid even if idle.</span></div>
-      <div class="row"><span class="aws">Savings Plan</span><span class="like">Prepaid mobile plan / Azure savings plan</span><span>Commit $/hour; discount follows whatever you run.</span></div>
-      <div class="row"><span class="aws">Spot</span><span class="like">Standby airline seat / Azure Spot VM</span><span>Cheapest, but you can be bumped with 2 minutes' notice.</span></div>
+      <div class="row head"><span>AWS</span><span>Closest idea you already know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">On-Demand</span><span class="like">Taxi meter</span><span>Full price, stop any time.</span></div>
+      <div class="row"><span class="aws">Reserved Instance</span><span class="like">1–3 year lease</span><span>Big discount for a fixed instance type; paid even if idle.</span></div>
+      <div class="row"><span class="aws">Savings Plan</span><span class="like">Prepaid mobile plan</span><span>Commit $/hour; discount follows whatever you run.</span></div>
+      <div class="row"><span class="aws">Spot</span><span class="like">Standby airline seat</span><span>Cheapest, but you can be bumped with 2 minutes' notice.</span></div>
       <div class="row"><span class="aws">Dedicated Host</span><span class="like">Renting the whole building</span><span>Whole physical server for licences and compliance.</span></div>
       <div class="row"><span class="aws">Capacity Reservation</span><span class="like">Booking a table you might not use</span><span>Guarantees room in an AZ; no discount.</span></div>
     </div>
@@ -80,6 +81,21 @@
     <div class="story" id="poStory">
       <div class="scroll"><svg class="diagram" id="poStorySvg" style="min-width:0" viewBox="0 0 700 440" aria-label="Relative hourly price bars for six EC2 purchasing options with an illustration of each"></svg></div>
     </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li><b>On-Demand</b>: no commitment, pay per second (Linux/Windows, after the first minute), highest price. Short-term, unpredictable or uninterruptible workloads.</li>
+      <li><b>Reserved Instances</b>: <b>1 or 3 years</b> for a specific instance type, Region, tenancy and OS; up to about <b>72%</b> off. Payment: No, Partial or <b>All Upfront</b> (biggest discount). Steady workloads like databases.</li>
+      <li><b>Regional</b> RIs give a discount across the Region's AZs; <b>zonal</b> RIs also reserve capacity in one AZ. Unused RIs can be sold on the <b>Reserved Instance Marketplace</b>.</li>
+      <li><b>Convertible RIs</b>: can change instance type/family, OS, tenancy; smaller discount (up to about 66%).</li>
+      <li><b>Savings Plans</b>: commit to a <b>$ per hour</b> of usage for 1 or 3 years; above it you pay On-Demand. <b>Compute Savings Plans</b> also cover Fargate and Lambda; <b>EC2 Instance Savings Plans</b> lock the family and Region.</li>
+      <li><b>Spot</b>: spare capacity, up to about <b>90% off</b>, can be <b>interrupted</b> (2-minute warning). Batch, data analysis, image processing, flexible and fault-tolerant jobs. <b>Not</b> for critical jobs or databases.</li>
+      <li><b>Dedicated Host</b>: a whole physical server; host-level visibility; <b>BYOL</b> (per-socket/core licences) and compliance. Most expensive; On-Demand or reserved.</li>
+      <li><b>Dedicated Instance</b>: hardware not shared with other customers, but no control over placement on the host.</li>
+      <li><b>Capacity Reservation</b>: guarantees On-Demand capacity in <b>one AZ</b> for any duration; <b>no discount</b>; billed whether you use it or not.</li>
+    </ol></div>
   </section>
 
   <h2 class="part-title">Try it yourself</h2>
@@ -184,6 +200,7 @@
   <footer>Prices in the cost stage are illustrative ratios, not a quote: real rates vary by Region, instance and payment option. "Up to" discounts from AWS pricing pages, checked October 2026. Sources: EC2 notes (EC2 Instance Purchasing Options, Shared Responsibility model for EC2).</footer>
 </div>
 
+<script src="topics.js"></script>
 <script>
 (function () {
   const K = Kit, $ = K.$;

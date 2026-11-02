@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EC2 review</title>
+<meta name="description" content="AWS Cloud Practitioner: EC2 section review with a one-path recap, section summary, commonly confused pairs, a mixed drill and 20 exam-style questions.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 10px; }
+  .topic-links a { display: block; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--fg); text-decoration: none; }
+  .topic-links a:hover { border-color: var(--orange); }
+  .topic-links a span { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · EC2 · Section review</div>
+    <h1>EC2: review</h1>
+    <ul class="lede">
+      <li><b>EC2</b> rents virtual servers (IaaS): AMI + instance type + storage + security group + key pair + user data.</li>
+      <li>Requests reach the <b>public IP</b>, pass the <b>security group</b> (stateful, allow-only), and hit the software on the instance.</li>
+      <li>Get in with <b>SSH 22</b>, <b>Instance Connect</b> or <b>RDP 3389</b>; give the instance AWS access with an <b>IAM role</b>.</li>
+      <li>Pay with <b>On-Demand, Reserved, Savings Plans, Spot, Dedicated</b> or <b>Capacity Reservations</b>, and set a <b>budget</b> first.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="recapH">
+    <h2 class="stage-title" id="recapH">The whole section on one path</h2>
+    <div class="stage-kind">Press play · each hop is one topic</div>
+    <div class="controls"><button class="btn primary" id="recapPlay" type="button">Play the request</button></div>
+    <div class="scroll"><svg class="diagram nf-canvas" id="recapSvg" viewBox="0 0 1000 430" aria-label="Visitors and an admin reach an EC2 instance through its security group; the instance uses a role; a budget watches the bill"></svg></div>
+    <p class="nf-cap" id="recapCap">Press <b>Play the request</b>.</p>
+  </section>
+
+  <section aria-labelledby="sumH">
+    <h2 id="sumH">Section summary</h2>
+    <div class="sum-grid">
+      <div class="card"><h3>Budgets</h3><ul><li>AWS Budgets emails on actual or forecasted cost/usage.</li><li>Zero-spend and monthly cost budgets.</li><li>Root activates IAM access to billing.</li><li>EBS, public IPv4, NAT Gateway bill too.</li></ul></div>
+      <div class="card"><h3>EC2 basics &amp; user data</h3><ul><li>IaaS; AMI, type, storage, SG, key pair, user data.</li><li>User data: once, first boot, as root.</li><li>Stop: EBS kept, new public IP on start. Terminate: gone, root EBS deleted.</li><li>Elastic IP keeps a fixed public IPv4.</li></ul></div>
+      <div class="card"><h3>Instance types</h3><ul><li><code>m5.2xlarge</code> = family · generation · size.</li><li>General (T, M) · Compute (C) · Memory (R, X) · Storage (I, D, H) · Accelerated (P, G).</li></ul></div>
+      <div class="card"><h3>Security groups</h3><ul><li>Allow-only, stateful; inbound blocked, outbound allowed by default.</li><li>Sources: CIDR or another SG; Region/VPC scoped; many-to-many.</li><li>Timeout = SG; refused = app. Ports 21, 22, 80, 443, 3389.</li></ul></div>
+      <div class="card"><h3>Connecting &amp; roles</h3><ul><li>SSH 22 with .pem (chmod 400, ec2-user); PuTTY .ppk; RDP 3389 for Windows.</li><li>Instance Connect: browser, temporary key, still port 22.</li><li>IAM role via instance profile; never aws configure with your keys.</li></ul></div>
+      <div class="card"><h3>Purchasing &amp; responsibility</h3><ul><li>On-Demand · Reserved (1/3 yr, ~72%) · Convertible · Savings Plans ($/h) · Spot (~90%, interruptible) · Dedicated Host (BYOL) · Dedicated Instance · Capacity Reservation (no discount).</li><li>You: SG rules, OS patches, software, IAM roles, data. AWS: hardware, host isolation, network.</li></ul></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="topH">
+    <h2 id="topH">Topics in this section</h2>
+    <div class="topic-links">
+      <a href="aws-budgets.html">AWS Budgets<span>Alerts before the bill</span></a>
+      <a href="ec2-basics.html">EC2 basics<span>Launch choices</span></a>
+      <a href="ec2-user-data.html">User data &amp; lifecycle<span>Bootstrap, stop, start, terminate</span></a>
+      <a href="ec2-instance-types.html">Instance types<span>Families and names</span></a>
+      <a href="security-groups.html">Security groups<span>Firewall and ports</span></a>
+      <a href="ssh.html">SSH<span>Key pairs, port 22</span></a>
+      <a href="ec2-instance-connect.html">Instance Connect<span>Browser SSH</span></a>
+      <a href="ec2-iam-roles.html">IAM roles for EC2<span>No keys on servers</span></a>
+      <a href="purchasing-options.html">Purchasing options<span>Six ways to pay</span></a>
+    </div>
+  </section>
+
+  <section aria-labelledby="pairH">
+    <h2 id="pairH">Commonly confused pairs</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Pair</th><th>The difference</th></tr></thead>
+        <tbody>
+          <tr><td>Stop vs terminate</td><td>Stop keeps EBS and lets you start again (new public IP); terminate deletes the instance (and root volume by default)</td></tr>
+          <tr><td>Public vs private IPv4</td><td>Public reaches it from the internet and changes on stop/start; private is inside AWS and stays</td></tr>
+          <tr><td>Timeout vs connection refused</td><td>Blocked before arrival (security group) vs arrived but nothing listening (application)</td></tr>
+          <tr><td>Security group vs NACL</td><td>Instance-level, stateful, allow-only vs subnet-level, stateless, allow and deny (VPC section)</td></tr>
+          <tr><td>SSH vs RDP</td><td>Linux, port 22, key pair vs Windows, port 3389</td></tr>
+          <tr><td>Reserved Instance vs Savings Plan</td><td>Commit to an instance configuration vs commit to $ per hour of compute</td></tr>
+          <tr><td>Standard vs Convertible RI</td><td>Bigger discount, fixed vs smaller discount, can change type/family</td></tr>
+          <tr><td>Dedicated Host vs Dedicated Instance</td><td>Whole physical server with host visibility (BYOL) vs hardware not shared with other customers, no host control</td></tr>
+          <tr><td>Capacity Reservation vs Reserved Instance</td><td>Capacity guarantee in one AZ, no discount vs discount for a 1/3-year commitment</td></tr>
+          <tr><td>Spot vs On-Demand</td><td>Up to ~90% cheaper but interruptible vs full price, never interrupted by AWS</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="drillH">
+    <h2 class="stage-title" id="drillH">Mixed drill: name it</h2>
+    <div class="card" id="drill"></div>
+  </section>
+
+  <section aria-labelledby="exH">
+    <h2 id="exH">Exam-style questions</h2>
+    <p class="sub">Twenty original questions in the style of CLF-C02 and common practice sets. Pick an answer (two for "Select TWO") to see why.</p>
+    <div id="mcq"></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Section cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Virtual servers, you manage the OS</span><span class="arrow">→</span><span class="then">EC2 (IaaS)</span></li>
+      <li><span class="if">Configure an instance automatically at first boot</span><span class="arrow">→</span><span class="then">User data</span></li>
+      <li><span class="if">Instance firewall</span><span class="arrow">→</span><span class="then">Security group</span></li>
+      <li><span class="if">Linux admin / Windows admin</span><span class="arrow">→</span><span class="then">SSH 22 / RDP 3389</span></li>
+      <li><span class="if">App on EC2 needs AWS access</span><span class="arrow">→</span><span class="then">IAM role</span></li>
+      <li><span class="if">Steady 24/7 workload for 3 years</span><span class="arrow">→</span><span class="then">Reserved Instance / Savings Plan</span></li>
+      <li><span class="if">Interruptible batch, cheapest</span><span class="arrow">→</span><span class="then">Spot</span></li>
+      <li><span class="if">Per-socket licences, compliance</span><span class="arrow">→</span><span class="then">Dedicated Host</span></li>
+      <li><span class="if">Guaranteed capacity in one AZ</span><span class="arrow">→</span><span class="then">Capacity Reservation</span></li>
+      <li><span class="if">Short, unpredictable, no interruptions</span><span class="arrow">→</span><span class="then">On-Demand</span></li>
+      <li><span class="if">Email when spend passes a threshold</span><span class="arrow">→</span><span class="then">AWS Budgets</span></li>
+      <li><span class="if">Patching the EC2 guest OS</span><span class="arrow">→</span><span class="then">Customer</span></li>
+    </ul>
+  </section>
+
+  <footer>Questions are original, written to the official exam guide (Tasks 3.3, 4.1, 2.1) and the scenario patterns of public practice sets: <a href="https://docs.aws.amazon.com/aws-certification/latest/examguides/cloud-practitioner-02.html">AWS CLF-C02 exam guide</a>, <a href="https://training.resources.awscloud.com/associate-certification-articles/updated-cloud-practitioner-exam-prep-course">AWS official practice question set</a>, <a href="https://www.educative.io/blog/aws-cloud-practitioner-exam-questions-clf-c02">Educative</a>, <a href="https://www.sailor.sh/blog/aws-cloud-practitioner-practice-questions">Sailor.sh</a>. Section notes: EC2 notes 1–11.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('recapSvg'), {
+    zones: [{ id: 'reg', x: 300, y: 20, w: 680, h: 390, kind: 'region', label: 'ap-south-1' }, { id: 'az', x: 520, y: 60, w: 260, h: 330, kind: 'az', label: 'AZ a' }],
+    nodes: {
+      vis: { x: 80, y: 90, icon: 'users', kind: 'user', label: 'Visitors' },
+      adm: { x: 80, y: 300, icon: 'terminal', kind: 'user', label: 'You (SSH)' },
+      sg: { x: 410, y: 190, icon: 'shield', kind: 'sec', label: 'Security group', sub: '80 · 22' },
+      ec2: { x: 650, y: 190, icon: 'chip', kind: 'compute', label: 't3.micro', sub: 'user data: httpd' },
+      ebs: { x: 650, y: 330, icon: 'disk', kind: 'storage', label: 'EBS' },
+      role: { x: 870, y: 190, icon: 'idcard', kind: 'sec', label: 'IAM role' },
+      s3: { x: 870, y: 330, icon: 'bucket', kind: 'storage', label: 'S3' },
+      bud: { x: 870, y: 80, icon: 'chart', kind: 'mgmt', label: 'Budget' }
+    },
+    links: [{ a: 'vis', b: 'sg', via: [[250, 90], [250, 190]] }, { a: 'adm', b: 'sg', via: [[250, 300], [250, 190]] }, { a: 'sg', b: 'ec2' }, { a: 'ec2', b: 'ebs', kind: 'priv' }, { a: 'ec2', b: 'role', kind: 'dash' }, { a: 'role', b: 's3' }, { a: 'ec2', b: 'bud', via: [[650, 80]], kind: 'dash' }]
+  });
+  $('recapPlay').addEventListener('click', async () => {
+    const run = K.newRun('r'); net.reset(); const say = h => $('recapCap').innerHTML = h;
+    try {
+      say('An <b>AMI</b> + <b>instance type</b> + <b>EBS</b> make the instance; <b>user data</b> installed the web server at first boot.'); net.badge('ec2', 'running', 'ok'); await K.sleep(700, run);
+      say('A visitor reaches the public IP; the <b>security group</b> allows HTTP 80.'); await net.send(['vis', 'sg', 'ec2'], { run, label: 'GET /' });
+      say('You connect with <b>SSH on 22</b> (or Instance Connect) using your key pair.'); await net.send(['adm', 'sg', 'ec2'], { run, label: 'SSH :22' });
+      say('The app reads S3 through an <b>IAM role</b>, never stored keys.'); await net.send(['ec2', 'role', 's3'], { run, tone: 'green' });
+      say('A <b>budget</b> watches the bill; the purchasing option (On-Demand, RI, Savings Plan, Spot…) decides the price.'); await net.send(['ec2', 'bud'], { run, tone: 'yellow', label: '$' });
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  });
+
+  K.pick($('drill'), [
+    { q: 'Template with the OS used to launch an instance.', a: 'AMI', why: 'Amazon Machine Image.' },
+    { q: 'Script that runs once at first boot as root.', a: 'User data', why: 'Bootstrapping.' },
+    { q: 'Allow-only, stateful firewall for instances.', a: 'Security group', why: 'Inbound blocked by default.' },
+    { q: 'Static public IPv4 that survives stop/start.', a: 'Elastic IP', why: 'Billed hourly.' },
+    { q: 'Gives an instance temporary AWS credentials.', a: 'IAM role', why: 'Through an instance profile.' },
+    { q: 'Up to 90% off, can be interrupted.', a: 'Spot', why: 'Spare capacity.' },
+    { q: 'Commit to $/hour of compute for 1 or 3 years.', a: 'Savings Plan', why: 'Flexible across instances (Compute SP also covers Lambda, Fargate).' },
+    { q: 'Whole physical server for licences.', a: 'Dedicated Host', why: 'BYOL, host visibility.' },
+    { q: 'Email when monthly cost passes $10.', a: 'AWS Budgets', why: 'Actual or forecasted alerts.' },
+    { q: 'Browser-based SSH with a temporary key.', a: 'Instance Connect', why: 'Still uses port 22.' }
+  ], ['AMI', 'User data', 'Security group', 'Elastic IP', 'IAM role', 'Spot', 'Savings Plan', 'Dedicated Host', 'AWS Budgets', 'Instance Connect']);
+
+  K.mcq($('mcq'), [
+    { q: 'Which AWS service provides resizable virtual servers in the cloud?', o: ['Amazon S3', 'Amazon EC2', 'AWS Lambda', 'Amazon RDS'], a: [1], why: 'EC2 provides virtual servers (instances).' },
+    { q: 'A company wants every new EC2 instance to install a web server automatically on first boot. What should it use?', o: ['An IAM role', 'EC2 user data', 'A security group', 'An Elastic IP'], a: [1], why: 'User data runs a bootstrap script once at first launch.' },
+    { q: 'Which statements about security groups are correct?', o: ['They support allow rules only', 'They are stateless', 'By default all inbound traffic is blocked', 'They can only be attached to one instance', 'They are applied at the subnet level'], a: [0, 2], why: 'Security groups are allow-only and stateful, inbound is blocked by default, and one group can protect many instances.' },
+    { q: 'A user can\'t reach a website on an EC2 instance; the browser times out. What is the MOST likely cause?', o: ['The instance type is too small', 'The security group has no inbound rule for the web port', 'The AMI is out of date', 'The EBS volume is full'], a: [1], why: 'A timeout usually means the traffic was dropped by the security group.' },
+    { q: 'Which port must be open to connect to a Windows instance with Remote Desktop?', o: ['22', '80', '443', '3389'], a: [3], why: 'RDP uses port 3389.' },
+    { q: 'An application on EC2 must upload files to S3. What is the MOST secure way to grant access?', o: ['Run aws configure with an administrator\'s access keys', 'Attach an IAM role with the needed S3 permissions to the instance', 'Put access keys in the user data script', 'Make the bucket public'], a: [1], why: 'Roles provide temporary credentials; stored keys are a risk.' },
+    { q: 'Under the shared responsibility model, which is the customer\'s responsibility for EC2?', o: ['Patching the guest operating system', 'Replacing faulty physical hardware', 'Configuring security group rules', 'Isolating instances on the physical host', 'Physical security of the data centre'], a: [0, 2], why: 'Customers own the OS, software, SG rules, IAM and data; AWS owns hardware and host isolation.' },
+    { q: 'A company runs a database on EC2 24/7 and expects to for the next three years. Which purchasing option gives the biggest discount for that specific instance?', o: ['On-Demand', 'Spot Instances', 'Standard Reserved Instance, 3-year, all upfront', 'Capacity Reservation'], a: [2], why: 'A standard 3-year all-upfront RI gives the deepest discount for a steady, known configuration.' },
+    { q: 'Which purchasing option is BEST for fault-tolerant batch jobs that can be interrupted?', o: ['On-Demand', 'Spot Instances', 'Dedicated Hosts', 'Reserved Instances'], a: [1], why: 'Spot is the cheapest and fits interruptible work.' },
+    { q: 'A company must use its existing per-socket software licences on EC2. Which option should it choose?', o: ['Dedicated Instances', 'Dedicated Hosts', 'Spot Instances', 'Savings Plans'], a: [1], why: 'Dedicated Hosts give visibility of sockets and cores for BYOL.' },
+    { q: 'A team commits to spend $10/hour on compute for 1 year but wants freedom to change instance families and use Lambda. Which option fits?', o: ['Standard Reserved Instances', 'Compute Savings Plan', 'EC2 Instance Savings Plan', 'Capacity Reservation'], a: [1], why: 'Compute Savings Plans apply across families, Regions, and also Fargate and Lambda.' },
+    { q: 'What does an EC2 Capacity Reservation provide?', o: ['A discount for a 1-year term', 'Guaranteed On-Demand capacity in a specific AZ, without a discount', 'A dedicated physical server', 'Free capacity when unused'], a: [1], why: 'It guarantees capacity and is billed at On-Demand rates whether used or not.' },
+    { q: 'Which pricing model has no upfront commitment and charges only for the compute time used?', o: ['On-Demand', 'Reserved Instances', 'Savings Plans', 'Dedicated Hosts reserved for 3 years'], a: [0], why: 'On-Demand is pay-as-you-go with no commitment.' },
+    { q: 'An EC2 instance is stopped and then started. What usually happens to its public IPv4 address?', o: ['It stays the same', 'It changes', 'It becomes private', 'It is converted to an Elastic IP'], a: [1], why: 'Without an Elastic IP, the public IPv4 is released on stop and a new one is assigned on start.' },
+    { q: 'Which EC2 instance family is BEST for an in-memory database with a very large data set?', o: ['Compute optimized', 'Memory optimized', 'Storage optimized', 'General purpose'], a: [1], why: 'Memory optimized (R, X) instances provide large RAM.' },
+    { q: 'In the instance type m5.2xlarge, what does "m" represent?', o: ['The size', 'The generation', 'The instance family', 'The Region'], a: [2], why: 'm = family (general purpose), 5 = generation, 2xlarge = size.' },
+    { q: 'Which service can email a team when monthly AWS costs are forecast to exceed a set amount?', o: ['AWS Budgets', 'AWS CloudTrail', 'Amazon Inspector', 'AWS Artifact'], a: [0], why: 'Budgets supports actual and forecasted alerts.' },
+    { q: 'An IAM administrator can\'t view the Billing console. What must happen?', o: ['Attach AmazonS3FullAccess', 'The root user must activate IAM access to billing information', 'Enable MFA on the user', 'Create a new account'], a: [1], why: 'Activating IAM access to billing is a root-only task.' },
+    { q: 'What is required to connect with EC2 Instance Connect from the console?', o: ['An open RDP port', 'An inbound security group rule allowing SSH on port 22', 'A Dedicated Host', 'An Elastic IP'], a: [1], why: 'Instance Connect uses SSH under the hood.' },
+    { q: 'Which statements about EC2 user data are correct?', o: ['It runs on every reboot', 'It runs only at the first launch by default', 'It runs with root privileges', 'It can only be written in PowerShell', 'It must be stored in S3'], a: [1, 2], why: 'User data runs once at first boot as root.' }
+  ]);
+})();
+</script>
+</body>
+</html>

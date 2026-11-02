@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IAM security tools</title>
+<meta name="description" content="AWS Cloud Practitioner: IAM credential report (account-wide CSV of credential status) and IAM Access Advisor (services each identity can use and when it last used them), used to apply least privilege.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../assets/css/theme.css">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/explainer.css">
+<script src="../assets/js/theme.js"></script>
+<script src="../assets/js/explainer-kit.js"></script>
+<style>
+  .tool-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 14px; align-items: start; }
+  @media (max-width: 880px) { .tool-grid { grid-template-columns: minmax(0, 1fr); } }
+  .rep { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12px; }
+  .rep th, .rep td { padding: 6px 7px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+  .rep th { color: var(--muted); font-weight: 500; }
+  .rep td { color: var(--fg-soft); transition: background .25s; }
+  .rep td.bad { color: var(--bad-text); background: color-mix(in srgb, var(--red) 12%, transparent); }
+  .rep td.ok { color: var(--good-text); }
+  .rep tr.flag td:first-child { box-shadow: inset 3px 0 0 var(--red); }
+  .rep tr.miss td:first-child { box-shadow: inset 3px 0 0 var(--yellow); }
+  .rep button { all: unset; cursor: pointer; font-family: var(--display); font-size: 12px; border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; color: var(--fg-soft); }
+  .rep button[aria-pressed="true"] { border-color: var(--red); color: var(--bad-text); }
+  .tbl-title { font-family: var(--mono); font-size: 12px; color: var(--muted); margin: 0 0 6px; }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">AWS CLF-C02 · IAM · Domain 2 Security &amp; Compliance</div>
+    <h1>IAM security tools</h1>
+    <ul class="lede">
+      <li>Two built-in audit tools, two questions. <b>Credential report</b>: whose <b>credentials</b> are weak? <b>Access Advisor</b>: which <b>permissions</b> are never used?</li>
+      <li>The <b>credential report</b> is <b>account-level</b>: a <b>CSV</b> of every user (and root) with password, MFA and access-key status.</li>
+      <li><b>Access Advisor</b> (the "Last accessed" tab) shows, for a user, group, role or policy, which <b>services</b> it can use and <b>when it last used them</b>.</li>
+      <li>Both serve <b>least privilege</b>: fix weak credentials, remove permissions nobody uses.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: a monthly IAM audit</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="tool-grid">
+        <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 560 460" style="min-width:460px" aria-label="An auditor asks IAM for a credential report and for Access Advisor data"></svg></div>
+        <div class="card"><p class="tbl-title" id="tTitle"></p><div class="scroll"><table class="rep" id="tbl"></table></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li><b>IAM credential report</b> = <b>account-level</b>, downloaded as <b>CSV</b>. Lists all IAM users <b>and the root user</b> with: password enabled / last used / last changed, <b>MFA active</b>, access keys active / <b>last rotated</b> / last used, certificates.</li>
+      <li>Use it to find: users <b>without MFA</b>, <b>old or unused access keys</b>, old passwords, stale users.</li>
+      <li>It can be generated <b>once every 4 hours</b>; AWS keeps one report.</li>
+      <li><b>IAM Access Advisor</b> = <b>last accessed information</b> for a <b>user, group, role or policy</b>: which services it is allowed to use, which <b>policy</b> grants them, and <b>when</b> each was last accessed (tracked for at least 400 days).</li>
+      <li>Use it to <b>remove unused permissions</b>: if a user with AdministratorAccess only ever touches EC2 and S3, narrow their policy.</li>
+      <li>Exam trigger words: "which users have no MFA / old keys" → <b>credential report</b>; "which services has this user used" → <b>Access Advisor</b>.</li>
+      <li>Related (later topics): <b>IAM Access Analyzer</b> finds resources shared publicly or with other accounts; <b>AWS Trusted Advisor</b> flags root without MFA; <b>CloudTrail</b> is the full log of API calls.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+
+  <section aria-labelledby="auH">
+    <h2 class="stage-title" id="auH">Audit this credential report</h2>
+    <div class="stage-kind">Flag every row that needs action · then check</div>
+    <div class="card">
+      <div class="scroll"><table class="rep" id="au"></table></div>
+      <div class="controls" style="justify-content:flex-start;margin-top:10px"><button class="btn primary" id="auCheck" type="button">Check my audit</button><button class="btn" id="auReset" type="button">Reset</button></div>
+      <p class="nf-cap" id="auCap">Today is 1 Nov 2026. Rule of thumb: everyone with console access needs MFA; keys older than 90 days get rotated; users idle for 90+ days get reviewed.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="whH">
+    <h2 class="stage-title" id="whH">Which tool?</h2>
+    <div class="card" id="wh"></div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Run both tools (from the course hands-on)</summary>
+      <ol>
+        <li>IAM → <b>Credential report → Download credential report</b>. Open the CSV.</li>
+        <li>Check the <b>&lt;root_account&gt;</b> row first: MFA should be <code>true</code> and there should be <b>no access keys</b>.</li>
+        <li>For each user check <code>mfa_active</code>, <code>password_last_used</code>, <code>access_key_1_last_rotated</code>, <code>access_key_1_last_used_date</code>.</li>
+        <li>IAM → <b>Users → (a user) → Last accessed</b> tab. See every service the user may use, the policy that grants it, and when it was last used.</li>
+        <li>For services never used, narrow the user's policies.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Exam cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">List of all users and the status of their credentials</span><span class="arrow">→</span><span class="then">Credential report (account-level, CSV)</span></li>
+      <li><span class="if">Services a user can access and when last used</span><span class="arrow">→</span><span class="then">IAM Access Advisor</span></li>
+      <li><span class="if">Remove permissions nobody uses</span><span class="arrow">→</span><span class="then">Access Advisor → least privilege</span></li>
+      <li><span class="if">Find users without MFA</span><span class="arrow">→</span><span class="then">Credential report</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>Credential report</th><th>Access Advisor</th></tr></thead>
+        <tbody>
+          <tr><td>Scope</td><td>Whole account</td><td>One user, group, role or policy</td></tr>
+          <tr><td>Focus</td><td>Credential status (passwords, MFA, keys)</td><td>Service permissions and last use</td></tr>
+          <tr><td>Output</td><td>CSV download</td><td>Console tab (also CLI/API)</td></tr>
+          <tr><td>Helps you</td><td>Fix missing MFA, rotate or delete old keys</td><td>Trim unused permissions</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag">Corrected</span><p><b>Access Advisor isn't only for users.</b> The notes call it user-level; it also works for groups, roles and policies. It reports permissions from identity-based policies only.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <div class="quiz">
+      <details><summary>Is the credential report per user or per account?<span class="go">Show answer</span></summary><div class="ans"><p><b>Per account</b>: one CSV listing every user, including root.</p></div></details>
+      <details><summary>Which tool helps you apply least privilege by showing unused services?<span class="go">Show answer</span></summary><div class="ans"><p><b>IAM Access Advisor</b> (last accessed information).</p></div></details>
+      <details><summary>What should the root row in the credential report show?<span class="go">Show answer</span></summary><div class="ans"><p><b>MFA active, no access keys.</b></p></div></details>
+    </div>
+  </section>
+
+  <footer>Report rows are illustrative. Sources: IAM notes "IAM Security Tools", "IAM: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_getting-report.html">Credential reports</a>; <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_last-accessed.html">Last accessed information</a>.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('stSvg'), {
+    nodes: {
+      aud: { x: 80, y: 90, icon: 'user', kind: 'user', label: 'You (auditor)' },
+      iam: { x: 290, y: 90, icon: 'shield', kind: 'sec', label: 'IAM' },
+      csv: { x: 480, y: 90, icon: 'doc', kind: 'mgmt', label: 'Credential report', sub: 'CSV · whole account' },
+      user: { x: 80, y: 300, icon: 'user', kind: 'user', label: 'Charles', sub: 'AdministratorAccess' },
+      adv: { x: 290, y: 300, icon: 'eye', kind: 'mgmt', label: 'Access Advisor', sub: 'last accessed' },
+      pol: { x: 480, y: 300, icon: 'doc', kind: 'storage', label: 'Narrower policy', sub: 'EC2 + S3 only' }
+    },
+    links: [{ a: 'aud', b: 'iam', label: 'generate' }, { a: 'iam', b: 'csv' }, { a: 'user', b: 'adv', kind: 'dash' }, { a: 'adv', b: 'pol', label: 'trim' }, { a: 'aud', b: 'adv', via: [[180, 90], [180, 210], [290, 210]] }]
+  });
+  const CSV = { head: ['user', 'password_enabled', 'password_last_used', 'mfa_active', 'access_key_1_active', 'key_1_last_rotated'],
+    rows: [['<root_account>', 'true', '2026-10-02', 'true', 'false', 'N/A'], ['Pritam', 'true', '2026-10-31', 'false', 'true', '2026-09-20'], ['CI-Bot', 'false', 'N/A', 'false', 'true', '2025-09-28'], ['old-intern', 'true', '2026-03-14', 'false', 'false', 'N/A'], ['Charles', 'true', '2026-10-30', 'true', 'false', 'N/A']],
+    bad: { 1: [3], 2: [5], 3: [2, 3] } };
+  const ADV = { head: ['service', 'granted by', 'last accessed'], rows: [['Amazon EC2', 'AdministratorAccess', 'today'], ['Amazon S3', 'AdministratorAccess', '2 days ago'], ['IAM', 'AdministratorAccess', '3 months ago'], ['Amazon RDS', 'AdministratorAccess', 'not accessed in tracking period'], ['AWS Lambda', 'AdministratorAccess', 'not accessed in tracking period'], ['…400+ more', 'AdministratorAccess', 'never']] };
+  function table(t, mark) {
+    $('tbl').innerHTML = `<thead><tr>${t.head.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>` + t.rows.map((r, i) => `<tr>${r.map((c, j) => `<td class="${mark && mark[i] && mark[i].includes(j) ? 'bad' : ''}">${c.replace('<', '&lt;').replace('>', '&gt;')}</td>`).join('')}</tr>`).join('') + '</tbody>';
+  }
+  function base(i) {
+    net.reset();
+    net.focus([['aud', 'iam', 'csv', 'adv'], ['aud', 'iam', 'csv'], ['csv'], ['csv'], ['user', 'adv', 'aud'], ['user', 'adv', 'pol'], null][i]);
+    if (i <= 3) { $('tTitle').textContent = 'credential-report.csv (illustrative)'; table(CSV, i >= 2 ? CSV.bad : null); }
+    else { $('tTitle').textContent = 'Access Advisor: Charles (illustrative)'; table(ADV, i >= 5 ? { 3: [2], 4: [2], 5: [2] } : null); }
+    if (i === 0) { $('tTitle').textContent = 'Two tools, two questions'; $('tbl').innerHTML = '<tbody><tr><td>Credential report</td><td>Whose credentials are weak?</td></tr><tr><td>Access Advisor</td><td>Which permissions go unused?</td></tr></tbody>'; }
+    if (i === 3) net.badge('csv', '3 fixes needed', 'bad');
+    if (i === 5) net.badge('pol', 'least privilege', 'ok');
+  }
+  const STEPS = [
+    { title: 'Two questions every audit asks',
+      text: 'IAM has two built-in tools for regular reviews. The <b>credential report</b> answers "whose <b>credentials</b> are weak?". <b>Access Advisor</b> answers "which <b>permissions</b> are never used?". Both lead to the same goal: least privilege.' },
+    { title: 'Generate the credential report',
+      text: 'In IAM choose <b>Credential report → Download</b>. IAM produces one <b>CSV for the whole account</b>: every IAM user plus the root user. You can regenerate it every four hours.',
+      play: async run => { base(1); await net.send(['aud', 'iam'], { run, label: 'generate' }); await net.send(['iam', 'csv'], { run, tone: 'cyan' }); } },
+    { title: 'Read it row by row',
+      text: 'Each row shows the password (enabled, last used), <b>MFA active</b>, and each access key (active, <b>last rotated</b>, last used). The root row should say MFA <b>true</b> and no keys.' },
+    { title: 'Spot the problems',
+      text: '<b>Pritam</b> has no MFA. <b>CI-Bot</b>\'s key hasn\'t been rotated for over a year. <b>old-intern</b> hasn\'t signed in for months and has no MFA: probably a leaver to remove. Fix these and rerun the report.',
+      tip: '"Find users without MFA or with old keys" → credential report.' },
+    { title: 'Access Advisor: what Charles really uses',
+      text: 'Open <b>Users → Charles → Last accessed</b>. Access Advisor lists every service his policies allow (all 400+, thanks to AdministratorAccess), which policy grants it, and <b>when he last used it</b>. It also works for groups, roles and policies.',
+      play: async run => { base(4); await net.send(['aud', 'adv'], { run, label: 'last accessed' }); } },
+    { title: 'Trim to what is used',
+      text: 'Charles only uses EC2 and S3. Replace AdministratorAccess with a policy for those services. If something breaks, AccessDenied names exactly what to add back. That\'s <b>least privilege</b> in practice.',
+      tip: '"Which services has this user used / remove unused permissions" → Access Advisor.',
+      play: async run => { base(5); await net.send(['adv', 'pol'], { run, tone: 'green' }); } },
+    { title: 'Make it a habit',
+      text: 'Run both monthly. Later in the course: <b>IAM Access Analyzer</b> spots resources shared publicly or with other accounts, <b>Trusted Advisor</b> warns about root without MFA, and <b>CloudTrail</b> records every API call.' }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* audit drill */
+  const AU = [
+    { r: ['<root_account>', 'true', '2026-10-28', 'true', 'false', 'N/A'], bad: false, why: 'Root has MFA and no keys: good.' },
+    { r: ['<root_account> (other acct)', 'true', '2026-10-12', 'false', 'true', '2024-02-01'], bad: true, why: 'Root without MFA and with access keys: fix first.' },
+    { r: ['priya', 'true', '2026-10-31', 'true', 'true', '2026-09-15'], bad: false, why: 'MFA on, key rotated recently.' },
+    { r: ['backup-job', 'false', 'N/A', 'false', 'true', '2025-01-10'], bad: true, why: 'Key not rotated for almost two years: rotate it (or replace with a role).' },
+    { r: ['rahul', 'true', '2026-10-30', 'false', 'false', 'N/A'], bad: true, why: 'Console user without MFA.' },
+    { r: ['temp-contractor', 'true', '2026-02-02', 'true', 'false', 'N/A'], bad: true, why: 'Unused for nine months: review and remove.' }
+  ];
+  const head = ['user', 'password_enabled', 'password_last_used', 'mfa_active', 'access_key_1_active', 'key_1_last_rotated', ''];
+  function auDraw() { $('au').innerHTML = `<thead><tr>${head.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>` + AU.map((x, i) => `<tr data-i="${i}">${x.r.map(c => `<td>${c.replace('<', '&lt;').replace('>', '&gt;')}</td>`).join('')}<td><button type="button" aria-pressed="false" data-i="${i}">Flag</button></td></tr>`).join('') + '</tbody>'; }
+  $('au').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); });
+  $('auCheck').addEventListener('click', () => {
+    let right = 0, notes = [];
+    AU.forEach((x, i) => { const f = $('au').querySelector(`button[data-i="${i}"]`).getAttribute('aria-pressed') === 'true'; const tr = $('au').querySelector(`tr[data-i="${i}"]`); tr.classList.toggle('flag', f && x.bad); tr.classList.toggle('miss', !f && x.bad); if (f === x.bad) right++; else notes.push(`<b>${x.r[0].replace('<', '&lt;').replace('>', '&gt;')}</b>: ${x.why}`); });
+    $('auCap').innerHTML = right === AU.length ? '<span class="ok-text">All six right.</span> Four rows need action: root without MFA, an old key, a user without MFA, and a stale user.' : `<span class="accent">${right} of ${AU.length} right.</span><br>${notes.join('<br>')}`;
+  });
+  $('auReset').addEventListener('click', () => { auDraw(); $('auCap').textContent = 'Flag every row that needs action, then check.'; });
+  auDraw();
+
+  K.pick($('wh'), [
+    { q: 'Security asks for a list of every IAM user who has no MFA.', a: 'Credential report', why: 'Account-wide credential status.' },
+    { q: 'You want to know whether Bob has ever used DynamoDB.', a: 'Access Advisor', why: 'Last accessed information per service.' },
+    { q: 'Find access keys that haven\'t been rotated in 90 days.', a: 'Credential report', why: 'It shows key last-rotated dates.' },
+    { q: 'A role has broad permissions; you want to cut the unused ones.', a: 'Access Advisor', why: 'It works for roles too.' }
+  ], ['Credential report', 'Access Advisor']);
+})();
+</script>
+</body>
+</html>

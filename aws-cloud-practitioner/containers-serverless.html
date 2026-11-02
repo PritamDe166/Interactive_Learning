@@ -53,16 +53,16 @@
   </header>
 
   <section aria-labelledby="whatH">
-    <h2 id="whatH">In .NET / Azure terms</h2>
-    <p class="sub">Each AWS compute option maps to something in the Azure / .NET world.</p>
+    <h2 id="whatH">In terms you already know</h2>
+    <p class="sub">Each AWS compute option, next to what you would build yourself with Docker and .NET.</p>
     <div class="card analogy">
-      <div class="row head"><span>AWS</span><span>Closest .NET / Azure idea</span><span>The difference</span></div>
-      <div class="row"><span class="aws">ECR</span><span class="like">Azure Container Registry</span><span>Private registry for your Docker images.</span></div>
-      <div class="row"><span class="aws">ECS</span><span class="like">Azure Container Apps / Service Fabric</span><span>AWS's own container orchestrator.</span></div>
-      <div class="row"><span class="aws">Fargate</span><span class="like">Azure Container Instances</span><span>Run containers without managing VMs.</span></div>
-      <div class="row"><span class="aws">EKS</span><span class="like">AKS</span><span>Managed Kubernetes.</span></div>
-      <div class="row"><span class="aws">Lambda</span><span class="like">Azure Functions</span><span>Event-driven functions, 15-minute max, pay per use.</span></div>
-      <div class="row"><span class="aws">API Gateway</span><span class="like">Azure API Management</span><span>HTTP front door with auth, throttling, API keys.</span></div>
+      <div class="row head"><span>AWS</span><span>Closest idea you already know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">ECR</span><span class="like">A private Docker Hub for your company</span><span>Private registry for your Docker images.</span></div>
+      <div class="row"><span class="aws">ECS</span><span class="like">Docker Compose run for you across many servers</span><span>AWS's own container orchestrator.</span></div>
+      <div class="row"><span class="aws">Fargate</span><span class="like">docker run without owning the machine</span><span>Run containers without managing VMs.</span></div>
+      <div class="row"><span class="aws">EKS</span><span class="like">A Kubernetes cluster someone else keeps running</span><span>Managed Kubernetes.</span></div>
+      <div class="row"><span class="aws">Lambda</span><span class="like">A background job or controller action that only exists while it runs</span><span>Event-driven functions, 15-minute max, pay per use.</span></div>
+      <div class="row"><span class="aws">API Gateway</span><span class="like">The front door of an ASP.NET API: routing, auth, rate limits</span><span>HTTP front door with auth, throttling, API keys.</span></div>
     </div>
   </section>
 
@@ -237,7 +237,7 @@
       { title: 'Start: your .NET API on one EC2 instance',
         text: 'Today the API runs on a VM. You patch its OS, install the runtime, deploy the app and keep it running. It works, but every server is yours to look after.' },
       { title: 'Package the app as a container',
-        text: 'A <b>container image</b> bundles your app with its runtime and dependencies, so it runs the same everywhere (like a <span class="mono">Dockerfile</span> build). Push images to <b>Amazon ECR</b>, AWS\'s private registry (like Azure Container Registry).',
+        text: 'A <b>container image</b> bundles your app with its runtime and dependencies, so it runs the same everywhere (like a <span class="mono">Dockerfile</span> build). Push images to <b>Amazon ECR</b>, AWS\'s private registry (like a private Docker Hub).',
         play: async run => { await reveal(['ecr', 'img', 'lImg'], run); const p = K.pill(P, 'docker push', 'alt'); await K.move(p, [95, 137], [95, 88], 450, run); p.remove(); } },
       { title: 'ECS runs containers for you',
         text: '<b>Amazon ECS</b> decides where containers run, starts them, restarts failed ones and connects them to a load balancer. With the <b>EC2 launch type</b>, the cluster\'s EC2 hosts are still <b>yours</b> to size and patch.',
@@ -247,13 +247,13 @@
         tip: '"Containers with least operational overhead" → Fargate.',
         play: async run => { for (const k of ['os0', 'os1', 'host1', 'host2']) { E[k].classList.add('gone'); await K.sleep(250, run); } } },
       { title: 'EKS: if your team uses Kubernetes',
-        text: '<b>Amazon EKS</b> is managed <b>Kubernetes</b> (like AKS). Containers run as <b>pods</b> on EC2 nodes or on Fargate. Choose it when you already use Kubernetes or need to stay portable across clouds; otherwise ECS is simpler.',
+        text: '<b>Amazon EKS</b> is managed <b>Kubernetes</b>. Containers run as <b>pods</b> on EC2 nodes or on Fargate. Choose it when you already use Kubernetes or need to stay portable across clouds; otherwise ECS is simpler.',
         tip: 'The word "Kubernetes" in a question → EKS.' },
       { title: 'Lambda: just a function, run by events',
         text: 'For small pieces of work, skip servers and containers entirely. A <b>Lambda</b> function runs when an <b>event</b> happens (a file lands in S3, a message arrives, a schedule fires), scales automatically to thousands of parallel runs, and stops. Max <b>15 minutes</b> per run.',
         play: flow },
       { title: 'API Gateway: put an HTTP API in front',
-        text: 'A Lambda function has no URL of its own. <b>API Gateway</b> gives it one, plus authentication, throttling and API keys (like Azure API Management). API Gateway + Lambda + DynamoDB is the classic <b>serverless API</b>.',
+        text: 'A Lambda function has no URL of its own. <b>API Gateway</b> gives it one, plus authentication, throttling and API keys (the jobs an API gateway or middleware does in ASP.NET). API Gateway + Lambda + DynamoDB is the classic <b>serverless API</b>.',
         play: flow },
       { title: 'Pay only while code runs',
         text: 'An EC2 instance is billed every second it\'s on, busy or idle. Lambda bills <b>per request</b> ($0.20 per million) plus <b>duration × memory</b> (GB-seconds). The free tier covers 1M requests and 400,000 GB-seconds a month. Idle costs nothing.' },
