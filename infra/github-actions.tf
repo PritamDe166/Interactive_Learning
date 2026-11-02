@@ -29,7 +29,10 @@ data "aws_iam_policy_document" "github_actions_trust" {
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:PritamDe166/Interactive_Learning:ref:refs/heads/main"]
+      values = [
+        "repo:PritamDe166@141994281/Interactive_Learning@1438523169:ref:refs/heads/main",
+        "repo:PritamDe166/Interactive_Learning:ref:refs/heads/main"
+      ]
     }
   }
 }
