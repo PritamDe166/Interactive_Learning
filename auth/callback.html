@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/auth.css">
 <script src="../assets/js/theme.js"></script>
+<script src="../assets/js/auth.js"></script>
 </head>
 <body>
 <div class="wrap auth-wrap">
@@ -27,18 +28,16 @@
     <section class="panel auth-card" aria-labelledby="status-title">
       <div class="eyebrow">Sign-in checkpoint</div>
       <h2 id="status-title">You’re almost in.</h2>
-      <p class="auth-card-copy" id="callbackMessage">The authentication callback is ready. Token exchange will be connected in the next step.</p>
-      <a class="google-button" href="../index.html">Continue to explainers</a>
+      <p class="auth-card-copy" id="callbackMessage">Completing your secure Cognito session…</p>
+      <a class="google-button" href="../login.html">Return to sign in</a>
       <p class="auth-footer">If you did not start this sign-in, close this tab.</p>
     </section>
   </main>
 </div>
 <script>
-const params = new URLSearchParams(window.location.search);
-const message = document.getElementById('callbackMessage');
-if (params.has('error')) {
-  message.textContent = 'The sign-in provider returned an error. Please return to the login page and try again.';
-}
+window.auth.completeGoogleSignIn().catch(error => {
+  document.getElementById('callbackMessage').textContent = error.message;
+});
 </script>
 </body>
 </html>

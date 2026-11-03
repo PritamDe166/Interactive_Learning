@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="assets/css/base.css">
 <link rel="stylesheet" href="assets/css/auth.css">
 <script src="assets/js/theme.js"></script>
+<script src="assets/js/auth.js"></script>
 </head>
 <body>
 <div class="wrap auth-wrap">
@@ -52,8 +53,15 @@
   </main>
 </div>
 <script>
-document.getElementById('googleSignIn').addEventListener('click', () => {
-  document.getElementById('authStatus').hidden = false;
+document.getElementById('googleSignIn').addEventListener('click', async () => {
+  const button = document.getElementById('googleSignIn');
+  button.disabled = true;
+  try { await window.auth.startGoogleSignIn(); }
+  catch (error) {
+    document.getElementById('authStatus').textContent = error.message;
+    document.getElementById('authStatus').hidden = false;
+    button.disabled = false;
+  }
 });
 </script>
 </body>
