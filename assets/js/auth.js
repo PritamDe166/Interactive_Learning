@@ -1,6 +1,7 @@
 /* Cognito authorization-code flow for the static website. */
 const COGNITO_DOMAIN = 'https://ap-south-2kb5kpaQta.auth.ap-south-2.amazoncognito.com';
 const COGNITO_CLIENT_ID = '322ksn2mncfa1kcj8hhlhh9i5';
+const AUTH_API_URL = 'https://jyibhpqcx0.execute-api.ap-south-2.amazonaws.com';
 const AUTH_REDIRECT_URI = `${window.location.origin}/auth/callback.html`;
 
 const base64Url = bytes => btoa(String.fromCharCode(...bytes))
@@ -46,22 +47,17 @@ async function completeGoogleSignIn() {
   if (!code) throw new Error('No authorization code was returned. Start again from the login page.');
   if (!expectedState || params.get('state') !== expectedState) throw new Error('The sign-in state did not match. Start again from the login page.');
 
-  const body = new URLSearchParams({
-    grant_type: 'authorization_code',
-    client_id: COGNITO_CLIENT_ID,
-    code,
-    redirect_uri: AUTH_REDIRECT_URI,
-    code_verifier: verifier
-  });
-  const response = await fetch(`${COGNITO_DOMAIN}/oauth2/token`, {
+  const response = await fetch(`${AUTH_API_URL}/session`, {
     method: 'POST',
-    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-    body
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({code, codeVerifier: verifier})
   });
-  const tokens = await response.json();
-  if (!response.ok) throw new Error(tokens.error_description || tokens.error || 'Token exchange failed.');
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error || 'Authentication service rejected the session.');
 
-  sessionStorage.setItem('cognito_tokens', JSON.stringify(tokens));
+  Object.entries(result.cookies || {}).forEach(([name, value]) => {
+    document.cookie = `${name}=${value}; Max-Age=3600; Path=/; Secure; SameSite=Lax`;
+  });
   sessionStorage.removeItem('cognito_oauth_state');
   sessionStorage.removeItem('cognito_pkce_verifier');
   window.history.replaceState({}, document.title, window.location.pathname);
