@@ -43,8 +43,8 @@
 /* ===== Edit these two lists as you add work. ===== */
 const SUBJECTS = [
   {name:"System Design", path:"system-design/index.html", accent:"var(--teal)", icon:"net",
-   blurb:"Two tracks. HLD: 119-day roadmap of networking, scaling, caching, databases, distributed systems and reliability. LLD: SOLID and object-oriented design, more as you learn.",
-   done:14, total:119, unit:"HLD days", pages:18},
+   blurb:"Two tracks. HLD: 147 sessions (H1–H147) from networking, scaling and caching to databases, distributed systems and reliability. LLD: 67 topics (L1–L67) from OOP and SOLID to design patterns, concurrency and classic problems.",
+   done:21, total:147, unit:"HLD sessions", pages:32},
   {name:"AWS", path:"aws-cloud-practitioner/index.html", accent:"var(--orange)", icon:"cloud",
    blurb:"Cloud Practitioner (CLF-C02), one page per topic: follow each request as it travels through Regions, AZs, edge locations and services. Being rebuilt section by section.",
    done:30, total:85, unit:"topics rebuilt", pages:43},
@@ -59,6 +59,15 @@ const SUBJECTS = [
    done:0, total:null, unit:"topics"}
 ];
 const RECENT = [
+  {subject:"System Design", title:"LLD creational patterns: Singleton, Factory method, Abstract factory, Builder, Prototype", note:"LLD L12–L16", href:"system-design/lld/singleton.html"},
+  {subject:"System Design", title:"Caching in practice: worked design, sizing calculator, CDN cache-key lab", note:"HLD Week 3 playbook", href:"system-design/hld/caching-in-practice.html"},
+  {subject:"System Design", title:"CDN & HTTP caching: Cache-Control, ETag, header lab", note:"HLD Day 21", href:"system-design/hld/cdn-http-caching.html"},
+  {subject:"System Design", title:"Caching failure modes: stampede & avalanche simulator", note:"HLD Day 20", href:"system-design/hld/cache-failure-modes.html"},
+  {subject:"System Design", title:"Distributed caching: L1 + L2, Redis cluster, add-a-node lab", note:"HLD Day 19", href:"system-design/hld/distributed-caching.html"},
+  {subject:"System Design", title:"Eviction: inside an LRU cache + LRU/LFU/FIFO race", note:"HLD Day 18", href:"system-design/hld/cache-eviction.html"},
+  {subject:"System Design", title:"Write strategies & invalidation: race replayer", note:"HLD Day 17", href:"system-design/hld/cache-write-strategies.html"},
+  {subject:"System Design", title:"Read strategies: cache-aside, read-through, request lab", note:"HLD Day 16", href:"system-design/hld/cache-read-strategies.html"},
+  {subject:"System Design", title:"Cache patterns at a glance: 14 looping diagrams + scenario picker", note:"HLD Week 3 atlas", href:"system-design/hld/caching-patterns-atlas.html"},
   {subject:"System Design", title:"Why caching exists: hits, misses, layers & limits", note:"HLD Day 15", href:"system-design/hld/caching-overview.html"},
   {subject:"AWS", title:"EC2 storage review: summary & 20 exam-style questions", note:"Storage review", href:"aws-cloud-practitioner/storage-review.html"},
   {subject:"AWS", title:"Choosing EC2 storage: decision walker", note:"Storage 8", href:"aws-cloud-practitioner/ec2-storage-choices.html"},

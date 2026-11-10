@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="../../assets/css/explainer.css">
 <script src="../../assets/js/theme.js"></script>
 <script src="../../assets/js/explainer-kit.js"></script>
+<script src="../sd-series.js"></script>
 <style>
   .pcards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 10px; margin-top: 8px; }
   .pcard { display: grid; gap: 6px; padding: 14px; border: 1.5px solid var(--line); border-radius: 14px; background: var(--panel); text-decoration: none; color: var(--fg); transition: border-color .15s, transform .15s; }
@@ -52,35 +53,40 @@
     </ul>
   </header>
 
-  <section aria-labelledby="pcH">
-    <h2 class="stage-title" id="pcH">The five, one page each</h2>
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn: the idea, then the code</h2>
+    <p class="sec-sub">Step through the walkthrough with <b>Next ▶</b>, then compare the before and after C#.</p>
+    <div class="sub-block" aria-labelledby="pcH">
+    <h3 class="stage-title sub" id="pcH">The five, one page each</h3>
     <div class="stage-kind">Open a principle for its own walkthrough and playground</div>
     <div class="pcards" id="pcards"></div>
-  </section>
-
-  <section aria-labelledby="storyH">
-    <h2 class="stage-title" id="storyH">Walkthrough: all five in one design</h2>
+  </div>
+    <div class="sub-block" aria-labelledby="storyH">
+    <h3 class="stage-title sub" id="storyH">Walkthrough: all five in one design</h3>
     <div class="stage-kind">An appointment-booking feature · each step lights up one principle</div>
     <div class="story wide" id="solidStory">
       <div class="scroll"><svg class="diagram" id="solidSvg" style="min-width:0" viewBox="0 0 760 400" role="img" aria-label="Class diagram of an appointment booking design showing the five SOLID principles"></svg></div>
     </div>
+  </div>
   </section>
 
-  <h2 class="part-title">Try it yourself</h2>
-  <p class="sub">Spot which principle a snippet breaks, then see what happens when you apply SOLID too hard.</p>
-
-  <section aria-labelledby="spotH">
-    <h2 class="stage-title" id="spotH">1. Spot the violation</h2>
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">2</span>Try it yourself</h2>
+    <p class="sec-sub">Spot which principle a snippet breaks, then see what happens when you apply SOLID too hard.</p>
+    <div class="sub-block" aria-labelledby="spotH">
+    <h3 class="stage-title sub" id="spotH">1. Spot the violation</h3>
     <div class="stage-kind">Read the C#, pick the principle it breaks most clearly</div>
     <div class="spot-head"><div class="label" id="spotCount"></div><div class="label" id="spotScore"></div></div>
     <pre class="codeblock" id="spotCode" style="min-height:0;overflow-x:auto"></pre>
     <div class="spot-btns" id="spotBtns"></div>
     <p class="status-line" id="spotWhy" style="text-align:left">Which letter? S, O, L, I or D.</p>
     <div class="controls"><button class="btn" type="button" id="spotNext">Next snippet ▶</button></div>
-  </section>
-
-  <section aria-labelledby="dialH">
-    <h2 class="stage-title" id="dialH">2. Guidelines, not rules</h2>
+  </div>
+    <div class="sub-block" aria-labelledby="dialH">
+    <h3 class="stage-title sub" id="dialH">2. Guidelines, not rules</h3>
     <div class="stage-kind">One small feature, "send a welcome email" · turn up how strictly SOLID is applied</div>
     <label class="label" for="dial">Strictness: <span id="dialV" class="mono"></span></label>
     <input type="range" id="dial" min="0" max="3" value="1" style="width:100%">
@@ -88,10 +94,13 @@
       <pre class="codeblock" id="dialCode"></pre>
       <div class="card"><div class="label">Verdict</div><p class="verdict" id="dialVerdict"></p><p class="muted" id="dialCount"></p></div>
     </div>
+  </div>
   </section>
 
-  <section aria-labelledby="cheatH">
-    <h2 id="cheatH">Cheat-sheet</h2>
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">3</span>Revise in two minutes</h2>
+    <div class="sub-block" aria-labelledby="cheatH">
+    <h3 class="sec-h3" id="cheatH">Cheat-sheet</h3>
     <ul class="cheat">
       <li><span class="if">One class changes for unrelated reasons (DB, email, rules)</span><span class="arrow">→</span><span class="then"><b>S</b>: split by reason to change</span></li>
       <li><span class="if">Every new type means editing a switch or if-chain in tested code</span><span class="arrow">→</span><span class="then"><b>O</b>: extend with a new class (decorator, strategy, extension method)</span></li>
@@ -100,10 +109,9 @@
       <li><span class="if"><span class="mono">new SqlRepository()</span> inside a service; can't test without a real DB</span><span class="arrow">→</span><span class="then"><b>D</b>: depend on an interface, inject it through the constructor</span></li>
       <li><span class="if">More interfaces than real alternatives, one method each</span><span class="arrow">→</span><span class="then">you've overdone it: keep it simple</span></li>
     </ul>
-  </section>
-
-  <section aria-labelledby="refH">
-    <h2 id="refH">Reference: the five at a glance</h2>
+  </div>
+    <div class="sub-block" aria-labelledby="refH">
+    <h3 class="sec-h3" id="refH">Reference: the five at a glance</h3>
     <div class="scroll card table-card">
       <table>
         <thead><tr><th></th><th>Principle</th><th>One line</th><th>Typical C# tool</th></tr></thead>
@@ -120,10 +128,13 @@
       <div class="note"><span class="flag add">Added</span><p><b>The cautions in your notes:</b> you can follow every principle and still write bad code; over-applied interface segregation ends in one method per interface; most projects have one implementation per interface, so the main practical win of interfaces is <b>mocking in tests</b>, not swapping databases.</p></div>
       <div class="note"><span class="flag add">Added</span><p><b>Where the name comes from:</b> the principles were collected by Robert C. Martin around 2000; Michael Feathers coined the SOLID acronym. Liskov substitution is from Barbara Liskov (1987).</p></div>
     </div>
+  </div>
   </section>
 
-  <section aria-labelledby="quizH">
-    <h2 id="quizH">Check yourself</h2>
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">4</span>Test yourself</h2>
+    <div class="sub-block" aria-labelledby="quizH">
+    <h3 class="sec-h3" id="quizH">Check yourself</h3>
     <p class="sub">Answer out loud before you open each card.</p>
     <div class="quiz">
       <details><summary>Name the five principles and give each a one-line meaning.<span class="go">Show answer</span></summary>
@@ -139,9 +150,10 @@
       <details><summary>In an interview, how would you show SOLID rather than recite it?<span class="go">Show answer</span></summary>
         <div class="ans"><p>Take one small design (booking, payments, notifications), point at a concrete smell, and show the before/after: which class changes now, and what you can test in isolation.</p></div></details>
     </div>
+  </div>
   </section>
 
-  <nav class="solid-nav" aria-label="SOLID pages"><a href="index.html">← LLD roadmap</a><a href="solid-srp.html">S · Single responsibility →</a></nav>
+  <nav id="prevnext"></nav>
 
   <footer>Sources: your Notion notes "SOLID Principles: Five Guidelines for Object-Oriented Code" (LLD, Topic-Wise Explanation); Robert C. Martin's SOLID articles; the principle pages linked above list their own sources. The booking design, snippets and strictness levels are illustrative.</footer>
 </div>
@@ -317,6 +329,9 @@ public class WelcomeEmailFactory : IEmailFactory { ... }
   }
   $('dial').addEventListener('input', dial); dial();
 })();
+</script>
+<script>
+SD.page({ track: 'lld' });
 </script>
 </body>
 </html>

@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="../../assets/css/explainer.css">
 <script src="../../assets/js/theme.js"></script>
 <script src="../../assets/js/explainer-kit.js"></script>
+<script src="../sd-series.js"></script>
 <style>
   .chain { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0; margin-top: 12px; }
   .layer { border: 2px solid var(--line); border-radius: 14px; padding: 10px 12px; margin: 4px; background: var(--panel); transition: border-color .25s, box-shadow .25s; min-width: 140px; }
@@ -42,16 +43,21 @@
     </ul>
   </header>
 
-  <section aria-labelledby="storyH">
-    <h2 class="stage-title" id="storyH">Walkthrough: fees, plans and a cache</h2>
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn: the idea, then the code</h2>
+    <p class="sec-sub">Step through the walkthrough with <b>Next ▶</b>, then compare the before and after C#.</p>
+    <div class="sub-block" aria-labelledby="storyH">
+    <h3 class="stage-title sub" id="storyH">Walkthrough: fees, plans and a cache</h3>
     <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
     <div class="story wide" id="ocpStory">
       <div class="scroll"><svg class="diagram" id="ocpSvg" style="min-width:0" viewBox="0 0 760 380" role="img" aria-label="Class diagrams showing a fee calculator refactored to strategies, then a repository decorated with caching"></svg></div>
     </div>
-  </section>
-
-  <section aria-labelledby="codeH">
-    <h2 class="stage-title" id="codeH">The same thing in C#</h2>
+  </div>
+    <div class="sub-block" aria-labelledby="codeH">
+    <h3 class="stage-title sub" id="codeH">The same thing in C#</h3>
     <div class="stage-kind">Strategy for new plans · decorator for new behaviour</div>
     <div class="cs-pair">
       <div><div class="label bad-text">Before: every new plan edits this method</div><pre class="codeblock" id="csBefore"></pre></div>
@@ -61,13 +67,14 @@
       <div><div class="label ok-text">Decorator: caching added around the real repository</div><pre class="codeblock" id="csDeco"></pre></div>
       <div><div class="label ok-text">Extension method: a new method on a type you can't edit</div><pre class="codeblock" id="csExt"></pre></div>
     </div>
+  </div>
   </section>
 
-  <h2 class="part-title">Try it yourself</h2>
-  <p class="sub">Add plans to both designs, then build a decorator stack and call it.</p>
-
-  <section aria-labelledby="simH">
-    <h2 class="stage-title" id="simH">1. Add three new plans</h2>
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">2</span>Try it yourself</h2>
+    <p class="sec-sub">Add plans to both designs, then build a decorator stack and call it.</p>
+    <div class="sub-block" aria-labelledby="simH">
+    <h3 class="stage-title sub" id="simH">1. Add three new plans</h3>
     <div class="stage-kind">Same three requests, two designs · count what you touch in tested code</div>
     <div class="seg" id="plDesign" role="group" aria-label="Design"><button type="button" data-v="switch" aria-pressed="true">switch in FeeCalculator</button><button type="button" data-v="strategy" aria-pressed="false">IDiscountPolicy strategies</button></div>
     <div class="chips" id="plBtns" style="margin-top:10px"></div>
@@ -82,10 +89,9 @@
     </div>
     <div class="controls" style="margin-top:10px"><button class="btn" type="button" id="plReset">Reset</button></div>
     <p class="status-line" id="plStatus">Pick a design, then add plans.</p>
-  </section>
-
-  <section aria-labelledby="decoH">
-    <h2 class="stage-title" id="decoH">2. Decorator stack builder</h2>
+  </div>
+    <div class="sub-block" aria-labelledby="decoH">
+    <h3 class="stage-title sub" id="decoH">2. Decorator stack builder</h3>
     <div class="stage-kind">Wrap the real repository in layers · then call GetPatient(42) twice</div>
     <div class="chips" id="dcBtns"><button class="chip-btn" type="button" data-k="log" aria-pressed="false">+ Logging</button><button class="chip-btn" type="button" data-k="cache" aria-pressed="false">+ Caching</button><button class="chip-btn" type="button" data-k="retry" aria-pressed="false">+ Retry</button></div>
     <div class="chain" id="dcChain"></div>
@@ -93,10 +99,13 @@
     <div class="controls"><button class="btn primary" type="button" id="dcCall">Call GetPatient(42) twice</button></div>
     <div class="card"><div class="label">What happened</div><pre class="mono ocp-log" id="dcLog">Add layers, then call.</pre></div>
     <p class="status-line" id="dcStatus">BookingService only sees IPatientRepository, so none of this needed a change to it.</p>
+  </div>
   </section>
 
-  <section aria-labelledby="cheatH">
-    <h2 id="cheatH">Cheat-sheet</h2>
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">3</span>Revise in two minutes</h2>
+    <div class="sub-block" aria-labelledby="cheatH">
+    <h3 class="sec-h3" id="cheatH">Cheat-sheet</h3>
     <ul class="cheat">
       <li><span class="if">A switch / if-chain on a type, plan, format or channel keeps growing</span><span class="arrow">→</span><span class="then">strategy: one class per case behind an interface</span></li>
       <li><span class="if">Need logging, caching, retry or metrics around an existing service</span><span class="arrow">→</span><span class="then">decorator registered in DI; the service is untouched</span></li>
@@ -105,10 +114,9 @@
       <li><span class="if">"What if we need X someday?" with no evidence</span><span class="arrow">→</span><span class="then">don't add the abstraction yet; refactor when the second case arrives</span></li>
       <li><span class="if">Interview: "how does OCP relate to plugins?"</span><span class="arrow">→</span><span class="then">the core knows only the interface; plugins (new classes) depend on the core, not the other way round</span></li>
     </ul>
-  </section>
-
-  <section aria-labelledby="refH">
-    <h2 id="refH">Reference: ways to extend without modifying</h2>
+  </div>
+    <div class="sub-block" aria-labelledby="refH">
+    <h3 class="sec-h3" id="refH">Reference: ways to extend without modifying</h3>
     <div class="scroll card table-card">
       <table>
         <thead><tr><th>Technique</th><th>How</th><th>Switch at runtime?</th><th>Watch out</th></tr></thead>
@@ -126,10 +134,13 @@
       <div class="note"><span class="flag add">Added</span><p><b>Real examples people use:</b> discounts by customer type, notification channels, payment methods, report formats, tax rules. Each is a family of variants that grows over time, which is exactly where OCP pays off.</p></div>
       <div class="note"><span class="flag add">Added</span><p><b>Strategic closure:</b> you can't predict every change. Close the design along the axes that are already varying (here: plans and cross-cutting concerns), and leave the rest simple until a real second case appears.</p></div>
     </div>
+  </div>
   </section>
 
-  <section aria-labelledby="quizH">
-    <h2 id="quizH">Check yourself</h2>
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">4</span>Test yourself</h2>
+    <div class="sub-block" aria-labelledby="quizH">
+    <h3 class="sec-h3" id="quizH">Check yourself</h3>
     <p class="sub">Answer out loud before you open each card.</p>
     <div class="quiz">
       <details><summary>Why is editing a tested, shipped class riskier than adding a new one?<span class="go">Show answer</span></summary>
@@ -145,9 +156,10 @@
       <details><summary>How is OCP connected to Liskov substitution?<span class="go">Show answer</span></summary>
         <div class="ans"><p>Extension through interfaces only works if every new implementation honours the contract. A new strategy that throws or behaves differently breaks callers, which is an LSP failure.</p></div></details>
     </div>
+  </div>
   </section>
 
-  <nav class="solid-nav" aria-label="SOLID pages"><a href="solid-srp.html">← S · Single responsibility</a><a href="solid-lsp.html">L · Liskov substitution →</a></nav>
+  <nav id="prevnext"></nav>
 
   <footer>Sources: your Notion notes "SOLID Principles: Five Guidelines for Object-Oriented Code"; Robert C. Martin, "The Open Closed Principle" (Clean Coder blog, 2014); Bertrand Meyer, <i>Object-Oriented Software Construction</i> (1988); dotnettutorials.net real-time OCP examples in C#. Plans, fees and log lines are illustrative.</footer>
 </div>
@@ -328,6 +340,9 @@ if (slot.IsClinicHoliday()) { ... }`, 'cs');
   $('dcCall').addEventListener('click', callTwice);
   drawDeco();
 })();
+</script>
+<script>
+SD.page({ track: 'lld' });
 </script>
 </body>
 </html>

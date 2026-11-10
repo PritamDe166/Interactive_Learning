@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cache Eviction Policies</title>
+<meta name="description" content="H18: LRU, LFU, FIFO and TTL, animated; how an LRU cache is built from a hash map and a doubly linked list; and a three-way eviction race.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/theme.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/explainer.css">
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/explainer-kit.js"></script>
+<script src="../sd-series.js"></script>
+<script src="caching-flows.js"></script>
+<style>
+  .cev-lab { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+  .cev-panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; min-width: 0; }
+  .cev-panel h3 { margin: 0 0 2px; font-size: 17px; }
+  .cev-panel .rule { margin: 0 0 10px; font-size: 13px; color: var(--muted); }
+  .cev-slots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .cev-slot { height: 56px; border-radius: 10px; border: 1px dashed var(--line); display: grid; place-items: center; align-content: center; gap: 2px; font-family: var(--mono); }
+  .cev-slot b { font-size: 19px; color: var(--fg); }
+  .cev-slot small { font-size: 10px; color: var(--muted); }
+  .cev-slot.full { border-style: solid; background: var(--panel-2); }
+  .cev-slot.hit { border-color: var(--teal); background: color-mix(in srgb, var(--teal) 22%, var(--panel)); }
+  .cev-slot.new { border-color: var(--accent-text); background: color-mix(in srgb, var(--yellow) 18%, var(--panel)); }
+  .cev-ev { margin: 8px 0 0; font-size: 13px; min-height: 2.6em; color: var(--fg-soft); overflow-wrap: anywhere; }
+  .cev-score { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+  .cev-score b { color: var(--fg); font-size: 15px; }
+  .cev-keys { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 12px; }
+  .cev-keys .btn { min-width: 44px; font-family: var(--mono); font-weight: 600; }
+  .cev-seq { font-family: var(--mono); font-size: 12.5px; color: var(--muted); text-align: center; margin: 10px 0 0; overflow-wrap: anywhere; }
+  .cev-seq b { color: var(--accent-text); }
+  .cev-predict { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; margin-top: 8px; font-size: 14px; }
+  .cev-predict .btn[aria-pressed="true"] { border-color: var(--accent-text); color: var(--accent-text); }
+  @media (max-width: 760px) { .cev-lab { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body data-anim="continuous">
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← HLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Week 3 · H18 · Caching &amp; CDN</div>
+    <h1>Cache Eviction Policies</h1>
+    <ul class="lede">
+      <li>Memory is finite: when the cache is full, an <b>eviction policy</b> picks which key leaves.</li>
+      <li><b>LRU</b> evicts the least recently used key; <b>LFU</b> the least frequently used; <b>FIFO</b> the oldest inserted.</li>
+      <li><b>TTL expiry</b> is different: it removes keys for being old, not because memory is full.</li>
+      <li>An LRU cache is a <b>hash map + doubly linked list</b>, so every get and put is O(1).</li>
+    </ul>
+  </header>
+
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn it step by step</h2>
+    <p class="sec-sub">Inside an LRU cache. Press <b>Next ▶</b> to go one step at a time, or <b>Play all</b> to watch the whole story.</p>
+    <div class="story" id="story"></div>
+  </section>
+
+  <section id="compare" data-nav="Compare">
+    <h2 class="sec-h"><span class="sec-n">2</span>Compare: 4 patterns side by side</h2>
+    <p class="sec-sub">Read each card top to bottom: rule, diagram, numbered steps, takeaway. Press <b>▶ Play</b> on any diagram to watch it happen.</p>
+    <div id="atlas"></div>
+  </section>
+
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">3</span>Try it: LRU vs LFU vs FIFO</h2>
+    <p class="sec-sub">Same keys, same 3 slots, three eviction rules. Predict the winner, then play a preset or click keys yourself. <span class="mono">(Highest hit count wins)</span></p>
+    <ol class="howto"><li><span>Predict a winner (optional)</span></li><li><span>Press a preset, or click keys A–F</span></li><li><span>Compare the hit counts in the three panels</span></li></ol>
+    <div class="cev-predict" id="predict">Predict the winner: <button class="btn" type="button" data-p="LRU">LRU</button><button class="btn" type="button" data-p="LFU">LFU</button><button class="btn" type="button" data-p="FIFO">FIFO</button></div>
+    <div class="cev-lab" id="panels"></div>
+    <div class="cev-keys" id="keys"></div>
+    <div class="controls">
+      <button class="btn" type="button" data-preset="burst">1 · hot keys + one-off scan</button>
+      <button class="btn" type="button" data-preset="shift">2 · popularity shifts</button>
+      <button class="btn" type="button" data-preset="fifo">3 · one very hot key</button>
+      <button class="btn" type="button" id="labReset">Reset</button>
+    </div>
+    <p class="cev-seq" id="seq">Sequence: –</p>
+    <p class="hint" id="labHint">Pick a preset. Each one is designed so a different policy looks good or bad.</p>
+  </section>
+
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">4</span>Revise in two minutes</h2>
+    <h3 class="sec-h3">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">General purpose, recency matters</span><span class="arrow">→</span><span class="then">LRU (Redis <code>allkeys-lru</code>)</span></li>
+      <li><span class="if">Stable hot set + one-off scans</span><span class="arrow">→</span><span class="then">LFU (Redis <code>allkeys-lfu</code>)</span></li>
+      <li><span class="if">Only some keys may be evicted</span><span class="arrow">→</span><span class="then"><code>volatile-*</code> policies (keys with a TTL)</span></li>
+      <li><span class="if">Cache must never drop data</span><span class="arrow">→</span><span class="then"><code>noeviction</code>: writes fail when full</span></li>
+      <li><span class="if">"Implement an LRU cache"</span><span class="arrow">→</span><span class="then">Dictionary + doubly linked list, O(1) get/put</span></li>
+      <li><span class="if">Stale-but-once-popular keys squat in LFU</span><span class="arrow">→</span><span class="then">Counter decay / ageing</span></li>
+    </ul>
+    <h3 class="sec-h3">Reference</h3>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Policy</th><th>Evicts</th><th>Tracks</th><th>Good at</th><th>Weak at</th></tr></thead>
+        <tbody>
+          <tr><td>LRU</td><td>Least recently used</td><td>Last access order</td><td>Shifting popularity</td><td>One-off scans</td></tr>
+          <tr><td>LFU</td><td>Least frequently used</td><td>Access counts (+ decay)</td><td>Stable hot sets</td><td>Popularity that moves</td></tr>
+          <tr><td>FIFO</td><td>First inserted</td><td>Insert order</td><td>Simplicity</td><td>Evicts hot early keys</td></tr>
+          <tr><td>TTL expiry</td><td>Expired keys</td><td>Expiry time</td><td>Bounding staleness</td><td>Not a memory policy</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><span class="flag">Added</span>FIFO and Redis's eviction settings were not in the day list; Redis's default <code>maxmemory-policy</code> is <code>noeviction</code>, so you choose LRU or LFU explicitly.</div>
+    <div class="note"><span class="flag">Corrected</span>Redis does not keep a perfect LRU list: it samples a few keys (<code>maxmemory-samples</code>, default 5) and evicts the best candidate among them. Its LFU uses a small counter that decays over time.</div>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">5</span>Test yourself</h2>
+    <h3 class="sec-h3">Which pattern fits?</h3>
+    <div id="drill"></div>
+    <h3 class="sec-h3">Explain it out loud</h3>
+    <p class="sub">Answer before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Why not keep the LRU order in an array or List&lt;T&gt;?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Moving an item is O(n).</b> A doubly linked list unlinks and relinks a node in O(1), and the dictionary finds that node in O(1).</p></div></details>
+      <details><summary>Why does the list need to be doubly linked?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>To unlink a node in O(1)</b> you need its previous node; a singly linked list would have to walk from the head.</p></div></details>
+      <details><summary>A nightly report reads every record once. Which policy protects your hot keys?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>LFU.</b> Under LRU each scanned key becomes "most recent" and pushes the hot keys out.</p></div></details>
+      <details><summary>Expiry vs eviction: what's the difference?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Expiry</b> removes a key because its TTL ran out; <b>eviction</b> removes one because memory is full. A key can be evicted long before it expires.</p></div></details>
+      <details><summary>Redis is full and set to noeviction. What happens on SET?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>The write fails with an OOM error</b>; reads still work. Choose this only when losing keys is worse than failing writes.</p></div></details>
+      <details><summary>What breaks LFU, and how is it fixed?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Old popularity.</b> A key read a million times yesterday never leaves. Counters must decay over time (Redis does this).</p></div></details>
+    </div>
+  </section>
+
+  <nav id="prevnext"></nav>
+
+  <footer>Sources: Week 3 notes; Redis documentation, key eviction; LRU cache design (hash map + doubly linked list). Lab results come from the exact sequences shown.</footer>
+</div>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const ids = ['lru', 'lfu', 'fifo', 'ttl'];
+  CF.page({ file: 'cache-eviction.html', ids });
+
+  /* ---------- walkthrough: LRU internals ---------- */
+  let op;
+  const showMap = (m, keys, hl) => { for (let i = 0; i < 4; i++) { const k = keys[i]; m.state('m' + i, k ? (k === hl ? 'on' : '') : 'hide'); if (k) m.text('m' + i, `"${k}" → node ${k}`); } };
+  const showList = (m, keys, marks = {}) => { keys.forEach((k, i) => { m.text('l' + i, k || '–'); m.state('l' + i, marks[k] || (k ? '' : 'dim')); }); };
+  CF.story('story', {
+    vb: [420, 230], tone: 'yellow', alt: 'A hash map of keys pointing into a doubly linked list',
+    build(m) {
+      m.label(78, 26, 'Dictionary (key → node)', 'at-small'); m.label(291, 26, 'Doubly linked list', 'at-small');
+      for (let i = 0; i < 4; i++) m.box('m' + i, 78, 56 + i * 38, '', { w: 120, h: 26 });
+      ['l0', 'l1', 'l2'].forEach((id, i) => m.box(id, 215 + i * 76, 90, '', { w: 58, h: 34 }));
+      m.wire('l0', 'l1'); m.wire('l1', 'l2');
+      m.label(215, 126, 'head · newest', 'at-small'); m.label(367, 126, 'tail · oldest', 'at-small');
+      op = m.label(291, 190, '', 'at-strong');
+    },
+    reset(m) { op.textContent = ''; showMap(m, ['A', 'B', 'C']); showList(m, ['C', 'B', 'A']); },
+    steps: [
+      { title: 'Two structures working together',
+        text: 'The <b>dictionary</b> finds any key\'s node in O(1). The <b>doubly linked list</b> keeps the order of use: head = most recent, tail = least recent. Capacity is 3 and it is full.',
+        set(m) { op.textContent = 'capacity 3 · full'; } },
+      { title: 'get(B): find it through the dictionary',
+        text: 'Look up "B" in the dictionary: it hands back the list node directly, no searching. It\'s a hit.',
+        set(m) { showMap(m, ['A', 'B', 'C'], 'B'); showList(m, ['C', 'B', 'A'], { B: 'on' }); op.textContent = 'get(B) → hit, O(1) lookup'; } },
+      { title: 'get(B): move it to the head',
+        text: 'Because B was just used, unlink it and insert it at the head. With prev/next pointers that\'s a few pointer changes: O(1). A is still at the tail.',
+        set(m) { showMap(m, ['A', 'B', 'C'], 'B'); showList(m, ['B', 'C', 'A'], { B: 'ok' }); op.textContent = 'move B to head, O(1)'; },
+        async play(m, r) { showList(m, ['C', 'B', 'A'], { B: 'on' }); await m.sleep(400, r); showList(m, ['C', '', 'A']); await m.sleep(450, r); showList(m, ['B', 'C', 'A'], { B: 'ok' }); op.textContent = 'move B to head, O(1)'; } },
+      { title: 'put(D) when full: the tail is the victim',
+        text: 'D is new and the cache is full. The least recently used key is always at the <b>tail</b>: A.',
+        set(m) { showList(m, ['B', 'C', 'A'], { A: 'hot' }); m.state('m0', 'hot'); op.textContent = 'evict tail: A'; } },
+      { title: 'Evict A, insert D at the head',
+        text: 'Remove A from the list and from the dictionary, then add D at the head and record it in the dictionary. Still O(1).',
+        tip: 'In C#: Dictionary&lt;TKey, LinkedListNode&lt;Entry&gt;&gt; plus LinkedList&lt;Entry&gt;. Store the key inside the node so you can delete it from the dictionary on eviction.',
+        set(m) { showMap(m, ['B', 'C', 'D'], 'D'); showList(m, ['D', 'B', 'C'], { D: 'ok' }); op.textContent = 'list: D ⇄ B ⇄ C'; },
+        async play(m, r) { showList(m, ['B', 'C', 'A'], { A: 'hot' }); await m.sleep(400, r); showList(m, ['B', 'C', ''], {}); showMap(m, ['B', 'C']); await m.sleep(450, r); showList(m, ['D', 'B', 'C'], { D: 'ok' }); showMap(m, ['B', 'C', 'D'], 'D'); op.textContent = 'list: D ⇄ B ⇄ C'; } },
+      { title: 'LFU changes what the list means',
+        text: 'LFU keeps a count per key and evicts the lowest count (oldest on ties). Efficient versions group keys into frequency buckets, each one a small LRU list.',
+        set(m) { showList(m, ['D×1', 'B×4', 'C×2']); m.state('l0', 'hot'); op.textContent = 'LFU would evict D (count 1)'; } },
+      { title: 'What Redis really does',
+        text: 'Redis doesn\'t keep a full list per key. On eviction it <b>samples</b> a few keys (default 5) and drops the best candidate. Its LFU counter decays over time so old popularity fades.',
+        tip: 'Mention "approximate LRU" if asked how Redis scales eviction.',
+        set(m) { op.textContent = 'sample 5 keys → evict the oldest of them'; } }
+    ]
+  });
+
+  /* ---------- three-way race ---------- */
+  const CAP = 3, KEYS = ['A', 'B', 'C', 'D', 'E', 'F'];
+  const POL = { LRU: 'Evicts the key used least recently. Left = oldest.', LFU: 'Evicts the key used least often (oldest wins a tie).', FIFO: 'Evicts the key inserted first, however often it is read.' };
+  $('panels').innerHTML = Object.keys(POL).map(p => `<div class="cev-panel"><h3>${p}</h3><p class="rule">${POL[p]}</p><div class="cev-slots" id="s${p}"></div><p class="cev-ev" id="e${p}">Empty cache.</p><div class="cev-score">hits <b id="h${p}">0</b> · misses <b id="x${p}">0</b> · ratio <b id="r${p}">–</b></div></div>`).join('');
+  let S, seq, t;
+  function reset() { S = { LRU: { list: [], hit: 0, miss: 0 }, FIFO: { list: [], hit: 0, miss: 0 }, LFU: { map: new Map(), hit: 0, miss: 0 } }; seq = []; t = 0; paint(null, {}); for (const p in POL) $('e' + p).textContent = 'Empty cache.'; $('seq').textContent = 'Sequence: –'; }
+  function access(k) {
+    t++; seq.push(k); const r = {};
+    for (const p of ['LRU', 'FIFO']) { const s = S[p], i = s.list.indexOf(k);
+      if (i >= 0) { s.hit++; if (p === 'LRU') { s.list.splice(i, 1); s.list.push(k); } r[p] = { k, hit: true }; }
+      else { s.miss++; let ev = null; if (s.list.length >= CAP) ev = s.list.shift(); s.list.push(k); r[p] = { k, hit: false, ev }; } }
+    const f = S.LFU;
+    if (f.map.has(k)) { const e = f.map.get(k); e.c++; e.t = t; f.hit++; r.LFU = { k, hit: true }; }
+    else { f.miss++; let ev = null; if (f.map.size >= CAP) { let b = null; for (const [kk, e] of f.map) if (!b || e.c < b[1].c || (e.c === b[1].c && e.t < b[1].t)) b = [kk, e]; ev = b[0]; f.map.delete(ev); } f.map.set(k, { c: 1, t }); r.LFU = { k, hit: false, ev }; }
+    paint(k, r);
+  }
+  function paint(k, r) {
+    for (const p of Object.keys(POL)) {
+      const items = p === 'LFU' ? [...S.LFU.map.entries()].map(([x, e]) => [x, 'read ×' + e.c]) : S[p].list.map((x, i, a) => [x, i === 0 ? 'oldest' : i === a.length - 1 ? 'newest' : '']);
+      $('s' + p).innerHTML = Array.from({ length: CAP }, (_, i) => { const it = items[i]; const cls = it ? 'full' + (it[0] === k ? (r[p].hit ? ' hit' : ' new') : '') : ''; return `<div class="cev-slot ${cls}">${it ? `<b>${it[0]}</b><small>${it[1]}</small>` : ''}</div>`; }).join('');
+      const s = S[p]; $('h' + p).textContent = s.hit; $('x' + p).textContent = s.miss; $('r' + p).textContent = s.hit + s.miss ? Math.round(100 * s.hit / (s.hit + s.miss)) + '%' : '–';
+      if (k) { const x = r[p]; $('e' + p).innerHTML = x.hit ? `<span class="ok-text">${x.k}: hit</span>` : `<span class="bad-text">${x.k}: miss</span>${x.ev ? ` → evicted <b>${x.ev}</b>` : ' → stored'}`; }
+    }
+    if (seq.length) $('seq').innerHTML = 'Sequence: ' + seq.map((x, i) => i === seq.length - 1 ? `<b>${x}</b>` : x).join(' ');
+  }
+  $('keys').innerHTML = KEYS.map(k => `<button class="btn" type="button" data-k="${k}">${k}</button>`).join('');
+  $('keys').addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (!b) return; Kit.cancel('cev'); access(b.dataset.k); });
+  const PRESETS = {
+    burst: { seq: 'A B A B A B C D E F A B A B'.split(' '), hint: 'A and B are hot; a report reads C, D, E, F once each. LFU keeps A and B through the scan (8 hits); LRU and FIFO lose them (6 hits each).' },
+    shift: { seq: 'A A A A A A B C B C D B C D B C D B C'.split(' '), hint: 'A was hot this morning, then B, C, D take over. LFU keeps stale A (×6) and churns the new keys (10 hits); LRU and FIFO adapt (15 hits each).' },
+    fifo: { seq: 'A B C A D A E A F A'.split(' '), hint: 'A is read every other time. FIFO still evicts A because it was inserted first (3 hits); LRU and LFU keep it (4 hits each).' }
+  };
+  let predicted = null;
+  $('predict').addEventListener('click', e => { const b = e.target.closest('[data-p]'); if (!b) return; predicted = b.dataset.p; $('predict').querySelectorAll('[data-p]').forEach(x => x.setAttribute('aria-pressed', String(x === b))); });
+  document.querySelectorAll('[data-preset]').forEach(b => b.addEventListener('click', async () => {
+    const p = PRESETS[b.dataset.preset], run = Kit.newRun('cev');
+    reset(); $('labHint').textContent = 'Playing…';
+    try { for (const k of p.seq) { access(k); await Kit.sleep(420, run); } } catch (e) { return; }
+    const best = Math.max(...Object.keys(POL).map(x => S[x].hit)), winners = Object.keys(POL).filter(x => S[x].hit === best);
+    $('labHint').innerHTML = (predicted ? (winners.includes(predicted) ? '<span class="ok-text">You called it.</span> ' : `<span class="bad-text">Winner: ${winners.join(' & ')}.</span> `) : '') + p.hint;
+  }));
+  $('labReset').addEventListener('click', () => { Kit.cancel('cev'); reset(); });
+  reset();
+})();
+</script>
+</body>
+</html>

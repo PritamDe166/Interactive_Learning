@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="../../assets/css/explainer.css">
 <script src="../../assets/js/theme.js"></script>
 <script src="../../assets/js/explainer-kit.js"></script>
+<script src="../sd-series.js"></script>
 <style>
   .cz-strip { display: grid; grid-template-columns: repeat(40, minmax(0, 1fr)); gap: 3px; margin-top: 14px; }
   .cz-strip i { display: block; aspect-ratio: 1; border-radius: 3px; background: var(--panel-2); }
@@ -35,7 +36,7 @@
   </div>
 
   <header>
-    <div class="eyebrow">Week 3 · Day 15 · Caching &amp; CDN</div>
+    <div class="eyebrow">Week 3 · H15 · Caching &amp; CDN</div>
     <h1>Why Caching Exists</h1>
     <ul class="lede">
       <li>A <b>cache</b> keeps a temporary copy of data or a computed result in a <b>faster, closer</b> place so it can be <b>reused</b>.</li>
@@ -46,28 +47,56 @@
     </ul>
   </header>
 
-  <section aria-labelledby="anH">
-    <h2 id="anH">In terms you already know</h2>
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn: why caching exists</h2>
+    <p class="sec-sub">Press <b>Next ▶</b> to watch one popular product go from meltdown to cached, then map the ideas to what you already use in .NET.</p>
+    <div class="sub-block" aria-labelledby="stH">
+    <h3 class="stage-title sub" id="stH">Walkthrough: one popular product, from meltdown to cache</h3>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 430" aria-label="Shoppers reach an app server through a CDN and reverse proxy; the app reads a Redis cache before the database and a replica, and calls a paid LLM API"></svg></div>
+    </div>
+  </div>
+    <div class="sub-block" aria-labelledby="anH">
+    <h3 class="sec-h3" id="anH">In terms you already know</h3>
     <div class="card analogy">
       <div class="row head"><span>Idea</span><span>You've seen it as</span><span>Note</span></div>
       <div class="row"><span class="aws">In-process cache</span><span class="like"><code>IMemoryCache</code> / IIS output caching</span><span>Lives in one server's RAM; each server has its own copy.</span></div>
       <div class="row"><span class="aws">Distributed cache</span><span class="like"><code>IDistributedCache</code> backed by Redis</span><span>One shared cache for all app servers; a network hop, but far faster than the database.</span></div>
       <div class="row"><span class="aws">Why RAM beats disk</span><span class="like">SQL Server's buffer pool keeping hot pages in memory</span><span>Same idea, one level up: keep the <i>answer</i>, not just the pages.</span></div>
     </div>
+  </div>
   </section>
 
-  <section aria-labelledby="stH">
-    <h2 class="stage-title" id="stH">Walkthrough: one popular product, from meltdown to cache</h2>
-    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
-    <div class="story wide" id="story">
-      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 430" aria-label="Shoppers reach an app server through a CDN and reverse proxy; the app reads a Redis cache before the database and a replica, and calls a paid LLM API"></svg></div>
+  <section id="compare" data-nav="Compare">
+    <h2 class="sec-h"><span class="sec-n">2</span>Compare: where can a request stop?</h2>
+    <div class="sub-block" aria-labelledby="geoH">
+    <h3 class="stage-title sub" id="geoH">Where does the request stop?</h3>
+    <div class="stage-kind">A shopper in Bengaluru opens a product photo · tick the layers that already hold it</div>
+    <div class="card">
+      <div class="cz-row"><label>Origin servers in <select id="org"><option value="near">Mumbai (same country)</option><option value="far" selected>Virginia, USA</option></select></label></div>
+      <div class="cz-checks" id="lay">
+        <label><input type="checkbox" value="br"> Browser cache</label>
+        <label><input type="checkbox" value="cdn" checked> CDN edge (Chennai)</label>
+        <label><input type="checkbox" value="px"> Reverse proxy</label>
+        <label><input type="checkbox" value="loc"> App in-process</label>
+        <label><input type="checkbox" value="rd" checked> Redis</label>
+      </div>
+      <div class="controls"><button class="btn primary" id="geoGo" type="button">Open the photo</button></div>
+      <div class="scroll"><svg class="diagram nf-canvas" id="geoSvg" viewBox="0 0 1000 250" aria-label="Request path from shopper through browser cache, CDN edge, reverse proxy, app in-process cache, Redis and database"></svg></div>
+      <p class="nf-cap" id="geoCap">Press <b>Open the photo</b>.</p>
+      <ul class="checks cz-bd" id="geoBd"></ul>
     </div>
+  </div>
   </section>
 
-  <h2 class="part-title">Try it yourself</h2>
-
-  <section aria-labelledby="simH">
-    <h2 class="stage-title" id="simH">Hit-ratio lab</h2>
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">3</span>Try it: hit ratio and what to cache</h2>
+    <div class="sub-block" aria-labelledby="simH">
+    <h3 class="stage-title sub" id="simH">Hit-ratio lab</h3>
     <div class="stage-kind">1,000 products · 500 requests/s · change the knobs while it runs</div>
     <div class="card">
       <div class="ranges">
@@ -87,34 +116,17 @@
       <div class="cz-legend"><span><b style="background:var(--teal)"></b>hit</span><span><b style="background:var(--orange)"></b>miss → database</span><span><b style="background:var(--red)"></b>hit, but stale</span><span>last 200 requests</span></div>
       <p class="nf-cap" id="simCap">Press <b>Start</b>. Then try: popularity "Even", cache 1%; or data changing "every second".</p>
     </div>
-  </section>
-
-  <section aria-labelledby="geoH">
-    <h2 class="stage-title" id="geoH">Where does the request stop?</h2>
-    <div class="stage-kind">A shopper in Bengaluru opens a product photo · tick the layers that already hold it</div>
-    <div class="card">
-      <div class="cz-row"><label>Origin servers in <select id="org"><option value="near">Mumbai (same country)</option><option value="far" selected>Virginia, USA</option></select></label></div>
-      <div class="cz-checks" id="lay">
-        <label><input type="checkbox" value="br"> Browser cache</label>
-        <label><input type="checkbox" value="cdn" checked> CDN edge (Chennai)</label>
-        <label><input type="checkbox" value="px"> Reverse proxy</label>
-        <label><input type="checkbox" value="loc"> App in-process</label>
-        <label><input type="checkbox" value="rd" checked> Redis</label>
-      </div>
-      <div class="controls"><button class="btn primary" id="geoGo" type="button">Open the photo</button></div>
-      <div class="scroll"><svg class="diagram nf-canvas" id="geoSvg" viewBox="0 0 1000 250" aria-label="Request path from shopper through browser cache, CDN edge, reverse proxy, app in-process cache, Redis and database"></svg></div>
-      <p class="nf-cap" id="geoCap">Press <b>Open the photo</b>.</p>
-      <ul class="checks cz-bd" id="geoBd"></ul>
-    </div>
-  </section>
-
-  <section aria-labelledby="pkH">
-    <h2 class="stage-title" id="pkH">Should you cache it?</h2>
+  </div>
+    <div class="sub-block" aria-labelledby="pkH">
+    <h3 class="stage-title sub" id="pkH">Should you cache it?</h3>
     <div class="card" id="pick"></div>
+  </div>
   </section>
 
-  <section aria-labelledby="cheatH">
-    <h2 id="cheatH">Cheat-sheet</h2>
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">4</span>Revise in two minutes</h2>
+    <div class="sub-block" aria-labelledby="cheatH">
+    <h3 class="sec-h3" id="cheatH">Cheat-sheet</h3>
     <ul class="cheat">
       <li><span class="if">Same data read again and again</span><span class="arrow">→</span><span class="then">Cache it</span></li>
       <li><span class="if">Expensive to compute or pay for (LLM, geocoding API)</span><span class="arrow">→</span><span class="then">Cache the result</span></li>
@@ -124,10 +136,9 @@
       <li><span class="if">Changes every second</span><span class="arrow">→</span><span class="then">Little gain; don't bother (or very short TTL)</span></li>
       <li><span class="if">"How good is my cache?"</span><span class="arrow">→</span><span class="then">Hit ratio = hits ÷ total requests</span></li>
     </ul>
-  </section>
-
-  <section aria-labelledby="refH">
-    <h2 id="refH">Reference</h2>
+  </div>
+    <div class="sub-block" aria-labelledby="refH">
+    <h3 class="sec-h3" id="refH">Reference</h3>
     <div class="scroll card table-card">
       <table>
         <thead><tr><th>Where</th><th>Kind</th><th>Shared by</th><th>Example</th></tr></thead>
@@ -160,10 +171,13 @@
       <div class="note"><span class="flag add">Added</span><p>Browser and CDN caches commonly use <b>disk/SSD</b> as well as memory, so "disk is rarely used for caching" applies to server-side caches. "The DB crashes at around a million requests" is illustrative: the real limit depends on the query, hardware and connection pool.</p></div>
       <div class="note"><span class="flag add">Added</span><p><b>TTL</b> (time to live) is the usual way to bound staleness, and a <b>cache stampede</b> (many misses at once when a hot key expires) is Day 20.</p></div>
     </div>
+  </div>
   </section>
 
-  <section aria-labelledby="quizH">
-    <h2 id="quizH">Check yourself</h2>
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">5</span>Test yourself</h2>
+    <div class="sub-block" aria-labelledby="quizH">
+    <h3 class="sec-h3" id="quizH">Check yourself</h3>
     <div class="quiz">
       <details><summary>100 requests, 80 served by the cache. Hit ratio?<span class="go">Show answer</span></summary><div class="ans"><p><b>80%</b> (80 ÷ 100). Miss ratio 20%: only those 20 reach the database.</p></div></details>
       <details><summary>Why doesn't adding a read replica fix latency?<span class="go">Show answer</span></summary><div class="ans"><p>It splits the load, but every read still hits a <b>disk-backed</b> database. A cache in RAM answers repeated reads much faster.</p></div></details>
@@ -172,7 +186,10 @@
       <details><summary>Should a bank balance be cached?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> It must always be fresh; a stale balance is a real bug. Read it from the source of truth.</p></div></details>
       <details><summary>A celebrity's post is read worldwide. One cache in the US. Problem?<span class="go">Show answer</span></summary><div class="ans"><p>Users far away still pay the long round trip. Use <b>regional caches</b> (fed by replicated data) or a <b>CDN</b>, so each region reads a nearby copy.</p></div></details>
     </div>
+  </div>
   </section>
+
+  <nav id="prevnext"></nav>
 
   <footer>Sources: HLD note "Caching Overview: Why, What, When, Where, and Why Not Everything" (Week 3); latency figures follow the widely used "latency numbers every programmer should know" (Jeff Dean, updated by Colin Scott) and are rounded. All timings, rates and the simulator's numbers (1 ms hit, 12 ms miss, 500 req/s) are illustrative.</footer>
 </div>
@@ -361,6 +378,9 @@
     { q: 'Trending topics list recomputed by a heavy query.', a: 'Short TTL', why: 'Expensive to compute; a minute or two old is acceptable.' }
   ], ['Cache', 'Short TTL', 'Don\'t cache']);
 })();
+</script>
+<script>
+SD.page({ track: 'hld' });
 </script>
 </body>
 </html>

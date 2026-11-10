@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Builder</title>
+<meta name="description" content="Creational pattern L15: build a complex object step by step. An appointment with many optional parts moves from telescoping constructors to a fluent builder that validates in Build(), plus a director for presets and when C# object initializers are enough.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/theme.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/explainer.css">
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/explainer-kit.js"></script>
+<script src="../sd-series.js"></script>
+<style>
+  .result { margin-top: 10px; border: 2px solid var(--line); border-radius: 12px; padding: 12px 14px; background: var(--panel); min-height: 60px; transition: border-color .25s; }
+  .result.ok { border-color: var(--teal); }
+  .result.bad { border-color: var(--red); }
+  .result dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 6px 0 0; font-size: 13.5px; }
+  .result dt { font-family: var(--mono); color: var(--muted); }
+  .result dd { margin: 0; }
+  .result ul { margin: 6px 0 0; padding-left: 18px; color: var(--bad-text); font-size: 14px; }
+  .bars { display: grid; gap: 8px; margin-top: 12px; }
+  .bar { display: grid; grid-template-columns: 170px 1fr 70px; gap: 10px; align-items: center; font-size: 13px; }
+  .bar .track { height: 18px; background: var(--panel-2); border-radius: 6px; overflow: hidden; }
+  .bar .fill { height: 100%; border-radius: 6px; transition: width .3s; }
+  .bar .fill.bad { background: var(--red); }
+  .bar .fill.ok { background: var(--teal); }
+  .bar b { font-family: var(--mono); text-align: right; }
+  @media (max-width: 560px) { .bar { grid-template-columns: 110px 1fr 56px; font-size: 12px; } }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← LLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">System Design · LLD · Creational · L15</div>
+    <h1>Builder</h1>
+    <ul class="lede">
+      <li>Build a complex object <b>step by step</b> through readable method calls, then get the finished object from <span class="mono">Build()</span>.</li>
+      <li>It replaces <b>telescoping constructors</b>: <span class="mono">new Appointment(p, d, t, 30, true, null, "R12", 2, false)</span>. Which <span class="mono">true</span> is which?</li>
+      <li><span class="mono">Build()</span> is the one place to <b>validate the combination</b>, so the object you get back is always valid and can be immutable.</li>
+      <li>You use builders daily: <span class="mono">StringBuilder</span>, <span class="mono">WebApplication.CreateBuilder()</span>, <span class="mono">DbContextOptionsBuilder</span>, <span class="mono">UriBuilder</span>.</li>
+    </ul>
+  </header>
+
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn: from a constructor puzzle to a fluent builder</h2>
+    <p class="sec-sub">An appointment has a patient, doctor and time, then many optional parts: in-person or video, interpreter, reminders. Step through with <b>Next ▶</b>.</p>
+    <div class="sub-block">
+      <h3 class="stage-title sub">Walkthrough: booking an appointment</h3>
+      <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+      <div class="story wide" id="story">
+        <div class="scroll"><svg class="diagram" id="sv" style="min-width:0" viewBox="0 0 760 380" role="img" aria-label="Telescoping constructors, then an AppointmentBuilder with fluent methods that creates an immutable Appointment, then a director with presets"></svg></div>
+      </div>
+    </div>
+    <div class="sub-block">
+      <h3 class="stage-title sub">The same thing in C#</h3>
+      <div class="stage-kind">Before · the builder · calling it</div>
+      <div class="cs-pair">
+        <div><div class="label bad-text">Before: telescoping constructors</div><pre class="codeblock" id="csBefore"></pre></div>
+        <div><div class="label ok-text">After: call sites read like a sentence</div><pre class="codeblock" id="csUse"></pre></div>
+      </div>
+      <div class="cs-pair" style="margin-top:12px">
+        <div><div class="label ok-text">The builder: collects, then validates once</div><pre class="codeblock" id="csBuilder"></pre></div>
+        <div><div class="label ok-text">Often enough in modern C#: required + init</div><pre class="codeblock" id="csInit"></pre></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="compare" data-nav="Compare">
+    <h2 class="sec-h"><span class="sec-n">2</span>Compare: four ways to create a complex object</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Approach</th><th>Readable call site?</th><th>Validates the combination?</th><th>Immutable result?</th><th>Use when</th></tr></thead>
+        <tbody>
+          <tr><td>Telescoping constructors</td><td class="bad-text">No: positional <span class="mono">true, null, 2</span></td><td>per constructor</td><td>yes</td><td>2–3 parameters only</td></tr>
+          <tr><td>Optional / named arguments</td><td>yes, if callers name them</td><td>in the constructor</td><td>yes</td><td>a few independent options</td></tr>
+          <tr><td>Object initializer + <span class="mono">required</span> / <span class="mono">init</span></td><td class="ok-text">yes</td><td>only "is it set?" (no cross-field rules)</td><td>yes (<span class="mono">init</span>)</td><td>simple DTOs and options</td></tr>
+          <tr><td>Builder</td><td class="ok-text">yes, fluent</td><td class="ok-text">yes, in <span class="mono">Build()</span></td><td class="ok-text">yes</td><td>many optional parts, rules between them, step-by-step or reusable presets</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">3</span>Try it yourself</h2>
+    <p class="sec-sub">Assemble an appointment call by call and see what Build() accepts, then count how many constructors you'd otherwise need.</p>
+    <div class="sub-block">
+      <h3 class="stage-title sub">1. Build an appointment</h3>
+      <div class="stage-kind">Click calls to add or remove them · then Build()</div>
+      <div class="chips" id="bCalls"></div>
+      <div class="lab-row"><button class="btn" type="button" id="bDirector">Director: FollowUp preset</button><button class="btn" type="button" id="bClear">Clear</button></div>
+      <pre class="codeblock" id="bCode" style="min-height:0"></pre>
+      <div class="controls"><button class="btn primary" type="button" id="bBuild">Build()</button></div>
+      <div class="result" id="bResult"><span class="mono" style="color:var(--muted)">Nothing built yet.</span></div>
+    </div>
+    <div class="sub-block">
+      <h3 class="stage-title sub">2. How many constructors would you need?</h3>
+      <div class="stage-kind">One constructor per combination of optional parts vs one builder method per part</div>
+      <div class="ranges"><div class="range"><label for="nOpt">Optional parts <output id="oOpt"></output></label><input type="range" id="nOpt" min="1" max="10" step="1" value="5"></div></div>
+      <div class="bars" id="bars"></div>
+      <p class="status-line" id="nStatus"></p>
+    </div>
+  </section>
+
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">4</span>Revise in two minutes</h2>
+    <h3 class="sec-h3">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">Constructor with many parameters, several optional</span><span class="arrow">→</span><span class="then">builder (or named arguments if they're few and independent)</span></li>
+      <li><span class="if">Rules between fields ("video needs a link", "end after start")</span><span class="arrow">→</span><span class="then">check them in <span class="mono">Build()</span>; throw with every problem listed</span></li>
+      <li><span class="if">Same configurations built again and again</span><span class="arrow">→</span><span class="then">director (or static presets) that calls the builder steps</span></li>
+      <li><span class="if">Just a DTO with a few required fields</span><span class="arrow">→</span><span class="then">object initializer with <span class="mono">required</span> / <span class="mono">init</span>; no builder</span></li>
+      <li><span class="if">Test data with sensible defaults</span><span class="arrow">→</span><span class="then">test data builder: <span class="mono">new AppointmentBuilder().Video().Build()</span></span></li>
+      <li><span class="if">Fluent method signature</span><span class="arrow">→</span><span class="then">each step returns <span class="mono">this</span> so calls chain</span></li>
+    </ul>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>Builders you already use:</b> <span class="mono">WebApplication.CreateBuilder(args)</span> → configure services → <span class="mono">Build()</span>; <span class="mono">DbContextOptionsBuilder.UseSqlServer(…)</span>; EF Core's <span class="mono">modelBuilder.Entity&lt;T&gt;().HasKey(…)</span>; <span class="mono">StringBuilder.Append(…).ToString()</span>; <span class="mono">UriBuilder</span>; <span class="mono">ConfigurationBuilder</span>.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>GoF vs fluent builder:</b> the original GoF Builder separates a director (the steps) from builders (how each step is done, e.g. HTML vs PDF report). Today "builder" usually means the fluent style; the director is optional.</p></div>
+    </div>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">5</span>Test yourself</h2>
+    <h3 class="sec-h3">Which one fits?</h3>
+    <div id="drill"></div>
+    <h3 class="sec-h3">Explain it out loud</h3>
+    <p class="sub">Answer before you open each card.</p>
+    <div class="quiz">
+      <details><summary>What is the telescoping constructor problem?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>A chain of constructors, each adding one more optional parameter. Callers pass long positional lists (<span class="mono">true, null, 2</span>) that are hard to read and easy to swap by mistake, and combinations explode.</p></div></details>
+      <details><summary>Why validate in Build() instead of in each setter method?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Many rules involve several fields and the order of calls is free. Only at <span class="mono">Build()</span> is the whole picture known, so it's the one place that can guarantee the object is valid.</p></div></details>
+      <details><summary>What does a director add?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Reusable recipes: it calls the builder steps for a known configuration (e.g. "follow-up visit"), so callers don't repeat the same chain.</p></div></details>
+      <details><summary>When is a builder overkill in C#?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>When an object initializer with <span class="mono">required</span> and <span class="mono">init</span> properties covers it: few fields, no cross-field rules, no presets.</p></div></details>
+      <details><summary>Name three builders in ASP.NET Core / .NET.<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">WebApplicationBuilder</span>, <span class="mono">DbContextOptionsBuilder</span>, <span class="mono">StringBuilder</span> (also <span class="mono">UriBuilder</span>, <span class="mono">ConfigurationBuilder</span>, EF <span class="mono">ModelBuilder</span>).</p></div></details>
+    </div>
+  </section>
+
+  <nav id="prevnext"></nav>
+
+  <footer>Sources: Gamma et al., <i>Design Patterns</i> (1994), Builder; Joshua Bloch, <i>Effective Java</i>, item 2 (telescoping constructors); Microsoft Learn: required members and init-only setters (C# 11 / 9), <span class="mono">WebApplicationBuilder</span>. Appointment details are illustrative.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  K.codeBlock($('csBefore'), `public class Appointment
+{
+    public Appointment(Patient p, Doctor d, DateTime start) { … }
+    public Appointment(Patient p, Doctor d, DateTime start, int minutes) { … }
+    public Appointment(Patient p, Doctor d, DateTime start, int minutes,
+                       bool isVideo, string? link, string? room) { … }
+    public Appointment(Patient p, Doctor d, DateTime start, int minutes,
+                       bool isVideo, string? link, string? room,
+                       int reminderHours, bool interpreter) { … }
+}
+
+var a = new Appointment(asha, rao, at, 30, true, null, "R12", 24, false);
+//                                        ^ video? but no link and a room?`, 'cs');
+  K.codeBlock($('csUse'), `var appt = new AppointmentBuilder()
+    .ForPatient(asha)
+    .WithDoctor(rao)
+    .At(new DateTime(2026, 11, 12, 10, 30, 0), minutes: 30)
+    .Video("https://meet.clinic/abc")
+    .WithInterpreter("Kannada")
+    .RemindBefore(hours: 24)
+    .Build();          // validated, immutable Appointment`, 'cs');
+  K.codeBlock($('csBuilder'), `public class AppointmentBuilder
+{
+    private Patient? patient; private Doctor? doctor;
+    private DateTime? start; private int minutes = 15;
+    private string? room, link, language; private int? remind;
+
+    public AppointmentBuilder ForPatient(Patient p) { patient = p; return this; }
+    public AppointmentBuilder Video(string url)     { link = url;  return this; }
+    public AppointmentBuilder InPerson(string r)    { room = r;    return this; }
+    // … other steps, each returns this
+
+    public Appointment Build()
+    {
+        var errors = new List<string>();
+        if (patient is null) errors.Add("patient is required");
+        if (start is null)   errors.Add("start time is required");
+        if ((room is null) == (link is null))
+            errors.Add("choose either InPerson(room) or Video(link)");
+        if (errors.Count > 0) throw new InvalidOperationException(string.Join("; ", errors));
+
+        return new Appointment(patient!, doctor!, start!.Value, minutes,
+                               room, link, language, remind);
+    }
+}`, 'cs');
+  K.codeBlock($('csInit'), `public class SlotQuery            // simple: no cross-field rules
+{
+    public required int DoctorId { get; init; }
+    public required DateOnly Day { get; init; }
+    public int Minutes { get; init; } = 15;
+}
+
+var q = new SlotQuery { DoctorId = 7, Day = today };  // compiler enforces "required"`, 'cs');
+
+  /* ---------- walkthrough ---------- */
+  const sv = $('sv'); K.umlDefs(sv);
+  const A = K.el('g', { class: 'sx' }, sv), B = K.el('g', { class: 'sx' }, sv), FX = K.el('g', {}, sv);
+  const tele = K.classBox(A, 110, 20, 540, { name: 'Appointment', methods: ['+ Appointment(p, d, start)', '+ Appointment(p, d, start, minutes)', '+ Appointment(p, d, start, minutes, isVideo, link, room)', '+ Appointment(p, d, start, minutes, isVideo, link, room, remind, interp)'] });
+  const call = K.node(A, 380, 225, 660, 50, 'new Appointment(asha, rao, at, 30, true, null, "R12", 24, false)', '');
+  const qs = [['video?', 428, 272], ['link?', 456, 292], ['room?', 501, 272], ['interpreter?', 580, 292]].map(([m, x, y]) => { K.el('line', { x1: x, y1: 248, x2: x, y2: y - 12, class: 'ref bad' }, A); return K.text(A, x, y, m, 'mlabel bad halo'); });
+  // scene B: builder
+  const bld = K.classBox(B, 30, 20, 330, { name: 'AppointmentBuilder', methods: ['+ ForPatient(patient)', '+ WithDoctor(doctor)', '+ At(start, minutes)', '+ InPerson(room)', '+ Video(link)', '+ WithInterpreter(language)', '+ RemindBefore(hours)', '+ Build(): Appointment'] });
+  const appt = K.classBox(B, 470, 40, 260, { name: 'Appointment', stereo: 'immutable', fields: ['Patient, Doctor, Start', 'Minutes', 'Room or Link', 'Language?', 'ReminderHours?'] });
+  const mk = K.umlLink(B, [360, 200], [470, 120], 'creates', [], 'Build()');
+  const dir = K.node(B, 600, 300, 250, 52, 'AppointmentDirector', 'FollowUp(builder, last)');
+  const dirL = K.umlLink(B, [475, 300], [360, 270], 'uses');
+  const errT = K.text(B, 545, 330, '', 'mlabel halo');
+
+  function show(i) {
+    FX.textContent = '';
+    A.classList.toggle('gone', i > 1); B.classList.toggle('gone', i < 2);
+    tele.rows.forEach((r, k) => r.classList.toggle('hot', i === 0 && k === 3));
+    call.g.classList.toggle('bad', i === 1); qs.forEach(q => q.style.opacity = i === 1 ? 1 : 0); A.querySelectorAll('line.ref').forEach(l => l.style.opacity = i === 1 ? 1 : 0);
+    bld.rows.forEach((r, k) => { r.classList.toggle('hot', (i === 3 && [0, 1, 2, 4, 5].includes(k)) || (i === 5 && [0, 1, 2, 3, 6].includes(k))); r.classList.toggle('bad', i === 4 && (k === 3 || k === 4)); });
+    bld.rows[7].classList.toggle('hot', i >= 3 && i !== 4); bld.rows[7].classList.toggle('bad', i === 4);
+    [appt.g, mk].forEach(e => e.style.opacity = i >= 3 && i !== 4 ? 1 : i === 2 ? .35 : 0);
+    appt.g.classList.toggle('ok', i === 3 || i === 5);
+    [dir.g, dirL].forEach(e => e.style.opacity = i === 5 ? 1 : 0); dir.g.classList.toggle('on', i === 5);
+    errT.textContent = i === 4 ? 'Build() throws: choose InPerson(room) or Video(link)' : '';
+    errT.setAttribute('class', 'mlabel halo ' + (i === 4 ? 'bad' : ''));
+    const note = ['four constructors, and still not every combination', 'positional arguments: easy to swap, impossible to read', 'one method per part; each returns the builder', 'call only the parts you need, in any order; Build() returns the object', 'Build() sees the whole picture and refuses invalid combinations', 'a director stores common recipes'][i];
+    K.text(FX, 380, 372, note, 'mlabel halo ' + (i === 1 || i === 4 ? 'bad' : i >= 3 ? 'ok' : 'accent'));
+  }
+  async function chain(run, ks) { for (const k of ks) { bld.rows[k].classList.add('hot'); await K.sleep(330, run); } }
+  K.story({
+    root: $('story'), show, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'Telescoping constructors', text: 'Each optional part adds another constructor overload. With four optional parts you already have four constructors and still miss combinations (video <i>with</i> interpreter but no reminder?).' },
+      { title: 'The call site is a puzzle', text: '<span class="mono">true, null, "R12", 24, false</span>: is it video or in person? Does it have a room <i>and</i> a video flag? Swap two booleans and it still compiles.' },
+      { title: 'A builder: one method per part', text: '<span class="mono">AppointmentBuilder</span> has a named method for each part. Each stores its value and <b>returns the builder</b>, so calls chain fluently.' },
+      { title: 'Chain only what you need', text: 'Patient, doctor, time, video link, interpreter: five readable calls in any order, then <span class="mono">Build()</span> creates an immutable <span class="mono">Appointment</span>.', play: run => chain(run, [0, 1, 2, 4, 5, 7]) },
+      { title: 'Build() validates the combination', text: 'Rules across fields live in one place. Calling both <span class="mono">InPerson</span> and <span class="mono">Video</span> (or neither) fails at <span class="mono">Build()</span>, so an invalid appointment never exists.', tip: 'Interviewers like hearing "the object is valid by construction".' },
+      { title: 'A director for common recipes', text: '<span class="mono">AppointmentDirector.FollowUp(builder, last)</span> calls the usual steps: same patient and doctor, 15 minutes, in the same room, reminder 24 h before. Callers just ask for a follow-up.', play: run => chain(run, [0, 1, 2, 3, 6, 7]) }
+    ]
+  });
+
+  /* ---------- lab 1: interactive builder ---------- */
+  const CALLS = [
+    ['patient', '.ForPatient(asha)'], ['doctor', '.WithDoctor(drRao)'], ['at', '.At(nov12At1030, minutes: 30)'],
+    ['room', '.InPerson("Room 12")'], ['video', '.Video("https://meet.clinic/abc")'], ['lang', '.WithInterpreter("Kannada")'], ['remind', '.RemindBefore(hours: 24)']
+  ];
+  let picked = [];
+  $('bCalls').innerHTML = CALLS.map(([k, t]) => `<button class="chip-btn" type="button" data-k="${k}" aria-pressed="false">${t}</button>`).join('');
+  function code() {
+    const lines = ['var appt = new AppointmentBuilder()'].concat(picked.map(k => '    ' + CALLS.find(c => c[0] === k)[1])).concat(['    .Build();']);
+    K.codeBlock($('bCode'), lines.join('\n'), 'cs');
+    $('bCalls').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(picked.includes(b.dataset.k))));
+  }
+  $('bCalls').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { const k = b.dataset.k; picked = picked.includes(k) ? picked.filter(x => x !== k) : [...picked, k]; code(); $('bResult').className = 'result'; }));
+  $('bDirector').addEventListener('click', () => { picked = ['patient', 'doctor', 'at', 'room', 'remind']; code(); $('bResult').className = 'result'; $('bResult').innerHTML = '<span class="mono" style="color:var(--muted)">The director filled in the usual follow-up steps. Press Build().</span>'; });
+  $('bClear').addEventListener('click', () => { picked = []; code(); $('bResult').className = 'result'; $('bResult').innerHTML = '<span class="mono" style="color:var(--muted)">Nothing built yet.</span>'; });
+  $('bBuild').addEventListener('click', () => {
+    const has = k => picked.includes(k), err = [];
+    if (!has('patient')) err.push('patient is required');
+    if (!has('doctor')) err.push('doctor is required');
+    if (!has('at')) err.push('start time is required');
+    if (has('room') && has('video')) err.push('choose either InPerson(room) or Video(link), not both');
+    if (!has('room') && !has('video')) err.push('choose InPerson(room) or Video(link)');
+    const r = $('bResult');
+    if (err.length) { r.className = 'result bad'; r.innerHTML = `<b class="bad-text">Build() threw InvalidOperationException</b><ul>${err.map(e => `<li>${e}</li>`).join('')}</ul>`; return; }
+    r.className = 'result ok';
+    r.innerHTML = `<b class="ok-text">Appointment created (immutable)</b><dl>
+      <dt>Patient</dt><dd>Asha</dd><dt>Doctor</dt><dd>Dr Rao</dd><dt>Start</dt><dd>12 Nov, 10:30 · 30 min</dd>
+      <dt>Where</dt><dd>${has('room') ? 'In person · Room 12' : 'Video · meet.clinic/abc'}</dd>
+      <dt>Interpreter</dt><dd>${has('lang') ? 'Kannada' : '—'}</dd><dt>Reminder</dt><dd>${has('remind') ? '24 h before' : '—'}</dd></dl>`;
+  });
+  code();
+
+  /* ---------- lab 2: combinations ---------- */
+  function bars() {
+    const n = +$('nOpt').value; $('oOpt').textContent = n;
+    const ctors = 2 ** n, meth = n + 1;
+    const max = Math.max(ctors, meth);
+    $('bars').innerHTML = [['Constructors for every combination', ctors, 'bad'], ['Builder methods (+ Build)', meth, 'ok']].map(([l, v, c]) => `<div class="bar"><span>${l}</span><span class="track"><span class="fill ${c}" style="width:${Math.max(2, 100 * Math.log2(v + 1) / Math.log2(max + 1))}%;display:block"></span></span><b>${v.toLocaleString('en-US')}</b></div>`).join('');
+    $('nStatus').innerHTML = `${n} optional parts → <b>${ctors.toLocaleString('en-US')}</b> constructor combinations, or <b>${meth}</b> builder methods. (Bars use a log scale.)`;
+  }
+  $('nOpt').addEventListener('input', bars); bars();
+
+  const O = ['Builder', 'Object initializer (required / init)', 'Named arguments', 'Director preset'];
+  SD.page({ track: 'lld', drill: { opts: O, items: [
+    { q: 'An invoice with optional discount, tax rules, multiple currencies and the rule "discount can\'t exceed subtotal".', a: O[0], why: 'Many optional parts and cross-field rules: validate them once in Build().' },
+    { q: 'A SearchRequest DTO with DoctorId and Day required, page size optional.', a: O[1], why: 'Few fields, no cross-field rules: required + init is enough.' },
+    { q: 'A helper method SendSms(to, text, retry: 3, priority: High) with two independent optional settings.', a: O[2], why: 'A couple of independent optional parameters: named arguments read well.' },
+    { q: 'Nurses book the same "vaccination slot" configuration 50 times a day.', a: O[3], why: 'A director (or preset method) captures the recipe so callers don\'t repeat the chain.' },
+    { q: 'Unit tests need valid Appointment objects with sensible defaults and one field changed per test.', a: O[0], why: 'A test data builder: defaults in the builder, override only what the test cares about.' }
+  ] } });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prototype</title>
+<meta name="description" content="Creational pattern L16: create new objects by copying a configured one. See in a memory diagram why assignment isn't a copy, how MemberwiseClone and record with-expressions share lists, and what a deep copy changes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/theme.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/explainer.css">
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/explainer-kit.js"></script>
+<script src="../sd-series.js"></script>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← LLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">System Design · LLD · Creational · L16</div>
+    <h1>Prototype</h1>
+    <ul class="lede">
+      <li>Create a new object by <b>copying an existing, already configured one</b> (the prototype) instead of building it from scratch.</li>
+      <li>Worth it when setting an object up is expensive (loaded from a database, many steps) and you need many slightly different copies.</li>
+      <li>The whole pattern hinges on one question: <b>shallow or deep copy?</b> Get it wrong and editing the copy silently changes the original.</li>
+      <li>In C#: <span class="mono">MemberwiseClone()</span> and record <span class="mono">with</span> expressions are both <b>shallow</b>.</li>
+    </ul>
+  </header>
+
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn: what a copy really copies</h2>
+    <p class="sec-sub">A "Diabetes review" consultation template has a title, a doctor, a list of checks and a list of prescriptions. Each patient's consultation starts as a copy. Step through with <b>Next ▶</b> and watch the arrows: they are references.</p>
+    <div class="sub-block">
+      <h3 class="stage-title sub">Walkthrough: copying a consultation template</h3>
+      <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+      <div class="story wide" id="story">
+        <div class="scroll"><svg class="diagram" id="sv" style="min-width:0" viewBox="0 0 760 380" role="img" aria-label="Memory diagram of an original template object and its copy, showing which lists and objects they share"></svg></div>
+      </div>
+    </div>
+    <div class="sub-block">
+      <h3 class="stage-title sub">The same thing in C#</h3>
+      <div class="stage-kind">Shallow · deep · records · a registry of prototypes</div>
+      <div class="cs-pair">
+        <div><div class="label bad-text">Shallow: MemberwiseClone shares the lists</div><pre class="codeblock" id="csShallow"></pre></div>
+        <div><div class="label ok-text">Deep: copy what the clone may change</div><pre class="codeblock" id="csDeep"></pre></div>
+      </div>
+      <div class="cs-pair" style="margin-top:12px">
+        <div><div class="label bad-text">Records: with is shallow too</div><pre class="codeblock" id="csRecord"></pre></div>
+        <div><div class="label ok-text">Prototype registry: clone by key</div><pre class="codeblock" id="csReg"></pre></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="compare" data-nav="Compare">
+    <h2 class="sec-h"><span class="sec-n">2</span>Compare: five ways to "copy"</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Code</th><th>New object?</th><th>Lists</th><th>Items in lists</th><th>Edit the copy's list…</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">var b = a;</td><td class="bad-text">No</td><td>same</td><td>same</td><td class="bad-text">changes a</td></tr>
+          <tr><td class="mono">a.MemberwiseClone()</td><td class="ok-text">Yes</td><td>shared</td><td>shared</td><td class="bad-text">changes a</td></tr>
+          <tr><td class="mono">a with { Title = … }</td><td class="ok-text">Yes</td><td>shared</td><td>shared</td><td class="bad-text">changes a</td></tr>
+          <tr><td>New lists, same items</td><td class="ok-text">Yes</td><td>copied</td><td>shared</td><td>safe to add / remove; editing an item still changes a</td></tr>
+          <tr><td>Deep copy</td><td class="ok-text">Yes</td><td>copied</td><td>copied</td><td class="ok-text">never touches a</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>Strings and value types are safe:</b> <span class="mono">string</span> is immutable and <span class="mono">int</span>, <span class="mono">decimal</span>, <span class="mono">DateTime</span> are copied by value, so giving the copy a new title never affects the original. The danger is <b>mutable reference types</b>: lists, dictionaries and your own classes.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Not everything should be deep-copied.</b> The <span class="mono">Doctor</span> is a shared entity: every consultation should point to the same doctor. Decide per field: copy what the clone owns, share what it only refers to.</p></div>
+    </div>
+  </section>
+
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">3</span>Try it: the copy lab</h2>
+    <p class="sec-sub">Pick how the copy is made, then edit the <b>copy</b>. Red values in the original are changes that leaked.</p>
+    <ol class="howto"><li><span>Pick a copy method</span></li><li><span>Click the edits to apply them to the copy</span></li><li><span>Look for red in the original (left)</span></li></ol>
+    <div class="seg" id="lMode" role="group" aria-label="Copy method"><button type="button" data-v="assign" aria-pressed="false">b = a</button><button type="button" data-v="shallow" aria-pressed="true">MemberwiseClone</button><button type="button" data-v="with" aria-pressed="false">record with</button><button type="button" data-v="lists" aria-pressed="false">new lists, same items</button><button type="button" data-v="deep" aria-pressed="false">deep copy</button></div>
+    <div class="chips" id="lActs" style="margin-top:10px"><button class="chip-btn" type="button" data-a="title" aria-pressed="false">copy.Title = "Review · Asha"</button><button class="chip-btn" type="button" data-a="add" aria-pressed="false">copy.Checks.Add("Foot exam")</button><button class="chip-btn" type="button" data-a="dose" aria-pressed="false">copy.Rx[0].Dose = "1000 mg"</button></div>
+    <div class="scroll"><svg class="diagram" id="lSv" style="min-width:0;margin-top:10px" viewBox="0 0 760 380" role="img" aria-label="Memory diagram for the chosen copy method"></svg></div>
+    <div class="kpis">
+      <div class="kpi" id="kLeak"><b>0</b><span>changes leaked into the original</span></div>
+      <div class="kpi" id="kShared"><b>–</b><span>objects shared by both</span></div>
+    </div>
+    <p class="status-line" id="lStatus">Click an edit.</p>
+  </section>
+
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">4</span>Revise in two minutes</h2>
+    <h3 class="sec-h3">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">Building an object is expensive and you need many variants</span><span class="arrow">→</span><span class="then">configure one prototype, then clone and tweak</span></li>
+      <li><span class="if">Object has only value types and strings</span><span class="arrow">→</span><span class="then">shallow copy (<span class="mono">MemberwiseClone</span>, record <span class="mono">with</span>) is enough</span></li>
+      <li><span class="if">Object holds lists or mutable objects the copy may change</span><span class="arrow">→</span><span class="then">deep-copy those fields explicitly (copy constructor or <span class="mono">Clone()</span>)</span></li>
+      <li><span class="if">Field is a shared entity (doctor, tenant)</span><span class="arrow">→</span><span class="then">keep the reference; don't clone it</span></li>
+      <li><span class="if">Need templates by name</span><span class="arrow">→</span><span class="then">prototype registry: <span class="mono">Dictionary&lt;string, Template&gt;</span> + <span class="mono">Clone()</span></span></li>
+      <li><span class="if">Tempted by <span class="mono">ICloneable</span></span><span class="arrow">→</span><span class="then">avoid it: it doesn't say shallow or deep; write your own typed <span class="mono">Clone()</span></span></li>
+      <li><span class="if">Deep copy via JSON serialise / deserialise</span><span class="arrow">→</span><span class="then">quick, but slow and drops non-serialisable state; fine for tests</span></li>
+    </ul>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">5</span>Test yourself</h2>
+    <h3 class="sec-h3">Does the original change?</h3>
+    <div id="drill"></div>
+    <h3 class="sec-h3">Explain it out loud</h3>
+    <p class="sub">Answer before you open each card.</p>
+    <div class="quiz">
+      <details><summary>What problem does the prototype pattern solve?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Creating many similar objects when setting one up is expensive or complicated: you configure one, then copy it, instead of repeating the setup. Callers also don't need to know the concrete class to copy it.</p></div></details>
+      <details><summary>Shallow vs deep copy in one sentence each.<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Shallow:</b> a new object whose fields hold the same references as the original. <b>Deep:</b> a new object whose mutable referenced objects are copied too.</p></div></details>
+      <details><summary>Is a record's <span class="mono">with</span> expression a deep copy?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>No.</b> It copies the record's fields (shallowly) and changes the ones you list. A <span class="mono">List</span> property is shared between the original and the new record.</p></div></details>
+      <details><summary>Why is <span class="mono">ICloneable</span> discouraged?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>It returns <span class="mono">object</span> and its contract doesn't say whether the copy is shallow or deep, so callers can't rely on it. Microsoft's design guidelines recommend not implementing it in public APIs.</p></div></details>
+      <details><summary>Should a cloned consultation also clone its Doctor?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>No: the doctor is a shared entity the consultation refers to. Clone what the copy owns (its checks, its prescriptions); share what it only points to.</p></div></details>
+    </div>
+  </section>
+
+  <nav id="prevnext"></nav>
+
+  <footer>Sources: Gamma et al., <i>Design Patterns</i> (1994), Prototype; Microsoft Learn: <span class="mono">Object.MemberwiseClone</span>, records and nondestructive mutation (<span class="mono">with</span>), <span class="mono">ICloneable</span> remarks. Template and drug details are illustrative.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  K.codeBlock($('csShallow'), `public class ConsultTemplate
+{
+    public string Title { get; set; } = "";
+    public Doctor Doctor { get; set; } = null!;
+    public List<string> Checks { get; set; } = new();
+    public List<Prescription> Rx { get; set; } = new();
+
+    public ConsultTemplate ShallowClone() =>
+        (ConsultTemplate)MemberwiseClone();
+}
+
+var copy = template.ShallowClone();
+copy.Checks.Add("Foot exam");   // template.Checks has it too!`, 'cs');
+  K.codeBlock($('csDeep'), `public ConsultTemplate DeepClone() => new()
+{
+    Title  = Title,                         // string: immutable, safe
+    Doctor = Doctor,                        // shared entity: keep the reference
+    Checks = new List<string>(Checks),      // new list
+    Rx     = Rx.Select(p => p with { }).ToList()  // new list, new items
+};
+
+public record Prescription(string Drug, string Dose);`, 'cs');
+  K.codeBlock($('csRecord'), `public record Template(string Title, List<string> Checks);
+
+var a = new Template("Diabetes review", ["HbA1c", "BP"]);
+var b = a with { Title = "Diabetes review · Asha" };
+
+b.Checks.Add("Foot exam");
+Console.WriteLine(a.Checks.Count);   // 3: the list is shared`, 'cs');
+  K.codeBlock($('csReg'), `public class TemplateRegistry
+{
+    private readonly Dictionary<string, ConsultTemplate> protos = new();
+
+    public void Register(string key, ConsultTemplate t) => protos[key] = t;
+
+    public ConsultTemplate Create(string key) => protos[key].DeepClone();
+}
+
+// startup: load once from the database
+registry.Register("diabetes-review", await LoadTemplate(12));
+// per patient: cheap copy
+var consult = registry.Create("diabetes-review");`, 'cs');
+
+  /* ---------- memory diagram ---------- */
+  const BASE = { title: 'Diabetes review', checks: ['HbA1c', 'BP'], dose: '500 mg' };
+  function share(mode) { return { obj: mode === 'assign', lists: ['assign', 'shallow', 'with'].includes(mode), items: mode !== 'deep' }; }
+  function state(mode, acts) {
+    const s = share(mode);
+    const c = { title: acts.has('title') ? 'Review · Asha' : BASE.title, checks: BASE.checks.concat(acts.has('add') ? ['Foot exam'] : []), dose: acts.has('dose') ? '1000 mg' : BASE.dose };
+    const o = { title: s.obj && acts.has('title') ? c.title : BASE.title, checks: BASE.checks.concat(acts.has('add') && s.lists ? ['Foot exam'] : []), dose: acts.has('dose') && s.items ? c.dose : BASE.dose };
+    const leaks = (o.title !== BASE.title) + (o.checks.length !== BASE.checks.length) + (o.dose !== BASE.dose);
+    return { s, o, c, leaks };
+  }
+  function draw(g, mode, acts) {
+    g.textContent = '';
+    const { s, o, c } = state(mode, acts);
+    const R = (x, y, w, h, cls) => K.el('rect', { x, y, width: w, height: h, rx: 10, class: 'obj ' + (cls || '') }, g);
+    const T = (x, y, t, cls, anchor) => { const e = K.text(g, x, y, t, 'objtxt ' + (cls || '')); e.style.textAnchor = anchor || 'start'; return e; };
+    const P = (pts, cls) => K.el('path', { d: 'M' + pts.map(p => p.join(' ')).join(' L'), class: 'ref ' + (cls || ''), 'marker-end': 'url(#uml-open)' }, g);
+    // doctor (always shared)
+    R(330, 16, 100, 46, ''); T(380, 35, 'Doctor', 'muted', 'middle'); T(380, 52, 'Dr Rao', '', 'middle');
+    // original card
+    const card = (x, label, v, isCopy) => {
+      R(x, 80, 220, 112, isCopy ? 'on' : '');
+      T(x + 12, 99, label, 'muted');
+      const red = k => !isCopy && v[k + 'Leak'];
+      T(x + 12, 122, `Title  "${v.title}"`, !isCopy && v.title !== BASE.title ? 'bad' : '');
+      ['Doctor', 'Checks', 'Rx'].forEach((f, k) => { const y = 142 + k * 20; if (isCopy) { K.el('circle', { cx: x + 14, cy: y - 4, r: 4 }, g).style.fill = 'var(--fg)'; T(x + 26, y, f); } else { T(x + 12, y, f); K.el('circle', { cx: x + 200, cy: y - 4, r: 4 }, g).style.fill = 'var(--fg)'; } });
+    };
+    card(20, 'original : ConsultTemplate', o, false);
+    // original heap objects
+    const leakC = o.checks.length !== BASE.checks.length, leakD = o.dose !== BASE.dose;
+    R(20, 222, 220, 46, leakC ? 'bad' : ''); T(32, 240, 'List<string>', 'muted'); T(32, 258, '[' + o.checks.join(', ') + ']', leakC ? 'bad' : '');
+    R(20, 282, 220, 30, ''); T(32, 302, 'List<Prescription> [1]', 'muted');
+    R(20, 326, 220, 46, leakD ? 'bad' : ''); T(32, 344, 'Prescription', 'muted'); T(32, 362, 'Metformin ' + o.dose, leakD ? 'bad' : '');
+    P([[224, 138], [300, 138], [300, 48], [328, 48]]); P([[224, 158], [252, 158], [252, 245], [242, 245]]); P([[224, 178], [262, 178], [262, 297], [242, 297]]); P([[130, 312], [130, 324]]);
+    if (s.obj) {
+      R(560, 96, 170, 44, 'bad'); T(645, 115, 'copy (variable)', 'muted', 'middle'); T(645, 132, 'no new object', 'bad', 'middle');
+      P([[560, 118], [242, 118]], 'bad');
+      return;
+    }
+    card(520, 'copy : ConsultTemplate', c, true);
+    P([[530, 138], [460, 138], [460, 48], [432, 48]]);
+    // checks
+    if (s.lists) P([[530, 158], [476, 158], [476, 252], [242, 252]], 'bad');
+    else { R(520, 222, 220, 46, 'ok'); T(532, 240, 'List<string> (copy)', 'muted'); T(532, 258, '[' + c.checks.join(', ') + ']'); P([[530, 158], [506, 158], [506, 245], [518, 245]], 'ok'); }
+    // rx list + item
+    if (s.lists) P([[530, 178], [490, 178], [490, 304], [242, 304]], 'bad');
+    else {
+      R(520, 282, 220, 30, 'ok'); T(532, 302, 'List<Prescription> (copy)', 'muted'); P([[530, 178], [496, 178], [496, 297], [518, 297]], 'ok');
+      if (s.items) P([[630, 312], [630, 352], [242, 352]], 'bad');
+      else { R(520, 326, 220, 46, 'ok'); T(532, 344, 'Prescription (copy)', 'muted'); T(532, 362, 'Metformin ' + c.dose); P([[630, 312], [630, 324]], 'ok'); }
+    }
+  }
+  function sharedCount(mode) { const s = share(mode); return s.obj ? 'all' : (s.lists ? 3 : s.items ? 2 : 1); }
+
+  /* ---------- walkthrough ---------- */
+  const sv = $('sv'); K.umlDefs(sv); const G = K.el('g', {}, sv), FX = K.el('g', {}, sv);
+  const SCENES = [
+    ['deep', [], 'the configured template: built once, from the database'],
+    ['assign', ['title'], 'b = a: two names, one object. The "copy" renamed the original'],
+    ['shallow', [], 'MemberwiseClone: a new object, but its fields hold the same references'],
+    ['shallow', ['add', 'dose'], 'edit the copy\'s lists → the original changes too'],
+    ['with', ['add'], 'record with: also shallow; the list is still shared'],
+    ['deep', ['title', 'add', 'dose'], 'deep copy: new lists and items; the doctor stays shared on purpose'],
+    ['deep', [], 'registry: keep prototypes by key; Create(key) returns a deep clone']
+  ];
+  function show(i) {
+    const [m, a, note] = SCENES[i]; draw(G, m, new Set(a)); FX.textContent = '';
+    if (i === 0) G.querySelectorAll('*').forEach(e => { if (+(e.getAttribute?.('x') || e.getAttribute?.('cx')) >= 500) e.style.opacity = 0; });
+    if (i === 0) G.querySelectorAll('path').forEach(p => { if (p.getAttribute('d').startsWith('M530')) p.style.opacity = 0; });
+    K.text(FX, 380, 210, note, 'mlabel halo ' + ([1, 3, 4].includes(i) ? 'bad' : i === 5 ? 'ok' : 'accent'));
+  }
+  K.story({
+    root: $('story'), show, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'A prototype worth copying', text: 'The "Diabetes review" template took a database query and some setup: title, doctor, standard checks, a starting prescription. Every patient\'s consultation should start from it.' },
+      { title: 'Assignment is not a copy', text: '<span class="mono">var copy = template;</span> only copies the <b>reference</b>. Renaming "the copy" renames the template, for every patient after this one.' },
+      { title: 'MemberwiseClone: a shallow copy', text: 'A new object with every field copied. For the string that\'s fine. For <span class="mono">Doctor</span>, <span class="mono">Checks</span> and <span class="mono">Rx</span> it copies the <b>references</b>, so both objects point to the same lists.' },
+      { title: 'Edit the copy, break the template', text: 'Adding "Foot exam" for Asha and raising her dose goes into the <b>shared</b> list and prescription. The template now has them too, and so will the next patient.', tip: 'This is the bug interviewers want you to spot. Draw the arrows.' },
+      { title: 'Records don\'t save you', text: '<span class="mono">template with { Title = … }</span> creates a new record, but copies fields the same shallow way. The <span class="mono">Checks</span> list is still shared.' },
+      { title: 'Deep copy what the clone owns', text: 'New <span class="mono">Checks</span> list, new <span class="mono">Rx</span> list, new <span class="mono">Prescription</span> objects. Every edit stays in the copy. The <span class="mono">Doctor</span> is still shared: it\'s an entity both refer to, not something the copy owns.' },
+      { title: 'Prototype registry', text: 'Load each template once at startup into a dictionary. <span class="mono">registry.Create("diabetes-review")</span> returns a deep clone: fast, and callers never need to know how a template is built.' }
+    ]
+  });
+
+  /* ---------- lab ---------- */
+  const ls = $('lSv'); K.umlDefs(ls); const LG = K.el('g', {}, ls);
+  let mode = 'shallow', acts = new Set();
+  function lab() {
+    draw(LG, mode, acts);
+    const st = state(mode, acts);
+    $('kLeak').querySelector('b').textContent = st.leaks; $('kLeak').className = 'kpi ' + (st.leaks ? 'bad' : acts.size ? 'good' : '');
+    $('kShared').querySelector('b').textContent = sharedCount(mode);
+    $('lActs').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(acts.has(b.dataset.a))));
+    $('lStatus').innerHTML = !acts.size ? 'Click an edit.' : st.leaks ? `<b>${st.leaks}</b> edit${st.leaks > 1 ? 's' : ''} to the copy also changed the original.` : 'Every edit stayed in the copy.';
+  }
+  K.seg($('lMode'), v => { mode = v; lab(); });
+  $('lActs').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { const a = b.dataset.a; acts.has(a) ? acts.delete(a) : acts.add(a); lab(); }));
+  lab();
+
+  const O = ['Original changes', 'Original unchanged'];
+  SD.page({ track: 'lld', drill: { opts: O, items: [
+    { q: 'var b = a; b.Title = "New";', a: O[0], why: 'b and a are the same object.' },
+    { q: 'var b = (Template)a.MemberwiseClone(); b.Title = "New";', a: O[1], why: 'b is a new object; assigning a string field only changes b.' },
+    { q: 'var b = (Template)a.MemberwiseClone(); b.Checks.Add("Foot exam");', a: O[0], why: 'The Checks list reference was copied, so both share one list.' },
+    { q: 'var b = a with { Title = "New" }; b.Checks.Clear();', a: O[0], why: 'with is shallow: the list is shared.' },
+    { q: 'var b = a with { Checks = new List<string>(a.Checks) }; b.Checks.Add("X");', a: O[1], why: 'The copy got its own list.' },
+    { q: 'Deep clone with new Rx items; then b.Rx[0].Dose = "1000 mg";', a: O[1], why: 'The prescription objects were copied too.' }
+  ] } });
+})();
+</script>
+</body>
+</html>

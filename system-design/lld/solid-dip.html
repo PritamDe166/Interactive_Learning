@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="../../assets/css/explainer.css">
 <script src="../../assets/js/theme.js"></script>
 <script src="../../assets/js/explainer-kit.js"></script>
+<script src="../sd-series.js"></script>
 <style>
   .proj rect { fill: transparent; stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 2 5; }
   .proj text { fill: var(--muted); font-family: var(--mono) !important; font-size: 12px; }
@@ -40,16 +41,21 @@
     </ul>
   </header>
 
-  <section aria-labelledby="storyH">
-    <h2 class="stage-title" id="storyH">Walkthrough: flipping the arrow</h2>
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn: the idea, then the code</h2>
+    <p class="sec-sub">Step through the walkthrough with <b>Next ▶</b>, then compare the before and after C#.</p>
+    <div class="sub-block" aria-labelledby="storyH">
+    <h3 class="stage-title sub" id="storyH">Walkthrough: flipping the arrow</h3>
     <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
     <div class="story wide" id="dipStory">
       <div class="scroll"><svg class="diagram" id="dipSvg" style="min-width:0" viewBox="0 0 760 400" role="img" aria-label="Class diagram across Domain and Infrastructure projects; the dependency between them flips direction"></svg></div>
     </div>
-  </section>
-
-  <section aria-labelledby="codeH">
-    <h2 class="stage-title" id="codeH">The same thing in C#</h2>
+  </div>
+    <div class="sub-block" aria-labelledby="codeH">
+    <h3 class="stage-title sub" id="codeH">The same thing in C#</h3>
     <div class="stage-kind">Before, after, and the composition root</div>
     <div class="cs-pair">
       <div><div class="label bad-text">Before: the service builds its own SQL repository</div><pre class="codeblock" id="csBefore"></pre></div>
@@ -59,13 +65,14 @@
       <div><div class="label ok-text">Program.cs: the one place that knows the concrete classes</div><pre class="codeblock" id="csRoot"></pre></div>
       <div><div class="label ok-text">Unit test: no database needed</div><pre class="codeblock" id="csTest"></pre></div>
     </div>
+  </div>
   </section>
 
-  <h2 class="part-title">Try it yourself</h2>
-  <p class="sub">Swap implementations under both designs, then decide where the interface should live.</p>
-
-  <section aria-labelledby="simH">
-    <h2 class="stage-title" id="simH">1. Swap the repository</h2>
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">2</span>Try it yourself</h2>
+    <p class="sec-sub">Swap implementations under both designs, then decide where the interface should live.</p>
+    <div class="sub-block" aria-labelledby="simH">
+    <h3 class="stage-title sub" id="simH">1. Swap the repository</h3>
     <div class="stage-kind">Book Asha at 9:00 with different repositories · without editing BookingService</div>
     <div class="controls" style="flex-wrap:wrap;gap:14px;justify-content:flex-start">
       <div class="chip-group" style="margin:0"><div class="label">BookingService gets its repository by</div><div class="seg" id="mdSeg" role="group" aria-label="Wiring"><button type="button" data-v="new" aria-pressed="true">new SqlBookingRepository()</button><button type="button" data-v="di" aria-pressed="false">constructor injection</button></div></div>
@@ -75,18 +82,20 @@
     <div class="controls"><button class="btn primary" type="button" id="bookBtn">Book Asha at 9:00</button></div>
     <div class="card"><div class="label">What happened</div><pre class="mono dip-log" id="bookLog">Press Book.</pre></div>
     <p class="status-line" id="bookStatus"></p>
-  </section>
-
-  <section aria-labelledby="ownH">
-    <h2 class="stage-title" id="ownH">2. Who owns the interface?</h2>
+  </div>
+    <div class="sub-block" aria-labelledby="ownH">
+    <h3 class="stage-title sub" id="ownH">2. Who owns the interface?</h3>
     <div class="stage-kind">Same interface, two homes · watch the project references</div>
     <div class="seg" id="owSeg" role="group" aria-label="Interface location"><button type="button" data-v="infra" aria-pressed="true">IBookingRepository in Infrastructure</button><button type="button" data-v="domain" aria-pressed="false">IBookingRepository in Domain</button></div>
     <div class="scroll"><svg class="diagram narrow" id="owSvg" viewBox="0 0 660 230" style="min-width:540px;max-width:720px;margin:10px auto 0;display:block" role="img" aria-label="Project reference graph"></svg></div>
     <p class="status-line" id="owStatus"></p>
+  </div>
   </section>
 
-  <section aria-labelledby="cheatH">
-    <h2 id="cheatH">Cheat-sheet</h2>
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">3</span>Revise in two minutes</h2>
+    <div class="sub-block" aria-labelledby="cheatH">
+    <h3 class="sec-h3" id="cheatH">Cheat-sheet</h3>
     <ul class="cheat">
       <li><span class="if"><span class="mono">new SqlSomething()</span>, <span class="mono">new HttpClient()</span>, <span class="mono">DateTime.Now</span> inside business logic</span><span class="arrow">→</span><span class="then">hidden dependency on a detail: ask for an abstraction instead</span></li>
       <li><span class="if">Can't unit-test a rule without a database or network</span><span class="arrow">→</span><span class="then">invert: interface owned by the domain + a fake in tests</span></li>
@@ -95,10 +104,9 @@
       <li><span class="if">"We use DI, so we follow DIP"</span><span class="arrow">→</span><span class="then">only if what's injected is an abstraction the high-level code owns</span></li>
       <li><span class="if">Stable, side-effect-free code (string, Math, your own value objects)</span><span class="arrow">→</span><span class="then">depend on it directly; no interface needed</span></li>
     </ul>
-  </section>
-
-  <section aria-labelledby="refH">
-    <h2 id="refH">Reference: DIP, DI and IoC</h2>
+  </div>
+    <div class="sub-block" aria-labelledby="refH">
+    <h3 class="sec-h3" id="refH">Reference: DIP, DI and IoC</h3>
     <div class="scroll card table-card">
       <table>
         <thead><tr><th>Term</th><th>What it is</th><th>In ASP.NET Core</th></tr></thead>
@@ -115,10 +123,13 @@
       <div class="note"><span class="flag add">Added</span><p><b>Ownership matters:</b> if <span class="mono">IBookingRepository</span> lives in the Infrastructure project, the domain still references infrastructure and nothing was inverted. Put it in the domain, name it in domain language, and use domain types in its signatures. This is the heart of Clean Architecture and Ports &amp; Adapters.</p></div>
       <div class="note"><span class="flag add">Added</span><p><b>From your notes:</b> a Service that creates its Repository depends on a concrete low-level class. Introduce an interface, inject it through the constructor, and the service no longer knows which repository it uses or how it works. Most projects have one implementation per interface, so the main practical win is mocking in tests.</p></div>
     </div>
+  </div>
   </section>
 
-  <section aria-labelledby="quizH">
-    <h2 id="quizH">Check yourself</h2>
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">4</span>Test yourself</h2>
+    <div class="sub-block" aria-labelledby="quizH">
+    <h3 class="sec-h3" id="quizH">Check yourself</h3>
     <p class="sub">Answer out loud before you open each card.</p>
     <div class="quiz">
       <details><summary>State DIP's two rules.<span class="go">Show answer</span></summary>
@@ -134,9 +145,10 @@
       <details><summary>Should every class get an interface?<span class="go">Show answer</span></summary>
         <div class="ans"><p>No. Invert dependencies on <b>volatile details</b> (I/O, external services, time). Depending directly on stable, pure code is fine.</p></div></details>
     </div>
+  </div>
   </section>
 
-  <nav class="solid-nav" aria-label="SOLID pages"><a href="solid-isp.html">← I · Interface segregation</a><a href="solid.html">SOLID overview →</a></nav>
+  <nav id="prevnext"></nav>
 
   <footer>Sources: your Notion notes "SOLID Principles: Five Guidelines for Object-Oriented Code"; Robert C. Martin, "The Dependency Inversion Principle" (1996), as quoted in the Wikipedia article and Coding Shuttle's LLD handbook; Mikhail Shilkov, "Dependency Inversion Implies Interfaces Are Owned by High-level Modules" (2016). Repository names and log lines are illustrative.</footer>
 </div>
@@ -275,6 +287,9 @@ public void Booking_a_taken_slot_throws()
   }
   K.seg($('owSeg'), own); own('infra');
 })();
+</script>
+<script>
+SD.page({ track: 'lld' });
 </script>
 </body>
 </html>

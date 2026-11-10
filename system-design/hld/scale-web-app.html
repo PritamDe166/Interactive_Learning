@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Design: Scale a Web App to Millions</title>
+<meta name="description" content="H14 design: grow one web app from a single server to millions of users, one layer at a time: separate database, load balancer and stateless servers, cache and CDN, read replicas, queues, redundancy and multiple regions. With a scale-ladder calculator and an answer template.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/theme.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/explainer.css">
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/explainer-kit.js"></script>
+<script src="../sd-series.js"></script>
+<style>
+  .ladder { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 8px; }
+  .ladder li { display: grid; grid-template-columns: 110px 1fr; gap: 12px; align-items: start; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; opacity: .45; transition: opacity .2s, border-color .2s; }
+  .ladder li.on { opacity: 1; }
+  .ladder li.now { border-color: var(--accent-text); }
+  .ladder li b.at { font-family: var(--mono); font-size: 12.5px; color: var(--accent-text); }
+  .ladder li span { min-width: 0; }
+  .tmpl { counter-reset: t; list-style: none; padding: 0; display: grid; gap: 8px; }
+  .tmpl li { counter-increment: t; display: grid; grid-template-columns: 30px 1fr; gap: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .tmpl li::before { content: counter(t); font: 700 14px var(--mono); color: var(--ink); background: var(--pill); border-radius: 50%; width: 26px; height: 26px; display: grid; place-items: center; }
+  .tmpl li > span { min-width: 0; }
+  @media (max-width: 560px) { .ladder li { grid-template-columns: 1fr; gap: 2px; } }
+</style>
+</head>
+<body data-anim="continuous">
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← HLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Week 2 · H14 · Design</div>
+    <h1>Design: Scale a Web App to Millions</h1>
+    <ul class="lede">
+      <li>The classic interview question: "Your app has 1 user today. Grow it to 10 million."</li>
+      <li>The answer is a <b>sequence</b>: at each size, find what breaks first and add one thing.</li>
+      <li>It uses everything from Weeks 1–2: DNS, load balancers, stateless servers, availability.</li>
+      <li>Then it previews what's next: caching (Week 3), replicas and sharding (Phase 2), queues (Phase 4).</li>
+    </ul>
+  </header>
+
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn: one app, one layer at a time</h2>
+    <p class="sec-sub">A clinic booking site (your patients, appointments and doctors). Press <b>Next ▶</b> to grow it; each step names the problem first, then the fix.</p>
+    <div class="story" id="story"></div>
+  </section>
+
+  <section id="compare" data-nav="Compare">
+    <h2 class="sec-h"><span class="sec-n">2</span>Compare: what breaks at each size</h2>
+    <p class="sec-sub">Rough sizes; real limits depend on the app. The pattern matters more than the numbers.</p>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Users</th><th>What breaks first</th><th>What you add</th><th>Learn it in</th></tr></thead>
+        <tbody>
+          <tr><td>1 – 1k</td><td>Nothing; one VM runs IIS and SQL Server</td><td>Backups, monitoring</td><td>H6</td></tr>
+          <tr><td>1k – 10k</td><td>App and DB fight for CPU and RAM</td><td>Separate database server</td><td>H8</td></tr>
+          <tr><td>10k – 100k</td><td>One app server is full, and a single point of failure</td><td>Load balancer, 2+ stateless app servers, sessions in Redis</td><td>H8–H13</td></tr>
+          <tr><td>100k – 1M</td><td>Database reads, slow page loads far from the server</td><td>Cache (Redis), CDN for static files and public pages</td><td>H15–H21</td></tr>
+          <tr><td>1M+</td><td>Primary DB still busy with reads; slow work blocks requests</td><td>Read replicas; queue + background workers</td><td>Phase 2, Phase 4</td></tr>
+          <tr><td>5M+</td><td>An outage in one data centre takes everything down; writes outgrow one DB</td><td>Every tier across zones, autoscaling; then multi-region + GeoDNS; sharding</td><td>H1, H6, Phase 2</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">3</span>Try it: the scale ladder</h2>
+    <p class="sec-sub">Move the slider and watch the load numbers and the list of things you need. <span class="mono">(Assumes 50 requests per user per day, a 3× peak, 90% reads, ~300 requests/s per app server, a 90% cache hit ratio and ~3,000 queries/s per database server. Illustrative.)</span></p>
+    <ol class="howto"><li><span>Drag the slider from 100 users up to 30 million</span></li><li><span>Read the numbers: peak requests, servers, database load</span></li><li><span>The highlighted row is what you'd add next</span></li></ol>
+    <div class="ranges">
+      <div class="range"><label for="zU">Daily active users <output id="oU"></output></label><input type="range" id="zU" min="0" max="10" step="1" value="5"></div>
+    </div>
+    <div class="kpis">
+      <div class="kpi accent"><b id="kRps">–</b><span>Peak requests/s</span></div>
+      <div class="kpi"><b id="kApp">–</b><span>App servers (+1 spare)</span></div>
+      <div class="kpi"><b id="kDb">–</b><span>DB reads/s after cache</span></div>
+      <div class="kpi"><b id="kW">–</b><span>DB writes/s</span></div>
+    </div>
+    <ol class="ladder" id="ladder"></ol>
+    <p class="hint" id="zHint"></p>
+  </section>
+
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">4</span>Revise: how to answer a design question</h2>
+    <h3 class="sec-h3">Answer in this order (about 45 minutes)</h3>
+    <ol class="tmpl">
+      <li><span><b>Requirements (5 min).</b> Functional: what users do. Non-functional: users, latency, availability, consistency. Write them down.</span></li>
+      <li><span><b>Estimates (5 min).</b> Users × requests per day ÷ 86,400 × peak factor; read/write ratio; data size per year.</span></li>
+      <li><span><b>High-level design (10 min).</b> Client → DNS → CDN → load balancer → stateless app → cache → database. Name each box's job.</span></li>
+      <li><span><b>Data model and APIs (5 min).</b> Main tables or documents, and 3–4 key endpoints.</span></li>
+      <li><span><b>Deep dive (15 min).</b> The part the interviewer cares about: the hot read path, the write path, a tricky feature.</span></li>
+      <li><span><b>Bottlenecks and failures (5 min).</b> What breaks first at 10×? Single points of failure? What happens when the cache or a region dies?</span></li>
+    </ol>
+    <h3 class="sec-h3">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">One server for everything</span><span class="arrow">→</span><span class="then">Fine to start; split the database out first</span></li>
+      <li><span class="if">App tier full or a single point of failure</span><span class="arrow">→</span><span class="then">Load balancer + stateless servers (sessions in Redis or tokens)</span></li>
+      <li><span class="if">Same reads over and over</span><span class="arrow">→</span><span class="then">Cache-aside in Redis; CDN for static and public pages</span></li>
+      <li><span class="if">Primary DB busy with reads</span><span class="arrow">→</span><span class="then">Read replicas (accept replication lag)</span></li>
+      <li><span class="if">Slow work inside a request (email, PDF, image)</span><span class="arrow">→</span><span class="then">Queue + background workers; return 202 Accepted</span></li>
+      <li><span class="if">One data centre down = outage</span><span class="arrow">→</span><span class="then">Spread every tier across availability zones; autoscale</span></li>
+      <li><span class="if">Users worldwide</span><span class="arrow">→</span><span class="then">Multiple regions + GeoDNS / latency routing</span></li>
+      <li><span class="if">Writes outgrow one database</span><span class="arrow">→</span><span class="then">Shard / partition (Phase 2)</span></li>
+    </ul>
+    <div class="note"><span class="flag add">Added</span>This design day had no page before. The scale-ladder numbers are back-of-envelope rules, the same kind of estimate an interviewer expects you to make out loud.</div>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">5</span>Test yourself</h2>
+    <h3 class="sec-h3">What do you add next?</h3>
+    <div id="drill"></div>
+    <h3 class="sec-h3">Explain it out loud</h3>
+    <p class="sub">Answer before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Why split the database out before adding a second app server?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Two app servers need one shared database.</b> Splitting first also lets each machine be sized for its job (CPU for the app, RAM and fast disk for SQL Server).</p></div></details>
+      <details><summary>What must change in the app before you put it behind a load balancer?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Make it stateless.</b> Sessions to Redis or tokens, uploaded files to blob storage, no in-memory data another server would need.</p></div></details>
+      <details><summary>Estimate peak requests per second for 2 million daily users.<span class="go">Show answer</span></summary>
+        <div class="ans"><p>2 M × 50 requests ÷ 86,400 ≈ <b>1,160/s average</b>; × 3 for the peak ≈ <b>3,500/s</b>. With 90% reads that is ~3,150 reads/s, ~350 writes/s.</p></div></details>
+      <details><summary>Read replicas are added. A user edits their profile and the page still shows the old value. Why?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Replication lag.</b> The read went to a replica that hadn't applied the write yet. Read your own writes from the primary for a short time, or use session consistency.</p></div></details>
+      <details><summary>Why does a queue help with traffic spikes?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>It absorbs the burst.</b> Requests are accepted quickly and workers process them at a steady rate, so the database isn't hit with the whole spike at once.</p></div></details>
+      <details><summary>What is the single point of failure left after adding two app servers behind one load balancer?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>The load balancer itself, and the single database.</b> Use a managed or active-passive LB pair, and a database standby in another zone.</p></div></details>
+    </div>
+  </section>
+
+  <nav id="prevnext"></nav>
+
+  <footer>Sources: Week 2 notes; system-design-primer ("scaling up to your first 10 million users" pattern); the H1–H13 pages. All numbers are illustrative rules of thumb.</footer>
+</div>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const D = ['Separate the database', 'Load balancer + stateless app servers', 'Cache + CDN', 'Read replicas', 'Queue + workers', 'Multiple zones / regions'];
+  SD.page({ track: 'hld', drill: { opts: D, items: [
+    { q: 'One VM runs IIS and SQL Server; both are at 90% CPU during the evening rush.', a: D[0], why: 'Give the database its own machine first; then the app can scale separately.' },
+    { q: 'The single app server is at 95% CPU and deploying it means downtime.', a: D[1], why: 'Two or more stateless servers behind a load balancer: more capacity and no single point of failure.' },
+    { q: 'The doctor list and clinic pages are read 200 times for every change, and pages are slow for users in other cities.', a: D[2], why: 'Cache the repeated reads; serve static files and public pages from a CDN.' },
+    { q: 'Cache hit ratio is 92%, but the primary database is still at 85% CPU from reads.', a: D[3], why: 'Move the remaining reads to replicas; keep writes on the primary.' },
+    { q: 'Booking requests take 4 seconds because they wait for confirmation emails and PDF receipts.', a: D[4], why: 'Put the email and PDF work on a queue; respond as soon as the booking is saved.' },
+    { q: 'A power failure in one data centre took the whole site down for two hours.', a: D[5], why: 'Run every tier in at least two availability zones (and later regions).' }
+  ] } });
+
+  /* ---------- worked design ---------- */
+  let note;
+  const L = (m, n) => {
+    const show = (id, on) => m.state(id, on ? '' : 'hide');
+    const wire = (a, b, on) => m.link(a, b, on ? '' : 'hide');
+    show('db', n >= 1); wire('a1', 'db', n >= 1);
+    show('lb', n >= 2); show('a2', n >= 2); show('cache', n >= 2);
+    wire('u', 'a1', n < 2); wire('u', 'lb', n >= 2); wire('lb', 'a1', n >= 2); wire('lb', 'a2', n >= 2); wire('a1', 'cache', n >= 2); wire('a2', 'cache', n >= 2); wire('a2', 'db', n >= 2);
+    show('cdn', n >= 3); wire('u', 'cdn', n >= 3);
+    show('rep', n >= 4); wire('db', 'rep', n >= 4);
+    show('q', n >= 5); wire('a2', 'q', n >= 5);
+    m.text('a1', n === 0 ? 'App + SQL' : n >= 2 ? 'App 1' : 'App');
+    if (n >= 2) m.badge('cache', n >= 3 ? 'sessions + cache' : 'sessions', 'teal');
+    if (n >= 3) m.badge('cdn', 'images, JS, CSS', 'teal');
+    if (n >= 4) m.badge('rep', 'reads', 'teal');
+    if (n >= 5) m.badge('q', 'emails, PDFs', 'yellow');
+    if (n >= 6) { m.badge('lb', '2 zones', 'violet'); m.badge('a2', 'autoscale 2–20', 'violet'); }
+  };
+  SD.story('story', {
+    vb: [480, 260], tone: 'teal', alt: 'A web app growing from one server to load balancer, app servers, Redis, CDN, database with replica and a queue',
+    build(m) {
+      m.tile('u', 36, 120, 'Users', 'users');
+      m.box('cdn', 120, 222, 'CDN', { icon: 'edge', w: 76 });
+      m.box('lb', 130, 120, 'Load balancer', { icon: 'lb', w: 110 });
+      m.box('a1', 260, 80, 'App', { icon: 'server', w: 96 });
+      m.box('a2', 260, 160, 'App 2', { icon: 'server', w: 96 });
+      m.box('cache', 395, 36, 'Redis', { icon: 'ram', w: 84 });
+      m.db('db', 395, 125, 'SQL Server');
+      m.db('rep', 395, 215, 'Replica');
+      m.box('q', 260, 236, 'Queue', { icon: 'pipe', w: 84, h: 28 });
+      m.wire('u', 'a1', { via: [[130, 60]] }); m.wire('u', 'lb'); m.wire('u', 'cdn'); m.wire('lb', 'a1'); m.wire('lb', 'a2');
+      m.wire('a1', 'cache'); m.wire('a2', 'cache'); m.wire('a1', 'db'); m.wire('a2', 'db'); m.wire('db', 'rep'); m.wire('a2', 'q');
+      note = m.label(150, 16, '', 'at-strong');
+    },
+    reset(m) { note.textContent = ''; },
+    steps: [
+      { title: '1 user: one server does everything',
+        text: 'One VM runs IIS and SQL Server. It is cheap and simple, and right for a first version. Add <b>backups</b> and <b>monitoring</b> from day one.',
+        set(m) { L(m, 0); note.textContent = '~1k users'; },
+        async play(m, r) { L(m, 0); await m.send(['u', 'a1'], { run: r, label: 'GET /book' }); note.textContent = '~1k users'; } },
+      { title: 'Problem: app and database fight for the machine → split them',
+        text: 'At a few thousand users, IIS and SQL Server compete for CPU and RAM. Move the <b>database to its own server</b>. Each can now be sized and scaled for its own job.',
+        set(m) { L(m, 1); note.textContent = '~10k users'; },
+        async play(m, r) { L(m, 1); await m.send(['u', 'a1', 'db'], { run: r, label: 'SELECT' }); note.textContent = '~10k users'; } },
+      { title: 'Problem: one app server is full and a single point of failure → load balancer',
+        text: 'Scaling up has a ceiling, and a deploy or crash takes the site down. Put a <b>load balancer</b> in front of <b>two or more app servers</b>. First make them stateless: sessions go to <b>Redis</b>.',
+        tip: 'Say "stateless" before you say "add servers": interviewers listen for it.',
+        set(m) { L(m, 2); note.textContent = '~100k users'; },
+        async play(m, r) { L(m, 2); await m.send(['u', 'lb', 'a1'], { run: r }); await m.send(['u', 'lb', 'a2'], { run: r }); note.textContent = '~100k users'; } },
+      { title: 'Problem: the database is busy repeating the same reads → cache + CDN',
+        text: 'Doctor lists and clinic pages are read hundreds of times per change. Keep them in <b>Redis</b> (cache-aside, with a TTL). Put images, JS and CSS, and public pages, on a <b>CDN</b> near users.',
+        set(m) { L(m, 3); note.textContent = '~1M users · 90% cache hits'; },
+        async play(m, r) { L(m, 3); await m.send(['u', 'cdn'], { run: r, label: 'logo.png', tone: 'teal' }); await m.send(['u', 'lb', 'a1', 'cache'], { run: r, label: 'doctors', tone: 'teal' }); note.textContent = '~1M users · 90% cache hits'; } },
+      { title: 'Problem: the primary database is still busy with reads → read replicas',
+        text: 'Writes go to the <b>primary</b>; most reads go to <b>replicas</b> that copy it. Replicas lag by a little, so read your own writes from the primary.',
+        set(m) { L(m, 4); note.textContent = 'writes → primary · reads → replicas'; },
+        async play(m, r) { L(m, 4); await m.send(['a2', 'db', 'rep'], { run: r, label: 'replicate', tone: 'yellow' }); note.textContent = 'writes → primary · reads → replicas'; } },
+      { title: 'Problem: slow work inside requests → queue + workers',
+        text: 'Booking waits 4 s for a confirmation email and a PDF. Save the booking, put a message on a <b>queue</b>, reply at once; <b>workers</b> send the email later. Spikes queue up instead of hitting the database.',
+        set(m) { L(m, 5); note.textContent = 'reply in 200 ms · email later'; },
+        async play(m, r) { L(m, 5); await m.send(['a2', 'q'], { run: r, label: 'BookingCreated', tone: 'yellow' }); note.textContent = 'reply in 200 ms · email later'; } },
+      { title: 'Problem: one data centre is one big single point of failure → zones + autoscaling',
+        text: 'Run every tier in <b>two or more availability zones</b>: load balancer, app servers, Redis, a database standby. <b>Autoscaling</b> adds app servers when CPU or queue length rises.',
+        set(m) { L(m, 6); note.textContent = '~5M users · survives a zone failure'; } },
+      { title: 'Problem: users far away, or a whole region down → multiple regions',
+        text: 'Copy the stack to a second region and route users with <b>GeoDNS / latency-based DNS</b> (H1). Writes need a plan: one primary region, or a database built for multi-region. When writes outgrow one database, <b>shard</b> (Phase 2).',
+        tip: 'Finish with the trade-offs: cost, replication lag, and what stays a single point of failure.',
+        set(m) { L(m, 7); note.textContent = '10M+ users · GeoDNS → 2 regions'; } }
+    ]
+  });
+
+  /* ---------- scale ladder ---------- */
+  const USERS = [100, 1e3, 1e4, 5e4, 1e5, 5e5, 1e6, 2e6, 5e6, 1e7, 3e7];
+  const STEPS = [
+    { at: 0, t: 'One server', d: 'IIS and SQL Server on one VM, plus backups and monitoring.' },
+    { at: 1e3, t: 'Separate DB', d: 'Database on its own server.' },
+    { at: 1e4, t: 'LB + 2 apps', d: 'Load balancer, two or more stateless app servers, sessions in Redis.' },
+    { at: 1e5, t: 'Cache + CDN', d: 'Redis cache-aside for hot reads; CDN for static files and public pages.' },
+    { at: 1e6, t: 'Replicas + queue', d: 'Read replicas; queue + background workers for slow work.' },
+    { at: 5e6, t: 'Zones, regions', d: 'Every tier across zones with autoscaling; then a second region with GeoDNS; plan for sharding.' }
+  ];
+  const n = v => v >= 1e6 ? (v / 1e6).toLocaleString('en-US') + ' M' : v >= 1e3 ? (v / 1e3).toLocaleString('en-US') + ' K' : String(v);
+  const r0 = x => x >= 100 ? Math.round(x).toLocaleString('en-US') : x >= 10 ? x.toFixed(0) : x.toFixed(1);
+  $('ladder').innerHTML = STEPS.map(s => `<li><b class="at">${s.at ? n(s.at) + '+' : 'start'}</b><span><b>${s.t}</b> · ${s.d}</span></li>`).join('');
+  function ladder() {
+    const u = USERS[+$('zU').value];
+    $('oU').textContent = n(u);
+    const peak = u * 50 / 86400 * 3, reads = peak * .9, writes = peak * .1;
+    const cached = u >= 1e5, dbReads = cached ? reads * .1 : reads;
+    const apps = Math.max(1, Math.ceil(peak / 300)) + (u >= 1e4 ? 1 : 0);
+    $('kRps').textContent = r0(peak); $('kApp').textContent = u < 1e4 ? '1' : apps; $('kDb').textContent = r0(dbReads); $('kW').textContent = r0(writes);
+    const lis = [...$('ladder').children]; let cur = 0;
+    STEPS.forEach((s, i) => { if (u >= s.at) cur = i; });
+    lis.forEach((li, i) => { li.classList.toggle('on', i <= cur); li.classList.toggle('now', i === cur); });
+    let h = `${n(u)} daily users ≈ ${r0(peak)} requests/s at peak. `;
+    if (u < 1e4) h += 'One app server copes; the first move is giving the database its own machine.';
+    else if (u < 1e5) h += 'Two app servers behind a load balancer give capacity and survive a crash. The database still serves every read.';
+    else if (u < 1e6) h += `Without the cache the database would see ${r0(reads)} reads/s; with 90% hits it sees ${r0(dbReads)}.`;
+    else h += dbReads > 3000 ? 'Even after the cache, reads exceed one database server: add replicas.' : 'Replicas give read headroom and a standby; queues smooth out write spikes.';
+    if (writes > 3000) h += ' Writes alone exceed one database: time to shard.';
+    $('zHint').textContent = h;
+  }
+  $('zU').addEventListener('input', ladder);
+  ladder();
+})();
+</script>
+</body>
+</html>

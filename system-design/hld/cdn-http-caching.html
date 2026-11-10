@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CDN &amp; HTTP Caching</title>
+<meta name="description" content="H21: pull vs push CDNs, Cache-Control, ETag and 304, versioned file names and purges, animated; plus a header lab that shows which cache answers your next request.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/theme.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/explainer.css">
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/explainer-kit.js"></script>
+<script src="../sd-series.js"></script>
+<script src="caching-flows.js"></script>
+<style>
+  .cdn-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin-top: 12px; }
+  .cdn-hdr { font-family: var(--mono); font-size: 13px; text-align: center; margin-top: 10px; color: var(--accent-text); overflow-wrap: anywhere; }
+  .cdn-presets { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 8px; margin-top: 12px; }
+  .cdn-presets button { font: 12.5px var(--mono); text-align: left; color: var(--fg-soft); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; cursor: pointer; overflow-wrap: anywhere; }
+  .cdn-presets button[aria-pressed="true"] { border-color: var(--accent-text); color: var(--fg); }
+  .cdn-result { margin-top: 12px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); font-size: 14.5px; min-height: 2.6em; }
+</style>
+</head>
+<body data-anim="continuous">
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← HLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Week 3 · H21 · Caching &amp; CDN</div>
+    <h1>CDN &amp; HTTP Caching</h1>
+    <ul class="lede">
+      <li>A <b>CDN</b> keeps copies of your responses on edge servers close to users.</li>
+      <li><b>Pull</b> CDNs fetch from your origin on the first miss; <b>push</b> CDNs get files uploaded ahead of time.</li>
+      <li>The <b>Cache-Control</b> header decides who may store a response (browser, CDN) and for how long.</li>
+      <li><b>ETag + 304</b> lets a stale copy be re-validated without downloading it again.</li>
+      <li>Static files get a <b>hash in the name</b> and a one-year cache; HTML stays short-lived. Purge is the emergency brake.</li>
+    </ul>
+  </header>
+
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn it step by step</h2>
+    <p class="sec-sub">The life of app.js. Press <b>Next ▶</b> to go one step at a time, or <b>Play all</b> to watch the whole story.</p>
+    <div class="story" id="story"></div>
+  </section>
+
+  <section id="compare" data-nav="Compare">
+    <h2 class="sec-h"><span class="sec-n">2</span>Compare: 6 patterns side by side</h2>
+    <p class="sec-sub">Read each card top to bottom: rule, diagram, numbered steps, takeaway. Press <b>▶ Play</b> on any diagram to watch it happen.</p>
+    <div id="atlas"></div>
+  </section>
+
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">3</span>Try it: Header lab</h2>
+    <p class="sec-sub">Pick a response header, load the file once, then predict where the next request is answered: your browser, the CDN edge, or the origin. <span class="mono">(Second request comes 2 minutes after the first)</span></p>
+    <ol class="howto"><li><span>Pick a response header</span></li><li><span>Press <b>1 · First load</b></span></li><li><span>Predict, then press <b>2a</b> or <b>2b</b></span></li></ol>
+    <div class="cdn-presets" id="presets"></div>
+    <div class="cdn-hdr" id="hdr"></div>
+    <div id="labStage"></div>
+    <div class="controls">
+      <button class="btn primary" type="button" id="first">1 · First load (you)</button>
+      <button class="btn" type="button" id="again">2a · You reload after 2 min</button>
+      <button class="btn" type="button" id="other">2b · Colleague nearby after 2 min</button>
+      <button class="btn" type="button" id="labReset">Reset</button>
+    </div>
+    <div class="cdn-result" id="result" aria-live="polite">Choose a header, then press "First load".</div>
+  </section>
+
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">4</span>Revise in two minutes</h2>
+    <h3 class="sec-h3">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">Hashed JS/CSS/fonts/images</span><span class="arrow">→</span><span class="then"><code>public, max-age=31536000, immutable</code></span></li>
+      <li><span class="if">HTML pages</span><span class="arrow">→</span><span class="then"><code>no-cache</code> + ETag (always revalidate)</span></li>
+      <li><span class="if">Per-user data (account, cart)</span><span class="arrow">→</span><span class="then"><code>private</code> (never the CDN)</span></li>
+      <li><span class="if">Secrets, one-time tokens</span><span class="arrow">→</span><span class="then"><code>no-store</code></span></li>
+      <li><span class="if">CDN may cache longer than browsers</span><span class="arrow">→</span><span class="then"><code>max-age=60, s-maxage=3600</code></span></li>
+      <li><span class="if">Wrong content already cached</span><span class="arrow">→</span><span class="then">Purge the URL (or tag)</span></li>
+      <li><span class="if">Huge, scheduled release</span><span class="arrow">→</span><span class="then">Push / pre-warm the CDN</span></li>
+    </ul>
+    <h3 class="sec-h3">In .NET terms</h3>
+    <div class="card analogy scroll">
+      <table>
+        <thead><tr><th>You've used</th><th>Same idea</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>IIS static content "Expire web content" / client cache settings</td><td><code>Cache-Control: max-age</code></td><td>IIS sets the header; browsers and CDNs obey it.</td></tr>
+          <tr><td><code>[ResponseCache(Duration = 60)]</code> in ASP.NET Core</td><td><code>Cache-Control: public, max-age=60</code></td><td>Sets headers only; response caching middleware or a CDN does the storing.</td></tr>
+          <tr><td><code>asp-append-version="true"</code> on a script tag</td><td>Versioned file names</td><td>Adds a content hash (<code>?v=…</code>) so new builds get a new URL.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3 class="sec-h3">Reference</h3>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Directive</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><code>max-age=N</code></td><td>Fresh for N seconds in any cache (browser and shared)</td></tr>
+          <tr><td><code>s-maxage=N</code></td><td>Overrides max-age for shared caches (CDN, proxies) only</td></tr>
+          <tr><td><code>public</code> / <code>private</code></td><td>Shared caches may / may not store it</td></tr>
+          <tr><td><code>no-cache</code></td><td>May store, but must revalidate with the origin before every use</td></tr>
+          <tr><td><code>no-store</code></td><td>Don't store it anywhere</td></tr>
+          <tr><td><code>immutable</code></td><td>Won't change while fresh: don't revalidate even on reload</td></tr>
+          <tr><td><code>stale-while-revalidate=N</code></td><td>May serve stale for N seconds while refreshing in the background</td></tr>
+          <tr><td><code>ETag</code> / <code>If-None-Match</code></td><td>Version tag; unchanged → <code>304 Not Modified</code>, no body</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><span class="flag">Corrected</span><code>no-cache</code> does not mean "don't cache": it means "store it, but check with the server before using it". "Don't cache" is <code>no-store</code>.</div>
+    <div class="note"><span class="flag">Added</span>Push vs pull CDNs come from the System Design Primer; ETag/304, versioned file names and purge were added because they are how CDN caching is controlled in practice.</div>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">5</span>Test yourself</h2>
+    <h3 class="sec-h3">Which pattern fits?</h3>
+    <div id="drill"></div>
+    <h3 class="sec-h3">Explain it out loud</h3>
+    <p class="sub">Answer before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Why cache app.4f2c.js for a year but index.html for 0 seconds?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>The hashed file can never change</b> (a new build gets a new name), but the HTML is what points to the new name, so it must always be fresh.</p></div></details>
+      <details><summary>no-cache vs no-store?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>no-cache</b>: keep a copy but revalidate before use (cheap 304s). <b>no-store</b>: keep nothing.</p></div></details>
+      <details><summary>A user's account page shows up for another user. Which header was wrong?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>It was cacheable by the CDN</b> (public or missing <code>private</code>). Per-user responses need <code>private</code> or <code>no-store</code>.</p></div></details>
+      <details><summary>What does a 304 save, and what doesn't it save?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>It saves the download</b> (no body). It still costs a round trip to whoever answers the revalidation.</p></div></details>
+      <details><summary>Pull CDN at a 9 AM global launch: what goes wrong?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Every edge misses at once</b> and all of them hit the origin together. Push or pre-warm the files first.</p></div></details>
+      <details><summary>Why prefer new file names over purges for static files?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Purges take time to spread and can be missed</b> by browsers that already cached the old file. A new URL is new everywhere immediately.</p></div></details>
+    </div>
+  </section>
+
+  <nav id="prevnext"></nav>
+
+  <footer>Sources: Week 3 notes; System Design Primer, Content delivery network; RFC 9111 (HTTP Caching) and MDN Cache-Control reference; Microsoft Learn, response caching in ASP.NET Core. Timings and sizes are illustrative.</footer>
+</div>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const ids = ['cdnpull', 'cdnpush', 'cc', 'etag', 'busting', 'purge'];
+  CF.page({ file: 'cdn-http-caching.html', ids });
+
+  /* ---------- walkthrough ---------- */
+  let h1, h2;
+  CF.story('story', {
+    vb: [450, 240], tone: 'blue', alt: 'Browser with its cache, a CDN edge and the origin',
+    build(m) {
+      m.tile('br', 44, 110, 'Browser · Pune', 'laptop'); m.box('bc', 44, 200, 'browser cache', { w: 96, h: 24 });
+      m.box('edge', 225, 110, 'CDN edge · Mumbai', { icon: 'edge', w: 128 }); m.box('origin', 392, 110, 'Origin', { icon: 'server', w: 84 });
+      m.wire('br', 'bc'); m.wire('br', 'edge'); m.wire('edge', 'origin');
+      h1 = m.label(225, 30, '', 'at-small'); h2 = m.label(225, 46, '', 'at-small');
+    },
+    reset() { h1.textContent = ''; h2.textContent = ''; },
+    steps: [
+      { title: 'First visit: nobody has the file',
+        text: 'The browser has no copy, so it asks the nearest CDN edge. The edge has nothing either (<b>miss</b>) and goes to the origin, far away.',
+        set(m) { m.badge('bc', 'empty', 'muted'); m.badge('edge', 'MISS', 'red'); h1.textContent = 'GET /app.4f2c.js'; },
+        async play(m, r) { h1.textContent = 'GET /app.4f2c.js'; await m.send(['br', 'bc'], { run: r, ms: 350 }); m.badge('bc', 'empty', 'muted'); await m.send(['br', 'edge'], { run: r }); m.badge('edge', 'MISS', 'red'); await m.send(['edge', 'origin'], { run: r }); } },
+      { title: 'The origin answers with caching rules',
+        text: 'The response carries headers that tell every cache what to do: <b>browsers</b> may keep it 5 minutes (<code>max-age=300</code>), <b>shared caches</b> like the CDN for a day (<code>s-maxage=86400</code>). An <code>ETag</code> names this version.',
+        set(m) { h1.textContent = 'Cache-Control: public, max-age=300, s-maxage=86400'; h2.textContent = 'ETag: "a1"'; m.state('origin', 'on'); },
+        async play(m, r) { m.state('origin', 'on'); h1.textContent = 'Cache-Control: public, max-age=300, s-maxage=86400'; h2.textContent = 'ETag: "a1"'; await m.send(['origin', 'edge'], { run: r, tone: 'yellow', label: '200 · 120 KB' }); } },
+      { title: 'Each cache stores it for its own time',
+        text: 'The edge keeps it for 24 hours and serves everyone nearby. The browser keeps it for 5 minutes.',
+        set(m) { h1.textContent = 'Cache-Control: public, max-age=300, s-maxage=86400'; m.badge('edge', 'stored 24 h', 'teal'); m.badge('bc', 'stored 5 min', 'teal'); },
+        async play(m, r) { h1.textContent = 'Cache-Control: public, max-age=300, s-maxage=86400'; m.badge('edge', 'stored 24 h', 'teal'); await m.send(['edge', 'br'], { run: r, tone: 'yellow' }); await m.send(['br', 'bc'], { run: r, tone: 'yellow', ms: 350 }); m.badge('bc', 'stored 5 min', 'teal'); } },
+      { title: 'Within 5 minutes: no network at all',
+        text: 'The browser\'s copy is fresh, so it uses it directly. Nothing leaves the laptop: the fastest request is the one you don\'t send.',
+        set(m) { m.badge('bc', 'HIT', 'teal'); m.state('bc', 'ok'); m.state('edge', 'dim'); m.state('origin', 'dim'); },
+        async play(m, r) { m.state('edge', 'dim'); m.state('origin', 'dim'); await m.send(['br', 'bc'], { run: r, label: 'fresh?' }); m.badge('bc', 'HIT', 'teal'); m.state('bc', 'ok'); } },
+      { title: 'After 5 minutes: revalidate with If-None-Match',
+        text: 'The browser copy is now stale but probably unchanged. It asks the edge "still <b>\"a1\"</b>?". The edge\'s copy is still fresh, so it answers <b>304 Not Modified</b> with no body.',
+        set(m) { h1.textContent = 'If-None-Match: "a1"'; h2.textContent = '304 Not Modified · 0 KB'; m.badge('edge', '304', 'teal'); m.badge('bc', 'reused', 'teal'); m.state('origin', 'dim'); },
+        async play(m, r) { m.state('origin', 'dim'); h1.textContent = 'If-None-Match: "a1"'; m.badge('bc', 'stale', 'muted'); await m.send(['br', 'edge'], { run: r, label: '"a1"?' }); m.badge('edge', '304', 'teal'); h2.textContent = '304 Not Modified · 0 KB'; await m.send(['edge', 'br'], { run: r, tone: 'teal', label: '304' }); m.badge('bc', 'reused', 'teal'); } },
+      { title: 'A new deploy: a new file name',
+        text: 'The build produces <b>app.9b1e.js</b> and the HTML now points to it. It\'s a new URL, so every cache misses once and fetches it. The old file is never served for the new page; nothing needed purging.',
+        tip: 'Hashed assets: max-age=31536000, immutable. HTML: no-cache + ETag.',
+        set(m) { h1.textContent = '<script src="/app.9b1e.js">'; m.badge('edge', '9b1e cached', 'teal'); m.badge('bc', '9b1e', 'teal'); },
+        async play(m, r) { h1.textContent = '<script src="/app.9b1e.js">'; await m.send(['br', 'edge'], { run: r, label: '9b1e' }); m.badge('edge', 'MISS', 'red'); await m.send(['edge', 'origin'], { run: r }); await m.send(['origin', 'edge', 'br'], { run: r, tone: 'yellow' }); m.badge('edge', '9b1e cached', 'teal'); m.badge('bc', '9b1e', 'teal'); } },
+      { title: 'When something can\'t be renamed: purge',
+        text: 'If a page that can\'t change its URL is cached with a mistake, you <b>purge</b> it: tell the CDN to drop it from every edge so the next request refetches. Purges take time to spread and send a burst to the origin, so they\'re the exception.',
+        set(m) { h1.textContent = 'PURGE /pricing'; m.badge('edge', 'dropped', 'muted'); } }
+    ]
+  });
+
+  /* ---------- header lab ---------- */
+  const P = [
+    { id: 'nostore', h: 'Cache-Control: no-store', br: 0, edge: 0 },
+    { id: 'priv', h: 'Cache-Control: private, max-age=600', br: 600, edge: 0 },
+    { id: 'pub', h: 'Cache-Control: public, max-age=600', br: 600, edge: 600 },
+    { id: 'split', h: 'Cache-Control: max-age=60, s-maxage=3600', br: 60, edge: 3600 },
+    { id: 'nocache', h: 'Cache-Control: no-cache + ETag: "v7"', br: 'reval', edge: 'reval' },
+    { id: 'imm', h: 'Cache-Control: public, max-age=31536000, immutable', br: 31536000, edge: 31536000 }
+  ];
+  $('presets').innerHTML = P.map((p, i) => `<button type="button" data-i="${i}" aria-pressed="${i === 2}">${p.h}</button>`).join('');
+  const wrap = document.createElement('div'); wrap.className = 'at-stage tone-blue';
+  wrap.innerHTML = '<svg viewBox="0 0 440 200" role="img" aria-label="You, a colleague, a CDN edge and the origin"></svg>';
+  $('labStage').appendChild(wrap);
+  const m = Kit.mini(wrap.querySelector('svg'));
+  m.tile('you', 46, 58, 'You (browser)', 'laptop'); m.tile('other', 46, 148, 'Colleague', 'laptop');
+  m.box('edge', 225, 100, 'CDN edge', { icon: 'edge', w: 104 }); m.box('origin', 380, 100, 'Origin', { icon: 'server', w: 84 });
+  m.wire('you', 'edge'); m.wire('other', 'edge'); m.wire('edge', 'origin');
+  let cur = P[2], loaded = false;
+  const say = html => { $('result').innerHTML = html; };
+  function reset() { Kit.cancel('cdnlab'); m.reset(); loaded = false; $('hdr').textContent = cur.h; say('Press "First load".'); }
+  async function first() {
+    reset(); const run = Kit.newRun('cdnlab');
+    try {
+      await m.send(['you', 'edge', 'origin'], { run, label: 'GET' });
+      await m.send(['origin', 'edge'], { run, tone: 'yellow', label: '200' });
+      m.badge('edge', cur.edge ? (cur.edge === 'reval' ? 'stored · revalidate' : 'stored') : 'not stored', cur.edge ? 'teal' : 'muted');
+      await m.send(['edge', 'you'], { run, tone: 'yellow' });
+      m.badge('you', cur.br ? (cur.br === 'reval' ? 'stored · revalidate' : 'stored') : 'not stored', cur.br ? 'teal' : 'muted');
+    } catch (e) { return; }
+    loaded = true; say('Loaded once. Now predict: who answers your reload, and who answers your colleague?');
+  }
+  async function second(who) {
+    if (!loaded) { say('Press "First load" first.'); return; }
+    Kit.cancel('cdnlab'); const run = Kit.newRun('cdnlab'); const src = who === 'you' ? 'you' : 'other';
+    m.state('you', ''); m.state('edge', ''); m.state('origin', ''); m.state('other', '');
+    try {
+      if (who === 'you' && typeof cur.br === 'number' && cur.br >= 120) {
+        m.state('you', 'ok'); m.badge('you', 'HIT · no request', 'teal');
+        say('<span class="ok-text">Answered by your browser cache.</span> The copy is still fresh, so no request leaves your machine' + (cur.id === 'imm' ? '; <code>immutable</code> means even a normal reload doesn\'t revalidate.' : '.'));
+        return;
+      }
+      if (cur.edge === 'reval' || (who === 'you' && cur.br === 'reval')) {
+        await m.send([src, 'edge'], { run, label: who === 'you' ? 'If-None-Match "v7"' : 'GET' });
+        await m.send(['edge', 'origin'], { run, label: '"v7"?' }); m.state('origin', 'on');
+        await m.send(['origin', 'edge'], { run, tone: 'teal', label: '304' });
+        await m.send(['edge', src], { run, tone: 'teal', label: who === 'you' ? '304' : '200 from edge' });
+        say(who === 'you'
+          ? '<span class="ok-text">Revalidated: 304, no body.</span> <code>no-cache</code> means both caches must check with the origin before reuse; nothing changed, so only headers travel.'
+          : '<span class="ok-text">Edge revalidated with the origin (304), then served its own copy.</span> Your colleague gets the full file, but the origin sent no body.');
+        return;
+      }
+      if (cur.edge && typeof cur.edge === 'number' && cur.edge >= 120) {
+        await m.send([src, 'edge'], { run, label: 'GET' }); m.state('edge', 'ok'); m.badge('edge', 'HIT', 'teal');
+        await m.send(['edge', src], { run, tone: 'teal', label: '200' });
+        say(`<span class="ok-text">Answered by the CDN edge.</span> ${who === 'you' ? 'Your browser copy expired after 60 s, but the edge keeps it for ' + (cur.edge >= 31536000 ? 'a year' : cur.edge / 60 + ' min') + ' (s-maxage).' : 'The edge copy is shared by everyone nearby; the origin is not touched.'}`);
+        return;
+      }
+      await m.send([src, 'edge', 'origin'], { run, label: 'GET' }); m.state('origin', 'on');
+      await m.send(['origin', 'edge', src], { run, tone: 'yellow', label: '200 full' });
+      say(`<span class="bad-text">All the way to the origin.</span> ${cur.id === 'nostore' ? '<code>no-store</code>: nobody kept a copy.' : '<code>private</code>: only your browser may keep it, so your colleague can\'t use any shared copy.'}`);
+    } catch (e) { /* cancelled */ }
+  }
+  $('presets').addEventListener('click', e => { const b = e.target.closest('[data-i]'); if (!b) return; cur = P[+b.dataset.i]; $('presets').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); reset(); });
+  $('first').addEventListener('click', first);
+  $('again').addEventListener('click', () => second('you'));
+  $('other').addEventListener('click', () => second('other'));
+  $('labReset').addEventListener('click', reset);
+  reset();
+})();
+</script>
+</body>
+</html>

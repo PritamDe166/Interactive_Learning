@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Abstract Factory</title>
+<meta name="description" content="Creational pattern L14: create families of related objects that must match. File storage, message queue and secrets for Azure, AWS or local development come from one factory, so you can't mix them by accident.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/theme.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/explainer.css">
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/explainer-kit.js"></script>
+<script src="../sd-series.js"></script>
+<style>
+  .slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 10px; margin-top: 12px; }
+  .slot { border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--panel); transition: border-color .25s, background .25s; }
+  .slot .k { font-family: var(--mono); font-size: 11.5px; color: var(--muted); letter-spacing: .04em; }
+  .slot .v { font-weight: 700; margin-top: 4px; }
+  .slot .w { font-size: 12.5px; color: var(--fg-soft); margin-top: 2px; }
+  .slot select { margin-top: 6px; width: 100%; font: 13px var(--mono); background: var(--panel-2); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 5px 6px; }
+  .slot.ok { border-color: var(--teal); }
+  .slot.bad { border-color: var(--red); background: color-mix(in srgb, var(--red) 10%, var(--panel)); }
+  .slot.on { border-color: var(--cyan); background: var(--teal-wash); }
+  .grid-cost { display: grid; grid-template-columns: 110px repeat(4, minmax(0, 1fr)); gap: 4px; margin-top: 12px; font-size: 12.5px; }
+  .grid-cost > div { padding: 7px 6px; border-radius: 8px; background: var(--panel); border: 1px solid var(--line); text-align: center; font-family: var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .grid-cost > .h { background: transparent; border-color: transparent; color: var(--muted); font-size: 11.5px; }
+  .grid-cost > .new { border-color: var(--teal); color: var(--good-text); }
+  .grid-cost > .edit { border-color: var(--red); color: var(--bad-text); }
+  .grid-cost > .gone { visibility: hidden; }
+  @media (max-width: 560px) { .grid-cost { grid-template-columns: 74px repeat(4, minmax(0, 1fr)); font-size: 10.5px; } }
+</style>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← LLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">System Design · LLD · Creational · L14</div>
+    <h1>Abstract Factory</h1>
+    <ul class="lede">
+      <li>An interface for creating a <b>family of related objects</b> without naming their concrete classes.</li>
+      <li>Use it when the objects <b>must match</b>: Azure storage with an Azure queue, not Azure storage with an AWS queue.</li>
+      <li>Swapping the whole family is one line: the factory you pick at startup (cloud in production, local fakes in development).</li>
+      <li>The trade-off: adding a new <i>kind</i> of product means editing every factory.</li>
+    </ul>
+  </header>
+
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn: one factory per family</h2>
+    <p class="sec-sub">A clinic app stores lab reports, queues "report ready" messages and reads secrets. It runs on Azure in production and on your laptop in development. Step through with <b>Next ▶</b>.</p>
+    <div class="sub-block">
+      <h3 class="stage-title sub">Walkthrough: storage, queue and secrets that belong together</h3>
+      <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+      <div class="story wide" id="story">
+        <div class="scroll"><svg class="diagram" id="sv" style="min-width:0" viewBox="0 0 760 400" role="img" aria-label="Abstract factory interface with Azure, AWS and local factories, each creating a matching file store, queue and secret store"></svg></div>
+      </div>
+    </div>
+    <div class="sub-block">
+      <h3 class="stage-title sub">The same thing in C#</h3>
+      <div class="stage-kind">The factory interface · one family · choosing it once</div>
+      <div class="cs-pair">
+        <div><div class="label ok-text">The abstract factory and one concrete family</div><pre class="codeblock" id="csFac"></pre></div>
+        <div><div class="label ok-text">Pick the family once; the rest of the app never knows</div><pre class="codeblock" id="csUse"></pre></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="compare" data-nav="Compare">
+    <h2 class="sec-h"><span class="sec-n">2</span>Compare: factory method vs abstract factory</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>Factory method (<a href="factory-method.html">L13</a>)</th><th>Abstract factory</th></tr></thead>
+        <tbody>
+          <tr><td>Creates</td><td>one product</td><td>several related products (a family)</td></tr>
+          <tr><td>Mechanism</td><td>inheritance: a subclass overrides one method</td><td>composition: you're handed a factory object</td></tr>
+          <tr><td>Guarantees</td><td>the right class for this subclass</td><td>all products come from the <b>same</b> family</td></tr>
+          <tr><td>Easy to add</td><td>a new product variant</td><td>a new family (one new factory + its products)</td></tr>
+          <tr><td>Hard to add</td><td>(nothing special)</td><td>a new product <i>kind</i>: every factory changes</td></tr>
+          <tr><td>Often built from</td><td>(it is the building block)</td><td>several factory methods on one interface</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>Real .NET example:</b> <span class="mono">DbProviderFactory</span> is an abstract factory: <span class="mono">SqlClientFactory.Instance</span> creates a matching <span class="mono">SqlConnection</span>, <span class="mono">SqlCommand</span> and <span class="mono">SqlParameter</span>; the Npgsql factory creates the PostgreSQL family. ADO.NET code written against <span class="mono">DbConnection</span> works with either.</p></div>
+    </div>
+  </section>
+
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">3</span>Try it yourself</h2>
+    <p class="sec-sub">Build the app's three services with and without a factory, then see which kind of change the pattern makes cheap.</p>
+    <div class="sub-block">
+      <h3 class="stage-title sub">1. Family builder</h3>
+      <div class="stage-kind">Pick a factory, or pick each service yourself · then upload a lab report</div>
+      <div class="seg" id="bMode" role="group" aria-label="How services are chosen"><button type="button" data-v="azure" aria-pressed="true">AzureFactory</button><button type="button" data-v="aws" aria-pressed="false">AwsFactory</button><button type="button" data-v="local" aria-pressed="false">LocalDevFactory</button><button type="button" data-v="manual" aria-pressed="false">No factory: pick each</button></div>
+      <div class="slots" id="bSlots"></div>
+      <div class="controls"><button class="btn primary" type="button" id="bGo">Upload report &amp; notify</button></div>
+      <pre class="codeblock" id="bLog" style="min-height:0"></pre>
+      <p class="status-line" id="bStatus">Choose how the services are created.</p>
+    </div>
+    <div class="sub-block">
+      <h3 class="stage-title sub">2. Which change is cheap?</h3>
+      <div class="stage-kind">Rows are families, columns are product kinds · green = new file, red = edit</div>
+      <div class="chips" id="cBtns"><button class="chip-btn" type="button" data-c="family" aria-pressed="false">+ GCP family</button><button class="chip-btn" type="button" data-c="kind" aria-pressed="false">+ ICache product kind</button></div>
+      <div class="grid-cost" id="cGrid"></div>
+      <div class="kpis">
+        <div class="kpi" id="kE"><b>0</b><span>existing files edited</span></div>
+        <div class="kpi" id="kN"><b>0</b><span>new files</span></div>
+      </div>
+      <p class="status-line" id="cStatus">Add a family, then a product kind.</p>
+    </div>
+  </section>
+
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">4</span>Revise in two minutes</h2>
+    <h3 class="sec-h3">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">Several objects must come from the same vendor, theme or environment</span><span class="arrow">→</span><span class="then">abstract factory: one <span class="mono">CreateX()</span> per product kind</span></li>
+      <li><span class="if">Swap everything for tests or local development</span><span class="arrow">→</span><span class="then">a <span class="mono">LocalDevFactory</span> / fake factory, chosen at startup</span></li>
+      <li><span class="if">You only create one kind of object</span><span class="arrow">→</span><span class="then">factory method or DI; abstract factory is overkill</span></li>
+      <li><span class="if">New product kinds are added often</span><span class="arrow">→</span><span class="then">expect to edit every factory; consider per-product DI registrations instead</span></li>
+      <li><span class="if">ASP.NET Core</span><span class="arrow">→</span><span class="then">often expressed as an extension method that registers the whole family: <span class="mono">services.AddAzureInfrastructure()</span></span></li>
+      <li><span class="if">Interview: "factory method vs abstract factory?"</span><span class="arrow">→</span><span class="then">one product by inheritance vs a matching family by composition</span></li>
+    </ul>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">5</span>Test yourself</h2>
+    <h3 class="sec-h3">Which one fits?</h3>
+    <div id="drill"></div>
+    <h3 class="sec-h3">Explain it out loud</h3>
+    <p class="sub">Answer before you open each card.</p>
+    <div class="quiz">
+      <details><summary>What does "family of related objects" mean? Give an example.<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Objects designed to work together and that must come from the same variant: a SQL Server connection + command + parameter, or Azure blob + Service Bus + Key Vault clients, or a dark-theme button + checkbox + menu.</p></div></details>
+      <details><summary>How does the pattern stop mixing families?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Client code never names a concrete class; it only calls methods on the one factory it was given. Every product therefore comes from that factory's family.</p></div></details>
+      <details><summary>What's the main weakness?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Adding a new product <i>kind</i> changes the factory interface, so every concrete factory must be edited. Adding a new family is easy; adding a new kind is not.</p></div></details>
+      <details><summary>Where do you choose the concrete factory in an ASP.NET Core app?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Once, at startup (Program.cs), based on configuration or environment. Register it as <span class="mono">ICloudFactory</span> (or register each product from it); nothing else in the app decides.</p></div></details>
+      <details><summary>Name an abstract factory in .NET itself.<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">DbProviderFactory</span> (<span class="mono">CreateConnection</span>, <span class="mono">CreateCommand</span>, <span class="mono">CreateParameter</span>).</p></div></details>
+    </div>
+  </section>
+
+  <nav id="prevnext"></nav>
+
+  <footer>Sources: Gamma et al., <i>Design Patterns</i> (1994), Abstract Factory; refactoring.guru, Abstract Factory; Microsoft Learn: <span class="mono">DbProviderFactory</span> (ADO.NET provider factories). Service and class names are illustrative.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  K.codeBlock($('csFac'), `public interface ICloudFactory
+{
+    IFileStore    CreateFileStore();
+    IMessageQueue CreateQueue();
+    ISecretStore  CreateSecrets();
+}
+
+public class AzureFactory(IConfiguration cfg) : ICloudFactory
+{
+    public IFileStore    CreateFileStore() => new BlobFileStore(cfg["Blob"]);
+    public IMessageQueue CreateQueue()     => new ServiceBusQueue(cfg["Bus"]);
+    public ISecretStore  CreateSecrets()   => new KeyVaultSecrets(cfg["Vault"]);
+}
+
+public class LocalDevFactory : ICloudFactory
+{
+    public IFileStore    CreateFileStore() => new DiskFileStore("C:/dev/files");
+    public IMessageQueue CreateQueue()     => new InMemoryQueue();
+    public ISecretStore  CreateSecrets()   => new UserSecretsStore();
+}`, 'cs');
+  K.codeBlock($('csUse'), `// Program.cs: the only place that knows the family
+ICloudFactory factory = builder.Environment.IsDevelopment()
+    ? new LocalDevFactory()
+    : new AzureFactory(builder.Configuration);
+
+builder.Services.AddSingleton(factory.CreateFileStore());
+builder.Services.AddSingleton(factory.CreateQueue());
+builder.Services.AddSingleton(factory.CreateSecrets());
+
+// Everywhere else: interfaces only
+public class LabReportService(IFileStore files, IMessageQueue queue)
+{
+    public async Task Publish(LabReport r)
+    {
+        var url = await files.SaveAsync(r.FileName, r.Pdf);
+        await queue.SendAsync(new ReportReady(r.PatientId, url));
+    }
+}`, 'cs');
+
+  /* ---------- walkthrough ---------- */
+  const sv = $('sv'); K.umlDefs(sv);
+  const G = K.el('g', {}, sv), FX = K.el('g', {}, sv);
+  const app = K.node(G, 128, 50, 236, 50, 'LabReportService', 'needs files + queue + secrets');
+  const iface = K.classBox(G, 310, 14, 300, { name: 'ICloudFactory', stereo: 'interface', methods: ['+ CreateFileStore(): IFileStore', '+ CreateQueue(): IMessageQueue', '+ CreateSecrets(): ISecretStore'] }, 'iface');
+  const uses = K.umlLink(G, [246, 50], [310, 60], 'uses');
+  const FAM = [
+    { n: 'AzureFactory', p: ['BlobFileStore', 'ServiceBusQueue', 'KeyVaultSecrets'] },
+    { n: 'AwsFactory', p: ['S3FileStore', 'SqsQueue', 'SecretsManager'] },
+    { n: 'LocalDevFactory', p: ['DiskFileStore', 'InMemoryQueue', 'UserSecretsStore'] }
+  ];
+  const fams = FAM.map((f, i) => {
+    const x = 20 + i * 250;
+    const fb = K.classBox(G, x, 175, 220, { name: f.n });
+    const l = K.umlLink(G, fb.top, [360 + i * 100, iface.bottom[1]], 'implements');
+    const prods = f.p.map((p, j) => K.node(G, x + 110, 255 + j * 46, 200, 36, p));
+    const pl = prods.map((p, j) => K.el('line', { x1: x + 8, y1: 203, x2: x + 8, y2: 255 + j * 46, class: 'ref' }, G));
+    return { fb, l, prods, pl };
+  });
+  const mixWarn = K.text(G, 380, 395, '', 'mlabel halo');
+
+  function show(i) {
+    FX.textContent = ''; mixWarn.textContent = ''; mixWarn.setAttribute('class', 'mlabel halo');
+    const vis = (on, ...els) => els.forEach(e => { e.style.transition = 'opacity .3s'; e.style.opacity = on ? 1 : 0; });
+    vis(i >= 1, iface.g, uses); fams.forEach((f, k) => { vis(i >= 2 && (k === 0 || i >= 3), f.fb.g, f.l, ...f.prods.map(p => p.g), ...f.pl); });
+    if (i === 0) { vis(true, fams[0].prods[0].g, fams[1].prods[1].g, fams[2].prods[2].g); [fams[0].prods[0], fams[1].prods[1], fams[2].prods[2]].forEach(p => p.g.classList.add('bad')); mixWarn.textContent = 'picked one by one: Azure blob + AWS queue + local secrets'; mixWarn.classList.add('bad'); }
+    else fams.forEach(f => f.prods.forEach(p => p.g.classList.remove('bad')));
+    fams.forEach((f, k) => { const on = (i === 2 && k === 0) || (i === 4 && k === 2) || (i === 3 && k === 1); f.fb.g.classList.toggle('on', on); f.prods.forEach(p => p.g.classList.toggle('ok', on)); f.pl.forEach(l => l.classList.toggle('ok', on)); });
+    app.g.classList.toggle('ok', i >= 2 && i <= 4);
+    iface.rows.forEach(r => r.classList.toggle('bad', false));
+    if (i === 5) { iface.rows.forEach(r => r.classList.remove('bad')); fams.forEach(f => f.fb.g.classList.add('bad')); mixWarn.textContent = '+ CreateCache() on the interface → all 3 factories must change'; mixWarn.classList.add('bad'); }
+    else fams.forEach(f => f.fb.g.classList.remove('bad'));
+    if (i === 2) { mixWarn.textContent = 'production: everything from AzureFactory'; mixWarn.classList.add('ok'); }
+    if (i === 3) { mixWarn.textContent = 'a new family is just a new factory + its products'; mixWarn.classList.add('ok'); }
+    if (i === 4) { mixWarn.textContent = 'development: one line in Program.cs picks LocalDevFactory'; mixWarn.classList.add('ok'); }
+    if (i === 1) { mixWarn.textContent = 'one method per product kind; no concrete class names'; mixWarn.classList.add('accent'); }
+  }
+  K.story({
+    root: $('story'), show, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'Three services that must match', text: 'Lab reports go to file storage, a "report ready" message goes on a queue, and connection strings come from a secret store. Created one by one with <span class="mono">new</span>, it\'s easy to end up with an <b>Azure blob, an AWS queue and local secrets</b>: wrong credentials, wrong region, failures only in production.' },
+      { title: 'One interface creates the whole family', text: '<span class="mono">ICloudFactory</span> has one creation method per product kind. <span class="mono">LabReportService</span> (or Program.cs) only ever talks to this interface and the product interfaces.' },
+      { title: 'AzureFactory builds a matching set', text: 'Each concrete factory returns its own family: blob storage, Service Bus and Key Vault. Because everything comes from one factory, mixing is impossible.' },
+      { title: 'Another family is just another factory', text: 'Moving a customer to AWS? Add <span class="mono">AwsFactory</span> with S3, SQS and Secrets Manager. Existing classes don\'t change.' },
+      { title: 'Swap the whole family in one line', text: 'In development, Program.cs picks <span class="mono">LocalDevFactory</span>: disk files, an in-memory queue, user secrets. Tests can pass a fake factory the same way.', tip: 'This dev / prod swap is the most convincing real-world reason to use the pattern. Lead with it.' },
+      { title: 'The weakness: a new product kind', text: 'Need a cache in every family? <span class="mono">CreateCache()</span> goes on the interface, and <b>every</b> factory must implement it. Families are cheap to add; kinds are expensive.' }
+    ]
+  });
+
+  /* ---------- lab 1: family builder ---------- */
+  const KINDS = ['File store', 'Message queue', 'Secret store'];
+  const VEND = { azure: 'Azure', aws: 'AWS', local: 'Local' };
+  let mode = 'azure', manual = [0, 1, 2];
+  function famOf(v, k) { return FAM[v].p[k]; }
+  function drawSlots() {
+    $('bSlots').innerHTML = KINDS.map((k, j) => {
+      if (mode !== 'manual') { const fi = ['azure', 'aws', 'local'].indexOf(mode); return `<div class="slot" data-j="${j}"><div class="k">${k.toUpperCase()}</div><div class="v">${famOf(fi, j)}</div><div class="w">from ${FAM[fi].n}.Create…()</div></div>`; }
+      return `<div class="slot" data-j="${j}"><div class="k">${k.toUpperCase()}</div><select data-j="${j}" aria-label="${k}">${FAM.map((f, fi) => `<option value="${fi}"${manual[j] === fi ? ' selected' : ''}>${f.p[j]} (${['Azure', 'AWS', 'Local'][fi]})</option>`).join('')}</select><div class="w">new ${famOf(manual[j], j)}(…)</div></div>`;
+    }).join('');
+    $('bSlots').querySelectorAll('select').forEach(s => s.addEventListener('change', () => { manual[+s.dataset.j] = +s.value; drawSlots(); }));
+    $('bLog').textContent = ''; $('bStatus').textContent = mode === 'manual' ? 'Pick any mix, then upload. Nothing stops a mismatch.' : 'All three come from one factory. Press upload.';
+  }
+  K.seg($('bMode'), v => { mode = v; drawSlots(); });
+  $('bGo').addEventListener('click', async () => {
+    const run = K.newRun('fam'); const fi = mode === 'manual' ? manual : [0, 1, 2].map(() => ['azure', 'aws', 'local'].indexOf(mode));
+    const slots = [...$('bSlots').children]; slots.forEach(s => s.className = 'slot');
+    const log = []; const out = () => { $('bLog').textContent = log.join('\n'); };
+    const cred = fi[2]; let ok = true;
+    try {
+      const STEP = [
+        j => `secrets: read connection strings from ${FAM[fi[2]].p[2]}`,
+        j => fi[0] === cred ? `files:   ${FAM[fi[0]].p[0]}.SaveAsync("hb-1234.pdf") ✓` : `files:   ${FAM[fi[0]].p[0]}.SaveAsync(…) ✗ credentials are for ${['Azure', 'AWS', 'Local'][cred]}`,
+        j => fi[1] === cred ? `queue:   ${FAM[fi[1]].p[1]}.SendAsync(ReportReady) ✓` : `queue:   ${FAM[fi[1]].p[1]}.SendAsync(…) ✗ credentials are for ${['Azure', 'AWS', 'Local'][cred]}`
+      ];
+      for (const j of [2, 0, 1]) {
+        slots[j].classList.add('on'); await K.sleep(450, run); slots[j].classList.remove('on');
+        const line = STEP[[2, 0, 1].indexOf(j)](); log.push(line); out();
+        const bad = line.includes('✗'); if (bad) ok = false; slots[j].classList.add(bad ? 'bad' : 'ok');
+      }
+      $('bStatus').innerHTML = ok ? (mode === 'manual' ? 'This mix happens to match. Nothing guaranteed it; change one dropdown and it breaks.' : `Every service came from <b>${FAM[fi[0]].n}</b>: a matching family by construction.`) : '<b>Mismatched family</b>: the services were built from different providers. With a factory this combination can\'t be created.';
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  });
+  drawSlots();
+
+  /* ---------- lab 2: cost grid ---------- */
+  let addFam = false, addKind = false;
+  function drawGrid() {
+    const fams = ['Azure', 'AWS', 'Local'].concat(addFam ? ['GCP'] : []);
+    const kinds = ['factory', 'IFileStore', 'IMessageQueue', 'ISecretStore'];
+    const cells = ['<div class="h"></div>'].concat(['Factory class', 'File store', 'Queue', 'Secrets'].map(h => `<div class="h">${h}</div>`));
+    let edits = 0, news = 0;
+    fams.forEach(f => {
+      const isNewFam = f === 'GCP';
+      cells.push(`<div class="h">${f}</div>`);
+      kinds.forEach((k, j) => {
+        const fi = ['Azure', 'AWS', 'Local'].indexOf(f); let cls = '', txt = j === 0 ? (fi >= 0 ? FAM[fi].n : '') : (fi >= 0 ? FAM[fi].p[j - 1] : '');
+        if (isNewFam) { cls = 'new'; news++; txt = j === 0 ? 'GcpFactory' : ['', 'GcsFileStore', 'PubSubQueue', 'GcpSecrets'][j]; }
+        else if (j === 0 && addKind) { cls = 'edit'; edits++; txt += ' +CreateCache'; }
+        cells.push(`<div class="${cls}" title="${txt}">${txt}</div>`);
+      });
+    });
+    let gridCols = 'repeat(4, minmax(0, 1fr))';
+    if (addKind) {
+      // add a 5th column for the cache product
+      const out = []; let col = 0;
+      const per = 5;
+      const rows = []; for (let r = 0; r < cells.length / per; r++) rows.push(cells.slice(r * per, r * per + per));
+      rows.forEach((row, r) => { out.push(...row); if (r === 0) out.push('<div class="h">Cache</div>'); else { const f = fams[r - 1]; out.push(`<div class="new">${f === 'GCP' ? 'Memorystore' : f === 'Local' ? 'MemoryCache' : f === 'Azure' ? 'AzureRedis' : 'ElastiCache'}</div>`); news++; } });
+      cells.length = 0; cells.push(...out); gridCols = 'repeat(5, minmax(0, 1fr))';
+      edits++; // the interface itself
+    }
+    $('cGrid').style.gridTemplateColumns = (innerWidth < 560 ? '74px ' : '110px ') + gridCols;
+    $('cGrid').innerHTML = cells.join('');
+    $('kE').querySelector('b').textContent = edits; $('kE').className = 'kpi ' + (edits ? 'bad' : (addFam ? 'good' : ''));
+    $('kN').querySelector('b').textContent = news;
+    $('cBtns').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.c === 'family' ? addFam : addKind)));
+    $('cStatus').innerHTML = addKind ? `A new <b>kind</b> edits ICloudFactory and <b>every existing</b> factory (${fams.length - (addFam ? 1 : 0)}). That's the pattern's cost.` : addFam ? 'A new <b>family</b> is 4 new files and <b>0 edits</b>.' : 'Add a family, then a product kind.';
+  }
+  $('cBtns').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { if (b.dataset.c === 'family') addFam = !addFam; else addKind = !addKind; drawGrid(); }));
+  addEventListener('resize', drawGrid);
+  drawGrid();
+
+  const O = ['Abstract factory', 'Factory method', 'Plain DI registrations'];
+  SD.page({ track: 'lld', drill: { opts: O, items: [
+    { q: 'A reporting tool must work with SQL Server or PostgreSQL: connection, command and parameter objects must all match.', a: O[0], why: 'A family of matching objects: exactly what DbProviderFactory is.' },
+    { q: 'Light and dark themes each need their own button, dialog and chart styles, never mixed.', a: O[0], why: 'Each theme is a family; one factory per theme keeps them consistent.' },
+    { q: 'A base exporter needs one writer object that differs per subclass.', a: O[1], why: 'One product chosen by a subclass: factory method.' },
+    { q: 'Your API has an email sender and a payment client from unrelated vendors that can vary independently.', a: O[2], why: 'They don\'t need to match each other; register each one separately.' },
+    { q: 'Local development should use disk storage, an in-memory queue and user secrets instead of Azure.', a: O[0], why: 'Swap a whole family at startup with one factory choice.' }
+  ] } });
+})();
+</script>
+</body>
+</html>

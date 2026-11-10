@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Caching Failure Modes</title>
+<meta name="description" content="H20: cache stampede, avalanche, penetration, hot keys and stale data, animated with their fixes; plus a simulator that charts database load when a hot key or many keys expire.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/theme.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/explainer.css">
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/explainer-kit.js"></script>
+<script src="../sd-series.js"></script>
+<script src="caching-flows.js"></script>
+<style>
+  .cfm-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin-top: 12px; }
+  .cfm-chart { position: relative; height: 220px; display: flex; align-items: flex-end; gap: 3px; margin-top: 16px; padding: 0 4px; border-bottom: 1px solid var(--line); }
+  .cfm-chart .b { flex: 1; min-width: 0; background: var(--teal); border-radius: 3px 3px 0 0; transition: height .35s; }
+  .cfm-chart .b.over { background: var(--red); }
+  .cfm-cap { position: absolute; left: 0; right: 0; border-top: 2px dashed var(--orange); pointer-events: none; }
+  .cfm-cap span { position: absolute; right: 4px; top: -18px; font-family: var(--mono); font-size: 11px; color: var(--orange); }
+  .cfm-axis { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--muted); padding: 4px 4px 0; }
+  .cfm-fix { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 10px; }
+  .cfm-fix label { display: inline-flex; gap: 6px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 13.5px; cursor: pointer; }
+  .cfm-fix input { accent-color: var(--teal); }
+</style>
+</head>
+<body data-anim="continuous">
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← HLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Week 3 · H20 · Caching &amp; CDN</div>
+    <h1>Caching Failure Modes</h1>
+    <ul class="lede">
+      <li>A cache hides load from the database, until the moment it <b>stops hiding it</b>.</li>
+      <li><b>Stampede</b>: one hot key expires and every request reloads it at once.</li>
+      <li><b>Avalanche</b>: many keys expire together, or a cache node dies.</li>
+      <li><b>Penetration</b>: lookups for keys that don't exist always reach the database.</li>
+      <li><b>Hot key</b> and <b>stale data</b> round out the set; each has a standard fix.</li>
+    </ul>
+  </header>
+
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn it step by step</h2>
+    <p class="sec-sub">A stampede and three ways to stop it. Press <b>Next ▶</b> to go one step at a time, or <b>Play all</b> to watch the whole story.</p>
+    <div class="story" id="story"></div>
+  </section>
+
+  <section id="compare" data-nav="Compare">
+    <h2 class="sec-h"><span class="sec-n">2</span>Compare: 6 patterns side by side</h2>
+    <p class="sec-sub">Read each card top to bottom: rule, diagram, numbered steps, takeaway. Press <b>▶ Play</b> on any diagram to watch it happen.</p>
+    <div id="atlas"></div>
+  </section>
+
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">3</span>Try it: Stampede &amp; avalanche simulator</h2>
+    <p class="sec-sub">Chart database queries per second when keys expire. Turn fixes on and off and watch the peak move against the database's capacity. <span class="mono">(A reload takes 2 s · DB capacity 500 queries/s · numbers are illustrative)</span></p>
+    <ol class="howto"><li><span>Pick a scenario</span></li><li><span>Drag the sliders</span></li><li><span>Tick fixes on and off and watch the red bars</span></li></ol>
+    <div class="cfm-row"><div class="seg" id="scSeg" role="group" aria-label="Scenario"><button type="button" data-v="stampede" aria-pressed="true">One hot key expires</button><button type="button" data-v="avalanche" aria-pressed="false">1,000 keys, same TTL</button></div></div>
+    <div class="ranges">
+      <div class="range"><label for="rRate"><span>Reads per second <span id="rateLbl">(hot key)</span></span> <output id="oRate"></output></label><input type="range" id="rRate" min="20" max="1500" step="10" value="800"></div>
+      <div class="range"><label for="rSrv">App servers <output id="oSrv"></output></label><input type="range" id="rSrv" min="1" max="20" step="1" value="6"></div>
+    </div>
+    <div class="cfm-fix" id="fixes">
+      <label><input type="checkbox" data-f="sf"> Single-flight (per server)</label>
+      <label><input type="checkbox" data-f="swr"> Stale-while-revalidate</label>
+      <label><input type="checkbox" data-f="jit"> TTL jitter ±10 s</label>
+    </div>
+    <div class="cfm-chart" id="chart"><div class="cfm-cap" id="cap"><span>DB capacity 500/s</span></div></div>
+    <div class="cfm-axis"><span>t = 0 s</span><span>key(s) expire at t = 10 s</span><span>t = 30 s</span></div>
+    <div class="kpis">
+      <div class="kpi bad"><b id="kPeak">–</b><span>Peak DB queries/s</span></div>
+      <div class="kpi accent"><b id="kTot">–</b><span>Extra DB queries</span></div>
+      <div class="kpi"><b id="kWait">–</b><span>Requests that waited</span></div>
+    </div>
+    <p class="hint" id="labHint">Start with no fixes, then add single-flight, then stale-while-revalidate. For the avalanche, try jitter.</p>
+  </section>
+
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">4</span>Revise in two minutes</h2>
+    <h3 class="sec-h3">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">Hot key expires, DB spikes</span><span class="arrow">→</span><span class="then">Stampede: single-flight / lock, stale-while-revalidate</span></li>
+      <li><span class="if">Many servers, still a spike</span><span class="arrow">→</span><span class="then">Distributed lock (SET NX) or refresh-ahead</span></li>
+      <li><span class="if">Spike at the same time every day</span><span class="arrow">→</span><span class="then">Avalanche: TTL jitter, staggered warm-up</span></li>
+      <li><span class="if">Cache node restarted, DB on fire</span><span class="arrow">→</span><span class="then">Avalanche: replicas, persistence, rate-limit the DB path</span></li>
+      <li><span class="if">Misses for IDs that don't exist</span><span class="arrow">→</span><span class="then">Penetration: cache NULL briefly, Bloom filter, validate input</span></li>
+      <li><span class="if">One node hot, others idle</span><span class="arrow">→</span><span class="then">Hot key: L1 copy, replicate or split the key</span></li>
+      <li><span class="if">Users see old values</span><span class="arrow">→</span><span class="then">Stale data: delete on write + TTL (H17)</span></li>
+    </ul>
+    <h3 class="sec-h3">Reference</h3>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Failure</th><th>Trigger</th><th>Symptom</th><th>Fixes</th></tr></thead>
+        <tbody>
+          <tr><td>Stampede (thundering herd, dogpile)</td><td>One hot key expires</td><td>Burst of identical queries</td><td>Single-flight, lock, SWR, refresh-ahead, early probabilistic refresh</td></tr>
+          <tr><td>Avalanche</td><td>Many keys expire together / node loss</td><td>Broad DB overload</td><td>TTL jitter, staggered warming, HA cache, DB rate limits</td></tr>
+          <tr><td>Penetration</td><td>Keys that don't exist</td><td>Misses that never become hits</td><td>Negative caching, Bloom filter, input validation, rate limits</td></tr>
+          <tr><td>Hot key</td><td>Skewed traffic</td><td>One cache node saturated</td><td>Local L1, key replication, key splitting</td></tr>
+          <tr><td>Stale data</td><td>Write path skips the cache</td><td>Old values served</td><td>Delete on write, short TTL, change events</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><span class="flag">Added</span>Avalanche, penetration, hot keys and stale-while-revalidate were added to the original "Cache Stampede" day; they're the usual follow-ups.</div>
+    <div class="note"><span class="flag">Updated</span>.NET's <code>HybridCache</code> and ASP.NET Core output caching both collapse concurrent misses for the same key within one process. With many servers you can still get one load per server.</div>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">5</span>Test yourself</h2>
+    <h3 class="sec-h3">Which pattern fits?</h3>
+    <div id="drill"></div>
+    <h3 class="sec-h3">Explain it out loud</h3>
+    <p class="sub">Answer before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Stampede vs avalanche: what's the difference?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Stampede</b>: many requests for <em>one</em> key at once. <b>Avalanche</b>: <em>many</em> keys missing at once (same TTL or cache loss).</p></div></details>
+      <details><summary>Single-flight solves the stampede on one server. Why can 20 servers still hurt?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Each server has its own lock</b>, so up to 20 loads run. Use a distributed lock, SWR or refresh-ahead if 20 is too many.</p></div></details>
+      <details><summary>What does stale-while-revalidate trade away?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Freshness for a short window.</b> Users get the old value instantly while one refresh runs; wrong for balances or stock at checkout.</p></div></details>
+      <details><summary>How does a Bloom filter stop penetration, and what can't it do?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>It says "definitely not present" or "maybe present".</b> Definite misses skip the DB. It can give false positives, never false negatives, and can't easily delete.</p></div></details>
+      <details><summary>Why add jitter instead of just a longer TTL?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>A longer TTL only moves the cliff.</b> Jitter spreads expiries out so they never line up.</p></div></details>
+      <details><summary>The cache cluster restarts during peak. What protects the database?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Replicas and persistence</b> so the cache comes back warm, plus rate limiting / circuit breakers on the DB path so a cold cache can't flood it.</p></div></details>
+    </div>
+  </section>
+
+  <nav id="prevnext"></nav>
+
+  <footer>Sources: Week 3 notes; Microsoft Learn (HybridCache, output caching); RFC 5861 (stale-while-revalidate); common cache failure patterns. The simulator is a simple model with illustrative numbers.</footer>
+</div>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const ids = ['stampede', 'swr', 'avalanche', 'penetration', 'hotkey', 'stale'];
+  CF.page({ file: 'cache-failure-modes.html', ids });
+
+  /* ---------- walkthrough ---------- */
+  const R = [0, 1, 2, 3, 4], YY = [36, 80, 124, 168, 212];
+  let note;
+  const fan = (m, route, o) => Promise.all(R.map(i => m.send(route(i), o(i))));
+  CF.story('story', {
+    vb: [440, 250], tone: 'red', alt: 'Five requests, a Redis cache, a lock and SQL Server',
+    build(m) {
+      R.forEach(i => m.box('r' + i, 40, YY[i], 'req ' + (i + 1), { w: 56, h: 24 }));
+      m.box('cache', 230, 56, 'Redis', { icon: 'ram', w: 92 }); m.box('lock', 230, 168, 'lock', { icon: 'lock', w: 80 }); m.db('db', 368, 120, 'SQL Server');
+      R.forEach(i => { m.wire('r' + i, 'cache', { dash: true }); m.wire('r' + i, 'db'); m.wire('r' + i, 'lock'); });
+      m.wire('lock', 'db'); m.wire('cache', 'db', { dash: true });
+      note = m.label(230, 242, '', 'at-strong');
+    },
+    reset(m) { note.textContent = ''; m.state('lock', 'hide'); R.forEach(i => m.link('r' + i, 'lock', 'hide')); m.link('lock', 'db', 'hide'); m.link('cache', 'db', 'hide'); },
+    steps: [
+      { title: 'A hot key, served from cache',
+        text: 'Five requests a moment ask for <b>product:12</b>. All are cache hits; the database is idle.',
+        set(m) { m.badge('cache', 'HIT', 'teal'); m.state('db', 'dim'); R.forEach(i => m.link('r' + i, 'db', 'dim')); },
+        async play(m, r) { m.state('db', 'dim'); R.forEach(i => m.link('r' + i, 'db', 'dim')); await fan(m, i => ['r' + i, 'cache'], i => ({ run: r, tone: 'teal', ms: 500 + i * 40 })); m.badge('cache', 'HIT', 'teal'); } },
+      { title: 'The key expires',
+        text: 'Its TTL runs out. For the next couple of seconds, until someone reloads it, every request will miss.',
+        set(m) { m.badge('cache', 'expired', 'muted'); } },
+      { title: 'Stampede: everyone reloads at once',
+        text: 'All five miss together and all five run the <b>same expensive query</b>. With 500 requests a second it\'s 500 identical queries. The database slows down, so reloads take longer, so more requests pile in.',
+        tip: 'Also called thundering herd or dogpile.',
+        set(m) { m.badge('cache', 'MISS ×5', 'red'); m.state('db', 'hot'); m.badge('db', '5 same queries', 'red'); R.forEach(i => m.link('r' + i, 'db', 'hot')); },
+        async play(m, r) { m.badge('cache', 'expired', 'muted'); await fan(m, i => ['r' + i, 'cache'], i => ({ run: r, tone: 'muted', ms: 450 })); m.badge('cache', 'MISS ×5', 'red'); await fan(m, i => ['r' + i, 'db'], i => ({ run: r, tone: 'red', ms: 600 + i * 50 })); m.state('db', 'hot'); m.badge('db', '5 same queries', 'red'); R.forEach(i => m.link('r' + i, 'db', 'hot')); } },
+      { title: 'Fix 1 · single-flight: one loader, the rest wait',
+        text: 'The first request takes a <b>lock</b> for the key and runs the query. The other four wait for its result instead of querying. One query instead of five.',
+        tip: '.NET HybridCache.GetOrCreateAsync does this for you, inside one process.',
+        set(m) { m.state('lock', ''); R.forEach(i => { m.link('r' + i, 'lock', ''); m.link('r' + i, 'db', 'hide'); }); m.link('lock', 'db', ''); m.badge('lock', 'held by req 1', 'teal'); m.badge('cache', 'filled', 'teal'); m.badge('db', '1 query', 'teal'); note.textContent = '5 requests → 1 query'; },
+        async play(m, r) { m.state('lock', ''); R.forEach(i => { m.link('r' + i, 'lock', ''); m.link('r' + i, 'db', 'hide'); }); m.link('lock', 'db', ''); await m.send(['r0', 'lock'], { run: r, label: 'acquire' }); m.badge('lock', 'held by req 1', 'teal'); await fan(m, i => i ? ['r' + i, 'lock'] : ['r0', 'lock'], i => ({ run: r, tone: i ? 'muted' : 'teal', ms: 450, label: i === 2 ? 'wait' : undefined })); await m.send(['lock', 'db'], { run: r, label: 'SELECT' }); m.badge('db', '1 query', 'teal'); await m.send(['db', 'lock'], { run: r, tone: 'yellow' }); m.badge('cache', 'filled', 'teal'); note.textContent = '5 requests → 1 query'; } },
+      { title: 'But single-flight is per server',
+        text: 'The lock lives in one process. With <b>20 app servers</b>, each runs its own reload: 20 queries, not 1. Usually fine; if not, use a distributed lock (Redis <code>SET key NX PX</code>) or one of the next two fixes.',
+        set(m) { m.state('lock', ''); m.link('lock', 'db', ''); m.badge('lock', 'per process', 'red'); note.textContent = '20 servers → up to 20 queries'; } },
+      { title: 'Fix 2 · stale-while-revalidate',
+        text: 'Keep the expired value a little longer and <b>serve it instantly</b>, while one background refresh fetches the new one. Nobody waits; the database sees one query.',
+        set(m) { m.link('cache', 'db', ''); R.forEach(i => m.link('r' + i, 'db', 'hide')); m.badge('cache', 'stale → v2', 'teal'); m.badge('db', '1 refresh', 'teal'); note.textContent = '0 requests waited'; },
+        async play(m, r) { m.link('cache', 'db', ''); R.forEach(i => m.link('r' + i, 'db', 'hide')); m.badge('cache', 'stale v1', 'muted'); await fan(m, i => ['r' + i, 'cache'], i => ({ run: r, tone: 'yellow', ms: 500 })); await m.send(['cache', 'db'], { run: r, label: 'refresh' }); await m.send(['db', 'cache'], { run: r, tone: 'yellow' }); m.badge('cache', 'stale → v2', 'teal'); m.badge('db', '1 refresh', 'teal'); note.textContent = '0 requests waited'; } },
+      { title: 'Fix 3 · jitter and early refresh',
+        text: 'Give keys a TTL of, say, 300 s <b>± 30 s</b> so keys written together don\'t expire together (that stops avalanches). Or refresh a hot key slightly <b>before</b> expiry, with a probability that rises as expiry approaches.',
+        tip: 'In an interview, name the failure first, then the fix and its trade-off.',
+        set(m) { R.forEach(i => m.link('r' + i, 'db', 'dim')); m.badge('cache', 'TTL 300 ± 30 s', 'teal'); m.state('cache', 'ok'); note.textContent = 'expiries spread out · no cliff'; } }
+    ]
+  });
+
+  /* ---------- simulator ---------- */
+  const T = 30, CAP = 500, LOAD = 2;
+  let scen = 'stampede';
+  const fx = { sf: false, swr: false, jit: false };
+  for (let i = 0; i < T; i++) $('chart').insertAdjacentHTML('beforeend', '<div class="b" style="height:0"></div>');
+  function simulate() {
+    const rate = +$('rRate').value, S = +$('rSrv').value;
+    const q = new Array(T).fill(0); let waited = 0;
+    const keys = scen === 'stampede' ? [{ e: 10, r: rate }] : Array.from({ length: 1000 }, (_, k) => ({ e: 10 + (fx.jit ? (k % 21) - 10 : 0), r: rate / 1000 }));
+        for (const k of keys) {
+      const e = Math.max(0, Math.min(T - 2, k.e));
+      if (fx.swr) { q[e] += Math.min(S, Math.max(k.r, 0.0)); }
+      else if (fx.sf) { q[e] += Math.min(S, k.r * LOAD); waited += k.r * LOAD; }
+      else { for (let d = 0; d < LOAD; d++) q[e + d] += k.r; waited += k.r * LOAD; }
+    }
+    return { q: q.map(x => Math.round(x)), waited: Math.round(waited) };
+  }
+  function paint() {
+    $('oRate').textContent = $('rRate').value; $('oSrv').textContent = $('rSrv').value;
+    $('rateLbl').textContent = scen === 'stampede' ? '(hot key)' : '(all keys, total)';
+    const { q, waited } = simulate(), peak = Math.max(...q), top = Math.max(peak, CAP) * 1.1;
+    [...$('chart').querySelectorAll('.b')].forEach((b, i) => { b.style.height = (100 * q[i] / top) + '%'; b.classList.toggle('over', q[i] > CAP); b.title = `t=${i}s: ${q[i]} queries`; });
+    $('cap').style.bottom = (100 * CAP / top) + '%';
+    $('kPeak').textContent = peak.toLocaleString('en-US'); $('kTot').textContent = q.reduce((a, b) => a + b, 0).toLocaleString('en-US'); $('kWait').textContent = waited.toLocaleString('en-US');
+    let h;
+    if (fx.swr) h = 'Stale-while-revalidate: each server refreshes once in the background and nobody waits for the database.';
+    else if (fx.sf) h = 'Single-flight: one load per server per key. Requests still wait for that load, but the database sees far fewer queries.';
+    else h = peak > CAP ? '<span class="bad-text">Over capacity.</span> Every miss runs the same query while the reload is in progress.' : 'Under capacity at this rate; raise the reads per second to see the cliff.';
+    if (scen === 'avalanche') h += fx.jit ? ' Jitter spreads the 1,000 expiries over 20 seconds.' : ' All 1,000 keys expire in the same second. Each key gets only a few reads, so single-flight barely helps here: try TTL jitter.';
+    $('labHint').innerHTML = h;
+  }
+  Kit.seg($('scSeg'), v => { scen = v; $('rRate').value = v === 'stampede' ? 800 : 1200; paint(); });
+  $('rRate').addEventListener('input', paint); $('rSrv').addEventListener('input', paint);
+  $('fixes').addEventListener('change', e => { const f = e.target.dataset.f; if (f) { fx[f] = e.target.checked; paint(); } });
+  paint();
+})();
+</script>
+</body>
+</html>

@@ -48,6 +48,10 @@
      await net.send(['user','edge','app'], { run, label, tone }) moves a glowing dot along the path.
      Icon tiles come from Kit.ICONS (users, globe, accel, dns, edge, lb, server, chip, db, bucket, …).
 
+   Pattern atlas (at-a-glance grid of sibling patterns, each with a looping mini diagram):
+     Kit.atlas(el, { cards: [{ id, name, rule, tone, tags, build(m) → phases }], filters }) — see its section below.
+   Page navigation: Kit.pageNav(el) builds a sticky numbered bar from <section data-nav> blocks.
+
    Edit-and-run box (real Python via Pyodide, loaded on first Run):
      Kit.pyRunner(el, { starters: [{ label, code, inputs? }] })
        Run shows output; Step through renders Kit.trace from the same tracer
@@ -827,6 +831,230 @@
           }
         } finally { if (!o.keep) dot.remove(); L.forEach(l => l.g.classList.remove('live')); }
         return dot;
+      }
+    };
+    return api;
+  };
+
+  /* ---------- pattern atlas (at-a-glance grid of sibling patterns) ----------
+     Kit.atlas(el, {
+       cards: [{ id, name, rule, tone: 'cyan'|'teal'|'yellow'|'orange'|'blue'|'violet'|'red',
+                 tags: ['read path'], vb: [360, 150], use, avoid, takeaway, href,
+                 build(m) → [{ cap, go: async run => {} }, …]   // phases
+                 reset?(m) }],
+       filters?: true                                              // show tag chips (only worth it for big grids)
+     })
+     Each card reads like an infographic panel: numbered badge, name, one-line rule, a mini diagram,
+     the phases as a numbered list (readable without playing), a bold takeaway and Use when / Watch out.
+     Nothing moves until the learner presses ▶ Play on a card; it plays once and offers ↺ Replay.
+     The phase being played is highlighted in the list. Global Speed / Pause apply.
+
+     Mini-diagram helper m = Kit.mini(svg) (viewBox units, default 360×150):
+       m.box(id, x, y, label, { w, h, sub, icon })  rounded box (centre x,y)
+       m.db(id, x, y, label, { sub })               database cylinder
+       m.tile(id, x, y, label, icon)                 icon tile (Kit.ICONS)
+       m.wire(a, b, { via, label, dash, id })        line between two nodes (or [x,y] points)
+       await m.send([a, b, …], { run, label, tone, ms, keep })   packet travels the wires
+       m.state(id, 'on'|'hot'|'ok'|'dim'|'hide'|'')  m.badge(id, text, tone) / m.badge(id) clears
+       m.link(a, b, 'dim'|'hide'|'hot'|'')  m.text(id, label)
+       m.label(x, y, text, cls) → <text> (cls: 'at-small'|'at-strong'|'at-good'|'at-bad'|'at-muted')
+       m.slots(id, x, y, n, { w, label })  → .set([{ t, tone }]) row of cells (buffers, cache slots)
+       m.sleep(ms, run)                              pause inside a phase
+       m.svg, m.nodes, m.reset()                     raw svg; clear states, badges and packets */
+  K.atlas = function (el, spec) {
+    el.classList.add('atlas');
+    const cards = spec.cards;
+    const tags = [...new Set(cards.flatMap(c => c.tags || []))];
+    el.innerHTML = (spec.filters && tags.length > 1 ? `<div class="at-filter" role="group" aria-label="Filter patterns"><button type="button" class="at-chip" aria-pressed="true" data-tag="">All ${cards.length}</button>${tags.map(t => `<button type="button" class="at-chip" aria-pressed="false" data-tag="${t}">${t}</button>`).join('')}</div>` : '')
+      + `<div class="at-grid"></div>`;
+    const grid = el.querySelector('.at-grid');
+    const states = [];
+    cards.forEach((c, i) => {
+      const card = document.createElement('article');
+      card.className = 'at-card tone-' + (c.tone || 'cyan');
+      card.dataset.id = c.id; card.dataset.tags = (c.tags || []).join('|');
+      const [vw, vh] = c.vb || [360, 150];
+      const plain = String(c.name).replace(/<[^>]+>/g, '');
+      card.innerHTML = `<header class="at-head"><span class="at-num">${i + 1}</span><h3>${c.name}</h3></header>
+        <p class="at-rule">${c.rule}</p>
+        <div class="at-view"><svg class="at-svg" viewBox="0 0 ${vw} ${vh}" role="img" aria-label="${(c.alt || plain).replace(/"/g, '')}"></svg>
+          <button type="button" class="at-play" data-a="play" aria-label="Play the ${plain} animation">▶ Play</button></div>
+        <ol class="at-steps"></ol>
+        ${c.takeaway ? `<p class="at-take">${c.takeaway}</p>` : ''}
+        <dl class="at-meta">${c.use ? `<div><dt class="at-good">Use when</dt><dd>${c.use}</dd></div>` : ''}${c.avoid ? `<div><dt class="at-bad">Watch out</dt><dd>${c.avoid}</dd></div>` : ''}</dl>
+        ${c.href ? `<a class="at-link" href="${c.href}">Deep dive →</a>` : ''}`;
+      grid.appendChild(card);
+      const m = K.mini(card.querySelector('svg'));
+      const phases = c.build(m) || [];
+      card.querySelector('.at-steps').innerHTML = phases.map(p => `<li><span>${p.cap}</span></li>`).join('');
+      const st = { c, card, m, phases, ch: 'atlas-' + c.id + '-' + i, playing: false, btn: card.querySelector('.at-play'), items: card.querySelectorAll('.at-steps li') };
+      m._st = st;
+      if (c.reset) c.reset(m);
+      states.push(st);
+    });
+
+    function mark(st, k) { st.items.forEach((li, j) => { li.classList.toggle('now', j === k); li.classList.toggle('done', k >= 0 && j < k); }); }
+    async function play(st) {
+      const run = K.newRun(st.ch);
+      st.m.reset(); if (st.c.reset) st.c.reset(st.m);
+      st.card.classList.add('playing'); st.btn.textContent = '■ Stop';
+      try {
+        for (let k = 0; k < st.phases.length; k++) { mark(st, k); await st.phases[k].go(run); await st.m.sleep(650, run); }
+        mark(st, st.phases.length); st.btn.textContent = '↺ Replay';
+      } catch (e) { if (!(e instanceof Stop)) throw e; st.btn.textContent = '▶ Play'; mark(st, -1); }
+      st.card.classList.remove('playing');
+    }
+
+    el.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.tag !== undefined) {
+        el.querySelectorAll('.at-chip').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+        const t = b.dataset.tag;
+        states.forEach(st => { st.card.hidden = !!t && !st.card.dataset.tags.split('|').includes(t); });
+        return;
+      }
+      if (b.dataset.a !== 'play') return;
+      const st = states.find(s => s.card === b.closest('.at-card'));
+      if (st.card.classList.contains('playing')) { K.cancel(st.ch); return; }
+      play(st);
+    });
+    return { cards: states };
+  };
+
+  /* ---------- page navigation ----------
+     Kit.pageNav(el): builds a sticky, numbered bar from every <section data-nav="Label" id="…">
+     on the page, places it as the last row of the sticky top bar, and highlights the section being read. */
+  K.pageNav = function (el) {
+    const secs = [...document.querySelectorAll('section[data-nav]')];
+    el.classList.add('page-nav'); el.setAttribute('aria-label', 'On this page');
+    const bar = document.querySelector('.explainer > .topbar'); if (bar) bar.appendChild(el);   // rides in the sticky top bar
+    const fit = () => { if (bar) document.documentElement.style.setProperty('--topbar-h', bar.offsetHeight + 'px'); };
+    fit(); addEventListener('resize', fit); if (bar && 'ResizeObserver' in window) new ResizeObserver(fit).observe(bar);
+    el.innerHTML = secs.map((s, i) => `<a href="#${s.id}"><span>${i + 1}</span>${s.dataset.nav}</a>`).join('');
+    const links = [...el.querySelectorAll('a')];
+    if (!('IntersectionObserver' in window)) return;
+    const vis = new Map();
+    const io = new IntersectionObserver(es => {
+      es.forEach(e => vis.set(e.target, e.intersectionRatio));
+      let best = null, bv = 0; secs.forEach(s => { const v = vis.get(s) || 0; if (v > bv) { bv = v; best = s; } });
+      links.forEach((a, i) => a.toggleAttribute('aria-current', secs[i] === best));
+    }, { threshold: [0, .1, .25, .5, .75, 1], rootMargin: '-140px 0px -40% 0px' });
+    secs.forEach(s => io.observe(s));
+  };
+
+  /* ---------- mini diagrams (shared by Kit.atlas and flow walkthroughs) ----------
+     const m = Kit.mini(svg); see the Kit.atlas header for the m.* helpers. Outside an atlas card,
+     m.sleep / m.send follow only the global Speed and Pause. */
+  K.mini = function (svg) {
+    const wl = K.el('g', { class: 'at-wires' }, svg), nl = K.el('g', { class: 'at-nodes' }, svg),
+      pl = K.el('g', { class: 'at-pk' }, svg), tl = K.el('g', { class: 'at-tags' }, svg);
+    // distance from a node's centre to its edge along direction (dx, dy)
+    const edge = (n, dx, dy) => { if (!n || !n.hw) return 0; const L = Math.hypot(dx, dy) || 1, ux = Math.abs(dx / L), uy = Math.abs(dy / L);
+      return Math.min(ux ? n.hw / ux : 1e9, uy ? n.hh / uy : 1e9) + 3; };
+    const N = {}, W = [];
+    const pt = a => Array.isArray(a) ? { x: a[0], y: a[1], hw: 0, hh: 0 } : N[a];
+    const api = {
+      svg, nodes: N,
+      box(id, x, y, label, o = {}) {
+        const w = o.w || 76, h = o.h || 30, g = K.el('g', { class: 'at-node at-box' }, nl);
+        K.el('rect', { x: x - w / 2, y: y - h / 2, width: w, height: h, rx: 7 }, g);
+        if (o.icon) { const ic = K.el('g', { class: 'at-ic', transform: `translate(${x - w / 2 + 6},${y - 8}) scale(.68)` }, g); ic.innerHTML = K.ICONS[o.icon] || ''; }
+        const t = K.text(g, x + (o.icon ? 8 : 0), y + 4, label, 'at-ntext');
+        if (o.sub) K.text(g, x, y + h / 2 + 12, o.sub, 'at-nsub');
+        return N[id] = { g, x, y, hw: w / 2, hh: h / 2, t, t0: label };
+      },
+      db(id, x, y, label, o = {}) {
+        const w = o.w || 46, h = 34, ry = 5, g = K.el('g', { class: 'at-node at-db' }, nl);
+        K.el('path', { d: `M${x - w / 2} ${y - h / 2 + ry} v${h - 2 * ry} a${w / 2} ${ry} 0 0 0 ${w} 0 v${-(h - 2 * ry)}` }, g);
+        K.el('ellipse', { cx: x, cy: y - h / 2 + ry, rx: w / 2, ry }, g);
+        K.el('path', { class: 'at-dbline', d: `M${x - w / 2} ${y + 1} a${w / 2} ${ry} 0 0 0 ${w} 0` }, g);
+        const t = K.text(g, x, y + h / 2 + 13, label, 'at-nsub at-strongsub');
+        if (o.sub) K.text(g, x, y + h / 2 + 25, o.sub, 'at-nsub');
+        return N[id] = { g, x, y, hw: w / 2, hh: h / 2, t, t0: label };
+      },
+      tile(id, x, y, label, icon) {
+        const s = 30, g = K.el('g', { class: 'at-node at-tile' }, nl);
+        K.el('rect', { x: x - s / 2, y: y - s / 2, width: s, height: s, rx: 7 }, g);
+        const ic = K.el('g', { class: 'at-ic', transform: `translate(${x - 10.5},${y - 10.5}) scale(.875)` }, g); ic.innerHTML = K.ICONS[icon] || '';
+        const t = K.text(g, x, y + s / 2 + 13, label, 'at-nsub at-strongsub');
+        return N[id] = { g, x, y, hw: s / 2, hh: s / 2, t, t0: label };
+      },
+      wire(a, b, o = {}) {
+        const A = pt(a), B = pt(b), pts = [[A.x, A.y], ...(o.via || []), [B.x, B.y]];
+        const g = K.el('g', { class: 'at-wire' + (o.dash ? ' dash' : '') }, wl);
+        const p = K.el('path', { d: 'M' + pts.map(q => q.join(' ')).join(' L') }, g);
+        if (o.label) { const m = o.at || [(pts[0][0] + pts[1][0]) / 2, (pts[0][1] + pts[1][1]) / 2 - 6]; K.text(g, m[0], m[1], o.label, 'at-wlabel'); }
+        const n = pts.length, s0 = edge(Array.isArray(a) ? null : A, pts[1][0] - pts[0][0], pts[1][1] - pts[0][1]),
+          s1 = edge(Array.isArray(b) ? null : B, pts[n - 2][0] - pts[n - 1][0], pts[n - 2][1] - pts[n - 1][1]);
+        const w = { a, b, g, p, id: o.id, s0, s1 }; W.push(w); return w;
+      },
+      state(id, s) { const n = N[id]; if (!n) return; ['on', 'hot', 'ok', 'dim', 'hide'].forEach(c => n.g.classList.toggle(c, c === s)); },
+      /** wire look: 'dim' | 'hide' | 'hot' | '' */
+      link(a, b, s) { const w = W.find(x => (x.a === a && x.b === b) || (x.a === b && x.b === a)); if (!w) return; ['dim', 'hide', 'hot'].forEach(c => w.g.classList.toggle('w-' + c, c === s)); },
+      /** set a node's label text (reset() restores it) */
+      text(id, t) { const n = N[id]; if (n && n.t) n.t.textContent = t; },
+      badge(id, text, tone) {
+        const n = N[id]; if (n.bd) { n.bd.remove(); n.bd = null; } if (!text) return;
+        const w = Math.max(30, text.length * 5.6 + 12), g = K.el('g', { class: 'at-badge ' + (tone || ''), transform: `translate(${n.x},${n.y - n.hh - 10})` }, tl);
+        K.el('rect', { x: -w / 2, y: -8, width: w, height: 16, rx: 8 }, g); K.text(g, 0, 3.5, text, ''); n.bd = g;
+      },
+      label(x, y, text, cls) { return K.text(tl, x, y, text, 'at-lbl ' + (cls || '')); },
+      slots(id, x, y, n, o = {}) {
+        const w = o.w || 18, gap = 4, g = K.el('g', { class: 'at-slots' }, nl), cells = [];
+        const x0 = x - (n * w + (n - 1) * gap) / 2;
+        for (let i = 0; i < n; i++) { const c = K.el('g', { class: 'at-slot' }, g); K.el('rect', { x: x0 + i * (w + gap), y: y - w / 2, width: w, height: w, rx: 4 }, c); K.text(c, x0 + i * (w + gap) + w / 2, y + 3.5, '', ''); cells.push(c); }
+        if (o.label) K.text(g, x, y - w / 2 - 6, o.label, 'at-nsub');
+        const s = { g, cells, set(arr) { cells.forEach((c, i) => { const v = arr[i]; c.setAttribute('class', 'at-slot' + (v ? ' full ' + (v.tone || '') : '')); c.querySelector('text').textContent = v ? v.t : ''; }); } };
+        N[id] = { g, x, y, hw: (n * w + (n - 1) * gap) / 2, hh: w / 2, slots: s }; return s;
+      },
+      sleep(ms, run) {
+        const st = api._st, target = K.reduce ? 1 : ms;
+        return new Promise((res, rej) => {
+          let acc = 0, last = performance.now();
+          (function f(t) {
+            if (!K.alive(run)) return rej(new Stop());
+            const frozen = K.paused;
+            acc += frozen ? 0 : Math.max(0, t - last) * K.speed; last = t;
+            acc >= target ? res() : requestAnimationFrame(f);
+          })(last);
+        });
+      },
+      async send(route, o = {}) {
+        const run = o.run, st = api._st;
+        const pk = K.el('g', { class: 'at-packet ' + (o.tone || '') }, pl);
+        K.el('rect', { x: -5, y: -5, width: 10, height: 10, rx: 2.5 }, pk);
+        if (o.label) { const w = o.label.length * 5.6 + 10, tg = K.el('g', { class: 'at-ptag', transform: 'translate(0,-13)' }, pk); K.el('rect', { x: -w / 2, y: -7.5, width: w, height: 15, rx: 7.5 }, tg); K.text(tg, 0, 3.3, o.label, ''); }
+        pk.setAttribute('transform', 'translate(-50,-50)');
+        try {
+          for (let i = 0; i < route.length - 1; i++) {
+            const a = route[i], b = route[i + 1];
+            const w = W.find(x => (x.a === a && x.b === b) || (x.a === b && x.b === a) || (x.id && x.id === o.via));
+            if (!w) throw new Error('Kit.atlas: no wire ' + a + '→' + b);
+            const fwd = w.a === a, len = w.p.getTotalLength(), ms = K.reduce ? 1 : (o.ms || Math.max(380, len * 6.5));
+            w.g.classList.add('live', o.tone || 'x');
+            await new Promise((res, rej) => {
+              let k = 0, last = performance.now();
+              (function f(t) {
+                if (!K.alive(run)) return rej(new Stop());
+                const frozen = K.paused;
+                k = Math.min(1, k + (frozen ? 0 : Math.max(0, t - last) * K.speed) / ms); last = t;
+                const lo = Math.min(w.s0, len / 2 - 1), hi = len - Math.min(w.s1, len / 2 - 1), e = K.ease(k);
+                const P = w.p.getPointAtLength(fwd ? lo + (hi - lo) * e : hi - (hi - lo) * e);
+                pk.setAttribute('transform', `translate(${P.x.toFixed(1)},${P.y.toFixed(1)})`);
+                k < 1 ? requestAnimationFrame(f) : res();
+              })(last);
+            });
+            w.g.classList.remove('live', o.tone || 'x');
+          }
+        } finally { if (!o.keep) pk.remove(); }
+        return pk;
+      },
+      reset() {
+        pl.textContent = '';
+        for (const id in N) { api.state(id, ''); if (N[id].bd) api.badge(id); if (N[id].slots) N[id].slots.set([]); }
+        W.forEach(w => w.g.setAttribute('class', 'at-wire' + (w.g.classList.contains('dash') ? ' dash' : '')));
+        for (const id in N) if (N[id].t && N[id].t0 !== undefined) N[id].t.textContent = N[id].t0;
+        tl.querySelectorAll('.at-lbl.temp').forEach(x => x.remove());
       }
     };
     return api;

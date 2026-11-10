@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Load Balancing Algorithms</title>
-<meta name="description" content="Day 13: watch six static and dynamic load balancing algorithms route live requests across three servers.">
+<meta name="description" content="Day 13: watch seven static and dynamic load balancing algorithms route live requests across three servers.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="../../assets/css/explainer.css">
 <script src="../../assets/js/theme.js"></script>
 <script src="../../assets/js/explainer-kit.js"></script>
+<script src="../sd-series.js"></script>
 </head>
 <body data-anim="continuous">
 <div class="wrap explainer">
@@ -20,31 +21,36 @@
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
   <header>
-    <div class="eyebrow">Week 2 · Day 13 · Scaling Fundamentals</div>
+    <div class="eyebrow">Week 2 · H13 · Scaling Fundamentals</div>
     <h1>Load Balancing Algorithms</h1>
     <ul class="lede"><li>A load balancer has one job per request: <b>pick a server</b>.</li><li><b class="s">Static</b> algorithms follow a fixed rule and never look at server health or load.</li><li><b class="d">Dynamic</b> algorithms check live numbers (open connections, response time) before every pick.</li><li>Real balancers often <b>blend</b> the two.</li></ul>
   </header>
 
-  <section aria-labelledby="treeH">
-    <h2 id="treeH">The six algorithms</h2>
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn: watch each algorithm route traffic</h2>
+    <p class="sec-sub">Click an algorithm in the tree; the stage below switches to it. Turn on <b>Slow down Server B</b> to see who notices.</p>
+    <div class="sub-block" aria-labelledby="treeH">
+    <h3 class="sec-h3" id="treeH">The seven algorithms</h3>
     <p class="sub">Click any box to watch it route traffic below.</p>
     <div class="scroll">
-      <svg class="tree" viewBox="0 0 1000 280" role="group" aria-label="Load balancing algorithm taxonomy">
-        <text class="root" x="580" y="34">Load-Balancing Algorithms</text>
-        <path class="curve" d="M566 56 C470 56 400 80 340 112"/>
-        <path class="curve" d="M594 56 C690 56 760 80 820 112"/>
-        <circle class="knot" cx="566" cy="56" r="5"/><circle class="knot" cx="594" cy="56" r="5"/>
-        <circle class="knot" cx="340" cy="112" r="5"/><circle class="knot" cx="820" cy="112" r="5"/>
-        <text class="cat" id="catS" x="332" y="140">Static</text>
-        <text class="cat dyn" id="catD" x="832" y="140">Dynamic</text>
+      <svg class="tree" viewBox="0 0 1100 280" role="group" aria-label="Load balancing algorithm taxonomy">
+        <text class="root" x="550" y="34">Load-Balancing Algorithms</text>
+        <path class="curve" d="M536 56 C440 56 370 80 312 112"/>
+        <path class="curve" d="M564 56 C660 56 790 80 855 112"/>
+        <circle class="knot" cx="536" cy="56" r="5"/><circle class="knot" cx="564" cy="56" r="5"/>
+        <circle class="knot" cx="312" cy="112" r="5"/><circle class="knot" cx="855" cy="112" r="5"/>
+        <text class="cat" id="catS" x="304" y="140">Static</text>
+        <text class="cat dyn" id="catD" x="867" y="140">Dynamic</text>
         <g id="leafWires"></g>
         <g id="leaves"></g>
       </svg>
     </div>
-  </section>
-
-  <section aria-labelledby="stageTitle">
-    <h2 class="stage-title" id="stageTitle">1. Round Robin</h2>
+  </div>
+    <div class="sub-block" aria-labelledby="stageTitle">
+    <h3 class="stage-title sub" id="stageTitle">1. Round Robin</h3>
     <div class="stage-kind" id="stageKind">Static</div>
     <div class="scroll">
       <svg class="stage-svg" id="stage" viewBox="0 0 1000 520" aria-label="Animated requests flowing from clients through a load balancer to three servers">
@@ -99,10 +105,13 @@
         </div>
       </div>
     </div>
+  </div>
   </section>
 
-  <section aria-labelledby="cmpH">
-    <h2 id="cmpH">Side by side</h2>
+  <section id="compare" data-nav="Compare">
+    <h2 class="sec-h"><span class="sec-n">2</span>Compare: the seven side by side</h2>
+    <div class="sub-block" aria-labelledby="cmpH">
+    <h3 class="sec-h3" id="cmpH">Side by side</h3>
     <p class="sub">The trade-off runs from simple and predictable (top) to adaptive but costly to run (bottom).</p>
     <div class="scroll card table-card">
       <table>
@@ -110,10 +119,30 @@
         <tbody id="cmpBody"></tbody>
       </table>
     </div>
+  </div>
   </section>
 
-  <section aria-labelledby="quizH">
-    <h2 id="quizH">Which one would you pick?</h2>
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">3</span>Revise in two minutes</h2>
+    <h3 class="sec-h3">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">Identical servers, stateless app</span><span class="arrow">→</span><span class="then">Round robin</span></li>
+      <li><span class="if">Mixed server sizes</span><span class="arrow">→</span><span class="then">Weighted round robin</span></li>
+      <li><span class="if">Same client or key → same server</span><span class="arrow">→</span><span class="then">Hash (IP or URL); consistent hashing if servers change often</span></li>
+      <li><span class="if">Requests vary a lot in duration</span><span class="arrow">→</span><span class="then">Least connections</span></li>
+      <li><span class="if">Servers can degrade without warning</span><span class="arrow">→</span><span class="then">Least response time</span></li>
+      <li><span class="if">Many balancers, large fleet</span><span class="arrow">→</span><span class="then">Power of two choices</span></li>
+      <li><span class="if">Legacy in-memory sessions</span><span class="arrow">→</span><span class="then">Sticky sessions (and plan to remove them)</span></li>
+    </ul>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">4</span>Test yourself</h2>
+    <p class="sec-sub">Pick an answer, then read why. Then answer each card out loud before you open it.</p>
+    <h3 class="sec-h3">Which one fits?</h3>
+    <div id="drill"></div>
+    <div class="sub-block" aria-labelledby="quizH">
+    <h3 class="sec-h3" id="quizH">Which one would you pick?</h3>
     <p class="sub">Answer out loud before you open each card. This is the step that makes it stick.</p>
     <div class="quiz">
       <details><summary>A patient-search API runs on six identical, stateless containers behind the balancer.<span class="go">Show answer</span></summary>
@@ -127,7 +156,10 @@
       <details><summary>Three cache nodes sit in front of the provider directory, and the same URL should always hit the same node so it stays warm.<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>Hash</b> on the URL. Watch out: adding a fourth node with plain mod-N remaps most keys and empties every cache at once. Consistent hashing (Day 54) fixes that.</p></div></details>
     </div>
+  </div>
   </section>
+
+  <nav id="prevnext"></nav>
 
   <footer>Simulation note: request timings and latencies are simulated, and each run uses a fixed random seed so you can replay it with Reset. Source: Day 13 notes, "Load Balancing Algorithms: Static vs Dynamic".</footer>
 </div>
@@ -164,7 +196,12 @@ const ALGOS=[
   pick:'Sends each request to the server with the lowest recently measured response time.',
   strength:'Reacts fastest to a server that is degrading.',
   weak:'Constant measuring adds overhead, and latency alone ignores how many requests a server already holds.',
-  when:'User-facing latency matters most and backends can degrade without warning.'}
+  when:'User-facing latency matters most and backends can degrade without warning.'},
+ {id:'p2c',name:'Power of Two Choices',kind:'dynamic',by:'Two random servers, the less busy wins',
+  pick:'Picks two servers at random and sends the request to the one with fewer open requests.',
+  strength:'Nearly as good as checking every server, at a fraction of the cost, and many independent balancers don\'t all pile onto the same "least loaded" server.',
+  weak:'Random sampling can miss the single best server; with only two or three servers it is barely different from least connections.',
+  when:'Large fleets or many balancers sharing the same backends (Envoy, NGINX and HAProxy support it).'}
 ];
 const CLIENTS=[{n:'Alice',ip:'10.0.0.12',y:100},{n:'Bob',ip:'10.0.0.37',y:205},{n:'Carol',ip:'10.0.0.58',y:315},{n:'Dave',ip:'10.0.0.91',y:420}];
 const SRV=[{n:'Server A',y:100,port:240},{n:'Server B',y:260,port:260},{n:'Server C',y:420,port:280}];
@@ -175,11 +212,11 @@ const $=id=>document.getElementById(id);
 const el=(tag,attrs,parent)=>{const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;};
 
 /* ---------- tree ---------- */
-const leafX=[85,250,415,580,750,915], leafY=210, LW=156, LH=46;
+const leafX=[80,235,390,545,700,855,1010], leafY=210, LW=150, LH=46;
 const leafWires=$('leafWires'), leaves=$('leaves');
 ALGOS.forEach((a,i)=>{
-  const fromX=a.kind==='static'?332:832, fromY=158;
-  const sx=fromX+(a.kind==='static'?(i-1.5)*14:(i-4.5)*20);
+  const fromX=a.kind==='static'?304:867, fromY=158;
+  const sx=fromX+(a.kind==='static'?(i-1.5)*14:(i-5)*20);
   el('path',{class:'curve',d:`M${sx} ${fromY} C${sx} ${fromY+28} ${leafX[i]} ${leafY-34} ${leafX[i]} ${leafY}`},leafWires);
   el('circle',{class:'knot',cx:sx,cy:fromY,r:4.5},leafWires);
   el('circle',{class:'knot',cx:leafX[i],cy:leafY,r:4.5},leafWires);
@@ -244,6 +281,7 @@ function decide(r){
   }
   else if(a==='hash'){const h=fnv(c.ip);s=h%3;why=`hash(${c.ip}) mod 3 = ${s}`;}
   else if(a==='lc'){const m=Math.min(...S.assigned);s=S.assigned.indexOf(m);why=`open [${S.assigned.join(', ')}], fewest wins`;}
+  else if(a==='p2c'){const x=Math.floor(S.rng()*3);let y=Math.floor(S.rng()*2);if(y>=x)y++;s=S.assigned[x]<=S.assigned[y]?x:y;why=`sampled ${LETTER[x]} (${S.assigned[x]} open) and ${LETTER[y]} (${S.assigned[y]} open), fewer wins`;}
   else {const ms=S.ewma.map(v=>Math.round(v/10));s=ms.indexOf(Math.min(...ms));why=`latency [${ms.join(', ')}] ms, fastest wins`;}
   r.s=s; S.assigned[s]++;
   S.log.unshift(`<span class="rq">req ${r.id}</span> · ${c.n} → <span class="sv">Server ${LETTER[s]}</span> · ${why}`);
@@ -345,6 +383,21 @@ $('slowB').addEventListener('change',render);
 if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches){traffic=false;$('playBtn').textContent='Resume traffic';}
 select(0);
 requestAnimationFrame(frame);
+})();
+</script>
+<script>
+(function () {
+  SD.page({ track: 'hld' });
+  const O = ['Round Robin', 'Weighted Round Robin', 'Hash', 'Least Connections', 'Least Response Time', 'Power of Two Choices', 'Sticky Round Robin'];
+  SD.drill(document.getElementById('drill'), [
+    { q: 'Six identical, stateless API containers.', a: 'Round Robin', why: 'All equal and stateless: the simplest rule works.' },
+    { q: 'Two new 16-core nodes and one old 4-core node.', a: 'Weighted Round Robin', why: 'Give the bigger nodes a bigger share.' },
+    { q: 'Three cache nodes; the same URL should always hit the same node.', a: 'Hash', why: 'Hashing the URL gives affinity without a lookup table.' },
+    { q: 'Some calls are file uploads that take a minute, others take 50 ms.', a: 'Least Connections', why: 'Long requests hold connections; send new work elsewhere.' },
+    { q: 'One backend sometimes becomes slow because of a noisy neighbour.', a: 'Least Response Time', why: 'It reacts to measured latency.' },
+    { q: '30 Envoy sidecars balance across 200 instances.', a: 'Power of Two Choices', why: 'Cheap, and independent balancers don\'t all pick the same server.' },
+    { q: 'A legacy app keeps the cart in server memory.', a: 'Sticky Round Robin', why: 'Keep each user on one server until the state moves to Redis.' }
+  ], O);
 })();
 </script>
 </body>

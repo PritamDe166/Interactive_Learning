@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simple Factory &amp; Factory Method</title>
+<meta name="description" content="Creational pattern L13: stop scattering new. Appointment reminders move from new-in-every-caller to a simple factory, then to the factory method pattern, then to keyed DI services in .NET.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/theme.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/explainer.css">
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/explainer-kit.js"></script>
+<script src="../sd-series.js"></script>
+</head>
+<body>
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← LLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">System Design · LLD · Creational · L13</div>
+    <h1>Simple Factory &amp; Factory Method</h1>
+    <ul class="lede">
+      <li>Both answer one question: <b>who decides which class to <span class="mono">new</span>?</b> Callers shouldn't; they should ask for "a notifier" and get the right one.</li>
+      <li><b>Simple factory</b>: one class with a <span class="mono">Create(type)</span> method and a switch. Not a GoF pattern, but the most common.</li>
+      <li><b>Factory method</b> (GoF): a base class calls an abstract <span class="mono">CreateX()</span>; each subclass decides what to create.</li>
+      <li>In ASP.NET Core the DI container is usually your factory: inject <span class="mono">INotifier</span>, or pick by key with keyed services.</li>
+    </ul>
+  </header>
+
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn: three ways to stop scattering <span class="mono">new</span></h2>
+    <p class="sec-sub">Appointment reminders go out by email or SMS, and WhatsApp is coming. Step through with <b>Next ▶</b>.</p>
+    <div class="sub-block">
+      <h3 class="stage-title sub">Walkthrough: who creates the notifier?</h3>
+      <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+      <div class="story wide" id="story">
+        <div class="scroll"><svg class="diagram" id="sv" style="min-width:0" viewBox="0 0 760 380" role="img" aria-label="Callers creating notifiers directly, then through a simple factory, then through factory-method subclasses, then through keyed DI"></svg></div>
+      </div>
+    </div>
+    <div class="sub-block">
+      <h3 class="stage-title sub">The same thing in C#</h3>
+      <div class="stage-kind">Simple factory · factory method · keyed DI</div>
+      <div class="cs-pair">
+        <div><div class="label bad-text">Before: every caller decides</div><pre class="codeblock" id="csBefore"></pre></div>
+        <div><div class="label ok-text">Simple factory: one place decides</div><pre class="codeblock" id="csSimple"></pre></div>
+      </div>
+      <div class="cs-pair" style="margin-top:12px">
+        <div><div class="label ok-text">Factory method: subclasses decide</div><pre class="codeblock" id="csFm"></pre></div>
+        <div><div class="label ok-text">.NET 8 keyed services: the container decides</div><pre class="codeblock" id="csDi"></pre></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="compare" data-nav="Compare">
+    <h2 class="sec-h"><span class="sec-n">2</span>Compare: the factory family</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>Simple factory</th><th>Factory method</th><th>Abstract factory (<a href="abstract-factory.html">L14</a>)</th><th>DI container</th></tr></thead>
+        <tbody>
+          <tr><td>Shape</td><td>one class, <span class="mono">Create(type)</span> with a switch</td><td>base class + overridable <span class="mono">CreateX()</span></td><td>interface with several <span class="mono">CreateX()</span> methods</td><td>registrations in Program.cs</td></tr>
+          <tr><td>Creates</td><td>one product, chosen by a parameter</td><td>one product, chosen by the subclass</td><td>a <b>family</b> of related products</td><td>anything registered</td></tr>
+          <tr><td>Add a variant</td><td>new class + <b>edit the switch</b></td><td>new class + new subclass, <b>no edits</b></td><td>a new family = a new factory class</td><td>new class + one registration</td></tr>
+          <tr><td>Use when</td><td>a few types, choice made at runtime from data</td><td>a base algorithm needs a step that varies by subclass</td><td>products must match (all Azure, all AWS)</td><td>most ASP.NET Core code</td></tr>
+          <tr><td>.NET examples</td><td><span class="mono">WebRequest.Create(uri)</span> (old)</td><td><span class="mono">DbProviderFactory.CreateCommand()</span></td><td><span class="mono">DbProviderFactory</span> (connection + command + parameter)</td><td><span class="mono">IHttpClientFactory</span>, <span class="mono">ILoggerFactory</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">3</span>Try it yourself</h2>
+    <p class="sec-sub">Send a reminder through a factory, then count what each design costs when new channels arrive.</p>
+    <div class="sub-block">
+      <h3 class="stage-title sub">1. The factory at work</h3>
+      <div class="stage-kind">Pick the patient's preferred channel · watch which class gets created</div>
+      <div class="chips" id="fChan"><button class="chip-btn" type="button" data-c="email" aria-pressed="true">email</button><button class="chip-btn" type="button" data-c="sms" aria-pressed="false">sms</button><button class="chip-btn" type="button" data-c="whatsapp" aria-pressed="false">whatsapp</button><button class="chip-btn" type="button" data-c="pigeon" aria-pressed="false">pigeon (unknown)</button></div>
+      <div class="scroll"><svg class="diagram" id="fSv" style="min-width:0;margin-top:10px" viewBox="0 0 760 250" role="img" aria-label="ReminderJob asks NotificationFactory for a notifier"></svg></div>
+      <div class="controls"><button class="btn primary" type="button" id="fGo">Send reminder</button></div>
+      <pre class="codeblock" id="fCode" style="min-height:0"></pre>
+      <p class="status-line" id="fStatus">ReminderJob only knows INotifier. Press Send.</p>
+    </div>
+    <div class="sub-block">
+      <h3 class="stage-title sub">2. New channels arrive</h3>
+      <div class="stage-kind">Three callers create notifiers · add channels and count the edits</div>
+      <div class="seg" id="aDesign" role="group" aria-label="Design"><button type="button" data-v="scatter" aria-pressed="true">new in every caller</button><button type="button" data-v="simple" aria-pressed="false">Simple factory</button><button type="button" data-v="fm" aria-pressed="false">Factory method</button></div>
+      <div class="chips" id="aBtns" style="margin-top:10px"><button class="chip-btn" type="button" data-p="WhatsApp" aria-pressed="false">+ WhatsApp</button><button class="chip-btn" type="button" data-p="Push" aria-pressed="false">+ Push notification</button><button class="chip-btn" type="button" data-p="Voice" aria-pressed="false">+ Voice call</button></div>
+      <div class="two" style="margin-top:10px">
+        <div><div class="label">Files touched</div><pre class="codeblock" id="aFiles" style="min-height:0;margin:4px 0 0"></pre></div>
+        <div>
+          <div class="kpis" style="margin-top:0">
+            <div class="kpi" id="kEdit"><b>0</b><span>edits to existing files</span></div>
+            <div class="kpi" id="kNew"><b>0</b><span>new files</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="status-line" id="aStatus">Pick a design, then add channels.</p>
+    </div>
+  </section>
+
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">4</span>Revise in two minutes</h2>
+    <h3 class="sec-h3">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">The same <span class="mono">if / switch → new</span> appears in several callers</span><span class="arrow">→</span><span class="then">simple factory: move it to one <span class="mono">Create(type)</span></span></li>
+      <li><span class="if">A base class runs a fixed algorithm but one object in it varies</span><span class="arrow">→</span><span class="then">factory method: abstract <span class="mono">CreateX()</span>, overridden by subclasses</span></li>
+      <li><span class="if">Choosing an implementation by a key at runtime in ASP.NET Core</span><span class="arrow">→</span><span class="then">keyed services (<span class="mono">AddKeyedScoped</span>) or a dictionary of <span class="mono">IEnumerable&lt;INotifier&gt;</span></span></li>
+      <li><span class="if">Need a new object per call but want DI to build it</span><span class="arrow">→</span><span class="then">inject a factory (<span class="mono">IHttpClientFactory</span>, <span class="mono">Func&lt;T&gt;</span>, <span class="mono">ActivatorUtilities</span>)</span></li>
+      <li><span class="if">Only ever one implementation</span><span class="arrow">→</span><span class="then">no factory: just inject it</span></li>
+      <li><span class="if">Interview: "factory method vs simple factory?"</span><span class="arrow">→</span><span class="then">parameter decides vs subclass decides; factory method needs no switch</span></li>
+    </ul>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><span class="flag add">Added</span><p><b>Why "factory method" confuses people:</b> any static method that returns a new object (<span class="mono">Guid.NewGuid()</span>, <span class="mono">TimeSpan.FromMinutes()</span>) is casually called a factory method. The GoF pattern is narrower: an <b>overridable</b> creation step inside a class, so subclasses choose the product.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Link to SOLID:</b> a simple factory still breaks open-closed (edit the switch for each new type) but contains the damage to one file. Factory method and keyed DI keep the code closed: new types are new classes. And callers depend on <span class="mono">INotifier</span>, not concrete classes (dependency inversion).</p></div>
+    </div>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">5</span>Test yourself</h2>
+    <h3 class="sec-h3">Which one fits?</h3>
+    <div id="drill"></div>
+    <h3 class="sec-h3">Explain it out loud</h3>
+    <p class="sub">Answer before you open each card.</p>
+    <div class="quiz">
+      <details><summary>What problem does any factory solve?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>It takes the decision "which concrete class?" away from the code that <i>uses</i> the object. Callers depend on an interface; the choice of <span class="mono">new</span> lives in one place.</p></div></details>
+      <details><summary>Simple factory vs factory method in one sentence each.<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Simple factory:</b> one method takes a parameter and switches to pick the class. <b>Factory method:</b> a base class declares an abstract creation method and each subclass returns its own product.</p></div></details>
+      <details><summary>Why does the factory method pattern avoid editing old code when a type is added?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>There's no switch to extend: the new variant comes with its own subclass that overrides <span class="mono">CreateNotifier()</span>. Existing classes don't change.</p></div></details>
+      <details><summary>What should a simple factory do with an unknown type?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Fail fast with a clear exception (<span class="mono">ArgumentOutOfRangeException</span>), or return a deliberate default / Null Object if the business allows it. Never return null silently.</p></div></details>
+      <details><summary>How would you pick a notifier by name in ASP.NET Core 8 without writing a switch?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Register keyed services (<span class="mono">AddKeyedScoped&lt;INotifier, SmsNotifier&gt;("sms")</span>) and resolve with <span class="mono">GetRequiredKeyedService&lt;INotifier&gt;(channel)</span> or <span class="mono">[FromKeyedServices("sms")]</span>.</p></div></details>
+    </div>
+  </section>
+
+  <nav id="prevnext"></nav>
+
+  <footer>Sources: Gamma et al., <i>Design Patterns</i> (1994), Factory Method; refactoring.guru, Factory Method; Microsoft Learn: keyed services in .NET 8 dependency injection, <span class="mono">DbProviderFactory</span>, <span class="mono">IHttpClientFactory</span>. Class names are illustrative.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  K.codeBlock($('csBefore'), `public class ReminderJob
+{
+    public void Run(Appointment a)
+    {
+        INotifier n;
+        if (a.Patient.Channel == "sms")
+            n = new SmsNotifier(twilioKey);
+        else
+            n = new EmailNotifier(smtpHost);
+        n.Send(a.Patient.Contact, Text(a));
+    }
+}
+// BookingService and CancelService
+// repeat the same if / new ...`, 'cs');
+  K.codeBlock($('csSimple'), `public static class NotifierFactory
+{
+    public static INotifier Create(string channel) => channel switch
+    {
+        "email"    => new EmailNotifier(),
+        "sms"      => new SmsNotifier(),
+        "whatsapp" => new WhatsAppNotifier(), // new: edit here only
+        _ => throw new ArgumentOutOfRangeException(nameof(channel))
+    };
+}
+
+// every caller
+var n = NotifierFactory.Create(a.Patient.Channel);
+n.Send(a.Patient.Contact, Text(a));`, 'cs');
+  K.codeBlock($('csFm'), `public abstract class ReminderSender
+{
+    // the factory method
+    protected abstract INotifier CreateNotifier();
+
+    public void SendReminder(Appointment a)
+    {
+        var n = CreateNotifier();          // subclass decides
+        n.Send(a.Patient.Contact, $"See you at {a.Start:t}");
+    }
+}
+
+public class SmsReminderSender : ReminderSender
+{
+    protected override INotifier CreateNotifier() => new SmsNotifier();
+}
+public class WhatsAppReminderSender : ReminderSender   // new file
+{
+    protected override INotifier CreateNotifier() => new WhatsAppNotifier();
+}`, 'cs');
+  K.codeBlock($('csDi'), `// Program.cs
+builder.Services.AddKeyedScoped<INotifier, EmailNotifier>("email");
+builder.Services.AddKeyedScoped<INotifier, SmsNotifier>("sms");
+builder.Services.AddKeyedScoped<INotifier, WhatsAppNotifier>("whatsapp");
+
+// ReminderJob: no switch, no new
+public class ReminderJob(IServiceProvider sp)
+{
+    public void Run(Appointment a)
+    {
+        var n = sp.GetRequiredKeyedService<INotifier>(a.Patient.Channel);
+        n.Send(a.Patient.Contact, Text(a));
+    }
+}`, 'cs');
+
+  /* ---------- walkthrough ---------- */
+  const sv = $('sv'); K.umlDefs(sv);
+  const A = K.el('g', { class: 'sx' }, sv), B = K.el('g', { class: 'sx' }, sv), C = K.el('g', { class: 'sx' }, sv), D = K.el('g', { class: 'sx' }, sv), FX = K.el('g', {}, sv);
+  const CY = [80, 185, 290];
+  const mkCallers = (g, sub) => ['ReminderJob', 'BookingService', 'CancelService'].map((n, i) => K.node(g, 100, CY[i], 170, 46, n, sub));
+  const mkProducts = g => ['EmailNotifier', 'SmsNotifier', 'WhatsAppNotifier'].map((n, i) => K.classBox(g, 560, CY[i] - 28, 180, { name: n, methods: ['+ Send(to, text)'] }));
+  // scene A: new everywhere
+  const aCall = mkCallers(A, 'if … new …'), aProd = mkProducts(A);
+  const aLinks = []; aCall.forEach((c, i) => aProd.forEach((p, j) => { const l = K.umlLink(A, [185, CY[i] + (j - 1) * 10], p.left, 'creates'); l.dataset.j = j; aLinks.push(l); }));
+  // scene B: simple factory
+  const bCall = mkCallers(B, 'Create(channel)'), bProd = mkProducts(B);
+  const fac = K.classBox(B, 255, 105, 240, { name: 'NotifierFactory', methods: ['+ Create(channel): INotifier', '   "email" → EmailNotifier', '   "sms" → SmsNotifier', '   "whatsapp" → WhatsApp…'] });
+  bCall.forEach((c, i) => K.umlLink(B, [185, CY[i]], [255, 130 + i * 25], 'uses'));
+  const bLinks = bProd.map((p, j) => K.umlLink(B, [495, 160 + j * 12], p.left, 'creates'));
+  // scene C: factory method
+  const base = K.classBox(C, 40, 20, 330, { name: 'ReminderSender', stereo: 'abstract', methods: ['+ SendReminder(appt)', '# abstract CreateNotifier(): INotifier'] }, 'iface');
+  const inot = K.classBox(C, 470, 30, 260, { name: 'INotifier', stereo: 'interface', methods: ['+ Send(to, text)'] }, 'iface');
+  K.umlLink(C, [370, 70], [470, 70], 'uses');
+  const subs = ['EmailReminderSender', 'SmsReminderSender', 'WhatsAppReminderSender'].map((n, i) => K.classBox(C, 15 + i * 250, 235, 230, { name: n, methods: ['# CreateNotifier()', '   → new ' + n.replace('ReminderSender', '') + 'Notifier()'] }));
+  const sLinks = subs.map((s, i) => K.umlLink(C, s.top, [120 + i * 85, base.bottom[1]], 'inherits'));
+  [aProd[2].g, bProd[2].g, subs[2].g].forEach(g => g.classList.add('sx'));
+  // scene D: DI
+  const cont = K.node(D, 380, 60, 360, 54, 'DI container', 'AddKeyedScoped<INotifier, …>(key)');
+  const keys = ['"email"', '"sms"', '"whatsapp"'].map((k, i) => K.node(D, 150 + i * 230, 175, 200, 46, k, ['EmailNotifier', 'SmsNotifier', 'WhatsAppNotifier'][i]));
+  keys.forEach(k => K.el('line', { x1: 380, y1: 87, x2: +k.g.querySelector('rect').getAttribute('x') + 100, y2: 152, class: 'ref' }, D));
+  const job = K.node(D, 380, 300, 380, 50, 'ReminderJob', 'GetRequiredKeyedService<INotifier>(channel)');
+
+  function show(i) {
+    FX.textContent = '';
+    A.classList.toggle('gone', i > 1); B.classList.toggle('gone', i < 2 || i > 3); C.classList.toggle('gone', i < 4 || i > 5); D.classList.toggle('gone', i < 6);
+    aProd[2].g.classList.toggle('sx', true); aProd[2].g.classList.toggle('gone', i < 1); aProd[2].g.classList.toggle('on', i === 1);
+    aLinks.forEach(l => { const w = l.dataset.j === '2'; l.classList.toggle('gone', w && i < 1); l.classList.toggle('bad', i === 1 && w); });
+    aCall.forEach(c => { c.g.classList.toggle('bad', i === 1); c.sub.textContent = i === 1 ? 'edited: + whatsapp case' : 'if … new …'; });
+    fac.rows[3].classList.toggle('gone', i < 3); fac.rows[3].classList.toggle('bad', i === 3); bProd[2].g.classList.toggle('gone', i < 3); bLinks[2].classList.toggle('gone', i < 3);
+    bProd[2].g.classList.toggle('on', i === 3); fac.g.classList.toggle('bad', i === 3); bCall.forEach(c => c.g.classList.toggle('ok', i === 3));
+    subs[2].g.classList.toggle('gone', i < 5); sLinks[2].classList.toggle('gone', i < 5); subs[2].g.classList.toggle('on', i === 5); base.g.classList.toggle('ok', i === 5);
+    job.g.classList.toggle('ok', i === 6); cont.g.classList.toggle('on', i === 6);
+    const note = ['3 callers × 2 classes: each caller knows every concrete class', 'adding WhatsApp = editing all 3 callers', 'callers know only the factory and INotifier', 'adding WhatsApp = 1 switch line + 1 new class', 'the base algorithm calls CreateNotifier(); subclasses choose', 'adding WhatsApp = new subclass, nothing edited', 'the container is the factory: register by key, resolve by key'][i];
+    K.text(FX, 380, 372, note, 'mlabel halo ' + ([1].includes(i) ? 'bad' : [3, 5, 6].includes(i) ? 'ok' : 'accent'));
+  }
+  K.story({
+    root: $('story'), show, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'Every caller decides', text: 'Three services each contain <span class="mono">if (channel == "sms") new SmsNotifier() else new EmailNotifier()</span>. Each one depends on every concrete class and its constructor arguments.' },
+      { title: 'WhatsApp arrives: three edits', text: 'The new channel means finding and <b>editing every caller</b>. Miss one and that flow silently never sends WhatsApp.', play: async run => { for (const c of aCall) { c.g.classList.add('bad'); await K.sleep(400, run); } } },
+      { title: 'Simple factory: one place decides', text: 'Move the decision into <span class="mono">NotifierFactory.Create(channel)</span>. Callers now depend on the factory and <span class="mono">INotifier</span>, nothing else.' },
+      { title: 'WhatsApp arrives: one edit', text: 'Add one line to the switch and one new class. Callers are untouched. Still an edit to tested code, but in exactly one place.', tip: 'Say: "a simple factory isn\'t a GoF pattern, but it\'s the one I\'d write first". It shows you know both.' },
+      { title: 'Factory method: subclasses decide', text: '<span class="mono">ReminderSender</span> owns the algorithm (build text, send). The one step that varies, <b>which notifier</b>, is an abstract <span class="mono">CreateNotifier()</span> each subclass overrides.' },
+      { title: 'WhatsApp arrives: no edits', text: 'Add <span class="mono">WhatsAppReminderSender</span>; it overrides one method. No switch exists, so nothing existing changes: open-closed.', play: async run => { subs[2].g.classList.remove('gone'); subs[2].g.classList.add('on'); await K.sleep(500, run); } },
+      { title: 'In .NET the container is your factory', text: 'Register each notifier with a key; resolve by the patient\'s channel. Constructor arguments (API keys, HttpClient) are wired by DI too, so no class calls <span class="mono">new</span> on a dependency.', tip: 'Mention IHttpClientFactory and ILoggerFactory as factories you already use daily.' }
+    ]
+  });
+
+  /* ---------- lab 1: factory at work ---------- */
+  const fs = $('fSv'); K.umlDefs(fs);
+  const fJob = K.node(fs, 100, 125, 170, 50, 'ReminderJob', 'needs an INotifier');
+  const fFac = K.node(fs, 360, 125, 210, 60, 'NotifierFactory', 'Create(channel)');
+  const fP = ['EmailNotifier', 'SmsNotifier', 'WhatsAppNotifier'].map((n, i) => K.node(fs, 650, 50 + i * 75, 190, 54, n, ''));
+  K.umlLink(fs, [185, 125], [253, 125], 'uses'); fP.forEach((p, i) => K.el('line', { x1: 465, y1: 125, x2: 555, y2: 50 + i * 75, class: 'ref' }, fs));
+  const fOut = K.text(fs, 360, 225, '', 'mlabel halo');
+  let ch = 'email';
+  const IDX = { email: 0, sms: 1, whatsapp: 2 };
+  function fReset() { fP.forEach(p => { p.g.classList.remove('on', 'ok'); p.sub.textContent = ''; }); fFac.g.classList.remove('bad', 'on'); fOut.textContent = ''; fOut.setAttribute('class', 'mlabel halo'); }
+  $('fChan').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { ch = b.dataset.c; $('fChan').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); fReset(); fCode(); $('fStatus').textContent = 'Press Send.'; }));
+  function fCode() { K.codeBlock($('fCode'), `var notifier = NotifierFactory.Create("${ch}");   // ReminderJob never says new\nnotifier.Send(patient.Contact, "Your appointment is tomorrow at 10:30");`, 'cs'); }
+  $('fGo').addEventListener('click', async () => {
+    const run = K.newRun('fac'); fReset();
+    try {
+      const p = K.pill(fs, '"' + ch + '"', 'ghost'); await K.move(p, [185, 100], [360, 100], 600, run); p.remove();
+      fFac.g.classList.add('on'); await K.sleep(350, run);
+      if (!(ch in IDX)) { fFac.g.classList.replace('on', 'bad'); fOut.textContent = 'ArgumentOutOfRangeException: unknown channel "' + ch + '"'; fOut.classList.add('bad'); $('fStatus').innerHTML = 'Unknown input fails <b>fast and loudly</b> in one place, instead of a null deep inside a caller.'; return; }
+      const t = fP[IDX[ch]]; const q = K.pill(fs, 'new', 'ok'); await K.move(q, [465, 125], [650, 50 + IDX[ch] * 75], 600, run); q.remove();
+      t.g.classList.add('on'); t.sub.textContent = 'created'; await K.sleep(300, run);
+      const r = K.pill(fs, 'INotifier', 'ok'); await K.move(r, [560, 160], [140, 170], 700, run); r.remove();
+      fJob.g.classList.add('ok'); fOut.textContent = 'ReminderJob received an INotifier and called Send()'; fOut.classList.add('ok');
+      $('fStatus').innerHTML = `The factory chose <b>${t.title.textContent}</b>. ReminderJob's code is identical for every channel.`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  });
+  fCode();
+
+  /* ---------- lab 2: add channels ---------- */
+  let design = 'scatter', added = [];
+  function drawAdd() {
+    const n = added.length; let files = [], edits = 0, nw = 0;
+    if (design === 'scatter') { if (n) ['ReminderJob.cs', 'BookingService.cs', 'CancelService.cs'].forEach(f => files.push(`${f.padEnd(26)}edited (+${n} case${n > 1 ? 's' : ''})`)); edits = n ? 3 : 0; added.forEach(p => files.push(`${(p + 'Notifier.cs').padEnd(26)}new`)); nw = n; }
+    if (design === 'simple') { if (n) files.push(`${'NotifierFactory.cs'.padEnd(26)}edited (+${n} case${n > 1 ? 's' : ''})`); edits = n ? 1 : 0; added.forEach(p => files.push(`${(p + 'Notifier.cs').padEnd(26)}new`)); nw = n; }
+    if (design === 'fm') { added.forEach(p => { files.push(`${(p + 'Notifier.cs').padEnd(26)}new`); files.push(`${(p + 'ReminderSender.cs').padEnd(26)}new`); }); nw = n * 2; }
+    $('aFiles').textContent = files.length ? files.join('\n') : '(nothing yet)';
+    $('kEdit').querySelector('b').textContent = edits; $('kEdit').className = 'kpi ' + (edits > 1 ? 'bad' : edits === 1 ? '' : n ? 'good' : '');
+    $('kNew').querySelector('b').textContent = nw;
+    $('aBtns').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(added.includes(b.dataset.p))));
+    $('aStatus').innerHTML = !n ? 'Pick a design, then add channels.' : { scatter: `Every channel edits <b>all 3 callers</b>. Forget one and that flow never sends it.`, simple: `Edits stay in <b>one file</b>, the factory. Good enough for most apps.`, fm: `<b>0 edits</b>: each channel brings its own subclass. More files, nothing old touched.` }[design];
+  }
+  K.seg($('aDesign'), v => { design = v; drawAdd(); });
+  $('aBtns').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { const p = b.dataset.p; added = added.includes(p) ? added.filter(x => x !== p) : [...added, p]; drawAdd(); }));
+  drawAdd();
+
+  const O = ['Simple factory', 'Factory method', 'Keyed DI services', 'Just inject it'];
+  SD.page({ track: 'lld', drill: { opts: O, items: [
+    { q: 'A console importer turns a file extension (.csv, .xlsx, .json) into the right parser; three types, rarely changes.', a: O[0], why: 'A small switch in one Create(ext) method is the simplest fix.' },
+    { q: 'A base ReportExporter writes headers, rows and footers; only the writer (PDF or Excel) differs per subclass.', a: O[1], why: 'The algorithm is fixed; one creation step varies by subclass.' },
+    { q: 'ASP.NET Core API: pick a payment gateway (razorpay, stripe, paytm) from the request at runtime.', a: O[2], why: 'Register each gateway with a key and resolve by key; DI also builds their dependencies.' },
+    { q: 'The app only ever sends email, through one EmailNotifier.', a: O[3], why: 'One implementation: register it and inject INotifier. A factory adds nothing.' },
+    { q: 'A library framework defines Document.Open(); apps subclass it to create their own Page types.', a: O[1], why: 'Classic factory method: the framework calls CreatePage(), apps override it.' }
+  ] } });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cache Read Strategies</title>
+<meta name="description" content="H16: cache-aside, read-through and refresh-ahead, animated step by step, with a request lab where you change the TTL and watch the hit ratio.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/theme.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/explainer.css">
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/explainer-kit.js"></script>
+<script src="../sd-series.js"></script>
+<script src="caching-flows.js"></script>
+<style>
+  .crs-keys { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 8px; margin-top: 12px; }
+  .crs-key { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-family: var(--mono); font-size: 12px; }
+  .crs-key .bar { height: 5px; border-radius: 3px; background: var(--track); margin-top: 6px; overflow: hidden; }
+  .crs-key .bar i { display: block; height: 100%; background: var(--teal); }
+  .crs-key.gone { opacity: .45; }
+  .crs-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin-top: 12px; }
+  .crs-clock { font-family: var(--mono); font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body data-anim="continuous">
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← HLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Week 3 · H16 · Caching &amp; CDN</div>
+    <h1>Cache Read Strategies</h1>
+    <ul class="lede">
+      <li>A read strategy answers one question: <b>who loads the data when the cache misses?</b></li>
+      <li><b>Cache-aside</b>: your code checks the cache, reads the DB on a miss and fills the cache.</li>
+      <li><b>Read-through</b>: same flow, but the cache layer does the loading for you.</li>
+      <li><b>Refresh-ahead</b>: hot keys are reloaded before they expire, so nobody waits on a miss.</li>
+      <li>The <b>TTL</b> and the <b>cache key</b> decide how fresh and how reusable each entry is.</li>
+    </ul>
+  </header>
+
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn it step by step</h2>
+    <p class="sec-sub">One product page, step by step. Press <b>Next ▶</b> to go one step at a time, or <b>Play all</b> to watch the whole story.</p>
+    <div class="story" id="story"></div>
+  </section>
+
+  <section id="compare" data-nav="Compare">
+    <h2 class="sec-h"><span class="sec-n">2</span>Compare: 4 patterns side by side</h2>
+    <p class="sec-sub">Read each card top to bottom: rule, diagram, numbered steps, takeaway. Press <b>▶ Play</b> on any diagram to watch it happen.</p>
+    <div id="atlas"></div>
+  </section>
+
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">3</span>Try it: Request lab</h2>
+    <p class="sec-sub">Send reads, change the TTL and the strategy, and watch the hit ratio and latency move. <span class="mono">(Product 1 is the popular one · times are illustrative (hit ≈ 2 ms, miss ≈ 27 ms))</span></p>
+    <ol class="howto"><li><span>Pick a strategy and a TTL</span></li><li><span>Press a <b>Read</b> button, or <b>10 realistic reads</b></span></li><li><span>Watch hit ratio, latency and the expiry bars</span></li></ol>
+    <div class="crs-row">
+      <div class="seg" id="stratSeg" role="group" aria-label="Strategy"><button type="button" data-v="aside" aria-pressed="true">Cache-aside</button><button type="button" data-v="through" aria-pressed="false">Read-through</button></div>
+      <div class="seg" id="ttlSeg" role="group" aria-label="TTL"><button type="button" data-v="10" aria-pressed="false">TTL 10 s</button><button type="button" data-v="30" aria-pressed="true">TTL 30 s</button><button type="button" data-v="120" aria-pressed="false">TTL 2 min</button></div>
+      <span class="crs-clock" id="clock">t = 0 s</span>
+    </div>
+    <div id="labStage"></div>
+    <div class="controls" id="reqBtns">
+      <button class="btn" type="button" data-p="1">Read product 1</button>
+      <button class="btn" type="button" data-p="2">Read product 2</button>
+      <button class="btn" type="button" data-p="3">Read product 3</button>
+      <button class="btn primary" type="button" id="burst">10 realistic reads</button>
+      <button class="btn" type="button" id="labReset">Reset</button>
+    </div>
+    <div class="kpis">
+      <div class="kpi good"><b id="kRatio">–</b><span>Hit ratio</span></div>
+      <div class="kpi"><b id="kLat">–</b><span>Avg latency</span></div>
+      <div class="kpi accent"><b id="kDb">0</b><span>DB queries</span></div>
+      <div class="kpi"><b id="kReq">0</b><span>Requests</span></div>
+    </div>
+    <div class="crs-keys" id="keys"></div>
+    <p class="hint" id="labHint">Try: press "10 realistic reads" with TTL 2 min, then switch to TTL 10 s, wait 10 seconds and press it again. Predict the hit ratio first.</p>
+  </section>
+
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">4</span>Revise in two minutes</h2>
+    <h3 class="sec-h3">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">"Add a cache" with no other detail</span><span class="arrow">→</span><span class="then">Cache-aside + TTL + delete on write</span></li>
+      <li><span class="if">Many services load the same data the same way</span><span class="arrow">→</span><span class="then">Read-through (one loader in the cache layer)</span></li>
+      <li><span class="if">Rebuild is slow and the key is hot</span><span class="arrow">→</span><span class="then">Refresh-ahead</span></li>
+      <li><span class="if">Data changes often, staleness hurts</span><span class="arrow">→</span><span class="then">Short TTL, or invalidate on write (H17)</span></li>
+      <li><span class="if">Same data per tenant or per language</span><span class="arrow">→</span><span class="then">Put tenant/lang in the key: <code>t:7:product:12:en</code></span></li>
+      <li><span class="if">Schema of the cached object changed</span><span class="arrow">→</span><span class="then">Bump a version in the key: <code>product:12:v3</code></span></li>
+    </ul>
+    <h3 class="sec-h3">In .NET terms</h3>
+    <div class="card analogy scroll">
+      <table>
+        <thead><tr><th>In .NET</th><th>Strategy</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td><code>cache.TryGetValue</code> → query → <code>cache.Set</code></td><td>Cache-aside</td><td>You write the check-load-store code yourself, with <code>IMemoryCache</code> or <code>IDistributedCache</code>.</td></tr>
+          <tr><td><code>HybridCache.GetOrCreateAsync(key, factory)</code></td><td>Read-through style</td><td>You hand the cache a loader; it calls it only on a miss (and only once per key at a time, per server).</td></tr>
+          <tr><td>A <code>BackgroundService</code> that reloads a key on a timer</td><td>Refresh-ahead</td><td>Keeps an expensive result warm so requests never pay for the rebuild.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3 class="sec-h3">Reference</h3>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Strategy</th><th>Who loads on a miss</th><th>First read</th><th>Code lives in</th><th>Watch out</th></tr></thead>
+        <tbody>
+          <tr><td>Cache-aside</td><td>Your app</td><td>Slow (miss)</td><td>Every caller (or a helper)</td><td>Duplicated loading code; stampedes</td></tr>
+          <tr><td>Read-through</td><td>Cache provider</td><td>Slow (miss)</td><td>The cache layer</td><td>Cache must know how to reach the DB</td></tr>
+          <tr><td>Refresh-ahead</td><td>Cache, in the background</td><td>Slow once, then never</td><td>A refresher job</td><td>Wasted refreshes of cold keys</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><span class="flag">Added</span>Caching at the query level (key = hash of the SQL) vs the object level (key = <code>product:12</code>): object-level keys are easier to invalidate when one row changes, which is why the System Design Primer recommends them.</div>
+    <div class="note"><span class="flag">Updated</span><code>HybridCache</code> (generally available since March 2025) wraps the read-through style around an in-process L1 and an optional distributed L2. Its stampede protection covers one process.</div>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">5</span>Test yourself</h2>
+    <h3 class="sec-h3">Which pattern fits?</h3>
+    <div id="drill"></div>
+    <h3 class="sec-h3">Explain it out loud</h3>
+    <p class="sub">Answer before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Cache-aside and read-through make the same trips. So what's actually different?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Who owns the loading code.</b> In cache-aside every caller checks, loads and stores. In read-through the cache layer has the loader, so callers just ask the cache.</p></div></details>
+      <details><summary>Why is the first request after a deploy slower even with a cache?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>The cache is cold.</b> Lazy strategies only fill on a miss. Pre-warm the hottest keys, or use refresh-ahead for them.</p></div></details>
+      <details><summary>Your TTL is 10 minutes and data changes every minute. What do users see?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Up to 10-minute-old data.</b> Shorten the TTL or delete the key when the data changes.</p></div></details>
+      <details><summary>Two tenants share a Redis. What must the key include?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>The tenant ID</b> (<code>tenant:7:product:12</code>). Otherwise tenant A can be served tenant B's data.</p></div></details>
+      <details><summary>When is refresh-ahead a bad idea?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>When keys are cold or unpredictable.</b> You pay to reload entries nobody reads again.</p></div></details>
+      <details><summary>Hit ratio is 95%, hit = 2 ms, miss = 27 ms. Average latency?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>≈ 3.25 ms.</b> 0.95 × 2 + 0.05 × 27. The misses are 5% of requests but over a third of the time.</p></div></details>
+    </div>
+  </section>
+
+  <nav id="prevnext"></nav>
+
+  <footer>Sources: Week 3 notes; System Design Primer, Cache section; Microsoft Learn, HybridCache and IDistributedCache docs. All latencies and timings on this page are illustrative.</footer>
+</div>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const ids = ['aside', 'through-read', 'refresh', 'ttl'];
+  CF.page({ file: 'cache-read-strategies.html', ids });
+
+  /* ---------- walkthrough ---------- */
+  let L = {};
+  CF.story('story', {
+    vb: [420, 230], tone: 'cyan', alt: 'A patient app, an API, a Redis cache and SQL Server',
+    build(m) {
+      m.tile('user', 40, 112, 'Patient app', 'phone');
+      m.box('app', 150, 112, 'API', { icon: 'server', w: 84 });
+      m.box('cache', 300, 46, 'Redis', { icon: 'ram', w: 92 });
+      m.db('db', 315, 160, 'SQL Server');
+      m.wire('user', 'app'); m.wire('app', 'cache'); m.wire('app', 'db'); m.wire('cache', 'db', { dash: true });
+      L.lat = m.label(150, 214, '', 'at-strong');
+      L.key = m.label(300, 96, '', 'at-small');
+    },
+    reset(m) { m.link('cache', 'db', 'hide'); L.lat.textContent = ''; L.key.textContent = ''; },
+    steps: [
+      { title: 'Without a cache, every read hits the database',
+        text: 'Each page view runs the same <b>SELECT</b> on SQL Server. At a few hundred requests a second the database does the same work over and over.',
+        set(m) { m.state('cache', 'dim'); m.state('db', 'hot'); m.badge('db', 'every request', 'red'); L.lat.textContent = '≈ 25 ms per read'; },
+        async play(m, r) { m.state('cache', 'dim'); for (let k = 0; k < 2; k++) { await m.send(['user', 'app', 'db'], { run: r, ms: 380 }); await m.send(['db', 'app', 'user'], { run: r, tone: 'yellow', ms: 380 }); } } },
+      { title: 'Cache-aside, step 1: ask the cache first',
+        text: 'The API builds a key, <b>product:12</b>, and asks Redis. Nothing is there yet, so it is a <b>miss</b>.',
+        set(m) { m.badge('cache', 'MISS', 'red'); L.key.textContent = 'GET product:12'; },
+        async play(m, r) { L.key.textContent = 'GET product:12'; await m.send(['user', 'app'], { run: r }); await m.send(['app', 'cache'], { run: r, label: 'GET' }); m.badge('cache', 'MISS', 'red'); await m.send(['cache', 'app'], { run: r, tone: 'muted' }); } },
+      { title: 'Step 2: on a miss, read the database',
+        text: 'The API runs the query itself. This is the slow part the cache exists to avoid next time.',
+        set(m) { m.badge('cache', 'MISS', 'red'); m.state('db', 'on'); },
+        async play(m, r) { m.state('db', 'on'); await m.send(['app', 'db'], { run: r, label: 'SELECT' }); await m.send(['db', 'app'], { run: r, tone: 'yellow', label: 'row' }); } },
+      { title: 'Step 3: store it in the cache with a TTL',
+        text: 'The API writes the result to Redis with an expiry, here <b>5 minutes</b>. The TTL is the upper bound on how stale this copy can get.',
+        tip: 'Always say what TTL you chose and why: it is your staleness budget.',
+        set(m) { m.badge('cache', 'TTL 5 min', 'teal'); L.key.textContent = 'SET product:12 EX 300'; L.lat.textContent = 'miss ≈ 27 ms'; },
+        async play(m, r) { L.key.textContent = 'SET product:12 EX 300'; await m.send(['app', 'cache'], { run: r, label: 'SET' }); m.badge('cache', 'TTL 5 min', 'teal'); await m.send(['app', 'user'], { run: r, tone: 'yellow' }); L.lat.textContent = 'miss ≈ 27 ms'; } },
+      { title: 'Step 4: the next read is a hit',
+        text: 'For the next 5 minutes every read of product 12 is answered from memory. The database is not touched.',
+        set(m) { m.badge('cache', 'HIT', 'teal'); m.state('cache', 'ok'); m.state('db', 'dim'); L.lat.textContent = 'hit ≈ 2 ms · miss ≈ 27 ms'; },
+        async play(m, r) { m.state('db', 'dim'); await m.send(['user', 'app', 'cache'], { run: r, label: 'GET' }); m.badge('cache', 'HIT', 'teal'); m.state('cache', 'ok'); await m.send(['cache', 'app', 'user'], { run: r, tone: 'teal' }); L.lat.textContent = 'hit ≈ 2 ms · miss ≈ 27 ms'; } },
+      { title: 'Read-through: same trips, different owner',
+        text: 'Now the API only talks to the cache. On a miss, the <b>cache layer</b> calls the loader and fills itself. Your controllers contain no loading code.',
+        set(m) { m.link('cache', 'db', ''); m.link('app', 'db', 'dim'); m.badge('cache', 'loads itself', 'teal'); },
+        async play(m, r) { m.link('cache', 'db', ''); m.link('app', 'db', 'dim'); await m.send(['app', 'cache'], { run: r, label: 'GET' }); m.badge('cache', 'MISS', 'red'); await m.send(['cache', 'db'], { run: r, label: 'load' }); await m.send(['db', 'cache'], { run: r, tone: 'yellow' }); m.badge('cache', 'loads itself', 'teal'); await m.send(['cache', 'app'], { run: r, tone: 'yellow' }); } },
+      { title: 'Refresh-ahead: reload hot keys before they expire',
+        text: 'For a key everyone reads, a background job reloads it when, say, 80% of the TTL has passed. Readers always find a fresh copy and never pay for the miss.',
+        set(m) { m.link('cache', 'db', ''); m.link('app', 'db', 'dim'); m.badge('cache', 'renewed', 'teal'); m.state('cache', 'ok'); },
+        async play(m, r) { m.link('cache', 'db', ''); m.link('app', 'db', 'dim'); m.badge('cache', 'TTL 20% left', 'red'); await m.sleep(500, r); await m.send(['cache', 'db'], { run: r, label: 'reload' }); await m.send(['db', 'cache'], { run: r, tone: 'yellow' }); m.badge('cache', 'renewed', 'teal'); m.state('cache', 'ok'); } },
+      { title: 'Designing the key',
+        text: 'A key must name exactly one thing: <b>tenant:7:product:12:en:v3</b>. Include the tenant, anything that changes the answer (language, currency), and a version you bump when the cached shape changes.',
+        tip: 'A wrong key is a data leak in a multi-tenant system.',
+        set(m) { L.key.textContent = 'tenant:7:product:12:en:v3'; m.state('cache', 'on'); } }
+    ]
+  });
+
+  /* ---------- request lab ---------- */
+  const wrap = document.createElement('div'); wrap.className = 'at-stage tone-cyan';
+  wrap.innerHTML = '<svg viewBox="0 0 420 190" role="img" aria-label="Request lab diagram"></svg>';
+  $('labStage').appendChild(wrap);
+  const m = Kit.mini(wrap.querySelector('svg'));
+  m.tile('user', 40, 95, 'Patient app', 'phone'); m.box('app', 150, 95, 'API', { icon: 'server', w: 84 });
+  m.box('cache', 300, 40, 'Redis', { icon: 'ram', w: 92 }); m.db('db', 312, 140, 'SQL Server');
+  m.wire('user', 'app'); m.wire('app', 'cache'); m.wire('app', 'db'); m.wire('cache', 'db', { dash: true });
+  let strat = 'aside', ttl = 30, t = 0, cache = new Map(), st, queue = Promise.resolve(), last = performance.now();
+  const paintLinks = () => { m.link('cache', 'db', strat === 'aside' ? 'hide' : ''); m.link('app', 'db', strat === 'aside' ? '' : 'dim'); };
+  function reset() { Kit.cancel('crs'); queue = Promise.resolve(); cache.clear(); t = 0; st = { req: 0, hit: 0, db: 0, ms: 0 }; m.reset(); paintLinks(); paint(); }
+  function paint() {
+    $('kReq').textContent = st.req; $('kDb').textContent = st.db;
+    $('kRatio').textContent = st.req ? Math.round(100 * st.hit / st.req) + '%' : '–';
+    $('kLat').textContent = st.req ? (st.ms / st.req).toFixed(1) + ' ms' : '–';
+  }
+  function paintKeys() {
+    $('clock').textContent = `t = ${Math.floor(t)} s`;
+    $('keys').innerHTML = [1, 2, 3].map(p => { const exp = cache.get(p); const left = exp ? Math.max(0, exp - t) : 0;
+      return `<div class="crs-key ${left ? '' : 'gone'}">product:${p}<br>${left ? `expires in ${Math.ceil(left)} s` : 'not cached'}<div class="bar"><i style="width:${Math.min(100, 100 * left / ttl)}%"></i></div></div>`; }).join('');
+  }
+  (function tick(now) { t += Kit.tick(now - last) / 1000; last = now; paintKeys(); requestAnimationFrame(tick); })(performance.now());
+  async function read(p, fast) {
+    const run = Kit.newRun('crs'), ms = fast ? 220 : 420, o = { run, ms };
+    m.badge('cache'); m.state('cache', ''); m.state('db', '');
+    await m.send(['user', 'app'], { ...o, label: 'product ' + p });
+    const hit = cache.has(p) && cache.get(p) > t;
+    await m.send(['app', 'cache'], { ...o, label: 'GET' });
+    st.req++;
+    if (hit) { st.hit++; st.ms += 2; m.badge('cache', 'HIT', 'teal'); m.state('cache', 'ok'); await m.send(['cache', 'app', 'user'], { ...o, tone: 'teal' }); }
+    else {
+      st.db++; st.ms += 27; m.badge('cache', 'MISS', 'red'); m.state('db', 'on');
+      if (strat === 'aside') { await m.send(['app', 'db'], { ...o, label: 'SELECT' }); await m.send(['db', 'app'], { ...o, tone: 'yellow' }); await m.send(['app', 'cache'], { ...o, label: 'SET' }); }
+      else { await m.send(['cache', 'db'], { ...o, label: 'load' }); await m.send(['db', 'cache'], { ...o, tone: 'yellow' }); await m.send(['cache', 'app'], { ...o, tone: 'yellow' }); }
+      cache.set(p, t + ttl); m.state('db', ''); await m.send(['app', 'user'], { ...o, tone: 'yellow' });
+    }
+    paint();
+  }
+  const enqueue = (p, fast) => { queue = queue.then(() => read(p, fast)).catch(() => {}); };
+  $('reqBtns').addEventListener('click', e => { const b = e.target.closest('[data-p]'); if (b) enqueue(+b.dataset.p); });
+  $('burst').addEventListener('click', () => { const seq = [1, 1, 2, 1, 3, 1, 1, 2, 1, 1]; seq.forEach(p => enqueue(p, true)); });
+  $('labReset').addEventListener('click', reset);
+  Kit.seg($('stratSeg'), v => { strat = v; paintLinks(); });
+  Kit.seg($('ttlSeg'), v => { ttl = +v; });
+  reset();
+})();
+</script>
+</body>
+</html>

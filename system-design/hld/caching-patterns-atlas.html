@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cache Patterns at a Glance</title>
+<meta name="description" content="Week 3 at a glance: all 14 caching patterns as infographic cards with animated diagrams, a cheat-sheet and a 'which one fits?' drill.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/theme.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/explainer.css">
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/explainer-kit.js"></script>
+<script src="../sd-series.js"></script>
+<script src="caching-flows.js"></script>
+</head>
+<body data-anim="continuous">
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← HLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Week 3 · Caching &amp; CDN · all patterns at a glance</div>
+    <h1>Cache Patterns at a Glance</h1>
+    <ul class="lede">
+      <li>Every cache design answers four questions: <b>who loads on a miss</b>, <b>when writes reach the database</b>, <b>what gets evicted</b>, and <b>what happens when it goes wrong</b>.</li>
+      <li><b>Read path</b>: cache-aside, read-through, refresh-ahead. <b>Write path</b>: write-through, write-behind, write-around, invalidate.</li>
+      <li><b>Eviction</b>: LRU, LFU and TTL decide what leaves a full or ageing cache.</li>
+      <li><b>Failure modes</b> (stampede, penetration, hot key) are what interviewers probe after you say "add Redis".</li>
+    </ul>
+  </header>
+
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="compare" data-nav="All patterns">
+    <h2 class="sec-h"><span class="sec-n">1</span>All 14 caching patterns</h2>
+    <p class="sec-sub">Filter by path, read each card top to bottom, press <b>▶ Play</b> to watch one, and use <b>Deep dive →</b> for the full lesson and lab.</p>
+    <div id="atlas"></div>
+  </section>
+
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">2</span>Revise in two minutes</h2>
+    <h3 class="sec-h3">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">Read-heavy, a slow first read is fine</span><span class="arrow">→</span><span class="then">Cache-aside + TTL</span></li>
+      <li><span class="if">Reads must see the latest write</span><span class="arrow">→</span><span class="then">Write-through (or invalidate on write)</span></li>
+      <li><span class="if">Huge write rate, a few seconds of loss is OK</span><span class="arrow">→</span><span class="then">Write-behind</span></li>
+      <li><span class="if">Written often, rarely read back</span><span class="arrow">→</span><span class="then">Write-around</span></li>
+      <li><span class="if">Expensive to rebuild, must never be slow</span><span class="arrow">→</span><span class="then">Refresh-ahead</span></li>
+      <li><span class="if">Data changed: update or delete the key?</span><span class="arrow">→</span><span class="then">Delete it; the next read refills</span></li>
+      <li><span class="if">Hot key expires, DB spikes</span><span class="arrow">→</span><span class="then">Stampede: single-flight, stale-while-revalidate, TTL jitter</span></li>
+      <li><span class="if">Lookups for IDs that don't exist</span><span class="arrow">→</span><span class="then">Penetration: cache "not found", Bloom filter</span></li>
+      <li><span class="if">One key, one overloaded cache node</span><span class="arrow">→</span><span class="then">Hot key: local L1 copy or replicas</span></li>
+      <li><span class="if">Static files, users worldwide</span><span class="arrow">→</span><span class="then">CDN (pull by default, push for big launches)</span></li>
+    </ul>
+    <h3 class="sec-h3">Reference</h3>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Pattern</th><th>Who loads on miss</th><th>When the DB is written</th><th>Freshness</th><th>Main risk</th></tr></thead>
+        <tbody>
+          <tr><td>Cache-aside</td><td>App</td><td>App writes DB directly</td><td>Stale until TTL or delete</td><td>Miss latency; stampede</td></tr>
+          <tr><td>Read-through</td><td>Cache provider</td><td>(pairs with any write rule)</td><td>Stale until TTL</td><td>Provider must know the DB</td></tr>
+          <tr><td>Refresh-ahead</td><td>Cache, before expiry</td><td>(read pattern)</td><td>Fresh for hot keys</td><td>Wasted refreshes</td></tr>
+          <tr><td>Write-through</td><td>–</td><td>Same request, before ack</td><td>Always fresh</td><td>Slower writes; caches unread data</td></tr>
+          <tr><td>Write-behind</td><td>–</td><td>Later, in batches</td><td>Cache ahead of DB</td><td>Data loss on cache failure</td></tr>
+          <tr><td>Write-around</td><td>App on next read</td><td>Directly, cache skipped</td><td>First read misses</td><td>Read-after-write miss</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><span class="flag">Added</span>Write-around, invalidate-on-write, cache penetration, hot keys and CDN push vs pull are not in the Week 3 day list; they are common follow-up questions, so they have cards here.</div>
+    <div class="note"><span class="flag">Updated</span><code>HybridCache</code> (package <code>Microsoft.Extensions.Caching.Hybrid</code>) has been generally available since March 2025 and is the recommended default for new ASP.NET Core code. Its stampede protection covers one process; ten app servers can still send ten loads to the database.</div>
+    <div class="note"><span class="flag">Corrected</span>TTL expiry and eviction are different things: expiry removes a key because it is old, eviction removes one because memory is full. Redis does both, and its eviction policy (<code>maxmemory-policy</code>, e.g. <code>allkeys-lru</code>, <code>allkeys-lfu</code>) is a setting you choose.</div>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">3</span>Test yourself</h2>
+    <h3 class="sec-h3">Which pattern fits?</h3>
+    <div id="drill"></div>
+    <h3 class="sec-h3">Explain it out loud</h3>
+    <p class="sub">Answer before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Why delete the cache key on update instead of writing the new value into it?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Two writers can race.</b> Request 1 writes v1 to the DB, request 2 writes v2 to the DB and cache, then request 1's late cache write puts v1 back: the cache is stale until TTL. A delete can't put an old value back; the next read loads whatever the DB has.</p></div></details>
+      <details><summary>Write-behind looks fastest. What do you give up?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Durability.</b> Writes are acknowledged before the database has them, so a cache crash loses the buffer. Fine for view counters, wrong for payments.</p></div></details>
+      <details><summary>You use HybridCache on 12 app servers. Can a stampede still hit the database?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Yes, up to 12 loads.</b> Single-flight is per process. Add TTL jitter, stale-while-revalidate, or a distributed lock if even 12 is too many.</p></div></details>
+      <details><summary>A nightly report scans every product once. Which eviction policy protects your hot keys?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>LFU.</b> Under LRU every scanned key becomes "most recent" and pushes the hot keys out. LFU sees they were read once and evicts them first.</p></div></details>
+      <details><summary>Bots request patient IDs that don't exist and the DB is busy. Why doesn't the cache help, and what fixes it?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Nothing is ever stored</b>, so every request misses. Cache the "not found" result with a short TTL, or check a Bloom filter of valid IDs first, and rate-limit the client.</p></div></details>
+      <details><summary>Pull CDN or push CDN for a 2 GB game patch released at 9:00 worldwide?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Push (or pre-warm).</b> With pull, the first users in every region miss at the same moment and all edges hit the origin together: a stampede at CDN scale.</p></div></details>
+    </div>
+  </section>
+
+  <nav id="prevnext"></nav>
+
+  <footer>Sources: Week 3 notes ("Caching Overview: Why, What, When, Where"); System Design Primer, Cache section; Microsoft Learn, HybridCache and output caching docs; Redis docs, key eviction. Mini-diagram timings are illustrative, not measured.</footer>
+</div>
+
+<script>
+  const ids = ['aside', 'through-read', 'refresh', 'wthrough', 'wbehind', 'waround', 'invalidate', 'lru', 'lfu', 'ttl', 'stampede', 'penetration', 'hotkey', 'cdn'];
+  CF.page({ file: 'caching-patterns-atlas.html', ids, links: true, filters: true });
+</script>
+</body>
+</html>

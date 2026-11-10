@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cache Write Strategies &amp; Invalidation</title>
+<meta name="description" content="H17: write-through, write-behind, write-around and invalidate-on-write, animated, plus a race replayer that shows why you delete the cache key instead of overwriting it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/theme.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/explainer.css">
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/explainer-kit.js"></script>
+<script src="../sd-series.js"></script>
+<script src="caching-flows.js"></script>
+<style>
+  .cws-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin-top: 12px; }
+  .cws-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; margin-top: 12px; }
+  .cws-log { list-style: none; counter-reset: s; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 14px; }
+  .cws-log li { counter-increment: s; display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 8px; color: var(--fg-soft); overflow-wrap: anywhere; }
+  .cws-log li::before { content: counter(s); font-family: var(--mono); font-size: 11px; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--line); color: var(--muted); }
+  .cws-verdict { margin-top: 12px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); font-size: 14.5px; min-height: 2.6em; }
+  .cws-verdict.ok { border-color: var(--teal); }
+  .cws-verdict.bad { border-color: var(--red); }
+  @media (max-width: 760px) { .cws-grid { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body data-anim="continuous">
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← HLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Week 3 · H17 · Caching &amp; CDN</div>
+    <h1>Cache Write Strategies &amp; Invalidation</h1>
+    <ul class="lede">
+      <li>Once data is cached there are <b>two copies</b>; every write must decide how the cache copy gets fixed.</li>
+      <li><b>Write-through</b>: update cache and DB together before acknowledging. Fresh, but slower writes.</li>
+      <li><b>Write-behind</b>: acknowledge after the cache, flush to the DB later. Fast, but can lose data.</li>
+      <li><b>Write-around</b>: write only to the DB; the cache fills on the next read.</li>
+      <li>With cache-aside, <b>delete the key</b> on write; overwriting it can put an old value back.</li>
+    </ul>
+  </header>
+
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn it step by step</h2>
+    <p class="sec-sub">Changing a price from ₹499 to ₹449. Press <b>Next ▶</b> to go one step at a time, or <b>Play all</b> to watch the whole story.</p>
+    <div class="story" id="story"></div>
+  </section>
+
+  <section id="compare" data-nav="Compare">
+    <h2 class="sec-h"><span class="sec-n">2</span>Compare: 5 patterns side by side</h2>
+    <p class="sec-sub">Read each card top to bottom: rule, diagram, numbered steps, takeaway. Press <b>▶ Play</b> on any diagram to watch it happen.</p>
+    <div id="atlas"></div>
+  </section>
+
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">3</span>Try it: Race replayer</h2>
+    <p class="sec-sub">Two requests overlap by a few milliseconds. Pick a policy, predict the final cache value, then play. <span class="mono">(Database starts at ₹499 · watch the cache badge at the end)</span></p>
+    <ol class="howto"><li><span>Pick a scenario and a write policy</span></li><li><span>Guess the final cache value</span></li><li><span>Press <b>Play the race</b> and read the verdict</span></li></ol>
+    <div class="cws-row">
+      <div class="seg" id="scSeg" role="group" aria-label="Scenario"><button type="button" data-v="writers" aria-pressed="true">Two writers</button><button type="button" data-v="reader" aria-pressed="false">Slow reader + writer</button></div>
+      <div class="seg" id="polSeg" role="group" aria-label="Policy"><button type="button" data-v="set" aria-pressed="true">SET on write</button><button type="button" data-v="del" aria-pressed="false">DEL on write</button><button type="button" data-v="ttl" aria-pressed="false">DEL + TTL 30 s</button><button type="button" data-v="dbl" aria-pressed="false">Delayed double DEL</button></div>
+    </div>
+    <div class="cws-grid">
+      <div id="labStage"></div>
+      <div class="card"><div class="label">What happened, in order</div><ol class="cws-log" id="log"></ol><div class="cws-verdict" id="verdict" aria-live="polite">Press Play.</div></div>
+    </div>
+    <div class="controls"><button class="btn primary" type="button" id="play">Play the race</button><button class="btn" type="button" id="labReset">Reset</button></div>
+  </section>
+
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">4</span>Revise in two minutes</h2>
+    <h3 class="sec-h3">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">Read-after-write must be fresh</span><span class="arrow">→</span><span class="then">Write-through, or DB write + DEL key</span></li>
+      <li><span class="if">Huge write rate, small loss OK</span><span class="arrow">→</span><span class="then">Write-behind (batch flush)</span></li>
+      <li><span class="if">Written a lot, read rarely</span><span class="arrow">→</span><span class="then">Write-around</span></li>
+      <li><span class="if">Using cache-aside and data changes</span><span class="arrow">→</span><span class="then">Update DB, then DEL the key</span></li>
+      <li><span class="if">"Can the cache still go stale?"</span><span class="arrow">→</span><span class="then">Yes, rarely: keep a TTL as a safety net</span></li>
+      <li><span class="if">Strict freshness across services</span><span class="arrow">→</span><span class="then">Publish change events (outbox/CDC) that invalidate</span></li>
+    </ul>
+    <h3 class="sec-h3">Reference</h3>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Strategy</th><th>DB written</th><th>Ack after</th><th>Freshness</th><th>Risk</th></tr></thead>
+        <tbody>
+          <tr><td>Write-through</td><td>Same request</td><td>Cache + DB</td><td>Always fresh</td><td>Slower writes; caches unread data</td></tr>
+          <tr><td>Write-behind</td><td>Later, batched</td><td>Cache only</td><td>Cache ahead of DB</td><td>Loss if the cache dies</td></tr>
+          <tr><td>Write-around</td><td>Directly</td><td>DB</td><td>First read misses</td><td>Read-after-write miss</td></tr>
+          <tr><td>Cache-aside + DEL</td><td>Directly</td><td>DB</td><td>Fresh after next read</td><td>Rare reader/writer race; TTL limits it</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><span class="flag">Added</span>Write-around and the invalidation race are not in the original day list; interviewers often ask "how do you keep cache and DB consistent?" right after "add a cache".</div>
+    <div class="note"><span class="flag">Corrected</span>Deleting the key does not make cache-aside perfectly consistent: a slow reader can still put an old value back (see the lab). A TTL bounds how long that lasts; a delayed second delete closes most of the gap.</div>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">5</span>Test yourself</h2>
+    <h3 class="sec-h3">Which pattern fits?</h3>
+    <div id="drill"></div>
+    <h3 class="sec-h3">Explain it out loud</h3>
+    <p class="sub">Answer before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Why is "update the cache on write" worse than "delete the key"?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Out-of-order writes.</b> Two writers can update the cache in the opposite order to the DB, leaving the older value cached. A delete can't put a wrong value in.</p></div></details>
+      <details><summary>Write-behind for a payments ledger: yes or no?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>No.</b> The client is told "saved" before the DB has it; a cache crash loses money movements.</p></div></details>
+      <details><summary>Update DB then delete key, or delete key then update DB?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>DB first, then delete.</b> Deleting first lets a reader reload the old row before your update lands, re-caching stale data.</p></div></details>
+      <details><summary>What does write-through cost you on reads?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Nothing extra; it costs on writes</b> (two hops) and memory (it caches data that may never be read).</p></div></details>
+      <details><summary>Ten services cache the same patient record. How do they all learn it changed?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Publish an event</b> (outbox or CDC) that each service consumes to delete its key, plus a TTL as a backstop.</p></div></details>
+      <details><summary>What is a "delayed double delete"?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Delete, then delete again after a short delay</b> (longer than a typical read). It removes a stale value a slow reader may have written in between.</p></div></details>
+    </div>
+  </section>
+
+  <nav id="prevnext"></nav>
+
+  <footer>Sources: Week 3 notes; System Design Primer, "When to update the cache"; common cache-consistency patterns (delete-on-write, delayed double delete). Timings are illustrative.</footer>
+</div>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const ids = ['wthrough', 'wbehind', 'waround', 'invalidate', 'stale'];
+  CF.page({ file: 'cache-write-strategies.html', ids });
+
+  /* ---------- walkthrough ---------- */
+  let note;
+  const hideAll = m => { m.link('cache', 'db', 'hide'); m.link('cache', 'buf', 'hide'); m.link('buf', 'db', 'hide'); m.state('buf', 'hide'); };
+  CF.story('story', {
+    vb: [420, 240], tone: 'blue', alt: 'Admin, API, Redis cache, write buffer and SQL Server',
+    build(m) {
+      m.tile('client', 36, 118, 'Admin', 'user'); m.box('app', 140, 118, 'API', { icon: 'server', w: 80 });
+      m.box('cache', 290, 44, 'Redis', { icon: 'ram', w: 90 }); m.slots('buf', 290, 118, 4, { w: 18, label: 'write buffer' }); m.db('db', 300, 192, 'SQL Server');
+      m.wire('client', 'app'); m.wire('app', 'cache'); m.wire('app', 'db');
+      m.wire('cache', 'db', { via: [[388, 44], [388, 192]] }); m.wire('cache', 'buf'); m.wire('buf', 'db');
+      note = m.label(150, 228, '', 'at-strong');
+    },
+    reset(m) { hideAll(m); note.textContent = ''; },
+    steps: [
+      { title: 'Two copies of the same price',
+        text: 'After a read, Redis and SQL Server both hold <b>₹499</b>. Now an admin changes it to <b>₹449</b>. Whatever we do, both copies have to end up right.',
+        set(m) { m.badge('cache', '₹499'); m.badge('db', '₹499'); } },
+      { title: 'Write-through: both, then acknowledge',
+        text: 'The write goes into the cache, and the cache writes to the database <b>in the same request</b>. The admin gets "saved" only after both succeed.',
+        tip: 'Fresh reads, but every write pays for two hops.',
+        set(m) { m.link('cache', 'db', ''); m.badge('cache', '₹449', 'teal'); m.badge('db', '₹449', 'teal'); note.textContent = 'write latency = cache + DB'; },
+        async play(m, r) { m.link('cache', 'db', ''); m.badge('cache', '₹499'); m.badge('db', '₹499'); await m.send(['client', 'app', 'cache'], { run: r, label: 'SET ₹449' }); m.badge('cache', '₹449', 'teal'); await m.send(['cache', 'db'], { run: r, label: 'write' }); m.badge('db', '₹449', 'teal'); await m.send(['db', 'cache'], { run: r, tone: 'teal', ms: 500 }); await m.send(['cache', 'app', 'client'], { run: r, tone: 'teal', label: 'saved' }); note.textContent = 'write latency = cache + DB'; } },
+      { title: 'Write-behind: acknowledge first, write later',
+        text: 'The write lands in the cache and goes into a <b>buffer</b>. The admin is told "saved" straight away, while the database still says ₹499.',
+        set(m) { m.link('cache', 'buf', ''); m.link('buf', 'db', ''); m.state('buf', ''); m.nodes.buf.slots.set([{ t: '449' }]); m.badge('cache', '₹449', 'teal'); m.badge('db', '₹499', 'red'); note.textContent = 'ack in ≈ 1 ms · DB is behind'; },
+        async play(m, r) { m.link('cache', 'buf', ''); m.link('buf', 'db', ''); m.state('buf', ''); m.badge('cache', '₹499'); m.badge('db', '₹499'); await m.send(['client', 'app', 'cache'], { run: r, label: 'SET ₹449' }); m.badge('cache', '₹449', 'teal'); m.nodes.buf.slots.set([{ t: '449' }]); await m.send(['cache', 'app', 'client'], { run: r, tone: 'teal', label: 'saved' }); m.badge('db', '₹499', 'red'); note.textContent = 'ack in ≈ 1 ms · DB is behind'; } },
+      { title: 'Write-behind: the batch flush',
+        text: 'A moment later the buffer is flushed to the database in one batch. Many small writes become one big one, which is why this is so fast.',
+        set(m) { m.link('cache', 'buf', ''); m.link('buf', 'db', ''); m.state('buf', ''); m.badge('cache', '₹449', 'teal'); m.badge('db', '₹449', 'teal'); },
+        async play(m, r) { m.link('cache', 'buf', ''); m.link('buf', 'db', ''); m.state('buf', ''); m.nodes.buf.slots.set([{ t: '449' }, { t: '+2' }]); m.badge('cache', '₹449', 'teal'); m.badge('db', '₹499', 'red'); await m.sleep(400, r); await m.send(['buf', 'db'], { run: r, label: 'batch' }); m.nodes.buf.slots.set([]); m.badge('db', '₹449', 'teal'); } },
+      { title: 'Write-behind: the risk',
+        text: 'If the cache node dies while writes are still in the buffer, they are <b>gone</b>, even though the user was told they were saved.',
+        tip: 'Never for money, orders or medical records. Fine for view counters and likes.',
+        set(m) { m.link('cache', 'buf', ''); m.link('buf', 'db', ''); m.state('buf', ''); m.nodes.buf.slots.set([{ t: '449', tone: 'red' }]); m.state('cache', 'hot'); m.badge('cache', 'crashed', 'red'); m.badge('db', '₹499', 'red'); note.textContent = 'the ₹449 write is lost'; } },
+      { title: 'Write-around: database only',
+        text: 'The write goes straight to the database. The cache is not touched; the next read misses and loads ₹449. Good for data that is written often and rarely read.',
+        set(m) { m.badge('cache', 'not cached', 'muted'); m.badge('db', '₹449', 'teal'); m.state('cache', 'dim'); },
+        async play(m, r) { m.state('cache', 'dim'); m.badge('db', '₹499'); await m.send(['client', 'app', 'db'], { run: r, label: 'UPDATE ₹449' }); m.badge('db', '₹449', 'teal'); m.badge('cache', 'not cached', 'muted'); } },
+      { title: 'Cache-aside: update the database, then delete the key',
+        text: 'The usual partner of cache-aside: write the database, then <b>DEL</b> the key. The next read misses and loads the new price. Don\'t SET the new value: the lab below shows why.',
+        set(m) { m.badge('cache', 'deleted', 'muted'); m.badge('db', '₹449', 'teal'); },
+        async play(m, r) { m.badge('cache', '₹499'); m.badge('db', '₹499'); await m.send(['client', 'app', 'db'], { run: r, label: 'UPDATE ₹449' }); m.badge('db', '₹449', 'teal'); await m.send(['app', 'cache'], { run: r, label: 'DEL', tone: 'red' }); m.badge('cache', 'deleted', 'muted'); } },
+      { title: 'How to choose',
+        text: 'Ask two questions. <b>Must the next read see this write?</b> Then write-through or delete-on-write. <b>Can I lose a few seconds of writes?</b> Only then write-behind. Written but rarely read? Write-around.',
+        tip: 'Always mention the TTL as your safety net, whatever the strategy.',
+        set(m) { m.badge('cache', '₹449', 'teal'); m.badge('db', '₹449', 'teal'); m.state('cache', 'ok'); m.state('db', 'ok'); } }
+    ]
+  });
+
+  /* ---------- race replayer ---------- */
+  const wrap = document.createElement('div'); wrap.className = 'at-stage tone-red';
+  wrap.innerHTML = '<svg viewBox="0 0 420 230" role="img" aria-label="Two requests racing to the database and cache"></svg>';
+  $('labStage').appendChild(wrap);
+  const m = Kit.mini(wrap.querySelector('svg'));
+  m.box('A', 70, 55, 'Admin A', { icon: 'user', w: 96 }); m.box('B', 70, 175, 'Admin B', { icon: 'user', w: 96 });
+  m.db('db', 330, 52, 'SQL Server'); m.box('cache', 330, 175, 'Redis', { icon: 'ram', w: 90 });
+  m.wire('A', 'db'); m.wire('A', 'cache'); m.wire('B', 'db'); m.wire('B', 'cache');
+  let scen = 'writers', pol = 'set', S;
+  const money = v => v == null ? 'empty' : '₹' + v;
+  function paint() { m.badge('db', money(S.db), 'teal'); m.badge('cache', money(S.cache), S.cache == null ? 'muted' : (S.cache === S.db ? 'teal' : 'red')); }
+  function plan() {
+    const p = [];
+    const cacheWrite = (who, val, label) => {
+      if (pol === 'set') p.push({ f: who, t: 'cache', label: 'SET ' + val, log: `${label} sets the cache to ₹${val}`, ap: s => s.cache = val });
+      else p.push({ f: who, t: 'cache', label: 'DEL', tone: 'red', log: `${label} deletes the cache key`, ap: s => s.cache = null });
+    };
+    if (scen === 'writers') {
+      p.push({ f: 'A', t: 'db', label: 'UPDATE 449', log: 'A updates the DB to ₹449', ap: s => s.db = 449 });
+      p.push({ f: 'B', t: 'db', label: 'UPDATE 399', log: 'B updates the DB to ₹399 (a moment later)', ap: s => s.db = 399 });
+      cacheWrite('B', 399, 'B');
+      cacheWrite('A', 449, 'A (its cache step was delayed)');
+      if (pol === 'dbl') { p.push({ f: 'A', t: 'cache', label: 'DEL again', tone: 'red', log: 'A deletes again after a short delay', ap: s => s.cache = null }); }
+    } else {
+      p.push({ f: 'A', t: 'cache', label: 'GET', log: 'Reader R: cache miss', ap: s => {} });
+      p.push({ f: 'A', t: 'db', label: 'SELECT', log: 'R reads ₹499 from the DB (slow query)', ap: s => s.held = 499 });
+      p.push({ f: 'B', t: 'db', label: 'UPDATE 449', log: 'Writer W updates the DB to ₹449', ap: s => s.db = 449 });
+      cacheWrite('B', 449, 'W');
+      p.push({ f: 'A', t: 'cache', label: 'SET 499', log: 'R finally stores what it read: ₹499', ap: s => s.cache = 499 });
+      if (pol === 'dbl') p.push({ f: 'B', t: 'cache', label: 'DEL again', tone: 'red', log: 'W deletes again after a short delay', ap: s => s.cache = null });
+    }
+    return p;
+  }
+  function reset() {
+    Kit.cancel('race'); m.reset();
+    S = scen === 'writers' ? { db: 499, cache: 499 } : { db: 499, cache: null };
+    m.text('A', scen === 'writers' ? 'Admin A' : 'Reader R'); m.text('B', scen === 'writers' ? 'Admin B' : 'Writer W');
+    paint(); $('log').innerHTML = ''; const v = $('verdict'); v.className = 'cws-verdict'; v.textContent = 'Predict the final cache value, then press Play.';
+  }
+  async function play() {
+    reset(); const run = Kit.newRun('race');
+    try {
+      for (const a of plan()) {
+        await m.send([a.f, a.t], { run, label: a.label, tone: a.tone, ms: 650 });
+        a.ap(S); paint(); $('log').insertAdjacentHTML('beforeend', `<li>${a.log}</li>`);
+        await Kit.sleep(250, run);
+      }
+    } catch (e) { return; }
+    const v = $('verdict');
+    if (S.cache == null) { v.className = 'cws-verdict ok'; v.innerHTML = `<span class="ok-text">Consistent.</span> The cache is empty, so the next read loads ${money(S.db)} from the database.`; }
+    else if (S.cache === S.db) { v.className = 'cws-verdict ok'; v.innerHTML = `<span class="ok-text">Consistent.</span> Cache and DB both say ${money(S.db)}.`; }
+    else { v.className = 'cws-verdict bad'; v.innerHTML = `<span class="bad-text">Stale.</span> Cache says ${money(S.cache)}, DB says ${money(S.db)}. ` + (pol === 'ttl' ? 'Readers see the wrong price for <b>at most 30 s</b>, until the TTL removes it.' : 'Readers see the wrong price until the key expires; with no TTL, forever.'); }
+  }
+  Kit.seg($('scSeg'), v => { scen = v; reset(); });
+  Kit.seg($('polSeg'), v => { pol = v; reset(); });
+  $('play').addEventListener('click', play);
+  $('labReset').addEventListener('click', reset);
+  reset();
+})();
+</script>
+</body>
+</html>

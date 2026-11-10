@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Caching in Practice: the Interview Playbook</title>
+<meta name="description" content="Week 3 playbook: a worked caching design step by step, clearing caches across servers, services and regions, CDN cache keys and Vary, cache leaks, big keys, warming, Redis beyond caching, a cache sizing calculator, a CDN cache-key lab, the metrics to watch and an answer template.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/theme.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/explainer.css">
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/explainer-kit.js"></script>
+<script src="../sd-series.js"></script>
+<script src="caching-flows.js"></script>
+<style>
+  .lab-h { font: 700 16px var(--display); margin: 26px 0 4px; }
+  .lab-h:first-of-type { margin-top: 10px; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin-top: 12px; }
+  .formula { font-family: var(--mono); font-size: 13px; color: var(--muted); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-top: 12px; overflow-x: auto; white-space: nowrap; }
+  .formula b { color: var(--fg); }
+  .toggles { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 10px; }
+  .toggles label { display: inline-flex; gap: 6px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 13.5px; cursor: pointer; }
+  .toggles label.off { opacity: .45; cursor: not-allowed; }
+  .toggles input { accent-color: var(--teal); }
+  .reqs td:nth-child(3) { font-family: var(--mono); font-size: 12.5px; word-break: break-all; }
+  .reqs td:nth-child(2) { font-family: var(--mono); font-size: 12.5px; }
+  .res { display: inline-block; margin-top: 4px; font: 700 12px var(--mono); padding: 2px 8px; border-radius: 999px; white-space: normal; border: 1px solid var(--line); }
+  .res.hit { color: var(--ok-text); }
+  .res.miss { color: var(--muted); }
+  .res.warn { color: var(--orange); }
+  .res.bad { color: var(--bad-text); border-color: var(--red); }
+  .tmpl { counter-reset: t; list-style: none; padding: 0; display: grid; gap: 8px; }
+  .tmpl li { counter-increment: t; display: grid; grid-template-columns: 30px 1fr; gap: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .tmpl li::before { content: counter(t); font: 700 14px var(--mono); color: var(--ink); background: var(--pill); border-radius: 50%; width: 26px; height: 26px; display: grid; place-items: center; }
+  .tmpl li > span { min-width: 0; }
+</style>
+</head>
+<body data-anim="continuous">
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← HLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Week 3 · Playbook · Caching &amp; CDN</div>
+    <h1>Caching in Practice: the Interview Playbook</h1>
+    <ul class="lede">
+      <li>The topic pages teach each pattern. This page puts them <b>together</b>, the way an interview question does.</li>
+      <li>Watch one design grow layer by layer, from browser to database.</li>
+      <li>See how to clear caches across <b>servers, services and regions</b>, and the CDN mistakes that leak data.</li>
+      <li>Then size a cache, tune a CDN cache key, and learn the five numbers that show if a cache is healthy.</li>
+    </ul>
+  </header>
+
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn: one design, layer by layer</h2>
+    <p class="sec-sub">"Add caching to a shop's product page: 10 million users, 50,000 reads per second, prices change a few times a day." Press <b>Next ▶</b> to add one layer at a time.</p>
+    <div class="story" id="story"></div>
+  </section>
+
+  <section id="compare" data-nav="Compare">
+    <h2 class="sec-h"><span class="sec-n">2</span>Compare: 10 practical patterns</h2>
+    <p class="sec-sub">The follow-up questions interviewers ask after "just add Redis". Read each card top to bottom; press <b>▶ Play</b> to watch it.</p>
+    <div id="atlas"></div>
+  </section>
+
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">3</span>Try it: two labs</h2>
+
+    <h3 class="lab-h">A · How big a cache do I need?</h3>
+    <p class="sec-sub">Back-of-envelope sizing, the way you would do it on a whiteboard. <span class="mono">(Overhead and per-node throughput are rough rules of thumb.)</span></p>
+    <ol class="howto"><li><span>Set how many items and how big each is</span></li><li><span>Set the hot share: how much of the data is read often</span></li><li><span>Pick replicas and node size; read the node count</span></li></ol>
+    <div class="ranges">
+      <div class="range"><label for="zItems">Items (products, sessions…) <output id="oItems"></output></label><input type="range" id="zItems" min="0" max="9" step="1" value="5"></div>
+      <div class="range"><label for="zSize">Average value size <output id="oSize"></output></label><input type="range" id="zSize" min="0" max="8" step="1" value="3"></div>
+      <div class="range"><label for="zHot">Hot share to cache <output id="oHot"></output></label><input type="range" id="zHot" min="5" max="100" step="5" value="20"></div>
+      <div class="range"><label for="zRps">Cache reads per second <output id="oRps"></output></label><input type="range" id="zRps" min="0" max="7" step="1" value="3"></div>
+    </div>
+    <div class="row">
+      <div class="seg" id="zRep" role="group" aria-label="Replicas per shard"><button type="button" data-v="0" aria-pressed="false">No replica</button><button type="button" data-v="1" aria-pressed="true">1 replica</button><button type="button" data-v="2" aria-pressed="false">2 replicas</button></div>
+      <div class="seg" id="zNode" role="group" aria-label="Memory per node"><button type="button" data-v="8" aria-pressed="false">8 GB nodes</button><button type="button" data-v="16" aria-pressed="false">16 GB</button><button type="button" data-v="32" aria-pressed="true">32 GB</button><button type="button" data-v="64" aria-pressed="false">64 GB</button></div>
+    </div>
+    <div class="formula" id="zFormula"></div>
+    <div class="kpis">
+      <div class="kpi"><b id="kData">–</b><span>Hot data</span></div>
+      <div class="kpi"><b id="kMem">–</b><span>RAM incl. overhead &amp; replicas</span></div>
+      <div class="kpi accent"><b id="kNodes">–</b><span>Nodes needed</span></div>
+      <div class="kpi"><b id="kWhy">–</b><span>Limited by</span></div>
+    </div>
+    <p class="hint" id="zHint"></p>
+
+    <h3 class="lab-h">B · CDN cache-key lab</h3>
+    <p class="sec-sub">Six visitors request the same page through one CDN edge. Change what goes into the cache key and see hits, wasted copies and leaks.</p>
+    <ol class="howto"><li><span>Pick the page</span></li><li><span>Tick the key settings</span></li><li><span>Read the result column: green is good, orange is wasteful or wrong, red is a leak</span></li></ol>
+    <div class="row"><div class="seg" id="kPage" role="group" aria-label="Page"><button type="button" data-v="product" aria-pressed="true">Public product page</button><button type="button" data-v="account" aria-pressed="false">Logged-in "My orders" page</button></div></div>
+    <div class="toggles" id="kOpts">
+      <label><input type="checkbox" data-o="utm"> Ignore <code>utm_*</code> in the key</label>
+      <label><input type="checkbox" data-o="lang"> <code>Vary: Accept-Language</code></label>
+      <label><input type="checkbox" data-o="cookie"> <code>Vary: Cookie</code></label>
+      <label><input type="checkbox" data-o="priv"> <code>Cache-Control: private</code></label>
+    </div>
+    <div class="card scroll" style="margin-top:12px">
+      <table class="reqs">
+        <thead><tr><th>#</th><th>Visitor</th><th>Request · cache key · edge result</th></tr></thead>
+        <tbody id="kRows"></tbody>
+      </table>
+    </div>
+    <div class="kpis">
+      <div class="kpi accent"><b id="kHit">–</b><span>Hit ratio</span></div>
+      <div class="kpi"><b id="kCopies">–</b><span>Copies stored</span></div>
+      <div class="kpi bad"><b id="kBad">–</b><span>Wrong or leaked responses</span></div>
+    </div>
+    <p class="hint" id="kHint"></p>
+  </section>
+
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">4</span>Revise: the answer template</h2>
+    <h3 class="sec-h3">"Add caching to this design": say it in this order</h3>
+    <ol class="tmpl">
+      <li><span><b>What and why.</b> Which reads are hot, how stale each may be (price: seconds; reviews: minutes), and the read/write ratio.</span></li>
+      <li><span><b>Where.</b> Browser and CDN for public, static or shared pages; L1 in-process for tiny hot data; Redis for shared data; DB last.</span></li>
+      <li><span><b>Read pattern.</b> Usually cache-aside with a TTL. Name the key, e.g. <code>product:{id}:v3</code>.</span></li>
+      <li><span><b>Write and invalidation.</b> Update the DB, then delete the key. Across servers: pub/sub. Across services: change events (outbox).</span></li>
+      <li><span><b>Size and eviction.</b> Hot data × overhead × replicas ÷ 0.7 headroom; allkeys-lru or LFU; keep values small.</span></li>
+      <li><span><b>Failures.</b> Stampede (single-flight, SWR), avalanche (TTL jitter), penetration (cache NULL), hot key (L1), cache down (fall back to the DB with rate limits).</span></li>
+      <li><span><b>Measure.</b> Hit ratio, evictions, memory, p99, DB load, origin offload at the CDN.</span></li>
+    </ol>
+
+    <h3 class="sec-h3">The five numbers on a cache dashboard</h3>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Metric</th><th>Healthy</th><th>Warning sign</th><th>Usually means</th></tr></thead>
+        <tbody>
+          <tr><td>Hit ratio</td><td>Steady, often 90%+ for hot reads</td><td>Drops suddenly</td><td>Evictions, a deploy changed key names, or a bad CDN key / Vary</td></tr>
+          <tr><td>Evictions per second</td><td>Near zero</td><td>Rising steadily</td><td>Memory too small for the working set</td></tr>
+          <tr><td>Memory used</td><td>Below ~70–80%</td><td>At the limit</td><td>Grow the cluster, shorten TTLs, shrink values</td></tr>
+          <tr><td>p99 latency</td><td>Low single-digit ms</td><td>Spikes while the average looks fine</td><td>Big keys, a hot key, or network saturation</td></tr>
+          <tr><td>DB load / origin offload</td><td>Flat, low</td><td>Spikes at fixed times</td><td>Stampede or avalanche (keys expiring together)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sec-h3">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">L1 copies disagree across servers</span><span class="arrow">→</span><span class="then">Pub/sub invalidation + short L1 TTL</span></li>
+      <li><span class="if">Another service caches your data</span><span class="arrow">→</span><span class="then">Outbox + change events; subscriber deletes its key</span></li>
+      <li><span class="if">Campaign links lower the CDN hit ratio</span><span class="arrow">→</span><span class="then">Drop <code>utm_*</code> from the cache key</span></li>
+      <li><span class="if">Page differs by language</span><span class="arrow">→</span><span class="then"><code>Vary: Accept-Language</code> (never <code>Vary: Cookie</code> on public pages)</span></li>
+      <li><span class="if">Logged-in or per-user response</span><span class="arrow">→</span><span class="then"><code>Cache-Control: private</code> or <code>no-store</code></span></li>
+      <li><span class="if">One Redis call slows all others</span><span class="arrow">→</span><span class="then">Big key: split, page or compress it</span></li>
+      <li><span class="if">New cluster or region going live</span><span class="arrow">→</span><span class="then">Warm the top N keys first</span></li>
+      <li><span class="if">Rate limit, lock, top-10 list</span><span class="arrow">→</span><span class="then">INCR + EXPIRE · SET NX PX · sorted set</span></li>
+    </ul>
+
+    <h3 class="sec-h3">In .NET terms</h3>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Idea</th><th>What you'd use</th></tr></thead>
+        <tbody>
+          <tr><td>L1 + Redis with stampede protection</td><td><code>HybridCache</code> (L1 <code>MemoryCache</code> + <code>IDistributedCache</code>)</td></tr>
+          <tr><td>Clear L1 on every server</td><td>StackExchange.Redis <code>ISubscriber.Publish</code> / <code>Subscribe</code>, then <code>RemoveAsync</code> (or HybridCache tags)</td></tr>
+          <tr><td>Change events across services</td><td>Outbox table in SQL Server + a relay to Azure Service Bus / Kafka; or SQL Server CDC</td></tr>
+          <tr><td>Response caching at the edge</td><td><code>[ResponseCache]</code> / Cache-Control headers; output caching with <code>VaryByQuery</code> / <code>VaryByHeader</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><span class="flag">Added</span>This page fills gaps the day-by-day plan didn't cover: multi-server and cross-service invalidation, CDN keys and leaks, sizing, monitoring, big keys, warming, multi-region and other Redis uses.</div>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">5</span>Test yourself</h2>
+    <h3 class="sec-h3">Which pattern fits? (last five: read the dashboard)</h3>
+    <div id="drill"></div>
+    <h3 class="sec-h3">Explain it out loud</h3>
+    <p class="sub">Answer before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Why delete the cache key after the DB write, not before?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Deleting first leaves a gap</b>: a reader can miss, load the <em>old</em> row and put it back before your write commits. Delete after the write (and keep a TTL as a safety net).</p></div></details>
+      <details><summary>Redis pub/sub drops messages for a server that is restarting. Is that a problem for L1 invalidation?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Only briefly.</b> A restarting server starts with an empty L1, so it has nothing stale. Servers that stay up but miss a message are covered by the short L1 TTL.</p></div></details>
+      <details><summary>Why is the outbox pattern used instead of "write the DB, then publish the event"?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Two separate steps can half-fail.</b> If the app crashes after the DB write, the event is never sent and caches stay stale. Writing the outbox row in the same transaction makes the event as durable as the change.</p></div></details>
+      <details><summary>Size a cache: 20 M products, 2 KB each, 20% hot, 1 replica.<span class="go">Show answer</span></summary>
+        <div class="ans"><p>20 M × 2 KB × 0.2 = <b>8 GB</b> hot data; × 1.5 overhead = 12 GB; × 2 for the replica = 24 GB; ÷ 0.7 headroom ≈ <b>34 GB</b>: two 32 GB nodes, or more for throughput.</p></div></details>
+      <details><summary>A CDN shows a high hit ratio but users report the wrong language. What happened?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>The language isn't in the cache key.</b> The first visitor's language is served to everyone. Add <code>Vary: Accept-Language</code> or put the language in the URL (<code>/hi/p/12</code>).</p></div></details>
+      <details><summary>Why keep rate-limit counters and locks out of an LRU cache?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Eviction can delete them under memory pressure</b>, which resets limits or releases locks early. Use a separate Redis (or <code>noeviction</code> / <code>volatile-*</code> policies) for them.</p></div></details>
+    </div>
+  </section>
+
+  <nav id="prevnext"></nav>
+
+  <footer>Sources: Week 3 notes; Redis documentation (pub/sub, SET NX PX, sorted sets, eviction policies, big keys); RFC 9111 (HTTP caching, Vary, private); Microsoft Learn (HybridCache, output caching); the outbox pattern. Sizing numbers are rules of thumb for whiteboard estimates.</footer>
+</div>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const ids = ['pubsub', 'events', 'cdnkey', 'vary', 'leak', 'bigkey', 'warm', 'redisuses', 'multiregion', 'monitor'];
+  const D = ['Cache too small', 'Stampede on one key', 'Hot key on one node', 'Penetration (missing IDs)', 'Big key', 'Bad CDN key / Vary'];
+  CF.page({ file: 'caching-in-practice.html', ids, extraDrill: [
+    { q: 'Dashboard: memory 100%, evictions 3,000/s and climbing, hit ratio 95% → 70% over a week.', a: D[0], why: 'The working set outgrew memory. Add nodes or shrink what you cache.', opts: D },
+    { q: 'Dashboard: hit ratio steady at 97%, but every 5 minutes DB queries spike 40× for about 2 seconds.', a: D[1], why: 'A hot key with a 5-minute TTL expires and everyone reloads it. Single-flight or stale-while-revalidate.', opts: D },
+    { q: 'Dashboard: one of six Redis nodes at 95% CPU, the others under 20%; total traffic is normal.', a: D[2], why: 'A single key gets most of the traffic. Add an L1 copy or split the key.', opts: D },
+    { q: 'Dashboard: hit ratio falling, evictions zero, memory 40%, many misses for product IDs above 9,000,000 (the largest real ID is 2,400,000).', a: D[3], why: 'Lookups for IDs that don\'t exist never become hits. Cache NULL briefly or use a Bloom filter.', opts: D },
+    { q: 'Dashboard: average Redis latency 0.3 ms, p99 jumps to 80 ms every time the nightly export runs.', a: D[4], why: 'The export reads one huge value and blocks Redis. Split or page it.', opts: D },
+    { q: 'Dashboard: CDN hit ratio fell from 92% to 8% right after a release; origin traffic 10×.', a: D[5], why: 'Something added per-visitor input to the key, e.g. Vary: Cookie or a random query parameter.', opts: D }
+  ] });
+
+  /* ---------- worked design ---------- */
+  let note;
+  const L = (m, n) => {
+    // layer n: 0 bare, 1 +CDN, 2 +Redis, 3 +L1, 4 +events, 5 failures, 6 metrics
+    m.state('cdn', n >= 1 ? '' : 'hide'); m.link('u', 'cdn', n >= 1 ? '' : 'hide'); m.link('cdn', 'app', n >= 1 ? '' : 'hide'); m.link('u', 'app', n >= 1 ? 'hide' : '');
+    m.state('redis', n >= 2 ? '' : 'hide'); m.link('app', 'redis', n >= 2 ? '' : 'hide');
+    m.state('l1', n >= 3 ? '' : 'hide'); m.link('app', 'l1', n >= 3 ? '' : 'hide');
+    m.state('bus', n >= 4 ? '' : 'hide'); m.link('db', 'bus', n >= 4 ? '' : 'hide'); m.link('bus', 'redis', n >= 4 ? '' : 'hide');
+    if (n >= 1) m.badge('cdn', 'images, JS, public HTML', 'teal');
+    if (n >= 2) m.badge('redis', 'product:{id} TTL 10 min', 'teal');
+    if (n >= 3) m.badge('l1', '30 s', 'teal');
+    const load = ['50,000/s', '20,000/s', '1,000/s', '300/s', '300/s', '300/s', '300/s'][n];
+    m.badge('db', load + ' reads', n === 0 ? 'red' : n < 2 ? 'yellow' : 'teal'); m.state('db', n === 0 ? 'hot' : '');
+  };
+  CF.story('story', {
+    vb: [460, 250], tone: 'teal', alt: 'Shop design growing: users, CDN, app servers with L1, Redis, SQL Server and an event bus',
+    build(m) {
+      m.tile('u', 36, 125, 'Users', 'users');
+      m.box('cdn', 132, 125, 'CDN', { icon: 'edge', w: 76 });
+      m.box('app', 240, 125, 'App ×12', { icon: 'server', w: 88 });
+      m.box('l1', 240, 200, 'L1', { icon: 'ram', w: 60, h: 26 });
+      m.box('redis', 370, 50, 'Redis', { icon: 'ram', w: 82 });
+      m.db('db', 370, 175, 'SQL Server');
+      m.box('bus', 428, 112, 'Bus', { icon: 'pipe', w: 58, h: 26 });
+      m.wire('u', 'cdn'); m.wire('cdn', 'app'); m.wire('u', 'app', { via: [[132, 80]] }); m.wire('app', 'l1'); m.wire('app', 'redis'); m.wire('app', 'db'); m.wire('db', 'bus'); m.wire('bus', 'redis');
+      note = m.label(150, 236, '', 'at-strong');
+    },
+    reset(m) { note.textContent = ''; },
+    steps: [
+      { title: 'Start: every read hits the database',
+        text: 'Twelve app servers, one SQL Server. 50,000 product reads a second all become queries. Before adding anything, say <b>what is read most</b> and <b>how stale it may be</b>: images never change, prices can be a few seconds old, stock at checkout must be live.',
+        tip: 'Asking "how fresh must this be?" first is what separates a design from "add Redis".',
+        set(m) { L(m, 0); note.textContent = 'DB overloaded'; },
+        async play(m, r) { L(m, 0); await m.send(['u', 'app', 'db'], { run: r, label: 'GET /p/12', tone: 'red' }); note.textContent = 'DB overloaded'; } },
+      { title: 'Layer 1 · Browser and CDN for what everyone shares',
+        text: 'Images, JS and CSS get fingerprinted names and <code>max-age=1 year</code>. The public product HTML gets <code>s-maxage=60</code> so the CDN answers most visitors. Logged-in parts (cart, "Hi Asha") load separately and are <code>private</code>.',
+        set(m) { L(m, 1); note.textContent = '~60% answered at the edge'; },
+        async play(m, r) { L(m, 1); await m.send(['u', 'cdn'], { run: r, label: 'GET' }); await m.send(['cdn', 'u'], { run: r, tone: 'teal', label: 'HIT' }); note.textContent = '~60% answered at the edge'; } },
+      { title: 'Layer 2 · Redis, cache-aside',
+        text: 'The app reads <code>product:12</code> from Redis; on a miss it queries SQL Server and stores the row with a 10-minute TTL (± jitter). Database reads drop to the miss rate.',
+        set(m) { L(m, 2); note.textContent = '95% Redis hits'; },
+        async play(m, r) { L(m, 2); await m.send(['cdn', 'app', 'redis'], { run: r, label: 'GET product:12' }); await m.send(['redis', 'app'], { run: r, tone: 'teal', label: 'HIT' }); note.textContent = '95% Redis hits'; } },
+      { title: 'Layer 3 · A small L1 in each app server',
+        text: 'The top few thousand products also live in each server\'s memory for 30 s. That removes a network hop and protects Redis from a single hot key. The price: 12 copies that can disagree.',
+        tip: 'In .NET, HybridCache gives you L1 + Redis + stampede protection in one call.',
+        set(m) { L(m, 3); note.textContent = 'hot keys served from memory'; },
+        async play(m, r) { L(m, 3); await m.send(['app', 'l1'], { run: r, label: 'L1?' }); m.state('l1', 'ok'); await m.send(['l1', 'app'], { run: r, tone: 'teal' }); note.textContent = 'hot keys served from memory'; } },
+      { title: 'Layer 4 · The write path keeps everyone honest',
+        text: 'A price change updates SQL Server and writes an outbox row in the same transaction. A relay publishes <b>ProductChanged 12</b>; a listener deletes the Redis key and broadcasts "drop product:12" so every server clears its L1. The CDN copy expires within 60 s (or is purged).',
+        set(m) { L(m, 4); m.badge('bus', 'ProductChanged', 'yellow'); note.textContent = 'stale for < 1 s in Redis + L1'; },
+        async play(m, r) { L(m, 4); await m.send(['app', 'db'], { run: r, label: 'UPDATE', tone: 'yellow' }); await m.send(['db', 'bus'], { run: r, tone: 'yellow' }); m.badge('bus', 'ProductChanged', 'yellow'); await m.send(['bus', 'redis'], { run: r, tone: 'yellow', label: 'DEL' }); m.badge('redis', 'dropped', 'muted'); await m.send(['redis', 'app', 'l1'], { run: r, tone: 'violet', label: 'drop L1' }); m.badge('l1', 'dropped', 'muted'); note.textContent = 'stale for < 1 s in Redis + L1'; } },
+      { title: 'Layer 5 · Plan for the failures',
+        text: '<b>Stampede</b>: single-flight per key. <b>Avalanche</b>: TTL jitter. <b>Missing IDs</b>: cache "not found" for 60 s. <b>Redis down</b>: fall back to the DB through a rate limiter and circuit breaker so it isn\'t flattened.',
+        set(m) { L(m, 5); m.badge('app', 'single-flight · breaker', 'violet'); note.textContent = 'a cache failure is slow, not fatal'; } },
+      { title: 'Layer 6 · Say what you would measure',
+        text: 'Hit ratio per layer, evictions, Redis memory and p99, DB queries per second, and CDN origin offload. Then size it: 2 M products × 4 KB × 20% hot is ~1.6 GB of data; with overhead, one replica and headroom, about 7 GB, so one small cluster is plenty.',
+        tip: 'End with the trade-off: prices may be up to 60 s stale at the CDN; checkout always reads the DB.',
+        set(m) { L(m, 6); m.badge('app', 'metrics', 'teal'); m.state('db', 'ok'); note.textContent = '50,000 reads/s → ~300 DB reads/s'; } }
+    ]
+  });
+
+  /* ---------- sizing calculator ---------- */
+  const ITEMS = [1e5, 2.5e5, 5e5, 1e6, 2e6, 5e6, 1e7, 2e7, 5e7, 1e8];
+  const SIZES = [0.5, 1, 2, 4, 8, 16, 32, 64, 100];
+  const RPS = [1e3, 1e4, 5e4, 1e5, 2.5e5, 5e5, 1e6, 2e6];
+  const OVER = 1.5, HEAD = 0.7, OPS = 100000; // overhead factor, target fill, ops/s per node (rough)
+  let rep = 1, node = 32;
+  const n = v => v >= 1e6 ? (v / 1e6).toLocaleString('en-US') + ' M' : v >= 1e3 ? (v / 1e3).toLocaleString('en-US') + ' K' : String(v);
+  const gb = v => v >= 100 ? Math.round(v).toLocaleString('en-US') + ' GB' : v >= 10 ? v.toFixed(0) + ' GB' : v >= 1 ? v.toFixed(1) + ' GB' : Math.round(v * 1024) + ' MB';
+  function size() {
+    const items = ITEMS[+$('zItems').value], kb = SIZES[+$('zSize').value], hot = +$('zHot').value / 100, rps = RPS[+$('zRps').value];
+    $('oItems').textContent = n(items); $('oSize').textContent = kb + ' KB'; $('oHot').textContent = Math.round(hot * 100) + '%'; $('oRps').textContent = n(rps) + '/s';
+    const data = items * kb * hot / (1024 * 1024);           // GB
+    const mem = data * OVER * (1 + rep) / HEAD;               // GB incl. overhead, replicas, headroom
+    const byMem = Math.max(1, Math.ceil(mem / node));
+    const shardsForOps = Math.ceil(rps / OPS);                // primaries needed for reads (replicas can serve reads too, keep it simple)
+    const byOps = shardsForOps * (1 + rep);
+    const nodes = Math.max(byMem, byOps);
+    $('zFormula').innerHTML = `<b>${n(items)}</b> × <b>${kb} KB</b> × <b>${Math.round(hot * 100)}%</b> = ${gb(data)} → × ${OVER} overhead × ${1 + rep} copies ÷ ${HEAD} headroom = <b>${gb(mem)}</b> → ÷ ${node} GB = <b>${byMem}</b> nodes · throughput: ${n(rps)}/s ÷ ${n(OPS)}/s per node × ${1 + rep} = <b>${byOps}</b>`;
+    $('kData').textContent = gb(data); $('kMem').textContent = gb(mem); $('kNodes').textContent = nodes; $('kWhy').textContent = byOps > byMem ? 'throughput' : 'memory';
+    let h = byOps > byMem ? 'Throughput, not memory, sets the node count here: the data is small but read very often. Replicas can also serve reads, so this is a safe upper bound.' : 'Memory sets the node count. Caching a smaller hot share, or smaller values, is cheaper than more nodes.';
+    if (kb >= 64) h += ' Values this large are "big keys": they block Redis while being copied. Split or compress them.';
+    if (rep === 0) h += ' With no replica, losing a node empties that shard: expect a burst of DB load (avalanche).';
+    $('zHint').textContent = h;
+  }
+  ['zItems', 'zSize', 'zHot', 'zRps'].forEach(id => $(id).addEventListener('input', size));
+  Kit.seg($('zRep'), v => { rep = +v; size(); });
+  Kit.seg($('zNode'), v => { node = +v; size(); });
+  size();
+
+  /* ---------- CDN cache-key lab ---------- */
+  const PAGES = {
+    product: { path: '/p/12', personal: false, reqs: [
+      { who: 'Visitor 1', q: 'utm_source=mail', lang: 'en', cookie: '_ga=1' },
+      { who: 'Visitor 2', q: 'utm_source=ads', lang: 'en', cookie: '_ga=2' },
+      { who: 'Visitor 3', q: '', lang: 'hi', cookie: '_ga=3' },
+      { who: 'Visitor 4', q: 'utm_source=sms', lang: 'hi', cookie: '_ga=4' },
+      { who: 'Visitor 5', q: '', lang: 'en', cookie: '_ga=5' },
+      { who: 'Visitor 6', q: 'color=red', lang: 'en', cookie: '_ga=6' }
+    ] },
+    account: { path: '/my/orders', personal: true, reqs: [
+      { who: 'Asha', q: '', lang: 'en', cookie: 'session=asha' },
+      { who: 'Ravi', q: '', lang: 'en', cookie: 'session=ravi' },
+      { who: 'Asha', q: '', lang: 'en', cookie: 'session=asha' },
+      { who: 'Meera', q: 'utm_source=mail', lang: 'hi', cookie: 'session=meera' },
+      { who: 'Ravi', q: '', lang: 'en', cookie: 'session=ravi' },
+      { who: 'Meera', q: '', lang: 'hi', cookie: 'session=meera' }
+    ] }
+  };
+  let pg = 'product';
+  const opt = { utm: false, lang: false, cookie: false, priv: false };
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  function keylab() {
+    const P = PAGES[pg], store = new Map(); let hits = 0, bad = 0;
+    const rows = P.reqs.map((r, i) => {
+      const qs = r.q.split('&').filter(Boolean).filter(p => !(opt.utm && p.startsWith('utm_'))).join('&');
+      const key = P.path + (qs ? '?' + qs : '') + (opt.lang ? ' · lang=' + r.lang : '') + (opt.cookie ? ' · ' + r.cookie : '');
+      const shown = P.path + (r.q ? '?' + r.q : '');
+      let res;
+      if (P.personal && opt.priv) res = ['miss', 'not cached (private) ✓'];
+      else if (!store.has(key)) { store.set(key, r); res = ['miss', 'MISS → stored']; }
+      else {
+        const s = store.get(key);
+        if (P.personal && s.cookie !== r.cookie) { res = ['bad', 'HIT · LEAK: got ' + s.who + '\'s orders']; bad++; }
+        else if (s.lang !== r.lang) { res = ['warn', 'HIT · wrong language (' + s.lang + ')']; bad++; }
+        else { res = ['hit', 'HIT ✓']; hits++; }
+      }
+      return `<tr><td>${i + 1}</td><td>${esc(r.who)}<br><span class="mono" style="color:var(--muted)">${r.lang} · ${r.cookie}</span></td><td>${esc(shown)}<br><span style="color:var(--muted)">key: ${esc(key)}</span><br><span class="res ${res[0]}">${res[1]}</span></td></tr>`;
+    });
+    $('kRows').innerHTML = rows.join('');
+    $('kHit').textContent = Math.round(100 * hits / P.reqs.length) + '%';
+    $('kCopies').textContent = store.size;
+    $('kBad').textContent = bad;
+    [...$('kOpts').querySelectorAll('label')].forEach(l => { const o = l.querySelector('input').dataset.o; const off = o === 'priv' && !P.personal; l.classList.toggle('off', off); l.querySelector('input').disabled = off; });
+    let h;
+    if (P.personal) {
+      if (opt.priv) h = 'Correct: per-user pages are never stored at the edge. Personal data stays safe; speed comes from the app\'s own cache.';
+      else if (bad) h = '<span class="bad-text">Leak.</span> A personalised page was cached under a key that doesn\'t include the user. Tick <code>Cache-Control: private</code>.';
+      else if (opt.cookie) h = 'No leak, because each session gets its own copy. It works, but a shared cache holding personal data is risky: <code>private</code> is the right fix.';
+      else h = 'Untick settings to see how a leak happens.';
+    } else {
+      if (opt.cookie) h = '<code>Vary: Cookie</code> gives every visitor a separate copy because analytics cookies differ: the hit ratio collapses. Untick it.';
+      else if (bad) h = 'The page differs by language but the key doesn\'t include it, so Hindi visitors get the English copy (or the reverse). Tick <code>Vary: Accept-Language</code>.';
+      else if (!opt.utm) h = 'Correct but wasteful: each <code>utm_source</code> value makes a new copy of the same page. Tick "Ignore utm_*".';
+      else h = 'Good key: campaign parameters ignored, language kept apart, and <code>color=red</code> kept because it really changes the page.';
+    }
+    $('kHint').innerHTML = h;
+  }
+  Kit.seg($('kPage'), v => { pg = v; keylab(); });
+  $('kOpts').addEventListener('change', e => { const o = e.target.dataset.o; if (o) { opt[o] = e.target.checked; keylab(); } });
+  keylab();
+})();
+</script>
+</body>
+</html>

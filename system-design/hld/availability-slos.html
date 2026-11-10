@@ -12,6 +12,8 @@
 <link rel="stylesheet" href="../../assets/css/explainer.css">
 <script src="../../assets/js/theme.js"></script>
 <script src="../../assets/js/explainer-kit.js"></script>
+<script src="../sd-series.js"></script>
+<script src="foundations-flows.js"></script>
 <style>
   .budget { position: relative; height: 26px; border-radius: 8px; background: var(--track); overflow: hidden; margin-top: 8px; }
   .budget i { position: absolute; inset: 0 auto 0 0; background: var(--teal); transition: width .4s, background .3s; }
@@ -36,13 +38,18 @@
   </div>
 
   <header>
-    <div class="eyebrow">Week 1 · Day 6 · Networking Fundamentals</div>
+    <div class="eyebrow">Week 1 · H6 · Networking Fundamentals</div>
     <h1>Availability, SLIs, SLOs & SLAs</h1>
     <ul class="lede"><li><b>SLI = measure</b>: what actually happened (e.g. % of requests that succeeded).</li><li><b>SLO = target</b>: what the team aims for (e.g. 99.9% over 30 days).</li><li><b>SLA = promise</b>: what customers are contractually owed if you miss it.</li><li><b>Error budget</b> = 100% − SLO: the failure you can afford to spend on shipping changes.</li></ul>
   </header>
 
-  <section aria-labelledby="ninesTitle">
-    <h2 class="stage-title" id="ninesTitle">What each nine costs</h2>
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn: nines, SLOs and error budgets</h2>
+    <div class="sub-block" aria-labelledby="ninesTitle">
+    <h3 class="stage-title sub" id="ninesTitle">What each nine costs</h3>
     <div class="stage-kind">Allowed downtime at a given availability</div>
     <div class="controls">
       <div class="seg" id="ninesSeg" role="group" aria-label="Availability target">
@@ -65,10 +72,9 @@
       <div class="month" id="month"></div>
       <p class="sub" id="monthNote" style="margin:8px 0 0"></p>
     </div>
-  </section>
-
-  <section aria-labelledby="ebTitle">
-    <h2 class="stage-title" id="ebTitle">Spend the error budget</h2>
+  </div>
+    <div class="sub-block" aria-labelledby="ebTitle">
+    <h3 class="stage-title sub" id="ebTitle">Spend the error budget</h3>
     <div class="stage-kind">SLO 99.9% over 30 days · SLA promised to customers: 99.5%</div>
     <div class="controls">
       <button class="btn" type="button" data-inc="blip">Network blip · 100% errors for 3 min</button>
@@ -93,10 +99,35 @@
       </div>
     </div>
     <div class="note"><span class="flag add">Why SLO is stricter than SLA</span><p>The internal target (99.9%) trips long before the contract (99.5%) does. When the error budget runs out, the team slows risky releases <i>before</i> customers are owed service credits.</p></div>
+  </div>
   </section>
 
-  <section aria-labelledby="compTitle">
-    <h2 class="stage-title" id="compTitle">Build a system, see its availability</h2>
+  <section id="compare" data-nav="Compare">
+    <h2 class="sec-h"><span class="sec-n">2</span>Compare: recovering from a disaster (RPO, RTO)</h2>
+    <h3 class="sec-h3">RPO and RTO</h3>
+    <div class="cards">
+      <div class="card"><h3>RPO · how much data can we lose?</h3><p><b>Recovery point objective</b>, measured in time. "RPO 5 minutes" means after a disaster you may lose at most the last 5 minutes of writes. Set by how often you back up or replicate.</p></div>
+      <div class="card"><h3>RTO · how long can we be down?</h3><p><b>Recovery time objective.</b> "RTO 1 hour" means service must be back within an hour. Set by how much is already running in the recovery site.</p></div>
+      <div class="card"><h3>How they relate to MTTR</h3><p>MTTR is the <i>measured</i> average repair time for ordinary failures; RTO is the <i>target</i> for a disaster. Lower RPO and RTO cost more: compare the four strategies below.</p></div>
+    </div>
+    <h3 class="sec-h3">4 disaster-recovery strategies</h3>
+    <p class="sub">From cheapest and slowest to most expensive and instant. Press <b>▶ Play</b> on a card.</p>
+    <div id="atlas"></div>
+    <div class="card scroll" style="margin-top:14px"><table>
+      <thead><tr><th>Strategy</th><th>RPO</th><th>RTO</th><th>Cost</th></tr></thead>
+      <tbody>
+        <tr><td>Backup &amp; restore</td><td>hours</td><td>hours – a day</td><td>$</td></tr>
+        <tr><td>Pilot light</td><td>minutes</td><td>tens of minutes</td><td>$$</td></tr>
+        <tr><td>Warm standby</td><td>seconds</td><td>minutes</td><td>$$$</td></tr>
+        <tr><td>Active-active</td><td>≈ 0</td><td>≈ 0</td><td>$$$$</td></tr>
+      </tbody></table></div>
+  </section>
+
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">3</span>Try it: build a system, see its availability</h2>
+    <p class="sec-sub">Add components in a chain and redundant copies in parallel; watch the total.</p>
+    <div class="sub-block" aria-labelledby="compTitle">
+    <h3 class="stage-title sub" id="compTitle">Build a system, see its availability</h3>
     <div class="stage-kind">Components in a chain multiply · redundant copies add up</div>
     <div class="card chain-wrap">
       <div class="comp" id="compRows"></div>
@@ -114,10 +145,31 @@
       <div class="note"><span class="flag add">Added</span><p><b>Availability = MTBF ÷ (MTBF + MTTR).</b> MTBF is the mean time between failures, MTTR the mean time to recover. Halving recovery time helps as much as halving failures, which is why fast rollbacks and alerts matter.</p></div>
       <div class="note"><span class="flag add">Added</span><p><b>Two ways to measure:</b> time-based ("up 99.9% of minutes") or request-based ("99.9% of requests succeeded"). Request-based SLIs reflect what users actually felt, including partial outages.</p></div>
     </div>
+  </div>
   </section>
 
-  <section aria-labelledby="quizH">
-    <h2 id="quizH">Check yourself</h2>
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">4</span>Revise in two minutes</h2>
+    <h3 class="sec-h3">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">99.9% vs 99.99% per month</span><span class="arrow">→</span><span class="then">~43 min vs ~4.3 min of downtime</span></li>
+      <li><span class="if">SLI / SLO / SLA</span><span class="arrow">→</span><span class="then">What you measure / your internal target / the contract with penalties</span></li>
+      <li><span class="if">Error budget</span><span class="arrow">→</span><span class="then">100% − SLO; spend it on releases, freeze when it is gone</span></li>
+      <li><span class="if">Components in a chain</span><span class="arrow">→</span><span class="then">Multiply: 99.9% × 99.9% × 99.9% ≈ 99.7%</span></li>
+      <li><span class="if">Redundant copies in parallel</span><span class="arrow">→</span><span class="then">1 − (1 − a)ⁿ: two 99% copies ≈ 99.99%</span></li>
+      <li><span class="if">Availability from failures</span><span class="arrow">→</span><span class="then">MTBF ÷ (MTBF + MTTR): faster repair helps as much as fewer failures</span></li>
+      <li><span class="if">How much data can we lose / how long down</span><span class="arrow">→</span><span class="then">RPO / RTO</span></li>
+      <li><span class="if">RPO & RTO near zero</span><span class="arrow">→</span><span class="then">Active-active across regions (most expensive)</span></li>
+    </ul>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">5</span>Test yourself</h2>
+    <p class="sec-sub">Pick an answer, then read why. Then answer each card out loud before you open it.</p>
+    <h3 class="sec-h3">Which one fits?</h3>
+    <div id="drill"></div>
+    <div class="sub-block" aria-labelledby="quizH">
+    <h3 class="sec-h3" id="quizH">Check yourself</h3>
     <p class="sub">Answer out loud before you open each card.</p>
     <div class="quiz">
       <details><summary>"99.95% of requests succeeded last month." SLI, SLO or SLA?<span class="go">Show answer</span></summary>
@@ -133,7 +185,10 @@
       <details><summary>Budget is exhausted on day 12. What changes?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>Freeze risky releases</b> and spend effort on reliability (tests, rollbacks, capacity) until the budget recovers.</p></div></details>
     </div>
+  </div>
   </section>
+
+  <nav id="prevnext"></nav>
 
   <footer>All figures use 365-day years and 30-day months. Sources: Day 6 notes, "Availability, SLI, SLO & SLA".</footer>
 </div>
@@ -237,6 +292,13 @@
     $('cWeak').textContent = weak.name;
   }
   rows(); calc();
+})();
+</script>
+<script>
+(function () {
+  SD.page({ track: 'hld' });
+  Kit.atlas(document.getElementById('atlas'), { cards: FF.cards(['drbackup','drpilot','drwarm','dractive']) });
+  FF.drill(document.getElementById('drill'), ['drbackup','drpilot','drwarm','dractive'], null);
 })();
 </script>
 </body>

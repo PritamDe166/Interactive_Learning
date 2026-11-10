@@ -22,6 +22,7 @@
   <nav class="track-tabs" aria-label="System design tracks">
     <a href="../hld/index.html"><b>HLD</b><span>High-level design</span></a>
     <a href="index.html" aria-current="page"><b>LLD</b><span>Low-level design</span></a>
+    <a href="../map.html"><b>MAP</b><span>Whole route</span></a>
   </nav>
 
   <header class="hero">
@@ -61,7 +62,7 @@
 
   <section class="howto" aria-label="How to use">
     <div class="box"><h4>HLD vs LLD</h4><p><b>HLD</b> decides which services, stores and queues exist and how they talk. <b>LLD</b> decides how one of those services is written: its classes, interfaces and the patterns that keep it easy to change.</p></div>
-    <div class="box"><h4>Adding topics</h4><p>In this page's script, add a part to <code>PARTS</code> with its topics, e.g. <code>{t:"Strategy pattern", k:"strategy pattern interface"}</code>. When an explainer is ready, put the file in this folder and add <code>file:"strategy.html"</code> to its topic.</p></div>
+    <div class="box"><h4>Adding topics</h4><p>In this page's script, topics are numbered L1–L67 as in the Notion plan, e.g. <code>{n:24, t:"Strategy", k:"…"}</code>. When an explainer is ready, put the file in this folder and add <code>file:"strategy.html"</code> to its topic and to <code>../sd-series.js</code>.</p></div>
     <div class="box"><h4>Explainer pages</h4><p>Copy <code>_template/explainer.html</code> here; pages in this folder load shared files from <code>../../assets/</code> and link back with <code>index.html</code>.</p></div>
   </section>
 
@@ -71,13 +72,88 @@
 <script>
 /* ===== LLD topics. Add parts and topics as you learn; publish an explainer by adding  file:"name.html"  to its topic. ===== */
 const PARTS = [
- {part:"Part 1", name:"SOLID principles", sections:[
-  {t:"SOLID overview", k:"solid principles guidelines object oriented design", file:"solid.html"},
-  {t:"S · Single responsibility", k:"srp single responsibility one reason to change god class", file:"solid-srp.html"},
-  {t:"O · Open-closed", k:"ocp open closed extension decorator strategy extension methods", file:"solid-ocp.html"},
-  {t:"L · Liskov substitution", k:"lsp liskov substitution inheritance subclass not implemented", file:"solid-lsp.html"},
-  {t:"I · Interface segregation", k:"isp interface segregation small interfaces repository", file:"solid-isp.html"},
-  {t:"D · Dependency inversion", k:"dip dependency inversion injection abstraction constructor", file:"solid-dip.html"}
+ {part:"Phase 1", name:"Object-oriented foundations", sections:[
+  {n:1,t:"OOP pillars",k:"Encapsulation, abstraction, inheritance, polymorphism (overloading vs overriding); interface vs abstract class in C#"},
+  {n:2,t:"Relationships",k:"Association, aggregation, composition, dependency, inheritance; is-a vs has-a; composition over inheritance"},
+  {n:3,t:"UML",k:"Class diagram notation, multiplicity, arrow types; sequence diagram basics"},
+  {n:4,t:"Design principles",k:"DRY, KISS, YAGNI, Law of Demeter, high cohesion / low coupling, program to an interface"},
+  {n:5,t:"LLD interview method",k:"Clarify requirements → find entities → relationships → class diagram → interfaces → patterns → code core flows → concurrency & edge cases; time budget"}
+ ]},
+ {part:"Phase 2", name:"SOLID", sections:[
+  {n:6,t:"SOLID overview",k:"Why it exists; the smell each principle fixes",file:"solid.html"},
+  {n:7,t:"S · Single responsibility",k:"One reason to change; splitting god classes",file:"solid-srp.html"},
+  {n:8,t:"O · Open-closed",k:"Extend via new classes (strategy, decorator) instead of editing",file:"solid-ocp.html"},
+  {n:9,t:"L · Liskov substitution",k:"Subtype contracts; rectangle/square; NotImplementedException smell",file:"solid-lsp.html"},
+  {n:10,t:"I · Interface segregation",k:"Small role interfaces; fat repository problem",file:"solid-isp.html"},
+  {n:11,t:"D · Dependency inversion",k:"Depend on abstractions; constructor injection; .NET DI lifetimes (singleton, scoped, transient)",file:"solid-dip.html"}
+ ]},
+ {part:"Phase 3", name:"Creational patterns", sections:[
+  {n:12,t:"Singleton",k:"Thread-safe variants (lock, double-check, Lazy); why a DI singleton is usually better; testability issues",file:"singleton.html"},
+  {n:13,t:"Simple factory & factory method",k:"Hiding new; choosing a subclass by input",file:"factory-method.html"},
+  {n:14,t:"Abstract factory",k:"Families of related objects; factory method vs abstract factory",file:"abstract-factory.html"},
+  {n:15,t:"Builder",k:"Step-by-step construction; fluent builder; director; vs telescoping constructors",file:"builder.html"},
+  {n:16,t:"Prototype",k:"Cloning; shallow vs deep copy; record with expressions",file:"prototype.html"}
+ ]},
+ {part:"Phase 4", name:"Structural patterns", sections:[
+  {n:17,t:"Adapter",k:"Wrapping an incompatible interface (third-party SDK); class vs object adapter"},
+  {n:18,t:"Decorator",k:"Add behaviour by wrapping; vs inheritance; .NET streams, HTTP handlers"},
+  {n:19,t:"Proxy",k:"Virtual, protection, caching, remote proxy; proxy vs decorator"},
+  {n:20,t:"Facade",k:"Simple entry point over a subsystem"},
+  {n:21,t:"Composite",k:"Tree structures (file system, org chart, menu)"},
+  {n:22,t:"Bridge",k:"Separate abstraction from implementation (notification × channel)"},
+  {n:23,t:"Flyweight",k:"Sharing intrinsic state to save memory (chess pieces, glyphs)"}
+ ]},
+ {part:"Phase 5", name:"Behavioural patterns", sections:[
+  {n:24,t:"Strategy",k:"Swappable algorithms (pricing, payment, routing); strategy vs if/else chains"},
+  {n:25,t:"Observer",k:"Publisher/subscriber in code; C# events & delegates, IObservable; \"notify me when back in stock\""},
+  {n:26,t:"State",k:"Behaviour changes with state (vending machine, order lifecycle); state vs strategy"},
+  {n:27,t:"Chain of responsibility",k:"Handler chain (ASP.NET Core middleware, approval flow, logger levels)"},
+  {n:28,t:"Command",k:"Requests as objects; undo/redo; queued commands"},
+  {n:29,t:"Template method",k:"Fixed algorithm skeleton with overridable steps"},
+  {n:30,t:"Iterator",k:"IEnumerable / yield return; custom collections"},
+  {n:31,t:"Mediator",k:"Central coordinator (chat room, MediatR)"},
+  {n:32,t:"Memento",k:"Snapshot & restore (undo in an editor)"},
+  {n:33,t:"Visitor",k:"Double dispatch; adding operations without changing classes"},
+  {n:34,t:"Null object & Interpreter",k:"Null object to remove null checks; interpreter (concept)"}
+ ]},
+ {part:"Phase 6", name:"Enterprise & architecture patterns", sections:[
+  {n:35,t:"Repository, Unit of Work, service layer",k:"Repository and Unit of Work; service layer; Specification; generic vs specific repositories; repository over EF Core DbContext?"},
+  {n:36,t:"Clean architecture in code",k:"Domain / Application / Infrastructure / API; dependency rule; CQRS with MediatR; when not to use a pattern"}
+ ]},
+ {part:"Phase 7", name:"Concurrency for LLD", sections:[
+  {n:37,t:"Threads & tasks",k:"Thread vs Task vs ThreadPool; async/await basics (.NET mechanics: .NET roadmap N13–N15)"},
+  {n:38,t:"Race conditions & locks",k:"Critical sections; lock / Monitor; Interlocked"},
+  {n:39,t:"Other primitives",k:"SemaphoreSlim, ReaderWriterLockSlim, Mutex, ManualResetEvent"},
+  {n:40,t:"Producer-consumer",k:"BlockingCollection, System.Threading.Channels; bounded buffers"},
+  {n:41,t:"Concurrent collections",k:"ConcurrentDictionary, ConcurrentQueue; immutable collections"},
+  {n:42,t:"Concurrency bugs",k:"Deadlock, livelock, starvation; async deadlocks (.Result)"},
+  {n:43,t:"Thread-safe designs",k:"Thread-safe singleton, cache, counter; optimistic vs pessimistic in memory"}
+ ]},
+ {part:"Phase 8", name:"Classic LLD problems", sections:[
+  {n:44,t:"Tic-tac-toe",k:"Entities, game loop, win check"},
+  {n:45,t:"Snake & ladder",k:"Board modelling, dice strategy"},
+  {n:46,t:"Parking lot",k:"Spot allocation strategy, pricing strategy, factory for vehicles"},
+  {n:47,t:"Vending machine",k:"State pattern"},
+  {n:48,t:"Elevator system",k:"State + scheduling strategy"},
+  {n:49,t:"ATM",k:"State + chain of responsibility (cash dispenser)"},
+  {n:50,t:"LRU cache",k:"Hash map + doubly linked list; thread safety"},
+  {n:51,t:"Rate limiter",k:"Strategy per algorithm (token bucket, sliding window); concurrency"},
+  {n:52,t:"Logging framework",k:"Chain of responsibility (levels), singleton, observer (sinks)"},
+  {n:53,t:"Notification service",k:"Observer, strategy per channel, bridge"},
+  {n:54,t:"Pub/sub system",k:"Observer + concurrency (topics, subscribers)"},
+  {n:55,t:"BookMyShow (movie booking)",k:"Seat locking, concurrency, payment flow"},
+  {n:56,t:"Meeting room / hotel booking",k:"Interval conflicts, availability search"},
+  {n:57,t:"Splitwise",k:"Expense split strategies, balance simplification"},
+  {n:58,t:"Library management",k:"Entities, search, fines"},
+  {n:59,t:"Car rental",k:"Inventory, reservations, pricing strategy"},
+  {n:60,t:"Inventory & order management (Zepto-style)",k:"Stock reservation, order state machine"},
+  {n:61,t:"Cricbuzz / live score",k:"Observer, state"},
+  {n:62,t:"Chess",k:"Polymorphic pieces, move validation"},
+  {n:63,t:"Payment system",k:"Strategy per method, idempotency, state; idempotent POST"},
+  {n:64,t:"Food delivery",k:"Order lifecycle, assignment strategy"},
+  {n:65,t:"Hash map (primer)",k:"Buckets, hashing, collisions (chaining vs open addressing), resizing"},
+  {n:66,t:"Call center (primer)",k:"Escalation chain (chain of responsibility), call queue, employee states"},
+  {n:67,t:"Deck of cards / blackjack (primer)",k:"Enums, generics, inheritance for game-specific rules"}
  ]}
 ];
 
@@ -87,16 +163,18 @@ const all=PARTS.flatMap(p=>p.sections);
 const live=all.filter(s=>s.file);
 $('sLive').textContent=live.length;
 $('sTopics').textContent=all.length;
-const next=all.find(s=>!s.file);
-$('sNext').textContent=!all.length?'–':next?`Topic ${all.indexOf(next)+1}`:'Done';
+/* next up: the first topic without a page after the furthest one you've built (earlier gaps stay visible in their phase) */
+const lastLive=Math.max(0,...all.filter(s=>s.file).map(s=>s.n));
+const next=all.find(s=>s.n>lastLive&&!s.file)||all.find(s=>!s.file);
+$('sNext').textContent=!all.length?'–':next?`L${next.n}`:'Done';
 const pct=all.length?Math.round(live.length*100/all.length):0;
 $('sPct').textContent=`${live.length} / ${all.length} · ${pct}%`;
 $('bar').style.width=Math.max(pct,live.length?2:0)+'%';
 
 let filter='all',query='';
 function card(s,n){
-  if(s.file)return `<a class="day-card live" href="${esc(s.file)}"><span class="day">Topic ${n}</span><span class="topic">${esc(s.t)}</span><span class="status">Open explainer</span></a>`;
-  return `<div class="day-card"><span class="day">Topic ${n}</span><span class="topic">${esc(s.t)}</span><span class="status">Coming soon</span></div>`;
+  if(s.file)return `<a class="day-card live" href="${esc(s.file)}" title="${esc(s.k||'')}"><span class="day">L${s.n}</span><span class="topic">${esc(s.t)}</span><span class="status">Open explainer</span></a>`;
+  return `<div class="day-card" title="${esc(s.k||'')}"><span class="day">L${s.n}</span><span class="topic">${esc(s.t)}</span><span class="status">Coming soon</span></div>`;
 }
 function render(){
   if(!all.length){
@@ -106,9 +184,9 @@ function render(){
   }
   const q=query.trim().toLowerCase();let html='',n=0;
   PARTS.forEach((p,i)=>{
-    const items=p.sections.map(s=>({s,n:++n})).filter(({s})=>(filter==='all'||s.file)&&(!q||s.t.toLowerCase().includes(q)||(s.k||'').toLowerCase().includes(q)));
+    const items=p.sections.map(s=>({s,n:++n})).filter(({s})=>(filter==='all'||s.file)&&(!q||s.t.toLowerCase().includes(q)||(s.k||'').toLowerCase().includes(q)||'l'+s.n===q));
     if(!items.length)return;
-    html+=`<section class="phase" id="p${i+1}"><div class="phase-head"><span class="num">${esc(p.part)}</span><h2>${esc(p.name)}</h2></div><div class="week"><div class="day-grid">${items.map(({s,n})=>card(s,n)).join('')}</div></div></section>`;
+    html+=`<section class="phase" id="p${i+1}"><div class="phase-head"><span class="num">${esc(p.part)}</span><h2>${esc(p.name)}</h2></div><details class="week"${q||filter!=='all'||p.sections.some(s=>s.file||s===next)?' open':''}><summary class="section-rule"><span class="wk">L${p.sections[0].n}–L${p.sections[p.sections.length-1].n}</span>${p.sections.filter(s=>s.file).length} of ${p.sections.length} ready</summary><div class="day-grid">${items.map(({s,n})=>card(s,n)).join('')}</div></details></section>`;
   });
   $('parts').innerHTML=html||`<p class="empty">No topics match “${esc(query)}”.</p>`;
 }

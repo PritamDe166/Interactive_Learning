@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="../../assets/css/explainer.css">
 <script src="../../assets/js/theme.js"></script>
 <script src="../../assets/js/explainer-kit.js"></script>
+<script src="../sd-series.js"></script>
 <style>
   .bar-rect { fill: var(--teal); }
   .bar-rect.tail { fill: var(--red); }
@@ -35,22 +36,27 @@
   </div>
 
   <header>
-    <div class="eyebrow">Week 1 · Day 5 · Networking Fundamentals</div>
+    <div class="eyebrow">Week 1 · H5 · Networking Fundamentals</div>
     <h1>Latency, Percentiles & Queueing</h1>
     <ul class="lede"><li><b>Latency</b>: how long one request takes.</li><li><b>Throughput</b>: how many requests finish per second.</li><li><b>Percentiles</b> (p50 / p95 / p99) show how latency is spread, especially the slow tail.</li><li>Near capacity, requests <b>queue</b>, and latency rises much faster than load.</li></ul>
   </header>
 
-  <section aria-labelledby="defH">
-    <h2 id="defH">Four numbers, four questions</h2>
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn: the numbers that describe speed</h2>
+    <div class="sub-block" aria-labelledby="defH">
+    <h3 class="sec-h3" id="defH">Four numbers, four questions</h3>
     <div class="cards">
       <div class="card"><h3>Latency · how long?</h3><p>Time for one request, end to end: network + queueing + processing + dependencies. Example: <span class="mono">120 ms</span>.</p></div>
       <div class="card"><h3>Throughput · how much?</h3><p>Work finished per unit time. Example: <span class="mono">10,000 RPS</span>. High throughput can coexist with high latency.</p></div>
       <div class="card"><h3>Concurrency · how many at once?</h3><p>Requests in flight right now. Linked to the other two by <b>Little's Law</b>: concurrency = throughput × latency.</p></div>
+    <div class="card"><h3>Bandwidth · how wide?</h3><p>The most data the link <b>could</b> carry per second, e.g. <span class="mono">1 Gbps</span>. Think of a pipe: bandwidth is its <b>width</b>, latency is its <b>length</b>. A wider pipe doesn't make the first byte arrive sooner.</p></div>
     </div>
-  </section>
-
-  <section aria-labelledby="histTitle">
-    <h2 class="stage-title" id="histTitle">Why the average lies</h2>
+  </div>
+    <div class="sub-block" aria-labelledby="histTitle">
+    <h3 class="stage-title sub" id="histTitle">Why the average lies</h3>
     <div class="stage-kind">1,000 simulated requests · log-scale latency axis</div>
     <div class="ranges">
       <div class="range"><label for="tailPct">Slow requests <output id="tailPctOut"></output></label><input type="range" id="tailPct" min="0" max="8" step="0.5" value="2"></div>
@@ -66,10 +72,46 @@
       <div class="kpi bad"><b id="kP99">–</b><span>p99 · 1 in 100 slower</span></div>
     </div>
     <p class="hint">Drag "Slow requests" from 0 to 2%. p50 barely moves, the average creeps up, and p99 jumps. The average describes nobody's real experience.</p>
+  </div>
   </section>
 
-  <section aria-labelledby="qTitle">
-    <h2 class="stage-title" id="qTitle">Load, queueing and saturation</h2>
+  <section id="compare" data-nav="Compare">
+    <h2 class="sec-h"><span class="sec-n">2</span>Compare: latency numbers and terms</h2>
+    <h3 class="sec-h3">Latency numbers to know</h3>
+    <p class="sub">Orders of magnitude, not exact values: they tell you what to cache and what to avoid in a hot path.</p>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th>Operation</th><th>Rough time</th><th>Compared with reading RAM</th></tr></thead>
+        <tbody>
+          <tr><td>L1 CPU cache read</td><td class="mono">~1 ns</td><td>100× faster</td></tr>
+          <tr><td>Main memory (RAM) read</td><td class="mono">~100 ns</td><td>1×</td></tr>
+          <tr><td>Read 1 MB from RAM</td><td class="mono">~10–50 µs</td><td></td></tr>
+          <tr><td>Round trip inside one data centre</td><td class="mono">~0.5 ms</td><td>5,000×</td></tr>
+          <tr><td>Redis GET over the network</td><td class="mono">~0.5–1 ms</td><td>mostly the network hop</td></tr>
+          <tr><td>SSD random read</td><td class="mono">~0.1 ms</td><td>1,000×</td></tr>
+          <tr><td>Simple indexed SQL query</td><td class="mono">~1–5 ms</td><td></td></tr>
+          <tr><td>HDD seek</td><td class="mono">~10 ms</td><td>100,000×</td></tr>
+          <tr><td>Round trip Mumbai ↔ Singapore</td><td class="mono">~60 ms</td><td></td></tr>
+          <tr><td>Round trip India ↔ US East</td><td class="mono">~200 ms</td><td>2,000,000×</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><span class="flag add">Added</span><p><b>How to use it:</b> memory is ~1,000× faster than a network call, and a cross-continent round trip costs as much as a hundred local database queries. That is why we cache, keep chatty calls inside one region and put content on a CDN.</p></div>
+    <h3 class="sec-h3">Latency vs bandwidth vs throughput</h3>
+    <div class="card scroll"><table>
+      <thead><tr><th></th><th>Question</th><th>Unit</th><th>Fix when it's the problem</th></tr></thead>
+      <tbody>
+        <tr><td>Latency</td><td>How long does one request take?</td><td class="mono">ms</td><td>Move closer (CDN, region), cache, fewer round trips</td></tr>
+        <tr><td>Bandwidth</td><td>How much could the link carry?</td><td class="mono">Mbps / Gbps</td><td>Bigger link, compression, smaller payloads</td></tr>
+        <tr><td>Throughput</td><td>How much work is actually done?</td><td class="mono">requests/s</td><td>More servers, remove the bottleneck, batch</td></tr>
+      </tbody></table></div>
+  </section>
+
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">3</span>Try it: push a server into saturation</h2>
+    <p class="sec-sub">Raise the load and watch the queue grow, then use the calculators.</p>
+    <div class="sub-block" aria-labelledby="qTitle">
+    <h3 class="stage-title sub" id="qTitle">Load, queueing and saturation</h3>
     <div class="stage-kind">One server · capacity 10 requests/s (100 ms each, on average)</div>
     <div class="ranges">
       <div class="range"><label for="lam">Incoming load <output id="lamOut"></output></label><input type="range" id="lam" min="1" max="12" step="0.5" value="5"></div>
@@ -96,10 +138,9 @@
       <div class="note"><span class="flag add">Added</span><p><b>Why the curve bends:</b> for a simple queue, average time in system ≈ service time ÷ (1 − utilisation). At 50% load that's 2× the service time, at 90% it's 10×, and at 99% it's 100×. Real systems aim to run their bottleneck well below 100%.</p></div>
       <div class="note"><span class="flag add">Added</span><p><b>Overload feeds itself.</b> Timeouts trigger client retries, retries add load, and more load means more timeouts. This is a retry storm, and Week 15 (backoff, circuit breakers) exists to stop it.</p></div>
     </div>
-  </section>
-
-  <section aria-labelledby="calcH">
-    <h2 id="calcH">Two quick calculators</h2>
+  </div>
+    <div class="sub-block" aria-labelledby="calcH">
+    <h3 class="sec-h3" id="calcH">Two quick calculators</h3>
     <div class="two">
       <div class="card">
         <div class="label">Little's Law: how many requests are in flight?</div>
@@ -120,10 +161,27 @@
       </div>
     </div>
     <div class="note"><span class="flag add">Added</span><p><b>Percentiles don't average.</b> The p99 of three servers is not the mean of their three p99s. Merge the raw histograms first; monitoring tools do this with histogram metrics.</p></div>
+  </div>
   </section>
 
-  <section aria-labelledby="quizH">
-    <h2 id="quizH">Check yourself</h2>
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">4</span>Revise in two minutes</h2>
+    <h3 class="sec-h3">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">One request feels slow</span><span class="arrow">→</span><span class="then">Latency: look at p95 / p99, not the average</span></li>
+      <li><span class="if">Can't serve enough users</span><span class="arrow">→</span><span class="then">Throughput: find the saturated resource</span></li>
+      <li><span class="if">Big downloads are slow, small ones fine</span><span class="arrow">→</span><span class="then">Bandwidth</span></li>
+      <li><span class="if">Concurrency needed</span><span class="arrow">→</span><span class="then">Little's Law: in-flight = throughput × latency</span></li>
+      <li><span class="if">Server above ~70–80% busy</span><span class="arrow">→</span><span class="then">Queueing makes latency climb steeply</span></li>
+      <li><span class="if">One page calls 10 services</span><span class="arrow">→</span><span class="then">Tail latency: the slowest call sets the page time</span></li>
+      <li><span class="if">Memory vs network vs another continent</span><span class="arrow">→</span><span class="then">~100 ns · ~0.5 ms · ~200 ms</span></li>
+    </ul>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">5</span>Test yourself</h2>
+    <div class="sub-block" aria-labelledby="quizH">
+    <h3 class="sec-h3" id="quizH">Check yourself</h3>
     <p class="sub">Answer out loud before you open each card.</p>
     <div class="quiz">
       <details><summary>Requirement: "50,000 RPS with p99 under 200 ms." Split it into its two kinds of requirement.<span class="go">Show answer</span></summary>
@@ -139,7 +197,10 @@
       <details><summary>High throughput, high latency: give a real example.<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>A batch job or a deep queue:</b> millions of items per hour, but each waits minutes. A truck full of hard drives has huge throughput too.</p></div></details>
     </div>
+  </div>
   </section>
+
+  <nav id="prevnext"></nav>
 
   <footer>Simulations use a fixed random seed and textbook M/M/1 queueing; real systems differ in detail but bend the same way. Sources: Day 5 notes, "Latency, Throughput & Percentiles" and "Load, Concurrency, Queueing & Saturation".</footer>
 </div>
@@ -307,6 +368,9 @@
   $('fan').addEventListener('input', fan);
   ll(); fan();
 })();
+</script>
+<script>
+SD.page({ track: 'hld' });
 </script>
 </body>
 </html>

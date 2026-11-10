@@ -12,6 +12,8 @@
 <link rel="stylesheet" href="../../assets/css/explainer.css">
 <script src="../../assets/js/theme.js"></script>
 <script src="../../assets/js/explainer-kit.js"></script>
+<script src="../sd-series.js"></script>
+<script src="foundations-flows.js"></script>
 <style>.dead rect { stroke: var(--red) !important; stroke-dasharray: 6 4; }</style>
 </head>
 <body>
@@ -22,13 +24,18 @@
   </div>
 
   <header>
-    <div class="eyebrow">Week 2 · Day 9 · Scaling Fundamentals</div>
+    <div class="eyebrow">Week 2 · H9 · Scaling Fundamentals</div>
     <h1>Stateless Applications</h1>
     <ul class="lede"><li><b>Stateless doesn't mean "no state".</b></li><li>It means no important state lives inside <b>one particular server</b>.</li><li>Keep it in a database, a shared cache or the client's token.</li><li>Then every server is <b>interchangeable</b>: any one can handle any request.</li></ul>
   </header>
 
-  <section aria-labelledby="cartTitle">
-    <h2 class="stage-title" id="cartTitle">Where does the cart live?</h2>
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn: where does the cart live?</h2>
+    <div class="sub-block" aria-labelledby="cartTitle">
+    <h3 class="stage-title sub" id="cartTitle">Where does the cart live?</h3>
     <div class="stage-kind">One shopper · three app servers behind a load balancer (round robin)</div>
     <div class="controls">
       <div class="seg" id="modeSeg" role="group" aria-label="Design">
@@ -59,10 +66,15 @@
         <div><div class="label k-weak">Breaks when</div><p id="dBad"></p></div>
       </div>
     </div>
+  </div>
   </section>
 
-  <section aria-labelledby="whereH">
-    <h2 id="whereH">Where state can live instead</h2>
+  <section id="compare" data-nav="Compare">
+    <h2 class="sec-h"><span class="sec-n">2</span>Compare: 4 places to keep state</h2>
+    <p class="sub">Keep the app servers forgettable: session data, identity and files each have a better home. Press <b>▶ Play</b> on a card.</p>
+    <div id="atlas"></div>
+    <div class="sub-block" aria-labelledby="whereH">
+    <h3 class="sec-h3" id="whereH">Where state can live instead</h3>
     <div class="cards">
       <div class="card"><h3>Database</h3><p>Durable business data: patients, orders, carts that must survive. Every server reads the same rows.</p></div>
       <div class="card"><h3>Shared cache (Redis)</h3><p>Fast, shared, temporary data: sessions, carts, rate-limit counters. All servers see the same values.</p></div>
@@ -73,10 +85,42 @@
       <div class="note"><span class="flag add">Added</span><p><b>State didn't disappear, it moved.</b> Redis and the database are now critical shared dependencies. They need their own replication, monitoring and capacity planning (Weeks 3 and 7).</p></div>
       <div class="note"><span class="flag add">Added</span><p><b>Local caches are fine.</b> A server can keep a copy of reference data or compiled templates in memory. That's allowed as long as losing it only costs speed, not correctness.</p></div>
     </div>
+  </div>
+    <h3 class="sec-h3">Cookie or token?</h3>
+    <div class="card scroll"><table>
+      <thead><tr><th></th><th>Session cookie (ID only)</th><th>Token (JWT)</th></tr></thead>
+      <tbody>
+        <tr><td>What the client holds</td><td>A random session ID</td><td>Signed claims (user, roles, expiry)</td></tr>
+        <tr><td>How it is sent</td><td>Browser sends it automatically</td><td>App adds <code>Authorization: Bearer …</code> (or puts it in a cookie)</td></tr>
+        <tr><td>Server work per request</td><td>Look up the session (Redis)</td><td>Check the signature, no lookup</td></tr>
+        <tr><td>Logout / revoke</td><td>Instant: delete the session</td><td>Hard: valid until expiry → keep it short, use refresh tokens</td></tr>
+        <tr><td>Main risk</td><td>CSRF → <code>SameSite</code> cookies, anti-forgery tokens</td><td>Theft via XSS if kept in localStorage</td></tr>
+        <tr><td>Fits</td><td>Browser web apps</td><td>APIs, mobile apps, service-to-service</td></tr>
+      </tbody></table></div>
+    <div class="note"><span class="flag add">Added</span><p>Use <code>HttpOnly</code> + <code>Secure</code> + <code>SameSite</code> on any cookie that carries a session ID or token, so page scripts can't read it and other sites can't send it.</p></div>
   </section>
 
-  <section aria-labelledby="quizH">
-    <h2 id="quizH">Check yourself</h2>
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">3</span>Revise in two minutes</h2>
+    <h3 class="sec-h3">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">Stateless server</span><span class="arrow">→</span><span class="then">Any server can handle any request; nothing important lives only in its memory or disk</span></li>
+      <li><span class="if">Login sessions</span><span class="arrow">→</span><span class="then">Shared store (Redis) or a signed token</span></li>
+      <li><span class="if">Uploaded files</span><span class="arrow">→</span><span class="then">Blob / object storage, store only the key</span></li>
+      <li><span class="if">Business data</span><span class="arrow">→</span><span class="then">The database</span></li>
+      <li><span class="if">Can't change a legacy app yet</span><span class="arrow">→</span><span class="then">Sticky sessions, knowing users lose sessions when a server dies</span></li>
+      <li><span class="if">Instant logout needed</span><span class="arrow">→</span><span class="then">Server-side sessions, not long-lived JWTs</span></li>
+      <li><span class="if">Why it matters</span><span class="arrow">→</span><span class="then">Autoscaling, rolling deploys and failover all assume servers are disposable</span></li>
+    </ul>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">4</span>Test yourself</h2>
+    <p class="sec-sub">Pick an answer, then read why. Then answer each card out loud before you open it.</p>
+    <h3 class="sec-h3">Which one fits?</h3>
+    <div id="drill"></div>
+    <div class="sub-block" aria-labelledby="quizH">
+    <h3 class="sec-h3" id="quizH">Check yourself</h3>
     <p class="sub">Answer out loud before you open each card.</p>
     <div class="quiz">
       <details><summary>"Our API is stateless, so it doesn't use a database." What's wrong?<span class="go">Show answer</span></summary>
@@ -92,7 +136,10 @@
       <details><summary>When are sticky sessions still reasonable?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>Legacy apps</b> that keep session state in memory and can't be changed yet, or for cache locality. Treat them as a stopgap.</p></div></details>
     </div>
+  </div>
   </section>
+
+  <nav id="prevnext"></nav>
 
   <footer>Sources: Day 9 notes, "Stateless Applications"; sticky sessions also appear in Days 10–13.</footer>
 </div>
@@ -194,6 +241,13 @@
   $('resetBtn').addEventListener('click', reset);
   K.seg($('modeSeg'), v => { mode = v; reset(); });
   reset();
+})();
+</script>
+<script>
+(function () {
+  SD.page({ track: 'hld' });
+  Kit.atlas(document.getElementById('atlas'), { cards: FF.cards(['sticky','sessionstore','jwt','blob']) });
+  FF.drill(document.getElementById('drill'), ['sticky','sessionstore','jwt','blob'], null);
 })();
 </script>
 </body>

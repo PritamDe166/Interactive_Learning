@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>System Design: HLD</title>
-<meta name="description" content="High-level design (HLD): interactive, animated explainers for a 119-day system design roadmap.">
+<meta name="description" content="High-level design (HLD): interactive, animated explainers for the 147-session (H1–H147) system design roadmap.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
@@ -22,6 +22,7 @@
   <nav class="track-tabs" aria-label="System design tracks">
     <a href="index.html" aria-current="page"><b>HLD</b><span>High-level design</span></a>
     <a href="../lld/index.html"><b>LLD</b><span>Low-level design</span></a>
+    <a href="../map.html"><b>MAP</b><span>Whole route</span></a>
   </nav>
 
   <header class="hero">
@@ -43,7 +44,7 @@
     </div>
     <div class="stats">
       <div class="stat"><b id="sLive">0</b><span>Days covered</span></div>
-      <div class="stat"><b id="sDays">0</b><span>Roadmap days</span></div>
+      <div class="stat"><b id="sDays">0</b><span>Roadmap sessions</span></div>
       <div class="stat"><b id="sNext">–</b><span>Next up</span></div>
       <div class="meter">
         <div class="row"><span>Roadmap covered</span><span id="sPct">0%</span></div>
@@ -55,7 +56,7 @@
   <div class="toolbar">
     <input class="search" id="q" type="search" placeholder="Search topics, e.g. caching, raft, kafka" aria-label="Search topics">
     <div class="seg" role="group" aria-label="Filter">
-      <button type="button" data-f="all" aria-pressed="true">All days</button>
+      <button type="button" data-f="all" aria-pressed="true">All sessions</button>
       <button type="button" data-f="live" aria-pressed="false">Explainers only</button>
     </div>
     <nav class="jump" id="jump" aria-label="Jump to phase"></nav>
@@ -65,7 +66,7 @@
 
   <section class="howto" aria-label="How to use">
     <div class="box"><h4>Study loop</h4><p>Open the explainer and run its experiments. Close it, sketch the diagram on paper, then explain it out loud without notes.</p></div>
-    <div class="box"><h4>Adding a new explainer</h4><p>Drop the file in this folder, then in <code>index.html</code> set its day's <code>file</code> to the file name, e.g. <code>file:"cache-aside.html"</code>. Commit and push.</p></div>
+    <div class="box"><h4>Adding a new explainer</h4><p>Drop the file in this folder, then in <code>index.html</code> set its session's <code>file</code> to the file name, e.g. <code>file:"cache-aside.html"</code>, and add it to <code>../sd-series.js</code> so it gets the week strip and previous / next links. Commit and push.</p></div>
     <div class="box"><h4>Embedding in Notion</h4><p>Copy an explainer's GitHub Pages URL, type <code>/embed</code> on the day's Notion page, paste it, and drag the block taller.</p></div>
   </section>
 
@@ -73,82 +74,192 @@
 </div>
 
 <script>
-/* ===== Roadmap data. To publish a new explainer, add  file:"your-file.html"  to its day. ===== */
+/* ===== Roadmap data. To publish a new explainer, add  file:"your-file.html"  to its day.
+   A week-level pattern atlas (Kit.atlas revision page) goes in  atlas:{file, t, s?} (or an array of them) on the week; it does not count as a day. ===== */
 const ROADMAP = [
  {phase:"Phase 1", name:"Foundations", weeks:[
-  {w:1,name:"Networking Fundamentals",days:[
-   {d:1,t:"Client-Server Architecture · DNS Resolution",file:"client-server-dns.html"},
-   {d:2,t:"HTTP Lifecycle · Methods · Status Codes",file:"http.html"},
-   {d:3,t:"TCP · UDP · Three-Way Handshake",file:"tcp-udp.html"},
-   {d:4,t:"HTTPS · TLS Handshake · Certificates",file:"https-tls.html"},
-   {d:5,t:"Latency · Throughput · p50/p95/p99",file:"latency-throughput.html"},
-   {d:6,t:"Availability · SLA · SLO · SLI",file:"availability-slos.html"},
-   {d:7,t:"Review: journey of a request",review:true,file:"week-1-review.html"}]},
-  {w:2,name:"Scaling Fundamentals",days:[
-   {d:8,t:"Vertical vs Horizontal Scaling",file:"scaling.html"},
-   {d:9,t:"Stateless Applications",file:"stateless.html"},
-   {d:10,t:"Reverse Proxy · NGINX",file:"proxy-lb-gateway.html"},
-   {d:11,t:"API Gateway",file:"proxy-lb-gateway.html"},
-   {d:12,t:"Load Balancers: L4 vs L7",file:"proxy-lb-gateway.html"},
-   {d:13,t:"Load Balancing Algorithms",file:"load-balancing-algorithms.html"},
-   {d:14,t:"Design: Scalable Web Application",review:true}]},
-  {w:3,name:"Caching & CDN",days:[
-   {d:15,t:"Why Caching Exists",file:"caching-overview.html"},{d:16,t:"Cache Aside"},{d:17,t:"Write Through"},
-   {d:18,t:"Write Behind"},{d:19,t:"LRU · LFU"},{d:20,t:"Cache Stampede"},{d:21,t:"CDN · Edge Caching"}]}
+  {w:1,name:"Networking",days:[
+   {d:1,t:"Client-server & DNS",s:"Request/response model; resolution path (browser → OS → resolver → root → TLD → authoritative); record types A, AAAA, CNAME, MX, NS, TXT; TTL & caching; GeoDNS / DNS failover",file:"client-server-dns.html"},
+   {d:2,t:"HTTP",s:"Request/response anatomy; methods, safe vs idempotent; status codes 2xx/3xx/4xx/5xx; key headers (Cache-Control, ETag, Authorization); keep-alive; HTTP/1.1 vs 2 vs 3",file:"http.html"},
+   {d:3,t:"TCP & UDP",s:"3-way handshake & teardown; sequence numbers, ACKs, retransmission; flow vs congestion control; head-of-line blocking; UDP use cases; OSI vs TCP/IP layers",file:"tcp-udp.html"},
+   {d:4,t:"HTTPS & TLS",s:"Symmetric vs asymmetric; TLS 1.3 (1-RTT) vs 1.2; certificate chain, CA, SNI; TLS termination; mTLS",file:"https-tls.html"},
+   {d:5,t:"Latency & throughput",s:"Latency vs throughput vs bandwidth; p50/p95/p99, tail latency; queueing, saturation, Little's Law; latency numbers to know",file:"latency-throughput.html"},
+   {d:6,t:"Availability",s:"Nines & downtime; SLI / SLO / SLA, error budgets; availability in series vs parallel ; MTBF, MTTR, RPO, RTO",file:"availability-slos.html"},
+   {d:7,t:"Review: journey of a request",s:"Whiteboard the full journey of a request with rough latency per step",review:true,file:"week-1-review.html"}]},
+  {w:2,name:"Scaling",days:[
+   {d:8,t:"Vertical vs horizontal scaling",s:"Limits, cost, single point of failure; what must change to scale out; performance vs scalability problem",file:"scaling.html"},
+   {d:9,t:"Stateless applications",s:"Where state goes (Redis session, JWT, DB, object storage); sticky sessions and their cost",file:"stateless.html"},
+   {d:10,t:"Reverse proxy & NGINX",s:"Forward vs reverse proxy; TLS termination, compression, static caching, buffering; NGINX upstreams (concept)",file:"proxy-lb-gateway.html#h10"},
+   {d:11,t:"API gateway",s:"Routing, auth, rate limiting, transformation, aggregation; BFF ; gateway vs proxy vs LB",file:"proxy-lb-gateway.html#h11"},
+   {d:12,t:"Load balancers",s:"L4 vs L7; health checks, connection draining; active-passive vs active-active ; hardware / software / DNS LB",file:"proxy-lb-gateway.html#h12"},
+   {d:13,t:"LB algorithms",s:"Round robin, weighted RR, IP hash, random, least connections, least response time, power of two choices , consistent hashing",file:"load-balancing-algorithms.html"},
+   {d:14,t:"Design: scale a web app to millions",s:"Scale a web app from 1 user to millions",review:true,file:"scale-web-app.html"}]},
+  {w:3,name:"Caching & CDN",atlas:[{file:"caching-in-practice.html",t:"Playbook: worked design, sizing, CDN keys, invalidation across servers",s:"Open playbook"},{file:"caching-patterns-atlas.html",t:"14 cache patterns: read, write, eviction, failure, CDN",s:"Open pattern atlas"}],days:[
+   {d:15,t:"Why caching",s:"Hit/miss/hit ratio; cache layers (browser → CDN → proxy → in-process → Redis → DB buffer pool); what not to cache",file:"caching-overview.html"},
+   {d:16,t:"Read strategies",s:"Cache-aside, read-through, refresh-ahead; TTL choice; cache key design; serialization; caching at the query level vs the object level",file:"cache-read-strategies.html"},
+   {d:17,t:"Write strategies & invalidation",s:"Write-through, write-behind, write-around ; delete vs update key; stale-data races",file:"cache-write-strategies.html"},
+   {d:18,t:"Eviction",s:"LRU, LFU, FIFO, TTL; expiry vs eviction; Redis maxmemory-policy; LRU = hash map + doubly linked list",file:"cache-eviction.html"},
+   {d:19,t:"Distributed caching",s:"Redis vs Memcached; Redis data types; persistence (RDB/AOF) & replication; L1 + L2 (.NET HybridCache)",file:"distributed-caching.html"},
+   {d:20,t:"Caching failure modes",s:"Stampede (single-flight, locks, stale-while-revalidate, jitter); penetration, avalanche, hot keys",file:"cache-failure-modes.html"},
+   {d:21,t:"CDN & HTTP caching",s:"Pull vs push CDN; Cache-Control, ETag, 304; versioned file names; purge; signed URLs",file:"cdn-http-caching.html"}]},
+  {w:4,name:"Estimation & interview method",days:[
+   {d:22,t:"Numbers to know",s:"Powers of two; latency numbers; 1 day ≈ 10⁵ s; 1M req/day ≈ 12 QPS"},
+   {d:23,t:"Traffic & storage",s:"DAU → QPS → peak QPS; read:write ratio; storage = record size × count × retention × replicas"},
+   {d:24,t:"Bandwidth, memory, servers",s:"Bandwidth from QPS × payload; cache sizing (80/20); server count"},
+   {d:25,t:"Interview framework",s:"Clarify (5 min) → estimate (3) → API (3) → high-level design (10) → deep dive (15) → bottlenecks (5); for every answer state what you'd measure, the quick mitigation, the root-cause fix and the trade-off"},
+   {d:26,t:"Data modelling",s:"Access patterns first; entities, keys, partition keys; when to denormalize"},
+   {d:27,t:"Design: URL shortener",s:"ID generation, base62, 301 vs 302, caching, analytics",review:true},
+   {d:28,t:"Design: Pastebin + review",s:"Object storage + metadata DB, expiry",review:true}]}
  ]},
  {phase:"Phase 2", name:"Databases", weeks:[
-  {w:4,name:"Database Fundamentals",days:[
-   {d:22,t:"SQL vs NoSQL"},{d:23,t:"ACID vs BASE"},{d:24,t:"B-Tree Indexes"},{d:25,t:"Composite Indexes"},
-   {d:26,t:"Covering Indexes"},{d:27,t:"Query Planner"},{d:28,t:"Normalization vs Denormalization"}]},
-  {w:5,name:"Database Internals",days:[
-   {d:29,t:"Storage Pages"},{d:30,t:"Segments"},{d:31,t:"WAL (Write-Ahead Logging)"},{d:32,t:"MVCC"},
-   {d:33,t:"Read Amplification"},{d:34,t:"Write Amplification"},{d:35,t:"PostgreSQL Architecture"}]},
-  {w:6,name:"Transactions & Concurrency",days:[
-   {d:36,t:"Locks"},{d:37,t:"Isolation Levels"},{d:38,t:"Dirty Reads"},{d:39,t:"Non-Repeatable Reads"},
-   {d:40,t:"Phantom Reads"},{d:41,t:"Deadlocks"},{d:42,t:"Optimistic vs Pessimistic Concurrency"}]}
+  {w:5,name:"Fundamentals & indexing",days:[
+   {d:29,t:"Relational refresher",s:"Keys, constraints, joins; normalization 1NF–3NF vs denormalization"},
+   {d:30,t:"ACID vs BASE",s:"What each ACID letter guarantees and how (undo log, WAL, fsync); BASE"},
+   {d:31,t:"NoSQL families",s:"Key-value, document, wide-column, graph: data model and query pattern of each"},
+   {d:32,t:"SQL vs NoSQL",s:"Schema, joins, transactions, scaling, consistency; choose by access pattern; polyglot persistence"},
+   {d:33,t:"B-tree indexes",s:"Structure; lookup & range scan; clustered vs non-clustered, heap; write cost"},
+   {d:34,t:"Composite & covering",s:"Leftmost prefix; INCLUDE columns; selectivity; partial / hash / full-text indexes"},
+   {d:35,t:"Query planner & connections",s:"Execution plans, seek vs scan, statistics; N+1; keyset pagination; SQL tuning; connection pooling: borrow → execute → return, pool sizing, instances × pool size ≤ DB max connections, PgBouncer"}]},
+  {w:6,name:"Storage engines",days:[
+   {d:36,t:"Pages & buffer pool",s:"Pages, extents, dirty pages, checkpoints"},
+   {d:37,t:"WAL",s:"Write-ahead rule; crash recovery replay; fsync, group commit"},
+   {d:38,t:"B-tree vs LSM-tree",s:"Memtable, SSTables, compaction; why LSM writes fast"},
+   {d:39,t:"Amplification",s:"Read / write / space amplification; Bloom filters in LSM"},
+   {d:40,t:"MVCC",s:"Row versions, snapshots; VACUUM / SQL Server version store"},
+   {d:41,t:"PostgreSQL architecture",s:"Processes, shared buffers, WAL, autovacuum, replication slots"},
+   {d:42,t:"Review: read & write paths",s:"Draw read & write paths for a B-tree DB and an LSM DB",review:true}]},
+  {w:7,name:"Transactions & concurrency",days:[
+   {d:43,t:"Locks",s:"Shared/exclusive; row/page/table; escalation; 2PL"},
+   {d:44,t:"Isolation levels",s:"Read uncommitted → serializable, snapshot; defaults in SQL Server / Postgres / MySQL"},
+   {d:45,t:"Read anomalies",s:"Dirty, non-repeatable, phantom reads; level-vs-anomaly matrix"},
+   {d:46,t:"Write anomalies",s:"Lost update, write skew; SELECT … FOR UPDATE; SSI"},
+   {d:47,t:"Deadlocks",s:"Cycle, detection, victim; lock ordering, short transactions"},
+   {d:48,t:"Optimistic vs pessimistic",s:"rowversion / EF Core concurrency token + retry; atomic updates"},
+   {d:49,t:"Design: booking",s:"Prevent double booking: constraints, holds with expiry, optimistic locking",review:true}]}
  ]},
- {phase:"Phase 3", name:"Distributed Data", weeks:[
-  {w:7,name:"Replication",days:[
-   {d:43,t:"Leader-Follower Replication"},{d:44,t:"Sync Replication"},{d:45,t:"Async Replication"},
-   {d:46,t:"Replication Lag"},{d:47,t:"Read Replicas"},{d:48,t:"Failover"},{d:49,t:"Design Exercise",review:true}]},
-  {w:8,name:"Sharding",days:[
-   {d:50,t:"Horizontal Partitioning"},{d:51,t:"Range-Based Sharding"},{d:52,t:"Hash-Based Sharding"},
-   {d:53,t:"Hot Shards"},{d:54,t:"Consistent Hashing"},{d:55,t:"Virtual Nodes"},{d:56,t:"Design Exercise",review:true}]},
-  {w:9,name:"Consistency",days:[
-   {d:57,t:"CAP Theorem"},{d:58,t:"PACELC"},{d:59,t:"Strong Consistency"},{d:60,t:"Eventual Consistency"},
-   {d:61,t:"Quorum Reads"},{d:62,t:"Quorum Writes"},{d:63,t:"Trade-Off Analysis",review:true}]}
+ {phase:"Phase 3", name:"Distributed data", weeks:[
+  {w:8,name:"Replication",days:[
+   {d:50,t:"Leader-follower",s:"Why replicate; statement vs WAL vs logical replication"},
+   {d:51,t:"Sync / async / semi-sync",s:"Durability vs latency"},
+   {d:52,t:"Replication lag",s:"Read-your-writes, monotonic reads, consistent prefix; fixes"},
+   {d:53,t:"Read replicas & failover",s:"Read routing; detection, promotion; split brain & fencing"},
+   {d:54,t:"Multi-leader",s:"Multi-region / offline; conflicts: LWW, merge, CRDTs"},
+   {d:55,t:"Leaderless",s:"N/R/W; read repair, hinted handoff, Merkle trees"},
+   {d:56,t:"Design",s:"Multi-region read-heavy patient profile service",review:true}]},
+  {w:9,name:"Partitioning & sharding",days:[
+   {d:57,t:"Partitioning basics",s:"Partitioning vs replication; horizontal vs vertical; federation"},
+   {d:58,t:"Range sharding",s:"Shard key; range scans; hot ranges"},
+   {d:59,t:"Hash sharding",s:"Even spread; mod-N resharding problem"},
+   {d:60,t:"Consistent hashing",s:"Ring, clockwise successor, virtual nodes"},
+   {d:61,t:"Hot shards",s:"Celebrity problem, key salting, splitting; directory sharding"},
+   {d:62,t:"Life with shards",s:"Local vs global secondary indexes; cross-shard queries; rebalancing; routing"},
+   {d:63,t:"Design: key-value store",s:"Sharding + replication + quorum",review:true}]},
+  {w:10,name:"Consistency",days:[
+   {d:64,t:"CAP",s:"CP vs AP during a partition; misconceptions"},
+   {d:65,t:"PACELC",s:"Latency vs consistency without a partition; examples"},
+   {d:66,t:"Consistency models",s:"Linearizable → sequential → causal → read-your-writes / monotonic → eventual"},
+   {d:67,t:"Strong consistency",s:"How it's achieved and its cost"},
+   {d:68,t:"Weak & eventual consistency",s:"Weak consistency: best effort, reads may never see a write (VoIP, live video, memcached)  ; eventual: convergence; LWW, version vectors, CRDTs"},
+   {d:69,t:"Quorum",s:"R + W > N; tuning; sloppy quorum"},
+   {d:70,t:"Trade-off exercise",s:"Bank ledger vs social feed vs shopping cart"}]}
  ]},
- {phase:"Phase 4", name:"Distributed Systems", weeks:[
-  {w:10,name:"Coordination & Consensus",days:[
-   {d:64,t:"Distributed Locks"},{d:65,t:"Leader Election"},{d:66,t:"The Consensus Problem"},{d:67,t:"Raft"},
-   {d:68,t:"Paxos (Conceptual)"},{d:69,t:"ZooKeeper"},{d:70,t:"etcd"}]},
-  {w:11,name:"Distributed Transactions",days:[
-   {d:71,t:"Two-Phase Commit"},{d:72,t:"Saga Pattern"},{d:73,t:"Choreography"},{d:74,t:"Orchestration"},
-   {d:75,t:"Outbox Pattern"},{d:76,t:"Inbox Pattern"},{d:77,t:"Idempotency"}]},
-  {w:12,name:"Messaging Systems",days:[
-   {d:78,t:"Queue vs Pub/Sub"},{d:79,t:"Kafka Concepts"},{d:80,t:"RabbitMQ Concepts"},{d:81,t:"Delivery Guarantees"},
-   {d:82,t:"Dead Letter Queues"},{d:83,t:"Backpressure"},{d:84,t:"Event-Driven Architecture"}]}
+ {phase:"Phase 4", name:"Distributed systems", weeks:[
+  {w:11,name:"Coordination & consensus",days:[
+   {d:71,t:"Time & ordering",s:"Clock skew, NTP; Lamport clocks; vector clocks"},
+   {d:72,t:"Failure detection",s:"Heartbeats, timeouts, gossip, phi-accrual"},
+   {d:73,t:"Leader election",s:"Leases; via etcd/ZooKeeper; bully algorithm"},
+   {d:74,t:"Consensus & Raft",s:"Majority quorums; terms, elections, log replication, commit index"},
+   {d:75,t:"Paxos, ZooKeeper, etcd",s:"Paxos concept; what coordination services are used for"},
+   {d:76,t:"Distributed locks",s:"Redis SET NX PX, leases, Redlock debate; fencing tokens"},
+   {d:77,t:"Split brain + review",s:"Cause and fix; draw election + heartbeat + failover"}]},
+  {w:12,name:"Distributed transactions",days:[
+   {d:78,t:"2PC",s:"Prepare/commit; coordinator failure; blocking"},
+   {d:79,t:"Saga",s:"Local transactions + compensations; PENDING/CONFIRMED/FAILED states"},
+   {d:80,t:"Choreography vs orchestration",s:"Trade-offs; workflow engines (concept)"},
+   {d:81,t:"Outbox & CDC",s:"Dual-write problem; transactional outbox; CDC"},
+   {d:82,t:"Inbox",s:"Idempotent consumers; dedupe table"},
+   {d:83,t:"Idempotency keys",s:"Key → stored response; IN_PROGRESS; request hash; TTL"},
+   {d:84,t:"Design: checkout / payment",s:"Saga + outbox + idempotency end to end",review:true}]},
+  {w:13,name:"Messaging",days:[
+   {d:85,t:"Why async; queue types",s:"Decoupling, load leveling, 202 Accepted + background worker; standard queue (at-least-once, order may vary) vs FIFO vs pub/sub vs distributed log vs priority queue ; task queues"},
+   {d:86,t:"Kafka",s:"Topics, partitions, offsets, consumer groups, ordering, retention, ISR"},
+   {d:87,t:"RabbitMQ & SQS",s:"Exchanges, acks, prefetch; visibility timeout; standard vs FIFO; log vs broker"},
+   {d:88,t:"Delivery guarantees",s:"At-most / at-least / effectively-once; ordering; message groups"},
+   {d:89,t:"DLQ & retries",s:"Backoff, poison messages, DLQ, redrive"},
+   {d:90,t:"Backpressure",s:"Bounded queues, consumer lag, load shedding, scale on queue depth"},
+   {d:91,t:"Event-driven architecture",s:"Events vs commands; notification vs state transfer; schema registry; design: notification system"}]}
  ]},
- {phase:"Phase 5", name:"Modern Architecture", weeks:[
-  {w:13,name:"Service Architecture",days:[
-   {d:85,t:"Monoliths"},{d:86,t:"Microservices"},{d:87,t:"Service Boundaries"},{d:88,t:"Service Discovery"},
-   {d:89,t:"API Gateway Deep Dive"},{d:90,t:"CQRS"},{d:91,t:"Event Sourcing (Conceptual)"}]},
-  {w:14,name:"APIs & Security",days:[
-   {d:92,t:"REST"},{d:93,t:"gRPC"},{d:94,t:"GraphQL"},{d:95,t:"Pagination"},{d:96,t:"JWT"},{d:97,t:"OAuth2"},
-   {d:98,t:"OpenID Connect · RBAC"}]}
+ {phase:"Phase 5", name:"Architecture, APIs & security", weeks:[
+  {w:14,name:"Service architecture",days:[
+   {d:92,t:"Monolith → microservices",s:"Modular monolith; when to split"},
+   {d:93,t:"Service boundaries",s:"Bounded contexts; database per service; shared-DB anti-pattern"},
+   {d:94,t:"Service discovery",s:"Client- vs server-side; registry; DNS; health checks"},
+   {d:95,t:"Gateway, sidecar, mesh",s:"Gateway vs BFF; sidecar; service mesh (mTLS, retries, observability)"},
+   {d:96,t:"CQRS",s:"Write vs read models; projections; materialized views"},
+   {d:97,t:"Event sourcing",s:"Event store, projections, snapshots, replay; when not to use"},
+   {d:98,t:"Migration patterns",s:"Strangler fig; anti-corruption layer"}]},
+  {w:15,name:"APIs & real-time",days:[
+   {d:99,t:"REST deep dive",s:"Resource modelling; versioning (/v1 vs /v2 side by side during migration); ETag / If-None-Match (304) / If-Match; idempotent DELETE (same effect on retry, status may differ)"},
+   {d:100,t:"RPC, gRPC & GraphQL",s:"RPC vs REST: actions vs resources, when each fits  ; gRPC: Protobuf, HTTP/2, streaming; GraphQL: schema, resolvers, N+1 / DataLoader"},
+   {d:101,t:"Pagination & batch",s:"Offset vs cursor; batch/bulk endpoints"},
+   {d:102,t:"Real-time",s:"Polling, long polling, SSE, WebSockets, webhooks; scaling WebSockets with a backplane"},
+   {d:103,t:"Rate limiting",s:"Token bucket, leaky bucket, fixed / sliding window; Redis limiter; 429 + Retry-After"},
+   {d:104,t:"Design: chat app",s:"Messages, presence, receipts, storage",review:true},
+   {d:105,t:"Design: rate limiter service",s:"—",review:true}]},
+  {w:16,name:"Security",days:[
+   {d:106,t:"AuthN basics",s:"AuthN vs AuthZ; sessions vs tokens; password hashing"},
+   {d:107,t:"JWT",s:"Structure, HS256 vs RS256, validation, refresh, revocation"},
+   {d:108,t:"OAuth 2.0",s:"Auth code + PKCE, client credentials, scopes"},
+   {d:109,t:"OIDC & SSO",s:"ID vs access token; SSO; SAML vs OIDC"},
+   {d:110,t:"Authorization models",s:"RBAC, ABAC, ReBAC; tenant isolation"},
+   {d:111,t:"Securing systems",s:"TLS/mTLS, encryption at rest, secrets; input sanitization, SQL injection, XSS, principle of least privilege  ; BOLA, CORS, CSRF"},
+   {d:112,t:"Design: multi-tenant SaaS auth",s:"—",review:true}]}
  ]},
- {phase:"Phase 6", name:"Reliability, Cloud & Operations", weeks:[
-  {w:15,name:"Reliability",days:[
-   {d:99,t:"Retries"},{d:100,t:"Exponential Backoff"},{d:101,t:"Circuit Breakers"},{d:102,t:"Timeouts"},
-   {d:103,t:"Bulkheads"},{d:104,t:"Graceful Degradation"},{d:105,t:"Multi-Region Design"}]},
-  {w:16,name:"Cloud & Platform Concepts",days:[
-   {d:106,t:"Object Storage"},{d:107,t:"CDN Architecture"},{d:108,t:"Containers"},{d:109,t:"Docker Fundamentals"},
-   {d:110,t:"Kubernetes: Pods · Services"},{d:111,t:"Deployments · ConfigMaps · Secrets · Ingress"},{d:112,t:"Service Mesh (Conceptual)"}]}
+ {phase:"Phase 6", name:"Reliability & operations", weeks:[
+  {w:17,name:"Reliability",days:[
+   {d:113,t:"Reliability goals",s:"Why systems fail; blast radius; designing for failure (overview; each failure type gets its own session in Week 20)"},
+   {d:114,t:"Timeouts & retries",s:"Deadline propagation; backoff + jitter; retry budgets"},
+   {d:115,t:"Circuit breaker & bulkheads",s:"Closed → open → half-open; bulkheads; fallbacks; Polly"},
+   {d:116,t:"Load shedding",s:"Server-side limits, kill switches, graceful degradation"},
+   {d:117,t:"Redundancy & failover",s:"Active-passive vs active-active; backups; RPO/RTO"},
+   {d:118,t:"Multi-region",s:"Data replication choices, GeoDNS, regional failover"},
+   {d:119,t:"Chaos engineering",s:"Game days, fault injection"}]},
+  {w:18,name:"Cloud & delivery",days:[
+   {d:120,t:"Object storage",s:"Buckets, keys, storage classes; presigned URLs; multipart upload"},
+   {d:121,t:"Containers & Docker",s:"Images, layers, containers vs VMs, registries"},
+   {d:122,t:"Kubernetes core",s:"Pods, Deployments, Services, Ingress, ConfigMaps, Secrets, HPA"},
+   {d:123,t:"Deployment strategies",s:"Rolling, blue-green, canary, feature flags; expand/contract migrations"},
+   {d:124,t:"Autoscaling & capacity",s:"Scale on CPU / latency / queue depth; warm pools"},
+   {d:125,t:"CDN at scale",s:"Multi-CDN, origin shield, edge compute"},
+   {d:126,t:"Service mesh + review",s:"—"}]}
  ]},
- {phase:"Phase 7", name:"Observability, Search & Analytics", weeks:[
-  {w:17,name:"Observability & Data",days:[
-   {d:113,t:"Logging"},{d:114,t:"Metrics"},{d:115,t:"Tracing"},{d:116,t:"OpenTelemetry"},
-   {d:117,t:"Search: Inverted Index · Tokenization · Ranking"},{d:118,t:"OLTP vs OLAP"},{d:119,t:"Data Warehouse · Data Lake"}]}
+ {phase:"Phase 7", name:"Observability & data", weeks:[
+  {w:19,name:"Observability & data",days:[
+   {d:127,t:"Logging",s:"Structured logs, trace IDs, sampling, centralization"},
+   {d:128,t:"Metrics",s:"Counters, gauges, histograms; RED & USE; SLO alerts; cardinality"},
+   {d:129,t:"Tracing",s:"Spans, context propagation, OpenTelemetry"},
+   {d:130,t:"When logs aren't enough",s:"Structured JSON logs + trace ID; context fields (requestId, userId, operation, latency); log at boundaries; no PII; consistent levels; metrics + tracing + SLO alerts together"},
+   {d:131,t:"Search",s:"Inverted index, analyzers, BM25; Elasticsearch shards; typeahead"},
+   {d:132,t:"OLTP vs OLAP",s:"Row vs columnar; warehouse vs lake vs lakehouse; ETL vs ELT"},
+   {d:133,t:"Batch vs stream",s:"MapReduce, Spark; Kafka Streams / Flink; windowing; lambda vs kappa"}]}
+ ]},
+ {phase:"Phase 8", name:"Interview readiness", weeks:[
+  {w:20,name:"Production failures & troubleshooting",days:[
+   {d:134,t:"Failure types I",s:"Cascading failure (one dependency fails, callers overload); retry storm (timeout → retry → overload); thundering herd (many clients wake at once, cache expiry)"},
+   {d:135,t:"Failure types II",s:"Deadlock; memory leak (retained allocations grow); split brain (two leaders, conflicting writes); corner-case data corruption (integer overflow, time zones, encoding)"},
+   {d:136,t:"Troubleshooting framework",s:"Detect & quantify (p50/p95/p99, RED, USE, Little's Law) → mitigate fast → root cause from traces/logs/metrics → prevent recurrence → state trade-offs; scenario: API slow under load"},
+   {d:137,t:"Resource exhaustion",s:"Thread-pool exhaustion (thread dumps; sizing: CPU-bound ≈ cores + 1, I/O-bound ≈ cores × (1 + wait/compute)); DB connections exhausted (leaks, long transactions, pool sizing, PgBouncer); app crashes after a while (heap dump, dotnet-dump / dotnet-gcdump, unbounded caches)"},
+   {d:138,t:"Works locally, fails in prod",s:"Config & secrets; DNS, TLS, proxies; CPU/memory limits; version drift; data volume; time zones & concurrency; permissions; readiness/liveness probes; intermittent inter-service failures (stale keep-alive, DNS caching, no graceful shutdown)"},
+   {d:139,t:"Safe change",s:"Deploy breaks service communication: backward-compatible additive changes, expand → migrate → contract, tolerant readers, schema registry, contract tests (Pact), canary/blue-green; scheduled job runs on many instances: distributed lock, leader election, K8s CronJob concurrencyPolicy: Forbid, idempotent jobs"},
+   {d:140,t:"Peaks & spikes",s:"High latency at peak: caching, indexes/N+1, move work async, parallel calls, batching, hedged requests; traffic spike: rate limiting, load shedding, queue-based load leveling, backpressure, pre-scaling; inconsistent data from concurrent updates: atomic SQL, optimistic/pessimistic locks, serialize per key"}]},
+  {w:21,name:"Building blocks",days:[
+   {d:141,t:"Unique IDs",s:"UUID v4 vs v7, ticket server, Snowflake"},
+   {d:142,t:"Probabilistic structures",s:"Bloom filter, HyperLogLog, count-min sketch"},
+   {d:143,t:"Geospatial",s:"Geohash, quadtree, S2; nearby search"},
+   {d:144,t:"Feed fan-out",s:"Fan-out on write vs read; celebrity hybrid"},
+   {d:145,t:"Media upload",s:"Presigned, chunked/resumable upload, transcoding, CDN"},
+   {d:146,t:"Scheduling",s:"Distributed cron, delay queues, timer wheels"},
+   {d:147,t:"Counting at scale",s:"Sharded counters, approximate counts, leaderboards"}]}
  ]}
 ];
 
@@ -161,7 +272,7 @@ $('sLive').textContent=live.length;
 $('sDays').textContent=allDays.length;
 const lastLive=live.length?Math.max(...live.map(d=>d.d)):0;
 const next=allDays.find(d=>d.d>lastLive&&!d.file);
-$('sNext').textContent=next?`Day ${next.d}`:'Done';
+$('sNext').textContent=next?`H${next.d}`:'Done';
 const pct=Math.round(live.length*100/allDays.length);
 $('sPct').textContent=`${live.length} / ${allDays.length} · ${pct}%`;
 $('bar').style.width=Math.max(pct,live.length?2:0)+'%';
@@ -169,13 +280,16 @@ $('bar').style.width=Math.max(pct,live.length?2:0)+'%';
 $('jump').innerHTML=ROADMAP.map((p,i)=>`<a href="#p${i+1}">${p.phase.replace('Phase ','P')} · ${esc(p.name)}</a>`).join('');
 
 let filter='all', query='';
+/* weeks shown open by default: the one with the next session and the one before it; the rest fold away */
+const wkOf=d=>ROADMAP.flatMap(p=>p.weeks).find(w=>w.days.some(x=>x.d===d));
+const OPEN=new Set([next&&wkOf(next.d)?.w, next&&wkOf(next.d)?.w-1].filter(Boolean));
 function card(d){
   const cls=['day-card'];if(d.review)cls.push('review');
   if(d.file){
     cls.push('live');
-    return `<a class="${cls.join(' ')}" href="${esc(d.file)}"><span class="day">Day ${d.d}</span><span class="topic">${esc(d.t)}</span><span class="status">Open explainer</span></a>`;
+    return `<a class="${cls.join(' ')}" href="${esc(d.file)}" title="${esc(d.s||'')}"><span class="day">H${d.d}</span><span class="topic">${esc(d.t)}</span><span class="status">Open explainer</span></a>`;
   }
-  return `<div class="${cls.join(' ')}"><span class="day">Day ${d.d}</span><span class="topic">${esc(d.t)}</span><span class="status">${d.review?'Practice day':'Coming soon'}</span></div>`;
+  return `<div class="${cls.join(' ')}" title="${esc(d.s||'')}"><span class="day">H${d.d}</span><span class="topic">${esc(d.t)}</span><span class="status">${d.review?'Practice day':'Coming soon'}</span></div>`;
 }
 function render(){
   const q=query.trim().toLowerCase();
@@ -183,9 +297,11 @@ function render(){
   ROADMAP.forEach((p,i)=>{
     let weeks='';
     p.weeks.forEach(w=>{
-      const days=w.days.filter(d=>(filter==='all'||d.file)&&(!q||d.t.toLowerCase().includes(q)||w.name.toLowerCase().includes(q)||String(d.d)===q));
+      const days=w.days.filter(d=>(filter==='all'||d.file)&&(!q||d.t.toLowerCase().includes(q)||(d.s||'').toLowerCase().includes(q)||w.name.toLowerCase().includes(q)||'h'+d.d===q||String(d.d)===q));
       if(!days.length)return;
-      weeks+=`<div class="week"><h3 class="section-rule"><span class="wk">Week ${w.w}</span>${esc(w.name)}</h3><div class="day-grid">${days.map(card).join('')}</div></div>`;
+      const at=w.atlas&&!q?[].concat(w.atlas).map(a=>`<a class="day-card live atlas-card" href="${esc(a.file)}"><span class="day">Week ${w.w} · ${a.s==='Open playbook'?'put it together':'at a glance'}</span><span class="topic">${esc(a.t)}</span><span class="status">${esc(a.s||'Open pattern atlas')}</span></a>`).join(''):'';
+      const nLive=w.days.filter(d=>d.file).length, open=q||filter!=='all'||OPEN.has(w.w);
+      weeks+=`<details class="week"${open?' open':''}><summary class="section-rule"><span class="wk">Week ${w.w}</span>${esc(w.name)}<span class="wk-meta">H${w.days[0].d}–${w.days[w.days.length-1].d} · ${nLive?nLive+' of '+w.days.length+' ready':'coming soon'}</span></summary><div class="day-grid">${at}${days.map(card).join('')}</div></details>`;
     });
     if(!weeks)return;
     const wr=p.weeks.length>1?`Weeks ${p.weeks[0].w}–${p.weeks[p.weeks.length-1].w}`:`Week ${p.weeks[0].w}`;

@@ -12,6 +12,8 @@
 <link rel="stylesheet" href="../../assets/css/explainer.css">
 <script src="../../assets/js/theme.js"></script>
 <script src="../../assets/js/explainer-kit.js"></script>
+<script src="../sd-series.js"></script>
+<script src="foundations-flows.js"></script>
 <style>.dead rect { stroke: var(--red) !important; stroke-dasharray: 6 4; }</style>
 </head>
 <body>
@@ -27,18 +29,23 @@
     <ul class="lede"><li>Three layers sit between users and your code.</li><li><b>Reverse proxy</b>: protects and optimises traffic for a backend.</li><li><b>Load balancer</b>: spreads traffic across healthy instances.</li><li><b>API gateway</b>: applies API rules (auth, rate limits, routing) before a service is reached.</li><li>Real products often do more than one of these.</li></ul>
   </header>
 
-  <section aria-labelledby="ladderH">
-    <h2 id="ladderH">Each layer adds capabilities</h2>
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn: what each layer adds</h2>
+    <p class="sec-sub">Each layer in front of your app does one more job. Follow one request through all of them.</p>
+    <div class="sub-block" aria-labelledby="ladderH">
+    <h3 class="sec-h3" id="ladderH">Each layer adds capabilities</h3>
     <div class="cards">
       <div class="card"><h3>Reverse proxy</h3><p>"Protect and optimise access to my backend."</p><ul><li>TLS termination</li><li>Caching and compression</li><li>Hides backend IPs, filters bad requests</li><li>One public entry point</li></ul></div>
       <div class="card"><h3>Load balancer</h3><p>"Spread traffic and survive instance failures."</p><ul><li>Distribution algorithms (<a href="load-balancing-algorithms.html">Day 13</a>)</li><li>Health checks and failover</li><li>Add or remove instances live</li></ul></div>
       <div class="card"><h3>API gateway</h3><p>"Govern and expose APIs consistently."</p><ul><li>Authentication and authorisation</li><li>Rate limits and quotas per client or plan</li><li>Routing by path or version, request transformation</li><li>Central logs and metrics</li></ul></div>
     </div>
     <p class="sub" style="margin-top:12px">Tools: Nginx, HAProxy, Caddy and Envoy can do proxying and load balancing; Kong, AWS API Gateway, Apigee and Tyk are gateways; AWS ALB (Layer 7) and NLB (Layer 4) are managed load balancers.</p>
-  </section>
-
-  <section aria-labelledby="pathTitle">
-    <h2 class="stage-title" id="pathTitle">Follow a request through production</h2>
+  </div>
+    <div class="sub-block" aria-labelledby="pathTitle">
+    <h3 class="stage-title sub" id="pathTitle">Follow a request through production</h3>
     <div class="stage-kind">Pick a request · each layer either answers, rejects, or passes it on</div>
     <div class="chip-group"><div class="chips" id="scenChips"></div></div>
     <div class="controls" style="margin-top:10px">
@@ -54,10 +61,22 @@
         <div><div class="label">Why this layer</div><p id="pathWhy">–</p></div>
       </div>
     </div>
+  </div>
   </section>
 
-  <section aria-labelledby="l4Title">
-    <h2 class="stage-title" id="l4Title">Layer 4 vs Layer 7 load balancing</h2>
+  <section id="compare" data-nav="Compare">
+    <h2 class="sec-h"><span class="sec-n">2</span>Compare: proxies, L4 vs L7, gateway patterns and HA</h2>
+    <span id="h10"></span>
+    <div class="sub-block" aria-labelledby="fwdTitle">
+    <h3 class="sec-h3" id="fwdTitle">Forward vs reverse proxy</h3>
+    <div class="scroll">
+      <svg class="diagram narrow" id="fwd" viewBox="0 0 1000 220" aria-label="Forward proxy acts for clients; reverse proxy acts for servers"></svg>
+    </div>
+    <p class="sub">Same mechanism, different side. A forward proxy hides the <b>clients</b> (company egress proxy, VPN). A reverse proxy hides the <b>servers</b>.</p>
+  </div>
+    <span id="h12"></span>
+    <div class="sub-block" aria-labelledby="l4Title">
+    <h3 class="stage-title sub" id="l4Title">Layer 4 vs Layer 7 load balancing</h3>
     <div class="stage-kind">Two users, each with one connection carrying two requests</div>
     <div class="controls">
       <div class="seg" id="lSeg" role="group" aria-label="Load balancer type">
@@ -82,30 +101,16 @@
         </tbody>
       </table>
     </div>
+  </div>
+    <h3 class="sec-h3" id="h11">Gateway patterns and keeping the front door up</h3>
+    <p class="sub">BFF and aggregation are what a gateway does beyond routing; DNS balancing and active-passive / active-active are how the balancers themselves stay available. Press <b>▶ Play</b> on a card.</p>
+    <div id="atlas"></div>
   </section>
 
-  <section aria-labelledby="fwdTitle">
-    <h2 id="fwdTitle">Forward vs reverse proxy</h2>
-    <div class="scroll">
-      <svg class="diagram narrow" id="fwd" viewBox="0 0 1000 220" aria-label="Forward proxy acts for clients; reverse proxy acts for servers"></svg>
-    </div>
-    <p class="sub">Same mechanism, different side. A forward proxy hides the <b>clients</b> (company egress proxy, VPN). A reverse proxy hides the <b>servers</b>.</p>
-  </section>
-
-  <section aria-labelledby="fixH">
-    <h2 id="fixH">Corrections and additions</h2>
-    <div class="notes">
-      <div class="note"><span class="flag">Corrected</span><p><b>A server with no proxy in front doesn't return 502.</b> 502 Bad Gateway is produced by a proxy or gateway when its upstream misbehaves. An overloaded bare server shows up as timeouts, refused connections or 503s.</p></div>
-      <div class="note"><span class="flag">Corrected</span><p><b>The server doesn't validate certificates in normal TLS</b>; the client does. The server's TLS cost is the key exchange and signing. Offloading that is what TLS termination saves (validation happens on the server only with mutual TLS).</p></div>
-      <div class="note"><span class="flag">Corrected</span><p><b>"A load balancer is a reverse proxy" is true for Layer 7.</b> Layer 4 balancers often forward TCP connections without terminating them, so they never see HTTP.</p></div>
-      <div class="note"><span class="flag">Corrected</span><p><b>A CDN terminating TLS doesn't remove TLS from your origin.</b> The edge usually opens its own HTTPS connection to the origin. The saving is that it reuses a few long-lived connections instead of one handshake per user.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Health checks come in two kinds:</b> active (the balancer polls <span class="mono">/health</span> every few seconds) and passive (it notices real requests failing). <b>Connection draining</b> lets in-flight requests finish before an instance is removed for a deploy.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Every layer is itself a dependency.</b> Gateways and load balancers run as redundant pairs or managed services; otherwise you've moved the single point of failure, not removed it.</p></div>
-    </div>
-  </section>
-
-  <section aria-labelledby="needH">
-    <h2 id="needH">Which do you actually need?</h2>
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">3</span>Try it: which do you actually need?</h2>
+    <div class="sub-block" aria-labelledby="needH">
+    <h3 class="sec-h3" id="needH">Which do you actually need?</h3>
     <div class="scroll card table-card">
       <table>
         <thead><tr><th>Situation</th><th>Usually enough</th></tr></thead>
@@ -118,10 +123,43 @@
         </tbody>
       </table>
     </div>
+  </div>
   </section>
 
-  <section aria-labelledby="quizH">
-    <h2 id="quizH">Check yourself</h2>
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">4</span>Revise in two minutes</h2>
+    <h3 class="sec-h3">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">Hide servers, terminate TLS, compress, cache, buffer slow clients</span><span class="arrow">→</span><span class="then">Reverse proxy (NGINX, IIS ARR, YARP)</span></li>
+      <li><span class="if">Control what employees reach on the internet</span><span class="arrow">→</span><span class="then">Forward proxy</span></li>
+      <li><span class="if">Spread traffic, health checks, drain connections</span><span class="arrow">→</span><span class="then">Load balancer</span></li>
+      <li><span class="if">Route by IP and port only, any protocol</span><span class="arrow">→</span><span class="then">L4 load balancer</span></li>
+      <li><span class="if">Route by path, header or cookie</span><span class="arrow">→</span><span class="then">L7 load balancer</span></li>
+      <li><span class="if">Auth, rate limits, routing, versioning for many APIs</span><span class="arrow">→</span><span class="then">API gateway</span></li>
+      <li><span class="if">Web and mobile need different responses</span><span class="arrow">→</span><span class="then">Backend for frontend (BFF)</span></li>
+      <li><span class="if">One screen needs 5 services</span><span class="arrow">→</span><span class="then">Gateway aggregation (parallel calls, timeouts)</span></li>
+      <li><span class="if">The balancer itself must not be a single point of failure</span><span class="arrow">→</span><span class="then">Active-passive pair with a floating IP, or active-active + DNS</span></li>
+    </ul>
+    <div class="sub-block" aria-labelledby="fixH">
+    <h3 class="sec-h3" id="fixH">Corrections and additions</h3>
+    <div class="notes">
+      <div class="note"><span class="flag">Corrected</span><p><b>A server with no proxy in front doesn't return 502.</b> 502 Bad Gateway is produced by a proxy or gateway when its upstream misbehaves. An overloaded bare server shows up as timeouts, refused connections or 503s.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>The server doesn't validate certificates in normal TLS</b>; the client does. The server's TLS cost is the key exchange and signing. Offloading that is what TLS termination saves (validation happens on the server only with mutual TLS).</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>"A load balancer is a reverse proxy" is true for Layer 7.</b> Layer 4 balancers often forward TCP connections without terminating them, so they never see HTTP.</p></div>
+      <div class="note"><span class="flag">Corrected</span><p><b>A CDN terminating TLS doesn't remove TLS from your origin.</b> The edge usually opens its own HTTPS connection to the origin. The saving is that it reuses a few long-lived connections instead of one handshake per user.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Health checks come in two kinds:</b> active (the balancer polls <span class="mono">/health</span> every few seconds) and passive (it notices real requests failing). <b>Connection draining</b> lets in-flight requests finish before an instance is removed for a deploy.</p></div>
+      <div class="note"><span class="flag add">Added</span><p><b>Every layer is itself a dependency.</b> Gateways and load balancers run as redundant pairs or managed services; otherwise you've moved the single point of failure, not removed it.</p></div>
+    </div>
+  </div>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">5</span>Test yourself</h2>
+    <p class="sec-sub">Pick an answer, then read why. Then answer each card out loud before you open it.</p>
+    <h3 class="sec-h3">Which one fits?</h3>
+    <div id="drill"></div>
+    <div class="sub-block" aria-labelledby="quizH">
+    <h3 class="sec-h3" id="quizH">Check yourself</h3>
     <p class="sub">Answer out loud before you open each card.</p>
     <div class="quiz">
       <details><summary>Where should an expired token be rejected, and why there?<span class="go">Show answer</span></summary>
@@ -137,7 +175,10 @@
       <details><summary>Does a simple internal app with two servers need an API gateway?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>Usually not.</b> A load balancer (or Nginx) is enough. Add layers for real needs, not for the diagram.</p></div></details>
     </div>
+  </div>
   </section>
+
+  <nav id="prevnext"></nav>
 
   <footer>Sources: Days 10–12 notes, "Reverse Proxy, Load Balancer, and API Gateway" and "Backend Architecture Layers: CDN, Reverse Proxy, Load Balancer, and API Gateway". Algorithms are covered in <a href="load-balancing-algorithms.html">Day 13</a>.</footer>
 </div>
@@ -338,6 +379,13 @@
   const rp = K.node(f, 750, 120, 110, 60, 'Proxy', 'Nginx'); rp.g.classList.add('teal');
   [[70], [120], [170]].forEach(([y], i) => { K.el('line', { x1: 805, y1: 120, x2: 880, y2: y, class: 'msg solid' }, f); const n = K.node(f, 930, y, 100, 36, `app-${i + 1}`); n.g.classList.add('solid'); });
   K.el('line', { x1: 500, y1: 30, x2: 500, y2: 210, class: 'axis' }, f);
+})();
+</script>
+<script>
+(function () {
+  SD.page({ track: 'hld' });
+  Kit.atlas(document.getElementById('atlas'), { cards: FF.cards(['bff','aggregate','dnslb','activepassive','activeactive']) });
+  FF.drill(document.getElementById('drill'), ['bff','aggregate','dnslb','activepassive','activeactive'], null);
 })();
 </script>
 </body>

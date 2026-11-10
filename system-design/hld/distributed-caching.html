@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Distributed Caching</title>
+<meta name="description" content="H19: in-process vs distributed caches, L1 + L2, Redis cluster hash slots, replication and persistence, animated; plus a lab showing how many keys move when you add a cache node.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="../../assets/css/theme.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/explainer.css">
+<script src="../../assets/js/theme.js"></script>
+<script src="../../assets/js/explainer-kit.js"></script>
+<script src="../sd-series.js"></script>
+<script src="caching-flows.js"></script>
+<style>
+  .dc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 5px; margin-top: 14px; }
+  .dc-key { font-family: var(--mono); font-size: 10.5px; text-align: center; padding: 7px 2px; border-radius: 7px; border: 2px solid transparent; color: var(--fg); transition: background .3s, border-color .3s; }
+  .dc-key.n0 { background: color-mix(in srgb, var(--cyan) 30%, var(--panel)); }
+  .dc-key.n1 { background: color-mix(in srgb, var(--orange) 30%, var(--panel)); }
+  .dc-key.n2 { background: color-mix(in srgb, var(--violet) 30%, var(--panel)); }
+  .dc-key.n3 { background: color-mix(in srgb, var(--yellow) 34%, var(--panel)); }
+  .dc-key.moved { border-color: var(--red); }
+  .dc-legend { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; font-size: 12.5px; color: var(--muted); margin-top: 10px; }
+  .dc-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 5px; vertical-align: -2px; }
+  .dc-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin-top: 12px; }
+</style>
+</head>
+<body data-anim="continuous">
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="back" href="index.html">← HLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <div class="eyebrow">Week 3 · H19 · Caching &amp; CDN</div>
+    <h1>Distributed Caching</h1>
+    <ul class="lede">
+      <li>An <b>in-process cache</b> lives inside each server: fastest, but every server has its own copy.</li>
+      <li>A <b>distributed cache</b> (Redis) is shared by all servers: one copy, one network hop away.</li>
+      <li><b>L1 + L2</b> combines both: a tiny local cache in front of Redis.</li>
+      <li>Redis grows with <b>sharding</b> (16,384 hash slots), survives failures with <b>replicas</b>, and restarts warm with <b>persistence</b>.</li>
+    </ul>
+  </header>
+
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn it step by step</h2>
+    <p class="sec-sub">From one server to a Redis cluster. Press <b>Next ▶</b> to go one step at a time, or <b>Play all</b> to watch the whole story.</p>
+    <div class="story" id="story"></div>
+  </section>
+
+  <section id="compare" data-nav="Compare">
+    <h2 class="sec-h"><span class="sec-n">2</span>Compare: 6 patterns side by side</h2>
+    <p class="sec-sub">Read each card top to bottom: rule, diagram, numbered steps, takeaway. Press <b>▶ Play</b> on any diagram to watch it happen.</p>
+    <div id="atlas"></div>
+  </section>
+
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">3</span>Try it: Add a cache node</h2>
+    <p class="sec-sub">60 keys live on 3 cache nodes. Add a fourth node and count how many keys have to move (red outline = moved). Predict first. <span class="mono">(Fewer moved keys = fewer cache misses right after scaling)</span></p>
+    <ol class="howto"><li><span>Pick how keys are placed</span></li><li><span>Press <b>Add node 4</b></span></li><li><span>Count the red outlines: those keys moved</span></li></ol>
+    <div class="dc-row">
+      <div class="seg" id="methSeg" role="group" aria-label="Key placement"><button type="button" data-v="mod" aria-pressed="true">hash % N</button><button type="button" data-v="ring" aria-pressed="false">Consistent hashing</button><button type="button" data-v="slots" aria-pressed="false">Redis hash slots</button></div>
+    </div>
+    <div class="controls"><button class="btn primary" type="button" id="addNode">Add node 4</button><button class="btn" type="button" id="back3">Back to 3 nodes</button></div>
+    <div class="kpis">
+      <div class="kpi bad"><b id="kMoved">0</b><span>Keys moved</span></div>
+      <div class="kpi"><b id="kPct">0%</b><span>Share of keys</span></div>
+      <div class="kpi good"><b id="kIdeal">25%</b><span>Ideal (new node's share)</span></div>
+    </div>
+    <div class="dc-legend"><span><i style="background:color-mix(in srgb, var(--cyan) 30%, var(--panel))"></i>node 1</span><span><i style="background:color-mix(in srgb, var(--orange) 30%, var(--panel))"></i>node 2</span><span><i style="background:color-mix(in srgb, var(--violet) 30%, var(--panel))"></i>node 3</span><span><i style="background:color-mix(in srgb, var(--yellow) 34%, var(--panel))"></i>node 4</span></div>
+    <div class="dc-grid" id="grid"></div>
+    <p class="hint" id="labHint">With <b>hash % N</b>, almost every key's node changes when N goes from 3 to 4. Try it, then switch method.</p>
+  </section>
+
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">4</span>Revise in two minutes</h2>
+    <h3 class="sec-h3">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">Tiny, near-static lookup data</span><span class="arrow">→</span><span class="then">In-process L1</span></li>
+      <li><span class="if">Sessions, shared state across servers</span><span class="arrow">→</span><span class="then">Redis (distributed)</span></li>
+      <li><span class="if">Very hot keys, latency-sensitive</span><span class="arrow">→</span><span class="then">L1 (short TTL) + Redis L2</span></li>
+      <li><span class="if">Data bigger than one node</span><span class="arrow">→</span><span class="then">Redis Cluster (hash slots)</span></li>
+      <li><span class="if">A node can't be lost</span><span class="arrow">→</span><span class="then">Replicas + Sentinel / Cluster failover</span></li>
+      <li><span class="if">Restart must not be cold</span><span class="arrow">→</span><span class="then">RDB snapshots and/or AOF</span></li>
+      <li><span class="if">Simple string cache, multithreaded</span><span class="arrow">→</span><span class="then">Memcached is enough</span></li>
+    </ul>
+    <h3 class="sec-h3">In .NET terms</h3>
+    <div class="card analogy scroll">
+      <table>
+        <thead><tr><th>You've used</th><th>Pattern</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td><code>IMemoryCache</code> / IIS in-memory session</td><td>In-process (L1)</td><td>Lost on app-pool recycle; different on every server behind the load balancer.</td></tr>
+          <tr><td>SQL Server session state, <code>AddStackExchangeRedisCache</code></td><td>Distributed (L2)</td><td>Shared by every server; costs a network round trip.</td></tr>
+          <tr><td><code>AddHybridCache()</code> + a Redis <code>IDistributedCache</code></td><td>L1 + L2</td><td>Reads check memory first, then Redis, then your loader.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3 class="sec-h3">Reference</h3>
+    <div class="card scroll">
+      <table>
+        <thead><tr><th></th><th>Redis</th><th>Memcached</th></tr></thead>
+        <tbody>
+          <tr><td>Data types</td><td>Strings, hashes, lists, sets, sorted sets, streams…</td><td>Strings (byte blobs)</td></tr>
+          <tr><td>Persistence</td><td>RDB snapshots, AOF log</td><td>None</td></tr>
+          <tr><td>Replication / failover</td><td>Replicas, Sentinel, Cluster</td><td>None built in</td></tr>
+          <tr><td>Scaling out</td><td>Redis Cluster: 16,384 hash slots</td><td>Client-side consistent hashing</td></tr>
+          <tr><td>Threads</td><td>Commands run on one main thread (I/O threads optional)</td><td>Multithreaded</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><span class="flag">Added</span>This whole day was added to the plan: interviewers expect you to say <em>where</em> the cache lives and how it scales, not just "add Redis".</div>
+    <div class="note"><span class="flag">Updated</span><code>HybridCache</code> removes a key from its own L1 and from Redis, but other servers' L1 copies live until their own short expiry; keep L1 TTLs short.</div>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">5</span>Test yourself</h2>
+    <h3 class="sec-h3">Which pattern fits?</h3>
+    <div id="drill"></div>
+    <h3 class="sec-h3">Explain it out loud</h3>
+    <p class="sub">Answer before you open each card.</p>
+    <div class="quiz">
+      <details><summary>You moved from 1 to 4 servers and users now see different prices on refresh. Why?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Each server has its own in-process cache</b>, updated at different times. Use a shared cache, or keep L1 TTLs very short.</p></div></details>
+      <details><summary>Why does hash % N hurt when you add a node?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Changing N changes almost every key's node</b>, so most of the cache misses at once. Consistent hashing and hash slots move only about 1/(N+1) of the keys.</p></div></details>
+      <details><summary>MGET user:1 user:2 fails on Redis Cluster with CROSSSLOT. Fix?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Put the keys in one slot with a hash tag</b>: <code>{user}:1</code>, <code>{user}:2</code> hash only the part in braces.</p></div></details>
+      <details><summary>Can a failover lose data in Redis?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Yes.</b> Replication is asynchronous; writes the primary acknowledged but hadn't copied yet are lost when a replica is promoted.</p></div></details>
+      <details><summary>RDB or AOF?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>RDB</b> is compact and fast to load but can lose minutes; <b>AOF</b> with fsync every second loses about a second. Many setups use both.</p></div></details>
+      <details><summary>When is an in-process cache the right answer?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Small, read-mostly data</b> where brief differences between servers don't matter (config, country lists), or as a short L1 in front of Redis.</p></div></details>
+    </div>
+  </section>
+
+  <nav id="prevnext"></nav>
+
+  <footer>Sources: Week 3 notes; Redis documentation (cluster specification, replication, persistence); Microsoft Learn, HybridCache and distributed caching in ASP.NET Core. Latencies are rough orders of magnitude. The lab uses FNV-1a hashing (with a bit mixer) for illustration; Redis itself uses CRC16 for slots.</footer>
+</div>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const ids = ['l1', 'redis', 'hybrid', 'cluster', 'replication', 'persistence'];
+  CF.page({ file: 'distributed-caching.html', ids });
+
+  /* ---------- walkthrough ---------- */
+  let note;
+  const Y = [48, 125, 202];
+  const only = (m, n) => { for (let i = 0; i < 3; i++) { const on = i < n; m.state('a' + i, on ? '' : 'hide'); m.state('c' + i, on ? '' : 'hide'); m.link('a' + i, 'c' + i, on ? '' : 'hide'); m.link('c' + i, 'db', 'hide'); m.link('a' + i, 'redis', 'hide'); m.link('c' + i, 'redis', 'hide'); } };
+  const l1Mode = (m, n) => { only(m, n); for (let i = 0; i < n; i++) m.link('c' + i, 'db', ''); m.state('redis', 'hide'); m.link('redis', 'db', 'hide'); };
+  const redisMode = m => { only(m, 3); for (let i = 0; i < 3; i++) { m.state('c' + i, 'hide'); m.link('a' + i, 'c' + i, 'hide'); m.link('a' + i, 'redis', ''); } m.state('redis', ''); m.link('redis', 'db', ''); };
+  const hybridMode = m => { only(m, 3); for (let i = 0; i < 3; i++) m.link('c' + i, 'redis', ''); m.state('redis', ''); m.link('redis', 'db', ''); };
+  CF.story('story', {
+    vb: [440, 250], tone: 'red', alt: 'Three app servers with local caches, a shared Redis and a database',
+    build(m) {
+      for (let i = 0; i < 3; i++) { m.box('a' + i, 64, Y[i], 'App ' + (i + 1), { icon: 'server', w: 84 }); m.box('c' + i, 168, Y[i], 'L1', { w: 46, h: 26 }); }
+      m.box('redis', 290, 125, 'Redis', { icon: 'ram', w: 90 }); m.db('db', 400, 125, 'DB', { w: 40 });
+      for (let i = 0; i < 3; i++) { m.wire('a' + i, 'c' + i); m.wire('c' + i, 'db', { via: [[230, Y[i]], [360, 125]] }); m.wire('a' + i, 'redis', { via: [[120, Y[i]], [230, 125]] }); m.wire('c' + i, 'redis'); }
+      m.wire('redis', 'db');
+      note = m.label(220, 240, '', 'at-strong');
+    },
+    reset(m) { note.textContent = ''; },
+    steps: [
+      { title: 'One server, one in-process cache',
+        text: 'With a single server, <code>IMemoryCache</code> is perfect: the value sits in the process\'s own memory, so a hit costs microseconds and no network.',
+        set(m) { l1Mode(m, 1); m.badge('c0', 'HIT', 'teal'); note.textContent = 'L1 hit ≈ microseconds'; },
+        async play(m, r) { l1Mode(m, 1); await m.send(['a0', 'c0'], { run: r, label: 'GET' }); m.badge('c0', 'HIT', 'teal'); note.textContent = 'L1 hit ≈ microseconds'; } },
+      { title: 'Scale out to three servers',
+        text: 'Behind a load balancer there are now three processes, so <b>three separate caches</b>. Each one loaded the price on its own: three copies of <b>₹499</b>.',
+        set(m) { l1Mode(m, 3); [0, 1, 2].forEach(i => m.badge('c' + i, '₹499')); } },
+      { title: 'An update reaches only one of them',
+        text: 'Server 2 handles the price change: it updates the database and its own L1. Servers 1 and 3 keep serving <b>₹499</b> until their copies expire. Users see the price flip between refreshes.',
+        tip: 'This is the classic reason to say "distributed cache" in an interview.',
+        set(m) { l1Mode(m, 3); m.badge('c0', '₹499', 'red'); m.badge('c1', '₹449', 'teal'); m.badge('c2', '₹499', 'red'); m.state('c0', 'hot'); m.state('c2', 'hot'); note.textContent = '3 caches · 2 wrong answers'; },
+        async play(m, r) { l1Mode(m, 3); [0, 1, 2].forEach(i => m.badge('c' + i, '₹499')); await m.send(['a1', 'c1', 'db'], { run: r, label: 'UPDATE ₹449' }); m.badge('c1', '₹449', 'teal'); m.badge('c0', '₹499', 'red'); m.badge('c2', '₹499', 'red'); m.state('c0', 'hot'); m.state('c2', 'hot'); note.textContent = '3 caches · 2 wrong answers'; } },
+      { title: 'One shared cache: Redis',
+        text: 'Move the cache out of the processes into Redis. Every server reads the same key, so one delete fixes it for everyone. The price: a network round trip on every read.',
+        set(m) { redisMode(m); m.badge('redis', '₹449', 'teal'); m.state('redis', 'ok'); note.textContent = 'one copy · +≈0.5–1 ms per read'; },
+        async play(m, r) { redisMode(m); m.badge('redis', '₹499'); await m.send(['a1', 'redis'], { run: r, label: 'DEL', tone: 'red' }); m.badge('redis', 'gone', 'muted'); await m.send(['a0', 'redis'], { run: r, label: 'GET' }); await m.send(['redis', 'db'], { run: r, label: 'reload' }); m.badge('redis', '₹449', 'teal'); m.state('redis', 'ok'); note.textContent = 'one copy · +≈0.5–1 ms per read'; } },
+      { title: 'L1 + L2: local speed, shared truth',
+        text: 'Keep a <b>small L1 with a short TTL</b> (say 30 s) in front of Redis (L2). Most reads never leave the process; staleness between servers is capped at the L1 TTL.',
+        tip: '.NET: AddHybridCache() plus AddStackExchangeRedisCache() gives you exactly this.',
+        set(m) { hybridMode(m); [0, 1, 2].forEach(i => m.badge('c' + i, '30 s', 'teal')); m.badge('redis', '10 min', 'teal'); note.textContent = 'L1 ≈ µs · L2 ≈ 1 ms · DB ≈ 5–50 ms'; },
+        async play(m, r) { hybridMode(m); await m.send(['a0', 'c0'], { run: r, label: 'GET' }); m.badge('c0', 'miss', 'red'); await m.send(['c0', 'redis'], { run: r }); m.badge('redis', 'HIT', 'teal'); await m.send(['redis', 'c0'], { run: r, tone: 'yellow' }); m.badge('c0', '30 s', 'teal'); m.badge('redis', '10 min', 'teal'); note.textContent = 'L1 ≈ µs · L2 ≈ 1 ms · DB ≈ 5–50 ms'; } },
+      { title: 'Redis or Memcached?',
+        text: '<b>Memcached</b> is a fast, multithreaded store for plain strings with no persistence or replication. <b>Redis</b> adds data types (hashes, sorted sets, streams), persistence, replication and clustering. For most new systems, Redis.',
+        set(m) { redisMode(m); m.badge('redis', 'types · persistence · HA', 'teal'); } },
+      { title: 'When one Redis node isn\'t enough',
+        text: '<b>Redis Cluster</b> splits keys into 16,384 hash slots spread over several primaries, each with replicas. If a primary fails, its replica is promoted. The cards above animate both.',
+        set(m) { redisMode(m); m.text('redis', 'Redis Cluster'); m.badge('redis', '3 primaries + replicas', 'teal'); note.textContent = 'slot = CRC16(key) mod 16384'; } }
+    ]
+  });
+
+  /* ---------- add-a-node lab ---------- */
+  const fnv = s => { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; } h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16; return h >>> 0; };
+  const KEYS = Array.from({ length: 60 }, (_, i) => 'user:' + (i + 1));
+  const H = KEYS.map(fnv);
+  function place(method, n) {
+    if (method === 'mod') return H.map(h => h % n);
+    if (method === 'ring') {
+      const pts = []; for (let k = 0; k < n; k++) for (let v = 0; v < 40; v++) pts.push([fnv(`node${k}#${v}`), k]);
+      pts.sort((a, b) => a[0] - b[0]);
+      return H.map(h => { const p = pts.find(x => x[0] >= h) || pts[0]; return p[1]; });
+    }
+    // Redis-style slots: 16384 slots, contiguous ranges for 3 nodes; node 4 takes a share from each
+    const owner = new Array(16384); const per = Math.ceil(16384 / 3);
+    for (let s = 0; s < 16384; s++) owner[s] = Math.min(2, Math.floor(s / per));
+    if (n === 4) for (let k = 0; k < 3; k++) { const mine = []; for (let s = 0; s < 16384; s++) if (owner[s] === k) mine.push(s); mine.slice(mine.length - Math.floor(mine.length / 4)).forEach(s => owner[s] = 3); }
+    return H.map(h => owner[h % 16384]);
+  }
+  let method = 'mod', n = 3;
+  function paint() {
+    const base = place(method, 3), cur = place(method, n);
+    let moved = 0;
+    $('grid').innerHTML = KEYS.map((k, i) => { const mv = cur[i] !== base[i]; if (mv) moved++; return `<div class="dc-key n${cur[i]}${mv ? ' moved' : ''}" title="${k} → node ${cur[i] + 1}">${k.replace('user:', 'u')}</div>`; }).join('');
+    $('kMoved').textContent = moved; $('kPct').textContent = Math.round(100 * moved / KEYS.length) + '%';
+    const hints = {
+      mod: 'hash % N: changing N from 3 to 4 changes the node for most keys, so most of the cache misses at once right after scaling.',
+      ring: 'Consistent hashing: each node owns arcs of a ring (40 virtual nodes each). The new node takes over only the arcs it lands on, roughly a quarter of the keys.',
+      slots: 'Redis hash slots: keys map to 16,384 slots; node 4 takes a quarter of the slots from each existing node. Only keys in those slots move.'
+    };
+    $('labHint').innerHTML = n === 3 ? 'Press <b>Add node 4</b> and count the red outlines.' : hints[method];
+  }
+  Kit.seg($('methSeg'), v => { method = v; paint(); });
+  $('addNode').addEventListener('click', () => { n = 4; paint(); });
+  $('back3').addEventListener('click', () => { n = 3; paint(); });
+  paint();
+})();
+</script>
+</body>
+</html>

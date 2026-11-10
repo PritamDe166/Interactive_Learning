@@ -12,6 +12,8 @@
 <link rel="stylesheet" href="../../assets/css/explainer.css">
 <script src="../../assets/js/theme.js"></script>
 <script src="../../assets/js/explainer-kit.js"></script>
+<script src="../sd-series.js"></script>
+<script src="foundations-flows.js"></script>
 </head>
 <body>
 <div class="wrap explainer">
@@ -21,13 +23,18 @@
   </div>
 
   <header>
-    <div class="eyebrow">Week 1 · Day 2 · Networking Fundamentals</div>
+    <div class="eyebrow">Week 1 · H2 · Networking Fundamentals</div>
     <h1>HTTP Requests & Status Codes</h1>
     <ul class="lede"><li>A <b>request</b> says <b>what to do</b> (method) to <b>which resource</b> (path).</li><li>It carries metadata (<b>headers</b>) and optional data (<b>body</b>).</li><li>The <b>response</b> answers with a <b>status code</b>, headers and an optional body.</li><li>It all travels over the connection that DNS, TCP and TLS set up first.</li></ul>
   </header>
 
-  <section aria-labelledby="anH">
-    <h2 id="anH">Anatomy</h2>
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn: what a request and response look like</h2>
+    <div class="sub-block" aria-labelledby="anH">
+    <h3 class="sec-h3" id="anH">Anatomy</h3>
     <div class="pair">
       <div>
         <div class="label">Request = method + path + headers + body</div>
@@ -47,10 +54,39 @@ Location: /patients/124
 { "id": 124, "name": "John" }</pre>
       </div>
     </div>
+  </div>
   </section>
 
-  <section aria-labelledby="idemTitle">
-    <h2 class="stage-title" id="idemTitle">Send it twice</h2>
+  <section id="compare" data-nav="Compare">
+    <h2 class="sec-h"><span class="sec-n">2</span>Compare: methods and HTTP versions</h2>
+    <div class="sub-block" aria-labelledby="mH">
+    <h3 class="sec-h3" id="mH">Methods at a glance</h3>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Method</th><th>Purpose</th><th>Safe</th><th>Idempotent</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td>GET</td><td>Read a resource</td><td class="ok-text">Yes</td><td class="ok-text">Yes</td><td>Cacheable; never change data in a GET handler</td></tr>
+          <tr><td>HEAD</td><td>Like GET, headers only</td><td class="ok-text">Yes</td><td class="ok-text">Yes</td><td>Check size or freshness without downloading</td></tr>
+          <tr><td>OPTIONS</td><td>Ask what is allowed</td><td class="ok-text">Yes</td><td class="ok-text">Yes</td><td>Used by browsers for CORS preflight</td></tr>
+          <tr><td>POST</td><td>Create, or run an action</td><td class="bad-text">No</td><td class="bad-text">No</td><td>Make it safe to retry with an idempotency key</td></tr>
+          <tr><td>PUT</td><td>Replace the whole resource</td><td class="bad-text">No</td><td class="ok-text">Yes</td><td>Can also create at a client-chosen URL</td></tr>
+          <tr><td>PATCH</td><td>Change part of a resource</td><td class="bad-text">No</td><td>Depends</td><td>"Set age = 41" is; "append to list" is not</td></tr>
+          <tr><td>DELETE</td><td>Remove a resource</td><td class="bad-text">No</td><td class="ok-text">Yes</td><td>Second call may return 404, but the state is the same</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><span class="flag add">Added</span><p><b>Safe</b> means "doesn't change server state". Every safe method is idempotent, but not the other way round: PUT and DELETE change state, yet repeating them changes nothing further.</p></div>
+  </div>
+    <h3 class="sec-h3">HTTP/1.1 vs 2 vs 3</h3>
+    <p class="sub">Same requests, three ways to carry them. Press <b>▶ Play</b> on a card. The transport details are on <a href="tcp-udp.html">H3 TCP &amp; UDP</a>.</p>
+    <div id="atlas"></div>
+  </section>
+
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">3</span>Try it: retries and status codes</h2>
+    <p class="sec-sub">Send the same request twice and see which methods are safe to retry, then trace who sends each status code.</p>
+    <div class="sub-block" aria-labelledby="idemTitle">
+    <h3 class="stage-title sub" id="idemTitle">Send it twice</h3>
     <div class="stage-kind">Idempotent = repeating the request leaves the same final state</div>
 
     <div class="chip-group">
@@ -92,29 +128,9 @@ Location: /patients/124
         <div><div class="label">What to watch</div><p id="fWatch"></p></div>
       </div>
     </div>
-  </section>
-
-  <section aria-labelledby="mH">
-    <h2 id="mH">Methods at a glance</h2>
-    <div class="scroll card table-card">
-      <table>
-        <thead><tr><th>Method</th><th>Purpose</th><th>Safe</th><th>Idempotent</th><th>Note</th></tr></thead>
-        <tbody>
-          <tr><td>GET</td><td>Read a resource</td><td class="ok-text">Yes</td><td class="ok-text">Yes</td><td>Cacheable; never change data in a GET handler</td></tr>
-          <tr><td>HEAD</td><td>Like GET, headers only</td><td class="ok-text">Yes</td><td class="ok-text">Yes</td><td>Check size or freshness without downloading</td></tr>
-          <tr><td>OPTIONS</td><td>Ask what is allowed</td><td class="ok-text">Yes</td><td class="ok-text">Yes</td><td>Used by browsers for CORS preflight</td></tr>
-          <tr><td>POST</td><td>Create, or run an action</td><td class="bad-text">No</td><td class="bad-text">No</td><td>Make it safe to retry with an idempotency key</td></tr>
-          <tr><td>PUT</td><td>Replace the whole resource</td><td class="bad-text">No</td><td class="ok-text">Yes</td><td>Can also create at a client-chosen URL</td></tr>
-          <tr><td>PATCH</td><td>Change part of a resource</td><td class="bad-text">No</td><td>Depends</td><td>"Set age = 41" is; "append to list" is not</td></tr>
-          <tr><td>DELETE</td><td>Remove a resource</td><td class="bad-text">No</td><td class="ok-text">Yes</td><td>Second call may return 404, but the state is the same</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="note"><span class="flag add">Added</span><p><b>Safe</b> means "doesn't change server state". Every safe method is idempotent, but not the other way round: PUT and DELETE change state, yet repeating them changes nothing further.</p></div>
-  </section>
-
-  <section aria-labelledby="scTitle">
-    <h2 class="stage-title" id="scTitle">Who sends which status code?</h2>
+  </div>
+    <div class="sub-block" aria-labelledby="scTitle">
+    <h3 class="stage-title sub" id="scTitle">Who sends which status code?</h3>
     <div class="stage-kind">Client → gateway / load balancer → service</div>
     <div class="chip-group" id="codeGroups"></div>
     <div class="scroll">
@@ -133,10 +149,32 @@ Location: /patients/124
       <div class="note"><span class="flag add">Added</span><p><b>1xx and 3xx were empty in the notes.</b> 1xx: <span class="mono">100 Continue</span>, <span class="mono">101 Switching Protocols</span> (WebSocket upgrade). 3xx: <span class="mono">301</span>/<span class="mono">308</span> permanent move, <span class="mono">302</span>/<span class="mono">307</span> temporary move (307/308 keep the method and body), <span class="mono">304 Not Modified</span> (your cached copy is still valid).</p></div>
       <div class="note"><span class="flag add">Added</span><p><b>401 is misnamed.</b> Its official name is "Unauthorized", but it means <i>not authenticated</i>: who are you? <b>403</b> means "I know who you are, and you're not allowed".</p></div>
     </div>
+  </div>
   </section>
 
-  <section aria-labelledby="quizH">
-    <h2 id="quizH">Check yourself</h2>
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">4</span>Revise in two minutes</h2>
+    <h3 class="sec-h3">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">Read without changing anything</span><span class="arrow">→</span><span class="then">GET (safe and idempotent)</span></li>
+      <li><span class="if">Retry after a timeout is OK</span><span class="arrow">→</span><span class="then">GET, PUT, DELETE are idempotent; POST is not, unless you add an idempotency key</span></li>
+      <li><span class="if">Create a new resource</span><span class="arrow">→</span><span class="then">POST → 201 Created + Location header</span></li>
+      <li><span class="if">Not logged in / logged in but not allowed</span><span class="arrow">→</span><span class="then">401 / 403</span></li>
+      <li><span class="if">Too many requests</span><span class="arrow">→</span><span class="then">429 + Retry-After</span></li>
+      <li><span class="if">Server or upstream down</span><span class="arrow">→</span><span class="then">502 Bad Gateway, 503 Unavailable, 504 Gateway Timeout</span></li>
+      <li><span class="if">Many requests from one page</span><span class="arrow">→</span><span class="then">HTTP/2 multiplexing on one connection</span></li>
+      <li><span class="if">Mobile, lossy networks</span><span class="arrow">→</span><span class="then">HTTP/3 over QUIC; falls back to HTTP/2 if UDP is blocked</span></li>
+      <li><span class="if">Avoid a new TCP+TLS handshake per request</span><span class="arrow">→</span><span class="then">Keep-alive (persistent connections), on by default in HTTP/1.1</span></li>
+    </ul>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">5</span>Test yourself</h2>
+    <p class="sec-sub">Pick an answer, then read why. Then answer each card out loud before you open it.</p>
+    <h3 class="sec-h3">Which one fits?</h3>
+    <div id="drill"></div>
+    <div class="sub-block" aria-labelledby="quizH">
+    <h3 class="sec-h3" id="quizH">Check yourself</h3>
     <p class="sub">Answer out loud before you open each card.</p>
     <div class="quiz">
       <details><summary>A user's payment POST timed out. The app retries. How do you avoid charging twice?<span class="go">Show answer</span></summary>
@@ -152,7 +190,10 @@ Location: /patients/124
       <details><summary>Why should a GET handler never change data?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>GET is safe and cacheable.</b> Browsers prefetch it, crawlers follow it and caches replay it, so side effects would fire unexpectedly.</p></div></details>
     </div>
+  </div>
   </section>
+
+  <nav id="prevnext"></nav>
 
   <footer>Sources: Day 2 notes, "HTTP Quick Revision Notes". Patient data is made up.</footer>
 </div>
@@ -330,6 +371,13 @@ Location: /patients/124
     $('codeGroups').querySelectorAll('button').forEach(o => o.setAttribute('aria-pressed', String(o === b)));
     showCode(CODES.find(x => x.c === +b.dataset.c));
   }));
+})();
+</script>
+<script>
+(function () {
+  SD.page({ track: 'hld' });
+  Kit.atlas(document.getElementById('atlas'), { cards: FF.cards(['h11','h2','h3']) });
+  FF.drill(document.getElementById('drill'), ['h11','h2','h3'], null);
 })();
 </script>
 </body>
