@@ -1,4 +1,4 @@
-name: Deploy interactive learning site
+name: Deploy See How It Works site
 
 on:
   push:

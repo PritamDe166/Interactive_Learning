@@ -17,3 +17,13 @@ output "github_actions_role_arn" {
   description = "IAM role assumed by GitHub Actions"
   value       = aws_iam_role.github_actions_deploy.arn
 }
+
+output "route53_name_servers" {
+  description = "Enter these 4 nameservers at Hostinger for seehowitworks.dev"
+  value       = aws_route53_zone.site.name_servers
+}
+
+output "site_url" {
+  description = "Public address of the website"
+  value       = "https://${local.domain_name}"
+}

@@ -1,7 +1,9 @@
-# Interactive Explainers
+# See How It Works
 
 Animated, clickable explainers for topics I'm learning. Live at
-https://pritamde166.github.io/Interactive_Learning/
+https://seehowitworks.dev
+
+Hosted on S3 + CloudFront (Terraform in `infra/`), deployed by `.github/workflows/deploy.yml` on every push to `main`. DNS for `seehowitworks.dev` is a Route 53 hosted zone; the domain is registered at Hostinger with its nameservers pointing to Route 53.
 
 ## Layout
 

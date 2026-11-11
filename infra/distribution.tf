@@ -4,7 +4,8 @@ data "aws_cloudfront_cache_policy" "caching_optimized" {
 
 resource "aws_cloudfront_distribution" "website" {
   enabled             = true
-  comment             = "Interactive Learning website"
+  comment             = "See How It Works website"
+  aliases             = [local.domain_name, local.www_domain]
   default_root_object = "index.html"
   price_class         = "PriceClass_100"
   is_ipv6_enabled     = true
@@ -24,6 +25,11 @@ resource "aws_cloudfront_distribution" "website" {
     cached_methods  = ["GET", "HEAD", "OPTIONS"]
 
     cache_policy_id = data.aws_cloudfront_cache_policy.caching_optimized.id
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.www_redirect.arn
+    }
   }
 
   restrictions {
@@ -33,7 +39,8 @@ resource "aws_cloudfront_distribution" "website" {
   }
 
   viewer_certificate {
-    cloudfront_default_certificate = true
-    minimum_protocol_version       = "TLSv1.2_2021"
+    acm_certificate_arn      = aws_acm_certificate_validation.site.certificate_arn
+    ssl_support_method       = "sni-only"
+    minimum_protocol_version = "TLSv1.2_2021"
   }
 }
