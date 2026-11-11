@@ -113,10 +113,10 @@
       <div><div class="label ok-text">CareDesk's header clock</div><div id="goodClock"></div></div>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag add">Added</span><p><b>Not in your notes.</b> This page fills a gap: your notes rely on change detection (ngOnChanges, ngModel) without explaining it. It's a frequent interview topic, and the rules changed a lot between Angular 16 and 22.</p></div>
-      <div class="note"><span class="flag add">Updated</span><p><b>zone.js is gone by default.</b> Older apps loaded zone.js, which patched timers, promises and events to trigger a check of the whole tree after any async work. New apps are zoneless: smaller, faster, and explicit about what changed. That's why CareDesk's header clock needed a signal.</p></div>
-      <div class="note"><span class="flag add">Updated</span><p><b>OnPush by default (v22).</b> <span class="mono">ChangeDetectionStrategy.OnPush</span> is now the default and the old <span class="mono">Default</span> strategy is named <span class="mono">Eager</span>. Existing code you see in interviews may still set <span class="mono">OnPush</span> explicitly; it means the same thing.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>First render ran a second pass.</b> In the real logs, App and PatientList were checked again right after the first render (caused by the search box's <span class="mono">ngModel</span>: with the box removed, the second pass disappeared). Extra passes are normal; never rely on how many times a template is evaluated.</p></div>
+      <div class="note"><p><b>Why it matters.</b> Features like ngOnChanges and ngModel depend on change detection, it's a frequent interview topic, and the rules changed a lot between Angular 16 and 22.</p></div>
+      <div class="note"><p><b>zone.js is gone by default.</b> Older apps loaded zone.js, which patched timers, promises and events to trigger a check of the whole tree after any async work. New apps are zoneless: smaller, faster, and explicit about what changed. That's why CareDesk's header clock needed a signal.</p></div>
+      <div class="note"><p><b>OnPush by default (v22).</b> <span class="mono">ChangeDetectionStrategy.OnPush</span> is now the default and the old <span class="mono">Default</span> strategy is named <span class="mono">Eager</span>. Existing code you see in interviews may still set <span class="mono">OnPush</span> explicitly; it means the same thing.</p></div>
+      <div class="note"><p><b>First render ran a second pass.</b> In the real logs, App and PatientList were checked again right after the first render (caused by the search box's <span class="mono">ngModel</span>: with the box removed, the second pass disappeared). Extra passes are normal; never rely on how many times a template is evaluated.</p></div>
     </div>
   </section>
 

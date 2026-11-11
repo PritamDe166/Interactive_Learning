@@ -120,14 +120,14 @@
       </table>
     </div>
     <div class="cc-pair" style="margin-top:14px">
-      <div><div class="label bad-text">Before: declare in a module (your notes)</div><div id="oldCmp"></div></div>
+      <div><div class="label bad-text">Before: declare in a module (Angular 16)</div><div id="oldCmp"></div></div>
       <div><div class="label ok-text">After: the parent imports the child</div><div id="newCmp"></div></div>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag">Corrected</span><p><b>Import path.</b> The notes say to import Component from "angular/JSON". It's <span class="mono">import { Component } from '@angular/core';</span>.</p></div>
-      <div class="note"><span class="flag add">Updated</span><p><b>No <span class="mono">declarations</span> array.</b> The notes register each component in <span class="mono">app.module.ts</span>. Standalone components (the default since v19) are used by importing them in the component whose template uses them.</p></div>
-      <div class="note"><span class="flag add">Updated</span><p><b>File names.</b> <span class="mono">ng g c patient-card</span> now creates <span class="mono">patient-card.ts</span> with <span class="mono">class PatientCard</span>. Your notes' <span class="mono">user.component.ts</span> / <span class="mono">UserComponent</span> naming is the pre-v20 style; both work.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>How scoping works.</b> Angular adds attributes such as <span class="mono">_ngcontent-ng-c3110745158</span> to each element of a component and rewrites its CSS to <span class="mono">article[_ngcontent-ng-c3110745158]</span>. That's why PatientList's <span class="mono">h3</span> rule didn't colour the card's name in the real build.</p></div>
+      <div class="note"><p><b>Import path.</b> <span class="mono">Component</span> comes from <span class="mono">import { Component } from '@angular/core';</span>.</p></div>
+      <div class="note"><p><b>No <span class="mono">declarations</span> array.</b> Older apps registered each component in <span class="mono">app.module.ts</span>. Standalone components (the default since v19) are used by importing them in the component whose template uses them.</p></div>
+      <div class="note"><p><b>File names.</b> <span class="mono">ng g c patient-card</span> now creates <span class="mono">patient-card.ts</span> with <span class="mono">class PatientCard</span>. The older <span class="mono">user.component.ts</span> / <span class="mono">UserComponent</span> naming is the pre-v20 style; both work.</p></div>
+      <div class="note"><p><b>How scoping works.</b> Angular adds attributes such as <span class="mono">_ngcontent-ng-c3110745158</span> to each element of a component and rewrites its CSS to <span class="mono">article[_ngcontent-ng-c3110745158]</span>. That's why PatientList's <span class="mono">h3</span> rule didn't colour the card's name in the real build.</p></div>
     </div>
   </section>
 

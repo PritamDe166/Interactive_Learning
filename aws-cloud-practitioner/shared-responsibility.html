@@ -141,9 +141,8 @@
       <div class="card"><h3>Customer-specific</h3><p>Only you can do them: for example <b>service and communications protection</b> or zone security, routing data within your own security environments.</p></div>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag add">Merged</span><p>Your notes had a separate shared-responsibility page in six sections (Overview, IAM, EC2, EC2 storage, S3, Databases). They're combined here, with one consistent set of duties.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Storage specifics:</b> AWS replicates EBS volumes inside their AZ and EFS data across AZs, replaces faulty hardware, and ensures its staff can't read your data. You set up snapshots and backups, choose encryption, and accept that <b>EC2 Instance Store</b> data is lost when the instance stops.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Exam guide wording (Task 2.1):</b> "how the responsibilities shift depending on the service". The classic contrast: on <b>EC2</b> you patch the OS; on <b>RDS</b> and <b>Lambda</b> AWS does.</p></div>
+      <div class="note"><p><b>Storage specifics:</b> AWS replicates EBS volumes inside their AZ and EFS data across AZs, replaces faulty hardware, and ensures its staff can't read your data. You set up snapshots and backups, choose encryption, and accept that <b>EC2 Instance Store</b> data is lost when the instance stops.</p></div>
+      <div class="note"><p><b>Exam guide wording (Task 2.1):</b> "how the responsibilities shift depending on the service". The classic contrast: on <b>EC2</b> you patch the OS; on <b>RDS</b> and <b>Lambda</b> AWS does.</p></div>
     </div>
   </section>
 

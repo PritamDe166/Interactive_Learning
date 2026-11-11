@@ -146,10 +146,10 @@
       </table>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag">Updated</span><p><b>CodeCommit is open to new customers again.</b> AWS stopped onboarding new customers in July 2024, then returned CodeCommit to general availability in November 2025. Your notes and older courses may say it's closed.</p></div>
-      <div class="note"><span class="flag">Corrected</span><p><b>CodeBuild doesn't watch your repository on its own.</b> It runs when something triggers it: a webhook, a CodePipeline stage, or a manual start. And CloudFormation uploads a template to S3 only in some cases (for example large templates), not always.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Secrets Manager vs Parameter Store:</b> both hold secrets; <b>Secrets Manager</b> adds automatic <b>rotation</b> (for example RDS passwords) and costs per secret. Parameter Store is cheaper and good for configuration. Exam: "rotate database credentials automatically" → Secrets Manager.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Drift isn't auto-repaired.</b> Drift detection only reports differences. You fix it by updating the template or reverting the change. Beanstalk itself uses CloudFormation behind the scenes.</p></div>
+      <div class="note"><p><b>CodeCommit is open to new customers again.</b> AWS stopped onboarding new customers in July 2024, then returned CodeCommit to general availability in November 2025. Older courses may say it's closed.</p></div>
+      <div class="note"><p><b>CodeBuild doesn't watch your repository on its own.</b> It runs when something triggers it: a webhook, a CodePipeline stage, or a manual start. And CloudFormation uploads a template to S3 only in some cases (for example large templates), not always.</p></div>
+      <div class="note"><p><b>Secrets Manager vs Parameter Store:</b> both hold secrets; <b>Secrets Manager</b> adds automatic <b>rotation</b> (for example RDS passwords) and costs per secret. Parameter Store is cheaper and good for configuration. Exam: "rotate database credentials automatically" → Secrets Manager.</p></div>
+      <div class="note"><p><b>Drift isn't auto-repaired.</b> Drift detection only reports differences. You fix it by updating the template or reverting the change. Beanstalk itself uses CloudFormation behind the scenes.</p></div>
     </div>
   </section>
 

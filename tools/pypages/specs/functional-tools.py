@@ -114,7 +114,6 @@ print(list(chain(["9:00"], ["9:30", "10:00"])), list(islice(names, 2)))''',
       </table>
     </div>''',
  "notes": [
-  ["Added", "<b>From your Notion plans:</b> \"sorting / filter / map\" (Roadmap) and \"map/filter/reduce/lambda, itertools\" (Week 5 of the 8-week plan)."],
   ["Added", "<b>lambda limits:</b> one expression, no statements. If it needs a name or several lines, write a normal <span class=\"mono\">def</span>; it also gives clearer tracebacks."],
   ["Added", "<b>sort() vs sorted():</b> both accept <span class=\"mono\">key=</span> and <span class=\"mono\">reverse=</span>; <span class=\"mono\">list.sort()</span> sorts in place and returns None (see Built-in functions)."]
  ],

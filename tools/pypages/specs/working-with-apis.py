@@ -134,7 +134,7 @@ print(status, json.loads(body)["error"])''',
       <tr><td class="mono">500 / 502 / 503</td><td>server-side problem</td><td>retry later with backoff</td></tr>
     </tbody></table></div>''',
  "notes": [
-  ["Added", "<b>From your Notion Roadmap:</b> \"Working with APIs (requests, JSON)\", the last step before AI agents, which are mostly API calls with JSON in and JSON out."],
+  ["Added", "<b>The step before AI agents:</b> agents are mostly API calls with JSON in and JSON out."],
   ["Added", "<b>Why it's simulated here:</b> the edit-and-run box uses Pyodide in the browser, where <span class=\"mono\">requests</span> can't open network connections and browsers block most cross-site calls (CORS). Run the reference script in your own venv against a real or test API."],
   ["Added", "<b>Timeouts:</b> requests has <b>no default timeout</b>, so a hung server can freeze your script forever. Always pass <span class=\"mono\">timeout=</span>."],
   ["Updated", "<b>Alternatives:</b> <span class=\"mono\">httpx</span> offers the same style plus async support (<span class=\"mono\">async with httpx.AsyncClient()</span>), common in FastAPI and agent code. requests remains the most widely used synchronous client."]

@@ -74,8 +74,8 @@
       </table>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag add">Added</span><p><b>Strings and value types are safe:</b> <span class="mono">string</span> is immutable and <span class="mono">int</span>, <span class="mono">decimal</span>, <span class="mono">DateTime</span> are copied by value, so giving the copy a new title never affects the original. The danger is <b>mutable reference types</b>: lists, dictionaries and your own classes.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Not everything should be deep-copied.</b> The <span class="mono">Doctor</span> is a shared entity: every consultation should point to the same doctor. Decide per field: copy what the clone owns, share what it only refers to.</p></div>
+      <div class="note"><p><b>Strings and value types are safe:</b> <span class="mono">string</span> is immutable and <span class="mono">int</span>, <span class="mono">decimal</span>, <span class="mono">DateTime</span> are copied by value, so giving the copy a new title never affects the original. The danger is <b>mutable reference types</b>: lists, dictionaries and your own classes.</p></div>
+      <div class="note"><p><b>Not everything should be deep-copied.</b> The <span class="mono">Doctor</span> is a shared entity: every consultation should point to the same doctor. Decide per field: copy what the clone owns, share what it only refers to.</p></div>
     </div>
   </section>
 

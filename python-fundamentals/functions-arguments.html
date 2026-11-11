@@ -103,11 +103,11 @@
       </ul>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag">Corrected</span><p><b>grades() in Function_basics.py</b> returns "Grade C" for exactly 80 and 60 (see puzzle 1). Use <span class="mono">&gt;=</span> boundaries, and since <span class="mono">elif</span> already excludes the first case, <span class="mono">num &lt; 80 and</span> isn't needed.</p></div>
-      <div class="note"><span class="flag">Corrected</span><p><b>pet_details2 in Keyword_Args_functions.py</b> returns inside the loop, so only the first keyword is reported (puzzle 2).</p></div>
-      <div class="note"><span class="flag">Corrected</span><p><b>calculator_func</b> is annotated <span class="mono">-&gt; int</span> but returns a 4-tuple, and <span class="mono">a/b</span> fails when b is 0. Annotate <span class="mono">-&gt; tuple[int, int, int, float]</span>. Likewise <span class="mono">average_func([])</span> raises ZeroDivisionError.</p></div>
-      <div class="note"><span class="flag add">Updated</span><p><b>Union[str, None]</b> (parse_age) is written <span class="mono">str | None</span> since Python 3.10, with no import from <span class="mono">typing</span>. More in Type hints.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Mutable default arguments</b> aren't in the repo but are the classic Python function bug: the walkthrough's last two steps show it happening.</p></div>
+      <div class="note"><p><b>Boundary values.</b> A grading function that uses <span class="mono">&gt;</span> returns the lower grade for exactly 80 and 60 (see puzzle 1). Use <span class="mono">&gt;=</span> boundaries, and since <span class="mono">elif</span> already excludes the first case, <span class="mono">num &lt; 80 and</span> isn't needed.</p></div>
+      <div class="note"><p><b>Returning inside a loop.</b> A <span class="mono">return</span> inside the <span class="mono">for</span> loop ends the function after the first item, so only the first keyword is reported (puzzle 2).</p></div>
+      <div class="note"><p><b>Annotations should match what's returned.</b> A function annotated <span class="mono">-&gt; int</span> that returns four numbers should be <span class="mono">-&gt; tuple[int, int, int, float]</span>. Also guard division: <span class="mono">a / b</span> fails when b is 0, and averaging an empty list raises <span class="mono">ZeroDivisionError</span>.</p></div>
+      <div class="note"><p><b><span class="mono">Union[str, None]</span></b> is written <span class="mono">str | None</span> since Python 3.10, with no import from <span class="mono">typing</span>. More in Type hints.</p></div>
+      <div class="note"><p><b>Mutable default arguments</b> are the classic Python function bug: the walkthrough's last two steps show it happening.</p></div>
     </div>
   </section>
 

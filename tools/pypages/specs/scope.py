@@ -119,8 +119,8 @@ print(count, tick(), tick())''',
       </table>
     </div>''',
  "notes": [
-  ["Corrected", "<b>Scope_Examples.py, Exercise 5:</b> the message says <span class=\"mono\">\"This variable is in inner function\"</span>, but <span class=\"mono\">message</span> is created in <b>outerfunction1</b> (the enclosing scope) and only read by the inner one."],
-  ["Corrected", "<b>Scopes.py:</b> <span class=\"mono\">local_scope()</span> is defined but never called, so its print never runs. Mixed naming (<span class=\"mono\">fetchGlobalVar</span> vs <span class=\"mono\">change_global_correct</span>): PEP 8 uses snake_case for functions."],
+  ["Corrected", "<b>Where a variable lives.</b> A variable created in the outer function and only read by the inner one belongs to the <b>enclosing</b> scope, not the inner function."],
+  ["Corrected", "<b>A function that's never called never runs.</b> Defining <span class=\"mono\">local_scope()</span> does nothing until you call it. And PEP 8 uses snake_case for function names (<span class=\"mono\">fetch_global_var</span>, not <span class=\"mono\">fetchGlobalVar</span>)."],
   ["Added", "<b>UnboundLocalError</b> (puzzle 2) is the error you hit when you forget <span class=\"mono\">global</span>/<span class=\"mono\">nonlocal</span>; the repo shows the fix but not the failure. Since 3.12 the message says \"cannot access local variable … where it is not associated with a value\"."],
   ["Added", "<b>Use global sparingly.</b> Functions that take inputs and return outputs are easier to test. Closures (shown in the walkthrough) are the foundation for decorators."]
  ],

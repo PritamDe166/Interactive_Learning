@@ -148,10 +148,10 @@
       <div class="card"><h3>Migrating databases</h3><p><b>DMS</b> moves data while the source stays online (and keeps replicating). <b>SCT</b> converts the schema when engines differ (Oracle → Aurora PostgreSQL).</p></div>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag">Updated</span><p><b>Multi-AZ now has two forms.</b> A Multi-AZ <b>DB instance</b> has one standby that can't serve reads (the classic exam answer). A Multi-AZ <b>DB cluster</b> has two standbys in three AZs that <b>can</b> serve reads. For the exam: Multi-AZ = HA.</p></div>
-      <div class="note"><span class="flag">Updated</span><p><b>Aurora's marketing number changed</b>: AWS now quotes up to <b>6×</b> the throughput of MySQL and PostgreSQL (the course says 5× / 3×). If only one is offered, go with the course wording. Aurora Serverless v2 scales in 0.5 ACU steps and can scale to zero.</p></div>
-      <div class="note"><span class="flag">Updated</span><p><b>Timestream for LiveAnalytics has an end-of-support notice</b>; AWS points to Timestream for InfluxDB. ElastiCache now offers <b>Valkey</b> as well as Redis OSS and Memcached. Managed Blockchain supports Ethereum, Hyperledger Fabric and more.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>In scope but missing from the notes:</b> Kinesis, OpenSearch Service and SCT (cards above). Out of scope: Keyspaces, MemoryDB, MSK. Timestream and Managed Blockchain are on neither list: know only the trigger word.</p></div>
+      <div class="note"><p><b>Multi-AZ now has two forms.</b> A Multi-AZ <b>DB instance</b> has one standby that can't serve reads (the classic exam answer). A Multi-AZ <b>DB cluster</b> has two standbys in three AZs that <b>can</b> serve reads. For the exam: Multi-AZ = HA.</p></div>
+      <div class="note"><p><b>Aurora's marketing number</b>: AWS now quotes up to <b>6×</b> the throughput of MySQL and PostgreSQL; older material says 5× / 3×. If only one is offered in an exam question, go with that. Aurora Serverless v2 scales in 0.5 ACU steps and can scale to zero.</p></div>
+      <div class="note"><p><b>Timestream for LiveAnalytics has an end-of-support notice</b>; AWS points to Timestream for InfluxDB. ElastiCache now offers <b>Valkey</b> as well as Redis OSS and Memcached. Managed Blockchain supports Ethereum, Hyperledger Fabric and more.</p></div>
+      <div class="note"><p><b>Also in the exam scope:</b> Kinesis, OpenSearch Service and SCT (cards above). Out of scope: Keyspaces, MemoryDB, MSK. Timestream and Managed Blockchain are on neither list: know only the trigger word.</p></div>
     </div>
   </section>
 

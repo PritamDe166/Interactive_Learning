@@ -161,10 +161,10 @@
       <div class="card"><h3>What it costs</h3><p><b>ELB</b>: per hour plus capacity units (LCU / NLCU / GLCU). <b>EC2 Auto Scaling</b>: no extra charge; you pay for the instances, EBS and CloudWatch it uses. Mix Spot and On-Demand in one group.</p></div>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag">Corrected</span><p><b>The Classic Load Balancer isn't retired.</b> It's the <b>previous generation</b>, still documented and billed; AWS recommends migrating to ALB or NLB.</p></div>
-      <div class="note"><span class="flag">Corrected</span><p><b>ELB + ASG don't deliver "agility".</b> They deliver high availability and elasticity. Agility is the general cloud benefit of getting resources in minutes instead of weeks.</p></div>
-      <div class="note"><span class="flag">Updated</span><p><b>Use launch templates.</b> Launch configurations are deprecated; accounts created since 1 October 2024 can't create them. The hands-on's Amazon Linux 2 reached end of support on 30 June 2026 (use AL2023).</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>HA vs DR:</b> multi-<b>AZ</b> (ASG + ELB) survives a data-centre failure; multi-<b>Region</b> is disaster recovery and lower latency for distant users, covered in Global Infrastructure. A single-AZ ASG is not highly available.</p></div>
+      <div class="note"><p><b>The Classic Load Balancer isn't retired.</b> It's the <b>previous generation</b>, still documented and billed; AWS recommends migrating to ALB or NLB.</p></div>
+      <div class="note"><p><b>ELB + ASG don't deliver "agility".</b> They deliver high availability and elasticity. Agility is the general cloud benefit of getting resources in minutes instead of weeks.</p></div>
+      <div class="note"><p><b>Use launch templates.</b> Launch configurations are deprecated; accounts created since 1 October 2024 can't create them. The hands-on's Amazon Linux 2 reached end of support on 30 June 2026 (use AL2023).</p></div>
+      <div class="note"><p><b>HA vs DR:</b> multi-<b>AZ</b> (ASG + ELB) survives a data-centre failure; multi-<b>Region</b> is disaster recovery and lower latency for distant users, covered in Global Infrastructure. A single-AZ ASG is not highly available.</p></div>
     </div>
   </section>
 

@@ -117,8 +117,8 @@ print(with_tax.__annotations__)''',
       </table>
     </div>''',
  "notes": [
-  ["Corrected", "<b>Function_basics.py</b> uses <span class=\"mono\">Union[str, None]</span> imported from typing; since Python 3.10 write <span class=\"mono\">str | None</span>. Its <span class=\"mono\">calculator_func(...) -&gt; int</span> actually returns a tuple of four numbers; mypy would report that line."],
-  ["Added", "<b>From your Notion plan:</b> \"type hints\" (8-week plan, Week 5). Hints also matter for the AI-agent goal in your Roadmap: tool-calling libraries and FastAPI/Pydantic build JSON schemas from them."],
+  ["Corrected", "<b>Modern hint syntax.</b> Since Python 3.10 write <span class=\"mono\">str | None</span> instead of <span class=\"mono\">Union[str, None]</span>. A function annotated <span class=\"mono\">-&gt; int</span> that returns a tuple is exactly the kind of mistake mypy reports."],
+  ["Added", "<b>Why hints matter beyond readability:</b> tool-calling libraries for AI agents and FastAPI/Pydantic build JSON schemas from them."],
   ["Updated", "<b>Python 3.14</b> evaluates annotations lazily (PEP 649/749), so a class can refer to itself or to classes defined later without quotes or <span class=\"mono\">from __future__ import annotations</span>."]
  ],
  "quiz": [

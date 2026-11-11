@@ -873,3 +873,17 @@ section[data-nav] { scroll-margin-top: calc(var(--topbar-h, 110px) + 8px); paddi
 .objtxt.muted { fill: var(--muted); }
 .objtxt.bad { fill: var(--bad-text); }
 .objtxt.ok { fill: var(--good-text); }
+
+/* ===== Section panels: every top-level section of an explainer sits in its own panel =====
+   Applies to all explainer pages (small sections on AWS/Python/Angular, the five numbered
+   sections on System Design). Cards inside a panel use the page background so they read as inset. */
+.wrap.explainer > section { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 26px 28px 28px; margin-top: 28px; }
+.wrap.explainer > section[data-nav] { margin-top: 32px; padding-top: 22px; }
+.wrap.explainer > section > :first-child { margin-top: 0; }
+.wrap.explainer > section .card,
+.wrap.explainer > section .remember,
+.wrap.explainer > section .quiz details { background: var(--bg); }
+.wrap.explainer > .part-title { margin-top: 40px; }
+@media (max-width: 560px) {
+  .wrap.explainer > section { padding: 18px 14px 20px; border-radius: 14px; margin-top: 20px; }
+}

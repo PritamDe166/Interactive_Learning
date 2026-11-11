@@ -81,9 +81,9 @@
       <div class="card"><h3>Client token (JWT)</h3><p>The client carries signed claims (<span class="mono">Authorization: Bearer …</span>). Any server can verify the signature without a lookup.</p></div>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag add">Added</span><p><b>The JWT trade-off:</b> because no server stores the session, you can't easily "log someone out" before the token expires. Common fix: short-lived access tokens (minutes) plus a refresh token that <i>is</i> checked against a store, or a small revocation list.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>State didn't disappear, it moved.</b> Redis and the database are now critical shared dependencies. They need their own replication, monitoring and capacity planning (Weeks 3 and 7).</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Local caches are fine.</b> A server can keep a copy of reference data or compiled templates in memory. That's allowed as long as losing it only costs speed, not correctness.</p></div>
+      <div class="note"><p><b>The JWT trade-off:</b> because no server stores the session, you can't easily "log someone out" before the token expires. Common fix: short-lived access tokens (minutes) plus a refresh token that <i>is</i> checked against a store, or a small revocation list.</p></div>
+      <div class="note"><p><b>State didn't disappear, it moved.</b> Redis and the database are now critical shared dependencies. They need their own replication, monitoring and capacity planning (Weeks 3 and 7).</p></div>
+      <div class="note"><p><b>Local caches are fine.</b> A server can keep a copy of reference data or compiled templates in memory. That's allowed as long as losing it only costs speed, not correctness.</p></div>
     </div>
   </div>
     <h3 class="sec-h3">Cookie or token?</h3>
@@ -97,7 +97,7 @@
         <tr><td>Main risk</td><td>CSRF → <code>SameSite</code> cookies, anti-forgery tokens</td><td>Theft via XSS if kept in localStorage</td></tr>
         <tr><td>Fits</td><td>Browser web apps</td><td>APIs, mobile apps, service-to-service</td></tr>
       </tbody></table></div>
-    <div class="note"><span class="flag add">Added</span><p>Use <code>HttpOnly</code> + <code>Secure</code> + <code>SameSite</code> on any cookie that carries a session ID or token, so page scripts can't read it and other sites can't send it.</p></div>
+    <div class="note"><p>Use <code>HttpOnly</code> + <code>Secure</code> + <code>SameSite</code> on any cookie that carries a session ID or token, so page scripts can't read it and other sites can't send it.</p></div>
   </section>
 
   <section id="revise" data-nav="Revise">

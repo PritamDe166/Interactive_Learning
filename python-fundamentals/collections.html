@@ -120,10 +120,10 @@
       </table>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag">Corrected</span><p><b>remove() comment in Collections.py:</b> <span class="mono">employee_ages.remove(12)  # Remove the age we just added</span>, but the line before appended <b>100</b>. <span class="mono">remove(12)</span> deletes the first 12 in the list.</p></div>
-      <div class="note"><span class="flag">Corrected</span><p><b>Tuple_exercises.py:</b> the comment says <span class="mono">(10.4)</span> without a comma "is just an integer". It's a <b>float</b>: parentheses don't change the type, they just group.</p></div>
-      <div class="note"><span class="flag">Corrected</span><p><b>Lists_exercises.py</b> imports <span class="mono">indexOf</span> from <span class="mono">operator</span> and an unused <span class="mono">math</span>. The normal way is <span class="mono">fruits.index("orange")</span>, or <span class="mono">enumerate()</span> while looping. The "5 favourite movies" list has 4 items.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Keys must be hashable:</b> str, int, tuple work as dict keys and set items; lists and dicts don't (<span class="mono">TypeError: unhashable type: 'list'</span>).</p></div>
+      <div class="note"><p><b><span class="mono">remove(x)</span> removes by value, not position.</b> It deletes the <b>first</b> item equal to x, which may not be the one you just added. Use <span class="mono">pop()</span> to remove the last item.</p></div>
+      <div class="note"><p><b><span class="mono">(10.4)</span> without a comma is just a float</b>, not a tuple: parentheses don't change the type, they just group. A one-item tuple needs the comma: <span class="mono">(10.4,)</span>.</p></div>
+      <div class="note"><p><b>Finding an item's position.</b> Use <span class="mono">fruits.index("orange")</span>, or <span class="mono">enumerate()</span> while looping; there's no need to import <span class="mono">indexOf</span> from <span class="mono">operator</span>.</p></div>
+      <div class="note"><p><b>Keys must be hashable:</b> str, int, tuple work as dict keys and set items; lists and dicts don't (<span class="mono">TypeError: unhashable type: 'list'</span>).</p></div>
     </div>
   </section>
 

@@ -75,7 +75,7 @@ Location: /patients/124
         </tbody>
       </table>
     </div>
-    <div class="note"><span class="flag add">Added</span><p><b>Safe</b> means "doesn't change server state". Every safe method is idempotent, but not the other way round: PUT and DELETE change state, yet repeating them changes nothing further.</p></div>
+    <div class="note"><p><b>Safe</b> means "doesn't change server state". Every safe method is idempotent, but not the other way round: PUT and DELETE change state, yet repeating them changes nothing further.</p></div>
   </div>
     <h3 class="sec-h3">HTTP/1.1 vs 2 vs 3</h3>
     <p class="sub">Same requests, three ways to carry them. Press <b>▶ Play</b> on a card. The transport details are on <a href="tcp-udp.html">H3 TCP &amp; UDP</a>.</p>
@@ -146,8 +146,8 @@ Location: /patients/124
       <div><div class="label">Typical fix or client action</div><p id="scFix">–</p></div>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag add">Added</span><p><b>1xx and 3xx were empty in the notes.</b> 1xx: <span class="mono">100 Continue</span>, <span class="mono">101 Switching Protocols</span> (WebSocket upgrade). 3xx: <span class="mono">301</span>/<span class="mono">308</span> permanent move, <span class="mono">302</span>/<span class="mono">307</span> temporary move (307/308 keep the method and body), <span class="mono">304 Not Modified</span> (your cached copy is still valid).</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>401 is misnamed.</b> Its official name is "Unauthorized", but it means <i>not authenticated</i>: who are you? <b>403</b> means "I know who you are, and you're not allowed".</p></div>
+      <div class="note"><p><b>1xx and 3xx in practice.</b> 1xx: <span class="mono">100 Continue</span>, <span class="mono">101 Switching Protocols</span> (WebSocket upgrade). 3xx: <span class="mono">301</span>/<span class="mono">308</span> permanent move, <span class="mono">302</span>/<span class="mono">307</span> temporary move (307/308 keep the method and body), <span class="mono">304 Not Modified</span> (your cached copy is still valid).</p></div>
+      <div class="note"><p><b>401 is misnamed.</b> Its official name is "Unauthorized", but it means <i>not authenticated</i>: who are you? <b>403</b> means "I know who you are, and you're not allowed".</p></div>
     </div>
   </div>
   </section>

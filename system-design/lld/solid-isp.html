@@ -118,9 +118,9 @@
       </table>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag add">Added</span><p><b>Origin:</b> Robert C. Martin formulated ISP while consulting for Xerox, whose printer software had one large job class that every task depended on. Small changes forced long rebuilds across the system; splitting the class's interface by client fixed it.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>.NET learned this too:</b> <span class="mono">IReadOnlyList&lt;T&gt;</span> and <span class="mono">IReadOnlyCollection&lt;T&gt;</span> arrived in .NET 4.5 so read-only callers no longer depend on <span class="mono">Add</span>/<span class="mono">Remove</span>, and arrays and read-only collections stopped needing throwing implementations (see the Liskov page).</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>From your notes:</b> split a bulky generic repository into read, write and delete interfaces, recombine with a main interface that inherits them when needed, and avoid the over-applied version with one method per interface.</p></div>
+      <div class="note"><p><b>Origin:</b> Robert C. Martin formulated ISP while consulting for Xerox, whose printer software had one large job class that every task depended on. Small changes forced long rebuilds across the system; splitting the class's interface by client fixed it.</p></div>
+      <div class="note"><p><b>.NET learned this too:</b> <span class="mono">IReadOnlyList&lt;T&gt;</span> and <span class="mono">IReadOnlyCollection&lt;T&gt;</span> arrived in .NET 4.5 so read-only callers no longer depend on <span class="mono">Add</span>/<span class="mono">Remove</span>, and arrays and read-only collections stopped needing throwing implementations (see the Liskov page).</p></div>
+      <div class="note"><p><b>In practice:</b> split a bulky generic repository into read, write and delete interfaces, recombine with a main interface that inherits them when needed, and avoid the over-applied version with one method per interface.</p></div>
     </div>
   </div>
   </section>
@@ -149,7 +149,7 @@
 
   <nav id="prevnext"></nav>
 
-  <footer>Sources: your Notion notes "SOLID Principles: Five Guidelines for Object-Oriented Code"; NDepend blog, "SOLID Design: The Interface Segregation Principle" (.NET collection interfaces); Stackify, "Interface Segregation Principle" (Xerox origin). Class names and counts are illustrative.</footer>
+  <footer>Sources: study notes "SOLID Principles: Five Guidelines for Object-Oriented Code"; NDepend blog, "SOLID Design: The Interface Segregation Principle" (.NET collection interfaces); Stackify, "Interface Segregation Principle" (Xerox origin). Class names and counts are illustrative.</footer>
 </div>
 
 <script>
@@ -243,7 +243,7 @@ public class ReportService(IReadRepository<Patient> patients) { ... }`, 'cs');
       { title: 'No more stubs or stray coupling', text: '<span class="mono">AuditLogReader</span> implements the read role only: two real methods. ReportService\'s fake needs two methods, and import changes no longer touch it.', tip: 'Mention test fakes: "the smaller the interface a class depends on, the smaller the mock". It shows you\'ve felt the pain.' },
       { title: 'Recombine when something needs it all', text: '<span class="mono">IRepository&lt;T&gt;</span> can still exist, <b>inheriting</b> read and write. The SQL repository implements it plus import, so code needing everything has one convenient type.' },
       { title: '.NET did the same', text: '<span class="mono">IList&lt;T&gt;</span> includes Add and Remove. Since .NET 4.5, read-only callers can ask for <span class="mono">IReadOnlyList&lt;T&gt;</span> or <span class="mono">IReadOnlyCollection&lt;T&gt;</span> instead, and accept far more kinds of collection.' },
-      { title: 'Don\'t split to dust', text: 'One method per interface means dozens of tiny types to find and wire up. Your notes call this out: group methods by the role a client plays, then stop.' }
+      { title: 'Don\'t split to dust', text: 'One method per interface means dozens of tiny types to find and wire up. Group methods by the role a client plays, then stop.' }
     ]
   });
 

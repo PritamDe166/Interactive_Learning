@@ -111,10 +111,10 @@
       <div><div class="label ok-text">Prefer: computed (or linkedSignal if it must be editable)</div><div id="effGood"></div></div>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag add">Added</span><p><b>Not in your notes.</b> Signals arrived after Angular 16. In Angular 22 they're the core of reactivity: inputs, outputs, queries, forms and HTTP resources all speak signals, and zoneless change detection depends on them.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Laziness, proven.</b> CareDesk had a <span class="mono">computed</span> that nothing read. Its log line never appeared in any scenario: a computed that isn't read is never evaluated.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Batched and glitch-free.</b> Writing <span class="mono">'m'</span> then <span class="mono">'me'</span> in the same function produced one effect run (<span class="mono">"me"</span>) and one recompute of each computed. Readers never see a half-updated graph.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Equality stops the wave.</b> Typing "ra" after "r" made <span class="mono">filtered</span> return a new array, but <span class="mono">first</span> was still the same Ravi object, so <span class="mono">note</span> did not reset. Default equality is <span class="mono">Object.is</span>; pass <span class="mono">{ equal: fn }</span> to customise it.</p></div>
+      <div class="note"><p><b>Why it matters.</b> Signals arrived after Angular 16. In Angular 22 they're the core of reactivity: inputs, outputs, queries, forms and HTTP resources all speak signals, and zoneless change detection depends on them.</p></div>
+      <div class="note"><p><b>Laziness, proven.</b> CareDesk had a <span class="mono">computed</span> that nothing read. Its log line never appeared in any scenario: a computed that isn't read is never evaluated.</p></div>
+      <div class="note"><p><b>Batched and glitch-free.</b> Writing <span class="mono">'m'</span> then <span class="mono">'me'</span> in the same function produced one effect run (<span class="mono">"me"</span>) and one recompute of each computed. Readers never see a half-updated graph.</p></div>
+      <div class="note"><p><b>Equality stops the wave.</b> Typing "ra" after "r" made <span class="mono">filtered</span> return a new array, but <span class="mono">first</span> was still the same Ravi object, so <span class="mono">note</span> did not reset. Default equality is <span class="mono">Object.is</span>; pass <span class="mono">{ equal: fn }</span> to customise it.</p></div>
     </div>
   </section>
 

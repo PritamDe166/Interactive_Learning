@@ -159,10 +159,10 @@
       <div class="card"><h3>CloudFront vs S3 replication</h3><p><b>CloudFront</b>: cache read-heavy static content at hundreds of edges, served until the TTL expires (default 24 h). <b>S3 CRR</b>: a full, near-real-time copy of a bucket in a few chosen Regions.</p></div>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag">Updated</span><p><b>CloudFront now has 750+ points of presence</b> (plus regional edge caches), not the ~216 quoted in the course. AWS runs 39 Regions with 124 AZs (October 2026); counts change, so the exam won't test them.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Route 53 has more than four routing policies.</b> The course covers Simple, Weighted, Latency and Failover; Geolocation is the next most common on exams. Health checks are optional for Weighted and Latency and required for Failover's primary.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Edge location ≠ Region.</b> You can't run your app on an edge location; CloudFront, Route 53, Global Accelerator and Transfer Acceleration use them. To run compute closer to users, AWS has <b>Local Zones</b>, <b>Wavelength</b> (5G networks) and <b>Outposts</b> (in your data centre).</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Costs:</b> a hosted zone is about $0.50/month plus queries; domains bill yearly and auto-renew. CloudFront has a free tier and flat-rate plans; Global Accelerator charges hourly plus premium data transfer; Transfer Acceleration charges per GB only when it actually speeds things up.</p></div>
+      <div class="note"><p><b>CloudFront now has 750+ points of presence</b> (plus regional edge caches); older courses quote ~216. AWS runs 39 Regions with 124 AZs (October 2026); counts change, so the exam won't test them.</p></div>
+      <div class="note"><p><b>Route 53 has more than four routing policies.</b> Simple, Weighted, Latency and Failover are the core four; Geolocation is the next most common on exams. Health checks are optional for Weighted and Latency and required for Failover's primary.</p></div>
+      <div class="note"><p><b>Edge location ≠ Region.</b> You can't run your app on an edge location; CloudFront, Route 53, Global Accelerator and Transfer Acceleration use them. To run compute closer to users, AWS has <b>Local Zones</b>, <b>Wavelength</b> (5G networks) and <b>Outposts</b> (in your data centre).</p></div>
+      <div class="note"><p><b>Costs:</b> a hosted zone is about $0.50/month plus queries; domains bill yearly and auto-renew. CloudFront has a free tier and flat-rate plans; Global Accelerator charges hourly plus premium data transfer; Transfer Acceleration charges per GB only when it actually speeds things up.</p></div>
     </div>
   </section>
 

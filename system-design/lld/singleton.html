@@ -126,8 +126,8 @@
       </table>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag add">Added</span><p><b>Captive dependency:</b> a singleton that receives a scoped service keeps the first request's instance forever. ASP.NET Core checks this in Development (scope validation) and throws "Cannot consume scoped service … from singleton".</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Why <span class="mono">volatile</span> in double-checked locking:</b> without it another thread could, in theory, see the reference before the object is fully built. .NET's memory model makes the plain version work on today's runtimes, but <span class="mono">volatile</span> (or <span class="mono">Lazy&lt;T&gt;</span>) says what you mean.</p></div>
+      <div class="note"><p><b>Captive dependency:</b> a singleton that receives a scoped service keeps the first request's instance forever. ASP.NET Core checks this in Development (scope validation) and throws "Cannot consume scoped service … from singleton".</p></div>
+      <div class="note"><p><b>Why <span class="mono">volatile</span> in double-checked locking:</b> without it another thread could, in theory, see the reference before the object is fully built. .NET's memory model makes the plain version work on today's runtimes, but <span class="mono">volatile</span> (or <span class="mono">Lazy&lt;T&gt;</span>) says what you mean.</p></div>
     </div>
   </section>
 

@@ -122,9 +122,9 @@
       </table>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag add">Added</span><p><b>Origin:</b> Barbara Liskov introduced the idea in a 1987 keynote on data abstraction; Liskov and Jeannette Wing formalised it in 1994 as "behavioural subtyping", with the pre/postcondition, invariant and history rules above.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Real .NET example:</b> arrays and <span class="mono">ReadOnlyCollection&lt;T&gt;</span> implement <span class="mono">ICollection&lt;T&gt;</span> but throw <span class="mono">NotSupportedException</span> from <span class="mono">Add</span>. Code that takes <span class="mono">ICollection&lt;T&gt;</span> and adds will crash at run time. It's both an LSP and an interface-segregation problem, which is why the read-only interfaces were introduced.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>From your notes:</b> a "not implemented" override breaks LSP because the child can't stand in for the parent; the fix in the Parent/Child example is a shared <span class="mono">Human</span> base with <span class="mono">Adult</span> and <span class="mono">Child</span> subclasses.</p></div>
+      <div class="note"><p><b>Origin:</b> Barbara Liskov introduced the idea in a 1987 keynote on data abstraction; Liskov and Jeannette Wing formalised it in 1994 as "behavioural subtyping", with the pre/postcondition, invariant and history rules above.</p></div>
+      <div class="note"><p><b>Real .NET example:</b> arrays and <span class="mono">ReadOnlyCollection&lt;T&gt;</span> implement <span class="mono">ICollection&lt;T&gt;</span> but throw <span class="mono">NotSupportedException</span> from <span class="mono">Add</span>. Code that takes <span class="mono">ICollection&lt;T&gt;</span> and adds will crash at run time. It's both an LSP and an interface-segregation problem, which is why the read-only interfaces were introduced.</p></div>
+      <div class="note"><p><b>In practice:</b> a "not implemented" override breaks LSP because the child can't stand in for the parent; the fix in the Parent/Child example is a shared <span class="mono">Human</span> base with <span class="mono">Adult</span> and <span class="mono">Child</span> subclasses.</p></div>
     </div>
   </div>
   </section>
@@ -153,7 +153,7 @@
 
   <nav id="prevnext"></nav>
 
-  <footer>Sources: your Notion notes "SOLID Principles: Five Guidelines for Object-Oriented Code"; Liskov &amp; Wing, "A behavioral notion of subtyping" (1994) as summarised on Wikipedia's Liskov substitution principle page; Microsoft Learn, ReadOnlyCollection&lt;T&gt;.ICollection&lt;T&gt;.Add; NDepend blog on ISP and .NET collections. Notifier and test names are illustrative.</footer>
+  <footer>Sources: study notes "SOLID Principles: Five Guidelines for Object-Oriented Code"; Liskov &amp; Wing, "A behavioral notion of subtyping" (1994) as summarised on Wikipedia's Liskov substitution principle page; Microsoft Learn, ReadOnlyCollection&lt;T&gt;.ICollection&lt;T&gt;.Add; NDepend blog on ISP and .NET collections. Notifier and test names are illustrative.</footer>
 </div>
 
 <script>

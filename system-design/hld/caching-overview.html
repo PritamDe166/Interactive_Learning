@@ -165,11 +165,11 @@
       </table>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag">Corrected</span><p><b>An in-process cache lives in the process's RAM (heap)</b>, not "in the CPU cache". CPU caches (L1/L2/L3) are managed by the hardware; your code can't put entries there. It is still the fastest option because there's no network hop.</p></div>
-      <div class="note"><span class="flag">Corrected</span><p>The note groups forward and reverse proxies. A <b>forward proxy</b> sits on the <b>client</b> side (an office or ISP); a <b>reverse proxy</b> sits in front of the <b>origin</b>. Both can cache.</p></div>
-      <div class="note"><span class="flag">Corrected</span><p>"Writes go to the database, not the cache" is true for <b>cache-aside</b> (Day 16). <b>Write-through</b> and <b>write-behind</b> (Days 17–18) write to the cache as part of the write.</p></div>
-      <div class="note"><span class="flag add">Added</span><p>Browser and CDN caches commonly use <b>disk/SSD</b> as well as memory, so "disk is rarely used for caching" applies to server-side caches. "The DB crashes at around a million requests" is illustrative: the real limit depends on the query, hardware and connection pool.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>TTL</b> (time to live) is the usual way to bound staleness, and a <b>cache stampede</b> (many misses at once when a hot key expires) is Day 20.</p></div>
+      <div class="note"><p><b>An in-process cache lives in the process's RAM (heap)</b>, not "in the CPU cache". CPU caches (L1/L2/L3) are managed by the hardware; your code can't put entries there. It is still the fastest option because there's no network hop.</p></div>
+      <div class="note"><p><b>Forward vs reverse proxy.</b> A <b>forward proxy</b> sits on the <b>client</b> side (an office or ISP); a <b>reverse proxy</b> sits in front of the <b>origin</b>. Both can cache.</p></div>
+      <div class="note"><p>"Writes go to the database, not the cache" is true for <b>cache-aside</b> (Day 16). <b>Write-through</b> and <b>write-behind</b> (Days 17–18) write to the cache as part of the write.</p></div>
+      <div class="note"><p>Browser and CDN caches commonly use <b>disk/SSD</b> as well as memory, so "disk is rarely used for caching" applies to server-side caches. "The DB crashes at around a million requests" is illustrative: the real limit depends on the query, hardware and connection pool.</p></div>
+      <div class="note"><p><b>TTL</b> (time to live) is the usual way to bound staleness, and a <b>cache stampede</b> (many misses at once when a hot key expires) is Day 20.</p></div>
     </div>
   </div>
   </section>

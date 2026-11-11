@@ -62,10 +62,10 @@
   <section class="howto" aria-label="How to use">
     <div class="box"><h4>Study loop</h4><p>Step through the walkthrough, then answer the "predict the output" cards before revealing. Say why, not just what.</p></div>
     <div class="box"><h4>Regenerating traces</h4><p>Snippets live in <code>snippets/&lt;page&gt;.json</code>. Run <code>python3 tools/pytrace.py python-fundamentals/snippets/&lt;page&gt;.json</code> from the repo root to rebuild <code>traces/&lt;page&gt;.js</code>. Topics 2–20 are generated from <code>tools/pypages/specs/&lt;page&gt;.py</code> by <code>tools/pypages/build.py</code>, which also checks every puzzle and quiz answer against a real run.</p></div>
-    <div class="box"><h4>Source</h4><p>Practice code: <a href="https://github.com/PritamDe166/Python_Fundamentals">PritamDe166/Python_Fundamentals</a>. Tags show which files each topic draws on; "gap" topics weren't in the repo; Part 5 comes from your Notion plans.</p></div>
+    <div class="box"><h4>Source</h4><p>Practice code: <a href="https://github.com/PritamDe166/Python_Fundamentals">PritamDe166/Python_Fundamentals</a>. Tags show which files each topic draws on; "gap" topics weren't in the repo; Part 5 adds topics beyond it.</p></div>
   </section>
 
-  <footer>Parts 1–4 follow the Python_Fundamentals repo; Part 5 adds topics from your Notion learning plans. Greyed topics are coming soon.</footer>
+  <footer>Parts 1–4 follow the Python_Fundamentals repo; Part 5 adds topics beyond the repo. Greyed topics are coming soon.</footer>
 </div>
 
 <script>
@@ -119,7 +119,7 @@ $('bar').style.width=Math.max(pct,live.length?2:0)+'%';
 let filter='all',query='';
 function card(s,n){
   const cls=['day-card'];
-  const doms=`<span class="doms">${s.tags.map(t=>`<span class="dom${t==='gap'||t==='plan'?' gap':''}">${esc(t==='gap'?'gap: new topic':t==='plan'?'from your Notion plan':t)}</span>`).join('')}</span>`;
+  const doms=`<span class="doms">${s.tags.map(t=>`<span class="dom${t==='gap'||t==='plan'?' gap':''}">${esc(t==='gap'?'gap: new topic':t==='plan'?'beyond the basics':t)}</span>`).join('')}</span>`;
   if(s.file){cls.push('live');return `<a class="${cls.join(' ')}" href="${esc(s.file)}"><span class="day">Topic ${n}</span><span class="topic">${esc(s.t)}</span>${doms}<span class="status">Open explainer</span></a>`;}
   if(s.todo)cls.push('review');
   return `<div class="${cls.join(' ')}"><span class="day">Topic ${n}</span><span class="topic">${esc(s.t)}</span>${doms}<span class="status">Coming soon</span></div>`;

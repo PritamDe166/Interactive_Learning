@@ -111,8 +111,8 @@
         </tbody>
       </table>
     </div>
-    <div class="note"><span class="flag">Added</span>FIFO and Redis's eviction settings were not in the day list; Redis's default <code>maxmemory-policy</code> is <code>noeviction</code>, so you choose LRU or LFU explicitly.</div>
-    <div class="note"><span class="flag">Corrected</span>Redis does not keep a perfect LRU list: it samples a few keys (<code>maxmemory-samples</code>, default 5) and evicts the best candidate among them. Its LFU uses a small counter that decays over time.</div>
+    <div class="note">Redis's default <code>maxmemory-policy</code> is <code>noeviction</code>, so you choose LRU or LFU explicitly.</div>
+    <div class="note">Redis does not keep a perfect LRU list: it samples a few keys (<code>maxmemory-samples</code>, default 5) and evicts the best candidate among them. Its LFU uses a small counter that decays over time.</div>
   </section>
 
   <section id="test" data-nav="Test">

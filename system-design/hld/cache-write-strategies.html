@@ -98,8 +98,8 @@
         </tbody>
       </table>
     </div>
-    <div class="note"><span class="flag">Added</span>Write-around and the invalidation race are not in the original day list; interviewers often ask "how do you keep cache and DB consistent?" right after "add a cache".</div>
-    <div class="note"><span class="flag">Corrected</span>Deleting the key does not make cache-aside perfectly consistent: a slow reader can still put an old value back (see the lab). A TTL bounds how long that lasts; a delayed second delete closes most of the gap.</div>
+    <div class="note">Interviewers often ask "how do you keep cache and DB consistent?" right after "add a cache"; write-around and the invalidation race are the usual follow-ups.</div>
+    <div class="note">Deleting the key does not make cache-aside perfectly consistent: a slow reader can still put an old value back (see the lab). A TTL bounds how long that lasts; a delayed second delete closes most of the gap.</div>
   </section>
 
   <section id="test" data-nav="Test">

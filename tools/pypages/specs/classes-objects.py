@@ -123,7 +123,7 @@ print(asha.clinic, isinstance(ravi, Patient))''',
       </table>
     </div>''',
  "notes": [
-  ["Corrected", "<b>BankAccount.withdraw</b> in class_objects_practise.py prints \"Insufficient funds.\" and carries on, so the caller can't tell it failed. Raise an exception instead (see the Your turn starter). Money is also stored as float; real systems use <span class=\"mono\">decimal.Decimal</span> or integer paise/cents."],
+  ["Corrected", "<b>Don't just print on failure.</b> A <span class=\"mono\">withdraw</span> that prints \"Insufficient funds.\" and carries on leaves the caller unable to tell it failed. Raise an exception instead (see the Your turn starter). Store money as <span class=\"mono\">decimal.Decimal</span> or integer paise/cents, not float."],
   ["Added", "<b>Attribute names:</b> <span class=\"mono\">self.car_make</span>, <span class=\"mono\">self.account_balance</span>, <span class=\"mono\">self.employee_name</span> repeat the class name. Inside a Car, <span class=\"mono\">self.make</span> is clear enough, and callers write <span class=\"mono\">car.make</span>."],
   ["Added", "<b>display_car_info / show_balance</b> print directly. Defining <span class=\"mono\">__str__</span> or <span class=\"mono\">__repr__</span> lets <span class=\"mono\">print(car)</span> and f-strings work, and keeps formatting separate from logic (OOP deeper page)."],
   ["Added", "<b>main() runs on import.</b> The file ends with a bare <span class=\"mono\">main()</span>. Use <span class=\"mono\">if __name__ == \"__main__\": main()</span> so importing the classes from another file doesn't run the demo (Modules page)."]

@@ -147,7 +147,6 @@ print(ravi, ravi.is_senior, ravi == Patient("Ravi", 64))''',
       </table>
     </div>''',
  "notes": [
-  ["Added", "<b>From your Notion plan:</b> \"classes (__init__/__str__/__repr__), inheritance &amp; polymorphism, @staticmethod/@classmethod\" (8-week plan, Week 5)."],
   ["Added", "<b>Fixing the repo's classes:</b> <span class=\"mono\">Car</span> and <span class=\"mono\">Employee</span> are mostly data, so <span class=\"mono\">@dataclass</span> would remove their __init__ boilerplate and give printable objects; <span class=\"mono\">display_car_info()</span> becomes <span class=\"mono\">__str__</span>."],
   ["Added", "<b>Coming from C#:</b> @property ≈ a C# property with get/set; dunders ≈ operator overloads and ToString()/Equals()/GetHashCode() overrides; @dataclass ≈ a <span class=\"mono\">record</span>. Python has no interfaces by default: duck typing, or <span class=\"mono\">typing.Protocol</span> / <span class=\"mono\">abc.ABC</span> when you want them."]
  ],

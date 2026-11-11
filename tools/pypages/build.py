@@ -103,7 +103,9 @@ def render(S, MAP):
 ''' for c in customs)
     custom_js = '\n'.join(f"  /* ===== {c['title']} ===== */\n  (function () {{\n{c['js']}\n  }})();" for c in customs)
     cheat = ''.join(f'      <li><span class="if">{a}</span><span class="arrow">→</span><span class="then">{b}</span></li>\n' for a, b in S['cheat'])
-    notes = ''.join(f'      <div class="note"><span class="flag{"" if f == "Corrected" else " add"}">{f}</span><p>{t}</p></div>\n' for f, t in S.get('notes', []))
+    # Notes render as plain "good to know" points; the first item (old label) is ignored.
+    notes = ''.join(f'      <div class="note"><p>{t}</p></div>\n' for f, t in S.get('notes', []))
+    notes_html = f'    <div class="notes" style="margin-top:14px">\n{notes}    </div>\n' if notes else ''
     quiz = ''.join(f'''      <details><summary>{q['q']}<span class="go">Show answer</span></summary>
         <div class="ans"><p>{q['a']}</p></div></details>
 ''' for q in S['quiz'])
@@ -200,9 +202,7 @@ def render(S, MAP):
   <section aria-labelledby="refH">
     <h2 id="refH">{S.get('ref_title', 'Reference')}</h2>
 {S.get('ref_html', '')}
-    <div class="notes" style="margin-top:14px">
-{notes}    </div>
-  </section>
+{notes_html}  </section>
 
   <section aria-labelledby="quizH">
     <h2 id="quizH">Check yourself</h2>

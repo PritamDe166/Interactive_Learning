@@ -71,9 +71,9 @@
         </tbody>
       </table>
     </div>
-    <div class="note"><span class="flag">Added</span>Write-around, invalidate-on-write, cache penetration, hot keys and CDN push vs pull are not in the Week 3 day list; they are common follow-up questions, so they have cards here.</div>
-    <div class="note"><span class="flag">Updated</span><code>HybridCache</code> (package <code>Microsoft.Extensions.Caching.Hybrid</code>) has been generally available since March 2025 and is the recommended default for new ASP.NET Core code. Its stampede protection covers one process; ten app servers can still send ten loads to the database.</div>
-    <div class="note"><span class="flag">Corrected</span>TTL expiry and eviction are different things: expiry removes a key because it is old, eviction removes one because memory is full. Redis does both, and its eviction policy (<code>maxmemory-policy</code>, e.g. <code>allkeys-lru</code>, <code>allkeys-lfu</code>) is a setting you choose.</div>
+    <div class="note">Write-around, invalidate-on-write, cache penetration, hot keys and CDN push vs pull are common interview follow-ups, so they have cards here.</div>
+    <div class="note"><code>HybridCache</code> (package <code>Microsoft.Extensions.Caching.Hybrid</code>) has been generally available since March 2025 and is the recommended default for new ASP.NET Core code. Its stampede protection covers one process; ten app servers can still send ten loads to the database.</div>
+    <div class="note">TTL expiry and eviction are different things: expiry removes a key because it is old, eviction removes one because memory is full. Redis does both, and its eviction policy (<code>maxmemory-policy</code>, e.g. <code>allkeys-lru</code>, <code>allkeys-lfu</code>) is a setting you choose.</div>
   </section>
 
   <section id="test" data-nav="Test">

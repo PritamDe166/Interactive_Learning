@@ -158,11 +158,11 @@
       <div class="card"><h3>Lock it down</h3><p><b>MFA Delete</b>: MFA for permanent deletes (root only). <b>Object Lock</b> / <b>Glacier Vault Lock</b>: write-once-read-many (WORM) for compliance.</p></div>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag">Corrected</span><p><b>Maximum object size is 48.8 TiB</b> (multipart, 10,000 parts of up to 5 GiB), not 50 TB; older material says 5 TB. A single PUT is limited to 5 GB, and multipart is recommended from about 100 MB.</p></div>
-      <div class="note"><span class="flag">Corrected</span><p><b>Existing objects are replicated with S3 Batch Replication</b>, not "S3 Batch Operations" in general. Replication has no time guarantee unless you pay for <b>Replication Time Control</b> (15-minute SLA).</p></div>
-      <div class="note"><span class="flag">Updated</span><p><b>Snowball devices reach end of support on 31 December 2026</b> in commercial Regions, and the Snow Family isn't on the CLF-C02 in-scope list. Know it only as "ship a physical device to move huge data".</p></div>
-      <div class="note"><span class="flag">Updated</span><p><b>S3 Express One Zone</b>: single-digit-millisecond latency, up to 10× faster than Standard, request costs up to 80% lower, one AZ, "directory buckets". Bucket names can also live in an <b>account regional namespace</b> that only your account can claim.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Pricing levers:</b> you pay for GB-months stored, requests, retrievals (IA and Glacier) and data transfer <i>out</i>. Data in is free. Every version of an object is billed as a full object, so pair versioning with lifecycle expiration.</p></div>
+      <div class="note"><p><b>Maximum object size is 48.8 TiB</b> (multipart, 10,000 parts of up to 5 GiB), not 50 TB; older material says 5 TB. A single PUT is limited to 5 GB, and multipart is recommended from about 100 MB.</p></div>
+      <div class="note"><p><b>Existing objects are replicated with S3 Batch Replication</b>, not "S3 Batch Operations" in general. Replication has no time guarantee unless you pay for <b>Replication Time Control</b> (15-minute SLA).</p></div>
+      <div class="note"><p><b>Snowball devices reach end of support on 31 December 2026</b> in commercial Regions, and the Snow Family isn't on the CLF-C02 in-scope list. Know it only as "ship a physical device to move huge data".</p></div>
+      <div class="note"><p><b>S3 Express One Zone</b>: single-digit-millisecond latency, up to 10× faster than Standard, request costs up to 80% lower, one AZ, "directory buckets". Bucket names can also live in an <b>account regional namespace</b> that only your account can claim.</p></div>
+      <div class="note"><p><b>Pricing levers:</b> you pay for GB-months stored, requests, retrievals (IA and Glacier) and data transfer <i>out</i>. Data in is free. Every version of an object is billed as a full object, so pair versioning with lifecycle expiration.</p></div>
     </div>
   </section>
 

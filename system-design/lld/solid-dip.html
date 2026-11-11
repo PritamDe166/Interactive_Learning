@@ -119,9 +119,9 @@
       </table>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag add">Added</span><p><b>The two statements</b> (Robert C. Martin, 1996): high-level modules should not depend on low-level modules, both should depend on abstractions; and abstractions should not depend on details, details should depend on abstractions.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Ownership matters:</b> if <span class="mono">IBookingRepository</span> lives in the Infrastructure project, the domain still references infrastructure and nothing was inverted. Put it in the domain, name it in domain language, and use domain types in its signatures. This is the heart of Clean Architecture and Ports &amp; Adapters.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>From your notes:</b> a Service that creates its Repository depends on a concrete low-level class. Introduce an interface, inject it through the constructor, and the service no longer knows which repository it uses or how it works. Most projects have one implementation per interface, so the main practical win is mocking in tests.</p></div>
+      <div class="note"><p><b>The two statements</b> (Robert C. Martin, 1996): high-level modules should not depend on low-level modules, both should depend on abstractions; and abstractions should not depend on details, details should depend on abstractions.</p></div>
+      <div class="note"><p><b>Ownership matters:</b> if <span class="mono">IBookingRepository</span> lives in the Infrastructure project, the domain still references infrastructure and nothing was inverted. Put it in the domain, name it in domain language, and use domain types in its signatures. This is the heart of Clean Architecture and Ports &amp; Adapters.</p></div>
+      <div class="note"><p><b>In practice:</b> a Service that creates its Repository depends on a concrete low-level class. Introduce an interface, inject it through the constructor, and the service no longer knows which repository it uses or how it works. Most projects have one implementation per interface, so the main practical win is mocking in tests.</p></div>
     </div>
   </div>
   </section>
@@ -150,7 +150,7 @@
 
   <nav id="prevnext"></nav>
 
-  <footer>Sources: your Notion notes "SOLID Principles: Five Guidelines for Object-Oriented Code"; Robert C. Martin, "The Dependency Inversion Principle" (1996), as quoted in the Wikipedia article and Coding Shuttle's LLD handbook; Mikhail Shilkov, "Dependency Inversion Implies Interfaces Are Owned by High-level Modules" (2016). Repository names and log lines are illustrative.</footer>
+  <footer>Sources: study notes "SOLID Principles: Five Guidelines for Object-Oriented Code"; Robert C. Martin, "The Dependency Inversion Principle" (1996), as quoted in the Wikipedia article and Coding Shuttle's LLD handbook; Mikhail Shilkov, "Dependency Inversion Implies Interfaces Are Owned by High-level Modules" (2016). Repository names and log lines are illustrative.</footer>
 </div>
 
 <script>
@@ -239,7 +239,7 @@ public void Booking_a_taken_slot_throws()
       { title: 'Introduce an abstraction the domain owns', text: 'The domain declares what it needs: <span class="mono">IBookingRepository</span>, in <b>its own</b> project and in its own words (IsTaken, Save). BookingService depends only on that.' },
       { title: 'The arrow flips', text: '<span class="mono">SqlBookingRepository</span> implements the domain\'s interface, so now <b>Infrastructure references Domain</b>. The source-code dependency points from detail to policy. That reversal is the "inversion".', tip: 'Draw the project references before and after. Interviewers want to hear that the interface lives with the high-level code; otherwise nothing was inverted.' },
       { title: 'Constructor injection wires it', text: 'BookingService receives an <span class="mono">IBookingRepository</span> through its constructor. Only <span class="mono">Program.cs</span>, the composition root, knows the concrete class and registers it with the DI container.' },
-      { title: 'Tests plug in a fake', text: 'The test project implements the same interface with an in-memory <span class="mono">FakeBookingRepository</span>. The booking rule is tested in milliseconds, no database. Per your notes, this is the benefit you\'ll use most.' },
+      { title: 'Tests plug in a fake', text: 'The test project implements the same interface with an in-memory <span class="mono">FakeBookingRepository</span>. The booking rule is tested in milliseconds, no database. In most projects this is the benefit you\'ll use most.' },
       { title: 'DI is not DIP', text: 'Injecting <span class="mono">SqlBookingRepository</span> (the concrete class) through the constructor is dependency injection, but the domain would still depend on infrastructure. DIP is about <b>which way</b> the dependency points, not how the object arrives.' }
     ]
   });

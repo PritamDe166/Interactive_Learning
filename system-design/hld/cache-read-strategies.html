@@ -118,8 +118,8 @@
         </tbody>
       </table>
     </div>
-    <div class="note"><span class="flag">Added</span>Caching at the query level (key = hash of the SQL) vs the object level (key = <code>product:12</code>): object-level keys are easier to invalidate when one row changes, which is why the System Design Primer recommends them.</div>
-    <div class="note"><span class="flag">Updated</span><code>HybridCache</code> (generally available since March 2025) wraps the read-through style around an in-process L1 and an optional distributed L2. Its stampede protection covers one process.</div>
+    <div class="note">Caching at the query level (key = hash of the SQL) vs the object level (key = <code>product:12</code>): object-level keys are easier to invalidate when one row changes, which is why the System Design Primer recommends them.</div>
+    <div class="note"><code>HybridCache</code> (generally available since March 2025) wraps the read-through style around an in-process L1 and an optional distributed L2. Its stampede protection covers one process.</div>
   </section>
 
   <section id="test" data-nav="Test">

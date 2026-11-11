@@ -143,12 +143,12 @@
     <div class="sub-block" aria-labelledby="fixH">
     <h3 class="sec-h3" id="fixH">Corrections and additions</h3>
     <div class="notes">
-      <div class="note"><span class="flag">Corrected</span><p><b>A server with no proxy in front doesn't return 502.</b> 502 Bad Gateway is produced by a proxy or gateway when its upstream misbehaves. An overloaded bare server shows up as timeouts, refused connections or 503s.</p></div>
-      <div class="note"><span class="flag">Corrected</span><p><b>The server doesn't validate certificates in normal TLS</b>; the client does. The server's TLS cost is the key exchange and signing. Offloading that is what TLS termination saves (validation happens on the server only with mutual TLS).</p></div>
-      <div class="note"><span class="flag">Corrected</span><p><b>"A load balancer is a reverse proxy" is true for Layer 7.</b> Layer 4 balancers often forward TCP connections without terminating them, so they never see HTTP.</p></div>
-      <div class="note"><span class="flag">Corrected</span><p><b>A CDN terminating TLS doesn't remove TLS from your origin.</b> The edge usually opens its own HTTPS connection to the origin. The saving is that it reuses a few long-lived connections instead of one handshake per user.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Health checks come in two kinds:</b> active (the balancer polls <span class="mono">/health</span> every few seconds) and passive (it notices real requests failing). <b>Connection draining</b> lets in-flight requests finish before an instance is removed for a deploy.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Every layer is itself a dependency.</b> Gateways and load balancers run as redundant pairs or managed services; otherwise you've moved the single point of failure, not removed it.</p></div>
+      <div class="note"><p><b>A server with no proxy in front doesn't return 502.</b> 502 Bad Gateway is produced by a proxy or gateway when its upstream misbehaves. An overloaded bare server shows up as timeouts, refused connections or 503s.</p></div>
+      <div class="note"><p><b>The server doesn't validate certificates in normal TLS</b>; the client does. The server's TLS cost is the key exchange and signing. Offloading that is what TLS termination saves (validation happens on the server only with mutual TLS).</p></div>
+      <div class="note"><p><b>"A load balancer is a reverse proxy" is true for Layer 7.</b> Layer 4 balancers often forward TCP connections without terminating them, so they never see HTTP.</p></div>
+      <div class="note"><p><b>A CDN terminating TLS doesn't remove TLS from your origin.</b> The edge usually opens its own HTTPS connection to the origin. The saving is that it reuses a few long-lived connections instead of one handshake per user.</p></div>
+      <div class="note"><p><b>Health checks come in two kinds:</b> active (the balancer polls <span class="mono">/health</span> every few seconds) and passive (it notices real requests failing). <b>Connection draining</b> lets in-flight requests finish before an instance is removed for a deploy.</p></div>
+      <div class="note"><p><b>Every layer is itself a dependency.</b> Gateways and load balancers run as redundant pairs or managed services; otherwise you've moved the single point of failure, not removed it.</p></div>
     </div>
   </div>
   </section>

@@ -180,7 +180,7 @@ print(dept.find("x"), dept.replace("Cardio", "Neuro"))''',
       </table>
     </div>''',
  "notes": [
-  ["Added", "<b>Why this page exists:</b> the repo uses strings everywhere but has no file on slicing or methods. These are among the most-used Python skills, so this is a gap topic."],
+  ["Added", "<b>Why it matters:</b> slicing and string methods are among the most-used Python skills."],
   ["Added", "<b>strip() removes characters, not a word.</b> <span class=\"mono\">\"report.csv\".strip(\".csv\")</span> gives <span class=\"mono\">'report'</span> by luck but <span class=\"mono\">\"vacs.csv\".strip(\".csv\")</span> gives <span class=\"mono\">''</span>. Use <span class=\"mono\">removesuffix(\".csv\")</span>."],
   ["Added", "<b>Comparing text from users:</b> normalise first with <span class=\"mono\">s.strip().lower()</span> (or <span class=\"mono\">casefold()</span> for non-English text) before using <span class=\"mono\">==</span>."],
   ["Added", "<b>Multi-line strings</b> use triple quotes <span class=\"mono\">\"\"\"...\"\"\"</span>; the newlines are part of the value. Adjacent literals join automatically: <span class=\"mono\">\"ab\" \"cd\"</span> is <span class=\"mono\">'abcd'</span>."]

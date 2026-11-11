@@ -96,7 +96,7 @@
         </tbody>
       </table>
     </div>
-    <div class="note"><span class="flag add">Added</span><p><b>How to use it:</b> memory is ~1,000× faster than a network call, and a cross-continent round trip costs as much as a hundred local database queries. That is why we cache, keep chatty calls inside one region and put content on a CDN.</p></div>
+    <div class="note"><p><b>How to use it:</b> memory is ~1,000× faster than a network call, and a cross-continent round trip costs as much as a hundred local database queries. That is why we cache, keep chatty calls inside one region and put content on a CDN.</p></div>
     <h3 class="sec-h3">Latency vs bandwidth vs throughput</h3>
     <div class="card scroll"><table>
       <thead><tr><th></th><th>Question</th><th>Unit</th><th>Fix when it's the problem</th></tr></thead>
@@ -135,8 +135,8 @@
       </div>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag add">Added</span><p><b>Why the curve bends:</b> for a simple queue, average time in system ≈ service time ÷ (1 − utilisation). At 50% load that's 2× the service time, at 90% it's 10×, and at 99% it's 100×. Real systems aim to run their bottleneck well below 100%.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Overload feeds itself.</b> Timeouts trigger client retries, retries add load, and more load means more timeouts. This is a retry storm, and Week 15 (backoff, circuit breakers) exists to stop it.</p></div>
+      <div class="note"><p><b>Why the curve bends:</b> for a simple queue, average time in system ≈ service time ÷ (1 − utilisation). At 50% load that's 2× the service time, at 90% it's 10×, and at 99% it's 100×. Real systems aim to run their bottleneck well below 100%.</p></div>
+      <div class="note"><p><b>Overload feeds itself.</b> Timeouts trigger client retries, retries add load, and more load means more timeouts. This is a retry storm, and Week 15 (backoff, circuit breakers) exists to stop it.</p></div>
     </div>
   </div>
     <div class="sub-block" aria-labelledby="calcH">
@@ -160,7 +160,7 @@
         <p class="sub" style="margin:0">That's why big systems care about p99 and p99.9 of every dependency.</p>
       </div>
     </div>
-    <div class="note"><span class="flag add">Added</span><p><b>Percentiles don't average.</b> The p99 of three servers is not the mean of their three p99s. Merge the raw histograms first; monitoring tools do this with histogram metrics.</p></div>
+    <div class="note"><p><b>Percentiles don't average.</b> The p99 of three servers is not the mean of their three p99s. Merge the raw histograms first; monitoring tools do this with histogram metrics.</p></div>
   </div>
   </section>
 

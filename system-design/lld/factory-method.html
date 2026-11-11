@@ -117,8 +117,8 @@
       <li><span class="if">Interview: "factory method vs simple factory?"</span><span class="arrow">→</span><span class="then">parameter decides vs subclass decides; factory method needs no switch</span></li>
     </ul>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag add">Added</span><p><b>Why "factory method" confuses people:</b> any static method that returns a new object (<span class="mono">Guid.NewGuid()</span>, <span class="mono">TimeSpan.FromMinutes()</span>) is casually called a factory method. The GoF pattern is narrower: an <b>overridable</b> creation step inside a class, so subclasses choose the product.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Link to SOLID:</b> a simple factory still breaks open-closed (edit the switch for each new type) but contains the damage to one file. Factory method and keyed DI keep the code closed: new types are new classes. And callers depend on <span class="mono">INotifier</span>, not concrete classes (dependency inversion).</p></div>
+      <div class="note"><p><b>Why "factory method" confuses people:</b> any static method that returns a new object (<span class="mono">Guid.NewGuid()</span>, <span class="mono">TimeSpan.FromMinutes()</span>) is casually called a factory method. The GoF pattern is narrower: an <b>overridable</b> creation step inside a class, so subclasses choose the product.</p></div>
+      <div class="note"><p><b>Link to SOLID:</b> a simple factory still breaks open-closed (edit the switch for each new type) but contains the damage to one file. Factory method and keyed DI keep the code closed: new types are new classes. And callers depend on <span class="mono">INotifier</span>, not concrete classes (dependency inversion).</p></div>
     </div>
   </section>
 

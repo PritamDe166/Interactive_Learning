@@ -109,8 +109,8 @@
       </table>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag">Corrected</span><p><b>"TCP guarantees error-free data" is too strong.</b> TCP's 16-bit checksum catches most corruption, not all. Systems that must be certain add their own checks; TLS's integrity protection does this for HTTPS.</p></div>
-      <div class="note"><span class="flag">Corrected</span><p><b>The UDP checksum is optional only on IPv4.</b> On IPv6 it is mandatory. Either way it only detects damage; nothing repairs or resends.</p></div>
+      <div class="note"><p><b>"TCP guarantees error-free data" is too strong.</b> TCP's 16-bit checksum catches most corruption, not all. Systems that must be certain add their own checks; TLS's integrity protection does this for HTTPS.</p></div>
+      <div class="note"><p><b>The UDP checksum is optional only on IPv4.</b> On IPv6 it is mandatory. Either way it only detects damage; nothing repairs or resends.</p></div>
     </div>
   </div>
     <div class="sub-block" aria-labelledby="httpH">
@@ -120,7 +120,7 @@
       <div class="card"><h3>HTTP/2 · TCP</h3><p><b>Multiplexes</b> many requests on one connection. But if one TCP packet is lost, every stream waits for it: <b>head-of-line blocking</b>.</p></div>
       <div class="card"><h3>HTTP/3 · QUIC · UDP</h3><p>QUIC rebuilds reliability <b>per stream</b> on top of UDP, so one loss stalls only its own stream. TLS 1.3 is built in, setup takes one round trip, and connections survive a Wi-Fi → mobile switch.</p></div>
     </div>
-    <div class="note"><span class="flag add">Added</span><p><b>Why QUIC uses UDP:</b> TCP lives in operating-system kernels and network gear, so it is hard to change. UDP is a thin, universally allowed wrapper, so QUIC can add its own reliability, ordering per stream and encryption in user space.</p></div>
+    <div class="note"><p><b>Why QUIC uses UDP:</b> TCP lives in operating-system kernels and network gear, so it is hard to change. UDP is a thin, universally allowed wrapper, so QUIC can add its own reliability, ordering per stream and encryption in user space.</p></div>
   </div>
   </section>
 

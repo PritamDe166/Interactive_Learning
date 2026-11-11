@@ -138,7 +138,7 @@ except ValueError as e:
       <div class="card"><div class="label">Python does (roughly)</div><pre class="codeblock" style="min-height:0;margin:6px 0 0"><span class="ln">mgr = Lock()</span><span class="ln">v = mgr.__enter__()</span><span class="ln"><span class="k">try</span>:</span><span class="ln">    body()</span><span class="ln"><span class="k">except</span> BaseException <span class="k">as</span> e:</span><span class="ln">    <span class="k">if not</span> mgr.__exit__(type(e), e, e.__traceback__):</span><span class="ln">        <span class="k">raise</span></span><span class="ln"><span class="k">else</span>:</span><span class="ln">    mgr.__exit__(<span class="b">None</span>, <span class="b">None</span>, <span class="b">None</span>)</span></pre></div>
     </div>''',
  "notes": [
-  ["Added", "<b>From your Notion plan:</b> \"context managers\" (8-week plan, Week 5) and \"with open\" (Week 2). Your file scripts already use <span class=\"mono\">with open(...)</span>; this page shows the mechanism behind it."],
+  ["Added", "<b>You've already used one.</b> Every <span class=\"mono\">with open(...)</span> is a context manager; this page shows the mechanism behind it."],
   ["Added", "<b>Coming from C#:</b> <span class=\"mono\">with</span> plays the role of <span class=\"mono\">using</span> / <span class=\"mono\">IDisposable</span>, with the extra ability to see and even suppress the exception in <span class=\"mono\">__exit__</span>."],
   ["Added", "<b>Async code</b> uses <span class=\"mono\">async with</span> and <span class=\"mono\">__aenter__</span>/<span class=\"mono\">__aexit__</span> (e.g. HTTP client sessions); same idea."]
  ],

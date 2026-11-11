@@ -97,7 +97,7 @@
     <h2 id="refH">Reference: old directives vs blocks</h2>
     <div class="scroll card table-card">
       <table>
-        <thead><tr><th>Before (v16, your notes era)</th><th>Angular 22</th><th>Difference</th></tr></thead>
+        <thead><tr><th>Before (v16)</th><th>Angular 22</th><th>Difference</th></tr></thead>
         <tbody>
           <tr><td class="mono">*ngIf="cond; else other"</td><td class="mono">@if (cond) { } @else { }</td><td>no <span class="mono">&lt;ng-template&gt;</span> needed for else; built in, no import</td></tr>
           <tr><td class="mono">*ngFor="let p of list; trackBy: byId"</td><td class="mono">@for (p of list; track p.id) { }</td><td><span class="mono">track</span> is required and is an expression, not a method</td></tr>
@@ -112,9 +112,9 @@
       <div><div class="label ok-text">After: built-in blocks</div><div id="newCf"></div></div>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag add">Added</span><p><b>Not in your notes.</b> Control flow is how every list and condition in a modern template is written, and the example in your screenshot (<span class="mono">@if (a &gt; b) … @else if … @else</span>) is this syntax.</p></div>
-      <div class="note"><span class="flag add">Updated</span><p><b>Deprecated, not removed.</b> In CareDesk, a template using <span class="mono">*ngFor</span> and <span class="mono">*ngIf</span> (with <span class="mono">NgFor</span>, <span class="mono">NgIf</span> imported) still built without warnings in v22. The deprecation shows in your editor. Migrate with <span class="mono">ng generate @angular/core:control-flow</span>.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Angular warns about bad tracking.</b> With <span class="mono">track p</span> and freshly fetched objects, the browser console showed <span class="mono">NG0956: The configured tracking expression (track by identity) caused re-creation of the entire collection of size 3</span>.</p></div>
+      <div class="note"><p><b>Why it matters.</b> Control flow is how every list and condition in a modern template is written, for example <span class="mono">@if (a &gt; b) … @else if … @else</span>.</p></div>
+      <div class="note"><p><b>Deprecated, not removed.</b> In CareDesk, a template using <span class="mono">*ngFor</span> and <span class="mono">*ngIf</span> (with <span class="mono">NgFor</span>, <span class="mono">NgIf</span> imported) still built without warnings in v22. The deprecation shows in your editor. Migrate with <span class="mono">ng generate @angular/core:control-flow</span>.</p></div>
+      <div class="note"><p><b>Angular warns about bad tracking.</b> With <span class="mono">track p</span> and freshly fetched objects, the browser console showed <span class="mono">NG0956: The configured tracking expression (track by identity) caused re-creation of the entire collection of size 3</span>.</p></div>
     </div>
   </section>
 

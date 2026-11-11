@@ -68,9 +68,9 @@
       <div class="kpi"><b id="kFs">–</b><span>Forward secrecy</span></div>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag">Corrected</span><p><b>In TLS 1.3, key agreement happens first, not after certificate validation.</b> The key shares ride in ClientHello and ServerHello, so both sides derive handshake keys immediately and the certificate is sent <i>encrypted</i>. The notes' order (certificate → validate → key establishment) matches TLS 1.2.</p></div>
-      <div class="note"><span class="flag">Corrected</span><p><b>In TLS 1.3 the server sends Finished first</b>, in its very first reply. The client sends its Finished after checking the certificate. Client-first is the TLS 1.2 order.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>0-RTT resumption:</b> a returning client can send its request inside the first TLS message. It's fastest, but an attacker could <i>replay</i> that early request, so servers allow it only for safe, idempotent requests such as GET.</p></div>
+      <div class="note"><p><b>In TLS 1.3, key agreement happens first, not after certificate validation.</b> The key shares ride in ClientHello and ServerHello, so both sides derive handshake keys immediately and the certificate is sent <i>encrypted</i>. The order certificate → validate → key establishment is TLS 1.2.</p></div>
+      <div class="note"><p><b>In TLS 1.3 the server sends Finished first</b>, in its very first reply. The client sends its Finished after checking the certificate. Client-first is the TLS 1.2 order.</p></div>
+      <div class="note"><p><b>0-RTT resumption:</b> a returning client can send its request inside the first TLS message. It's fastest, but an attacker could <i>replay</i> that early request, so servers allow it only for safe, idempotent requests such as GET.</p></div>
     </div>
   </div>
   </section>

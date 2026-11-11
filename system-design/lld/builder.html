@@ -124,8 +124,8 @@
       <li><span class="if">Fluent method signature</span><span class="arrow">→</span><span class="then">each step returns <span class="mono">this</span> so calls chain</span></li>
     </ul>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag add">Added</span><p><b>Builders you already use:</b> <span class="mono">WebApplication.CreateBuilder(args)</span> → configure services → <span class="mono">Build()</span>; <span class="mono">DbContextOptionsBuilder.UseSqlServer(…)</span>; EF Core's <span class="mono">modelBuilder.Entity&lt;T&gt;().HasKey(…)</span>; <span class="mono">StringBuilder.Append(…).ToString()</span>; <span class="mono">UriBuilder</span>; <span class="mono">ConfigurationBuilder</span>.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>GoF vs fluent builder:</b> the original GoF Builder separates a director (the steps) from builders (how each step is done, e.g. HTML vs PDF report). Today "builder" usually means the fluent style; the director is optional.</p></div>
+      <div class="note"><p><b>Builders you already use:</b> <span class="mono">WebApplication.CreateBuilder(args)</span> → configure services → <span class="mono">Build()</span>; <span class="mono">DbContextOptionsBuilder.UseSqlServer(…)</span>; EF Core's <span class="mono">modelBuilder.Entity&lt;T&gt;().HasKey(…)</span>; <span class="mono">StringBuilder.Append(…).ToString()</span>; <span class="mono">UriBuilder</span>; <span class="mono">ConfigurationBuilder</span>.</p></div>
+      <div class="note"><p><b>GoF vs fluent builder:</b> the original GoF Builder separates a director (the steps) from builders (how each step is done, e.g. HTML vs PDF report). Today "builder" usually means the fluent style; the director is optional.</p></div>
     </div>
   </section>
 

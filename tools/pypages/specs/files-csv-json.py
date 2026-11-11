@@ -155,10 +155,10 @@ print(data["visits"][1]["name"], type(text).__name__)''',
       </table>
     </div>''',
  "notes": [
-  ["Corrected", "<b>file_read_write_using_Open.py</b> opens <span class=\"mono\">notes.txt</span> with <span class=\"mono\">\"w\"</span>, which <b>erases</b> the notes the other scripts wrote and replaces them with one line. Easy to lose data this way: use \"a\", or write to a new file."],
-  ["Corrected", "<b>csv_read.py, ReadCsvHeaders:</b> <span class=\"mono\">for row in header</span> loops over the <b>column names</b> of the header row, not rows. Name it <span class=\"mono\">for column in header</span>."],
-  ["Corrected", "<b>Paths:</b> every script uses <span class=\"mono\">\"File read and write/files repository/...\"</span>, which only works when you run Python from the repo root. Build the path from the script's location with <span class=\"mono\">pathlib.Path(__file__).parent</span>."],
-  ["Updated", "<b>Encoding:</b> none of the repo's open() calls pass <span class=\"mono\">encoding=</span>. Before Python 3.15 the default depended on the OS (often cp1252 on Windows), so non-English names could break. Python 3.15 (Oct 2026) makes UTF-8 the default (PEP 686), but passing <span class=\"mono\">encoding=\"utf-8\"</span> keeps code correct on older versions too."],
+  ["Corrected", "<b>Opening with \"w\" erases the file.</b> A script that opens <span class=\"mono\">notes.txt</span> with <span class=\"mono\">\"w\"</span> replaces everything already in it with what it writes. Easy to lose data this way: use \"a\", or write to a new file."],
+  ["Corrected", "<b>Looping over a CSV header gives columns, not rows.</b> <span class=\"mono\">for row in header</span> loops over the column names; name it <span class=\"mono\">for column in header</span>."],
+  ["Corrected", "<b>Relative paths depend on where you run Python.</b> A path like <span class=\"mono\">\"files/data.csv\"</span> only works from one folder. Build the path from the script's location with <span class=\"mono\">pathlib.Path(__file__).parent</span>."],
+  ["Updated", "<b>Always pass <span class=\"mono\">encoding=</span>.</b> Before Python 3.15 the default depended on the OS (often cp1252 on Windows), so non-English names could break. Python 3.15 (Oct 2026) makes UTF-8 the default (PEP 686), but passing <span class=\"mono\">encoding=\"utf-8\"</span> keeps older versions safe."],
   ["Added", "<b>Naming:</b> functions like <span class=\"mono\">ReadCsvAsDictionaries</span> use PascalCase; PEP 8 uses snake_case for functions (<span class=\"mono\">read_csv_as_dicts</span>) and PascalCase for classes."]
  ],
  "quiz": [

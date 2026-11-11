@@ -129,7 +129,7 @@ print(lengths, units, total)''',
       </table>
     </div>''',
  "notes": [
-  ["Added", "<b>Gap topic:</b> the repo builds lists with <span class=\"mono\">append</span> in loops (Loops.py, Lists_exercises.py) but never uses comprehensions, which are everywhere in real Python code and in the Notion learning plan (Week 1)."],
+  ["Added", "<b>Why it matters.</b> Beginner code often builds lists with <span class=\"mono\">append</span> in loops; comprehensions do the same in one line and are everywhere in real Python code."],
   ["Added", "<b>Own scope:</b> the loop variable of a comprehension does <b>not</b> leak out (unlike a for loop). Since Python 3.12 list/dict/set comprehensions are inlined for speed (PEP 709), but this rule hasn't changed."],
   ["Added", "<b>Readability rule:</b> one <span class=\"mono\">for</span> and one <span class=\"mono\">if</span> is easy to read. Two nested <span class=\"mono\">for</span>s is the usual limit; beyond that, write a loop or a helper function."]
  ],

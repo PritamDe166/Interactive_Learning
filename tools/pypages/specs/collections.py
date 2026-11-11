@@ -147,9 +147,9 @@ for key, value in patient.items():
       </table>
     </div>''',
  "notes": [
-  ["Corrected", "<b>remove() comment in Collections.py:</b> <span class=\"mono\">employee_ages.remove(12)  # Remove the age we just added</span>, but the line before appended <b>100</b>. <span class=\"mono\">remove(12)</span> deletes the first 12 in the list."],
-  ["Corrected", "<b>Tuple_exercises.py:</b> the comment says <span class=\"mono\">(10.4)</span> without a comma \"is just an integer\". It's a <b>float</b>: parentheses don't change the type, they just group."],
-  ["Corrected", "<b>Lists_exercises.py</b> imports <span class=\"mono\">indexOf</span> from <span class=\"mono\">operator</span> and an unused <span class=\"mono\">math</span>. The normal way is <span class=\"mono\">fruits.index(\"orange\")</span>, or <span class=\"mono\">enumerate()</span> while looping. The \"5 favourite movies\" list has 4 items."],
+  ["Corrected", "<b><span class=\"mono\">remove(x)</span> removes by value, not position.</b> It deletes the <b>first</b> item equal to x, which may not be the one you just added. Use <span class=\"mono\">pop()</span> to remove the last item."],
+  ["Corrected", "<b><span class=\"mono\">(10.4)</span> without a comma is just a float</b>, not a tuple: parentheses don't change the type, they just group. A one-item tuple needs the comma: <span class=\"mono\">(10.4,)</span>."],
+  ["Corrected", "<b>Finding an item's position.</b> Use <span class=\"mono\">fruits.index(\"orange\")</span>, or <span class=\"mono\">enumerate()</span> while looping; there's no need to import <span class=\"mono\">indexOf</span> from <span class=\"mono\">operator</span>."],
   ["Added", "<b>Keys must be hashable:</b> str, int, tuple work as dict keys and set items; lists and dicts don't (<span class=\"mono\">TypeError: unhashable type: 'list'</span>)."]
  ],
  "quiz": [

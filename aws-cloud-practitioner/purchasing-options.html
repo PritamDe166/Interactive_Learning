@@ -171,10 +171,10 @@
       <div class="card"><h3>Who patches what?</h3><p>Pricing doesn't change the split: AWS runs the hosts, you run the OS, software, security groups and data. See <a href="shared-responsibility.html">Shared Responsibility</a>.</p></div>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag add">Added</span><p><b>Spot gives a 2-minute interruption notice</b> (via instance metadata and EventBridge). Use it to checkpoint and drain. Spread Spot across many instance types and AZs (EC2 Fleet / Auto Scaling mixed instances) to lower the chance of losing everything at once.</p></div>
-      <div class="note"><span class="flag">Updated</span><p><b>You don't "bid" for Spot any more.</b> You pay the current Spot price, which moves slowly; interruptions happen mainly when AWS needs the capacity back. A maximum price is optional and defaults to the On-Demand price.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Only Standard RIs can be sold</b> on the Reserved Instance Marketplace; Convertible RIs can't. AWS now generally recommends <b>Savings Plans</b> over RIs for EC2 because they apply automatically across sizes, OSs and (Compute SP) services.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Discount percentages are AWS's "up to" figures</b> and vary by instance type, Region, term and upfront payment. The exam tests the ranking (Spot &gt; RI ≈ Savings Plans &gt; On-Demand), not exact numbers.</p></div>
+      <div class="note"><p><b>Spot gives a 2-minute interruption notice</b> (via instance metadata and EventBridge). Use it to checkpoint and drain. Spread Spot across many instance types and AZs (EC2 Fleet / Auto Scaling mixed instances) to lower the chance of losing everything at once.</p></div>
+      <div class="note"><p><b>You don't "bid" for Spot any more.</b> You pay the current Spot price, which moves slowly; interruptions happen mainly when AWS needs the capacity back. A maximum price is optional and defaults to the On-Demand price.</p></div>
+      <div class="note"><p><b>Only Standard RIs can be sold</b> on the Reserved Instance Marketplace; Convertible RIs can't. AWS now generally recommends <b>Savings Plans</b> over RIs for EC2 because they apply automatically across sizes, OSs and (Compute SP) services.</p></div>
+      <div class="note"><p><b>Discount percentages are AWS's "up to" figures</b> and vary by instance type, Region, term and upfront payment. The exam tests the ranking (Spot &gt; RI ≈ Savings Plans &gt; On-Demand), not exact numbers.</p></div>
     </div>
   </section>
 

@@ -153,7 +153,7 @@ print(total, with_tax.__name__)''',
       </table>
     </div>''',
  "notes": [
-  ["Added", "<b>From your Notion plan:</b> \"basic decorators\" (8-week plan, Week 2). They build directly on closures from the Scope page."],
+  ["Added", "<b>Builds on closures.</b> Decorators build directly on closures from the Scope page."],
   ["Added", "<b>Coming from .NET:</b> the effect resembles an ASP.NET action filter or middleware, but a Python decorator is just a function call at definition time. There is no attribute metadata involved."],
   ["Added", "<b>Keep wrappers thin:</b> they run on every call. Put heavy setup outside the wrapper, in the decorator body, which runs only once."]
  ],

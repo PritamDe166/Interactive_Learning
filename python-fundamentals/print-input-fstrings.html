@@ -121,10 +121,10 @@
       </table>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag">Corrected</span><p><b>The comma adds its own space.</b> In <span class="mono">Print_statements.py</span>, <span class="mono">print("Colors are "+": "+"Oranges"," Apples")</span> prints <span class="mono">Colors are : Oranges··Apples</span> with two spaces: one from <span class="mono">sep</span>, one inside <span class="mono">" Apples"</span>.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Prefer f-strings.</b> <span class="mono">"{} {}".format(a, b)</span> (your InputOutput examples) and <span class="mono">"%s" % a</span> still work and appear in older code, but f-strings are shorter, faster and read left to right.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>input() + int() can fail.</b> If the user types <span class="mono">abc</span>, <span class="mono">int()</span> raises <span class="mono">ValueError</span>. Wrapping it in <span class="mono">try/except</span> is covered in Errors &amp; exceptions.</p></div>
-      <div class="note"><span class="flag add">Updated</span><p><b>Newer f-string features:</b> since Python 3.12 you can reuse the same quote type inside the braces (<span class="mono">f"{d["key"]}"</span>) and split long expressions across lines. Python 3.14 adds <b>t-strings</b> (<span class="mono">t"..."</span>), template strings that keep the parts separate for safe HTML or SQL building.</p></div>
+      <div class="note"><p><b>The comma adds its own space.</b> <span class="mono">print("Colors are "+": "+"Oranges"," Apples")</span> prints <span class="mono">Colors are : Oranges··Apples</span> with two spaces: one from <span class="mono">sep</span>, one inside <span class="mono">" Apples"</span>.</p></div>
+      <div class="note"><p><b>Prefer f-strings.</b> <span class="mono">"{} {}".format(a, b)</span> (your InputOutput examples) and <span class="mono">"%s" % a</span> still work and appear in older code, but f-strings are shorter, faster and read left to right.</p></div>
+      <div class="note"><p><b>input() + int() can fail.</b> If the user types <span class="mono">abc</span>, <span class="mono">int()</span> raises <span class="mono">ValueError</span>. Wrapping it in <span class="mono">try/except</span> is covered in Errors &amp; exceptions.</p></div>
+      <div class="note"><p><b>Newer f-string features:</b> since Python 3.12 you can reuse the same quote type inside the braces (<span class="mono">f"{d["key"]}"</span>) and split long expressions across lines. Python 3.14 adds <b>t-strings</b> (<span class="mono">t"..."</span>), template strings that keep the parts separate for safe HTML or SQL building.</p></div>
     </div>
   </section>
 

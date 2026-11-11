@@ -154,7 +154,7 @@ print(abs(-7), pow(2, 10), divmod(17, 5))''',
       </table>
     </div>''',
  "notes": [
-  ["Corrected", "<b>round() in BuiltinFunctions_Math_Numbers.py:</b> the examples (4.56756, 8.542, -13.349) never hit a half, so they hide the surprise: <span class=\"mono\">round(2.5)</span> is 2, <span class=\"mono\">round(0.5)</span> is 0. Also <span class=\"mono\">round(2.675, 2)</span> gives 2.67, because 2.675 can't be stored exactly as a float."],
+  ["Corrected", "<b><span class=\"mono\">round()</span> rounds halves to even.</b> <span class=\"mono\">round(2.5)</span> is 2 and <span class=\"mono\">round(0.5)</span> is 0. Also <span class=\"mono\">round(2.675, 2)</span> gives 2.67, because 2.675 can't be stored exactly as a float. Examples like 4.56756 or 8.542 never hit a half, so they hide this."],
   ["Added", "<b>Lazy results print oddly:</b> <span class=\"mono\">print(reversed(nums2))</span> in the repo shows <span class=\"mono\">&lt;list_reverseiterator object at 0x…&gt;</span>, not the items. Wrap it in <span class=\"mono\">list()</span> or loop over it, as the next line does."],
   ["Added", "<b>zip() hides length mismatches:</b> the repo zips 3 fruits with 4 numbers and the 4th number vanishes silently. Use <span class=\"mono\">zip(..., strict=True)</span> when they must match."],
   ["Added", "<b>help() and dir()</b> are for the interactive prompt. In scripts they print pages of text; in an editor, hover or go-to-definition is quicker."]

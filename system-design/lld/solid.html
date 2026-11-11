@@ -125,8 +125,8 @@
       </table>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag add">Added</span><p><b>The cautions in your notes:</b> you can follow every principle and still write bad code; over-applied interface segregation ends in one method per interface; most projects have one implementation per interface, so the main practical win of interfaces is <b>mocking in tests</b>, not swapping databases.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Where the name comes from:</b> the principles were collected by Robert C. Martin around 2000; Michael Feathers coined the SOLID acronym. Liskov substitution is from Barbara Liskov (1987).</p></div>
+      <div class="note"><p><b>The cautions:</b> you can follow every principle and still write bad code; over-applied interface segregation ends in one method per interface; most projects have one implementation per interface, so the main practical win of interfaces is <b>mocking in tests</b>, not swapping databases.</p></div>
+      <div class="note"><p><b>Where the name comes from:</b> the principles were collected by Robert C. Martin around 2000; Michael Feathers coined the SOLID acronym. Liskov substitution is from Barbara Liskov (1987).</p></div>
     </div>
   </div>
   </section>
@@ -143,7 +143,7 @@
         <div class="ans"><p><b>D</b> (the service depends on an interface) and <b>O</b> (you can register a different or decorated implementation without editing the service). It also makes S easier to keep.</p></div></details>
       <details><summary>A subclass overrides a method with <span class="mono">throw new NotImplementedException()</span>. Which principles are in trouble?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>L</b>: the child can't stand in for the parent. Often <b>I</b> too: the base type or interface promises more than every implementer can do.</p></div></details>
-      <details><summary>Why did your notes call SOLID "guidelines, not rules"?<span class="go">Show answer</span></summary>
+      <details><summary>Why is SOLID called "guidelines, not rules"?<span class="go">Show answer</span></summary>
         <div class="ans"><p>Followed to the letter they can still produce bad, over-abstracted code. The speaker's main advice: <b>keep it simple</b> and apply the principles where change is actually expected.</p></div></details>
       <details><summary>What is the most common real benefit of depending on interfaces?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>Testability</b>: you can inject a fake or mock. Swapping the real implementation (e.g. a different database) is rarer than people expect.</p></div></details>
@@ -155,7 +155,7 @@
 
   <nav id="prevnext"></nav>
 
-  <footer>Sources: your Notion notes "SOLID Principles: Five Guidelines for Object-Oriented Code" (LLD, Topic-Wise Explanation); Robert C. Martin's SOLID articles; the principle pages linked above list their own sources. The booking design, snippets and strictness levels are illustrative.</footer>
+  <footer>Sources: study notes "SOLID Principles: Five Guidelines for Object-Oriented Code" (LLD, Topic-Wise Explanation); Robert C. Martin's SOLID articles; the principle pages linked above list their own sources. The booking design, snippets and strictness levels are illustrative.</footer>
 </div>
 
 <script>
@@ -320,7 +320,7 @@ public interface ITemplateProvider { string Get(string key); }
 public interface IAddressFormatter { string Format(Student s); }
 public interface ISubjectLineBuilder { string Build(Student s); }
 public class WelcomeEmailFactory : IEmailFactory { ... }
-// ...five interfaces, one implementation each, for one email`, v: '<b class="bad">Too far.</b> Every rule obeyed, yet the code is harder to read and change. One method per interface is the ISP trap from your notes. Keep it simple.', c: '6+ classes, 5 interfaces' }
+// ...five interfaces, one implementation each, for one email`, v: '<b class="bad">Too far.</b> Every rule obeyed, yet the code is harder to read and change. One method per interface is the ISP trap. Keep it simple.', c: '6+ classes, 5 interfaces' }
   ];
   function dial() {
     const d = D[+$('dial').value];

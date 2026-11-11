@@ -91,12 +91,12 @@
       </table>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag add">Added</span><p><b>Bigger isn't linear.</b> Doubling cores rarely doubles throughput: locks, memory bandwidth and garbage collection eat into it. The simulator models this with a 0.9 exponent.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Autoscaling</b> adds or removes instances on a metric (CPU, request count, queue depth). It only works if any instance can serve any request, which is tomorrow's topic: <a href="stateless.html">stateless applications</a>.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Fixing a database bottleneck</b> means different tools: caching (Week 3), read replicas (Week 7) and sharding (Week 8). Adding app servers just sends more traffic to the same database.</p></div>
+      <div class="note"><p><b>Bigger isn't linear.</b> Doubling cores rarely doubles throughput: locks, memory bandwidth and garbage collection eat into it. The simulator models this with a 0.9 exponent.</p></div>
+      <div class="note"><p><b>Autoscaling</b> adds or removes instances on a metric (CPU, request count, queue depth). It only works if any instance can serve any request, which is tomorrow's topic: <a href="stateless.html">stateless applications</a>.</p></div>
+      <div class="note"><p><b>Fixing a database bottleneck</b> means different tools: caching (Week 3), read replicas (Week 7) and sharding (Week 8). Adding app servers just sends more traffic to the same database.</p></div>
     </div>
   </div>
-    <div class="note"><span class="flag add">Added</span><p><b>Performance problem vs scalability problem.</b> If the system is slow for <i>one</i> user, it is a performance problem: profile the code, add an index, cache. If it is fast for one user but slow <i>under load</i>, it is a scalability problem: add capacity or remove the shared bottleneck. Scaling out never fixes a slow query; it only runs more copies of it.</p></div>
+    <div class="note"><p><b>Performance problem vs scalability problem.</b> If the system is slow for <i>one</i> user, it is a performance problem: profile the code, add an index, cache. If it is fast for one user but slow <i>under load</i>, it is a scalability problem: add capacity or remove the shared bottleneck. Scaling out never fixes a slow query; it only runs more copies of it.</p></div>
   </section>
 
   <section id="revise" data-nav="Revise">

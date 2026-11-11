@@ -126,10 +126,10 @@
       </table>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><span class="flag add">Added</span><p><b>Not in your notes</b> beyond "Angular has intuitive HTTP components". This page adds the modern resource API and just enough RxJS to read existing code.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b><span class="mono">value()</span> throws in the error state.</b> CareDesk's first version used <span class="mono">res.value() ?? []</span>. When the server returned 500 the console showed <span class="mono">ResourceValueError: Resource is currently in an error state (see Error.cause for details): Http failure response for …/api/patients.json: 500 Internal Server Error</span>. Guard with <span class="mono">hasValue()</span>.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>Fetching too early.</b> The first version also requested patients on the login page, without a token, because the header injects the store at start-up. Making the URL depend on <span class="mono">isLoggedIn()</span> removed that request and made the list load by itself right after sign-in.</p></div>
-      <div class="note"><span class="flag add">Added</span><p><b>About the API.</b> CareDesk reads <span class="mono">public/api/patients.json</span>, a static sample file served by <span class="mono">ng serve</span>. The POST to <span class="mono">/api/appointments</span> was answered by the test script with 201; a real backend (an ASP.NET Core minimal API, say) would validate the bearer token there.</p></div>
+      <div class="note"><p><b>What this page adds.</b> The modern resource API, plus just enough RxJS to read existing code.</p></div>
+      <div class="note"><p><b><span class="mono">value()</span> throws in the error state.</b> CareDesk's first version used <span class="mono">res.value() ?? []</span>. When the server returned 500 the console showed <span class="mono">ResourceValueError: Resource is currently in an error state (see Error.cause for details): Http failure response for …/api/patients.json: 500 Internal Server Error</span>. Guard with <span class="mono">hasValue()</span>.</p></div>
+      <div class="note"><p><b>Fetching too early.</b> The first version also requested patients on the login page, without a token, because the header injects the store at start-up. Making the URL depend on <span class="mono">isLoggedIn()</span> removed that request and made the list load by itself right after sign-in.</p></div>
+      <div class="note"><p><b>About the API.</b> CareDesk reads <span class="mono">public/api/patients.json</span>, a static sample file served by <span class="mono">ng serve</span>. The POST to <span class="mono">/api/appointments</span> was answered by the test script with 201; a real backend (an ASP.NET Core minimal API, say) would validate the bearer token there.</p></div>
     </div>
   </section>
 

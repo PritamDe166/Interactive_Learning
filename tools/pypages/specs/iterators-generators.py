@@ -132,7 +132,7 @@ print(sum(squares), list(squares))''',
       </table>
     </div>''',
  "notes": [
-  ["Added", "<b>From your Notion plan:</b> \"Iterators &amp; generators (yield)\" (8-week plan, Week 2). The repo meets lazy objects (reversed, zip, map) but never writes its own."],
+  ["Added", "<b>You've already met lazy objects.</b> <span class=\"mono\">reversed</span>, <span class=\"mono\">zip</span> and <span class=\"mono\">map</span> are iterators; this page shows how to write your own."],
   ["Added", "<b>range() is not a generator:</b> it's a lazy <i>sequence</i>. You can index it, take its len() and loop over it many times."],
   ["Added", "<b>Real use:</b> reading a large CSV with <span class=\"mono\">csv.DictReader</span> is already lazy; wrapping it in a generator that cleans each row keeps memory flat however big the file is."]
  ],

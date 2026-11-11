@@ -142,11 +142,11 @@ print(add_visit("x"), add_visit("y"))''',
       </ul>
     </div>''',
  "notes": [
-  ["Corrected", "<b>grades() in Function_basics.py</b> returns \"Grade C\" for exactly 80 and 60 (see puzzle 1). Use <span class=\"mono\">&gt;=</span> boundaries, and since <span class=\"mono\">elif</span> already excludes the first case, <span class=\"mono\">num &lt; 80 and</span> isn't needed."],
-  ["Corrected", "<b>pet_details2 in Keyword_Args_functions.py</b> returns inside the loop, so only the first keyword is reported (puzzle 2)."],
-  ["Corrected", "<b>calculator_func</b> is annotated <span class=\"mono\">-&gt; int</span> but returns a 4-tuple, and <span class=\"mono\">a/b</span> fails when b is 0. Annotate <span class=\"mono\">-&gt; tuple[int, int, int, float]</span>. Likewise <span class=\"mono\">average_func([])</span> raises ZeroDivisionError."],
-  ["Updated", "<b>Union[str, None]</b> (parse_age) is written <span class=\"mono\">str | None</span> since Python 3.10, with no import from <span class=\"mono\">typing</span>. More in Type hints."],
-  ["Added", "<b>Mutable default arguments</b> aren't in the repo but are the classic Python function bug: the walkthrough's last two steps show it happening."]
+  ["Corrected", "<b>Boundary values.</b> A grading function that uses <span class=\"mono\">&gt;</span> returns the lower grade for exactly 80 and 60 (see puzzle 1). Use <span class=\"mono\">&gt;=</span> boundaries, and since <span class=\"mono\">elif</span> already excludes the first case, <span class=\"mono\">num &lt; 80 and</span> isn't needed."],
+  ["Corrected", "<b>Returning inside a loop.</b> A <span class=\"mono\">return</span> inside the <span class=\"mono\">for</span> loop ends the function after the first item, so only the first keyword is reported (puzzle 2)."],
+  ["Corrected", "<b>Annotations should match what's returned.</b> A function annotated <span class=\"mono\">-&gt; int</span> that returns four numbers should be <span class=\"mono\">-&gt; tuple[int, int, int, float]</span>. Also guard division: <span class=\"mono\">a / b</span> fails when b is 0, and averaging an empty list raises <span class=\"mono\">ZeroDivisionError</span>."],
+  ["Updated", "<b><span class=\"mono\">Union[str, None]</span></b> is written <span class=\"mono\">str | None</span> since Python 3.10, with no import from <span class=\"mono\">typing</span>. More in Type hints."],
+  ["Added", "<b>Mutable default arguments</b> are the classic Python function bug: the walkthrough's last two steps show it happening."]
  ],
  "quiz": [
   {"q": "<span class=\"mono\">def f(a, b=2): return a * b\\nprint(f(3), f(3, 3), f(b=1, a=5))</span>", "code": "def f(a, b=2): return a * b\nprint(f(3), f(3, 3), f(b=1, a=5))", "expect": "6 9 5", "a": "<b class=\"mono\">6 9 5</b>. Default, positional, then keywords in any order."},
