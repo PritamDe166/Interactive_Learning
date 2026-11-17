@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>EC2 Instance Storage</title>
 <meta name="description" content="This page has been split into one explainer per topic.">
-<link rel="stylesheet" href="../assets/css/theme.css">
-<link rel="stylesheet" href="../assets/css/base.css">
-<link rel="stylesheet" href="../assets/css/explainer.css">
-<script src="../assets/js/theme.js"></script>
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261118">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261118">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261118">
+<script src="../assets/js/theme.js?v=20261118"></script>
 <style>
   .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: var(--space-xs); margin-top: var(--space-md); }
   .topic-links a { display: block; padding: var(--space-sm) var(--space-md); border-radius: 0; background: var(--panel); color: var(--fg); text-decoration: none; font-weight: 600; }
@@ -16,7 +16,64 @@
   .topic-links a span { display: block; font-size: 13px; font-weight: 400; color: var(--muted); margin-top: var(--space-3xs); }
 </style>
 </head>
-<body>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">32</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
 <div class="wrap explainer">
   <div class="topbar">
     <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>

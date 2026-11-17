@@ -12,9 +12,9 @@ Interactive_explainations/
 ├── index.html                      # hub: links to every subject
 ├── assets/
 │   ├── css/
-│   │   ├── site/                   # new design system (Grid, see design.md): tokens.css, base.css, home.css; used by index.html and about.html
-│   │   ├── theme.css               # ALL colours + fonts, dark (default) and light
-│   │   ├── base.css                # shared layout: top bar, toggle, type, footer
+│   │   ├── site/                   # design system (Grid, see design.md): tokens.css, base.css, workbench.css (home and About); home.css is the old home, unused
+│   │   ├── theme.css               # ALL colours + fonts, light (default) and dark
+│   │   ├── base.css                # shared layout: top bar, toggle, type, footer, workbench sidebar
 │   │   ├── hub.css                 # home pages: root hub + subject roadmaps
 │   │   └── explainer.css           # explainer building blocks: stage, controls, cards, quiz
 │   ├── fonts/                      # Radio Canada Big + Radio Canada, self-hosted (OFL)
@@ -61,9 +61,10 @@ Interactive_explainations/
 1. Copy `_template/explainer.html` into the subject folder and rename it (lowercase, hyphens).
 2. Fill in the content and the page's own script.
 3. Link it from the subject's `index.html` (for System Design HLD, add `file:"name.html"` to its H-session in `system-design/hld/index.html`; for LLD, add `file` to its L-topic in `PARTS` in `system-design/lld/index.html`). System Design pages also go into `system-design/sd-series.js` so they get the week strip and previous / next links.
-4. In the root `index.html`, bump `done` (days covered) and `pages` (explainer files) for the subject, and add an entry to `RECENT`.
-5. Commit and push. GitHub Pages updates in about a minute.
+4. In the root `index.html`, bump `pages` (explainer files) for the subject, and add an entry to the top of `RECENT` (give it a `fig` to show it as a card).
+5. Run `python3 tools/build_shell.py` (adds the sidebar to the new page and lists it on every page of the subject) and `python3 tools/build_search_index.py`.
+6. Commit and push. The deploy runs on every push to `main`.
 
 ## Starting a new subject
 
-Create the folder (e.g. `aws/`) with an `index.html` that loads `theme`, `base` and `hub` CSS from `../assets/css/`, then set `path:"aws/index.html"` on the subject in the root `index.html`.
+Create the folder (e.g. `aws/`) with an `index.html` that loads `theme`, `base` and `hub` CSS from `../assets/css/`, then set `path:"aws/index.html"` on the subject in the root `index.html`, and add it to `SUBJECTS` in `tools/build_shell.py`.

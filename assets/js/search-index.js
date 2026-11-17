@@ -6,7 +6,7 @@ window.SEARCH_INDEX = [
 "k": "HLD",
 "h": "system-design/hld/availability-slos.html",
 "d": "Day 6: what each extra nine costs in downtime, an error budget you can burn with incidents, and how series and redundant components combine into overall availability.",
-"w": "SLI = measure : what actually happened (e.g. % of requests that succeeded). SLO = target : what the team aims for (e.g. 99.9% over 30 days). SLA = promise : what customers are contractually owed if you miss it. Error budget = 100% − SLO: the failure you can afford to spend on shipping changes. 1 Learn: nines, SLOs and error budgets What each nine costs Spend the error budget 2 Compare: recovering from a disaster (RPO, RTO) RPO and RTO RPO · how much data can we lose? RTO · how long can we be dow"
+"w": "SLI = measure : what actually happened (e.g. % of requests that succeeded). SLO = target : what the team aims for (e.g. 99.9% over 30 days). SLA = promise : what customers are contractually owed if you miss it. Error budget = 100% − SLO: the failure you can afford to spend on shipping changes. 1 Learn: nines, SLOs and error budgets What each nine costs Spend the error budget 2 Compare: recovering from a disaster (RPO, RTO) RPO and RTO RPO, how much data can we lose? RTO, how long can we be down?"
 },
 {
 "t": "Cache Eviction Policies",
@@ -142,7 +142,7 @@ window.SEARCH_INDEX = [
 "k": "HLD",
 "h": "system-design/hld/scale-web-app.html",
 "d": "H14 design: grow one web app from a single server to millions of users, one layer at a time: separate database, load balancer and stateless servers, cache and CDN, read replicas, queues, redundancy and multiple regions. With a scale-ladder calculator and an answer template.",
-"w": "The classic interview question: \"Your app has 1 user today. Grow it to 10 million.\" The answer is a sequence : at each size, find what breaks first and add one thing. It uses everything from Weeks 1–2: DNS, load balancers, stateless servers, availability. Then it previews what's next: caching (Week 3), replicas and sharding (Phase 2), queues (Phase 4). 1 Learn: one app, one layer at a time 2 Compare: what breaks at each size 3 Try it: the scale ladder 4 Revise: how to answer a design question An"
+"w": "The classic interview question: \"Your app has 1 user today. Grow it to 10 million.\" The answer is a sequence : at each size, find what breaks first and add one thing. It uses everything from Weeks 1 to 2: DNS, load balancers, stateless servers, availability. Then it previews what's next: caching (Week 3), replicas and sharding (Phase 2), queues (Phase 4). 1 Learn: one app, one layer at a time 2 Compare: what breaks at each size 3 Try it: the scale ladder 4 Revise: how to answer a design question"
 },
 {
 "t": "Vertical vs Horizontal Scaling",
@@ -270,7 +270,7 @@ window.SEARCH_INDEX = [
 "k": "LLD",
 "h": "system-design/lld/solid.html",
 "d": "SOLID overview: five object-oriented design guidelines shown in one appointment-booking class diagram, with a spot-the-violation game.",
-"w": "Five guidelines for object-oriented code that is easy to change, test and extend . S ingle responsibility · O pen-closed · L iskov substitution · I nterface segregation · D ependency inversion. They work together: small focused classes, talking through interfaces , with implementations plugged in from outside. They are guidelines, not rules . Applied mechanically they produce over-engineered code; the goal is simple code that is safe to change. The five, one page each Walkthrough: all five in on"
+"w": "Five guidelines for object-oriented code that is easy to change, test and extend . S ingle responsibility, O pen-closed, L iskov substitution, I nterface segregation, D ependency inversion. They work together: small focused classes, talking through interfaces , with implementations plugged in from outside. They are guidelines, not rules . Applied mechanically they produce over-engineered code; the goal is simple code that is safe to change. The five, one page each Walkthrough: all five in one de"
 },
 {
 "t": "System Design",
@@ -398,7 +398,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/ec2-instance-types.html",
 "d": "AWS Cloud Practitioner: EC2 instance families (general purpose, compute, memory, storage optimized, accelerated) and how to read a name like m5.2xlarge.",
-"w": "Instance types are tuned for different bottlenecks : balanced, CPU, memory, local storage, or GPUs. General purpose (T, M) · Compute optimized (C) · Memory optimized (R, X) · Storage optimized (I, D, H) · Accelerated (P, G). A name like m5.2xlarge reads: family m, generation 5, size 2xlarge. Bigger size = more vCPUs, memory, network and cost . Pick the family for the bottleneck, then the size. Walkthrough: send each workload to the right family Read an instance type name Name the family"
+"w": "Instance types are tuned for different bottlenecks : balanced, CPU, memory, local storage, or GPUs. General purpose (T, M), Compute optimized (C), Memory optimized (R, X), Storage optimized (I, D, H), Accelerated (P, G). A name like m5.2xlarge reads: family m, generation 5, size 2xlarge. Bigger size = more vCPUs, memory, network and cost . Pick the family for the bottleneck, then the size. Walkthrough: send each workload to the right family Read an instance type name Name the family"
 },
 {
 "t": "EC2 review",
@@ -670,7 +670,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "python-fundamentals/comprehensions.html",
 "d": "Python fundamentals: list, dict and set comprehensions and generator expressions, shown side by side with the loop they replace.",
-"w": "A comprehension builds a new list from an existing sequence in one expression: [f * 2 for f in fees] . Read it as what to keep · for each item · optional filter : [expr for x in items if cond] . Same idea for dicts {k: v for ...} and sets {x for ...} ; with round brackets it becomes a lazy generator expression . Use one when the loop only builds a collection. If it needs several statements, keep the normal loop. Walkthrough: the same list, two ways Comprehension pipeline Reference: the four shap"
+"w": "A comprehension builds a new list from an existing sequence in one expression: [f * 2 for f in fees] . Read it as what to keep , for each item , optional filter : [expr for x in items if cond] . Same idea for dicts {k: v for ...} and sets {x for ...} ; with round brackets it becomes a lazy generator expression . Use one when the loop only builds a collection. If it needs several statements, keep the normal loop. Walkthrough: the same list, two ways Comprehension pipeline Reference: the four shap"
 },
 {
 "t": "Conditionals & loops",

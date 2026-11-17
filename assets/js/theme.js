@@ -1,6 +1,6 @@
 /* =========================================================================
    theme.js — light/dark mode for every page.
-   - Dark by default; the viewer's choice is remembered in localStorage.
+   - Light by default; the viewer's choice is remembered in localStorage.
    - Load it in <head> (not deferred) so the saved theme applies before paint.
    - Any element with  data-theme-toggle  becomes the toggle button.
    - Pages can listen for  document.addEventListener('themechange', ...)
@@ -40,6 +40,14 @@
   window.ExplainerTheme = { get: current, set: apply };
 
   document.addEventListener('DOMContentLoaded', function () {
+    /* the sidebar's page list (tools/build_shell.py) is a menu on small screens: closed until asked for */
+    var pages = document.querySelector('[data-wb-pages]');
+    if (pages && window.matchMedia) {
+      var small = window.matchMedia('(max-width: 72rem)');
+      var fit = function () { pages.open = !small.matches; };
+      fit();
+      if (small.addEventListener) small.addEventListener('change', fit);
+    }
     document.querySelectorAll('[data-theme-toggle]').forEach(function (btn) {
       paint(btn);
       btn.addEventListener('click', function () { apply(current() === 'dark' ? 'light' : 'dark'); });

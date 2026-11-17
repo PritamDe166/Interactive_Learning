@@ -40,13 +40,18 @@ Three colour roles, one job each:
 ## Motion
 - Character: still. State changes only (colour on hover, 220ms ease-out). No scroll reveals. Under reduced motion everything ends at once.
 
-## Rollout to the rest of the site
-Done: `index.html`, `about.html` (stylesheet `assets/css/site/home.css`).
-Next, in this order: the five subject roadmaps (`*/index.html`, today on `hub.css`), then the explainers (`explainer.css`).
-- Map the old tokens in `assets/css/theme.css` onto these roles rather than rewriting each page: `--bg` to paper, `--panel` to paper-2, `--fg` to ink, `--yellow`/`--accent-text` to accent, `--teal` stays as the "good/hit" state colour.
-- Explainers drop the tracked-caps mono eyebrows (`WEEK 3 · H18 · CACHING & CDN`), the rounded pills and the yellow numbered circles; section numbers become display numerals as on the home page.
-- After the explainers change, recapture `assets/img/home/*.webp` so the home page shows them in the new look.
-- Run `python3 tools/build_search_index.py` after adding or renaming any page.
+## Layout: the learning workbench
+Every page is a workbench: a dark sidebar (field) on the left, the page on paper to its right. Designed in Figma first: https://www.figma.com/design/c6fwa4Y7qqp8cvVByJalon (frames "Home / Learning workbench", "Diagram kit", "Explainer / Cache eviction").
+- Home (`index.html`, `assets/css/site/workbench.css`): page head with the tally, the caching lab (one request through client, cache and database, hit or miss), "Choose your rabbit hole" subject tabs, "Fresh from the lab", the lime close band. About (`about.html`) uses the same shell and stylesheet. `site/home.css` is the earlier home design, no longer linked; it can be deleted.
+- Subject pages: the sidebar is written into every page under the subject folders by `python3 tools/build_shell.py` (between `<!-- shell:start -->` and `<!-- shell:end -->`). It lists the subject's pages in the same groups as its roadmap, from `sd-series.js`, `aws-cloud-practitioner/topics.js` and the `PARTS` lists in the Python and Angular roadmaps. Styles: the "Workbench shell" block at the end of `assets/css/base.css`. Below 72rem it folds into a "pages" menu above the page.
+- Explainers (`explainer.css`, "Workbench layer" at the end): sections on paper, numbered with a blue display numeral; tabs underline in blue; the walkthrough is a diagram well with the narration on a dark panel; previous / next are two wells.
+- Diagrams: square nodes with a hairline. Blue fill = happening now (`.on`), lime = the answer or a hit (`.solid`, `.hit`, `.ok`), red only for errors, faded = out of play (`.dim`). Wires are grey, blue while a request travels them. Request pills are ink with paper text.
+
+## Adding or changing pages
+- After adding, renaming or reordering any page: update its roadmap list (above), then run `python3 tools/build_shell.py` and `python3 tools/build_search_index.py`. Both are safe to run again.
+- A new explainer copied from `_template/explainer.html` gets its sidebar from `build_shell.py`.
+- Stylesheets and scripts are linked with `?v=<date>` so browsers fetch new styles after a deploy. When you change a CSS or JS file, bump the date on every link (one find-and-replace across the repo) and on the `@import` lines in `theme.css`, `site/home.css` and `site/workbench.css`.
+- After the explainers change look, recapture `assets/img/home/*.webp` if a page still shows them (About does not; the home page draws its own lab).
 
 ## Exports
 `assets/css/site/tokens.css` in this project. Tailwind, DTCG or shadcn blocks are added here on request.

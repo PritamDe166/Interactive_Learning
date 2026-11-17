@@ -18,8 +18,8 @@
 /* Hallmark · dropped "4 of 5 subjects started" from the hero · hero review asked for one figure; the subject list shows AI as planned */
 /* Hallmark · reworded the hero line to name interview prep and the four subjects · hero review: the line never said who the site is for */
 /* Hallmark · dropped the footer's "To add a subject…" note from view · it is a note to the site's owner, kept as an HTML comment beside the SUBJECTS list */
-@import url("./tokens.css");
-@import url("./base.css");
+@import url("./tokens.css?v=20261118");
+@import url("./base.css?v=20261118");
 
 /* ---------- the page ---------- */
 body { font-size: 1.0625rem; line-height: 1.5; }

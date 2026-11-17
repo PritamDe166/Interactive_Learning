@@ -983,3 +983,123 @@ summary .mono { white-space: pre-wrap; display: block; font-family: var(--mono);
 .explainer textarea, .explainer input[type="text"], .explainer input[type="search"], .explainer input[type="number"], .explainer input:not([type]) { border-color: var(--muted); }
 .story .cc, .story pre { overflow-x: auto; }
 .cc-dots { display: none; }
+
+/* readable line length: running text stops at about 70 characters; diagrams, tables and code keep the width */
+.explainer p, .explainer .sub, .explainer .sec-sub, .explainer .hint, .explainer .note,
+.explainer ul.lede, .explainer ol:not(.howto) > li, .explainer ul:not(.cheat):not(.series):not(.log) > li,
+.explainer details .ans, .explainer .story-cap .txt { max-width: 70ch; }
+.explainer .hint { margin-inline: auto; }
+.explainer td p, .explainer th p, .explainer .card p { max-width: none; }
+.explainer ul.lede, .explainer ul.lede > li { max-width: 58ch; }
+.explainer p, .explainer .sub, .explainer .sec-sub, .explainer ol:not(.howto) > li, .explainer ul:not(.cheat):not(.series):not(.log):not(.lede) > li { max-width: 65ch; }
+
+/* =========================================================================
+   Workbench layer (design.md, Figma "Explainer / Cache eviction" and the diagram kit)
+   Sections sit on paper; only the diagram stage is a well. Blue means "happening now",
+   lime means "the answer", red is kept for errors; everything else is neutral.
+   ========================================================================= */
+.wrap.explainer { padding-top: 0; }
+.wrap.explainer > section,
+.wrap.explainer > section[data-nav] { background: none; padding: 0; margin-top: var(--space-3xl); }
+.wrap.explainer > section .card,
+.wrap.explainer > section .remember,
+.wrap.explainer > section .quiz details { background: var(--panel); }
+.wrap.explainer > section .card .card, .wrap.explainer > section details .card { background: var(--bg); }
+@media (max-width: 760px) { .wrap.explainer > section { padding: 0; margin-top: var(--space-2xl); } }
+
+/* top bar: back link reads as a breadcrumb; the page tabs underline */
+.explainer > .topbar { margin-bottom: var(--space-lg); padding-block: var(--space-xs) 0; margin-inline: calc(-1 * var(--space-xs)); padding-inline: var(--space-xs); background: color-mix(in oklab, var(--bg) 94%, transparent); }
+.topbar .back { font-size: var(--text-sm); color: var(--muted); }
+.topbar .back:hover { color: var(--color-accent); }
+.anim-ctrl { font-size: var(--text-sm); }
+.page-nav { gap: var(--space-lg); padding: var(--space-2xs) 0 0; }
+.page-nav a { gap: var(--space-xs); padding: var(--space-xs) 0 var(--space-sm); background: none; border: 0; box-shadow: inset 0 -2px 0 transparent; color: var(--muted); font-size: var(--text-sm); font-weight: 500; transition: color var(--dur-short) var(--ease-out), box-shadow var(--dur-short) var(--ease-out); }
+.page-nav a span { width: auto; height: auto; display: inline; background: none; color: inherit; font: inherit; font-variant-numeric: tabular-nums; }
+.page-nav a:hover { color: var(--fg); }
+.page-nav a[aria-current] { color: var(--fg); box-shadow: inset 0 -2px 0 var(--color-accent); }
+.page-nav a[aria-current] span { background: none; color: var(--color-accent); }
+/* the sidebar lists the week's pages, so the strip under the head only shows on small screens */
+@media (min-width: 72.01rem) { body.wb .series { display: none; } }
+
+/* the walkthrough: diagram on a well, narration on the dark panel */
+.story { gap: 0; margin-top: var(--space-lg); background: var(--panel); }
+.story > .at-stage, .story > .scroll, .story > :not(.story-cap) { padding: var(--space-lg); }
+.story > .at-stage svg { background: transparent; }
+.story-cap {
+  --color-focus: var(--color-field-ink);
+  background: var(--color-field); color: var(--color-field-ink);
+  padding: var(--space-lg); gap: var(--space-sm);
+}
+.story-cap .count { color: color-mix(in oklab, var(--color-field-ink) 66%, transparent); font-family: var(--font-body); }
+.story-cap h3 { color: var(--color-field-ink); }
+.story-cap .txt { color: color-mix(in oklab, var(--color-field-ink) 82%, transparent); }
+.story-cap .txt b, .story-cap .txt strong { color: var(--color-field-ink); }
+.story-cap .txt code, .story-cap .tip code { background: color-mix(in oklab, var(--color-field-ink) 12%, transparent); color: var(--color-field-ink); }
+.story-cap .tip { border-left: 2px solid var(--color-mark); color: color-mix(in oklab, var(--color-field-ink) 82%, transparent); }
+.story-cap .tip b { color: var(--color-mark); }
+.story-cap .btn { background: var(--color-paper); color: var(--color-ink); box-shadow: none; }
+.story-cap .btn:hover { background: var(--color-paper-3); }
+.story-cap .btn.primary { background: var(--color-accent); color: var(--color-accent-ink); }
+.story-cap .btn.primary:hover { background: var(--color-accent-hover); }
+.story-dots { gap: var(--space-2xs); }
+.story-dots button {
+  --c: color-mix(in oklab, var(--color-field-ink) 25%, transparent);
+  width: 28px; height: 24px; padding: 0; border: 0; border-radius: 0; box-shadow: none; outline-offset: 0;
+  background: linear-gradient(var(--c), var(--c)) center / 100% 3px no-repeat;
+}
+.story-dots button.seen { --c: var(--color-accent); background: linear-gradient(var(--c), var(--c)) center / 100% 3px no-repeat; }
+.story-dots button.on { --c: var(--color-field-ink); background: linear-gradient(var(--c), var(--c)) center / 100% 3px no-repeat; box-shadow: none; outline: 0; }
+.story-dots button:focus-visible { outline: 2px solid var(--color-field-ink); outline-offset: 0; }
+.story.wide .story-cap { order: 0; }
+
+/* diagrams: square nodes with a hairline; active = blue, answer = lime, dim = faded */
+.atlas [class*="tone-"], .at-stage, .at-stage[class*="tone-"] { --tone: var(--color-accent); }
+.at-stage svg { background: var(--panel); }
+.node rect, .at-node rect, .at-slot rect, .pill rect, .at-ptag rect, .at-badge rect, .at-packet rect { rx: 0; ry: 0; }
+.node rect, .at-node rect, .at-node path, .at-node ellipse { fill: var(--bg); stroke: var(--line); stroke-width: 1; }
+.node .n-title, .at-ntext { fill: var(--fg); }
+.node.on rect, .node.teal rect, .at-node.on rect, .at-node.on path, .at-node.on ellipse { fill: var(--color-accent); stroke: var(--color-accent); }
+.node.on .n-title, .node.on .n-sub, .node.teal .n-title, .node.teal .n-sub,
+.at-node.on .at-ntext, .at-node.on .at-nsub, .at-node.on .at-strongsub { fill: var(--color-accent-ink); }
+.at-node.on .at-ic { stroke: var(--color-accent-ink); }
+.node.solid rect, .node.hit rect, .at-node.ok rect, .at-node.ok path, .at-node.ok ellipse { fill: var(--color-mark); stroke: var(--color-mark); }
+.node.solid .n-title, .node.solid .n-sub, .node.hit .n-title, .node.hit .n-sub,
+.at-node.ok .at-ntext, .at-node.ok .at-nsub, .at-node.ok .at-strongsub { fill: var(--color-mark-ink); }
+.node.ok rect { stroke: var(--color-accent); stroke-width: 2; }
+.at-node.ok .at-ic { stroke: var(--color-mark-ink); }
+.node.bad rect, .at-node.hot rect, .at-node.hot path, .at-node.hot ellipse { fill: color-mix(in oklab, var(--red) 14%, var(--bg)); stroke: var(--red); stroke-width: 1.5; }
+.node.dim, .at-node.dim { opacity: 0.35; }
+.wire, .at-wire path { stroke: var(--muted); }
+.at-wire.live path { stroke: var(--color-accent); stroke-width: 2; }
+.pill rect, .at-packet rect { fill: var(--fg); }
+.pill text { fill: var(--bg); }
+.pill.alt rect, .at-packet.yellow rect { fill: var(--color-mark); } .pill.alt text { fill: var(--color-mark-ink); }
+.pill.ok rect, .at-packet.teal rect { fill: var(--color-accent); } .pill.ok text { fill: var(--color-accent-ink); }
+.at-packet { color: var(--fg); }
+.at-ptag rect { fill: var(--fg); stroke: none; }
+.at-ptag text { fill: var(--bg); }
+.at-badge rect { fill: var(--color-mark); } .at-badge text { fill: var(--color-mark-ink); }
+.at-slot.full rect { fill: var(--color-accent); } .at-slot.full text { fill: var(--color-accent-ink); }
+.at-slot.full.yellow rect { fill: var(--color-mark); } .at-slot.full.yellow text { fill: var(--color-mark-ink); }
+.at-lbl.at-strong { fill: var(--fg); }
+
+/* pattern cards: ink headings, blue numerals, no tinted titles */
+.at-card { padding: var(--space-lg); gap: var(--space-xs); }
+.at-head h3 { color: var(--fg); font-family: var(--font-display); font-weight: var(--display-weight); font-size: var(--text-title); letter-spacing: -0.015em; }
+.at-num { width: auto; height: auto; background: none; border: 0; color: var(--color-accent); font: var(--display-weight) var(--text-title)/1 var(--font-display); }
+.at-take { color: var(--fg); box-shadow: inset 2px 0 0 var(--color-mark); padding-left: var(--space-sm); }
+.at-steps li::before { border-radius: 0; color: var(--color-accent); border-color: var(--line); }
+.at-steps li.now { background: color-mix(in oklab, var(--color-accent) 10%, transparent); }
+.at-steps li.now::before { background: var(--color-accent); color: var(--color-accent-ink); }
+.at-play { border-radius: 0; background: var(--fg); color: var(--bg); border: 0; }
+
+/* previous and next: two wells, the title in the display face */
+.prevnext { gap: var(--space-md); margin-top: var(--space-3xl); }
+.prevnext a { padding: var(--space-md) var(--space-lg); background: var(--panel); font: var(--display-weight) var(--text-title)/1.2 var(--font-display); letter-spacing: -0.015em; transition: background-color var(--dur-short) var(--ease-out); }
+.prevnext a small { font: 400 var(--text-xs)/1.4 var(--font-body); letter-spacing: 0; }
+.prevnext a:hover { background: var(--panel-2); }
+/* cheat-sheet: hairline rows on paper, the answer highlighted */
+ul.cheat li, .cheat li { background: none; border-top: 1px solid var(--line); padding-inline: 0; }
+:root[data-theme="dark"] .story-cap { box-shadow: inset 0 0 0 1px var(--line); }
+@media (max-width: 760px) { .story > .at-stage, .story > .scroll, .story > :not(.story-cap) { padding: var(--space-sm); } }
+.story > * { min-width: 0; }

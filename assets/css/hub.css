@@ -183,3 +183,5 @@ details.week > summary::after { order: 2; }
 a.day-card:hover, .day-card:hover { border-color: var(--cyan); }
 .dom { font-size: 12px; }
 .phase-head { margin-top: var(--space-2xl); }
+/* readable line length on roadmaps */
+.wrap p, .wrap li > span:only-child { max-width: 70ch; }

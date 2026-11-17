@@ -5,81 +5,94 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>About · See How It Works</title>
 <meta name="description" content="Who built See How It Works and why: a visual learner sharing animated study pages for interview preparation.">
-<link rel="stylesheet" href="assets/css/site/home.css">
-<script src="assets/js/theme.js"></script>
+<link rel="stylesheet" href="assets/css/site/workbench.css?v=20261118">
+<script src="assets/js/theme.js?v=20261118"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to the page</a>
 
-<header class="nav">
-  <div class="container nav__in">
+<div class="shell">
+  <aside class="side" aria-label="Site">
     <a class="wordmark" href="index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
-    <a class="find-pill" href="index.html#find"><span>Search<span class="pill-more"> every explainer</span></span><kbd>/</kbd></a>
-    <div class="nav__end">
-      <a class="back nav__about" href="index.html">All subjects</a>
-      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
-    </div>
-  </div>
-</header>
+    <nav aria-label="Sections">
+      <div>
+        <ul>
+          <li><a href="index.html">Explore</a></li>
+          <li><a href="index.html#latest">Latest explainers</a></li>
+          <li><a href="about.html" aria-current="page">Why this exists</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Subjects</h2>
+        <ul>
+          <li><a href="system-design/index.html">System Design<span class="n">32</span></a></li>
+          <li><a href="aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
+          <li><a href="python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+          <li><a href="angular/index.html">Angular<span class="n">15</span></a></li>
+          <li><span class="soon">AI<span class="n">Soon</span></span></li>
+        </ul>
+      </div>
+    </nav>
+  </aside>
 
-<main id="main" class="about">
-  <section class="about-hero" aria-labelledby="aboutH">
-    <div class="container about-hero__grid">
-      <div class="about-hero__text">
-        <h1 id="aboutH">Hi, I&rsquo;m Pritam.</h1>
-        <p class="lead">I&rsquo;m a .NET developer and team lead with 12 years of experience, currently preparing for interviews in system design, AWS, Python and AI.</p>
-        <div class="hero__actions">
-          <a class="btn" href="index.html#subjects">Browse the subjects</a>
+  <div class="main">
+    <header class="top">
+      <div class="top__in">
+        <ol class="crumbs" aria-label="You are here"><li>The lab</li><li aria-current="page">Why this exists</li></ol>
+        <a class="top__why" href="index.html">All subjects</a>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+      </div>
+    </header>
+
+    <main class="main__in about" id="main">
+      <section class="about-head" aria-labelledby="aboutH">
+        <div class="about-head__text">
+          <h1 id="aboutH">Hi, I&rsquo;m Pritam.</h1>
+          <p>I&rsquo;m a .NET developer and team lead with 12 years of experience, currently preparing for interviews in system design, AWS, Python and AI.</p>
+          <a class="btn btn--primary" href="index.html#subjects">Browse the subjects</a>
         </div>
-      </div>
-      <figure class="portrait" data-slot="portrait" data-alt="The owner's portrait">
-        <img src="assets/img/pritam.jpg?v=2" width="600" height="600" alt="Pritam in a grey checked suit" fetchpriority="high" style="object-position: 50% 15%">
-      </figure>
-    </div>
-  </section>
+        <figure class="portrait" data-slot="portrait" data-alt="The owner's portrait">
+          <img src="assets/img/pritam.jpg?v=2" width="600" height="600" alt="Pritam in a grey checked suit" fetchpriority="high" style="object-position: 50% 15%">
+        </figure>
+      </section>
 
-  <section class="section section--tight-top" aria-labelledby="whyH">
-    <div class="container why">
-      <h2 id="whyH">Why I built this</h2>
-      <div class="why__body">
-        <p class="why__lead">I&rsquo;m a visual learner.</p>
-        <p>Reading notes didn&rsquo;t help me picture how things work, so I started turning each topic into a small page I could click through and play with.</p>
-        <p>It helped me learn faster, so I decided to share it. If you&rsquo;re preparing for interviews too, I hope this is an <b>easy place to start</b>: understand a topic in a few minutes, interactively, then go deeper.</p>
-      </div>
-    </div>
-  </section>
+      <section class="sec why" aria-labelledby="whyH">
+        <h2 id="whyH">Why I built this</h2>
+        <div class="why__body">
+          <p class="why__lead">I&rsquo;m a visual learner.</p>
+          <p>Reading notes didn&rsquo;t help me picture how things work, so I started turning each topic into a small page I could click through and play with.</p>
+          <p>It helped me learn faster, so I decided to share it. If you&rsquo;re preparing for interviews too, I hope this is an <b>easy place to start</b>: understand a topic in a few minutes, interactively, then go deeper.</p>
+        </div>
+      </section>
 
-  <section class="section how" aria-labelledby="useH">
-    <div class="container">
-      <div class="head"><h2 id="useH">How to use a page</h2></div>
-      <ol class="use">
-        <li>Read the short bullets at the top.</li>
-        <li>Step through the walkthrough.</li>
-        <li>Play with the examples, then try the quiz.</li>
-      </ol>
-    </div>
-  </section>
+      <section class="sec" aria-labelledby="useH">
+        <div class="sec__head"><h2 id="useH">How to use a page</h2></div>
+        <ol class="use">
+          <li><b>1</b><span>Read the short bullets at the top.</span></li>
+          <li><b>2</b><span>Step through the walkthrough.</span></li>
+          <li><b>3</b><span>Play with the examples, then try the quiz.</span></li>
+        </ol>
+      </section>
 
-  <section class="start" aria-labelledby="startH">
-    <div class="container cols">
-      <h2 id="startH">Start here</h2>
-      <ul>
-        <li><a href="system-design/index.html">System Design</a></li>
-        <li><a href="aws-cloud-practitioner/index.html">AWS</a></li>
-        <li><a href="python-fundamentals/index.html">Python</a></li>
-        <li><a href="angular/index.html">Angular</a></li>
-      </ul>
-    </div>
-  </section>
-</main>
+      <section class="sec" aria-labelledby="startH">
+        <div class="sec__head"><h2 id="startH">Start here</h2></div>
+        <ul class="rows rows--start">
+          <li><a href="system-design/index.html"><span class="t">System Design</span><span class="n">HLD and LLD</span></a></li>
+          <li><a href="aws-cloud-practitioner/index.html"><span class="t">AWS</span><span class="n">Cloud Practitioner</span></a></li>
+          <li><a href="python-fundamentals/index.html"><span class="t">Python</span><span class="n">Fundamentals</span></a></li>
+          <li><a href="angular/index.html"><span class="t">Angular</span><span class="n">Modern Angular</span></a></li>
+        </ul>
+      </section>
 
-<footer class="letter">
-  <div class="container cols">
-    <div class="letter__body">
-      <p>Each page lists its sources. Spotted a mistake? Let me know on <a class="link" href="https://github.com/PritamDe166/Interactive_Learning">GitHub</a>.</p>
-      <p class="sign">Pritam</p>
-    </div>
+      <section class="close" aria-label="Sign-off">
+        <h2>Close the tab. Draw it from memory.</h2>
+        <div class="close__r">
+          <p>Each page lists its sources. Spotted a mistake? Let me know on <a class="close__link" href="https://github.com/PritamDe166/Interactive_Learning">GitHub</a>.</p>
+          <p class="sign">Pritam</p>
+        </div>
+      </section>
+    </main>
   </div>
-</footer>
+</div>
 </body>
 </html>

@@ -5,16 +5,77 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Stateless Applications</title>
 <meta name="description" content="Day 9: a shopping cart under three designs — server memory, sticky sessions, and external state in Redis — with crashes and load balancing that show why stateless servers scale.">
-<link rel="stylesheet" href="../../assets/css/theme.css">
-<link rel="stylesheet" href="../../assets/css/base.css">
-<link rel="stylesheet" href="../../assets/css/explainer.css">
-<script src="../../assets/js/theme.js"></script>
-<script src="../../assets/js/explainer-kit.js"></script>
+<link rel="stylesheet" href="../../assets/css/theme.css?v=20261118">
+<link rel="stylesheet" href="../../assets/css/base.css?v=20261118">
+<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261118">
+<script src="../../assets/js/theme.js?v=20261118"></script>
+<script src="../../assets/js/explainer-kit.js?v=20261118"></script>
 <script src="../sd-series.js"></script>
 <script src="foundations-flows.js"></script>
 <style>.dead rect { stroke: var(--red) !important; stroke-dasharray: 6 4; }</style>
 </head>
-<body>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>System Design pages</summary>
+<nav aria-label="System Design pages">
+<h2 class="wb-track">HLD</h2>
+<a class="wb-road" href="index.html">HLD roadmap</a>
+<details class="wb-g"><summary>Week 1: Networking</summary><ul>
+<li><a href="client-server-dns.html"><span class="t">Client-server &amp; DNS</span><span class="n">H1</span></a></li>
+<li><a href="http.html"><span class="t">HTTP</span><span class="n">H2</span></a></li>
+<li><a href="tcp-udp.html"><span class="t">TCP &amp; UDP</span><span class="n">H3</span></a></li>
+<li><a href="https-tls.html"><span class="t">HTTPS &amp; TLS</span><span class="n">H4</span></a></li>
+<li><a href="latency-throughput.html"><span class="t">Latency &amp; throughput</span><span class="n">H5</span></a></li>
+<li><a href="availability-slos.html"><span class="t">Availability, SLOs &amp; recovery</span><span class="n">H6</span></a></li>
+<li><a href="week-1-review.html"><span class="t">Review: journey of a request</span><span class="n">H7</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Week 2: Scaling</summary><ul>
+<li><a href="scaling.html"><span class="t">Vertical vs horizontal scaling</span><span class="n">H8</span></a></li>
+<li><a href="stateless.html" aria-current="page"><span class="t">Stateless applications</span><span class="n">H9</span></a></li>
+<li><a href="proxy-lb-gateway.html"><span class="t">Reverse proxy, API gateway &amp; load balancers</span><span class="n">H10–12</span></a></li>
+<li><a href="load-balancing-algorithms.html"><span class="t">Load-balancing algorithms</span><span class="n">H13</span></a></li>
+<li><a href="scale-web-app.html"><span class="t">Design: scale a web app to millions</span><span class="n">H14</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Week 3: Caching</summary><ul>
+<li><a href="caching-overview.html"><span class="t">Why caching exists</span><span class="n">H15</span></a></li>
+<li><a href="cache-read-strategies.html"><span class="t">Read strategies</span><span class="n">H16</span></a></li>
+<li><a href="cache-write-strategies.html"><span class="t">Write strategies &amp; invalidation</span><span class="n">H17</span></a></li>
+<li><a href="cache-eviction.html"><span class="t">Eviction policies</span><span class="n">H18</span></a></li>
+<li><a href="distributed-caching.html"><span class="t">Distributed caching</span><span class="n">H19</span></a></li>
+<li><a href="cache-failure-modes.html"><span class="t">Caching failure modes</span><span class="n">H20</span></a></li>
+<li><a href="cdn-http-caching.html"><span class="t">CDN &amp; HTTP caching</span><span class="n">H21</span></a></li>
+<li><a href="caching-in-practice.html"><span class="t">Caching in practice: the interview playbook</span></a></li>
+<li><a href="caching-patterns-atlas.html"><span class="t">All caching patterns at a glance</span></a></li>
+</ul></details>
+<h2 class="wb-track">LLD</h2>
+<a class="wb-road" href="../lld/index.html">LLD roadmap</a>
+<details class="wb-g"><summary>Phase 2: SOLID</summary><ul>
+<li><a href="../lld/solid.html"><span class="t">SOLID overview</span><span class="n">L6</span></a></li>
+<li><a href="../lld/solid-srp.html"><span class="t">S: Single responsibility</span><span class="n">L7</span></a></li>
+<li><a href="../lld/solid-ocp.html"><span class="t">O: Open-closed</span><span class="n">L8</span></a></li>
+<li><a href="../lld/solid-lsp.html"><span class="t">L: Liskov substitution</span><span class="n">L9</span></a></li>
+<li><a href="../lld/solid-isp.html"><span class="t">I: Interface segregation</span><span class="n">L10</span></a></li>
+<li><a href="../lld/solid-dip.html"><span class="t">D: Dependency inversion</span><span class="n">L11</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Phase 3: Creational patterns</summary><ul>
+<li><a href="../lld/singleton.html"><span class="t">Singleton</span><span class="n">L12</span></a></li>
+<li><a href="../lld/factory-method.html"><span class="t">Simple factory &amp; factory method</span><span class="n">L13</span></a></li>
+<li><a href="../lld/abstract-factory.html"><span class="t">Abstract factory</span><span class="n">L14</span></a></li>
+<li><a href="../lld/builder.html"><span class="t">Builder</span><span class="n">L15</span></a></li>
+<li><a href="../lld/prototype.html"><span class="t">Prototype</span><span class="n">L16</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../index.html" aria-current="true">System Design<span class="n">32</span></a></li>
+<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
+<li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
 <div class="wrap explainer">
   <div class="topbar">
     <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>

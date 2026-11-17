@@ -11,156 +11,163 @@
 <meta property="og:description" content="Animated, clickable explainers for system design, AWS, Python and Angular, built while learning.">
 <meta property="og:url" content="https://seehowitworks.dev/">
 <meta property="og:type" content="website">
-<link rel="stylesheet" href="assets/css/site/home.css">
-<script src="assets/js/theme.js"></script>
+<link rel="stylesheet" href="assets/css/site/workbench.css?v=20261118">
+<script src="assets/js/theme.js?v=20261118"></script>
 <script>document.documentElement.classList.add('js');</script>
 </head>
 <body>
-<a class="skip" href="#main">Skip to the subjects</a>
+<a class="skip" href="#main">Skip to the content</a>
 
-<header class="nav">
-  <div class="container nav__in">
+<div class="shell">
+  <aside class="side" aria-label="Site">
     <a class="wordmark" href="index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
-    <a class="find-pill" href="#find" data-find-open hidden><span>Search<span class="pill-more"> every explainer</span></span><kbd>/</kbd></a>
-    <div class="nav__end">
-      <a class="back nav__about" href="about.html">About</a>
-      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
-    </div>
-  </div>
-</header>
-
-<main id="main">
-  <section class="hero" aria-labelledby="heroH">
-    <div class="container hero__grid">
-      <div class="hero__field" aria-hidden="true"></div>
-      <div class="hero__head">
-        <h1 id="heroH">See How It Works</h1>
-        <p class="over" aria-hidden="true">See How It Works</p>
+    <nav aria-label="Sections">
+      <div>
+        <ul>
+          <li><a href="#main" aria-current="page">Explore</a></li>
+          <li><a href="#latest">Latest explainers</a></li>
+        </ul>
       </div>
-      <div class="hero__text">
-        <div class="hero__lede">
-          <p class="lead">Animated, clickable walkthroughs for interview prep: system design, AWS, Python, Angular.</p>
-          <div class="hero__actions">
-            <a class="btn" href="#subjects">Browse the subjects</a>
-            <a class="link" href="#latest">See the latest</a>
-          </div>
+      <div>
+        <h2>Subjects</h2>
+        <ul id="sideSubjects">
+          <li><a href="system-design/index.html">System Design</a></li>
+          <li><a href="aws-cloud-practitioner/index.html">AWS</a></li>
+          <li><a href="python-fundamentals/index.html">Python</a></li>
+          <li><a href="angular/index.html">Angular</a></li>
+          <li><span class="soon">AI <span class="n">Soon</span></span></li>
+        </ul>
+      </div>
+    </nav>
+    <div class="side__note">
+      <b>Built to learn. Shared to help.</b>
+      <p>One diagram at a time. Always a work in progress.</p>
+      <a href="about.html">Why I built this</a>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="top">
+      <div class="top__in">
+        <ol class="crumbs" aria-label="You are here"><li>The lab</li><li aria-current="page">Explore</li></ol>
+        <form class="find" role="search" id="findForm" action="#" hidden>
+          <label for="findQ">Search every explainer</label>
+          <input id="findQ" name="q" type="search" autocomplete="off" spellcheck="false" placeholder="Search pages" aria-controls="findHits" aria-describedby="findHint">
+          <kbd aria-hidden="true">/</kbd>
+          <p class="sr" id="findHint" aria-live="polite"></p>
+          <ul class="find__hits" id="findHits" hidden></ul>
+        </form>
+        <a class="top__why" href="about.html">Why this exists</a>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+      </div>
+    </header>
+
+    <main class="main__in" id="main">
+      <section class="head" aria-labelledby="heroH">
+        <div>
+          <h1 id="heroH">Big ideas. Broken down.</h1>
+          <p>Animated, clickable walkthroughs. Follow the flow, change a variable, make it click.</p>
         </div>
         <dl class="tally" id="totals"></dl>
-      </div>
-      <figure class="hero__shot">
-        <div class="shot" data-slot="hero" data-kind="product" data-alt="An explainer in use: the cache eviction lab mid-run, LRU, LFU and FIFO side by side">
-          <img src="assets/img/home/lru-try-it.webp" width="1864" height="1292" alt="The cache eviction lab after a run: LRU, LFU and FIFO caches side by side, LFU ahead with 8 hits to 6" fetchpriority="high">
+      </section>
+
+      <section class="lab" aria-labelledby="labH" id="lab">
+        <div class="lab__stage">
+          <div class="lab__title"><h2 id="labH">Caching in practice</h2><p>System Design, HLD</p></div>
+          <div class="flow" id="flow">
+            <div class="node" data-n="client"><b>Client</b><small>GET user:1042</small></div>
+            <div class="wire" data-w="0"><span>lookup key</span></div>
+            <div class="node node--cache" data-n="cache"><b>Cache</b><small>in memory</small><span class="slot" id="slot">empty for user:1042</span></div>
+            <div class="wire" data-w="1"><span>fetch on miss</span></div>
+            <div class="node" data-n="db"><b>Database</b><small>source of truth</small></div>
+            <span class="pill" id="pill" aria-hidden="true">GET user:1042</span>
+          </div>
+          <div class="lab__bar" id="labBar" hidden>
+            <button class="btn" type="button" data-l="reset">Start again</button>
+            <button class="btn btn--ink" type="button" data-l="play">Play</button>
+            <ol class="steps" id="labSteps" aria-hidden="true"></ol>
+            <span class="lab__count" id="labCount"></span>
+            <button class="btn btn--primary" type="button" data-l="next">Next step</button>
+          </div>
         </div>
-        <figcaption>From <a class="link" href="system-design/hld/cache-eviction.html">Cache eviction policies</a>: three caches, the same keys.</figcaption>
-      </figure>
-    </div>
-  </section>
+        <div class="lab__panel">
+          <div>
+            <h3>Follow the request.</h3>
+            <p>Not another wall of text. A system you can step through.</p>
+          </div>
+          <fieldset id="labScenario" hidden>
+            <legend>Change the scenario</legend>
+            <div class="seg">
+              <input type="radio" name="scn" id="scnHit" value="hit"><label for="scnHit">Cache hit</label>
+              <input type="radio" name="scn" id="scnMiss" value="miss" checked><label for="scnMiss">Cache miss</label>
+            </div>
+          </fieldset>
+          <div class="now" aria-live="polite">
+            <h4 id="nowH">The key isn&rsquo;t here.</h4>
+            <p id="nowP">Next: fetch from the database, then save a copy in the cache.</p>
+          </div>
+          <a class="open" href="system-design/hld/caching-in-practice.html">Open the full explainer</a>
+        </div>
+      </section>
 
-  <section class="section" id="subjects-section" aria-labelledby="subjectsH">
-    <div class="container">
-      <div class="head">
-        <h2 id="subjectsH">Five subjects</h2>
-        <p>Each one is a roadmap of pages, in the order I learned them.</p>
-      </div>
-      <ul class="subjects" id="subjects"></ul>
-    </div>
-  </section>
+      <section class="sec" aria-labelledby="subjectsH">
+        <div class="sec__head">
+          <h2 id="subjectsH">Choose your rabbit hole.</h2>
+          <p>Follow a path, or jump to what you&rsquo;re curious about.</p>
+        </div>
+        <div id="subjects"></div>
+      </section>
 
-  <section class="section how" aria-labelledby="howH">
-    <div class="container">
-      <div class="head">
-        <h2 id="howH">How a page works</h2>
-        <p>Every explainer runs the same way, shown here on cache eviction.</p>
-      </div>
-      <ol class="stages">
-        <li class="stage">
-          <div class="stage__text"><h3>Read the short bullets at the top.</h3></div>
-          <figure class="stage__shot" data-kind="product"><img src="assets/img/home/lru-bullets.webp" width="1816" height="686" alt="The top of the cache eviction page: its title and four short bullets" loading="lazy"></figure>
-        </li>
-        <li class="stage">
-          <div class="stage__text"><h3>Step through the walkthrough.</h3></div>
-          <figure class="stage__shot" data-kind="product"><img src="assets/img/home/lru-walkthrough.webp" width="1768" height="924" alt="Step 5 of 7 inside an LRU cache: A is evicted and D goes in at the head of the list" loading="lazy"></figure>
-        </li>
-        <li class="stage">
-          <div class="stage__text"><h3>Play with the examples, then try the quiz.</h3></div>
-          <figure class="stage__shot" data-kind="product"><img src="assets/img/home/lru-test.webp" width="1864" height="1632" alt="The Test yourself section: a which-pattern-fits question and six explain-it-out-loud cards" loading="lazy"></figure>
-        </li>
-        <li class="stage stage--draw">
-          <div class="stage__text"><h3>Close it.</h3></div>
-          <div class="draw"><p>Then draw it from memory.</p></div>
-        </li>
-      </ol>
-    </div>
-  </section>
+      <section class="sec" id="latest" aria-labelledby="recentH">
+        <div class="sec__head">
+          <h2 id="recentH">Fresh from the lab.</h2>
+          <p id="recentCount"></p>
+        </div>
+        <div class="fresh" id="fresh"></div>
+        <ul class="rows" id="recent"></ul>
+      </section>
 
-  <section class="section latest" id="latest" aria-labelledby="recentH">
-    <div class="container">
-      <div class="head">
-        <h2 id="recentH">Latest explainers</h2>
-        <div class="seg" role="group" aria-label="Show explainers from" id="recentFilter" hidden></div>
-      </div>
-      <ul class="rows" id="recent"></ul>
-      <p class="more"><button class="btn" type="button" id="recentMore" hidden></button></p>
-    </div>
-  </section>
-
-  <section class="find" id="find" aria-labelledby="findH" hidden>
-    <div class="container cols">
-      <h2 id="findH">Look up a topic you&rsquo;re stuck on</h2>
-      <form role="search" id="findForm" action="#find">
-        <label for="findQ">Search page titles, summaries and headings</label>
-        <input id="findQ" name="q" type="search" autocomplete="off" spellcheck="false" placeholder="LRU, IAM, signals" aria-describedby="findHint" aria-controls="findHits">
-        <p class="hint" id="findHint" aria-live="polite"></p>
-      </form>
-      <ul class="hits" id="findHits"></ul>
-    </div>
-  </section>
-</main>
-
-<footer class="letter">
-  <div class="container cols">
-    <div class="letter__body">
-      <p>I&rsquo;m a visual learner preparing for interviews, and I built this to learn; now it&rsquo;s here for anyone preparing too.</p>
-      <p class="sign">Pritam</p>
-      <p><a class="link" href="about.html">Read why I built it</a></p>
-    </div>
-    <ul class="letter__links">
-      <li><a href="system-design/index.html">System Design</a></li>
-      <li><a href="aws-cloud-practitioner/index.html">AWS</a></li>
-      <li><a href="python-fundamentals/index.html">Python</a></li>
-      <li><a href="angular/index.html">Angular</a></li>
-      <li><a href="https://github.com/PritamDe166/Interactive_Learning">Source on GitHub</a></li>
-    </ul>
+      <section class="close" aria-labelledby="closeH">
+        <h2 id="closeH">Close the tab. Draw it from memory.</h2>
+        <div class="close__r">
+          <p>I&rsquo;m a visual learner preparing for interviews, and I built this to learn; now it&rsquo;s here for anyone preparing too.</p>
+          <a class="btn btn--ink" href="about.html">Why this exists</a>
+        </div>
+      </section>
+      <p class="foot">Each page lists its sources. Spotted a mistake? Tell me on <a class="link" href="https://github.com/PritamDe166/Interactive_Learning">GitHub</a>.</p>
+    </main>
   </div>
-</footer>
+</div>
 
-<script src="assets/js/search-index.js" defer></script>
+<script src="assets/js/search-index.js?v=20261118" defer></script>
 <script>
 /* ===== Edit these two lists as you add work. =====
    To add a subject, create its folder with an index.html, then set path (e.g. aws/index.html)
-   on its entry in SUBJECTS. Add new explainers to RECENT.
-   After adding or renaming pages, run: python3 tools/build_search_index.py */
+   on its entry in SUBJECTS. Add new explainers to the top of RECENT; the first three get a
+   small diagram card (fig: boxes left to right, "|on" = blue, "|mark" = lime; dark:true = dark card).
+   After adding or renaming pages, run: python3 tools/build_search_index.py
+   and python3 tools/build_shell.py (refreshes the sidebar on every explainer page). */
 const SUBJECTS = [
-  {name:"System Design", path:"system-design/index.html",
-   blurb:"HLD: 147 sessions (H1–H147), networking to reliability. LLD: 67 topics (L1–L67), OOP to design patterns.",
-   done:21, total:147, unit:"HLD sessions", pages:32},
-  {name:"AWS", path:"aws-cloud-practitioner/index.html",
-   blurb:"Cloud Practitioner (CLF-C02): follow each request through Regions, AZs, edge locations and services.",
-   done:30, total:85, unit:"topics rebuilt", pages:43},
-  {name:"Python", path:"python-fundamentals/index.html",
-   blurb:"Fundamentals stepped line by line, with edit-and-run boxes, from objects to type hints and APIs.",
-   done:20, total:20, unit:"topics", pages:20},
-  {name:"Angular", path:"angular/index.html",
-   blurb:"Modern Angular 22, learned by building one app, CareDesk: components to forms and HTTP.",
-   done:15, total:15, unit:"topics", pages:15},
-  {name:"AI", path:null,
-   blurb:"Embeddings, transformers and attention, RAG pipelines, agents and evaluation.",
-   done:0, total:null, unit:"topics"}
+  {name:"System Design", path:"system-design/index.html", note:"HLD and LLD", pages:32,
+   tracks:[
+     {label:"HLD", title:"Design the whole system.", blurb:"Networking, scaling, caching, then distributed systems.", n:147, unit:"sessions, 21 built so far", href:"system-design/hld/index.html", cta:"Explore HLD"},
+     {label:"LLD", title:"Make the details work.", blurb:"OOP and SOLID, design patterns, concurrency, then classic problems.", n:67, unit:"topics in the roadmap", href:"system-design/lld/index.html", cta:"Explore LLD"}]},
+  {name:"AWS", path:"aws-cloud-practitioner/index.html", note:"CLF-C02", pages:43,
+   tracks:[
+     {label:"Cloud Practitioner", title:"Follow every request through AWS.", blurb:"Regions, AZs and edge locations, then IAM, EC2, storage, S3 and databases.", n:30, unit:"of 85 topics rebuilt", href:"aws-cloud-practitioner/index.html", cta:"Explore AWS"}]},
+  {name:"Python", path:"python-fundamentals/index.html", note:"20 of 20 topics", pages:20,
+   tracks:[
+     {label:"Fundamentals", title:"Watch each line run.", blurb:"Stepped line by line with edit-and-run boxes, from objects to type hints and APIs.", n:20, unit:"topics, all built", href:"python-fundamentals/index.html", cta:"Explore Python"}]},
+  {name:"Angular", path:"angular/index.html", note:"15 of 15 topics, Angular 22", pages:15,
+   tracks:[
+     {label:"Modern Angular", title:"Build one app, CareDesk.", blurb:"Components, data flow, signals, routing, forms and HTTP, in build order.", n:15, unit:"topics, all built", href:"angular/index.html", cta:"Explore Angular"}]},
+  {name:"AI", path:null, note:"Coming soon", pages:0,
+   tracks:[]}
 ];
 const RECENT = [
-  {subject:"System Design", title:"LLD creational patterns: Singleton, Factory method, Abstract factory, Builder, Prototype", note:"LLD L12–L16", href:"system-design/lld/singleton.html"},
-  {subject:"System Design", title:"Caching in practice: worked design, sizing calculator, CDN cache-key lab", note:"HLD Week 3 playbook", href:"system-design/hld/caching-in-practice.html"},
-  {subject:"System Design", title:"CDN & HTTP caching: Cache-Control, ETag, header lab", note:"HLD Day 21", href:"system-design/hld/cdn-http-caching.html"},
+  {subject:"System Design", title:"LLD creational patterns: Singleton, Factory method, Abstract factory, Builder, Prototype", note:"LLD L12 to L16", href:"system-design/lld/singleton.html", fig:["Factory|mark","Product A / B"], dark:true},
+  {subject:"System Design", title:"Caching in practice: worked design, sizing calculator, CDN cache-key lab", note:"HLD Week 3 playbook", href:"system-design/hld/caching-in-practice.html", fig:["Client","Cache|on","Database"]},
+  {subject:"System Design", title:"CDN & HTTP caching: Cache-Control, ETag, header lab", note:"HLD Day 21", href:"system-design/hld/cdn-http-caching.html", fig:["Browser","Edge / CDN|mark","Origin"]},
   {subject:"System Design", title:"Caching failure modes: stampede & avalanche simulator", note:"HLD Day 20", href:"system-design/hld/cache-failure-modes.html"},
   {subject:"System Design", title:"Distributed caching: L1 + L2, Redis cluster, add-a-node lab", note:"HLD Day 19", href:"system-design/hld/distributed-caching.html"},
   {subject:"System Design", title:"Eviction: inside an LRU cache + LRU/LFU/FIFO race", note:"HLD Day 18", href:"system-design/hld/cache-eviction.html"},
@@ -178,74 +185,112 @@ const RECENT = [
 /* ===== Render ===== */
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const $=id=>document.getElementById(id);
-const totalExplainers=SUBJECTS.reduce((n,s)=>n+(s.pages||s.done||0),0); /* pages: unique explainer files (one page can cover several days) */
+const totalExplainers=SUBJECTS.reduce((n,s)=>n+(s.pages||0),0);
 const activeSubjects=SUBJECTS.filter(s=>s.path).length;
-$('totals').innerHTML=`<div><dt>explainer${totalExplainers===1?'':'s'} so far</dt><dd>${totalExplainers}</dd></div>`; /* activeSubjects: shown in the subject list as Planned */
+$('totals').innerHTML=`<div><dt>explainer${totalExplainers===1?'':'s'}</dt><dd>${totalExplainers}</dd></div><div><dt>subjects</dt><dd>${activeSubjects}</dd></div>`;
 
-$('subjects').innerHTML=SUBJECTS.map(s=>{
-  const pct=s.total?Math.round(s.done*100/s.total):0;
-  const bar=s.total?`<span class="bar" aria-hidden="true"><i style="width:${Math.max(pct,s.done?2:0)}%"></i></span>`:'';
-  const prog=s.path
-    ?`<span class="prog"><b>${s.done}${s.total?` / ${s.total}`:''}</b><span>${esc(s.unit)}</span>${bar}</span>`
-    :`<span class="prog"><b>Planned</b><span>Not started yet</span></span>`;
-  const inner=`<h3>${esc(s.name)}</h3><p>${esc(s.blurb)}</p>${prog}`;
-  return s.path
-    ? `<li class="subj"><a href="${esc(s.path)}">${inner}</a></li>`
-    : `<li class="subj soon"><div>${inner}</div></li>`;
-}).join('');
+/* sidebar counts */
+$('sideSubjects').innerHTML=SUBJECTS.map(s=>s.path
+  ?`<li><a href="${esc(s.path)}">${esc(s.name)}<span class="n">${s.pages}</span></a></li>`
+  :`<li><span class="soon">${esc(s.name)}<span class="n">Soon</span></span></li>`).join('');
 
-/* Latest explainers: six shown, the rest one click away; filter by subject. */
-const SHOW=6;
-let recentSubject='All', recentOpen=false;
-function renderRecent(){
-  const list=RECENT.filter(r=>recentSubject==='All'||r.subject===recentSubject);
-  $('recent').innerHTML=list.map((r,i)=>`<li class="${i>=SHOW?'is-more':''}"><a href="${esc(r.href)}"><span class="t">${esc(r.title)}</span><span class="s">${esc(r.subject)}</span><span class="n">${esc(r.note||'')}</span></a></li>`).join('');
-  $('recent').classList.toggle('is-open',recentOpen);
-  const more=$('recentMore');
-  more.hidden=list.length<=SHOW;
-  more.textContent=recentOpen?'Show fewer':`Show all ${list.length}`;
-  more.setAttribute('aria-expanded',String(recentOpen));
-}
-const subjectsInRecent=['All',...new Set(RECENT.map(r=>r.subject))];
-$('recentFilter').innerHTML=subjectsInRecent.map(n=>`<button type="button" aria-pressed="${n==='All'}" data-subject="${esc(n)}">${esc(n)}</button>`).join('');
-$('recentFilter').hidden=false;
-$('recentFilter').addEventListener('click',e=>{
-  const b=e.target.closest('button[data-subject]'); if(!b) return;
-  recentSubject=b.dataset.subject;
-  $('recentFilter').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
-  renderRecent();
+/* Choose your rabbit hole: one tab per subject, its tracks below */
+const trackCard=t=>`<article class="track"><small>${esc(t.label)}</small><h3>${esc(t.title)}</h3><p>${esc(t.blurb)}</p>
+  <div class="track__foot"><p class="track__fig"><b>${t.n}</b><span>${esc(t.unit)}</span></p><a class="btn btn--primary" href="${esc(t.href)}">${esc(t.cta)}</a></div></article>`;
+$('subjects').innerHTML=`<div class="tabs" role="tablist" aria-label="Subjects">${SUBJECTS.map((s,i)=>
+  `<button class="tab" type="button" role="tab" id="tab${i}" aria-controls="pane${i}" aria-selected="${i===0}" tabindex="${i===0?0:-1}"${s.path?'':' disabled'}><b>${esc(s.name)}</b><small>${s.path&&s.pages?`${s.pages} explainers, `:''}${esc(s.note)}</small></button>`).join('')}</div>
+  <div class="panes">${SUBJECTS.map((s,i)=>`<div class="pane" role="tabpanel" id="pane${i}" aria-labelledby="tab${i}"${i===0?'':' hidden'}>${s.tracks.map(trackCard).join('')}</div>`).join('')}</div>`;
+const tabs=[...document.querySelectorAll('.tab')];
+function pick(t,focus){tabs.forEach(x=>{const on=x===t;x.setAttribute('aria-selected',String(on));x.tabIndex=on?0:-1;$(x.getAttribute('aria-controls')).hidden=!on;}); if(focus) t.focus();}
+tabs.forEach(t=>t.addEventListener('click',()=>pick(t)));
+$('subjects').querySelector('.tabs').addEventListener('keydown',e=>{
+  const live=tabs.filter(t=>!t.disabled), i=live.indexOf(document.activeElement); if(i<0) return;
+  const d={ArrowRight:1,ArrowLeft:-1}[e.key]; if(!d) return;
+  e.preventDefault(); pick(live[(i+d+live.length)%live.length],true);
 });
-$('recentMore').addEventListener('click',()=>{recentOpen=!recentOpen;renderRecent();});
-renderRecent();
+
+/* Fresh from the lab: three cards with a small diagram, then the rest as rows */
+const fig=f=>`<span class="mini" aria-hidden="true">${f.map((b,i)=>{const[t,c]=b.split('|');return (i?'<i></i>':'')+`<b${c?` class="${c}"`:''}>${esc(t)}</b>`;}).join('')}</span>`;
+const cards=RECENT.filter(r=>r.fig).slice(0,3);
+$('fresh').innerHTML=cards.map(r=>`<a class="card${r.dark?' card--dark':''}" href="${esc(r.href)}"><span class="card__fig">${fig(r.fig)}</span><span class="card__s">${esc(r.subject)}, ${esc(r.note)}</span><span class="card__t">${esc(r.title)}</span></a>`).join('');
+$('recent').innerHTML=RECENT.filter(r=>!cards.includes(r)).map(r=>`<li><a href="${esc(r.href)}"><span class="t">${esc(r.title)}</span><span class="n">${esc(r.note||'')}</span></a></li>`).join('');
+$('recentCount').textContent=`${RECENT.length} latest explainers`;
+
+/* The lab: one request through client, cache and database */
+(function(){
+  const S={
+    miss:[
+      {on:['client'],w:[],at:'client',pill:'GET user:1042',slot:'empty for user:1042',h:'A request leaves the client.',p:'The app asks for user 1042. The cache is always asked first.'},
+      {on:['cache'],w:[0],at:'cache',pill:'GET user:1042',slot:'looking up user:1042',h:'The cache looks up the key.',p:'A lookup in memory takes well under a millisecond.'},
+      {on:['cache'],w:[0],at:'cache',pill:'GET user:1042',slot:'user:1042 not found',miss:true,h:'The key isn’t here.',p:'Next: fetch from the database, then save a copy in the cache.'},
+      {on:['db'],w:[0,1],at:'db',pill:'SELECT user 1042',slot:'user:1042 not found',miss:true,h:'Fetch from the database.',p:'The slow path: a disk-backed query, often tens of milliseconds.'},
+      {on:['cache','client'],w:[0,1],at:'client',pill:'200 OK, 40 ms',slot:'user:1042 saved, TTL 5 min',h:'Save a copy, then answer.',p:'The next request for this key is a hit and skips the database.'}],
+    hit:[
+      {on:['client'],w:[],at:'client',pill:'GET user:1042',slot:'user:1042 cached',h:'A request leaves the client.',p:'The same request, but a copy is already in the cache.'},
+      {on:['cache'],w:[0],at:'cache',pill:'GET user:1042',slot:'user:1042 found',hit:true,h:'Hit: the key is here.',p:'The value comes straight from memory. The database is never asked.'},
+      {on:['client'],w:[0],at:'client',pill:'200 OK, 2 ms',slot:'user:1042 found',hit:true,h:'Answered from memory.',p:'Twenty times faster, and one less query on the database.'}]
+  };
+  const flow=$('flow'),pill=$('pill'),slot=$('slot'),bar=$('labBar'),stepsEl=$('labSteps'),count=$('labCount');
+  const nodes={};flow.querySelectorAll('[data-n]').forEach(n=>nodes[n.dataset.n]=n);
+  const wires=[...flow.querySelectorAll('[data-w]')];
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)');
+  let scn='miss',i=2,timer=null;
+  function place(at){const f=flow.getBoundingClientRect(),n=nodes[at].getBoundingClientRect();pill.style.setProperty('--px',(n.left-f.left+Math.max(0,(n.width-pill.offsetWidth)/2))+'px');}
+  function paint(){
+    const list=S[scn],st=list[i];
+    Object.entries(nodes).forEach(([k,n])=>{n.classList.toggle('is-on',st.on.includes(k));n.classList.toggle('is-hit',!!st.hit&&k==='cache');});
+    wires.forEach((w,j)=>w.classList.toggle('is-on',st.w.includes(j)));
+    slot.textContent=st.slot;slot.classList.toggle('is-miss',!!st.miss);
+    pill.textContent=st.pill;pill.hidden=false;place(st.at);
+    $('nowH').textContent=st.h;$('nowP').textContent=st.p;
+    stepsEl.innerHTML=list.map((_,j)=>`<li class="${j<i?'is-done':j===i?'is-now':''}"></li>`).join('');
+    count.textContent=`${i+1} / ${list.length}`;
+    bar.querySelector('[data-l=next]').textContent=i===list.length-1?'Start again':'Next step';
+  }
+  function stop(){clearInterval(timer);timer=null;bar.querySelector('[data-l=play]').textContent='Play';}
+  function next(){i=(i+1)%S[scn].length;paint();}
+  bar.addEventListener('click',e=>{const b=e.target.closest('[data-l]');if(!b)return;
+    if(b.dataset.l==='next'){stop();next();}
+    if(b.dataset.l==='reset'){stop();i=0;paint();}
+    if(b.dataset.l==='play'){if(timer){stop();return;} if(i===S[scn].length-1)i=-1; next(); b.textContent='Pause';
+      timer=setInterval(()=>{if(i===S[scn].length-1){stop();return;}next();},reduce.matches?2600:1800);}
+  });
+  $('labScenario').addEventListener('change',e=>{scn=e.target.value;stop();i=0;paint();});
+  addEventListener('resize',()=>place(S[scn][i].at));
+  bar.hidden=false;$('labScenario').hidden=false;
+  paint();
+})();
 
 /* Find: searches assets/js/search-index.js (built by tools/build_search_index.py). */
 window.addEventListener('DOMContentLoaded',()=>{
   const INDEX=window.SEARCH_INDEX||[];
   if(!INDEX.length) return;
-  $('find').hidden=false;
-  document.querySelectorAll('[data-find-open]').forEach(a=>{a.hidden=false;});
-  const q=$('findQ'), hits=$('findHits'), hint=$('findHint');
+  const form=$('findForm'),q=$('findQ'),hits=$('findHits'),hint=$('findHint');
+  form.hidden=false;
+  q.placeholder=`Search ${INDEX.length} pages`;
   const norm=s=>s.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g,'');
   const rows=INDEX.map(p=>({...p,hay:norm(`${p.t} ${p.s} ${p.k} ${p.d} ${p.w||''}`),title:norm(p.t)}));
-  const idle=`${INDEX.length} pages, searched as you type.`;
-  hint.textContent=idle;
   function run(){
     const words=norm(q.value).split(/\s+/).filter(Boolean);
-    if(!words.length){hits.innerHTML='';hint.textContent=idle;return;}
+    if(!words.length){hits.innerHTML='';hits.hidden=true;hint.textContent='';return;}
     const found=rows.filter(r=>words.every(w=>r.hay.includes(w)))
       .map(r=>({r,score:words.reduce((n,w)=>n+(r.title.includes(w)?2:0)+(r.title.startsWith(w)?1:0),0)}))
       .sort((a,b)=>b.score-a.score).slice(0,8);
-    hits.innerHTML=found.map(({r})=>`<li><a href="${esc(r.h)}"><span class="t">${esc(r.t)}</span><span class="s">${esc(r.s)}${r.k?`, ${esc(r.k)}`:''}</span></a></li>`).join('');
-    hint.textContent=found.length?`${found.length===8?'Top 8':found.length} match${found.length===1?'':'es'}`:'No page matches that yet.';
+    hits.innerHTML=found.length
+      ?found.map(({r})=>`<li><a href="${esc(r.h)}"><span class="t">${esc(r.t)}</span><span class="s">${esc(r.s)}${r.k?`, ${esc(r.k)}`:''}</span></a></li>`).join('')
+      :'<li class="find__empty">No page matches that yet.</li>';
+    hits.hidden=false;
+    hint.textContent=found.length?`${found.length} match${found.length===1?'':'es'}`:'No page matches that yet.';
   }
   q.addEventListener('input',run);
-  $('findForm').addEventListener('submit',e=>{e.preventDefault();const first=hits.querySelector('a');if(first) first.click();});
-  function openFind(e){ if(e) e.preventDefault(); $('find').scrollIntoView({block:'start'}); q.focus({preventScroll:true}); }
-  document.querySelectorAll('[data-find-open]').forEach(a=>a.addEventListener('click',openFind));
+  form.addEventListener('submit',e=>{e.preventDefault();const first=hits.querySelector('a');if(first) first.click();});
+  q.addEventListener('keydown',e=>{if(e.key==='Escape'){q.value='';run();}});
+  document.addEventListener('click',e=>{if(!form.contains(e.target)) hits.hidden=true;});
+  q.addEventListener('focus',()=>{if(q.value) run();});
   document.addEventListener('keydown',e=>{
     if(e.key!=='/'||e.metaKey||e.ctrlKey||e.altKey) return;
     const t=e.target; if(t.closest&&t.closest('input, textarea, select, [contenteditable="true"]')) return;
-    openFind(e);
+    e.preventDefault(); q.focus();
   });
 });
 </script>
