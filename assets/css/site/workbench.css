@@ -3,8 +3,8 @@
  * axes: light/grotesk-sans/cool · posture: full-palette · modes: light+dark · v2.0.0 */
 /* Hallmark · pre-emit critique: P4 H4 E4 S5 R4 V4 · weakest: P, a hub argues little; the lab makes the argument, a system you step through instead of a wall of text */
 /* Hallmark · source: the owner's Figma mockup (IMG_0702, IMG_0703) · dropped its tracked-caps labels and glued arrows (54, 67, 63) */
-@import url("./tokens.css?v=20261118");
-@import url("./base.css?v=20261118");
+@import url("./tokens.css?v=20261119");
+@import url("./base.css?v=20261119");
 
 body { font-size: var(--text-md); }
 
@@ -29,7 +29,7 @@ body { font-size: var(--text-md); }
 .shell { display: grid; grid-template-columns: 256px minmax(0, 1fr); min-height: 100dvh; }
 .side { position: fixed; inset: 0 auto 0 0; width: 256px; z-index: var(--z-sticky-nav); display: flex; flex-direction: column; gap: var(--space-xl); padding: var(--space-lg); background: var(--color-field); color: var(--color-field-ink); --color-focus: var(--color-field-ink); overflow-y: auto; }
 .wordmark { display: inline-grid; grid-template-columns: auto auto; column-gap: var(--space-sm); justify-self: start; align-self: start; font: var(--display-weight) var(--text-md)/0.92 var(--font-display); letter-spacing: -0.01em; color: inherit; text-decoration: none; }
-.wordmark::before { content: ""; grid-row: span 2; width: 1.85em; aspect-ratio: 1; background: var(--color-mark); }
+.wordmark::before { content: ""; grid-row: span 2; width: 1.85em; aspect-ratio: 1; background: var(--color-mark) url("../../img/logo.svg") center / 100% no-repeat; }
 .wordmark span + span { font-weight: 400; }
 .wordmark:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 4px; }
 .side nav { display: grid; gap: var(--space-lg); }
@@ -274,3 +274,36 @@ body { font-size: var(--text-md); }
   .use li { min-height: 0; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; }
 }
 .top__in > .crumbs { margin-right: auto; }
+
+/* the site's name is the page head; the promise sits under it */
+.head h1 { font-size: clamp(3rem, 5.2vw + 1rem, 6.5rem); line-height: 0.9; letter-spacing: -0.045em; }
+.head h1 span { display: block; }
+.head h1 span + span { font-weight: 400; }
+.head .head__line { margin-top: var(--space-md); font: var(--display-weight) var(--text-xl)/1.15 var(--font-display); letter-spacing: -0.015em; color: var(--color-ink); }
+.head .head__line + p { margin-top: var(--space-xs); }
+/* the mark stands beside the name, as tall as its two lines */
+.head__name { display: flex; align-items: center; gap: clamp(1rem, 1.6vw, 1.75rem); }
+.head__mark { flex: none; width: clamp(5.25rem, 9.4vw + 1.75rem, 11.7rem); height: auto; aspect-ratio: 1; }
+
+/* ---------- buttons: offset style (same as the explainers) ---------- */
+:root { --btn-line: var(--color-ink); --btn-shadow: var(--color-ink); }
+:root[data-theme="dark"] { --btn-line: var(--color-ink); --btn-shadow: var(--color-mark); }
+.lab__panel, .close { --btn-line: var(--color-ink); }
+.lab__panel { --btn-shadow: var(--color-mark); }
+.btn {
+  min-height: 44px; padding: 0 var(--space-lg);
+  box-shadow: inset 0 0 0 2px var(--btn-line), 3px 3px 0 var(--btn-shadow);
+  transition: transform var(--dur-micro) var(--ease-out), box-shadow var(--dur-micro) var(--ease-out), background-color var(--dur-short) var(--ease-out);
+}
+:root[data-theme="dark"] .btn:not(.btn--primary):not(.btn--ink) { background: var(--color-paper-2); color: var(--color-ink); }
+:root[data-theme="dark"] .btn:not(.btn--primary):not(.btn--ink) { --btn-line: var(--color-ink-2); }
+.btn:hover { transform: translate(-1px, -1px); box-shadow: inset 0 0 0 2px var(--btn-line), 4px 4px 0 var(--btn-shadow); }
+.btn:active { transform: translate(3px, 3px); box-shadow: inset 0 0 0 2px var(--btn-line), 0 0 0 var(--btn-shadow); }
+.btn--primary, .btn--primary:hover, .btn--ink, .btn--ink:hover { box-shadow: inset 0 0 0 2px var(--btn-line), 3px 3px 0 var(--btn-shadow); }
+.btn--primary:hover, .btn--ink:hover { box-shadow: inset 0 0 0 2px var(--btn-line), 4px 4px 0 var(--btn-shadow); }
+.btn--primary:active, .btn--ink:active { box-shadow: inset 0 0 0 2px var(--btn-line); }
+:root[data-theme="dark"] .btn--ink { --btn-line: var(--color-ink); background: var(--color-mark); color: var(--color-mark-ink); }
+.close .btn--ink { --btn-shadow: var(--color-paper); background: var(--color-ink); color: var(--color-paper); }
+.btn:disabled { transform: none; box-shadow: inset 0 0 0 2px var(--btn-line); }
+.lab__bar { gap: var(--space-md); }
+@media (prefers-reduced-motion: reduce) { .btn { transition: none; } .btn:hover { transform: none; } }

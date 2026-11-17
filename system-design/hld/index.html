@@ -3,12 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
 <title>System Design: HLD</title>
 <meta name="description" content="High-level design (HLD): interactive, animated explainers for the 147-session (H1–H147) system design roadmap.">
-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261118">
-<link rel="stylesheet" href="../../assets/css/base.css?v=20261118">
-<link rel="stylesheet" href="../../assets/css/hub.css?v=20261118">
-<script src="../../assets/js/theme.js?v=20261118"></script>
+<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+<link rel="stylesheet" href="../../assets/css/hub.css?v=20261119">
+<script src="../../assets/js/theme.js?v=20261119"></script>
 </head>
 <body class="wb">
 <!-- shell:start -->
@@ -340,9 +341,9 @@ $('bar').style.width=Math.max(pct,live.length?2:0)+'%';
 $('jump').innerHTML=ROADMAP.map((p,i)=>`<a href="#p${i+1}">${p.phase.replace('Phase ','P')} · ${esc(p.name)}</a>`).join('');
 
 let filter='all', query='';
-/* weeks shown open by default: the one with the next session and the one before it; the rest fold away */
+/* weeks shown open by default: every week with a ready explainer, plus the week with the next session; weeks not started fold away */
 const wkOf=d=>ROADMAP.flatMap(p=>p.weeks).find(w=>w.days.some(x=>x.d===d));
-const OPEN=new Set([next&&wkOf(next.d)?.w, next&&wkOf(next.d)?.w-1].filter(Boolean));
+const OPEN=new Set([...ROADMAP.flatMap(p=>p.weeks).filter(w=>w.days.some(d=>d.file)).map(w=>w.w), next&&wkOf(next.d)?.w].filter(Boolean));
 function card(d){
   const cls=['day-card'];if(d.review)cls.push('review');
   if(d.file){

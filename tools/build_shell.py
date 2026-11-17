@@ -12,6 +12,7 @@ Sources (edit these, then re-run this script):
   angular/index.html               PARTS, topics with  file:"..."
 
 Run from the repo root:  python3 tools/build_shell.py
+Also adds the tab icon (assets/img/logo.svg) to any page missing one.
 The sidebar sits between <!-- shell:start --> and <!-- shell:end --> right after <body>.
 """
 import html
@@ -147,6 +148,10 @@ def main():
                 src = open(path, encoding='utf-8').read()
                 src = re.sub(r'\n?%s.*?%s' % (re.escape(START), re.escape(END)), '', src, flags=re.S)
                 block = '%s\n%s\n%s' % (START, sidebar(page, subject, data[subject], counts), END)
+                # the tab icon: the logo, on every page
+                if 'rel="icon"' not in src:
+                    icon = '<link rel="icon" href="%s?v=1" type="image/svg+xml">' % rel('assets/img/logo.svg', page)
+                    src = re.sub(r'(<meta name="viewport"[^>]*>)', lambda mm: mm.group(1) + '\n' + icon, src, count=1)
                 m = re.search(r'<body([^>]*)>', src)
                 attrs = m.group(1)
                 if 'class="' in attrs:

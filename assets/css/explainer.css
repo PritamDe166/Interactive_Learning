@@ -1037,7 +1037,7 @@ summary .mono { white-space: pre-wrap; display: block; font-family: var(--mono);
 .story-cap .txt code, .story-cap .tip code { background: color-mix(in oklab, var(--color-field-ink) 12%, transparent); color: var(--color-field-ink); }
 .story-cap .tip { border-left: 2px solid var(--color-mark); color: color-mix(in oklab, var(--color-field-ink) 82%, transparent); }
 .story-cap .tip b { color: var(--color-mark); }
-.story-cap .btn { background: var(--color-paper); color: var(--color-ink); box-shadow: none; }
+.story-cap .btn { background: var(--color-paper); color: var(--color-ink); }
 .story-cap .btn:hover { background: var(--color-paper-3); }
 .story-cap .btn.primary { background: var(--color-accent); color: var(--color-accent-ink); }
 .story-cap .btn.primary:hover { background: var(--color-accent-hover); }
@@ -1103,3 +1103,36 @@ ul.cheat li, .cheat li { background: none; border-top: 1px solid var(--line); pa
 :root[data-theme="dark"] .story-cap { box-shadow: inset 0 0 0 1px var(--line); }
 @media (max-width: 760px) { .story > .at-stage, .story > .scroll, .story > :not(.story-cap) { padding: var(--space-sm); } }
 .story > * { min-width: 0; }
+
+/* =========================================================================
+   Buttons: offset style (design.md). A 2px outline and a hard 3px shadow;
+   hover lifts a pixel, press sinks into the shadow; a pressed toggle stays sunk.
+   ========================================================================= */
+:root { --btn-line: var(--color-ink); --btn-shadow: var(--color-ink); }
+:root[data-theme="dark"] { --btn-line: var(--fg); --btn-shadow: var(--color-mark); }
+.story-cap, .wb-side { --btn-line: var(--color-field); --btn-shadow: var(--color-mark); }
+.btn, .chip-btn, .ac-btn {
+  border: 0; border-radius: 0;
+  background: var(--bg); color: var(--fg);
+  box-shadow: inset 0 0 0 2px var(--btn-line), 3px 3px 0 var(--btn-shadow);
+  font-weight: 500;
+  transition: transform var(--dur-micro) var(--ease-out), box-shadow var(--dur-micro) var(--ease-out), background-color var(--dur-short) var(--ease-out);
+}
+.chip-btn, .ac-btn { min-height: 36px; }
+.btn:hover, .chip-btn:hover, .ac-btn:hover:not(:disabled) { background: var(--bg); transform: translate(-1px, -1px); box-shadow: inset 0 0 0 2px var(--btn-line), 4px 4px 0 var(--btn-shadow); }
+.btn:active, .chip-btn:active, .ac-btn:active:not(:disabled) { transform: translate(3px, 3px); box-shadow: inset 0 0 0 2px var(--btn-line), 0 0 0 var(--btn-shadow); }
+.btn.primary { background: var(--color-accent); color: var(--color-accent-ink); box-shadow: inset 0 0 0 2px var(--btn-line), 3px 3px 0 var(--btn-shadow); }
+.btn.primary:hover { background: var(--color-accent-hover); color: var(--color-accent-ink); box-shadow: inset 0 0 0 2px var(--btn-line), 4px 4px 0 var(--btn-shadow); }
+.btn[aria-pressed="true"], .btn.on, .chip-btn[aria-pressed="true"], .ac-btn[aria-pressed="true"] {
+  background: var(--color-mark); color: var(--color-mark-ink);
+  transform: translate(3px, 3px); box-shadow: inset 0 0 0 2px var(--btn-line);
+}
+.btn.right, .predict .opts .chip-btn.right { background: color-mix(in oklab, var(--good-text) 14%, var(--bg)); color: var(--good-text); box-shadow: inset 0 0 0 2px var(--good-text), 3px 3px 0 var(--good-text); }
+.btn.wrong, .predict .opts .chip-btn.wrong { background: color-mix(in oklab, var(--bad-text) 14%, var(--bg)); color: var(--bad-text); box-shadow: inset 0 0 0 2px var(--bad-text), 3px 3px 0 var(--bad-text); }
+.btn:disabled, .btn[aria-disabled="true"], .chip-btn:disabled, .ac-btn:disabled { opacity: 0.5; transform: none; box-shadow: inset 0 0 0 2px var(--btn-line); cursor: not-allowed; }
+.story-cap .btn { background: var(--color-field-ink); color: var(--color-field); }
+.story-cap .btn:hover { background: var(--color-field-ink); }
+.story-cap .btn.primary { background: var(--color-accent); color: var(--color-accent-ink); }
+.story-nav, .controls, .cev-keys, .cev-predict, .chips { gap: var(--space-sm); }
+.at-play { background: var(--fg); color: var(--bg); box-shadow: 2px 2px 0 var(--color-mark); }
+@media (prefers-reduced-motion: reduce) { .btn, .chip-btn, .ac-btn { transition: none; } .btn:hover, .chip-btn:hover, .ac-btn:hover { transform: none; } }

@@ -47,6 +47,12 @@ Every page is a workbench: a dark sidebar (field) on the left, the page on paper
 - Explainers (`explainer.css`, "Workbench layer" at the end): sections on paper, numbered with a blue display numeral; tabs underline in blue; the walkthrough is a diagram well with the narration on a dark panel; previous / next are two wells.
 - Diagrams: square nodes with a hairline. Blue fill = happening now (`.on`), lime = the answer or a hit (`.solid`, `.hit`, `.ok`), red only for errors, faded = out of play (`.dim`). Wires are grey, blue while a request travels them. Request pills are ink with paper text.
 
+## Buttons
+Offset style everywhere: square, a 2px outline and a hard 3px shadow (ink on paper; lime on dark panels and in dark mode). Hover lifts a pixel, press sinks into the shadow, a pressed toggle stays sunk and turns lime. Primary is blue; one primary per group. Styles: end of `explainer.css` and `site/workbench.css`.
+
+## Logo
+`assets/img/logo.svg`: a lime square with an ink S drawn as a request route, from an outlined start node to a filled end node. It is the tab icon on every page (added by `tools/build_shell.py`), the square in the sidebar wordmark, and stands beside the name on the home page. Ink on lime only; never recoloured.
+
 ## Adding or changing pages
 - After adding, renaming or reordering any page: update its roadmap list (above), then run `python3 tools/build_shell.py` and `python3 tools/build_search_index.py`. Both are safe to run again.
 - A new explainer copied from `_template/explainer.html` gets its sidebar from `build_shell.py`.

@@ -45,7 +45,7 @@ img { max-width: 100%; }
   font: var(--display-weight) 0.9375rem/0.92 var(--font-display); letter-spacing: -0.01em;
   color: var(--fg); text-decoration: none; flex: none;
 }
-.topbar .wordmark::before { content: ""; grid-row: span 2; aspect-ratio: 1; background: var(--color-mark); }
+.topbar .wordmark::before { content: ""; grid-row: span 2; aspect-ratio: 1; background: var(--color-mark) url("../img/logo.svg") center / 100% no-repeat; }
 .topbar .wordmark span + span { font-weight: 400; }
 .back {
   font-family: var(--display);
@@ -143,7 +143,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   font: var(--display-weight) var(--text-md)/0.92 var(--font-display); letter-spacing: -0.01em;
   color: inherit; text-decoration: none;
 }
-.wb-mark::before { content: ""; grid-row: span 2; width: 1.85em; aspect-ratio: 1; background: var(--color-mark); }
+.wb-mark::before { content: ""; grid-row: span 2; width: 1.85em; aspect-ratio: 1; background: var(--color-mark) url("../img/logo.svg") center / 100% no-repeat; }
 .wb-mark span + span { font-weight: 400; }
 .wb-side details { background: none; border: 0; border-radius: 0; padding: 0; margin: 0; }
 .wb-side summary { list-style: none; cursor: pointer; }
