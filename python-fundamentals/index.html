@@ -1,34 +1,33 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Python Fundamentals Explainers</title>
 <meta name="description" content="Interactive, step-through explainers for Python fundamentals: see names, objects, frames and output change line by line.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/hub.css">
 <script src="../assets/js/theme.js"></script>
 <style>
   .y-py { color: var(--blue); }
-  .dom { display: inline-block; font-family: var(--mono); font-size: 10.5px; letter-spacing: .03em; padding: 2px 7px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+  .dom { display: inline-block; font-family: var(--mono); font-size: 12px; letter-spacing: .03em; padding: var(--space-3xs) var(--space-xs); border-radius: 0; border: 1px solid var(--line); color: var(--muted); }
   .dom.gap { border-color: var(--accent-text); color: var(--accent-text); }
-  .day-card .doms { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+  .day-card .doms { display: flex; flex-wrap: wrap; gap: var(--space-2xs); margin-top: var(--space-3xs); }
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="topbar">
-    <a class="back" href="../index.html">← All subjects</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="../index.html">All subjects</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header class="hero">
     <div>
-      <div class="eyebrow">Python 3 · step through real code · traces from Python 3.13 · edit-and-run on 3.14 in your browser</div>
-      <h1>Python <span class="y-py">Fundamentals</span></h1>
+      <p class="crumbs">Python 3 / step through real code / traces from Python 3.13 / edit-and-run on 3.14 in your browser</p>
+      <h1>Python Fundamentals</h1>
       <p class="lede">Watch Python run your code one line at a time: names, objects, frames and output, drawn the way the interpreter sees them. Built from my Python_Fundamentals practice repo, with bugs and gaps fixed along the way.</p>
       <svg class="flow" viewBox="0 0 560 90" aria-hidden="true">
         <path class="w" d="M90 30 C150 30 170 45 230 45"/><path class="w" d="M90 62 C150 62 170 45 230 45"/>
@@ -41,7 +40,7 @@
     <div class="stats">
       <div class="stat"><b id="sLive">0</b><span>Explainers</span></div>
       <div class="stat"><b id="sTopics">0</b><span>Topics</span></div>
-      <div class="stat"><b id="sNext">–</b><span>Next up</span></div>
+      <div class="stat"><b id="sNext">…</b><span>Next up</span></div>
       <div class="meter">
         <div class="row"><span>Topics covered</span><span id="sPct">0%</span></div>
         <div class="track"><i id="bar" style="width:0"></i></div>
@@ -61,11 +60,11 @@
 
   <section class="howto" aria-label="How to use">
     <div class="box"><h4>Study loop</h4><p>Step through the walkthrough, then answer the "predict the output" cards before revealing. Say why, not just what.</p></div>
-    <div class="box"><h4>Regenerating traces</h4><p>Snippets live in <code>snippets/&lt;page&gt;.json</code>. Run <code>python3 tools/pytrace.py python-fundamentals/snippets/&lt;page&gt;.json</code> from the repo root to rebuild <code>traces/&lt;page&gt;.js</code>. Topics 2–20 are generated from <code>tools/pypages/specs/&lt;page&gt;.py</code> by <code>tools/pypages/build.py</code>, which also checks every puzzle and quiz answer against a real run.</p></div>
+    <div class="box"><h4>Regenerating traces</h4><p>Snippets live in <code>snippets/&lt;page&gt;.json</code>. Run <code>python3 tools/pytrace.py python-fundamentals/snippets/&lt;page&gt;.json</code> from the repo root to rebuild <code>traces/&lt;page&gt;.js</code>. Topics 2 to 20 are generated from <code>tools/pypages/specs/&lt;page&gt;.py</code> by <code>tools/pypages/build.py</code>, which also checks every puzzle and quiz answer against a real run.</p></div>
     <div class="box"><h4>Source</h4><p>Practice code: <a href="https://github.com/PritamDe166/Python_Fundamentals">PritamDe166/Python_Fundamentals</a>. Tags show which files each topic draws on; "gap" topics weren't in the repo; Part 5 adds topics beyond it.</p></div>
   </section>
 
-  <footer>Parts 1–4 follow the Python_Fundamentals repo; Part 5 adds topics beyond the repo. Greyed topics are coming soon.</footer>
+  <footer>Parts 1 to 4 follow the Python_Fundamentals repo; Part 5 adds topics beyond the repo. Greyed topics are coming soon.</footer>
 </div>
 
 <script>

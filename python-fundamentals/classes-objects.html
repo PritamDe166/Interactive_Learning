@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Classes &amp; objects</title>
 <meta name="description" content="Python fundamentals: classes as blueprints, __init__ and self, instance vs class attributes, methods, inheritance with super(), and how attribute lookup works.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
@@ -15,10 +13,10 @@
 <script src="traces/classes-objects.js"></script>
 <style>
   .static-code { margin: 0; }
-  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
-  .mo-row { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; margin-top: 12px; }
-  .mo-box { flex: 1 1 150px; border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--panel-2); transition: all .3s; }
-  .mo-h { font-size: 13px; color: var(--fg-soft); margin-bottom: 4px; }
+  .puzzle-area { display: grid; gap: var(--space-sm); margin-top: var(--space-sm); }
+  .mo-row { display: flex; flex-wrap: wrap; align-items: stretch; gap: var(--space-xs); margin-top: var(--space-sm); }
+  .mo-box { flex: 1 1 150px; border: 2px solid var(--line); border-radius: 0; padding: var(--space-xs) var(--space-sm); background: var(--panel-2); transition: opacity .3s, transform .3s, background-color .3s, color .3s, border-color .3s, fill .3s, stroke .3s; }
+  .mo-h { font-size: 13px; color: var(--fg-soft); margin-bottom: var(--space-2xs); }
   .mo-h .mono { color: var(--accent-text); font-weight: 700; }
   .mo-a { font-size: 13px; color: var(--muted); }
   .mo-arr { align-self: center; color: var(--muted); font-size: 20px; }
@@ -30,12 +28,13 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← Python Fundamentals</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">Python Fundamentals</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Python · Topic 12 · Real programs</div>
+    <p class="crumbs">Python / Topic 12 / Real programs</p>
     <h1>Classes &amp; objects</h1>
     <ul class="lede"><li>A <b>class</b> is a blueprint; calling it (<span class="mono">Patient("Asha", 35)</span>) creates an <b>instance</b>, a new object with its own attributes.</li><li><span class="mono">__init__</span> runs right after the object is created to fill in its attributes. <span class="mono">self</span> is that new object.</li><li><b>Methods</b> are functions defined in the class. <span class="mono">asha.book("9:00")</span> is really <span class="mono">Patient.book(asha, "9:00")</span>.</li><li>A <b>subclass</b> inherits everything from its parent, can <b>override</b> methods, and calls the parent's version with <span class="mono">super()</span>.</li><li>Looking up <span class="mono">obj.x</span> checks the <b>instance</b>, then its <b>class</b>, then the <b>parent classes</b>.</li></ul>
   </header>
@@ -53,13 +52,13 @@
 
   <section aria-labelledby="runH">
     <h2 class="stage-title" id="runH">Edit and run</h2>
-    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div class="stage-kind">Change the code, Run ▶ for the output, Step through to watch it run</div>
     <div id="runner"></div>
   </section>
 
   <section aria-labelledby="predH">
     <h2 class="stage-title" id="predH">Predict the output</h2>
-    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="stage-kind">Pick a puzzle, choose your answer, then step through it</div>
     <div class="chips" id="pzChips"></div>
     <div class="puzzle-area" id="pzArea"></div>
   </section>
@@ -69,13 +68,13 @@
     <div class="stage-kind">Look up an attribute on ravi · Python walks instance → class → parents</div>
     <div class="chips" id="moBtns"><button class="chip-btn mono" type="button" data-a="name">ravi.name</button><button class="chip-btn mono" type="button" data-a="tier">ravi.tier</button><button class="chip-btn mono" type="button" data-a="book">ravi.book</button><button class="chip-btn mono" type="button" data-a="clinic">ravi.clinic</button><button class="chip-btn mono" type="button" data-a="__eq__">ravi.__eq__</button><button class="chip-btn mono" type="button" data-a="phone">ravi.phone</button></div>
     <div class="mo-row" id="moRow">
-      <div class="mo-box" data-k="inst"><div class="mo-h">instance <span class="mono">ravi</span></div><div class="mono mo-a">name · age · visits · tier</div></div>
+      <div class="mo-box" data-k="inst"><div class="mo-h">instance <span class="mono">ravi</span></div><div class="mono mo-a">name, age, visits, tier</div></div>
       <div class="mo-arr">→</div>
       <div class="mo-box" data-k="vip"><div class="mo-h">class <span class="mono">VIPPatient</span></div><div class="mono mo-a">__init__ · book</div></div>
       <div class="mo-arr">→</div>
-      <div class="mo-box" data-k="pat"><div class="mo-h">class <span class="mono">Patient</span></div><div class="mono mo-a">clinic · __init__ · book</div></div>
+      <div class="mo-box" data-k="pat"><div class="mo-h">class <span class="mono">Patient</span></div><div class="mono mo-a">clinic, __init__, book</div></div>
       <div class="mo-arr">→</div>
-      <div class="mo-box" data-k="obj"><div class="mo-h">class <span class="mono">object</span></div><div class="mono mo-a">__eq__ · __repr__ · __str__ · …</div></div>
+      <div class="mo-box" data-k="obj"><div class="mo-h">class <span class="mono">object</span></div><div class="mono mo-a">__eq__, __repr__, __str__, …</div></div>
     </div>
     <p class="status-line" id="moStatus">Pick an attribute. <span class="mono">VIPPatient.__mro__</span> is exactly this order.</p>
   </section>
@@ -122,17 +121,17 @@
     <h2 id="quizH">Check yourself</h2>
     <p class="sub">Say the answer out loud before you open each card.</p>
     <div class="quiz">
-      <details><summary><span class="mono">class A:\n    x = 1\na = A(); A.x = 2\nprint(a.x)</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">class A:<br>    x = 1<br>a = A(); A.x = 2<br>print(a.x)</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">2</b>. a has no own x, so it reads the class attribute's current value.</p></div></details>
-      <details><summary><span class="mono">class A: pass\nclass B(A): pass\nprint(isinstance(B(), A), issubclass(A, B))</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">class A: pass<br>class B(A): pass<br>print(isinstance(B(), A), issubclass(A, B))</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">True False</b>. Inheritance goes one way.</p></div></details>
-      <details><summary><span class="mono">class P:\n    def hi(self): return "P"\nclass C(P):\n    def hi(self): return "C" + super().hi()\nprint(C().hi())</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">class P:<br>    def hi(self): return "P"<br>class C(P):<br>    def hi(self): return "C" + super().hi()<br>print(C().hi())</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">CP</b>. The override runs, then super() runs the parent's.</p></div></details>
-      <details><summary><span class="mono">class A:\n    def __init__(self, v): self.v = v\nprint(A(3).v + A(4).v)</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">class A:<br>    def __init__(self, v): self.v = v<br>print(A(3).v + A(4).v)</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">7</b>. Two independent instances, each with its own v.</p></div></details>
-      <details><summary><span class="mono">class A: pass\nprint([c.__name__ for c in A.__mro__])</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">class A: pass<br>print([c.__name__ for c in A.__mro__])</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">['A', 'object']</b>. Every class ultimately inherits from object.</p></div></details>
-      <details><summary><span class="mono">class A:\n    def f(self): return self\na = A(); print(a.f() is a)</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">class A:<br>    def f(self): return self<br>a = A(); print(a.f() is a)</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">True</b>. self is the very object the method was called on.</p></div></details>
     </div>
   </section>

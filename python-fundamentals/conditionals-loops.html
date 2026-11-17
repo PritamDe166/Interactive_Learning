@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Conditionals &amp; loops</title>
 <meta name="description" content="Python fundamentals: if/elif/else, for loops over sequences and range(), while loops, break, continue and the loop else clause, stepped line by line.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
@@ -15,15 +13,15 @@
 <script src="traces/conditionals-loops.js"></script>
 <style>
   .static-code { margin: 0; }
-  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
+  .puzzle-area { display: grid; gap: var(--space-sm); margin-top: var(--space-sm); }
   .rg-axis { stroke: var(--muted); stroke-width: 1.5; }
   .rg-num { font-family: var(--mono); font-size: 12px; fill: var(--muted); }
   .rg-dot { fill: var(--cyan); animation: pop .3s ease-out both; transform-box: fill-box; transform-origin: center; }
   .rg-stop { stroke: var(--red); stroke-width: 2; stroke-dasharray: 4 4; }
   .rg-stopl { font-size: 11px; fill: var(--bad-text); font-family: var(--mono); }
   @keyframes pop { from { transform: scale(0); } to { transform: none; } }
-  .lc-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 8px; margin-top: 12px; }
-  .lc-p { border: 1.5px solid var(--line); border-radius: 10px; padding: 8px 10px; background: var(--panel-2); display: grid; gap: 2px; transition: all .25s; }
+  .lc-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .lc-p { border: 1.5px solid var(--line); border-radius: 0; padding: var(--space-xs) var(--space-xs); background: var(--panel-2); display: grid; gap: var(--space-3xs); transition: opacity .25s, transform .25s, background-color .25s, color .25s, border-color .25s, fill .25s, stroke .25s; }
   .lc-p span { font-size: 12px; color: var(--muted); font-family: var(--mono); }
   .lc-p i { font-style: normal; font-size: 12px; min-height: 16px; color: var(--fg-soft); }
   .lc-p.urgent span { color: var(--bad-text); }
@@ -34,7 +32,7 @@
   .lc-p.skip i, .lc-p.stop i { color: var(--bad-text); }
   .lc-p.stop { border-color: var(--red); }
   .lc-p.never { opacity: .35; }
-  .lc-else { margin-top: 10px; font-family: var(--mono); font-size: 14px; padding: 8px 12px; border-radius: 10px; border: 1.5px dashed var(--line); color: var(--muted); }
+  .lc-else { margin-top: var(--space-xs); font-family: var(--mono); font-size: 14px; padding: var(--space-xs) var(--space-sm); border-radius: 0; border: 1.5px dashed var(--line); color: var(--muted); }
   .lc-else.on { border-style: solid; border-color: var(--teal); color: var(--good-text); }
   .lc-else.off { text-decoration: line-through; }
 </style>
@@ -42,12 +40,13 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← Python Fundamentals</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">Python Fundamentals</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Python · Topic 4 · Control flow and data</div>
+    <p class="crumbs">Python / Topic 4 / Control flow and data</p>
     <h1>Conditionals &amp; loops</h1>
     <ul class="lede"><li><b>if / elif / else</b> checks conditions top to bottom and runs <b>only the first</b> branch that is true.</li><li>A <b>for</b> loop takes items one at a time from any sequence (list, string, <span class="mono">range()</span>); a <b>while</b> loop repeats as long as a condition stays true.</li><li><b>continue</b> skips to the next item; <b>break</b> leaves the loop completely.</li><li>Indentation is the syntax: the indented lines under a colon <b>are</b> the block.</li></ul>
   </header>
@@ -65,13 +64,13 @@
 
   <section aria-labelledby="runH">
     <h2 class="stage-title" id="runH">Edit and run</h2>
-    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div class="stage-kind">Change the code, Run ▶ for the output, Step through to watch it run</div>
     <div id="runner"></div>
   </section>
 
   <section aria-labelledby="predH">
     <h2 class="stage-title" id="predH">Predict the output</h2>
-    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="stage-kind">Pick a puzzle, choose your answer, then step through it</div>
     <div class="chips" id="pzChips"></div>
     <div class="puzzle-area" id="pzArea"></div>
   </section>
@@ -114,7 +113,7 @@
   <section aria-labelledby="refH">
     <h2 id="refH">Reference: truthiness and match</h2>
     <div class="two">
-      <div class="card"><div class="label">Falsy values (everything else is truthy)</div><p class="mono" style="margin:6px 0 0">False · None · 0 · 0.0 · "" · [] · () · {} · set() · range(0)</p><p class="muted" style="margin:8px 0 0">So <span class="mono">if items:</span> means "if the list isn't empty".</p></div>
+      <div class="card"><div class="label">Falsy values (everything else is truthy)</div><p class="mono" style="margin:6px 0 0">False, None, 0, 0.0, "", [], (), {}, set(), range(0)</p><p class="muted" style="margin:8px 0 0">So <span class="mono">if items:</span> means "if the list isn't empty".</p></div>
       <div class="card"><div class="label">match / case (Python 3.10+)</div><pre class="codeblock" style="min-height:0;margin:6px 0 0"><span class="ln"><span class="k">match</span> status:</span><span class="ln">    <span class="k">case</span> <span class="s">"urgent"</span>: ...</span><span class="ln">    <span class="k">case</span> <span class="s">"ok"</span> | <span class="s">"done"</span>: ...</span><span class="ln">    <span class="k">case</span> _: ...</span></pre><p class="muted" style="margin:8px 0 0">Like a switch, but it can also match shapes (tuples, dicts, classes). No fall-through.</p></div>
     </div>
     <div class="notes" style="margin-top:14px">
@@ -133,9 +132,9 @@
         <div class="ans"><p><b class="mono">[5, 3, 1]</b>. Counts down by 2 and stops before 0.</p></div></details>
       <details><summary><span class="mono">for c in "hi": print(c * 2, end="")</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">hhii</b>. A string is iterated character by character.</p></div></details>
-      <details><summary><span class="mono">x = 0\nwhile x &lt; 10: x += 3\nprint(x)</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">x = 0<br>while x &lt; 10: x += 3<br>print(x)</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">12</b>. 0 → 3 → 6 → 9 → 12; then 12 &lt; 10 is false.</p></div></details>
-      <details><summary><span class="mono">for i in range(3):\n    if i == 1: break\nelse: print("done")\nprint(i)</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">for i in range(3):<br>    if i == 1: break<br>else: print("done")<br>print(i)</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">1</b> only. break skipped the else, and i keeps its last value.</p></div></details>
       <details><summary><span class="mono">print("yes" if [] else "no")</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">no</b>. An empty list is falsy. This one-line form is the conditional expression.</p></div></details>

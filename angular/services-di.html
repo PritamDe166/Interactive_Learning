@@ -1,24 +1,22 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Services & dependency injection</title>
 <meta name="description" content="Angular 22 services and dependency injection on CareDesk: a PatientStore shared by the header and the list with @Service and inject(). Watch lookups walk the injector tree, and see a component-level provider split the state.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
 <script src="../assets/js/theme.js"></script>
 <script src="../assets/js/explainer-kit.js"></script>
 <style>
-  .ng-left { display: grid; gap: 12px; min-width: 0; align-content: start; }
+  .ng-left { display: grid; gap: var(--space-sm); min-width: 0; align-content: start; }
   .inj .tl { stroke: var(--line); stroke-width: 2; }
   .inj .ibox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
   .inj .ibox.root rect { stroke: var(--teal); stroke-dasharray: 0; }
   .inj .ibox .t { fill: var(--fg); font-weight: 700; font-size: 13.5px; }
-  .inj .ibox .s { fill: var(--muted); font-family: var(--mono) !important; font-size: 10.5px; }
+  .inj .ibox .s { fill: var(--muted); font-family: var(--mono) !important; font-size: 12px; }
   .inj .ibox.look rect { stroke: var(--orange); stroke-width: 3; }
   .inj .ibox.found rect { stroke: var(--teal); stroke-width: 3.5; fill: var(--teal-wash); }
   .inj .ibox.miss rect { stroke: var(--red); stroke-width: 3; }
@@ -27,18 +25,19 @@
   .inj .inst.two rect { fill: var(--violet); }
   .inj .reads { font-family: var(--mono) !important; font-size: 11px; fill: var(--cyan); }
   .inj .reads.bad { fill: var(--bad-text); }
-  .lab-ctl { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin-top: 10px; }
+  .lab-ctl { display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--space-md); align-items: center; margin-top: var(--space-xs); }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← Angular roadmap</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">Angular roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Angular 22 · Part 3 · Control flow &amp; structure</div>
+    <p class="crumbs">Angular 22 / Part 3 / Control flow &amp; structure</p>
     <h1>Services &amp; dependency injection</h1>
     <ul class="lede">
       <li>A <b>service</b> is a class for state or logic that several components share, such as CareDesk's <span class="mono">PatientStore</span>.</li>
@@ -51,7 +50,7 @@
 
   <section aria-labelledby="storyH">
     <h2 class="stage-title" id="storyH">Walkthrough: one store, two readers</h2>
-    <div class="stage-kind">Orange = where Angular looks · green = where it finds a provider · yellow tag = the instance · results from the real CareDesk run</div>
+    <div class="stage-kind">Orange = where Angular looks, green = where it finds a provider, yellow tag = the instance, results from the real CareDesk run</div>
     <div class="story" id="diStory">
       <div class="ng-left">
         <div class="scroll"><svg class="diagram inj" id="diSvg" style="min-width:0" viewBox="0 0 640 430" role="img" aria-label="Injector tree: root injector above App, which has Header and PatientList; PatientList has PatientCard"></svg></div>

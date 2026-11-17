@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Caching Failure Modes</title>
 <meta name="description" content="H20: cache stampede, avalanche, penetration, hot keys and stale data, animated with their fixes; plus a simulator that charts database load when a hot key or many keys expire.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -15,27 +13,28 @@
 <script src="../sd-series.js"></script>
 <script src="caching-flows.js"></script>
 <style>
-  .cfm-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin-top: 12px; }
-  .cfm-chart { position: relative; height: 220px; display: flex; align-items: flex-end; gap: 3px; margin-top: 16px; padding: 0 4px; border-bottom: 1px solid var(--line); }
-  .cfm-chart .b { flex: 1; min-width: 0; background: var(--teal); border-radius: 3px 3px 0 0; transition: height .35s; }
+  .cfm-row { display: flex; flex-wrap: wrap; gap: var(--space-xs); justify-content: center; align-items: center; margin-top: var(--space-sm); }
+  .cfm-chart { position: relative; height: 220px; display: flex; align-items: flex-end; gap: var(--space-3xs); margin-top: var(--space-md); padding: 0 var(--space-2xs); border-bottom: 1px solid var(--line); }
+  .cfm-chart .b { flex: 1; min-width: 0; background: var(--teal); border-radius: 0; transition: none; }
   .cfm-chart .b.over { background: var(--red); }
   .cfm-cap { position: absolute; left: 0; right: 0; border-top: 2px dashed var(--orange); pointer-events: none; }
   .cfm-cap span { position: absolute; right: 4px; top: -18px; font-family: var(--mono); font-size: 11px; color: var(--orange); }
-  .cfm-axis { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--muted); padding: 4px 4px 0; }
-  .cfm-fix { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 10px; }
-  .cfm-fix label { display: inline-flex; gap: 6px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 13.5px; cursor: pointer; }
+  .cfm-axis { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 11px; color: var(--muted); padding: var(--space-2xs) var(--space-2xs) 0; }
+  .cfm-fix { display: flex; flex-wrap: wrap; gap: var(--space-xs); justify-content: center; margin-top: var(--space-xs); }
+  .cfm-fix label { display: inline-flex; gap: var(--space-2xs); align-items: center; background: var(--panel); border-radius: 0; padding: var(--space-2xs) var(--space-sm); font-size: 13.5px; cursor: pointer; }
   .cfm-fix input { accent-color: var(--teal); }
 </style>
 </head>
 <body data-anim="continuous">
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← HLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">HLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Week 3 · H20 · Caching &amp; CDN</div>
+    <p class="crumbs">Week 3 / H20 / Caching &amp; CDN</p>
     <h1>Caching Failure Modes</h1>
     <ul class="lede">
       <li>A cache hides load from the database, until the moment it <b>stops hiding it</b>.</li>
@@ -63,7 +62,7 @@
 
   <section id="try" data-nav="Try it">
     <h2 class="sec-h"><span class="sec-n">3</span>Try it: Stampede &amp; avalanche simulator</h2>
-    <p class="sec-sub">Chart database queries per second when keys expire. Turn fixes on and off and watch the peak move against the database's capacity. <span class="mono">(A reload takes 2 s · DB capacity 500 queries/s · numbers are illustrative)</span></p>
+    <p class="sec-sub">Chart database queries per second when keys expire. Turn fixes on and off and watch the peak move against the database's capacity. <span class="mono">(A reload takes 2 s, DB capacity 500 queries/s, numbers are illustrative)</span></p>
     <ol class="howto"><li><span>Pick a scenario</span></li><li><span>Drag the sliders</span></li><li><span>Tick fixes on and off and watch the red bars</span></li></ol>
     <div class="cfm-row"><div class="seg" id="scSeg" role="group" aria-label="Scenario"><button type="button" data-v="stampede" aria-pressed="true">One hot key expires</button><button type="button" data-v="avalanche" aria-pressed="false">1,000 keys, same TTL</button></div></div>
     <div class="ranges">
@@ -78,9 +77,9 @@
     <div class="cfm-chart" id="chart"><div class="cfm-cap" id="cap"><span>DB capacity 500/s</span></div></div>
     <div class="cfm-axis"><span>t = 0 s</span><span>key(s) expire at t = 10 s</span><span>t = 30 s</span></div>
     <div class="kpis">
-      <div class="kpi bad"><b id="kPeak">–</b><span>Peak DB queries/s</span></div>
-      <div class="kpi accent"><b id="kTot">–</b><span>Extra DB queries</span></div>
-      <div class="kpi"><b id="kWait">–</b><span>Requests that waited</span></div>
+      <div class="kpi bad"><b id="kPeak">…</b><span>Peak DB queries/s</span></div>
+      <div class="kpi accent"><b id="kTot">…</b><span>Extra DB queries</span></div>
+      <div class="kpi"><b id="kWait">…</b><span>Requests that waited</span></div>
     </div>
     <p class="hint" id="labHint">Start with no fixes, then add single-flight, then stale-while-revalidate. For the avalanche, try jitter.</p>
   </section>

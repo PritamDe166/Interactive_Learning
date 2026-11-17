@@ -1,99 +1,86 @@
+/* Hallmark · shape: kept (explainer screens and roadmaps) · genre: editorial · theme: Grid (deal 1/3), owner's Figma palette · redesign: full · scope: app
+ * hero: kept · nav: kept (top bar with wordmark) · footer: kept · imagery: the explainers' own diagrams · signature: diagrams in lime, blue and sky on square wells
+ * axes: light/grotesk-sans/cool · posture: full-palette · modes: light+dark · v2.0.0 */
 /* =========================================================================
-   theme.css — the ONLY place colours and fonts are defined.
-   Dark is the default. assets/js/theme.js switches <html data-theme="light">.
-   Rule: components use these tokens, never raw hex values.
+   theme.css — the ONLY place colours and fonts are defined for explainers.
+   The system lives in site/tokens.css (see design.md); this file keeps the
+   older token names every explainer and diagram already uses, and points
+   them at that system. Light is the default; theme.js switches
+   <html data-theme="dark">.
+   Rule: components use these tokens, never raw colour values.
    ========================================================================= */
-@import url("https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
+@import url("site/tokens.css");
 
-:root,
-:root[data-theme="dark"] {
+@font-face { font-family: "JetBrains Mono"; font-weight: 400; font-style: normal; font-display: swap; src: url("../fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "JetBrains Mono"; font-weight: 500; font-style: normal; font-display: swap; src: url("../fonts/jetbrains-mono-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "JetBrains Mono"; font-weight: 600; font-style: normal; font-display: swap; src: url("../fonts/jetbrains-mono-latin-600-normal.woff2") format("woff2"); }
+
+:root {
   /* surfaces */
-  --bg: #242424;
-  --panel: #2c2c2b;
-  --panel-2: #323230;
-  --line: #3b3b39;
-  --track: #3a3a37;
+  --bg: var(--color-paper);
+  --panel: var(--color-paper-2);
+  --panel-2: var(--color-paper-3);
+  --line: var(--color-rule);
+  --track: var(--color-paper-3);
 
   /* text */
-  --fg: #f1f0ea;
-  --fg-soft: #d6d5ce;
-  --muted: #a6a59d;
-  --faint: #6f6e68;
+  --fg: var(--color-ink);
+  --fg-soft: var(--color-ink-2);
+  --muted: var(--color-muted);
+  --faint: oklch(50% 0.012 265);
 
-  /* brand fills (shapes: servers, balancer, request pills) */
-  --yellow: #f5cd2a;
-  --teal: #12a98d;
-  --pill: #33d4f2;
-  --ink: #1d1d1b;          /* text on yellow / cyan fills */
-  --on-accent: #ffffff;    /* text on teal fills */
+  /* diagram fills (servers, balancers, request pills); --ink is the text on them in both modes */
+  --yellow: var(--color-mark);              /* servers, caches, chosen items: acid lime */
+  --teal: oklch(53% 0.215 264);             /* balancers, active and "hit" fills: electric blue */
+  --pill: oklch(84% 0.085 240);             /* requests in flight: sky */
+  --ink: oklch(18% 0.009 265);
+  --on-accent: oklch(98.6% 0.005 265);      /* text on --teal fills */
 
-  /* accent text (headings, links, highlights) */
-  --accent-text: #f5cd2a;
-  --teal-text: #12a98d;
-  --cyan: #33d4f2;
-  --red: #ff5d70;
-  --good-text: #7fe3c9;
-  --bad-text: #ff9aa7;
+  /* accent text (links, highlights) */
+  --accent-text: oklch(44% 0.11 118);       /* the lime family, dark enough to read on white */
+  --teal-text: oklch(45% 0.2 264);
+  --cyan: oklch(48% 0.21 264);              /* links, live wires, highlights in code */
+  --red: oklch(51% 0.2 27);
+  --good-text: oklch(44% 0.12 158);
+  --bad-text: oklch(47% 0.19 27);
 
-  /* subject accents (hub) */
-  --orange: #ff9f3f;
-  --blue: #5aa2ff;
-  --violet: #b78cff;
+  /* subject accents (diagram series colours) */
+  --orange: oklch(50% 0.14 50);
+  --blue: var(--color-accent);
+  --violet: oklch(47% 0.2 295);
 
   /* details */
-  --teal-wash: #1f3a34;
-  --code-bg: #1d1d1b;
-  --code-fg: #f5cd2a;
-  --chip-bg: #1d1d1b;
-  --dot-empty: rgba(29, 29, 27, .16);
-  --dot-hot: #c8283d;
-  --glow-static: rgba(255, 255, 255, .55);
-  --glow-dynamic: rgba(255, 93, 112, .85);
+  --teal-wash: oklch(94% 0.035 264);
+  --code-bg: var(--color-paper);
+  --code-fg: var(--color-ink);
+  --chip-bg: var(--color-paper);
+  --dot-empty: oklch(18% 0.009 265 / 0.16);
+  --dot-hot: oklch(56% 0.2 27);
+  --glow-static: oklch(18% 0.009 265 / 0.22);
+  --glow-dynamic: oklch(56% 0.2 27 / 0.45);
 
-  /* type */
-  --display: "Barlow", "Segoe UI", system-ui, sans-serif;
+  /* type: --display is the running face (body and diagram labels); heads take --font-display */
+  --display: var(--font-body);
   --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
-
-  color-scheme: dark;
 }
 
-:root[data-theme="light"] {
-  --bg: #f3f3ef;
-  --panel: #ffffff;
-  --panel-2: #ebebe5;
-  --line: #d9d8d0;
-  --track: #e2e1da;
-
-  --fg: #1d1d1b;
-  --fg-soft: #3b3b37;
-  --muted: #5f5e58;
-  --faint: #8b8a83;
-
-  --yellow: #f5cd2a;
-  --teal: #12a98d;
-  --pill: #33d4f2;
-  --ink: #1d1d1b;
-  --on-accent: #ffffff;
-
-  --accent-text: #8f6a00;
-  --teal-text: #0b7c67;
-  --cyan: #0a7f9e;
-  --red: #d42f47;
-  --good-text: #0b7c67;
-  --bad-text: #c22a40;
-
-  --orange: #c86a00;
-  --blue: #2f6fd6;
-  --violet: #7a4fd6;
-
-  --teal-wash: #d7efe8;
-  --code-bg: #ebeae3;
-  --code-fg: #8a5f00;
-  --chip-bg: #ffffff;
-  --dot-empty: rgba(29, 29, 27, .16);
-  --dot-hot: #c8283d;
-  --glow-static: rgba(0, 0, 0, .22);
-  --glow-dynamic: rgba(212, 47, 71, .45);
-
-  color-scheme: light;
+:root[data-theme="dark"] {
+  --faint: oklch(66% 0.012 265);
+  --yellow: oklch(88% 0.17 115);
+  --teal: oklch(50% 0.17 264);
+  --pill: oklch(80% 0.09 240);
+  --accent-text: oklch(88% 0.17 115);
+  --teal-text: oklch(74% 0.13 264);
+  --red: oklch(66% 0.19 27);
+  --good-text: oklch(78% 0.12 158);
+  --bad-text: oklch(76% 0.13 27);
+  --orange: oklch(74% 0.14 60);
+  --violet: oklch(72% 0.14 295);
+  --teal-wash: oklch(27% 0.05 264);
+  --chip-bg: var(--color-paper-2);
+  --cyan: oklch(74% 0.14 264);
+  --code-bg: oklch(13.5% 0.007 265);
+  --dot-hot: oklch(66% 0.19 27);
+  --glow-static: oklch(95% 0.005 265 / 0.45);
+  --glow-dynamic: oklch(66% 0.19 27 / 0.7);
 }

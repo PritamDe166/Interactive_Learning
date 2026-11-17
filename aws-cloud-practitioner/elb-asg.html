@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Elastic Load Balancing &amp; Auto Scaling</title>
 <meta name="description" content="AWS Cloud Practitioner: run a day of traffic through an Auto Scaling group behind a load balancer, pick ALB, NLB or GWLB, and separate scalability, elasticity, agility and high availability.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
@@ -26,7 +24,7 @@
   .ln-d { fill: none; stroke: var(--accent-text); stroke-width: 2.5; }
   .ln-c { fill: none; stroke: var(--teal); stroke-width: 2.5; }
   .now { stroke: var(--muted); stroke-dasharray: 3 4; }
-  .legend { font-family: var(--mono); font-size: 11px; }
+  .legend { font-family: var(--display); font-size: 11px; }
   .legend .d { fill: var(--accent-text); }
   .legend .c { fill: var(--teal); }
   .zone.down { stroke: var(--red); }
@@ -40,12 +38,13 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">AWS CLF-C02 · Section 7 · Domains 1 &amp; 3 (Tasks 1.1, 3.2, 3.3)</div>
+    <p class="crumbs">AWS CLF-C02 / Section 7 / Domains 1 &amp; 3 (Tasks 1.1, 3.2, 3.3)</p>
     <h1>Elastic Load Balancing &amp; Auto Scaling</h1>
     <ul class="lede">
       <li><b>Load balancer (ELB)</b>: one entry point that spreads traffic and skips unhealthy targets.</li>
@@ -86,7 +85,7 @@
       <div class="seg" id="polSeg" role="group" aria-label="Scaling policy">
         <button type="button" data-v="fixed" aria-pressed="false">Fixed size</button>
         <button type="button" data-v="target" aria-pressed="true">Target tracking (CPU 50%)</button>
-        <button type="button" data-v="sched" aria-pressed="false">Scheduled (08–22 h)</button>
+        <button type="button" data-v="sched" aria-pressed="false">Scheduled (08 to 22 h)</button>
         <button type="button" data-v="pred" aria-pressed="false">Predictive</button>
       </div>
     </div>

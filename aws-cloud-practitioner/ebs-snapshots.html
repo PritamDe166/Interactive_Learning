@@ -1,38 +1,37 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>EBS snapshots</title>
 <meta name="description" content="AWS Cloud Practitioner: EBS snapshots are incremental point-in-time backups used to restore volumes in another AZ, copy across Regions, archive cheaply and recover from the Recycle Bin.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
 <script src="../assets/js/theme.js"></script>
 <script src="../assets/js/explainer-kit.js"></script>
 <style>
-  .blk { display: grid; grid-template-columns: repeat(8, 30px); gap: 6px; margin: 6px 0 14px; }
-  .blk span { width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel-2); display: grid; place-items: center; font: 600 11px var(--mono); color: var(--muted); }
+  .blk { display: grid; grid-template-columns: repeat(8, 30px); gap: var(--space-2xs); margin: var(--space-2xs) 0 var(--space-sm); }
+  .blk span { width: 30px; height: 30px; border-radius: 0; background: var(--panel-2); display: grid; place-items: center; font: 600 11px var(--mono); color: var(--muted); }
   .blk span.w { background: var(--teal-wash); color: var(--fg); border-color: var(--teal); }
   .blk span.ch { background: var(--orange); color: var(--on-accent); border-color: var(--orange); }
-  .lab-ctl { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
-  .vt .btn { padding: 4px 10px; font-size: 13px; margin: 2px 4px 2px 0; }
+  .lab-ctl { display: flex; flex-wrap: wrap; gap: var(--space-xs); align-items: center; margin-bottom: var(--space-sm); }
+  .vt .btn { padding: var(--space-2xs) var(--space-xs); font-size: 13px; margin: var(--space-3xs) var(--space-2xs) var(--space-3xs) 0; }
   .tier { font-family: var(--mono); font-size: 12px; }
   .lbl { font-size: 13px; color: var(--muted); }
-  .sw { display: inline-flex; gap: 8px; align-items: center; font-size: 14px; }
+  .sw { display: inline-flex; gap: var(--space-xs); align-items: center; font-size: 14px; }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">AWS CLF-C02 · EC2 instance storage · 2</div>
+    <p class="crumbs">AWS CLF-C02 / EC2 instance storage / 2</p>
     <h1>EBS snapshots</h1>
     <ul class="lede">
       <li>A <b>snapshot</b> is a point-in-time <b>backup of one EBS volume</b>, stored by AWS (in S3, behind the scenes).</li>
@@ -90,7 +89,7 @@
         <label class="sw"><input type="checkbox" id="rb"> Recycle Bin rule (7 days)</label>
         <button class="btn" id="rs" type="button">Reset</button>
       </div>
-      <div class="scroll table-card">
+      <div class="scroll">
         <table class="vt"><thead><tr><th>Snapshot</th><th>Blocks stored</th><th>Tier</th><th>Actions</th></tr></thead><tbody id="snaps"></tbody></table>
       </div>
       <p class="nf-cap" id="labCap">Press <b>Write data</b>, then <b>Take snapshot</b>.</p>
@@ -123,7 +122,7 @@
       <li><span class="if">Back up an EBS volume</span><span class="arrow">→</span><span class="then">EBS snapshot</span></li>
       <li><span class="if">Same data in another AZ</span><span class="arrow">→</span><span class="then">Create volume from snapshot in that AZ</span></li>
       <li><span class="if">Disaster recovery in another Region</span><span class="arrow">→</span><span class="then">Copy snapshot to that Region</span></li>
-      <li><span class="if">Keep for years, rarely restore, cheapest</span><span class="arrow">→</span><span class="then">EBS Snapshot Archive (24–72 h restore)</span></li>
+      <li><span class="if">Keep for years, rarely restore, cheapest</span><span class="arrow">→</span><span class="then">EBS Snapshot Archive (24 to 72 h restore)</span></li>
       <li><span class="if">Protect against accidental deletion</span><span class="arrow">→</span><span class="then">Recycle Bin retention rule</span></li>
       <li><span class="if">Automate snapshot schedules</span><span class="arrow">→</span><span class="then">Data Lifecycle Manager / AWS Backup</span></li>
     </ul>
@@ -136,15 +135,15 @@
         <thead><tr><th>Feature</th><th>What it does</th><th>Trade-off</th></tr></thead>
         <tbody>
           <tr><td>Standard tier</td><td>Incremental snapshots, restore any time</td><td>Normal price</td></tr>
-          <tr><td>Archive tier</td><td>Full copy of the snapshot, up to 75% cheaper</td><td>24–72 h to restore; billed for at least 90 days</td></tr>
-          <tr><td>Recycle Bin</td><td>Keeps deleted snapshots/AMIs (1–365 days) and volumes (1–7 days)</td><td>Only with a rule created before the delete</td></tr>
+          <tr><td>Archive tier</td><td>Full copy of the snapshot, up to 75% cheaper</td><td>24 to 72 h to restore; billed for at least 90 days</td></tr>
+          <tr><td>Recycle Bin</td><td>Keeps deleted snapshots/AMIs (1 to 365 days) and volumes (1 to 7 days)</td><td>Only with a rule created before the delete</td></tr>
           <tr><td>Copy snapshot</td><td>Duplicate into another Region (or account)</td><td>Storage billed in both Regions</td></tr>
         </tbody>
       </table>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><p><b>Recycle Bin now also protects EBS volumes</b> (retention 1–7 days), not only snapshots and AMIs (AWS Recycle Bin documentation).</p></div>
-      <div class="note"><p>Archive converts the snapshot into a <b>full</b> copy (not incremental), and is billed for a minimum of <b>90 days</b>. Retention ranges and the 7–30 day unlock delay for locked rules come from the AWS docs.</p></div>
+      <div class="note"><p><b>Recycle Bin now also protects EBS volumes</b> (retention 1 to 7 days), not only snapshots and AMIs (AWS Recycle Bin documentation).</p></div>
+      <div class="note"><p>Archive converts the snapshot into a <b>full</b> copy (not incremental), and is billed for a minimum of <b>90 days</b>. Retention ranges and the 7 to 30 day open delay for locked rules come from the AWS docs.</p></div>
     </div>
   </section>
 
@@ -153,7 +152,7 @@
     <div class="quiz">
       <details><summary>Is a snapshot tied to an AZ?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> It is stored at the Region level, which is why it can be restored into any AZ of that Region.</p></div></details>
       <details><summary>Why is the second snapshot much smaller than the first?<span class="go">Show answer</span></summary><div class="ans"><p>Snapshots are <b>incremental</b>: only blocks changed since the last snapshot are stored.</p></div></details>
-      <details><summary>A restore is needed within an hour. Is the Archive tier OK?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> Archived snapshots take 24–72 hours to restore.</p></div></details>
+      <details><summary>A restore is needed within an hour. Is the Archive tier OK?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> Archived snapshots take 24 to 72 hours to restore.</p></div></details>
       <details><summary>You deleted a snapshot and no rule existed. Can the Recycle Bin help?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> The rule must exist before the deletion.</p></div></details>
       <details><summary>How do you get an EBS volume's data into another Region?<span class="go">Show answer</span></summary><div class="ans"><p>Snapshot it, <b>copy the snapshot</b> to that Region, create a volume there.</p></div></details>
       <details><summary>Does a restored volume stay in sync with the original?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> It is an independent copy from that moment. For a shared live file system, use EFS.</p></div></details>

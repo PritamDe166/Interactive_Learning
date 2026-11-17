@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CDN &amp; HTTP Caching</title>
 <meta name="description" content="H21: pull vs push CDNs, Cache-Control, ETag and 304, versioned file names and purges, animated; plus a header lab that shows which cache answers your next request.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -15,23 +13,24 @@
 <script src="../sd-series.js"></script>
 <script src="caching-flows.js"></script>
 <style>
-  .cdn-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin-top: 12px; }
-  .cdn-hdr { font-family: var(--mono); font-size: 13px; text-align: center; margin-top: 10px; color: var(--accent-text); overflow-wrap: anywhere; }
-  .cdn-presets { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 8px; margin-top: 12px; }
-  .cdn-presets button { font: 12.5px var(--mono); text-align: left; color: var(--fg-soft); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; cursor: pointer; overflow-wrap: anywhere; }
+  .cdn-row { display: flex; flex-wrap: wrap; gap: var(--space-xs); justify-content: center; align-items: center; margin-top: var(--space-sm); }
+  .cdn-hdr { font-family: var(--mono); font-size: 13px; text-align: center; margin-top: var(--space-xs); color: var(--accent-text); overflow-wrap: anywhere; }
+  .cdn-presets { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .cdn-presets button { font: 12.5px var(--mono); text-align: left; color: var(--fg-soft); background: var(--panel); border-radius: 0; padding: var(--space-xs) var(--space-sm); cursor: pointer; overflow-wrap: anywhere; }
   .cdn-presets button[aria-pressed="true"] { border-color: var(--accent-text); color: var(--fg); }
-  .cdn-result { margin-top: 12px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); font-size: 14.5px; min-height: 2.6em; }
+  .cdn-result { margin-top: var(--space-sm); padding: var(--space-xs) var(--space-sm); border-radius: 0; border: 1px solid var(--line); font-size: 14.5px; min-height: 2.6em; }
 </style>
 </head>
 <body data-anim="continuous">
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← HLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">HLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Week 3 · H21 · Caching &amp; CDN</div>
+    <p class="crumbs">Week 3 / H21 / Caching &amp; CDN</p>
     <h1>CDN &amp; HTTP Caching</h1>
     <ul class="lede">
       <li>A <b>CDN</b> keeps copies of your responses on edge servers close to users.</li>
@@ -60,14 +59,14 @@
   <section id="try" data-nav="Try it">
     <h2 class="sec-h"><span class="sec-n">3</span>Try it: Header lab</h2>
     <p class="sec-sub">Pick a response header, load the file once, then predict where the next request is answered: your browser, the CDN edge, or the origin. <span class="mono">(Second request comes 2 minutes after the first)</span></p>
-    <ol class="howto"><li><span>Pick a response header</span></li><li><span>Press <b>1 · First load</b></span></li><li><span>Predict, then press <b>2a</b> or <b>2b</b></span></li></ol>
+    <ol class="howto"><li><span>Pick a response header</span></li><li><span>Press <b>1. First load</b></span></li><li><span>Predict, then press <b>2a</b> or <b>2b</b></span></li></ol>
     <div class="cdn-presets" id="presets"></div>
     <div class="cdn-hdr" id="hdr"></div>
     <div id="labStage"></div>
     <div class="controls">
-      <button class="btn primary" type="button" id="first">1 · First load (you)</button>
-      <button class="btn" type="button" id="again">2a · You reload after 2 min</button>
-      <button class="btn" type="button" id="other">2b · Colleague nearby after 2 min</button>
+      <button class="btn primary" type="button" id="first">1. First load (you)</button>
+      <button class="btn" type="button" id="again">2a. You reload after 2 min</button>
+      <button class="btn" type="button" id="other">2b. Colleague nearby after 2 min</button>
       <button class="btn" type="button" id="labReset">Reset</button>
     </div>
     <div class="cdn-result" id="result" aria-live="polite">Choose a header, then press "First load".</div>

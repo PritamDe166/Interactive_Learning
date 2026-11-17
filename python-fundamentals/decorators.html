@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Decorators</title>
 <meta name="description" content="Python fundamentals: functions as objects, wrapper functions, the @ syntax, functools.wraps, decorators with arguments, and stacking decorators.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
@@ -15,26 +13,27 @@
 <script src="traces/decorators.js"></script>
 <style>
   .static-code { margin: 0; }
-  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
-  .on-wrap { margin-top: 12px; }
-  .on-l { border: 2px solid var(--line); border-radius: 14px; padding: 10px 12px 12px; margin-top: 8px; transition: all .3s; }
+  .puzzle-area { display: grid; gap: var(--space-sm); margin-top: var(--space-sm); }
+  .on-wrap { margin-top: var(--space-sm); }
+  .on-l { border: 2px solid var(--line); border-radius: 0; padding: var(--space-xs) var(--space-sm) var(--space-sm); margin-top: var(--space-xs); transition: opacity .3s, transform .3s, background-color .3s, color .3s, border-color .3s, fill .3s, stroke .3s; }
   .on-h { font-family: var(--mono); font-size: 13px; color: var(--fg-soft); }
   .on-l.in { border-color: var(--cyan); box-shadow: 0 0 0 3px var(--teal-wash); }
   .on-l.out { border-color: var(--teal); box-shadow: none; }
   .on-l.stop { border-color: var(--red); }
   .on-fn { min-height: 44px; }
-  .fl-out { margin: 4px 0 0; min-height: 60px; white-space: pre-wrap; font-size: 14px; }
+  .fl-out { margin: var(--space-2xs) 0 0; min-height: 60px; white-space: pre-wrap; font-size: 14px; }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← Python Fundamentals</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">Python Fundamentals</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Python · Topic 16 · Going further</div>
+    <p class="crumbs">Python / Topic 16 / Going further</p>
     <h1>Decorators</h1>
     <ul class="lede"><li>A <b>decorator</b> is a function that takes a function and returns a <b>replacement</b>, usually a wrapper that adds behaviour before and after the original.</li><li><span class="mono">@log_calls</span> above <span class="mono">def f</span> is shorthand for <span class="mono">f = log_calls(f)</span>, run <b>once</b>, when the def runs.</li><li>The wrapper uses <span class="mono">*args, **kwargs</span> to accept any arguments and a <b>closure</b> to remember the original function.</li><li>Always add <span class="mono">@functools.wraps(func)</span> so the wrapper keeps the original's name and docstring. Used everywhere: logging, timing, caching, permissions, web routes.</li></ul>
   </header>
@@ -52,13 +51,13 @@
 
   <section aria-labelledby="runH">
     <h2 class="stage-title" id="runH">Edit and run</h2>
-    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div class="stage-kind">Change the code, Run ▶ for the output, Step through to watch it run</div>
     <div id="runner"></div>
   </section>
 
   <section aria-labelledby="predH">
     <h2 class="stage-title" id="predH">Predict the output</h2>
-    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="stage-kind">Pick a puzzle, choose your answer, then step through it</div>
     <div class="chips" id="pzChips"></div>
     <div class="puzzle-area" id="pzArea"></div>
   </section>
@@ -72,7 +71,7 @@
       <div class="on-l on-role" id="onRole"><div class="on-h">@require_role("admin") → wrapper</div>
         <div class="on-l on-fn" id="onFn"><div class="on-h">delete_patient (original)</div></div>
       </div></div></div>
-    <div class="two" style="margin-top:12px"><div class="card"><div class="label">Output</div><pre class="mono fl-out" id="onOut"></pre></div><div class="card"><div class="label">Caller gets</div><div class="mono" id="onRes" style="font-size:15px;overflow-wrap:anywhere">—</div></div></div>
+    <div class="two" style="margin-top:12px"><div class="card"><div class="label">Output</div><pre class="mono fl-out" id="onOut"></pre></div><div class="card"><div class="label">Caller gets</div><div class="mono" id="onRes" style="font-size:15px;overflow-wrap:anywhere">…</div></div></div>
     <p class="status-line" id="onStatus">Pick a caller.</p>
   </section>
 
@@ -115,11 +114,11 @@
     <h2 id="quizH">Check yourself</h2>
     <p class="sub">Say the answer out loud before you open each card.</p>
     <div class="quiz">
-      <details><summary><span class="mono">def d(f): return lambda: f() * 2\n@d\ndef five(): return 5\nprint(five())</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">def d(f): return lambda: f() * 2<br>@d<br>def five(): return 5<br>print(five())</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">10</b>. Any callable can be the replacement, even a lambda.</p></div></details>
       <details><summary><span class="mono">@d</span> above <span class="mono">def g</span> is the same as…?<span class="go">Show answer</span></summary>
         <div class="ans"><p><span class="mono">def g(...): ...</span> followed by <b class="mono">g = d(g)</b>.</p></div></details>
-      <details><summary><span class="mono">def count(f):\n    def w(*a):\n        w.calls += 1\n        return f(*a)\n    w.calls = 0\n    return w\n@count\ndef hi(): pass\nhi(); hi()\nprint(hi.calls)</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">def count(f):<br>    def w(*a):<br>        w.calls += 1<br>        return f(*a)<br>    w.calls = 0<br>    return w<br>@count<br>def hi(): pass<br>hi(); hi()<br>print(hi.calls)</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">2</b>. Functions are objects and can carry attributes; the wrapper keeps state between calls.</p></div></details>
     </div>
   </section>

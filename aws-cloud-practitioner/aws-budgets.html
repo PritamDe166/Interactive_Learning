@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>AWS Budgets and billing alerts</title>
 <meta name="description" content="AWS Cloud Practitioner: set up billing access, read the bill by service, watch Free Tier usage and create zero-spend and monthly cost budgets that email you before a lab gets expensive.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
@@ -20,20 +18,21 @@
   .bud .thr { stroke: var(--yellow); stroke-width: 1.5; stroke-dasharray: 4 4; }
   .bud text { fill: var(--muted); font-family: var(--mono); font-size: 11px; }
   .bud .al circle { fill: var(--red); } .bud .al text { fill: var(--bad-text); }
-  .bud-row { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
-  .bud-row label { display: flex; gap: 8px; align-items: center; font-size: 14px; color: var(--muted); }
+  .bud-row { display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--space-md); align-items: center; }
+  .bud-row label { display: flex; gap: var(--space-xs); align-items: center; font-size: 14px; color: var(--muted); }
   .bud-row input[type=range] { accent-color: var(--orange); }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">AWS CLF-C02 · EC2 · Domain 4 Billing, Pricing &amp; Support</div>
+    <p class="crumbs">AWS CLF-C02 / EC2 / Domain 4 Billing, Pricing &amp; Support</p>
     <h1>AWS Budgets &amp; billing alerts</h1>
     <ul class="lede">
       <li>Before launching anything, create a <b>budget</b> so AWS <b>emails you</b> when spending crosses a threshold.</li>
@@ -70,7 +69,7 @@
 
   <section aria-labelledby="budH">
     <h2 class="stage-title" id="budH">A month with a forgotten NAT Gateway</h2>
-    <div class="stage-kind">Set your budget · play the month · see which alerts fire · amounts illustrative</div>
+    <div class="stage-kind">Set your budget, play the month, see which alerts fire, amounts illustrative</div>
     <div class="card">
       <div class="bud-row">
         <label>Monthly budget <input type="range" id="bAmt" min="5" max="60" step="5" value="10"> <b id="bAmtV">$10</b></label>

@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Interface Segregation Principle</title>
 <meta name="description" content="SOLID, I: no client should depend on methods it doesn't use. A fat repository interface is split into role interfaces; .NET's read-only collection interfaces show the same idea.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -14,11 +12,11 @@
 <script src="../../assets/js/explainer-kit.js"></script>
 <script src="../sd-series.js"></script>
 <style>
-  .least { display: grid; gap: 8px; margin-top: 10px; }
-  .least .row { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 10px; align-items: start; padding: 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+  .least { display: grid; gap: var(--space-xs); margin-top: var(--space-xs); }
+  .least .row { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: var(--space-xs); align-items: start; padding: var(--space-xs); border-radius: 0; background: var(--panel); }
   @media (max-width: 700px) { .least .row { grid-template-columns: 1fr; } }
   .least .row .codeblock { margin: 0; min-height: 0; overflow-x: auto; font-size: 12.5px; }
-  .least .opts { display: flex; flex-wrap: wrap; gap: 6px; }
+  .least .opts { display: flex; flex-wrap: wrap; gap: var(--space-2xs); }
   .least .why { grid-column: 1 / -1; font-size: 13px; color: var(--fg-soft); min-height: 0; }
   .least .row.ok { border-color: var(--teal); }
   .least .row.no { border-color: var(--red); }
@@ -27,13 +25,14 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← LLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">LLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
     <div class="solid-letters" aria-label="SOLID principles"><a href="solid.html" title="Overview">∗</a><a href="solid-srp.html" title="Single responsibility">S</a><a href="solid-ocp.html" title="Open-closed">O</a><a href="solid-lsp.html" title="Liskov substitution">L</a><b title="Interface segregation">I</b><a href="solid-dip.html" title="Dependency inversion">D</a></div>
-    <div class="eyebrow">System Design · LLD · SOLID · I</div>
+    <p class="crumbs">System Design / LLD / SOLID / I</p>
     <h1>Interface Segregation Principle</h1>
     <ul class="lede">
       <li>No client should be forced to <b>depend on methods it doesn't use</b>.</li>
@@ -71,7 +70,7 @@
     <p class="sec-sub">Compare three ways of cutting the same interface, then pick the smallest .NET type each method really needs.</p>
     <div class="sub-block" aria-labelledby="simH">
     <h3 class="stage-title sub" id="simH">1. How finely should you split?</h3>
-    <div class="stage-kind">Rows: who uses or implements · columns: methods · red = waste</div>
+    <div class="stage-kind">Rows: who uses or implements, columns: methods, red = waste</div>
     <div class="seg" id="spSeg" role="group" aria-label="Interface design"><button type="button" data-v="fat" aria-pressed="true">One fat IRepository</button><button type="button" data-v="role" aria-pressed="false">Role interfaces</button><button type="button" data-v="tiny" aria-pressed="false">One method each</button></div>
     <pre class="codeblock" id="spCode" style="min-height:0;margin-top:10px"></pre>
     <div class="scroll card table-card" style="margin-top:10px"><table class="matrix" id="spMatrix"></table></div>

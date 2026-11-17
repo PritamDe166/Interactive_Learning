@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Liskov Substitution Principle</title>
 <meta name="description" content="SOLID, L: a subtype must work anywhere its base type is expected. Parent and Child, Rectangle and Square, contract rules and a substitution tester.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -14,8 +12,8 @@
 <script src="../../assets/js/explainer-kit.js"></script>
 <script src="../sd-series.js"></script>
 <style>
-  .suite { display: grid; gap: 6px; margin-top: 10px; }
-  .suite .tc { display: grid; grid-template-columns: 26px minmax(0, 1fr) minmax(0, 1.2fr); gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); transition: border-color .2s; }
+  .suite { display: grid; gap: var(--space-2xs); margin-top: var(--space-xs); }
+  .suite .tc { display: grid; grid-template-columns: 26px minmax(0, 1fr) minmax(0, 1.2fr); gap: var(--space-xs); align-items: center; padding: var(--space-xs) var(--space-xs); border-radius: 0; background: var(--panel); transition: border-color .2s; }
   @media (max-width: 640px) { .suite .tc { grid-template-columns: 26px 1fr; } .suite .tc .res { grid-column: 2; } }
   .suite .tc .ic { font-size: 16px; text-align: center; }
   .suite .tc .res { font-size: 13px; color: var(--fg-soft); }
@@ -24,20 +22,21 @@
   .suite .tc.pass .ic { color: var(--good-text); }
   .suite .tc.fail { border-color: var(--red); }
   .suite .tc.fail .ic, .suite .tc.fail .res b { color: var(--bad-text); }
-  .rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 10px; }
-  .rules .card p { margin: 6px 0 0; font-size: 14px; color: var(--fg-soft); }
+  .rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-xs); }
+  .rules .card p { margin: var(--space-2xs) 0 0; font-size: 14px; color: var(--fg-soft); }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← LLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">LLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
     <div class="solid-letters" aria-label="SOLID principles"><a href="solid.html" title="Overview">∗</a><a href="solid-srp.html" title="Single responsibility">S</a><a href="solid-ocp.html" title="Open-closed">O</a><b title="Liskov substitution">L</b><a href="solid-isp.html" title="Interface segregation">I</a><a href="solid-dip.html" title="Dependency inversion">D</a></div>
-    <div class="eyebrow">System Design · LLD · SOLID · L</div>
+    <p class="crumbs">System Design / LLD / SOLID / L</p>
     <h1>Liskov Substitution Principle</h1>
     <ul class="lede">
       <li>Anywhere the code expects a base type, you must be able to pass <b>any subtype</b> and still get correct behaviour.</li>

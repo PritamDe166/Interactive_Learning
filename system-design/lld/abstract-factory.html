@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Abstract Factory</title>
 <meta name="description" content="Creational pattern L14: create families of related objects that must match. File storage, message queue and secrets for Azure, AWS or local development come from one factory, so you can't mix them by accident.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -14,33 +12,34 @@
 <script src="../../assets/js/explainer-kit.js"></script>
 <script src="../sd-series.js"></script>
 <style>
-  .slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 10px; margin-top: 12px; }
-  .slot { border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--panel); transition: border-color .25s, background .25s; }
-  .slot .k { font-family: var(--mono); font-size: 11.5px; color: var(--muted); letter-spacing: .04em; }
-  .slot .v { font-weight: 700; margin-top: 4px; }
-  .slot .w { font-size: 12.5px; color: var(--fg-soft); margin-top: 2px; }
-  .slot select { margin-top: 6px; width: 100%; font: 13px var(--mono); background: var(--panel-2); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 5px 6px; }
+  .slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .slot { border: 2px solid var(--line); border-radius: 0; padding: var(--space-xs) var(--space-sm); background: var(--panel); transition: border-color .25s, background .25s; }
+  .slot .k { font-family: var(--display); font-size: 13px; color: var(--muted); }
+  .slot .v { font-weight: 700; margin-top: var(--space-2xs); }
+  .slot .w { font-size: 12.5px; color: var(--fg-soft); margin-top: var(--space-3xs); }
+  .slot select { margin-top: var(--space-2xs); width: 100%; font: 13px var(--mono); background: var(--panel-2); color: var(--fg); border-radius: 0; padding: var(--space-2xs) var(--space-2xs); }
   .slot.ok { border-color: var(--teal); }
   .slot.bad { border-color: var(--red); background: color-mix(in srgb, var(--red) 10%, var(--panel)); }
   .slot.on { border-color: var(--cyan); background: var(--teal-wash); }
-  .grid-cost { display: grid; grid-template-columns: 110px repeat(4, minmax(0, 1fr)); gap: 4px; margin-top: 12px; font-size: 12.5px; }
-  .grid-cost > div { padding: 7px 6px; border-radius: 8px; background: var(--panel); border: 1px solid var(--line); text-align: center; font-family: var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .grid-cost { display: grid; grid-template-columns: 110px repeat(4, minmax(0, 1fr)); gap: var(--space-2xs); margin-top: var(--space-sm); font-size: 12.5px; }
+  .grid-cost > div { padding: var(--space-xs) var(--space-2xs); border-radius: 0; background: var(--panel); text-align: center; font-family: var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .grid-cost > .h { background: transparent; border-color: transparent; color: var(--muted); font-size: 11.5px; }
   .grid-cost > .new { border-color: var(--teal); color: var(--good-text); }
   .grid-cost > .edit { border-color: var(--red); color: var(--bad-text); }
   .grid-cost > .gone { visibility: hidden; }
-  @media (max-width: 560px) { .grid-cost { grid-template-columns: 74px repeat(4, minmax(0, 1fr)); font-size: 10.5px; } }
+  @media (max-width: 560px) { .grid-cost { grid-template-columns: 74px repeat(4, minmax(0, 1fr)); font-size: 12px; } }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← LLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">LLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">System Design · LLD · Creational · L14</div>
+    <p class="crumbs">System Design / LLD / Creational / L14</p>
     <h1>Abstract Factory</h1>
     <ul class="lede">
       <li>An interface for creating a <b>family of related objects</b> without naming their concrete classes.</li>
@@ -65,7 +64,7 @@
     </div>
     <div class="sub-block">
       <h3 class="stage-title sub">The same thing in C#</h3>
-      <div class="stage-kind">The factory interface · one family · choosing it once</div>
+      <div class="stage-kind">The factory interface, one family, choosing it once</div>
       <div class="cs-pair">
         <div><div class="label ok-text">The abstract factory and one concrete family</div><pre class="codeblock" id="csFac"></pre></div>
         <div><div class="label ok-text">Pick the family once; the rest of the app never knows</div><pre class="codeblock" id="csUse"></pre></div>

@@ -1,28 +1,27 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>EC2 user data and instance lifecycle</title>
 <meta name="description" content="AWS Cloud Practitioner: bootstrap an EC2 web server with user data (runs once, as root, at first launch) and follow it through pending, running, stop, start and terminate: public IP, EBS and billing at each state.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
 <script src="../assets/js/theme.js"></script>
 <script src="../assets/js/explainer-kit.js"></script>
-<style>.life-btns { display: flex; flex-wrap: wrap; gap: 8px; }</style>
+<style>.life-btns { display: flex; flex-wrap: wrap; gap: var(--space-xs); }</style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">AWS CLF-C02 · EC2 · Domain 3 Technology</div>
+    <p class="crumbs">AWS CLF-C02 / EC2 / Domain 3 Technology</p>
     <h1>Launching a web server with user data</h1>
     <ul class="lede">
       <li><b>User data</b> is a script you paste at launch. It runs <b>once</b>, at the <b>first boot</b>, as <b>root</b>: perfect for installing a web server.</li>

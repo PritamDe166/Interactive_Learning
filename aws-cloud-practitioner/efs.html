@@ -1,38 +1,37 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>EFS and EFS-IA</title>
 <meta name="description" content="AWS Cloud Practitioner: Amazon EFS is a managed NFS file system shared by many Linux instances across AZs, pay per use, with Infrequent Access and Archive storage classes.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
 <script src="../assets/js/theme.js"></script>
 <script src="../assets/js/explainer-kit.js"></script>
 <style>
-  .pl { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px; margin-bottom: 12px; }
-  .pl label.f { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
-  .pl select { font: inherit; color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; }
-  .stack { display: flex; height: 34px; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); }
-  .stack span { display: block; height: 100%; transition: width .4s; font: 600 11px/34px var(--mono); color: var(--on-accent); padding-left: 6px; white-space: nowrap; overflow: hidden; }
+  .pl { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .pl label.f { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .pl select { font: inherit; color: var(--fg); background: var(--panel-2); border-radius: 0; padding: var(--space-xs) var(--space-xs); }
+  .stack { display: flex; height: 34px; border-radius: 0; overflow: hidden; border: 1px solid var(--line); }
+  .stack span { display: block; height: 100%; transition: none; font: 600 11px/34px var(--mono); color: var(--on-accent); padding-left: var(--space-2xs); white-space: nowrap; overflow: hidden; }
   .stack .s { background: var(--orange); } .stack .i { background: var(--cyan); } .stack .a { background: var(--violet); }
-  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 12px; }
-  .kpis div { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--panel-2); }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis div { border-radius: 0; padding: var(--space-xs) var(--space-sm); background: var(--panel-2); }
   .kpis b { display: block; font-size: 22px; } .kpis span { font-size: 12px; color: var(--muted); }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">AWS CLF-C02 · EC2 instance storage · 6</div>
+    <p class="crumbs">AWS CLF-C02 / EC2 instance storage / 6</p>
     <h1>EFS and EFS-IA</h1>
     <ul class="lede">
       <li><b>Amazon EFS</b> (Elastic File System) is a managed <b>NFS network file system</b>: one shared folder for many instances.</li>
@@ -87,10 +86,10 @@
       </div>
       <div class="stack"><span class="s" id="bS"></span><span class="i" id="bI"></span><span class="a" id="bA"></span></div>
       <div class="kpis">
-        <div><b id="kS">–</b><span>GB in Standard</span></div>
-        <div><b id="kI">–</b><span>GB in IA</span></div>
-        <div><b id="kA">–</b><span>GB in Archive</span></div>
-        <div><b id="kC">–</b><span>storage per month</span></div>
+        <div><b id="kS">…</b><span>GB in Standard</span></div>
+        <div><b id="kI">…</b><span>GB in IA</span></div>
+        <div><b id="kA">…</b><span>GB in Archive</span></div>
+        <div><b id="kC">…</b><span>storage per month</span></div>
       </div>
       <p class="nf-cap" id="lcCap"></p>
     </div>

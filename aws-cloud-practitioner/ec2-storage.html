@@ -1,31 +1,30 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>EC2 Instance Storage</title>
 <meta name="description" content="This page has been split into one explainer per topic.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
 <script src="../assets/js/theme.js"></script>
 <style>
-  .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 10px; margin-top: 16px; }
-  .topic-links a { display: block; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--fg); text-decoration: none; font-weight: 600; }
+  .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: var(--space-xs); margin-top: var(--space-md); }
+  .topic-links a { display: block; padding: var(--space-sm) var(--space-md); border-radius: 0; background: var(--panel); color: var(--fg); text-decoration: none; font-weight: 600; }
   .topic-links a:hover { border-color: var(--orange); }
-  .topic-links a span { display: block; font-size: 13px; font-weight: 400; color: var(--muted); margin-top: 3px; }
+  .topic-links a span { display: block; font-size: 13px; font-weight: 400; color: var(--muted); margin-top: var(--space-3xs); }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
   <header>
-    <div class="eyebrow">AWS CLF-C02 · EC2 instance storage</div>
+    <p class="crumbs">AWS CLF-C02 / EC2 instance storage</p>
     <h1>This page has moved</h1>
     <ul class="lede"><li>"EC2 Instance Storage" is now <b>one page per topic</b>, each built around data travelling between instances and storage.</li><li>Pick a topic below.</li></ul>
   </header>

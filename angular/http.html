@@ -1,36 +1,34 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>HTTP, resource & RxJS basics</title>
 <meta name="description" content="Angular 22 HTTP on CareDesk: load patients with httpResource (loading, error, retry as signals), keep a local copy with linkedSignal, post bookings with HttpClient, and the RxJS basics: cold Observables, subscribe and pipe.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
 <script src="../assets/js/theme.js"></script>
 <script src="../assets/js/explainer-kit.js"></script>
 <style>
-  .ng-left { display: grid; gap: 12px; min-width: 0; align-content: start; }
+  .ng-left { display: grid; gap: var(--space-sm); min-width: 0; align-content: start; }
   .hx .node.cur rect { stroke: var(--cyan); stroke-width: 3.5; fill: var(--teal-wash); }
   .hx .node.err rect { stroke: var(--red); stroke-width: 3.5; }
   .hx .node.idle { opacity: .45; }
   .hx .edge { stroke: var(--line); stroke-width: 2; fill: none; }
-  .hx .elbl { font-family: var(--mono) !important; font-size: 10.5px; fill: var(--muted); }
+  .hx .elbl { font-family: var(--mono) !important; font-size: 12px; fill: var(--muted); }
   .hx .sig text { font-family: var(--mono) !important; font-size: 12px; }
   .hx .sig .k { fill: var(--fg-soft); } .hx .sig .v { fill: var(--cyan); font-weight: 700; } .hx .sig .v.bad { fill: var(--bad-text); }
   .hx .wire { stroke: var(--line); stroke-width: 2; }
   .hx .req rect { fill: var(--pill); } .hx .req text { fill: var(--ink); font-family: var(--mono) !important; font-size: 11px; font-weight: 700; }
   .hx .req.post rect { fill: var(--orange); } .hx .req.bad rect { fill: var(--red); } .hx .req.bad text { fill: var(--on-accent); }
-  .ui { font-size: 14px; padding: 8px 10px; border-radius: 8px; background: var(--panel-2); min-height: 2.4em; }
+  .ui { font-size: 14px; padding: var(--space-xs) var(--space-xs); border-radius: 0; background: var(--panel-2); min-height: 2.4em; }
   .ui .err { color: var(--bad-text); } .ui .muted { color: var(--muted); }
-  .lab-ctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
-  .marble { display: grid; gap: 8px; margin-top: 10px; }
+  .lab-ctl { display: flex; flex-wrap: wrap; gap: var(--space-xs); align-items: center; margin-top: var(--space-xs); }
+  .marble { display: grid; gap: var(--space-xs); margin-top: var(--space-xs); }
   .mline { position: relative; height: 34px; border-bottom: 2px solid var(--line); overflow: hidden; }
   .mline span { position: absolute; bottom: -12px; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-family: var(--mono); font-size: 11px; font-weight: 700; color: var(--ink); background: var(--pill); }
-  .mline span.done { background: var(--teal); color: var(--on-accent); border-radius: 4px; width: 6px; }
+  .mline span.done { background: var(--teal); color: var(--on-accent); border-radius: 0; width: 6px; }
   .mlbl { font-family: var(--mono); font-size: 12px; color: var(--fg-soft); }
   .rlog { font-family: var(--mono); font-size: 12.5px; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; min-height: 3em; color: var(--fg-soft); }
 </style>
@@ -38,12 +36,13 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← Angular roadmap</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">Angular roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Angular 22 · Part 4 · Forms &amp; data · added topic</div>
+    <p class="crumbs">Angular 22 / Part 4 / Forms &amp; data / added topic</p>
     <h1>HTTP, resource &amp; RxJS basics</h1>
     <ul class="lede">
       <li><span class="mono">httpResource(() =&gt; url)</span> fetches data and exposes <b>signals</b>: <span class="mono">isLoading()</span>, <span class="mono">hasValue()</span>, <span class="mono">value()</span>, <span class="mono">error()</span>.</li>
@@ -57,7 +56,7 @@
 
   <section aria-labelledby="storyH">
     <h2 class="stage-title" id="storyH">Walkthrough: CareDesk talks to an API</h2>
-    <div class="stage-kind">Top: the resource's state · bottom: requests on the wire · every request, header and message from the real run</div>
+    <div class="stage-kind">Top: the resource's state, bottom: requests on the wire, every request, header and message from the real run</div>
     <div class="story" id="hStory">
       <div class="ng-left">
         <div class="scroll"><svg class="diagram hx" id="hSvg" style="min-width:0" viewBox="0 0 680 330" role="img" aria-label="Resource states idle, loading, resolved and error, the signals it exposes, and requests travelling to the API through the interceptor"></svg></div>

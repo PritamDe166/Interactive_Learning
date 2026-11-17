@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Caching in Practice: the Interview Playbook</title>
 <meta name="description" content="Week 3 playbook: a worked caching design step by step, clearing caches across servers, services and regions, CDN cache keys and Vary, cache leaks, big keys, warming, Redis beyond caching, a cache sizing calculator, a CDN cache-key lab, the metrics to watch and an answer template.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -15,24 +13,24 @@
 <script src="../sd-series.js"></script>
 <script src="caching-flows.js"></script>
 <style>
-  .lab-h { font: 700 16px var(--display); margin: 26px 0 4px; }
-  .lab-h:first-of-type { margin-top: 10px; }
-  .row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin-top: 12px; }
-  .formula { font-family: var(--mono); font-size: 13px; color: var(--muted); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-top: 12px; overflow-x: auto; white-space: nowrap; }
+  .lab-h { font: 700 16px var(--display); margin: var(--space-lg) 0 var(--space-2xs); }
+  .lab-h:first-of-type { margin-top: var(--space-xs); }
+  .row { display: flex; flex-wrap: wrap; gap: var(--space-xs); justify-content: center; align-items: center; margin-top: var(--space-sm); }
+  .formula { font-family: var(--mono); font-size: 13px; color: var(--muted); background: var(--panel); border-radius: 0; padding: var(--space-xs) var(--space-sm); margin-top: var(--space-sm); overflow-x: auto; white-space: nowrap; }
   .formula b { color: var(--fg); }
-  .toggles { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 10px; }
-  .toggles label { display: inline-flex; gap: 6px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 13.5px; cursor: pointer; }
+  .toggles { display: flex; flex-wrap: wrap; gap: var(--space-xs); justify-content: center; margin-top: var(--space-xs); }
+  .toggles label { display: inline-flex; gap: var(--space-2xs); align-items: center; background: var(--panel); border-radius: 0; padding: var(--space-2xs) var(--space-sm); font-size: 13.5px; cursor: pointer; }
   .toggles label.off { opacity: .45; cursor: not-allowed; }
   .toggles input { accent-color: var(--teal); }
   .reqs td:nth-child(3) { font-family: var(--mono); font-size: 12.5px; word-break: break-all; }
   .reqs td:nth-child(2) { font-family: var(--mono); font-size: 12.5px; }
-  .res { display: inline-block; margin-top: 4px; font: 700 12px var(--mono); padding: 2px 8px; border-radius: 999px; white-space: normal; border: 1px solid var(--line); }
+  .res { display: inline-block; margin-top: var(--space-2xs); font: 700 12px var(--mono); padding: var(--space-3xs) var(--space-xs); border-radius: 0; white-space: normal; border: 1px solid var(--line); }
   .res.hit { color: var(--ok-text); }
   .res.miss { color: var(--muted); }
   .res.warn { color: var(--orange); }
   .res.bad { color: var(--bad-text); border-color: var(--red); }
-  .tmpl { counter-reset: t; list-style: none; padding: 0; display: grid; gap: 8px; }
-  .tmpl li { counter-increment: t; display: grid; grid-template-columns: 30px 1fr; gap: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .tmpl { counter-reset: t; list-style: none; padding: 0; display: grid; gap: var(--space-xs); }
+  .tmpl li { counter-increment: t; display: grid; grid-template-columns: 30px 1fr; gap: var(--space-xs); background: var(--panel); border-radius: 0; padding: var(--space-xs) var(--space-sm); }
   .tmpl li::before { content: counter(t); font: 700 14px var(--mono); color: var(--ink); background: var(--pill); border-radius: 50%; width: 26px; height: 26px; display: grid; place-items: center; }
   .tmpl li > span { min-width: 0; }
 </style>
@@ -40,12 +38,13 @@
 <body data-anim="continuous">
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← HLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">HLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Week 3 · Playbook · Caching &amp; CDN</div>
+    <p class="crumbs">Week 3 / Playbook / Caching &amp; CDN</p>
     <h1>Caching in Practice: the Interview Playbook</h1>
     <ul class="lede">
       <li>The topic pages teach each pattern. This page puts them <b>together</b>, the way an interview question does.</li>
@@ -88,10 +87,10 @@
     </div>
     <div class="formula" id="zFormula"></div>
     <div class="kpis">
-      <div class="kpi"><b id="kData">–</b><span>Hot data</span></div>
-      <div class="kpi"><b id="kMem">–</b><span>RAM incl. overhead &amp; replicas</span></div>
-      <div class="kpi accent"><b id="kNodes">–</b><span>Nodes needed</span></div>
-      <div class="kpi"><b id="kWhy">–</b><span>Limited by</span></div>
+      <div class="kpi"><b id="kData">…</b><span>Hot data</span></div>
+      <div class="kpi"><b id="kMem">…</b><span>RAM incl. overhead &amp; replicas</span></div>
+      <div class="kpi accent"><b id="kNodes">…</b><span>Nodes needed</span></div>
+      <div class="kpi"><b id="kWhy">…</b><span>Limited by</span></div>
     </div>
     <p class="hint" id="zHint"></p>
 
@@ -107,14 +106,14 @@
     </div>
     <div class="card scroll" style="margin-top:12px">
       <table class="reqs">
-        <thead><tr><th>#</th><th>Visitor</th><th>Request · cache key · edge result</th></tr></thead>
+        <thead><tr><th>#</th><th>Visitor</th><th>Request, cache key, edge result</th></tr></thead>
         <tbody id="kRows"></tbody>
       </table>
     </div>
     <div class="kpis">
-      <div class="kpi accent"><b id="kHit">–</b><span>Hit ratio</span></div>
-      <div class="kpi"><b id="kCopies">–</b><span>Copies stored</span></div>
-      <div class="kpi bad"><b id="kBad">–</b><span>Wrong or leaked responses</span></div>
+      <div class="kpi accent"><b id="kHit">…</b><span>Hit ratio</span></div>
+      <div class="kpi"><b id="kCopies">…</b><span>Copies stored</span></div>
+      <div class="kpi bad"><b id="kBad">…</b><span>Wrong or leaked responses</span></div>
     </div>
     <p class="hint" id="kHint"></p>
   </section>
@@ -139,7 +138,7 @@
         <tbody>
           <tr><td>Hit ratio</td><td>Steady, often 90%+ for hot reads</td><td>Drops suddenly</td><td>Evictions, a deploy changed key names, or a bad CDN key / Vary</td></tr>
           <tr><td>Evictions per second</td><td>Near zero</td><td>Rising steadily</td><td>Memory too small for the working set</td></tr>
-          <tr><td>Memory used</td><td>Below ~70–80%</td><td>At the limit</td><td>Grow the cluster, shorten TTLs, shrink values</td></tr>
+          <tr><td>Memory used</td><td>Below ~70 to 80%</td><td>At the limit</td><td>Grow the cluster, shorten TTLs, shrink values</td></tr>
           <tr><td>p99 latency</td><td>Low single-digit ms</td><td>Spikes while the average looks fine</td><td>Big keys, a hot key, or network saturation</td></tr>
           <tr><td>DB load / origin offload</td><td>Flat, low</td><td>Spikes at fixed times</td><td>Stampede or avalanche (keys expiring together)</td></tr>
         </tbody>
@@ -155,7 +154,7 @@
       <li><span class="if">Logged-in or per-user response</span><span class="arrow">→</span><span class="then"><code>Cache-Control: private</code> or <code>no-store</code></span></li>
       <li><span class="if">One Redis call slows all others</span><span class="arrow">→</span><span class="then">Big key: split, page or compress it</span></li>
       <li><span class="if">New cluster or region going live</span><span class="arrow">→</span><span class="then">Warm the top N keys first</span></li>
-      <li><span class="if">Rate limit, lock, top-10 list</span><span class="arrow">→</span><span class="then">INCR + EXPIRE · SET NX PX · sorted set</span></li>
+      <li><span class="if">Rate limit, lock, top-10 list</span><span class="arrow">→</span><span class="then">INCR + EXPIRE, SET NX PX, sorted set</span></li>
     </ul>
 
     <h3 class="sec-h3">In .NET terms</h3>

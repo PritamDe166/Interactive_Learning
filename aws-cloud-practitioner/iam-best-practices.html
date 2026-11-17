@@ -1,25 +1,23 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>IAM best practices</title>
 <meta name="description" content="AWS Cloud Practitioner: IAM guidelines and best practices (root protection, MFA, password policy, groups, roles, key hygiene, audits) and the shared responsibility model for IAM.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
 <script src="../assets/js/theme.js"></script>
 <script src="../assets/js/explainer-kit.js"></script>
 <style>
-  .hard { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 8px 16px; }
-  .atk-res { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; font-size: 14.5px; }
-  .atk-res li { padding: 7px 10px; border-radius: 8px; background: var(--panel-2); display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .hard { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: var(--space-xs) var(--space-md); }
+  .atk-res { list-style: none; margin: var(--space-xs) 0 0; padding: 0; display: grid; gap: var(--space-2xs); font-size: 14.5px; }
+  .atk-res li { padding: var(--space-xs) var(--space-xs); border-radius: 0; background: var(--panel-2); display: flex; justify-content: space-between; gap: var(--space-xs); flex-wrap: wrap; }
   .atk-res li b.ok { color: var(--good-text); } .atk-res li b.bad { color: var(--bad-text); }
-  .pw { display: grid; gap: 10px; }
-  .pw input[type=text] { font: inherit; font-family: var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%; box-sizing: border-box; }
-  .pw-rules { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 14px; }
+  .pw { display: grid; gap: var(--space-xs); }
+  .pw input[type=text] { font: inherit; font-family: var(--mono); color: var(--fg); background: var(--panel-2); border-radius: 0; padding: var(--space-xs) var(--space-xs); width: 100%; box-sizing: border-box; }
+  .pw-rules { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2xs); font-size: 14px; }
   .pw-rules li::before { content: '✕ '; color: var(--bad-text); }
   .pw-rules li.ok::before { content: '✓ '; color: var(--good-text); }
 </style>
@@ -27,12 +25,13 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">AWS CLF-C02 · IAM · Domain 2 Security &amp; Compliance (Tasks 2.1, 2.3)</div>
+    <p class="crumbs">AWS CLF-C02 / IAM / Domain 2 Security &amp; Compliance (Tasks 2.1, 2.3)</p>
     <h1>IAM best practices &amp; shared responsibility</h1>
     <ul class="lede">
       <li>Lock the <b>root user</b> away (MFA, no access keys). Give <b>each person their own identity</b>; never share.</li>
@@ -57,7 +56,7 @@
       <li><b>Don't use the root user</b> for daily work. MFA on root, <b>no root access keys</b>, credentials stored safely.</li>
       <li><b>One identity per person.</b> Never share users, passwords, keys or MFA devices. (At company scale AWS recommends <b>IAM Identity Center</b> for people.)</li>
       <li><b>Groups</b> for permissions; <b>least privilege</b>; review and remove what's unused.</li>
-      <li><b>Password policy</b>: minimum length, upper/lower case, numbers, symbols, expiry (1–1,095 days), prevent reuse (last 1–24). Default: 8–128 characters, 3 of 4 character types. It <b>doesn't apply to root or to access keys</b>, and there's <b>no lockout</b> setting.</li>
+      <li><b>Password policy</b>: minimum length, upper/lower case, numbers, symbols, expiry (1 to 1,095 days), prevent reuse (last 1 to 24). Default: 8 to 128 characters, 3 of 4 character types. It <b>doesn't apply to root or to access keys</b>, and there's <b>no lockout</b> setting.</li>
       <li><b>MFA</b> = password (something you know) + device (something you have). Types: <b>passkeys / FIDO security keys</b> (phishing-resistant, preferred), <b>virtual authenticator apps</b>, <b>hardware TOTP tokens</b>. Up to <b>8</b> devices per user. SMS MFA is no longer offered.</li>
       <li><b>Roles</b> for AWS services (EC2, Lambda, CloudFormation): no keys on servers.</li>
       <li><b>Access keys</b>: secret like a password; never commit or share; rotate; delete unused. Prefer temporary credentials.</li>

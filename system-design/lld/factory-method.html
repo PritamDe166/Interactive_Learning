@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Simple Factory &amp; Factory Method</title>
 <meta name="description" content="Creational pattern L13: stop scattering new. Appointment reminders move from new-in-every-caller to a simple factory, then to the factory method pattern, then to keyed DI services in .NET.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -17,12 +15,13 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← LLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">LLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">System Design · LLD · Creational · L13</div>
+    <p class="crumbs">System Design / LLD / Creational / L13</p>
     <h1>Simple Factory &amp; Factory Method</h1>
     <ul class="lede">
       <li>Both answer one question: <b>who decides which class to <span class="mono">new</span>?</b> Callers shouldn't; they should ask for "a notifier" and get the right one.</li>
@@ -47,7 +46,7 @@
     </div>
     <div class="sub-block">
       <h3 class="stage-title sub">The same thing in C#</h3>
-      <div class="stage-kind">Simple factory · factory method · keyed DI</div>
+      <div class="stage-kind">Simple factory, factory method, keyed DI</div>
       <div class="cs-pair">
         <div><div class="label bad-text">Before: every caller decides</div><pre class="codeblock" id="csBefore"></pre></div>
         <div><div class="label ok-text">Simple factory: one place decides</div><pre class="codeblock" id="csSimple"></pre></div>

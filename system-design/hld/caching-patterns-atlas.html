@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cache Patterns at a Glance</title>
 <meta name="description" content="Week 3 at a glance: all 14 caching patterns as infographic cards with animated diagrams, a cheat-sheet and a 'which one fits?' drill.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -18,12 +16,13 @@
 <body data-anim="continuous">
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← HLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">HLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Week 3 · Caching &amp; CDN · all patterns at a glance</div>
+    <p class="crumbs">Week 3 / Caching &amp; CDN / all patterns at a glance</p>
     <h1>Cache Patterns at a Glance</h1>
     <ul class="lede">
       <li>Every cache design answers four questions: <b>who loads on a miss</b>, <b>when writes reach the database</b>, <b>what gets evicted</b>, and <b>what happens when it goes wrong</b>.</li>
@@ -65,8 +64,8 @@
           <tr><td>Cache-aside</td><td>App</td><td>App writes DB directly</td><td>Stale until TTL or delete</td><td>Miss latency; stampede</td></tr>
           <tr><td>Read-through</td><td>Cache provider</td><td>(pairs with any write rule)</td><td>Stale until TTL</td><td>Provider must know the DB</td></tr>
           <tr><td>Refresh-ahead</td><td>Cache, before expiry</td><td>(read pattern)</td><td>Fresh for hot keys</td><td>Wasted refreshes</td></tr>
-          <tr><td>Write-through</td><td>–</td><td>Same request, before ack</td><td>Always fresh</td><td>Slower writes; caches unread data</td></tr>
-          <tr><td>Write-behind</td><td>–</td><td>Later, in batches</td><td>Cache ahead of DB</td><td>Data loss on cache failure</td></tr>
+          <tr><td>Write-through</td><td>none</td><td>Same request, before ack</td><td>Always fresh</td><td>Slower writes; caches unread data</td></tr>
+          <tr><td>Write-behind</td><td>none</td><td>Later, in batches</td><td>Cache ahead of DB</td><td>Data loss on cache failure</td></tr>
           <tr><td>Write-around</td><td>App on next read</td><td>Directly, cache skipped</td><td>First read misses</td><td>Read-after-write miss</td></tr>
         </tbody>
       </table>

@@ -1,29 +1,27 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Parent ↔ child data flow</title>
 <meta name="description" content="Angular 22: CareDesk's PatientList hands a patient down to PatientCard with input(), the card reports back with output(), and a nurse's note syncs both ways with model(). Plus why mutating an object inside a signal does nothing.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
 <script src="../assets/js/theme.js"></script>
 <script src="../assets/js/explainer-kit.js"></script>
 <style>
-  .ng-left { display: grid; gap: 12px; min-width: 0; align-content: start; }
+  .ng-left { display: grid; gap: var(--space-sm); min-width: 0; align-content: start; }
   .story.ng-story { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); }
   @media (max-width: 880px) { .story.ng-story { grid-template-columns: minmax(0, 1fr); } }
-  .app-sim { display: grid; gap: 12px; margin-top: 12px; }
-  .comp { border: 2px solid var(--line); border-radius: 14px; background: var(--panel); padding: 12px 14px; min-width: 0; }
-  .comp.child { margin-left: 28px; }
-  .comp-h { display: flex; justify-content: space-between; gap: 10px; font-weight: 700; margin-bottom: 8px; flex-wrap: wrap; }
+  .app-sim { display: grid; gap: var(--space-sm); margin-top: var(--space-sm); }
+  .comp { border: 2px solid var(--line); border-radius: 0; background: var(--panel); padding: var(--space-sm) var(--space-sm); min-width: 0; }
+  .comp.child { margin-left: var(--space-lg); }
+  .comp-h { display: flex; justify-content: space-between; gap: var(--space-xs); font-weight: 700; margin-bottom: var(--space-xs); flex-wrap: wrap; }
   .comp-h span { font-family: var(--mono); font-size: 12px; font-weight: 400; color: var(--muted); }
-  .comp .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 6px 0; }
-  .comp input[type=text] { font: inherit; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); width: 180px; max-width: 100%; }
-  .comp h4 { margin: 2px 0; font-size: 20px; }
+  .comp .row { display: flex; flex-wrap: wrap; gap: var(--space-xs); align-items: center; margin: var(--space-2xs) 0; }
+  .comp input[type=text] { font: inherit; padding: var(--space-2xs) var(--space-xs); border-radius: 0; background: var(--panel-2); color: var(--fg); width: 180px; max-width: 100%; }
+  .comp h4 { margin: var(--space-3xs) 0; font-size: 20px; }
   .comp .btn { white-space: normal; text-align: left; }
   .sync { overflow-wrap: anywhere; }
   .comp .mono-v { font-family: var(--mono); font-size: 13px; color: var(--fg-soft); }
@@ -31,35 +29,36 @@
   .comp.flash { border-color: var(--cyan); }
   .comp.flash-up { border-color: var(--orange); }
   .comp.flash-two { border-color: var(--violet); }
-  .wires { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-left: 28px; font-family: var(--mono); font-size: 12.5px; }
-  .wires span { padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); transition: all .25s; }
+  .wires { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); margin-left: var(--space-lg); font-family: var(--mono); font-size: 12.5px; }
+  .wires span { padding: var(--space-3xs) var(--space-xs); border-radius: 0; border: 1px solid var(--line); color: var(--muted); transition: opacity .25s, transform .25s, background-color .25s, color .25s, border-color .25s, fill .25s, stroke .25s; }
   .wires span.wd.lit { border-color: var(--cyan); color: var(--cyan); }
   .wires span.wu.lit { border-color: var(--orange); color: var(--orange); }
   .wires span.wt.lit { border-color: var(--violet); color: var(--violet); }
   .wires span.bad.lit { border-color: var(--red); color: var(--bad-text); }
   .sync { font-size: 14px; margin: 0; }
   .sim-log { font-family: var(--mono); font-size: 12.5px; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; min-height: 6.5em; color: var(--fg-soft); }
-  .bug-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 12px; margin-top: 12px; }
-  .bug { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); padding: 12px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+  .bug-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: var(--space-sm); margin-top: var(--space-sm); }
+  .bug { border-radius: 0; background: var(--panel); padding: var(--space-sm); display: grid; gap: var(--space-xs); align-content: start; min-width: 0; }
   .bug .codeblock { min-height: 0; font-size: 12.5px; white-space: pre-wrap; overflow-wrap: anywhere; }
   .bug .q { margin: 0; font-size: 14px; color: var(--fg-soft); }
   .bug .verdict { margin: 0; font-size: 14px; }
-  .bug .err { font-family: var(--mono); font-size: 12px; color: var(--bad-text); overflow-wrap: anywhere; display: block; margin-top: 4px; }
-  .bug .btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .bug .err { font-family: var(--mono); font-size: 12px; color: var(--bad-text); overflow-wrap: anywhere; display: block; margin-top: var(--space-2xs); }
+  .bug .btns { display: flex; gap: var(--space-xs); flex-wrap: wrap; }
   .bug.right { border-color: var(--teal); } .bug.wrong { border-color: var(--red); }
-  .score { font-size: 14px; color: var(--fg-soft); margin: 10px 0 0; }
+  .score { font-size: 14px; color: var(--fg-soft); margin: var(--space-xs) 0 0; }
   .cc-pair.files { grid-template-columns: repeat(auto-fit, minmax(min(100%, 470px), 1fr)); }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← Angular roadmap</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">Angular roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Angular 22 · Part 2 · Data flow</div>
+    <p class="crumbs">Angular 22 / Part 2 / Data flow</p>
     <h1>Parent ↔ child data flow</h1>
     <ul class="lede">
       <li>Data goes <b>down</b> through inputs: the card declares <span class="mono">patient = input.required&lt;Patient&gt;()</span>, the list binds <span class="mono">[patient]="patient()"</span>.</li>
@@ -108,7 +107,7 @@
       </div>
       <div class="wires" aria-label="Bindings"><span class="wd" id="wUser">[patient]="patient()"</span><span class="wt" id="wNote">[(note)]="note"</span><span class="wu" id="wSaved">(reviewed)="onReviewed($event)"</span></div>
       <div class="comp child urgent-card" id="cChild">
-        <div class="comp-h">PatientCard <span>child · receives a patient, owns nothing</span></div>
+        <div class="comp-h">PatientCard <span>child, receives a patient, owns nothing</span></div>
         <h4 id="sGreet">Asha · Cardiology</h4>
         <div class="row"><label for="sNote" class="mono-v">note</label><input type="text" id="sNote" autocomplete="off" placeholder="Nurse's note"><button class="btn" type="button" id="sPing">Mark reviewed</button></div>
       </div>

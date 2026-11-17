@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Collections: list, tuple, set, dict</title>
 <meta name="description" content="Python fundamentals: lists, tuples, sets and dictionaries drawn as objects in memory, with indexing, unpacking, set operations and dict lookups.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
@@ -15,9 +13,9 @@
 <script src="traces/collections.js"></script>
 <style>
   .static-code { margin: 0; }
-  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
+  .puzzle-area { display: grid; gap: var(--space-sm); margin-top: var(--space-sm); }
   .lb-list { display: flex; flex-wrap: wrap; gap: 0; min-height: 64px; }
-  .lb-cell { border: 1.5px solid var(--line); margin-left: -1.5px; min-width: 56px; text-align: center; background: var(--panel-2); padding: 8px 6px 4px; display: grid; }
+  .lb-cell { border: 1.5px solid var(--line); margin-left: calc(-1 * var(--space-3xs)); min-width: 56px; text-align: center; background: var(--panel-2); padding: var(--space-xs) var(--space-2xs) var(--space-2xs); display: grid; }
   .lb-cell b { font-family: var(--mono); font-size: 20px; }
   .lb-cell span { font-family: var(--mono); font-size: 11px; color: var(--muted); }
   .lb-cell.chg { animation: lbpop .35s ease-out; border-color: var(--cyan); }
@@ -32,12 +30,13 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← Python Fundamentals</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">Python Fundamentals</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Python · Topic 5 · Control flow and data</div>
+    <p class="crumbs">Python / Topic 5 / Control flow and data</p>
     <h1>Collections: list, tuple, set, dict</h1>
     <ul class="lede"><li><b>list</b> <span class="mono">[ ]</span>: ordered, changeable, duplicates allowed. The everyday container.</li><li><b>tuple</b> <span class="mono">( )</span>: ordered but <b>fixed</b>. Good for records like (lat, lon) and for unpacking.</li><li><b>set</b> <span class="mono">{ }</span>: no order, <b>no duplicates</b>, very fast <span class="mono">in</span> checks, maths like union and intersection.</li><li><b>dict</b> <span class="mono">{key: value}</span>: look things up by key. Keys are unique; insertion order is kept.</li></ul>
   </header>
@@ -55,13 +54,13 @@
 
   <section aria-labelledby="runH">
     <h2 class="stage-title" id="runH">Edit and run</h2>
-    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div class="stage-kind">Change the code, Run ▶ for the output, Step through to watch it run</div>
     <div id="runner"></div>
   </section>
 
   <section aria-labelledby="predH">
     <h2 class="stage-title" id="predH">Predict the output</h2>
-    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="stage-kind">Pick a puzzle, choose your answer, then step through it</div>
     <div class="chips" id="pzChips"></div>
     <div class="puzzle-area" id="pzArea"></div>
   </section>
@@ -114,8 +113,8 @@
           <tr><td>Changeable</td><td>yes</td><td>no</td><td>yes</td><td>yes</td></tr>
           <tr><td>Duplicates</td><td>yes</td><td>yes</td><td>no</td><td>keys unique</td></tr>
           <tr><td>Access</td><td class="mono">x[0]</td><td class="mono">x[0]</td><td class="mono">in</td><td class="mono">x["key"]</td></tr>
-          <tr><td>Add</td><td class="mono">append insert extend</td><td>—</td><td class="mono">add update</td><td class="mono">d[k] = v, update</td></tr>
-          <tr><td>Remove</td><td class="mono">pop remove del</td><td>—</td><td class="mono">remove discard</td><td class="mono">pop del</td></tr>
+          <tr><td>Add</td><td class="mono">append insert extend</td><td>none</td><td class="mono">add update</td><td class="mono">d[k] = v, update</td></tr>
+          <tr><td>Remove</td><td class="mono">pop remove del</td><td>none</td><td class="mono">remove discard</td><td class="mono">pop del</td></tr>
         </tbody>
       </table>
     </div>

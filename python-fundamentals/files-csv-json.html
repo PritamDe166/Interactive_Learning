@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Files, CSV &amp; JSON</title>
 <meta name="description" content="Python fundamentals: open() modes, the with statement, reading line by line, csv.reader and DictReader, csv.writer, and converting between Python objects and JSON.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
@@ -15,25 +13,26 @@
 <script src="traces/files-csv-json.js"></script>
 <style>
   .static-code { margin: 0; }
-  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
-  .tp-file { margin-top: 12px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--code-bg); padding: 10px 12px; }
-  .tp-name { font-size: 13px; color: var(--accent-text); margin-bottom: 8px; }
-  .tp-tape { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; min-height: 36px; font-size: 16px; }
-  .tp-ch { padding: 3px 5px; border-radius: 4px; background: var(--panel-2); }
+  .puzzle-area { display: grid; gap: var(--space-sm); margin-top: var(--space-sm); }
+  .tp-file { margin-top: var(--space-sm); border: 1.5px solid var(--line); border-radius: 0; background: var(--code-bg); padding: var(--space-xs) var(--space-sm); }
+  .tp-name { font-size: 13px; color: var(--accent-text); margin-bottom: var(--space-xs); }
+  .tp-tape { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3xs); min-height: 36px; font-size: 16px; }
+  .tp-ch { padding: var(--space-3xs) var(--space-2xs); border-radius: 0; background: var(--panel-2); }
   .tp-ch.nl { color: var(--cyan); font-size: 12px; }
-  .tp-cur { width: 3px; height: 26px; background: var(--accent-text); border-radius: 2px; animation: blink 1s steps(2) infinite; }
+  .tp-cur { width: 3px; height: 26px; background: var(--accent-text); border-radius: 0; animation: blink 1s steps(2) infinite; }
   @keyframes blink { 50% { opacity: .2; } }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← Python Fundamentals</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">Python Fundamentals</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Python · Topic 11 · Real programs</div>
+    <p class="crumbs">Python / Topic 11 / Real programs</p>
     <h1>Files, CSV &amp; JSON</h1>
     <ul class="lede"><li><span class="mono">open(path, mode)</span> returns a <b>file object</b>. Mode <b>"r"</b> reads, <b>"w"</b> <b>erases</b> then writes, <b>"a"</b> appends to the end.</li><li>Always use <span class="mono">with open(...) as f:</span>. The file is <b>closed automatically</b> when the block ends, even after an error.</li><li>Pass <span class="mono">encoding="utf-8"</span>, and <span class="mono">newline=""</span> for CSV files.</li><li><b>csv.DictReader</b> turns each row into a dict keyed by the header. Values are always <b>strings</b>.</li><li><b>json</b>: <span class="mono">dump/load</span> work with files, <span class="mono">dumps/loads</span> with strings (the s is for string).</li></ul>
   </header>
@@ -51,13 +50,13 @@
 
   <section aria-labelledby="runH">
     <h2 class="stage-title" id="runH">Edit and run</h2>
-    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div class="stage-kind">Change the code, Run ▶ for the output, Step through to watch it run</div>
     <div id="runner"></div>
   </section>
 
   <section aria-labelledby="predH">
     <h2 class="stage-title" id="predH">Predict the output</h2>
-    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="stage-kind">Pick a puzzle, choose your answer, then step through it</div>
     <div class="chips" id="pzChips"></div>
     <div class="puzzle-area" id="pzArea"></div>
   </section>
@@ -130,7 +129,7 @@
         <div class="ans"><p>The file is <b>closed</b> when the block ends, whether it ends normally, with return, or with an exception. It's a <b>context manager</b> (its own page in Part 5).</p></div></details>
       <details><summary><span class="mono">import json; print(json.loads('[1, "a", null]'))</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">[1, 'a', None]</b>. JSON null becomes None.</p></div></details>
-      <details><summary><span class="mono">import csv, io\nprint(next(csv.reader(io.StringIO('a,"b,c",d'))))</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">import csv, io<br>print(next(csv.reader(io.StringIO('a,"b,c",d'))))</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">['a', 'b,c', 'd']</b>. The csv module handles quoted commas; <span class="mono">split(",")</span> wouldn't.</p></div></details>
       <details><summary><span class="mono">import json; print(json.dumps({"b": 1, "a": 2}, sort_keys=True))</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">{"a": 2, "b": 1}</b>. sort_keys gives stable output, handy for diffs and tests.</p></div></details>

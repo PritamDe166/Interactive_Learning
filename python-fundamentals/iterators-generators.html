@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Iterators &amp; generators</title>
 <meta name="description" content="Python fundamentals: the iterator protocol (iter and next), StopIteration, generator functions with yield, generator expressions, and why lazy evaluation saves memory.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
@@ -15,22 +13,23 @@
 <script src="traces/iterators-generators.js"></script>
 <style>
   .static-code { margin: 0; }
-  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
+  .puzzle-area { display: grid; gap: var(--space-sm); margin-top: var(--space-sm); }
   .ln.pl-pause { box-shadow: inset 3px 0 0 var(--accent-text); }
-  .mm-row { display: grid; grid-template-columns: 90px 1fr 80px; gap: 10px; align-items: center; margin-top: 10px; }
-  .mm-bar { height: 18px; border-radius: 9px; background: var(--panel-2); border: 1px solid var(--line); overflow: hidden; }
-  .mm-bar i { display: block; height: 100%; background: var(--cyan); transition: width .3s; }
+  .mm-row { display: grid; grid-template-columns: 90px 1fr 80px; gap: var(--space-xs); align-items: center; margin-top: var(--space-xs); }
+  .mm-bar { height: 18px; border-radius: 0; background: var(--panel-2); overflow: hidden; }
+  .mm-bar i { display: block; height: 100%; background: var(--cyan); transition: none; }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← Python Fundamentals</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">Python Fundamentals</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Python · Topic 14 · Going further</div>
+    <p class="crumbs">Python / Topic 14 / Going further</p>
     <h1>Iterators &amp; generators</h1>
     <ul class="lede"><li>A <b>for</b> loop calls <span class="mono">iter()</span> on the object to get an <b>iterator</b>, then <span class="mono">next()</span> until it raises <b>StopIteration</b>.</li><li>A function containing <span class="mono">yield</span> is a <b>generator function</b>: calling it runs <b>nothing</b> yet and returns a generator object.</li><li>Each <span class="mono">next()</span> runs the body up to the next <span class="mono">yield</span>, hands out that value and <b>pauses</b>, keeping its local variables.</li><li>Generators are <b>lazy</b>: values are made one at a time, so a stream of a million rows needs memory for one. They can be used <b>once</b>.</li></ul>
   </header>
@@ -48,13 +47,13 @@
 
   <section aria-labelledby="runH">
     <h2 class="stage-title" id="runH">Edit and run</h2>
-    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div class="stage-kind">Change the code, Run ▶ for the output, Step through to watch it run</div>
     <div id="runner"></div>
   </section>
 
   <section aria-labelledby="predH">
     <h2 class="stage-title" id="predH">Predict the output</h2>
-    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="stage-kind">Pick a puzzle, choose your answer, then step through it</div>
     <div class="chips" id="pzChips"></div>
     <div class="puzzle-area" id="pzArea"></div>
   </section>
@@ -66,7 +65,7 @@
       <pre class="codeblock" id="plCode" style="min-height:0;margin:0"></pre>
       <div>
         <div class="card"><div class="label">Generator state</div><div class="mono" id="plState" style="font-size:15px">not started</div><div class="mono muted" id="plVars" style="margin-top:6px"></div></div>
-        <div class="card" style="margin-top:10px"><div class="label">Caller received</div><div class="mono" id="plGot" style="font-size:15px;overflow-wrap:anywhere">—</div></div>
+        <div class="card" style="margin-top:10px"><div class="label">Caller received</div><div class="mono" id="plGot" style="font-size:15px;overflow-wrap:anywhere">…</div></div>
       </div>
     </div>
     <div class="controls" style="margin-top:12px"><button class="btn primary" type="button" id="plNext">next(gen)</button><button class="btn" type="button" id="plReset">gen = slots(540, 660)</button></div>
@@ -117,11 +116,11 @@
     <h2 id="quizH">Check yourself</h2>
     <p class="sub">Say the answer out loud before you open each card.</p>
     <div class="quiz">
-      <details><summary><span class="mono">def g():\n    yield 1\n    yield 2\nprint(sum(g()), len(list(g())))</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">def g():<br>    yield 1<br>    yield 2<br>print(sum(g()), len(list(g())))</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">3 2</b>. Each call to g() makes a new generator.</p></div></details>
-      <details><summary><span class="mono">r = range(3)\nprint(list(r), list(r), r[1])</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">r = range(3)<br>print(list(r), list(r), r[1])</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">[0, 1, 2] [0, 1, 2] 1</b>. range is reusable and indexable.</p></div></details>
-      <details><summary><span class="mono">it = iter([1, 2, 3])\nfor x in it:\n    print(x, next(it))</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">it = iter([1, 2, 3])<br>for x in it:<br>    print(x, next(it))</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">1 2</b> then <b>StopIteration</b>. The loop and your next() share one iterator: x=1, next→2, x=3, next→nothing left.</p></div></details>
     </div>
   </section>
@@ -178,7 +177,7 @@
       $('plCode').innerHTML = SRC.map((l, i) => `<span class="ln${hl.includes(i) ? ' on' : ''}${i === 3 && phase === 'paused' ? ' pl-pause' : ''}">${K.pyHighlight(l)}</span>`).join('');
       $('plState').innerHTML = phase === 'new' ? 'not started' : phase === 'paused' ? 'paused at line 4 (yield)' : '<span class="bad-text">finished</span>';
       $('plVars').textContent = phase === 'paused' ? `start=540  end=660  step=30  t=${t}` : '';
-      $('plGot').textContent = got.length ? got.map(hm).join(', ') : '—';
+      $('plGot').textContent = got.length ? got.map(hm).join(', ') : 'none';
     }
     $('plNext').addEventListener('click', () => {
       if (phase === 'done') { $('plStatus').innerHTML = '<b class="bad-text">StopIteration</b> · a finished generator stays finished. Create a new one to start over.'; return; }

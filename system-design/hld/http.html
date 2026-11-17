@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>HTTP Requests & Status Codes</title>
 <meta name="description" content="Day 2: HTTP request and response anatomy, methods and idempotency you can test by sending twice, and which component returns each status code.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -18,12 +16,13 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← HLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">HLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Week 1 · H2 · Networking Fundamentals</div>
+    <p class="crumbs">Week 1 / H2 / Networking Fundamentals</p>
     <h1>HTTP Requests & Status Codes</h1>
     <ul class="lede"><li>A <b>request</b> says <b>what to do</b> (method) to <b>which resource</b> (path).</li><li>It carries metadata (<b>headers</b>) and optional data (<b>body</b>).</li><li>The <b>response</b> answers with a <b>status code</b>, headers and an optional body.</li><li>It all travels over the connection that DNS, TCP and TLS set up first.</li></ul>
   </header>
@@ -142,8 +141,8 @@ Location: /patients/124
     </div>
     <p class="status-line" id="scStatus">Pick a status code to see where it comes from.</p>
     <div class="card facts" style="margin-top:12px">
-      <div><div class="label">Meaning</div><p id="scMeaning">–</p></div>
-      <div><div class="label">Typical fix or client action</div><p id="scFix">–</p></div>
+      <div><div class="label">Meaning</div><p id="scMeaning">…</p></div>
+      <div><div class="label">Typical fix or client action</div><p id="scFix">…</p></div>
     </div>
     <div class="notes" style="margin-top:14px">
       <div class="note"><p><b>1xx and 3xx in practice.</b> 1xx: <span class="mono">100 Continue</span>, <span class="mono">101 Switching Protocols</span> (WebSocket upgrade). 3xx: <span class="mono">301</span>/<span class="mono">308</span> permanent move, <span class="mono">302</span>/<span class="mono">307</span> temporary move (307/308 keep the method and body), <span class="mono">304 Not Modified</span> (your cached copy is still valid).</p></div>

@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Functional tools &amp; itertools</title>
 <meta name="description" content="Python fundamentals: lambda, sorted with key=, map, filter, functools.reduce, and itertools helpers like chain, groupby and islice.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
@@ -15,23 +13,24 @@
 <script src="traces/functional-tools.js"></script>
 <style>
   .static-code { margin: 0; }
-  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
-  .sk-table { position: relative; margin-top: 12px; }
-  .sk-head, .sk-row { display: grid; grid-template-columns: 1.2fr .6fr .7fr 1.6fr; gap: 8px; align-items: center; padding: 0 12px; }
-  .sk-head { height: 30px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
-  .sk-row { position: absolute; left: 0; right: 0; top: 0; height: 36px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel-2); transition: transform .5s ease; }
+  .puzzle-area { display: grid; gap: var(--space-sm); margin-top: var(--space-sm); }
+  .sk-table { position: relative; margin-top: var(--space-sm); }
+  .sk-head, .sk-row { display: grid; grid-template-columns: 1.2fr .6fr .7fr 1.6fr; gap: var(--space-xs); align-items: center; padding: 0 var(--space-sm); }
+  .sk-head { height: 30px; font-size: 13px; color: var(--muted); }
+  .sk-row { position: absolute; left: 0; right: 0; top: 0; height: 36px; border-radius: 0; background: var(--panel-2); transition: transform .5s ease; }
   .sk-k { color: var(--accent-text); overflow-wrap: anywhere; }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← Python Fundamentals</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">Python Fundamentals</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Python · Topic 15 · Going further</div>
+    <p class="crumbs">Python / Topic 15 / Going further</p>
     <h1>Functional tools &amp; itertools</h1>
     <ul class="lede"><li>Functions are objects: you can pass them to other functions. <b>lambda</b> writes a small one inline: <span class="mono">lambda p: p[1]</span>.</li><li><span class="mono">sorted(items, key=f)</span> sorts by <b>f(item)</b>, not by the item itself. Same <span class="mono">key=</span> works for min, max and groupby.</li><li><span class="mono">map(f, xs)</span> transforms, <span class="mono">filter(f, xs)</span> keeps items where f is true, <span class="mono">reduce(f, xs, start)</span> folds them into one value. A comprehension is often clearer for the first two.</li><li><b>itertools</b> has lazy building blocks: <span class="mono">chain</span>, <span class="mono">islice</span>, <span class="mono">groupby</span>, <span class="mono">count</span>…</li></ul>
   </header>
@@ -49,13 +48,13 @@
 
   <section aria-labelledby="runH">
     <h2 class="stage-title" id="runH">Edit and run</h2>
-    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div class="stage-kind">Change the code, Run ▶ for the output, Step through to watch it run</div>
     <div id="runner"></div>
   </section>
 
   <section aria-labelledby="predH">
     <h2 class="stage-title" id="predH">Predict the output</h2>
-    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="stage-kind">Pick a puzzle, choose your answer, then step through it</div>
     <div class="chips" id="pzChips"></div>
     <div class="puzzle-area" id="pzArea"></div>
   </section>
@@ -110,7 +109,7 @@
     <div class="quiz">
       <details><summary><span class="mono">print(sorted([3, -5, 2], key=abs))</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">[2, 3, -5]</b>. Sorted by absolute value; the original numbers are returned.</p></div></details>
-      <details><summary><span class="mono">from functools import reduce\nprint(reduce(lambda a, b: a * b, [1, 2, 3, 4]))</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">from functools import reduce<br>print(reduce(lambda a, b: a * b, [1, 2, 3, 4]))</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">24</b>. Without a start value, the first item is the start.</p></div></details>
       <details><summary><span class="mono">print(list(filter(None, [0, 1, "", "a", None])))</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">[1, 'a']</b>. With None as the function, filter keeps truthy items.</p></div></details>

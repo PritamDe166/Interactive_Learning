@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Latency, Percentiles & Queueing</title>
 <meta name="description" content="Day 5: latency vs throughput, why p95/p99 beat averages, and a live queue that shows latency exploding as a server nears saturation, with Little's Law.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -31,12 +29,13 @@
 <body data-anim="continuous">
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← HLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">HLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Week 1 · H5 · Networking Fundamentals</div>
+    <p class="crumbs">Week 1 / H5 / Networking Fundamentals</p>
     <h1>Latency, Percentiles & Queueing</h1>
     <ul class="lede"><li><b>Latency</b>: how long one request takes.</li><li><b>Throughput</b>: how many requests finish per second.</li><li><b>Percentiles</b> (p50 / p95 / p99) show how latency is spread, especially the slow tail.</li><li>Near capacity, requests <b>queue</b>, and latency rises much faster than load.</li></ul>
   </header>
@@ -66,10 +65,10 @@
       <svg class="diagram" id="hist" viewBox="0 0 1000 300" aria-label="Histogram of request latencies with markers for average, p50, p95 and p99"></svg>
     </div>
     <div class="kpis">
-      <div class="kpi"><b id="kAvg" style="color:var(--cyan)">–</b><span>Average</span></div>
-      <div class="kpi"><b id="kP50">–</b><span>p50 · typical user</span></div>
-      <div class="kpi accent"><b id="kP95">–</b><span>p95 · 1 in 20 slower</span></div>
-      <div class="kpi bad"><b id="kP99">–</b><span>p99 · 1 in 100 slower</span></div>
+      <div class="kpi"><b id="kAvg" style="color:var(--cyan)">…</b><span>Average</span></div>
+      <div class="kpi"><b id="kP50">…</b><span>p50 · typical user</span></div>
+      <div class="kpi accent"><b id="kP95">…</b><span>p95 · 1 in 20 slower</span></div>
+      <div class="kpi bad"><b id="kP99">…</b><span>p99 · 1 in 100 slower</span></div>
     </div>
     <p class="hint">Drag "Slow requests" from 0 to 2%. p50 barely moves, the average creeps up, and p99 jumps. The average describes nobody's real experience.</p>
   </div>
@@ -85,11 +84,11 @@
         <tbody>
           <tr><td>L1 CPU cache read</td><td class="mono">~1 ns</td><td>100× faster</td></tr>
           <tr><td>Main memory (RAM) read</td><td class="mono">~100 ns</td><td>1×</td></tr>
-          <tr><td>Read 1 MB from RAM</td><td class="mono">~10–50 µs</td><td></td></tr>
+          <tr><td>Read 1 MB from RAM</td><td class="mono">~10 to 50 µs</td><td></td></tr>
           <tr><td>Round trip inside one data centre</td><td class="mono">~0.5 ms</td><td>5,000×</td></tr>
-          <tr><td>Redis GET over the network</td><td class="mono">~0.5–1 ms</td><td>mostly the network hop</td></tr>
+          <tr><td>Redis GET over the network</td><td class="mono">~0.5 to 1 ms</td><td>mostly the network hop</td></tr>
           <tr><td>SSD random read</td><td class="mono">~0.1 ms</td><td>1,000×</td></tr>
-          <tr><td>Simple indexed SQL query</td><td class="mono">~1–5 ms</td><td></td></tr>
+          <tr><td>Simple indexed SQL query</td><td class="mono">~1 to 5 ms</td><td></td></tr>
           <tr><td>HDD seek</td><td class="mono">~10 ms</td><td>100,000×</td></tr>
           <tr><td>Round trip Mumbai ↔ Singapore</td><td class="mono">~60 ms</td><td></td></tr>
           <tr><td>Round trip India ↔ US East</td><td class="mono">~200 ms</td><td>2,000,000×</td></tr>
@@ -126,10 +125,10 @@
       </div>
       <div class="side">
         <div class="kpis" style="margin-top:0;grid-template-columns:repeat(2,minmax(0,1fr))">
-          <div class="kpi"><b id="kRho">–</b><span>Utilisation</span></div>
-          <div class="kpi accent"><b id="kW">–</b><span>Avg latency (theory)</span></div>
-          <div class="kpi"><b id="kL">–</b><span>In flight (Little's Law)</span></div>
-          <div class="kpi"><b id="kQ">–</b><span>Queue right now</span></div>
+          <div class="kpi"><b id="kRho">…</b><span>Utilisation</span></div>
+          <div class="kpi accent"><b id="kW">…</b><span>Avg latency (theory)</span></div>
+          <div class="kpi"><b id="kL">…</b><span>In flight (Little's Law)</span></div>
+          <div class="kpi"><b id="kQ">…</b><span>Queue right now</span></div>
         </div>
         <div class="card"><div class="label">What to notice</div><p id="qNote" style="margin:0"></p></div>
       </div>
@@ -172,9 +171,9 @@
       <li><span class="if">Can't serve enough users</span><span class="arrow">→</span><span class="then">Throughput: find the saturated resource</span></li>
       <li><span class="if">Big downloads are slow, small ones fine</span><span class="arrow">→</span><span class="then">Bandwidth</span></li>
       <li><span class="if">Concurrency needed</span><span class="arrow">→</span><span class="then">Little's Law: in-flight = throughput × latency</span></li>
-      <li><span class="if">Server above ~70–80% busy</span><span class="arrow">→</span><span class="then">Queueing makes latency climb steeply</span></li>
+      <li><span class="if">Server above ~70 to 80% busy</span><span class="arrow">→</span><span class="then">Queueing makes latency climb steeply</span></li>
       <li><span class="if">One page calls 10 services</span><span class="arrow">→</span><span class="then">Tail latency: the slowest call sets the page time</span></li>
-      <li><span class="if">Memory vs network vs another continent</span><span class="arrow">→</span><span class="then">~100 ns · ~0.5 ms · ~200 ms</span></li>
+      <li><span class="if">Memory vs network vs another continent</span><span class="arrow">→</span><span class="then">~100 ns, ~0.5 ms, ~200 ms</span></li>
     </ul>
   </section>
 

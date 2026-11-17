@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Global Infrastructure</title>
 <meta name="description" content="AWS Cloud Practitioner: Route 53 routing policies with users around the world, CloudFront vs Global Accelerator vs S3 Transfer Acceleration, and picking the right global service.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
@@ -16,7 +14,7 @@
   .usr circle { fill: var(--accent-text); }
   .usr text, .rg text { fill: var(--fg); font-size: 12.5px; font-weight: 600; text-anchor: middle; }
   .rg rect { fill: var(--panel); stroke: var(--teal); stroke-width: 2; transition: stroke .2s, fill .2s; }
-  .rg .sm { fill: var(--muted); font-family: var(--mono); font-size: 10.5px; font-weight: 400; }
+  .rg .sm { fill: var(--muted); font-family: var(--mono); font-size: 12px; font-weight: 400; }
   .rg.down rect { stroke: var(--red); fill: var(--panel-2); }
   .rg.hit rect { fill: var(--teal-wash); }
   .route { fill: none; stroke-width: 2.5; stroke: var(--cyan); opacity: .8; }
@@ -26,7 +24,7 @@
   .net-aws { fill: none; stroke: var(--teal); stroke-width: 4; opacity: .7; }
   .svc rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
   .svc text { fill: var(--fg); font-size: 13px; font-weight: 700; text-anchor: middle; }
-  .svc .sm { fill: var(--muted); font-family: var(--mono); font-size: 10.5px; font-weight: 400; }
+  .svc .sm { fill: var(--muted); font-family: var(--mono); font-size: 12px; font-weight: 400; }
   .svc.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
   .svc.fade text { opacity: .45; }
   .udot { fill: var(--accent-text); }
@@ -38,12 +36,13 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">AWS CLF-C02 · Section 12 · Domain 3 Technology &amp; Services (Tasks 3.2, 3.5)</div>
+    <p class="crumbs">AWS CLF-C02 / Section 12 / Domain 3 Technology &amp; Services (Tasks 3.2, 3.5)</p>
     <h1>Global Infrastructure</h1>
     <ul class="lede">
       <li>Going global gives <b>lower latency</b>, <b>disaster recovery</b> and <b>resilience</b> against attacks.</li>
@@ -149,7 +148,7 @@
           <tr><td><b>Latency</b></td><td>To the Region with the lowest latency for them</td><td>Global performance</td></tr>
           <tr><td><b>Failover</b></td><td>To primary while healthy, else secondary</td><td>Disaster recovery (active-passive)</td></tr>
           <tr><td><b>Geolocation</b></td><td>By the user's country or continent</td><td>Localised content, data-residency rules</td></tr>
-          <tr><td>Geoproximity · IP-based · Multivalue</td><td>By distance with bias · by client IP range · several healthy answers</td><td>Rarely asked at this level</td></tr>
+          <tr><td>Geoproximity, IP-based, Multivalue</td><td>By distance with bias, by client IP range, several healthy answers</td><td>Rarely asked at this level</td></tr>
         </tbody>
       </table>
     </div>

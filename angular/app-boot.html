@@ -1,19 +1,17 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>How an Angular app boots</title>
 <meta name="description" content="Angular 22: from ng new to pixels. Follow CareDesk from the CLI through index.html, main.ts and bootstrapApplication until the App component fills app-root.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
 <script src="../assets/js/theme.js"></script>
 <script src="../assets/js/explainer-kit.js"></script>
 <style>
-  .ng-left { display: grid; gap: 12px; min-width: 0; align-content: start; }
+  .ng-left { display: grid; gap: var(--space-sm); min-width: 0; align-content: start; }
   .lane-h rect { fill: var(--panel-2); stroke: var(--line); stroke-width: 1.5; }
   .lane-h text { fill: var(--fg); font-weight: 700; font-size: 13px; text-anchor: middle; }
   .lifeline { stroke: var(--line); stroke-width: 2; stroke-dasharray: 3 5; }
@@ -25,10 +23,10 @@
   .sq.old { opacity: .45; }
   .sq.gone { opacity: 0; }
   .sq-ah { fill: var(--fg-soft); } .sq.now .sq-ah { fill: var(--cyan); }
-  .appwin-body h1 { margin: 0; font-size: 22px; } .appwin-body p { margin: 2px 0 0; color: var(--muted); }
+  .appwin-body h1 { margin: 0; font-size: 22px; } .appwin-body p { margin: var(--space-3xs) 0 0; color: var(--muted); }
   .appwin-body .empty { font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
-  .pipe { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr)); gap: 8px; margin-top: 12px; }
-  .pipe div { border: 1.5px solid var(--line); border-radius: 10px; padding: 8px 10px; background: var(--panel); font-size: 13px; text-align: center; transition: border-color .25s; }
+  .pipe { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .pipe div { border: 1.5px solid var(--line); border-radius: 0; padding: var(--space-xs) var(--space-xs); background: var(--panel); font-size: 13px; text-align: center; transition: border-color .25s; }
   .pipe div b { display: block; font-size: 14px; }
   .pipe div.ok { border-color: var(--teal); } .pipe div.bad { border-color: var(--red); } .pipe div.skip { opacity: .4; }
   .err-out { font-family: var(--mono); font-size: 12.5px; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
@@ -37,12 +35,13 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← Angular roadmap</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">Angular roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Angular 22 · Part 1 · Foundations</div>
+    <p class="crumbs">Angular 22 / Part 1 / Foundations</p>
     <h1>How an Angular app boots</h1>
     <ul class="lede">
       <li><b>Node.js and the Angular CLI</b> are build tools on your machine. The app itself runs in the <b>browser</b>.</li>
@@ -115,7 +114,7 @@
           <tr><td class="mono">src/index.html</td><td>the single HTML page; holds <span class="mono">&lt;app-root&gt;</span></td></tr>
           <tr><td class="mono">src/main.ts</td><td>entry point: bootstraps <span class="mono">App</span></td></tr>
           <tr><td class="mono">src/styles.css</td><td>global styles</td></tr>
-          <tr><td class="mono">src/app/app.ts · .html · .css</td><td>the root component: class, template, component-scoped styles</td></tr>
+          <tr><td class="mono">src/app/app.ts, .html, .css</td><td>the root component: class, template, component-scoped styles</td></tr>
           <tr><td class="mono">src/app/app.config.ts</td><td>app-wide providers (<span class="mono">provideRouter</span>, error listeners)</td></tr>
           <tr><td class="mono">src/app/app.routes.ts</td><td>the route table (empty for now; filled on the Routing page)</td></tr>
           <tr><td class="mono">public/</td><td>static files copied as-is (favicon, images)</td></tr>

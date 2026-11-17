@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Builder</title>
 <meta name="description" content="Creational pattern L15: build a complex object step by step. An appointment with many optional parts moves from telescoping constructors to a fluent builder that validates in Build(), plus a director for presets and when C# object initializers are enough.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -14,17 +12,17 @@
 <script src="../../assets/js/explainer-kit.js"></script>
 <script src="../sd-series.js"></script>
 <style>
-  .result { margin-top: 10px; border: 2px solid var(--line); border-radius: 12px; padding: 12px 14px; background: var(--panel); min-height: 60px; transition: border-color .25s; }
+  .result { margin-top: var(--space-xs); border: 2px solid var(--line); border-radius: 0; padding: var(--space-sm) var(--space-sm); background: var(--panel); min-height: 60px; transition: border-color .25s; }
   .result.ok { border-color: var(--teal); }
   .result.bad { border-color: var(--red); }
-  .result dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; margin: 6px 0 0; font-size: 13.5px; }
+  .result dl { display: grid; grid-template-columns: max-content 1fr; gap: var(--space-2xs) var(--space-sm); margin: var(--space-2xs) 0 0; font-size: 13.5px; }
   .result dt { font-family: var(--mono); color: var(--muted); }
   .result dd { margin: 0; }
-  .result ul { margin: 6px 0 0; padding-left: 18px; color: var(--bad-text); font-size: 14px; }
-  .bars { display: grid; gap: 8px; margin-top: 12px; }
-  .bar { display: grid; grid-template-columns: 170px 1fr 70px; gap: 10px; align-items: center; font-size: 13px; }
-  .bar .track { height: 18px; background: var(--panel-2); border-radius: 6px; overflow: hidden; }
-  .bar .fill { height: 100%; border-radius: 6px; transition: width .3s; }
+  .result ul { margin: var(--space-2xs) 0 0; padding-left: var(--space-md); color: var(--bad-text); font-size: 14px; }
+  .bars { display: grid; gap: var(--space-xs); margin-top: var(--space-sm); }
+  .bar { display: grid; grid-template-columns: 170px 1fr 70px; gap: var(--space-xs); align-items: center; font-size: 13px; }
+  .bar .track { height: 18px; background: var(--panel-2); border-radius: 0; overflow: hidden; }
+  .bar .fill { height: 100%; border-radius: 0; transition: none; }
   .bar .fill.bad { background: var(--red); }
   .bar .fill.ok { background: var(--teal); }
   .bar b { font-family: var(--mono); text-align: right; }
@@ -34,12 +32,13 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← LLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">LLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">System Design · LLD · Creational · L15</div>
+    <p class="crumbs">System Design / LLD / Creational / L15</p>
     <h1>Builder</h1>
     <ul class="lede">
       <li>Build a complex object <b>step by step</b> through readable method calls, then get the finished object from <span class="mono">Build()</span>.</li>
@@ -64,7 +63,7 @@
     </div>
     <div class="sub-block">
       <h3 class="stage-title sub">The same thing in C#</h3>
-      <div class="stage-kind">Before · the builder · calling it</div>
+      <div class="stage-kind">Before, the builder, calling it</div>
       <div class="cs-pair">
         <div><div class="label bad-text">Before: telescoping constructors</div><pre class="codeblock" id="csBefore"></pre></div>
         <div><div class="label ok-text">After: call sites read like a sentence</div><pre class="codeblock" id="csUse"></pre></div>
@@ -82,7 +81,7 @@
       <table>
         <thead><tr><th>Approach</th><th>Readable call site?</th><th>Validates the combination?</th><th>Immutable result?</th><th>Use when</th></tr></thead>
         <tbody>
-          <tr><td>Telescoping constructors</td><td class="bad-text">No: positional <span class="mono">true, null, 2</span></td><td>per constructor</td><td>yes</td><td>2–3 parameters only</td></tr>
+          <tr><td>Telescoping constructors</td><td class="bad-text">No: positional <span class="mono">true, null, 2</span></td><td>per constructor</td><td>yes</td><td>2 to 3 parameters only</td></tr>
           <tr><td>Optional / named arguments</td><td>yes, if callers name them</td><td>in the constructor</td><td>yes</td><td>a few independent options</td></tr>
           <tr><td>Object initializer + <span class="mono">required</span> / <span class="mono">init</span></td><td class="ok-text">yes</td><td>only "is it set?" (no cross-field rules)</td><td>yes (<span class="mono">init</span>)</td><td>simple DTOs and options</td></tr>
           <tr><td>Builder</td><td class="ok-text">yes, fluent</td><td class="ok-text">yes, in <span class="mono">Build()</span></td><td class="ok-text">yes</td><td>many optional parts, rules between them, step-by-step or reusable presets</td></tr>

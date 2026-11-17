@@ -1,49 +1,48 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Signals</title>
 <meta name="description" content="Angular 22 signals on CareDesk's patient list: signal, computed, linkedSignal and effect as a dependency graph. Watch a search keystroke mark dependants dirty and pull fresh values, with logs from a real run.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
 <script src="../assets/js/theme.js"></script>
 <script src="../assets/js/explainer-kit.js"></script>
 <style>
-  .ng-left { display: grid; gap: 12px; min-width: 0; align-content: start; }
+  .ng-left { display: grid; gap: var(--space-sm); min-width: 0; align-content: start; }
   .sg .edge { stroke: var(--line); stroke-width: 2; fill: none; transition: stroke .2s, stroke-width .2s; }
   .sg .edge.hot { stroke: var(--cyan); stroke-width: 3; }
   .sg .sn rect { fill: var(--panel); stroke-width: 2.5; transition: fill .2s, stroke-width .2s; }
   .sg .sn.k-signal rect { stroke: var(--teal); } .sg .sn.k-computed rect { stroke: var(--cyan); } .sg .sn.k-linked rect { stroke: var(--violet); } .sg .sn.k-effect rect { stroke: var(--orange); } .sg .sn.k-tpl rect { stroke: var(--muted); stroke-dasharray: 5 4; }
   .sg .sn .t { fill: var(--fg); font-weight: 700; font-size: 13px; text-anchor: middle; }
-  .sg .sn .k { fill: var(--muted); font-family: var(--mono) !important; font-size: 10.5px; text-anchor: middle; }
+  .sg .sn .k { fill: var(--muted); font-family: var(--mono) !important; font-size: 12px; text-anchor: middle; }
   .sg .sn .v { fill: var(--fg-soft); font-family: var(--mono) !important; font-size: 11px; text-anchor: middle; }
   .sg .sn.dirty rect { fill: color-mix(in srgb, var(--orange) 22%, var(--panel)); }
   .sg .sn.ran rect { fill: var(--teal-wash); stroke-width: 4; }
   .sg .sn.same rect { fill: var(--panel-2); }
   .sg .sn.idle { opacity: .45; }
-  .sg .badge { font-family: var(--mono) !important; font-size: 10.5px; font-weight: 700; }
+  .sg .badge { font-family: var(--display) !important; font-size: 12px; font-weight: 700; }
   .sg .badge.dirty { fill: var(--orange); } .sg .badge.ran { fill: var(--good-text); } .sg .badge.same { fill: var(--muted); }
-  .keys { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--fg-soft); }
-  .keys span::before { content: ''; display: inline-block; width: 14px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: 0; border: 2px solid var(--teal); }
+  .keys { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-sm); font-size: 12.5px; color: var(--fg-soft); }
+  .keys span::before { content: ''; display: inline-block; width: 14px; height: 10px; border-radius: 0; margin-right: var(--space-2xs); vertical-align: 0; border: 2px solid var(--teal); }
   .keys .kc::before { border-color: var(--cyan); } .keys .kl::before { border-color: var(--violet); } .keys .ke::before { border-color: var(--orange); } .keys .kt::before { border-color: var(--muted); border-style: dashed; }
-  .lab-ctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
-  .lab-ctl input[type=text] { font: inherit; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); width: 200px; max-width: 100%; }
+  .lab-ctl { display: flex; flex-wrap: wrap; gap: var(--space-xs); align-items: center; margin-top: var(--space-xs); }
+  .lab-ctl input[type=text] { font: inherit; padding: var(--space-2xs) var(--space-xs); border-radius: 0; background: var(--panel-2); color: var(--fg); width: 200px; max-width: 100%; }
   .slog { font-family: var(--mono); font-size: 12.5px; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; min-height: 6em; color: var(--fg-soft); }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← Angular roadmap</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">Angular roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Angular 22 · Part 2 · Data flow · added topic</div>
+    <p class="crumbs">Angular 22 / Part 2 / Data flow / added topic</p>
     <h1>Signals</h1>
     <ul class="lede">
       <li>A <span class="mono">signal</span> is a value that tells its readers when it changes. Read it by calling it: <span class="mono">search()</span>.</li>
@@ -58,7 +57,7 @@
 
   <section aria-labelledby="storyH">
     <h2 class="stage-title" id="storyH">Walkthrough: the waiting room as a signal graph</h2>
-    <div class="stage-kind">Orange = marked dirty · green = re-ran · grey = re-ran but value equal · logs from the real run</div>
+    <div class="stage-kind">Orange = marked dirty, green = re-ran, grey = re-ran but value equal, logs from the real run</div>
     <div class="story" id="sgStory">
       <div class="ng-left">
         <div class="scroll"><svg class="diagram sg" id="sgSvg" style="min-width:0" viewBox="0 0 700 330" role="img" aria-label="Signal graph: patients and search feed filtered, which feeds urgent and first; first feeds note; search feeds an effect; template reads the results"></svg></div>
@@ -97,12 +96,12 @@
       <table>
         <thead><tr><th>API</th><th>Writable?</th><th>Runs when</th><th>CareDesk</th></tr></thead>
         <tbody>
-          <tr><td class="mono">signal(v)</td><td>yes</td><td>—</td><td class="mono">patients, search, message</td></tr>
+          <tr><td class="mono">signal(v)</td><td>yes</td><td>none</td><td class="mono">patients, search, message</td></tr>
           <tr><td class="mono">computed(fn)</td><td>no</td><td>read after a dependency changed</td><td class="mono">filtered, urgent, first</td></tr>
           <tr><td class="mono">linkedSignal(...)</td><td>yes</td><td>read after its source changed (resets)</td><td class="mono">note</td></tr>
-          <tr><td class="mono">effect(fn)</td><td>—</td><td>after a dependency changed, scheduled once</td><td>save search to localStorage</td></tr>
+          <tr><td class="mono">effect(fn)</td><td>none</td><td>after a dependency changed, scheduled once</td><td>save search to localStorage</td></tr>
           <tr><td class="mono">input() / model()</td><td>no / yes</td><td>parent binds a new value</td><td class="mono">patient, note on the card</td></tr>
-          <tr><td class="mono">resource / httpResource</td><td>—</td><td>params change → async load</td><td>step 15 (API)</td></tr>
+          <tr><td class="mono">resource / httpResource</td><td>none</td><td>params change → async load</td><td>step 15 (API)</td></tr>
         </tbody>
       </table>
     </div>

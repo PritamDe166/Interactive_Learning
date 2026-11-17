@@ -1,32 +1,31 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SSH into EC2</title>
 <meta name="description" content="AWS Cloud Practitioner: connect to a Linux EC2 instance with SSH on port 22 using a key pair; the .pem private key, chmod 400, ec2-user, PuTTY and .ppk, RDP for Windows, and the common errors.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
 <script src="../assets/js/theme.js"></script>
 <script src="../assets/js/explainer-kit.js"></script>
 <style>
-  .term { background: var(--code-bg); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; font-family: var(--mono); font-size: 13px; color: var(--fg-soft); min-height: 110px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .term { background: var(--code-bg); border: 1px solid var(--line); border-radius: 0; padding: var(--space-xs) var(--space-sm); font-family: var(--mono); font-size: 13px; color: var(--fg-soft); min-height: 110px; white-space: pre-wrap; overflow-wrap: anywhere; }
   .term .p { color: var(--good-text); } .term .e { color: var(--bad-text); } .term .h { color: var(--accent-text); }
-  .faults { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 6px 16px; }
+  .faults { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: var(--space-2xs) var(--space-md); }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">AWS CLF-C02 · EC2 · hands-on skill</div>
+    <p class="crumbs">AWS CLF-C02 / EC2 / hands-on skill</p>
     <h1>SSH into EC2</h1>
     <ul class="lede">
       <li><b>SSH</b> (Secure Shell) opens a remote terminal on a <b>Linux</b> instance over <b>port 22</b>.</li>

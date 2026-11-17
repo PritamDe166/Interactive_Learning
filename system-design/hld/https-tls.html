@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>HTTPS & the TLS Handshake</title>
 <meta name="description" content="Day 4: TLS 1.2 vs TLS 1.3 handshakes on a timeline showing where encryption starts, and a certificate validator you can break.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -18,12 +16,13 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← HLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">HLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Week 1 · H4 · Networking Fundamentals</div>
+    <p class="crumbs">Week 1 / H4 / Networking Fundamentals</p>
     <h1>HTTPS & the TLS Handshake</h1>
     <ul class="lede"><li><b>HTTPS = HTTP over TLS.</b></li><li>Job 1: <b>prove the server's identity</b> with a certificate.</li><li>Job 2: <b>agree on shared keys</b> during the handshake.</li><li>After that, everything is encrypted with fast <b>symmetric</b> crypto.</li></ul>
   </header>
@@ -63,9 +62,9 @@
       </svg>
     </div>
     <div class="kpis">
-      <div class="kpi accent"><b id="kRtt">–</b><span>Round trips before the request leaves</span></div>
-      <div class="kpi"><b id="kCert">–</b><span>Certificate travels</span></div>
-      <div class="kpi"><b id="kFs">–</b><span>Forward secrecy</span></div>
+      <div class="kpi accent"><b id="kRtt">…</b><span>Round trips before the request leaves</span></div>
+      <div class="kpi"><b id="kCert">…</b><span>Certificate travels</span></div>
+      <div class="kpi"><b id="kFs">…</b><span>Forward secrecy</span></div>
     </div>
     <div class="notes" style="margin-top:14px">
       <div class="note"><p><b>In TLS 1.3, key agreement happens first, not after certificate validation.</b> The key shares ride in ClientHello and ServerHello, so both sides derive handshake keys immediately and the certificate is sent <i>encrypted</i>. The order certificate → validate → key establishment is TLS 1.2.</p></div>
@@ -128,7 +127,7 @@
     <h3 class="sec-h3" id="moreH">Around the handshake</h3>
     <div class="cards">
       <div class="card"><h3>Asymmetric, then symmetric</h3><p>Public-key crypto (Diffie-Hellman, signatures) is slow but lets strangers agree on a secret. The bulk data then uses fast symmetric ciphers such as AES-GCM.</p></div>
-      <div class="card"><h3>TLS termination</h3><p>A load balancer or CDN can decrypt at the edge, which centralises certificates. Internal hops can be re-encrypted when the data is sensitive. More on Days 10–12.</p></div>
+      <div class="card"><h3>TLS termination</h3><p>A load balancer or CDN can decrypt at the edge, which centralises certificates. Internal hops can be re-encrypted when the data is sensitive. More on Days 10 to 12.</p></div>
       <div class="card"><h3>What HTTPS doesn't hide</h3><ul><li>IP addresses, timing and sizes</li><li>Usually the hostname, via SNI (unless Encrypted Client Hello is used)</li><li>DNS lookups, unless DoH or DoT is on</li></ul></div>
     </div>
   </div>

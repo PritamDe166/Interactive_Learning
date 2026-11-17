@@ -1,21 +1,19 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Shared Responsibility Model</title>
 <meta name="description" content="AWS Cloud Practitioner: pick EC2, RDS, Lambda, S3 or IAM and watch each security duty slide between AWS and you; then judge real incidents.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
 <script src="../assets/js/theme.js"></script>
 <script src="../assets/js/explainer-kit.js"></script>
 <style>
-  .col-head { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-anchor: middle; }
+  .col-head { font-family: var(--display); font-size: 13px; text-anchor: middle; }
   .col-bg { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; }
-  .duty { transition: transform .55s cubic-bezier(.4,.1,.2,1), opacity .3s; }
+  .duty { transition: transform .55s cubic-bezier(.4, .1, .2, 1), opacity .3s; }
   .duty rect { stroke-width: 0; }
   .duty.aws rect { fill: var(--yellow); }
   .duty.you rect { fill: var(--pill); }
@@ -35,18 +33,19 @@
   .side { font-family: var(--mono); font-size: 14px; font-weight: 700; text-anchor: middle; }
   .side.you { fill: var(--accent-text); }
   .side.aws { fill: var(--good-text); }
-  .divider { stroke: var(--red); stroke-width: 3; transition: all .4s; }
+  .divider { stroke: var(--red); stroke-width: 3; transition: opacity .4s, transform .4s, background-color .4s, color .4s, border-color .4s, fill .4s, stroke .4s; }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">AWS CLF-C02 · Cloud &amp; AWS overview · Domain 2 Security &amp; Compliance (Task 2.1)</div>
+    <p class="crumbs">AWS CLF-C02 / Cloud &amp; AWS overview / Domain 2 Security &amp; Compliance (Task 2.1)</p>
     <h1>Shared responsibility model</h1>
     <ul class="lede"><li><b>AWS: security <i>of</i> the cloud</b>. Data centres, hardware, network, and the software running its services.</li><li><b>You: security <i>in</i> the cloud</b>. Your data, who can access it, and how you configure each service.</li><li>The line <b>moves with the service</b>: the more AWS manages, the less you do.</li></ul>
   </header>
@@ -104,9 +103,9 @@
       <svg class="diagram" id="slide" viewBox="0 0 1000 480" aria-label="Ten security duties arranged in three columns: AWS, shared, you"></svg>
     </div>
     <div class="kpis">
-      <div class="kpi accent"><b id="kAws">–</b><span>Duties AWS owns</span></div>
-      <div class="kpi"><b id="kShared">–</b><span>Shared</span></div>
-      <div class="kpi" style="--x:0"><b id="kYou">–</b><span>Duties you own</span></div>
+      <div class="kpi accent"><b id="kAws">…</b><span>Duties AWS owns</span></div>
+      <div class="kpi"><b id="kShared">…</b><span>Shared</span></div>
+      <div class="kpi" style="--x:0"><b id="kYou">…</b><span>Duties you own</span></div>
     </div>
     <div class="card" style="margin-top:12px"><div class="label">Why it lands this way</div><p id="svcWhy" style="margin:0"></p></div>
   </section>
@@ -165,7 +164,7 @@
     </div>
   </section>
 
-  <footer>Duty assignments simplify AWS's published model for exam use; exact details vary by feature. Sources: "Shared Responsibility Model diagram", "Shared Responsibility Model for IAM", "Shared Responsibility model for EC2", "Shared responsibility model – EC2 Storage", "Shared Responsibility Model – S3", and the IAM and Databases CLF-C02 exam summaries.</footer>
+  <footer>Duty assignments simplify AWS's published model for exam use; exact details vary by feature. Sources: "Shared Responsibility Model diagram", "Shared Responsibility Model for IAM", "Shared Responsibility model for EC2", "Shared responsibility model, EC2 Storage", "Shared Responsibility Model, S3", and the IAM and Databases CLF-C02 exam summaries.</footer>
 </div>
 
 <script src="topics.js"></script>

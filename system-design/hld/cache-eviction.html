@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cache Eviction Policies</title>
 <meta name="description" content="H18: LRU, LFU, FIFO and TTL, animated; how an LRU cache is built from a hash map and a doubly linked list; and a three-way eviction race.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -15,25 +13,25 @@
 <script src="../sd-series.js"></script>
 <script src="caching-flows.js"></script>
 <style>
-  .cev-lab { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
-  .cev-panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; min-width: 0; }
-  .cev-panel h3 { margin: 0 0 2px; font-size: 17px; }
-  .cev-panel .rule { margin: 0 0 10px; font-size: 13px; color: var(--muted); }
-  .cev-slots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
-  .cev-slot { height: 56px; border-radius: 10px; border: 1px dashed var(--line); display: grid; place-items: center; align-content: center; gap: 2px; font-family: var(--mono); }
+  .cev-lab { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-sm); margin-top: var(--space-sm); }
+  .cev-panel { background: var(--panel); border-radius: 0; padding: var(--space-sm) var(--space-sm); min-width: 0; }
+  .cev-panel h3 { margin: 0 0 var(--space-3xs); font-size: 17px; }
+  .cev-panel .rule { margin: 0 0 var(--space-xs); font-size: 13px; color: var(--muted); }
+  .cev-slots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2xs); }
+  .cev-slot { height: 56px; border-radius: 0; border: 1px dashed var(--line); display: grid; place-items: center; align-content: center; gap: var(--space-3xs); font-family: var(--mono); }
   .cev-slot b { font-size: 19px; color: var(--fg); }
   .cev-slot small { font-size: 10px; color: var(--muted); }
   .cev-slot.full { border-style: solid; background: var(--panel-2); }
   .cev-slot.hit { border-color: var(--teal); background: color-mix(in srgb, var(--teal) 22%, var(--panel)); }
   .cev-slot.new { border-color: var(--accent-text); background: color-mix(in srgb, var(--yellow) 18%, var(--panel)); }
-  .cev-ev { margin: 8px 0 0; font-size: 13px; min-height: 2.6em; color: var(--fg-soft); overflow-wrap: anywhere; }
+  .cev-ev { margin: var(--space-xs) 0 0; font-size: 13px; min-height: 2.6em; color: var(--fg-soft); overflow-wrap: anywhere; }
   .cev-score { font-family: var(--mono); font-size: 12px; color: var(--muted); }
   .cev-score b { color: var(--fg); font-size: 15px; }
-  .cev-keys { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 12px; }
+  .cev-keys { display: flex; flex-wrap: wrap; gap: var(--space-2xs); justify-content: center; margin-top: var(--space-sm); }
   .cev-keys .btn { min-width: 44px; font-family: var(--mono); font-weight: 600; }
-  .cev-seq { font-family: var(--mono); font-size: 12.5px; color: var(--muted); text-align: center; margin: 10px 0 0; overflow-wrap: anywhere; }
+  .cev-seq { font-family: var(--mono); font-size: 12.5px; color: var(--muted); text-align: center; margin: var(--space-xs) 0 0; overflow-wrap: anywhere; }
   .cev-seq b { color: var(--accent-text); }
-  .cev-predict { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; margin-top: 8px; font-size: 14px; }
+  .cev-predict { display: flex; flex-wrap: wrap; gap: var(--space-2xs); align-items: center; justify-content: center; margin-top: var(--space-xs); font-size: 14px; }
   .cev-predict .btn[aria-pressed="true"] { border-color: var(--accent-text); color: var(--accent-text); }
   @media (max-width: 760px) { .cev-lab { grid-template-columns: minmax(0, 1fr); } }
 </style>
@@ -41,12 +39,13 @@
 <body data-anim="continuous">
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← HLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">HLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Week 3 · H18 · Caching &amp; CDN</div>
+    <p class="crumbs">Week 3 / H18 / Caching &amp; CDN</p>
     <h1>Cache Eviction Policies</h1>
     <ul class="lede">
       <li>Memory is finite: when the cache is full, an <b>eviction policy</b> picks which key leaves.</li>
@@ -74,17 +73,17 @@
   <section id="try" data-nav="Try it">
     <h2 class="sec-h"><span class="sec-n">3</span>Try it: LRU vs LFU vs FIFO</h2>
     <p class="sec-sub">Same keys, same 3 slots, three eviction rules. Predict the winner, then play a preset or click keys yourself. <span class="mono">(Highest hit count wins)</span></p>
-    <ol class="howto"><li><span>Predict a winner (optional)</span></li><li><span>Press a preset, or click keys A–F</span></li><li><span>Compare the hit counts in the three panels</span></li></ol>
+    <ol class="howto"><li><span>Predict a winner (optional)</span></li><li><span>Press a preset, or click keys A to F</span></li><li><span>Compare the hit counts in the three panels</span></li></ol>
     <div class="cev-predict" id="predict">Predict the winner: <button class="btn" type="button" data-p="LRU">LRU</button><button class="btn" type="button" data-p="LFU">LFU</button><button class="btn" type="button" data-p="FIFO">FIFO</button></div>
     <div class="cev-lab" id="panels"></div>
     <div class="cev-keys" id="keys"></div>
     <div class="controls">
-      <button class="btn" type="button" data-preset="burst">1 · hot keys + one-off scan</button>
-      <button class="btn" type="button" data-preset="shift">2 · popularity shifts</button>
-      <button class="btn" type="button" data-preset="fifo">3 · one very hot key</button>
+      <button class="btn" type="button" data-preset="burst">1. hot keys + one-off scan</button>
+      <button class="btn" type="button" data-preset="shift">2. popularity shifts</button>
+      <button class="btn" type="button" data-preset="fifo">3. one very hot key</button>
       <button class="btn" type="button" id="labReset">Reset</button>
     </div>
-    <p class="cev-seq" id="seq">Sequence: –</p>
+    <p class="cev-seq" id="seq">Sequence: none yet</p>
     <p class="hint" id="labHint">Pick a preset. Each one is designed so a different policy looks good or bad.</p>
   </section>
 
@@ -195,9 +194,9 @@
   /* ---------- three-way race ---------- */
   const CAP = 3, KEYS = ['A', 'B', 'C', 'D', 'E', 'F'];
   const POL = { LRU: 'Evicts the key used least recently. Left = oldest.', LFU: 'Evicts the key used least often (oldest wins a tie).', FIFO: 'Evicts the key inserted first, however often it is read.' };
-  $('panels').innerHTML = Object.keys(POL).map(p => `<div class="cev-panel"><h3>${p}</h3><p class="rule">${POL[p]}</p><div class="cev-slots" id="s${p}"></div><p class="cev-ev" id="e${p}">Empty cache.</p><div class="cev-score">hits <b id="h${p}">0</b> · misses <b id="x${p}">0</b> · ratio <b id="r${p}">–</b></div></div>`).join('');
+  $('panels').innerHTML = Object.keys(POL).map(p => `<div class="cev-panel"><h3>${p}</h3><p class="rule">${POL[p]}</p><div class="cev-slots" id="s${p}"></div><p class="cev-ev" id="e${p}">Empty cache.</p><div class="cev-score">hits <b id="h${p}">0</b> · misses <b id="x${p}">0</b> · ratio <b id="r${p}">…</b></div></div>`).join('');
   let S, seq, t;
-  function reset() { S = { LRU: { list: [], hit: 0, miss: 0 }, FIFO: { list: [], hit: 0, miss: 0 }, LFU: { map: new Map(), hit: 0, miss: 0 } }; seq = []; t = 0; paint(null, {}); for (const p in POL) $('e' + p).textContent = 'Empty cache.'; $('seq').textContent = 'Sequence: –'; }
+  function reset() { S = { LRU: { list: [], hit: 0, miss: 0 }, FIFO: { list: [], hit: 0, miss: 0 }, LFU: { map: new Map(), hit: 0, miss: 0 } }; seq = []; t = 0; paint(null, {}); for (const p in POL) $('e' + p).textContent = 'Empty cache.'; $('seq').textContent = 'Sequence: none yet'; }
   function access(k) {
     t++; seq.push(k); const r = {};
     for (const p of ['LRU', 'FIFO']) { const s = S[p], i = s.list.indexOf(k);

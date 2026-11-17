@@ -1,0 +1,32 @@
+[
+ {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "site",
+  "shape": "Narrative Workflow",
+  "theme": "grid",
+  "axes": "light/grotesk-sans/cool",
+  "hero": "Stage",
+  "nav": "search-led bar",
+  "footer": "letter close",
+  "imagery": "screenshots 4 (capture.mjs)",
+  "photos": [],
+  "entry": "overprint head over a near-black field with the LRU lab",
+  "fingerprint": "stage/search-led/letter/index-rows/steps/field-search",
+  "sections": [
+   "hero",
+   "subjects index",
+   "how a page works (steps)",
+   "latest index with filter",
+   "find band",
+   "letter close"
+  ],
+  "signature": "the site LRU lab mid-run under an overprinted head",
+  "waived": [
+   "39b",
+   "44c"
+  ],
+  "prompt": "study explainers for interview prep: pick a subject, open an animated walkthrough",
+  "date": "2026-11-17"
+ }
+]

@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Stateless Applications</title>
 <meta name="description" content="Day 9: a shopping cart under three designs — server memory, sticky sessions, and external state in Redis — with crashes and load balancing that show why stateless servers scale.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -19,12 +17,13 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← HLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">HLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Week 2 · H9 · Scaling Fundamentals</div>
+    <p class="crumbs">Week 2 / H9 / Scaling Fundamentals</p>
     <h1>Stateless Applications</h1>
     <ul class="lede"><li><b>Stateless doesn't mean "no state".</b></li><li>It means no important state lives inside <b>one particular server</b>.</li><li>Keep it in a database, a shared cache or the client's token.</li><li>Then every server is <b>interchangeable</b>: any one can handle any request.</li></ul>
   </header>
@@ -55,8 +54,8 @@
     </div>
     <div class="kpis">
       <div class="kpi"><b id="kAdded">0</b><span>Items you added</span></div>
-      <div class="kpi" id="kSeenBox"><b id="kSeen">–</b><span>Items the page showed last</span></div>
-      <div class="kpi accent"><b id="kServer">–</b><span>Last request served by</span></div>
+      <div class="kpi" id="kSeenBox"><b id="kSeen">…</b><span>Items the page showed last</span></div>
+      <div class="kpi accent"><b id="kServer">…</b><span>Last request served by</span></div>
     </div>
     <div class="info-grid">
       <div class="card"><div class="label">What happened · newest first</div><ul class="log" id="log"><li>Add a few items, then view the cart.</li></ul></div>
@@ -141,7 +140,7 @@
 
   <nav id="prevnext"></nav>
 
-  <footer>Sources: Day 9 notes, "Stateless Applications"; sticky sessions also appear in Days 10–13.</footer>
+  <footer>Sources: Day 9 notes, "Stateless Applications"; sticky sessions also appear in Days 10 to 13.</footer>
 </div>
 
 <script>
@@ -237,7 +236,7 @@
     K.log($('log'), `<span class="bad-text">Server ${NAMES[target]} crashed.</span> ${mode === 'redis' ? 'It held nothing, so nothing is lost.' : 'Everything in its memory is gone.'}`);
     draw();
   });
-  function reset() { K.cancel('cart'); fresh(); draw(); $('kAdded').textContent = '0'; $('kSeen').textContent = '–'; $('kSeenBox').className = 'kpi'; $('kServer').textContent = '–'; K.resetLog($('log'), 'Add a few items, then view the cart.'); }
+  function reset() { K.cancel('cart'); fresh(); draw(); $('kAdded').textContent = '0'; $('kSeen').textContent = '…'; $('kSeenBox').className = 'kpi'; $('kServer').textContent = '…'; K.resetLog($('log'), 'Add a few items, then view the cart.'); }
   $('resetBtn').addEventListener('click', reset);
   K.seg($('modeSeg'), v => { mode = v; reset(); });
   reset();

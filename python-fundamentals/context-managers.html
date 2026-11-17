@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Context managers</title>
 <meta name="description" content="Python fundamentals: the with statement, __enter__ and __exit__, guaranteed cleanup when errors happen, and writing your own with contextlib.contextmanager.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
@@ -15,26 +13,27 @@
 <script src="traces/context-managers.js"></script>
 <style>
   .static-code { margin: 0; }
-  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
-  .tl-lanes { margin-top: 12px; display: grid; gap: 8px; }
-  .tl-lane { display: grid; grid-template-columns: 90px 1fr; gap: 10px; align-items: center; font-family: var(--mono); font-size: 13px; color: var(--fg-soft); }
-  .tl-track { height: 22px; border-radius: 11px; background: var(--panel-2); border: 1px solid var(--line); overflow: hidden; }
-  .tl-track i { display: block; height: 100%; width: 0; background: var(--cyan); transition: width .5s ease; }
+  .puzzle-area { display: grid; gap: var(--space-sm); margin-top: var(--space-sm); }
+  .tl-lanes { margin-top: var(--space-sm); display: grid; gap: var(--space-xs); }
+  .tl-lane { display: grid; grid-template-columns: 90px 1fr; gap: var(--space-xs); align-items: center; font-family: var(--mono); font-size: 13px; color: var(--fg-soft); }
+  .tl-track { height: 22px; border-radius: 0; background: var(--panel-2); overflow: hidden; }
+  .tl-track i { display: block; height: 100%; width: 0; background: var(--cyan); transition: none; }
   .tl-track i.on { width: 100%; }
   .tl-track i.bad { width: 55%; background: var(--red); }
   .tl-track i.skip { width: 100%; background: repeating-linear-gradient(45deg, var(--line) 0 6px, transparent 6px 12px); }
-  .fl-out { margin: 4px 0 0; min-height: 60px; white-space: pre-wrap; font-size: 14px; }
+  .fl-out { margin: var(--space-2xs) 0 0; min-height: 60px; white-space: pre-wrap; font-size: 14px; }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← Python Fundamentals</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">Python Fundamentals</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Python · Topic 17 · Going further</div>
+    <p class="crumbs">Python / Topic 17 / Going further</p>
     <h1>Context managers</h1>
     <ul class="lede"><li><span class="mono">with X as v:</span> calls <span class="mono">X.__enter__()</span> before the block (its return value becomes <span class="mono">v</span>) and <span class="mono">X.__exit__()</span> after it, <b>no matter how</b> the block ends.</li><li>That makes <span class="mono">with</span> the standard way to <b>acquire and release</b>: files, locks, database transactions, network connections, temporary settings.</li><li><span class="mono">__exit__</span> receives the exception (if any). Returning a true value <b>swallows</b> it; usually you return False and let it propagate.</li><li><span class="mono">@contextmanager</span> lets you write one as a generator: code before <span class="mono">yield</span> is enter, code after (in <span class="mono">finally</span>) is exit.</li></ul>
   </header>
@@ -52,13 +51,13 @@
 
   <section aria-labelledby="runH">
     <h2 class="stage-title" id="runH">Edit and run</h2>
-    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div class="stage-kind">Change the code, Run ▶ for the output, Step through to watch it run</div>
     <div id="runner"></div>
   </section>
 
   <section aria-labelledby="predH">
     <h2 class="stage-title" id="predH">Predict the output</h2>
-    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="stage-kind">Pick a puzzle, choose your answer, then step through it</div>
     <div class="chips" id="pzChips"></div>
     <div class="puzzle-area" id="pzArea"></div>
   </section>
@@ -107,7 +106,7 @@
     <h2 id="quizH">Check yourself</h2>
     <p class="sub">Say the answer out loud before you open each card.</p>
     <div class="quiz">
-      <details><summary><span class="mono">from contextlib import contextmanager\n@contextmanager\ndef tag(n):\n    print(f"&lt;{n}&gt;", end="")\n    yield\n    print(f"&lt;/{n}&gt;")\nwith tag("b"):\n    print("hi", end="")</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">from contextlib import contextmanager<br>@contextmanager<br>def tag(n):<br>    print(f"&lt;{n}&gt;", end="")<br>    yield<br>    print(f"&lt;/{n}&gt;")<br>with tag("b"):<br>    print("hi", end="")</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">&lt;b&gt;hi&lt;/b&gt;</b>. Before yield, the body, after yield.</p></div></details>
       <details><summary>Why put the code after <span class="mono">yield</span> inside <span class="mono">finally</span>?<span class="go">Show answer</span></summary>
         <div class="ans"><p>If the with-block raises, the exception is thrown into the generator at the <span class="mono">yield</span>. Without try/finally the cleanup lines after yield would be <b>skipped</b>.</p></div></details>

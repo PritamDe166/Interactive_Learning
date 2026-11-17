@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>System Design: HLD</title>
 <meta name="description" content="High-level design (HLD): interactive, animated explainers for the 147-session (H1–H147) system design roadmap.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/hub.css">
@@ -15,7 +13,8 @@
 <body>
 <div class="wrap">
   <div class="topbar">
-    <a class="back" href="../index.html">← System Design</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="../index.html">System Design</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
@@ -27,8 +26,8 @@
 
   <header class="hero">
     <div>
-      <div class="eyebrow">High-level design · 119 days · 17 weeks</div>
-      <h1>System Design <span class="y">HLD</span></h1>
+      <p class="crumbs">High-level design / 119 days / 17 weeks</p>
+      <h1>System Design HLD</h1>
       <p class="lede">How the pieces of a system fit together: networking, scaling, caching, data, distributed systems and reliability. Open an explainer, play with it, then close it and draw it from memory.</p>
       <svg class="flow" viewBox="0 0 560 90" aria-hidden="true">
         <path class="w" d="M70 45 H200"/><path class="w" d="M300 45 C340 45 350 18 400 18"/><path class="w" d="M300 45 H400"/><path class="w" d="M300 45 C340 45 350 72 400 72"/>
@@ -45,7 +44,7 @@
     <div class="stats">
       <div class="stat"><b id="sLive">0</b><span>Days covered</span></div>
       <div class="stat"><b id="sDays">0</b><span>Roadmap sessions</span></div>
-      <div class="stat"><b id="sNext">–</b><span>Next up</span></div>
+      <div class="stat"><b id="sNext">…</b><span>Next up</span></div>
       <div class="meter">
         <div class="row"><span>Roadmap covered</span><span id="sPct">0%</span></div>
         <div class="track"><i id="bar" style="width:0"></i></div>

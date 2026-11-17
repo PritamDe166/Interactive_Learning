@@ -1,39 +1,38 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>EBS volumes</title>
 <meta name="description" content="AWS Cloud Practitioner: Amazon EBS volumes are network drives for EC2, locked to one Availability Zone, persistent, detachable, with Delete on termination rules.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
 <script src="../assets/js/theme.js"></script>
 <script src="../assets/js/explainer-kit.js"></script>
 <style>
-  .lab-ctl { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
-  .lab-ctl select { font: inherit; color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; }
+  .lab-ctl { display: flex; flex-wrap: wrap; gap: var(--space-xs); align-items: center; margin-bottom: var(--space-sm); }
+  .lab-ctl select { font: inherit; color: var(--fg); background: var(--panel-2); border-radius: 0; padding: var(--space-xs) var(--space-xs); }
   .vt td { vertical-align: middle; }
-  .vt .btn { padding: 4px 10px; font-size: 13px; margin: 2px 4px 2px 0; }
-  .st { font-family: var(--mono); font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); white-space: nowrap; }
+  .vt .btn { padding: var(--space-2xs) var(--space-xs); font-size: 13px; margin: var(--space-3xs) var(--space-2xs) var(--space-3xs) 0; }
+  .st { font-family: var(--mono); font-size: 12px; padding: var(--space-3xs) var(--space-xs); border-radius: 0; border: 1px solid var(--line); white-space: nowrap; }
   .st.in-use { color: var(--good-text); border-color: var(--good-text); }
   .st.available { color: var(--cyan); border-color: var(--cyan); }
   .st.creating { color: var(--yellow); border-color: var(--yellow); }
   .st.deleted { color: var(--muted); text-decoration: line-through; }
-  .inst { font-size: 14px; color: var(--fg-soft); margin: 0 0 10px; }
+  .inst { font-size: 14px; color: var(--fg-soft); margin: 0 0 var(--space-xs); }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">AWS CLF-C02 · EC2 instance storage · 1</div>
+    <p class="crumbs">AWS CLF-C02 / EC2 instance storage / 1</p>
     <h1>EBS volumes</h1>
     <ul class="lede">
       <li><b>Amazon EBS</b> (Elastic Block Store) is the disk of an EC2 instance, but it is a <b>network drive</b>, not a disk inside the server.</li>
@@ -90,7 +89,7 @@
         <button class="btn" id="term" type="button">Terminate instance</button>
         <button class="btn" id="rst" type="button">Reset</button>
       </div>
-      <div class="scroll table-card">
+      <div class="scroll">
         <table class="vt"><thead><tr><th>Volume</th><th>State</th><th>Delete on term.</th><th>Actions</th></tr></thead><tbody id="vols"></tbody></table>
       </div>
       <p class="nf-cap" id="labCap">The instance runs in <b>us-east-1a</b> with its 8 GiB root volume.</p>

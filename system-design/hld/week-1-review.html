@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Week 1 Review: Journey of a Request</title>
 <meta name="description" content="Day 7: the whole of Week 1 in two views — a timeline of DNS, TCP, TLS and HTTP costs you can tune, and the protocol stack showing how a request is wrapped layer by layer.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -30,20 +28,21 @@
   .layer text { fill: var(--fg); font-family: var(--mono); font-size: 12px; }
   .layer.l-http text { fill: var(--ink); font-weight: 600; }
   .stacklist li.on { color: var(--fg); }
-  .draw-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
-  .draw-list li { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .draw-list { display: grid; gap: var(--space-xs); margin: 0; padding: 0; list-style: none; }
+  .draw-list li { display: flex; gap: var(--space-xs); align-items: baseline; flex-wrap: wrap; }
   .draw-list a { color: var(--cyan); font-family: var(--mono); font-size: 12px; }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← HLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">HLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Week 1 · H7 · Review</div>
+    <p class="crumbs">Week 1 / H7 / Review</p>
     <h1>Journey of a Request</h1>
     <ul class="lede"><li>Everything from Week 1 in two pictures.</li><li>The <b>timeline</b>: what happens and how long it takes. <b>DNS</b> finds, <b>TCP</b> connects, <b>TLS</b> secures, <b>HTTP</b> asks.</li><li>The <b>stack</b>: what carries it. Each layer wraps the one above.</li></ul>
   </header>
@@ -58,9 +57,9 @@
     <div class="stage-kind">Opening https://api.example.com/patients/123</div>
     <div class="controls">
       <div class="seg" id="distSeg" role="group" aria-label="Distance to server">
-        <button type="button" data-v="5" aria-pressed="false">Same city · 5 ms RTT</button>
-        <button type="button" data-v="30" aria-pressed="true">Bengaluru → Mumbai · ~30 ms</button>
-        <button type="button" data-v="230" aria-pressed="false">Bengaluru → US East · ~230 ms</button>
+        <button type="button" data-v="5" aria-pressed="false">Same city, 5 ms RTT</button>
+        <button type="button" data-v="30" aria-pressed="true">Bengaluru → Mumbai, ~30 ms</button>
+        <button type="button" data-v="230" aria-pressed="false">Bengaluru → US East, ~230 ms</button>
       </div>
     </div>
     <div class="controls">
@@ -74,9 +73,9 @@
       <svg class="diagram" id="gantt" viewBox="0 0 1000 250" aria-label="Gantt chart of request phases over time"></svg>
     </div>
     <div class="kpis">
-      <div class="kpi accent"><b id="kTtfb">–</b><span>Time to first byte</span></div>
-      <div class="kpi"><b id="kSetup">–</b><span>Spent before the request leaves</span></div>
-      <div class="kpi"><b id="kRtts">–</b><span>Network round trips</span></div>
+      <div class="kpi accent"><b id="kTtfb">…</b><span>Time to first byte</span></div>
+      <div class="kpi"><b id="kSetup">…</b><span>Spent before the request leaves</span></div>
+      <div class="kpi"><b id="kRtts">…</b><span>Network round trips</span></div>
     </div>
     <p class="hint" id="tlHint"></p>
   </div>
@@ -125,12 +124,12 @@
     <p class="sub">Day 7 is for drawing. Close this page and sketch each one from memory, then check against the linked explainer.</p>
     <div class="card">
       <ol class="draw-list">
-        <li><b>1.</b> DNS lookup chain with caches and TTL <a href="client-server-dns.html">Day 1 →</a></li>
-        <li><b>2.</b> Request and response anatomy, plus 401 vs 403 and 502 vs 503 vs 504 <a href="http.html">Day 2 →</a></li>
-        <li><b>3.</b> SYN / SYN-ACK / ACK with sequence numbers, and a lost-packet retransmit <a href="tcp-udp.html">Day 3 →</a></li>
-        <li><b>4.</b> TLS 1.3 handshake, plus the certificate chain to a root CA <a href="https-tls.html">Day 4 →</a></li>
-        <li><b>5.</b> The latency-vs-utilisation curve and Little's Law <a href="latency-throughput.html">Day 5 →</a></li>
-        <li><b>6.</b> SLI → SLO → error budget → SLA, plus series vs parallel availability <a href="availability-slos.html">Day 6 →</a></li>
+        <li><b>1.</b> DNS lookup chain with caches and TTL <a href="client-server-dns.html">Day 1</a></li>
+        <li><b>2.</b> Request and response anatomy, plus 401 vs 403 and 502 vs 503 vs 504 <a href="http.html">Day 2</a></li>
+        <li><b>3.</b> SYN / SYN-ACK / ACK with sequence numbers, and a lost-packet retransmit <a href="tcp-udp.html">Day 3</a></li>
+        <li><b>4.</b> TLS 1.3 handshake, plus the certificate chain to a root CA <a href="https-tls.html">Day 4</a></li>
+        <li><b>5.</b> The latency-vs-utilisation curve and Little's Law <a href="latency-throughput.html">Day 5</a></li>
+        <li><b>6.</b> SLI → SLO → error budget → SLA, plus series vs parallel availability <a href="availability-slos.html">Day 6</a></li>
         <li><b>7.</b> Both diagrams on this page: timeline and stack</li>
       </ol>
     </div>
@@ -175,7 +174,7 @@
 
   <nav id="prevnext"></nav>
 
-  <footer>Timings are a simple model: one RTT per handshake round, fixed 50 ms server time, ~30 ms for an uncached DNS lookup. Sources: "The request, TCP explained", "Diagrams explained", and Days 1–6.</footer>
+  <footer>Timings are a simple model: one RTT per handshake round, fixed 50 ms server time, ~30 ms for an uncached DNS lookup. Sources: "The request, TCP explained", "Diagrams explained", and Days 1 to 6.</footer>
 </div>
 
 <script>

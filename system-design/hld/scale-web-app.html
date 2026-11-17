@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Design: Scale a Web App to Millions</title>
 <meta name="description" content="H14 design: grow one web app from a single server to millions of users, one layer at a time: separate database, load balancer and stateless servers, cache and CDN, read replicas, queues, redundancy and multiple regions. With a scale-ladder calculator and an answer template.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -14,33 +12,34 @@
 <script src="../../assets/js/explainer-kit.js"></script>
 <script src="../sd-series.js"></script>
 <style>
-  .ladder { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 8px; }
-  .ladder li { display: grid; grid-template-columns: 110px 1fr; gap: 12px; align-items: start; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; opacity: .45; transition: opacity .2s, border-color .2s; }
+  .ladder { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: var(--space-xs); }
+  .ladder li { display: grid; grid-template-columns: 110px 1fr; gap: var(--space-sm); align-items: start; background: var(--panel); border-radius: 0; padding: var(--space-xs) var(--space-sm); opacity: .45; transition: opacity .2s, border-color .2s; }
   .ladder li.on { opacity: 1; }
   .ladder li.now { border-color: var(--accent-text); }
   .ladder li b.at { font-family: var(--mono); font-size: 12.5px; color: var(--accent-text); }
   .ladder li span { min-width: 0; }
-  .tmpl { counter-reset: t; list-style: none; padding: 0; display: grid; gap: 8px; }
-  .tmpl li { counter-increment: t; display: grid; grid-template-columns: 30px 1fr; gap: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .tmpl { counter-reset: t; list-style: none; padding: 0; display: grid; gap: var(--space-xs); }
+  .tmpl li { counter-increment: t; display: grid; grid-template-columns: 30px 1fr; gap: var(--space-xs); background: var(--panel); border-radius: 0; padding: var(--space-xs) var(--space-sm); }
   .tmpl li::before { content: counter(t); font: 700 14px var(--mono); color: var(--ink); background: var(--pill); border-radius: 50%; width: 26px; height: 26px; display: grid; place-items: center; }
   .tmpl li > span { min-width: 0; }
-  @media (max-width: 560px) { .ladder li { grid-template-columns: 1fr; gap: 2px; } }
+  @media (max-width: 560px) { .ladder li { grid-template-columns: 1fr; gap: var(--space-3xs); } }
 </style>
 </head>
 <body data-anim="continuous">
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← HLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">HLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Week 2 · H14 · Design</div>
+    <p class="crumbs">Week 2 / H14 / Design</p>
     <h1>Design: Scale a Web App to Millions</h1>
     <ul class="lede">
       <li>The classic interview question: "Your app has 1 user today. Grow it to 10 million."</li>
       <li>The answer is a <b>sequence</b>: at each size, find what breaks first and add one thing.</li>
-      <li>It uses everything from Weeks 1–2: DNS, load balancers, stateless servers, availability.</li>
+      <li>It uses everything from Weeks 1 to 2: DNS, load balancers, stateless servers, availability.</li>
       <li>Then it previews what's next: caching (Week 3), replicas and sharding (Phase 2), queues (Phase 4).</li>
     </ul>
   </header>
@@ -61,10 +60,10 @@
       <table>
         <thead><tr><th>Users</th><th>What breaks first</th><th>What you add</th><th>Learn it in</th></tr></thead>
         <tbody>
-          <tr><td>1 – 1k</td><td>Nothing; one VM runs IIS and SQL Server</td><td>Backups, monitoring</td><td>H6</td></tr>
-          <tr><td>1k – 10k</td><td>App and DB fight for CPU and RAM</td><td>Separate database server</td><td>H8</td></tr>
-          <tr><td>10k – 100k</td><td>One app server is full, and a single point of failure</td><td>Load balancer, 2+ stateless app servers, sessions in Redis</td><td>H8–H13</td></tr>
-          <tr><td>100k – 1M</td><td>Database reads, slow page loads far from the server</td><td>Cache (Redis), CDN for static files and public pages</td><td>H15–H21</td></tr>
+          <tr><td>1 to 1k</td><td>Nothing; one VM runs IIS and SQL Server</td><td>Backups, monitoring</td><td>H6</td></tr>
+          <tr><td>1k to 10k</td><td>App and DB fight for CPU and RAM</td><td>Separate database server</td><td>H8</td></tr>
+          <tr><td>10k to 100k</td><td>One app server is full, and a single point of failure</td><td>Load balancer, 2+ stateless app servers, sessions in Redis</td><td>H8 to H13</td></tr>
+          <tr><td>100k to 1M</td><td>Database reads, slow page loads far from the server</td><td>Cache (Redis), CDN for static files and public pages</td><td>H15 to H21</td></tr>
           <tr><td>1M+</td><td>Primary DB still busy with reads; slow work blocks requests</td><td>Read replicas; queue + background workers</td><td>Phase 2, Phase 4</td></tr>
           <tr><td>5M+</td><td>An outage in one data centre takes everything down; writes outgrow one DB</td><td>Every tier across zones, autoscaling; then multi-region + GeoDNS; sharding</td><td>H1, H6, Phase 2</td></tr>
         </tbody>
@@ -80,10 +79,10 @@
       <div class="range"><label for="zU">Daily active users <output id="oU"></output></label><input type="range" id="zU" min="0" max="10" step="1" value="5"></div>
     </div>
     <div class="kpis">
-      <div class="kpi accent"><b id="kRps">–</b><span>Peak requests/s</span></div>
-      <div class="kpi"><b id="kApp">–</b><span>App servers (+1 spare)</span></div>
-      <div class="kpi"><b id="kDb">–</b><span>DB reads/s after cache</span></div>
-      <div class="kpi"><b id="kW">–</b><span>DB writes/s</span></div>
+      <div class="kpi accent"><b id="kRps">…</b><span>Peak requests/s</span></div>
+      <div class="kpi"><b id="kApp">…</b><span>App servers (+1 spare)</span></div>
+      <div class="kpi"><b id="kDb">…</b><span>DB reads/s after cache</span></div>
+      <div class="kpi"><b id="kW">…</b><span>DB writes/s</span></div>
     </div>
     <ol class="ladder" id="ladder"></ol>
     <p class="hint" id="zHint"></p>
@@ -96,7 +95,7 @@
       <li><span><b>Requirements (5 min).</b> Functional: what users do. Non-functional: users, latency, availability, consistency. Write them down.</span></li>
       <li><span><b>Estimates (5 min).</b> Users × requests per day ÷ 86,400 × peak factor; read/write ratio; data size per year.</span></li>
       <li><span><b>High-level design (10 min).</b> Client → DNS → CDN → load balancer → stateless app → cache → database. Name each box's job.</span></li>
-      <li><span><b>Data model and APIs (5 min).</b> Main tables or documents, and 3–4 key endpoints.</span></li>
+      <li><span><b>Data model and APIs (5 min).</b> Main tables or documents, and 3 to 4 key endpoints.</span></li>
       <li><span><b>Deep dive (15 min).</b> The part the interviewer cares about: the hot read path, the write path, a tricky feature.</span></li>
       <li><span><b>Bottlenecks and failures (5 min).</b> What breaks first at 10×? Single points of failure? What happens when the cache or a region dies?</span></li>
     </ol>
@@ -138,7 +137,7 @@
 
   <nav id="prevnext"></nav>
 
-  <footer>Sources: Week 2 notes; system-design-primer ("scaling up to your first 10 million users" pattern); the H1–H13 pages. All numbers are illustrative rules of thumb.</footer>
+  <footer>Sources: Week 2 notes; system-design-primer ("scaling up to your first 10 million users" pattern); the H1 to H13 pages. All numbers are illustrative rules of thumb.</footer>
 </div>
 
 <script>

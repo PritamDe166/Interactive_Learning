@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>System Design: LLD</title>
 <meta name="description" content="Low-level design (LLD): interactive explainers for object-oriented design, patterns and LLD problems.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/hub.css">
@@ -15,7 +13,8 @@
 <body>
 <div class="wrap">
   <div class="topbar">
-    <a class="back" href="../index.html">← System Design</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="../index.html">System Design</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
@@ -27,8 +26,8 @@
 
   <header class="hero">
     <div>
-      <div class="eyebrow">Low-level design · classes, interfaces and code structure</div>
-      <h1>System Design <span class="y">LLD</span></h1>
+      <p class="crumbs">Low-level design / classes, interfaces and code structure</p>
+      <h1>System Design LLD</h1>
       <p class="lede">How one service is built inside: classes and their responsibilities, interfaces, design patterns, concurrency, and classic design problems worked through in code.</p>
       <svg class="flow" viewBox="0 0 560 90" aria-hidden="true">
         <rect class="n" x="20" y="14" width="150" height="62" rx="9"/><text class="t-fg" x="95" y="38">«interface»</text><text class="t-fg" x="95" y="60">INotifier</text>
@@ -42,7 +41,7 @@
     <div class="stats">
       <div class="stat"><b id="sLive">0</b><span>Explainers</span></div>
       <div class="stat"><b id="sTopics">0</b><span>Topics</span></div>
-      <div class="stat"><b id="sNext">–</b><span>Next up</span></div>
+      <div class="stat"><b id="sNext">…</b><span>Next up</span></div>
       <div class="meter">
         <div class="row"><span>Topics covered</span><span id="sPct">0%</span></div>
         <div class="track"><i id="bar" style="width:0"></i></div>
@@ -62,7 +61,7 @@
 
   <section class="howto" aria-label="How to use">
     <div class="box"><h4>HLD vs LLD</h4><p><b>HLD</b> decides which services, stores and queues exist and how they talk. <b>LLD</b> decides how one of those services is written: its classes, interfaces and the patterns that keep it easy to change.</p></div>
-    <div class="box"><h4>Adding topics</h4><p>In this page's script, topics are numbered L1–L67 as in the Notion plan, e.g. <code>{n:24, t:"Strategy", k:"…"}</code>. When an explainer is ready, put the file in this folder and add <code>file:"strategy.html"</code> to its topic and to <code>../sd-series.js</code>.</p></div>
+    <div class="box"><h4>Adding topics</h4><p>In this page's script, topics are numbered L1 to L67 as in the Notion plan, e.g. <code>{n:24, t:"Strategy", k:"…"}</code>. When an explainer is ready, put the file in this folder and add <code>file:"strategy.html"</code> to its topic and to <code>../sd-series.js</code>.</p></div>
     <div class="box"><h4>Explainer pages</h4><p>Copy <code>_template/explainer.html</code> here; pages in this folder load shared files from <code>../../assets/</code> and link back with <code>index.html</code>.</p></div>
   </section>
 

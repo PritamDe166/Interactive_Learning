@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SOLID Principles</title>
 <meta name="description" content="SOLID overview: five object-oriented design guidelines shown in one appointment-booking class diagram, with a spot-the-violation game.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -14,8 +12,8 @@
 <script src="../../assets/js/explainer-kit.js"></script>
 <script src="../sd-series.js"></script>
 <style>
-  .pcards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 10px; margin-top: 8px; }
-  .pcard { display: grid; gap: 6px; padding: 14px; border: 1.5px solid var(--line); border-radius: 14px; background: var(--panel); text-decoration: none; color: var(--fg); transition: border-color .15s, transform .15s; }
+  .pcards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: var(--space-xs); margin-top: var(--space-xs); }
+  .pcard { display: grid; gap: var(--space-2xs); padding: var(--space-sm); border: 1.5px solid var(--line); border-radius: 0; background: var(--panel); text-decoration: none; color: var(--fg); transition: border-color .15s, transform .15s; }
   a.pcard:hover { border-color: var(--teal); transform: translateY(-2px); }
   .pcard .ltr { font-family: var(--mono); font-size: 28px; font-weight: 700; color: var(--accent-text); line-height: 1; }
   .pcard b { font-size: 15px; }
@@ -23,13 +21,13 @@
   .pcard em { font-style: normal; font-size: 12px; color: var(--cyan); font-family: var(--mono); }
   .pcard.soon { border-style: dashed; }
   .pcard.soon em { color: var(--muted); }
-  .spot-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-  .spot-btns button { width: 46px; height: 46px; font-family: var(--mono); font-size: 20px; font-weight: 700; border-radius: 12px; border: 1.5px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; }
+  .spot-btns { display: flex; gap: var(--space-xs); flex-wrap: wrap; margin-top: var(--space-xs); }
+  .spot-btns button { width: 46px; height: 46px; font-family: var(--mono); font-size: 20px; font-weight: 700; border-radius: 0; border: 1.5px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; }
   .spot-btns button:hover { border-color: var(--cyan); }
   .spot-btns button.right { background: var(--teal); color: var(--on-accent); border-color: var(--teal); }
   .spot-btns button.wrong { border-color: var(--red); color: var(--bad-text); }
-  .spot-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .dial-out { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 12px; margin-top: 12px; }
+  .spot-head { display: flex; justify-content: space-between; align-items: center; gap: var(--space-xs); flex-wrap: wrap; }
+  .dial-out { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: var(--space-sm); margin-top: var(--space-sm); }
   .dial-out .codeblock { margin: 0; min-height: 0; font-size: 12.5px; overflow-x: auto; }
   .verdict { font-size: 15px; }
   .verdict b.ok { color: var(--good-text); } .verdict b.warn { color: var(--accent-text); } .verdict b.bad { color: var(--bad-text); }
@@ -38,16 +36,17 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← LLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">LLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">System Design · LLD · SOLID · Overview</div>
+    <p class="crumbs">System Design / LLD / SOLID / Overview</p>
     <h1>SOLID Principles</h1>
     <ul class="lede">
       <li>Five guidelines for object-oriented code that is <b>easy to change, test and extend</b>.</li>
-      <li><b>S</b>ingle responsibility · <b>O</b>pen-closed · <b>L</b>iskov substitution · <b>I</b>nterface segregation · <b>D</b>ependency inversion.</li>
+      <li><b>S</b>ingle responsibility, <b>O</b>pen-closed, <b>L</b>iskov substitution, <b>I</b>nterface segregation, <b>D</b>ependency inversion.</li>
       <li>They work together: small focused classes, talking through <b>interfaces</b>, with implementations <b>plugged in</b> from outside.</li>
       <li>They are <b>guidelines, not rules</b>. Applied mechanically they produce over-engineered code; the goal is simple code that is safe to change.</li>
     </ul>
@@ -66,7 +65,7 @@
   </div>
     <div class="sub-block" aria-labelledby="storyH">
     <h3 class="stage-title sub" id="storyH">Walkthrough: all five in one design</h3>
-    <div class="stage-kind">An appointment-booking feature · each step lights up one principle</div>
+    <div class="stage-kind">An appointment-booking feature, each step lights up one principle</div>
     <div class="story wide" id="solidStory">
       <div class="scroll"><svg class="diagram" id="solidSvg" style="min-width:0" viewBox="0 0 760 400" role="img" aria-label="Class diagram of an appointment booking design showing the five SOLID principles"></svg></div>
     </div>
@@ -87,7 +86,7 @@
   </div>
     <div class="sub-block" aria-labelledby="dialH">
     <h3 class="stage-title sub" id="dialH">2. Guidelines, not rules</h3>
-    <div class="stage-kind">One small feature, "send a welcome email" · turn up how strictly SOLID is applied</div>
+    <div class="stage-kind">One small feature, "send a welcome email", turn up how strictly SOLID is applied</div>
     <label class="label" for="dial">Strictness: <span id="dialV" class="mono"></span></label>
     <input type="range" id="dial" min="0" max="3" value="1" style="width:100%">
     <div class="dial-out">
@@ -138,7 +137,7 @@
     <p class="sub">Answer out loud before you open each card.</p>
     <div class="quiz">
       <details><summary>Name the five principles and give each a one-line meaning.<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>S</b> one reason to change · <b>O</b> extend without modifying · <b>L</b> subclasses must be substitutable · <b>I</b> no client forced to depend on methods it doesn't use · <b>D</b> depend on abstractions, not concrete classes.</p></div></details>
+        <div class="ans"><p><b>S</b> one reason to change, <b>O</b> extend without modifying, <b>L</b> subclasses must be substitutable, <b>I</b> no client forced to depend on methods it doesn't use, <b>D</b> depend on abstractions, not concrete classes.</p></div></details>
       <details><summary>Which two principles does constructor injection in ASP.NET Core support most directly?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>D</b> (the service depends on an interface) and <b>O</b> (you can register a different or decorated implementation without editing the service). It also makes S easier to keep.</p></div></details>
       <details><summary>A subclass overrides a method with <span class="mono">throw new NotImplementedException()</span>. Which principles are in trouble?<span class="go">Show answer</span></summary>

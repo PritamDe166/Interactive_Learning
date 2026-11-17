@@ -1,42 +1,41 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>IAM security tools</title>
 <meta name="description" content="AWS Cloud Practitioner: IAM credential report (account-wide CSV of credential status) and IAM Access Advisor (services each identity can use and when it last used them), used to apply least privilege.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
 <script src="../assets/js/theme.js"></script>
 <script src="../assets/js/explainer-kit.js"></script>
 <style>
-  .tool-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 14px; align-items: start; }
+  .tool-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: var(--space-sm); align-items: start; }
   @media (max-width: 880px) { .tool-grid { grid-template-columns: minmax(0, 1fr); } }
   .rep { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12px; }
-  .rep th, .rep td { padding: 6px 7px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+  .rep th, .rep td { padding: var(--space-2xs) var(--space-xs); border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
   .rep th { color: var(--muted); font-weight: 500; }
   .rep td { color: var(--fg-soft); transition: background .25s; }
   .rep td.bad { color: var(--bad-text); background: color-mix(in srgb, var(--red) 12%, transparent); }
   .rep td.ok { color: var(--good-text); }
   .rep tr.flag td:first-child { box-shadow: inset 3px 0 0 var(--red); }
   .rep tr.miss td:first-child { box-shadow: inset 3px 0 0 var(--yellow); }
-  .rep button { all: unset; cursor: pointer; font-family: var(--display); font-size: 12px; border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; color: var(--fg-soft); }
+  .rep button { all: unset; cursor: pointer; font-family: var(--display); font-size: 12px; border: 1px solid var(--line); border-radius: 0; padding: var(--space-3xs) var(--space-xs); color: var(--fg-soft); }
   .rep button[aria-pressed="true"] { border-color: var(--red); color: var(--bad-text); }
-  .tbl-title { font-family: var(--mono); font-size: 12px; color: var(--muted); margin: 0 0 6px; }
+  .tbl-title { font-family: var(--mono); font-size: 12px; color: var(--muted); margin: 0 0 var(--space-2xs); }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">AWS CLF-C02 · IAM · Domain 2 Security &amp; Compliance</div>
+    <p class="crumbs">AWS CLF-C02 / IAM / Domain 2 Security &amp; Compliance</p>
     <h1>IAM security tools</h1>
     <ul class="lede">
       <li>Two built-in audit tools, two questions. <b>Credential report</b>: whose <b>credentials</b> are weak? <b>Access Advisor</b>: which <b>permissions</b> are never used?</li>

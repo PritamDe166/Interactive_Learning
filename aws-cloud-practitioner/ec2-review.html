@@ -1,33 +1,32 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>EC2 review</title>
 <meta name="description" content="AWS Cloud Practitioner: EC2 section review with a one-path recap, section summary, commonly confused pairs, a mixed drill and 20 exam-style questions.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
 <script src="../assets/js/theme.js"></script>
 <script src="../assets/js/explainer-kit.js"></script>
 <style>
-  .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 10px; }
-  .topic-links a { display: block; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--fg); text-decoration: none; }
+  .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-xs); }
+  .topic-links a { display: block; padding: var(--space-sm) var(--space-sm); border-radius: 0; background: var(--panel); color: var(--fg); text-decoration: none; }
   .topic-links a:hover { border-color: var(--orange); }
-  .topic-links a span { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .topic-links a span { display: block; font-size: 13px; color: var(--muted); margin-top: var(--space-3xs); }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">AWS CLF-C02 · EC2 · Section review</div>
+    <p class="crumbs">AWS CLF-C02 / EC2 / Section review</p>
     <h1>EC2: review</h1>
     <ul class="lede">
       <li><b>EC2</b> rents virtual servers (IaaS): AMI + instance type + storage + security group + key pair + user data.</li>
@@ -51,10 +50,10 @@
     <div class="sum-grid">
       <div class="card"><h3>Budgets</h3><ul><li>AWS Budgets emails on actual or forecasted cost/usage.</li><li>Zero-spend and monthly cost budgets.</li><li>Root activates IAM access to billing.</li><li>EBS, public IPv4, NAT Gateway bill too.</li></ul></div>
       <div class="card"><h3>EC2 basics &amp; user data</h3><ul><li>IaaS; AMI, type, storage, SG, key pair, user data.</li><li>User data: once, first boot, as root.</li><li>Stop: EBS kept, new public IP on start. Terminate: gone, root EBS deleted.</li><li>Elastic IP keeps a fixed public IPv4.</li></ul></div>
-      <div class="card"><h3>Instance types</h3><ul><li><code>m5.2xlarge</code> = family · generation · size.</li><li>General (T, M) · Compute (C) · Memory (R, X) · Storage (I, D, H) · Accelerated (P, G).</li></ul></div>
+      <div class="card"><h3>Instance types</h3><ul><li><code>m5.2xlarge</code> = family, generation, size.</li><li>General (T, M), Compute (C), Memory (R, X), Storage (I, D, H), Accelerated (P, G).</li></ul></div>
       <div class="card"><h3>Security groups</h3><ul><li>Allow-only, stateful; inbound blocked, outbound allowed by default.</li><li>Sources: CIDR or another SG; Region/VPC scoped; many-to-many.</li><li>Timeout = SG; refused = app. Ports 21, 22, 80, 443, 3389.</li></ul></div>
       <div class="card"><h3>Connecting &amp; roles</h3><ul><li>SSH 22 with .pem (chmod 400, ec2-user); PuTTY .ppk; RDP 3389 for Windows.</li><li>Instance Connect: browser, temporary key, still port 22.</li><li>IAM role via instance profile; never aws configure with your keys.</li></ul></div>
-      <div class="card"><h3>Purchasing &amp; responsibility</h3><ul><li>On-Demand · Reserved (1/3 yr, ~72%) · Convertible · Savings Plans ($/h) · Spot (~90%, interruptible) · Dedicated Host (BYOL) · Dedicated Instance · Capacity Reservation (no discount).</li><li>You: SG rules, OS patches, software, IAM roles, data. AWS: hardware, host isolation, network.</li></ul></div>
+      <div class="card"><h3>Purchasing &amp; responsibility</h3><ul><li>On-Demand, Reserved (1/3 yr, ~72%), Convertible, Savings Plans ($/h), Spot (~90%, interruptible), Dedicated Host (BYOL), Dedicated Instance, Capacity Reservation (no discount).</li><li>You: SG rules, OS patches, software, IAM roles, data. AWS: hardware, host isolation, network.</li></ul></div>
     </div>
   </section>
 
@@ -123,7 +122,7 @@
     </ul>
   </section>
 
-  <footer>Questions are original, written to the official exam guide (Tasks 3.3, 4.1, 2.1) and the scenario patterns of public practice sets: <a href="https://docs.aws.amazon.com/aws-certification/latest/examguides/cloud-practitioner-02.html">AWS CLF-C02 exam guide</a>, <a href="https://training.resources.awscloud.com/associate-certification-articles/updated-cloud-practitioner-exam-prep-course">AWS official practice question set</a>, <a href="https://www.educative.io/blog/aws-cloud-practitioner-exam-questions-clf-c02">Educative</a>, <a href="https://www.sailor.sh/blog/aws-cloud-practitioner-practice-questions">Sailor.sh</a>. Section notes: EC2 notes 1–11.</footer>
+  <footer>Questions are original, written to the official exam guide (Tasks 3.3, 4.1, 2.1) and the scenario patterns of public practice sets: <a href="https://docs.aws.amazon.com/aws-certification/latest/examguides/cloud-practitioner-02.html">AWS CLF-C02 exam guide</a>, <a href="https://training.resources.awscloud.com/associate-certification-articles/updated-cloud-practitioner-exam-prep-course">AWS official practice question set</a>, <a href="https://www.educative.io/blog/aws-cloud-practitioner-exam-questions-clf-c02">Educative</a>, <a href="https://www.sailor.sh/blog/aws-cloud-practitioner-practice-questions">Sailor.sh</a>. Section notes: EC2 notes 1 to 11.</footer>
 </div>
 
 <script src="topics.js"></script>

@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cache Write Strategies &amp; Invalidation</title>
 <meta name="description" content="H17: write-through, write-behind, write-around and invalidate-on-write, animated, plus a race replayer that shows why you delete the cache key instead of overwriting it.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -15,12 +13,12 @@
 <script src="../sd-series.js"></script>
 <script src="caching-flows.js"></script>
 <style>
-  .cws-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; margin-top: 12px; }
-  .cws-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; margin-top: 12px; }
-  .cws-log { list-style: none; counter-reset: s; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 14px; }
-  .cws-log li { counter-increment: s; display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 8px; color: var(--fg-soft); overflow-wrap: anywhere; }
+  .cws-row { display: flex; flex-wrap: wrap; gap: var(--space-xs); justify-content: center; align-items: center; margin-top: var(--space-sm); }
+  .cws-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--space-md); margin-top: var(--space-sm); }
+  .cws-log { list-style: none; counter-reset: s; margin: 0; padding: 0; display: grid; gap: var(--space-2xs); font-size: 14px; }
+  .cws-log li { counter-increment: s; display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: var(--space-xs); color: var(--fg-soft); overflow-wrap: anywhere; }
   .cws-log li::before { content: counter(s); font-family: var(--mono); font-size: 11px; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--line); color: var(--muted); }
-  .cws-verdict { margin-top: 12px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); font-size: 14.5px; min-height: 2.6em; }
+  .cws-verdict { margin-top: var(--space-sm); padding: var(--space-xs) var(--space-sm); border-radius: 0; border: 1px solid var(--line); font-size: 14.5px; min-height: 2.6em; }
   .cws-verdict.ok { border-color: var(--teal); }
   .cws-verdict.bad { border-color: var(--red); }
   @media (max-width: 760px) { .cws-grid { grid-template-columns: minmax(0, 1fr); } }
@@ -29,12 +27,13 @@
 <body data-anim="continuous">
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← HLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">HLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Week 3 · H17 · Caching &amp; CDN</div>
+    <p class="crumbs">Week 3 / H17 / Caching &amp; CDN</p>
     <h1>Cache Write Strategies &amp; Invalidation</h1>
     <ul class="lede">
       <li>Once data is cached there are <b>two copies</b>; every write must decide how the cache copy gets fixed.</li>

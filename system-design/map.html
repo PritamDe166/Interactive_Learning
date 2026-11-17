@@ -1,65 +1,63 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>System Design: learning map</title>
 <meta name="description" content="Bird's-eye map of the system design roadmap: every HLD and LLD phase, the topics inside it, and which explainers are ready.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/hub.css">
 <script src="../assets/js/theme.js"></script>
 <style>
-  .map-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px; }
+  .map-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-md); }
   .map-head .lede { max-width: 640px; }
-  .seg-tabs { display: inline-flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); }
-  .seg-tabs button { font: inherit; display: grid; gap: 1px; padding: 8px 18px; border: 0; border-radius: 10px; background: none; color: var(--fg-soft); cursor: pointer; text-align: left; }
-  .seg-tabs button b { font-size: 15px; letter-spacing: .04em; }
+  .seg-tabs { display: inline-flex; gap: var(--space-2xs); padding: var(--space-2xs); border-radius: 0; background: var(--panel); }
+  .seg-tabs button { font: inherit; display: grid; gap: 1px; padding: var(--space-xs) var(--space-md); border: 0; border-radius: 0; background: none; color: var(--fg-soft); cursor: pointer; text-align: left; }
+  .seg-tabs button b { font-size: 15px; }
   .seg-tabs button span { font-size: 12px; color: var(--muted); }
   .seg-tabs button:hover { background: var(--panel-2); color: var(--fg); }
   .seg-tabs button[aria-pressed="true"] { background: var(--teal-wash); color: var(--fg); box-shadow: inset 0 0 0 1px var(--teal); }
 
   /* overview rail: every phase at a glance */
-  .rail { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 8px; margin: 26px 0 8px; }
-  .rail a { --acc: var(--teal); display: grid; gap: 6px; padding: 10px 12px 11px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: inherit; text-decoration: none; transition: border-color .15s, transform .15s; }
+  .rail { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: var(--space-xs); margin: var(--space-lg) 0 var(--space-xs); }
+  .rail a { --acc: var(--teal); display: grid; gap: var(--space-2xs); padding: var(--space-xs) var(--space-sm) var(--space-sm); border-radius: 0; background: var(--panel); color: inherit; text-decoration: none; transition: border-color .15s, transform .15s; }
   .rail a:hover { border-color: var(--acc); transform: translateY(-2px); }
-  .rail .top { display: flex; align-items: center; gap: 8px; }
+  .rail .top { display: flex; align-items: center; gap: var(--space-xs); }
   .rail .n { width: 22px; height: 22px; flex: none; border-radius: 50%; display: grid; place-items: center; font: 600 12px var(--mono); color: var(--ink); background: var(--acc); }
   .rail .nm { font-size: 13.5px; font-weight: 600; line-height: 1.2; }
-  .rail .bar { height: 4px; border-radius: 3px; background: var(--track); overflow: hidden; }
+  .rail .bar { height: 4px; border-radius: 0; background: var(--track); overflow: hidden; }
   .rail .bar i { display: block; height: 100%; background: var(--acc); }
-  .rail small { font: 11px var(--mono); color: var(--muted); }
+  .rail small { font: 500 13px var(--display); color: var(--muted); }
 
-  .legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 14px 0 30px; font: 12px var(--mono); color: var(--muted); }
-  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .legend { display: flex; flex-wrap: wrap; gap: var(--space-2xs) var(--space-md); margin: var(--space-sm) 0 var(--space-lg); font: 500 13px var(--display); color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: var(--space-xs); }
   .legend b { color: var(--fg); font-weight: 600; }
 
   /* the route: a spine with one stop per phase */
-  .route { position: relative; padding-left: 64px; }
-  .route::before { content: ""; position: absolute; left: 21px; top: 10px; bottom: 30px; width: 2px; background: linear-gradient(var(--line), var(--line)) ; border-radius: 2px; }
-  .ph { --acc: var(--teal); position: relative; margin: 0 0 30px; scroll-margin-top: 20px; }
+  .route { position: relative; padding-left: var(--space-2xl); }
+  .route::before { content: ""; position: absolute; left: 21px; top: 10px; bottom: 30px; width: 2px; background: linear-gradient(var(--line), var(--line)) ; border-radius: 0; }
+  .ph { --acc: var(--teal); position: relative; margin: 0 0 var(--space-lg); scroll-margin-top: var(--space-md); }
   .ph .node { position: absolute; left: -64px; top: 0; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
     background: var(--bg); border: 2px solid var(--acc); font: 600 17px var(--mono); color: var(--acc); }
   .ph.has-next .node { box-shadow: 0 0 0 6px color-mix(in srgb, var(--acc) 22%, transparent); }
-  .ph-box { border: 1px solid var(--line); border-radius: 16px; background: var(--panel); overflow: hidden; }
-  .ph-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; padding: 14px 18px 4px; }
+  .ph-box { border-radius: 0; background: var(--panel); overflow: hidden; }
+  .ph-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2xs) var(--space-sm); padding: var(--space-sm) var(--space-md) var(--space-2xs); }
   .ph-top h2 { margin: 0; font-size: 21px; font-weight: 600; }
   .ph-top h2 a { color: inherit; text-decoration: none; }
   .ph-top h2 a:hover { color: var(--acc); }
-  .ph-top .meta { font: 12px var(--mono); color: var(--muted); }
-  .ph-top .count { margin-left: auto; font: 12px var(--mono); color: var(--muted); }
+  .ph-top .meta { font: 500 13px var(--display); color: var(--muted); }
+  .ph-top .count { margin-left: auto; font: 500 13px var(--display); color: var(--muted); }
   .ph-top .count b { color: var(--acc); font-weight: 600; }
 
-  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 205px), 1fr)); gap: 10px; padding: 10px 18px 16px; }
-  .card { display: flex; flex-direction: column; gap: 8px; min-width: 0; padding: 12px 13px 12px; border-radius: 12px;
-    background: var(--panel-2); border: 1px solid var(--line); border-top: 3px solid var(--acc); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 205px), 1fr)); gap: var(--space-xs); padding: var(--space-xs) var(--space-md) var(--space-md); }
+  .card { display: flex; flex-direction: column; gap: var(--space-xs); min-width: 0; padding: var(--space-sm) var(--space-sm) var(--space-sm); border-radius: 0;
+    background: var(--panel-2); border-top: 3px solid var(--acc); }
   .card h3 { margin: 0; font-size: 15.5px; font-weight: 600; line-height: 1.25; }
   .card p { margin: 0; font-size: 13.5px; line-height: 1.45; color: var(--fg-soft); }
-  .card .foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 4px; }
+  .card .foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: var(--space-xs); padding-top: var(--space-2xs); }
   .card .rng { font: 11px var(--mono); color: var(--muted); white-space: nowrap; }
-  .dots { display: flex; flex-wrap: wrap; gap: 5px; }
+  .dots { display: flex; flex-wrap: wrap; gap: var(--space-2xs); }
   .dot { width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid color-mix(in srgb, var(--acc) 70%, var(--muted)); background: transparent; display: block; }
   a.dot { background: var(--acc); border-color: var(--acc); transition: transform .12s; }
   a.dot:hover, a.dot:focus-visible { transform: scale(1.35); }
@@ -67,20 +65,20 @@
   @keyframes pulse { 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--fg) 8%, transparent); } }
   @media (prefers-reduced-motion: reduce) { .dot.next { animation: none; } }
 
-  .strip { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding: 10px 18px; background: var(--code-bg); border-top: 1px solid var(--line); }
-  .strip b { font: 600 11.5px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--acc); }
+  .strip { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2xs) var(--space-sm); padding: var(--space-xs) var(--space-md); background: var(--code-bg); border-top: 1px solid var(--line); }
+  .strip b { font: 600 11.5px var(--mono); color: var(--acc); }
   .strip span { font: 13px var(--mono); color: var(--fg-soft); }
 
-  .finish { position: relative; margin-left: -64px; padding-left: 64px; }
-  .finish .node { position: absolute; left: 0; top: 2px; width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: var(--yellow); color: var(--ink); font: 600 18px var(--mono); }
+  .finish { position: relative; margin-left: calc(-1 * var(--space-2xl)); padding-left: var(--space-2xl); }
+  .finish .node { position: absolute; left: 0; top: 2px; width: 44px; height: 44px; border-radius: 0; display: grid; place-items: center; background: var(--yellow); color: var(--ink); font: 600 18px var(--mono); }
   .finish .ph-box { border-style: dashed; }
-  .finish p { margin: 0; padding: 4px 18px 16px; color: var(--fg-soft); }
+  .finish p { margin: 0; padding: var(--space-2xs) var(--space-md) var(--space-md); color: var(--fg-soft); }
 
   @media (max-width: 640px) {
-    .route { padding-left: 46px; }
+    .route { padding-left: var(--space-xl); }
     .route::before { left: 15px; }
     .ph .node { left: -46px; width: 32px; height: 32px; font-size: 14px; }
-    .finish { margin-left: -46px; padding-left: 46px; }
+    .finish { margin-left: calc(-1 * var(--space-xl)); padding-left: var(--space-xl); }
     .finish .node { width: 32px; height: 32px; font-size: 15px; }
     .ph-top .count { margin-left: 0; width: 100%; }
   }
@@ -93,14 +91,15 @@
 <body>
 <div class="wrap">
   <div class="topbar">
-    <a class="back" href="index.html">← System Design</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">System Design</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header class="map-head">
     <div>
-      <div class="eyebrow">Learning map · the whole route on one page</div>
-      <h1>System Design <span class="y">map</span></h1>
+      <p class="crumbs">Learning map / the whole route on one page</p>
+      <h1>System Design map</h1>
       <p class="lede" id="lede"></p>
     </div>
     <div class="seg-tabs" role="group" aria-label="Track">

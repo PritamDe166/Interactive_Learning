@@ -1,19 +1,17 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Routing</title>
 <meta name="description" content="Angular 22 routing on CareDesk: a route table, router-outlet, routerLink, route parameters as inputs, lazy loading, redirects, wildcards and routerLinkActive, with every result from a real run.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
 <script src="../assets/js/theme.js"></script>
 <script src="../assets/js/explainer-kit.js"></script>
 <style>
-  .ng-left { display: grid; gap: 12px; min-width: 0; align-content: start; }
+  .ng-left { display: grid; gap: var(--space-sm); min-width: 0; align-content: start; }
   .rt .url rect { fill: var(--panel-2); stroke: var(--line); stroke-width: 1.5; }
   .rt .url text { fill: var(--fg); font-family: var(--mono) !important; font-size: 13px; }
   .rt .row rect { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; transition: fill .2s, stroke .2s; }
@@ -29,19 +27,20 @@
   .rt .chunk rect { fill: var(--violet); } .rt .chunk text { fill: var(--ink); font-family: var(--mono) !important; font-size: 11px; font-weight: 700; }
   .rt .verdict { font-size: 12.5px; font-family: var(--mono) !important; }
   .rt .verdict.ok { fill: var(--good-text); } .rt .verdict.bad { fill: var(--bad-text); }
-  .lab-ctl { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin-top: 10px; }
-  .lab-ctl input[type=text] { font-family: var(--mono); font-size: 14px; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); width: 220px; max-width: 100%; }
+  .lab-ctl { display: flex; flex-wrap: wrap; gap: var(--space-xs) var(--space-md); align-items: center; margin-top: var(--space-xs); }
+  .lab-ctl input[type=text] { font-family: var(--mono); font-size: 14px; padding: var(--space-2xs) var(--space-xs); border-radius: 0; background: var(--panel-2); color: var(--fg); width: 220px; max-width: 100%; }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← Angular roadmap</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">Angular roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Angular 22 · Part 3 · Control flow &amp; structure</div>
+    <p class="crumbs">Angular 22 / Part 3 / Control flow &amp; structure</p>
     <h1>Routing</h1>
     <ul class="lede">
       <li>The <b>router</b> maps the URL to a component and renders it in <span class="mono">&lt;router-outlet /&gt;</span>, without reloading the page.</li>
@@ -55,7 +54,7 @@
 
   <section aria-labelledby="storyH">
     <h2 class="stage-title" id="storyH">Walkthrough: CareDesk gets pages</h2>
-    <div class="stage-kind">Orange = route being checked · green = match · URLs, titles and file downloads from the real run</div>
+    <div class="stage-kind">Orange = route being checked, green = match, URLs, titles and file downloads from the real run</div>
     <div class="story" id="rtStory">
       <div class="ng-left">
         <div class="scroll"><svg class="diagram rt" id="rtSvg" style="min-width:0" viewBox="0 0 640 370" role="img" aria-label="URL bar, the route table checked top to bottom, and the router outlet showing the matched component"></svg></div>
@@ -73,7 +72,7 @@
     <div class="lab-ctl">
       <label class="mono" for="lUrl" style="font-size:13px">localhost:4200</label><input type="text" id="lUrl" value="/patients/2" autocomplete="off" spellcheck="false">
       <button class="btn primary" type="button" id="lGo">Navigate</button>
-      <span style="font-size:13px">Try: <a href="#" data-u="/">/</a> · <a href="#" data-u="/patients">/patients</a> · <a href="#" data-u="/patients/3">/patients/3</a> · <a href="#" data-u="/patients/99">/patients/99</a> · <a href="#" data-u="/billing">/billing</a></span>
+      <span style="font-size:13px">Try: <a href="#" data-u="/">/</a>, <a href="#" data-u="/patients">/patients</a>, <a href="#" data-u="/patients/3">/patients/3</a>, <a href="#" data-u="/patients/99">/patients/99</a>, <a href="#" data-u="/billing">/billing</a></span>
     </div>
     <div class="lab-ctl">
       <div class="seg" id="wSeg" role="group" aria-label="Wildcard position"><button type="button" data-v="last" aria-pressed="true">'**' last</button><button type="button" data-v="first" aria-pressed="false">'**' first</button></div>
@@ -106,7 +105,7 @@
       <div class="note"><p><b><span class="mono">routerLinkActiveOptions</span> needs square brackets.</b> Without brackets the value is the string <span class="mono">"{ exact: true }"</span>, and the CareDesk build failed: <span class="mono">TS2322: Type '"{ exact: true }"' is not assignable to type '{ exact: boolean; } | Partial&lt;IsActiveMatchOptions&gt; | …'</span>. Also, it's <span class="mono">routerLinkActive</span> (camel case).</p></div>
       <div class="note"><p><b>What <span class="mono">pathMatch: 'full'</span> means.</b> It applies to the <b>empty path</b> itself: redirect only when the whole URL is empty. Every URL starts with an empty prefix, so without it the route would match everything; Angular refuses that configuration (NG04014).</p></div>
       <div class="note"><p><b>No routing module.</b> The older <span class="mono">AppRoutingModule</span> with <span class="mono">RouterModule.forRoot(routes)</span> is replaced by <span class="mono">app.routes.ts</span> plus <span class="mono">provideRouter(routes)</span> in <span class="mono">app.config.ts</span>. Components import <span class="mono">RouterOutlet</span>, <span class="mono">RouterLink</span>, <span class="mono">RouterLinkActive</span> themselves.</p></div>
-      <div class="note"><p><b>Route titles and parameters as inputs.</b> <span class="mono">title</span> on a route set the browser tab ("Patient · CareDesk" on <span class="mono">/patients/2</span>). <span class="mono">withComponentInputBinding()</span> passed <span class="mono">:id</span> straight into <span class="mono">id = input.required&lt;string&gt;()</span>. URL values are always strings: convert with <span class="mono">Number()</span>.</p></div>
+      <div class="note"><p><b>Route titles and parameters as inputs.</b> <span class="mono">title</span> on a route set the browser tab ("Patient, CareDesk" on <span class="mono">/patients/2</span>). <span class="mono">withComponentInputBinding()</span> passed <span class="mono">:id</span> straight into <span class="mono">id = input.required&lt;string&gt;()</span>. URL values are always strings: convert with <span class="mono">Number()</span>.</p></div>
     </div>
   </section>
 

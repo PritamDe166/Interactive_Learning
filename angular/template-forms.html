@@ -1,48 +1,47 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Template-driven forms</title>
 <meta name="description" content="Angular 22 template-driven forms on CareDesk's booking form: ngForm, ngModel, name, validators, and the valid/invalid, pristine/dirty, untouched/touched states, recorded from a real run.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
 <script src="../assets/js/theme.js"></script>
 <script src="../assets/js/explainer-kit.js"></script>
 <style>
-  .ng-left { display: grid; gap: 12px; min-width: 0; align-content: start; }
+  .ng-left { display: grid; gap: var(--space-sm); min-width: 0; align-content: start; }
   .fm .node rect { transition: stroke .2s, fill .2s; }
   .fm .node.valid rect { stroke: var(--teal); } .fm .node.invalid rect { stroke: var(--red); }
   .fm .node.hot rect { stroke-width: 3.5; }
   .fm .tl { stroke: var(--line); stroke-width: 2; }
-  .fm .flag { font-family: var(--mono) !important; font-size: 10.5px; }
+  .fm .flag { font-family: var(--mono) !important; font-size: 12px; }
   .fm .flag.on { fill: var(--fg); font-weight: 700; } .fm .flag.off { fill: var(--muted); }
   .fm .flag.bad { fill: var(--bad-text); font-weight: 700; } .fm .flag.good { fill: var(--good-text); font-weight: 700; }
   .fm .val { font-family: var(--mono) !important; font-size: 11px; fill: var(--cyan); }
-  .bf { display: grid; gap: 8px; max-width: 420px; }
-  .bf label { display: grid; gap: 4px; font-size: 14px; color: var(--fg-soft); }
-  .bf select, .bf input, .bf textarea { font: inherit; padding: 6px 10px; border-radius: 8px; border: 2px solid var(--line); background: var(--panel-2); color: var(--fg); }
+  .bf { display: grid; gap: var(--space-xs); max-width: 420px; }
+  .bf label { display: grid; gap: var(--space-2xs); font-size: 14px; color: var(--fg-soft); }
+  .bf select, .bf input, .bf textarea { font: inherit; padding: var(--space-2xs) var(--space-xs); border-radius: 0; border: 2px solid var(--line); background: var(--panel-2); color: var(--fg); }
   .bf .ng-invalid.ng-touched { border-color: var(--red); }
   .bf .ng-valid.ng-dirty { border-color: var(--teal); }
   .bf .err { color: var(--bad-text); font-size: 13px; margin: 0; }
   .bf .ok { color: var(--good-text); margin: 0; }
   .bf .state { font-family: var(--mono); font-size: 12.5px; color: var(--fg-soft); margin: 0; }
   .classes { font-family: var(--mono); font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
-  .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; margin-top: 10px; }
+  .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: var(--space-sm); margin-top: var(--space-xs); }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← Angular roadmap</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">Angular roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Angular 22 · Part 4 · Forms &amp; data</div>
+    <p class="crumbs">Angular 22 / Part 4 / Forms &amp; data</p>
     <h1>Template-driven forms</h1>
     <ul class="lede">
       <li>In a <b>template-driven</b> form the template is the source of truth: <span class="mono">ngModel</span> on each field, <span class="mono">#f="ngForm"</span> on the form.</li>

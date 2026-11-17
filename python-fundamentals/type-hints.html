@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Type hints</title>
 <meta name="description" content="Python fundamentals: annotating variables, parameters and return values, built-in generics like list[int], X | None, and what a type checker such as mypy catches that Python itself doesn&#x27;t.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
@@ -15,19 +13,20 @@
 <script src="traces/type-hints.js"></script>
 <style>
   .static-code { margin: 0; }
-  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
-  .ck-out { margin: 4px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px; min-height: 48px; }
+  .puzzle-area { display: grid; gap: var(--space-sm); margin-top: var(--space-sm); }
+  .ck-out { margin: var(--space-2xs) 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px; min-height: 48px; }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← Python Fundamentals</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">Python Fundamentals</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Python · Topic 19 · Going further</div>
+    <p class="crumbs">Python / Topic 19 / Going further</p>
     <h1>Type hints</h1>
     <ul class="lede"><li>Type hints describe what a value <b>should</b> be: <span class="mono">def with_tax(amount: float) -&gt; float:</span>.</li><li>Python <b>does not check them at run time</b>. They're read by your editor and by type checkers such as <b>mypy</b> or <b>pyright</b> before the code runs.</li><li>Modern syntax: <span class="mono">list[int]</span>, <span class="mono">dict[str, float]</span>, <span class="mono">str | None</span> (3.10+). No <span class="mono">typing</span> import needed for these.</li><li>Hints document intent, power autocomplete, and catch whole classes of bugs (None, wrong types, typos) early: the closest Python gets to C#'s compiler checks.</li></ul>
   </header>
@@ -45,13 +44,13 @@
 
   <section aria-labelledby="runH">
     <h2 class="stage-title" id="runH">Edit and run</h2>
-    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div class="stage-kind">Change the code, Run ▶ for the output, Step through to watch it run</div>
     <div id="runner"></div>
   </section>
 
   <section aria-labelledby="predH">
     <h2 class="stage-title" id="predH">Predict the output</h2>
-    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="stage-kind">Pick a puzzle, choose your answer, then step through it</div>
     <div class="chips" id="pzChips"></div>
     <div class="puzzle-area" id="pzArea"></div>
   </section>
@@ -111,7 +110,7 @@
         <div class="ans"><p><b>No</b>, it prints <span class="mono">hello</span>. Only a type checker would complain.</p></div></details>
       <details><summary>What does <span class="mono">-&gt; None</span> on a function mean?<span class="go">Show answer</span></summary>
         <div class="ans"><p>It returns nothing useful (implicitly None). A checker will flag callers that try to use the result, a common bug with methods like <span class="mono">list.sort()</span>.</p></div></details>
-      <details><summary><span class="mono">def f(a: int, b: int = 2) -&gt; int: return a + b\nprint(f.__annotations__["return"].__name__)</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">def f(a: int, b: int = 2) -&gt; int: return a + b<br>print(f.__annotations__["return"].__name__)</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">int</b>. The return hint is stored under the key "return".</p></div></details>
     </div>
   </section>

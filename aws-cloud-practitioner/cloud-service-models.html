@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>IaaS, PaaS, SaaS and pricing</title>
 <meta name="description" content="AWS Cloud Practitioner: who manages which layer in on-premises, IaaS, PaaS and SaaS, with AWS examples, and the three things cloud pricing charges for.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
@@ -14,21 +12,21 @@
 <script src="../assets/js/explainer-kit.js"></script>
 <style>
   .sm-split { stroke: var(--red); stroke-width: 2.5; stroke-dasharray: 7 6; }
-  .sm-tag { font-family: var(--mono); font-size: 12.5px; }
+  .sm-tag { font-family: var(--display); font-size: 12.5px; }
   .sm-tag.you { fill: var(--orange); } .sm-tag.aws { fill: var(--violet); }
   .sm-ex { fill: var(--fg-soft); font-size: 15px; text-anchor: middle; }
   .sm-ex b { font-weight: 700; }
-  .sm-legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--muted); margin-top: 6px; }
-  .sm-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
-  .pick { display: grid; gap: 10px; }
+  .sm-legend { display: flex; flex-wrap: wrap; gap: var(--space-sm); font-size: 13px; color: var(--muted); margin-top: var(--space-2xs); }
+  .sm-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 0; vertical-align: -1px; margin-right: var(--space-2xs); }
+  .pick { display: grid; gap: var(--space-xs); }
   .pick .q { font-size: 16px; color: var(--fg); }
-  .pick .opts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pick .opts { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
   .pick .fb { min-height: 1.5em; color: var(--fg-soft); }
   .pick .count { font-family: var(--mono); font-size: 12px; color: var(--muted); }
   .btn.right { border-color: var(--teal); color: var(--good-text); }
   .btn.wrong { border-color: var(--red); color: var(--bad-text); }
-  .bill-lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-family: var(--mono); font-size: 13px; }
-  .bill-lines li { display: flex; justify-content: space-between; gap: 10px; padding: 6px 10px; border-radius: 8px; background: var(--panel-2); }
+  .bill-lines { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2xs); font-family: var(--mono); font-size: 13px; }
+  .bill-lines li { display: flex; justify-content: space-between; gap: var(--space-xs); padding: var(--space-2xs) var(--space-xs); border-radius: 0; background: var(--panel-2); }
   .bill-lines li.free { color: var(--good-text); }
   .bill-lines li.tot { background: none; border-top: 1px solid var(--line); border-radius: 0; font-weight: 600; color: var(--fg); }
 </style>
@@ -36,12 +34,13 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">AWS CLF-C02 · Cloud &amp; AWS overview · Domain 1 Cloud Concepts</div>
+    <p class="crumbs">AWS CLF-C02 / Cloud &amp; AWS overview / Domain 1 Cloud Concepts</p>
     <h1>IaaS, PaaS, SaaS &amp; pricing</h1>
     <ul class="lede">
       <li>Every app runs on a <b>stack of layers</b>, from networking up to your data. The models differ in <b>who manages which layers</b>.</li>
@@ -123,7 +122,7 @@
 
   <section aria-labelledby="billH">
     <h2 class="stage-title" id="billH">Where does the bill come from?</h2>
-    <div class="stage-kind">Click the events · watch which ones cost money · prices are illustrative</div>
+    <div class="stage-kind">Click the events, watch which ones cost money, prices are illustrative</div>
     <div class="controls">
       <button class="btn" id="bUp" type="button">Patient uploads a 50 MB scan</button>
       <button class="btn" id="bRun" type="button">Server runs for a month</button>

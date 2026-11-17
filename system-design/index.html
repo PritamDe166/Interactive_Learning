@@ -1,33 +1,32 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>System Design</title>
 <meta name="description" content="System design explainers in two tracks: high-level design (HLD) and low-level design (LLD).">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/hub.css">
 <script src="../assets/js/theme.js"></script>
-<style>.map-cta{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:baseline;margin-top:16px;padding:14px 20px;border:1px dashed var(--teal);border-radius:14px;color:inherit;text-decoration:none}.map-cta b{color:var(--teal-text);font-size:17px}.map-cta span{color:var(--fg-soft)}.map-cta:hover{background:var(--panel)}</style>
+<style>.map-cta{display:flex;flex-wrap:wrap;gap:var(--space-2xs) var(--space-sm);align-items:baseline;margin-top:var(--space-md);padding:var(--space-sm) var(--space-md);border:1px dashed var(--teal);border-radius: 0;color:inherit;text-decoration:none}.map-cta b{color:var(--teal-text);font-size:17px}.map-cta span{color:var(--fg-soft)}.map-cta:hover{background:var(--panel)}</style>
 </head>
 <body>
 <div class="wrap">
   <div class="topbar">
-    <a class="back" href="../index.html">← All subjects</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="../index.html">All subjects</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
   <header class="hub-head">
-    <div class="eyebrow">Two tracks · learn them side by side</div>
-    <h1>System <span class="y">Design</span></h1>
+    <p class="crumbs">Two tracks / learn them side by side</p>
+    <h1>System Design</h1>
     <p class="lede">High-level design is the architecture of a whole system; low-level design is how each piece is built in code. Pick a track.</p>
   </header>
 
   <main class="subjects" id="tracks"></main>
 
-  <a class="map-cta" href="map.html"><b>Learning map</b><span>Every HLD and LLD phase on one page, with the explainers that are ready →</span></a>
+  <a class="map-cta" href="map.html"><b>Learning map</b><span>Every HLD and LLD phase on one page, with the explainers that are ready</span></a>
 
   <footer>Update <code>done</code> and <code>pages</code> in this page's <code>TRACKS</code> list (and the System Design entry on the main hub) when you publish an explainer.</footer>
 </div>

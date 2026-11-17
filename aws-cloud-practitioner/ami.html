@@ -1,38 +1,37 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>AMIs</title>
 <meta name="description" content="AWS Cloud Practitioner: an Amazon Machine Image is a template for launching EC2 instances, built on EBS snapshots, usable across AZs and copyable to other Regions.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
 <script src="../assets/js/theme.js"></script>
 <script src="../assets/js/explainer-kit.js"></script>
 <style>
-  .race { display: grid; gap: 14px; }
-  .lane .t { font-size: 14px; margin-bottom: 6px; }
+  .race { display: grid; gap: var(--space-sm); }
+  .lane .t { font-size: 14px; margin-bottom: var(--space-2xs); }
   .lane .t b { color: var(--fg); }
-  .bar { display: flex; height: 26px; border-radius: 8px; overflow: hidden; background: var(--track); border: 1px solid var(--line); }
-  .bar span { display: block; height: 100%; width: 0; font: 600 11px var(--mono); color: var(--on-accent); line-height: 26px; padding-left: 6px; white-space: nowrap; overflow: hidden; }
+  .bar { display: flex; height: 26px; border-radius: 0; overflow: hidden; background: var(--track); border: 1px solid var(--line); }
+  .bar span { display: block; height: 100%; width: 0; font: 600 11px var(--mono); color: var(--on-accent); line-height: 26px; padding-left: var(--space-2xs); white-space: nowrap; overflow: hidden; }
   .bar .boot { background: var(--cyan); }
   .bar .inst { background: var(--orange); }
   .bar .cfg { background: var(--teal); }
-  .lane .res { font: 13px var(--mono); color: var(--muted); margin-top: 4px; }
+  .lane .res { font: 13px var(--mono); color: var(--muted); margin-top: var(--space-2xs); }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">AWS CLF-C02 · EC2 instance storage · 3</div>
+    <p class="crumbs">AWS CLF-C02 / EC2 instance storage / 3</p>
     <h1>AMIs: Amazon Machine Images</h1>
     <ul class="lede">
       <li>An <b>AMI</b> is the <b>template</b> an EC2 instance is launched from: OS, installed software, configuration.</li>
@@ -84,8 +83,8 @@
     <div class="stage-kind">Both servers must end up serving the web page</div>
     <div class="card">
       <div class="race">
-        <div class="lane"><div class="t"><b>A.</b> Public Amazon Linux AMI + user data that installs Apache</div><div class="bar"><span class="boot" id="a1">boot</span><span class="inst" id="a2">install httpd</span><span class="cfg" id="a3">page</span></div><div class="res" id="aR">–</div></div>
-        <div class="lane"><div class="t"><b>B.</b> Custom AMI with Apache baked in + user data that only writes the page</div><div class="bar"><span class="boot" id="b1">boot</span><span class="cfg" id="b3">page</span></div><div class="res" id="bR">–</div></div>
+        <div class="lane"><div class="t"><b>A.</b> Public Amazon Linux AMI + user data that installs Apache</div><div class="bar"><span class="boot" id="a1">boot</span><span class="inst" id="a2">install httpd</span><span class="cfg" id="a3">page</span></div><div class="res" id="aR">…</div></div>
+        <div class="lane"><div class="t"><b>B.</b> Custom AMI with Apache baked in + user data that only writes the page</div><div class="bar"><span class="boot" id="b1">boot</span><span class="cfg" id="b3">page</span></div><div class="res" id="bR">…</div></div>
       </div>
       <div class="controls"><button class="btn primary" id="go" type="button">Launch both</button></div>
       <p class="nf-cap" id="raceCap">Times are illustrative. Imagine an Auto Scaling group adding 10 servers in a traffic spike.</p>
@@ -102,7 +101,7 @@
     <details class="console-steps"><summary>Bake and launch a custom AMI (from the course hands-on)</summary>
       <ol>
         <li>Launch an instance: <b>Amazon Linux</b>, t2.micro/t3.micro, the security group that allows HTTP. In <b>User data</b>, paste the script that installs and starts <code>httpd</code> but <b>leave out</b> the line that writes <code>index.html</code>.</li>
-        <li>Wait 1–2 minutes (running ≠ ready). Open <code>http://&lt;public IP&gt;</code>: the Apache test page appears.</li>
+        <li>Wait 1 to 2 minutes (running ≠ ready). Open <code>http://&lt;public IP&gt;</code>: the Apache test page appears.</li>
         <li>Select the instance → <b>Actions → Image and templates → Create image</b>, name it <code>demo image</code> → Create.</li>
         <li><b>AMIs</b> page: status <code>pending</code>, then <code>available</code>.</li>
         <li>Select the AMI → <b>Launch instance from AMI</b> (or in the wizard: <b>My AMIs</b>). In User data paste only the line that writes "Hello World" to <code>index.html</code>.</li>
@@ -223,7 +222,7 @@
   $('go').addEventListener('click', async () => {
     const run = K.newRun('race');
     ['a1', 'a2', 'a3', 'b1', 'b3'].forEach(id => $(id).style.width = '0');
-    $('aR').textContent = '–'; $('bR').textContent = '–';
+    $('aR').textContent = '…'; $('bR').textContent = '…';
     try {
       const A = (async () => { await grow($('a1'), 30, run); await grow($('a2'), 100, run); await grow($('a3'), 5, run); $('aR').textContent = 'serving after ~135 s'; })();
       const B = (async () => { await grow($('b1'), 30, run); await grow($('b3'), 5, run); $('bR').textContent = 'serving after ~35 s'; })();

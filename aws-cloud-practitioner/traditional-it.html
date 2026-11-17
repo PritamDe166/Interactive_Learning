@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Traditional IT</title>
 <meta name="description" content="AWS Cloud Practitioner: how a website is served from your own data centre (DNS, router, switch, server, database) and why running it yourself is hard.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
@@ -19,19 +17,20 @@
   .ti-bars line.cap { stroke: var(--teal); stroke-width: 3; }
   .ti-bars text { fill: var(--muted); font-family: var(--mono); font-size: 11px; text-anchor: middle; }
   .ti-bars text.capl { fill: var(--teal-text); text-anchor: start; }
-  .ti-legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--muted); margin-top: 6px; }
-  .ti-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+  .ti-legend { display: flex; flex-wrap: wrap; gap: var(--space-sm); font-size: 13px; color: var(--muted); margin-top: var(--space-2xs); }
+  .ti-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 0; vertical-align: -1px; margin-right: var(--space-2xs); }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">AWS CLF-C02 · Cloud &amp; AWS overview · Domain 1 Cloud Concepts</div>
+    <p class="crumbs">AWS CLF-C02 / Cloud &amp; AWS overview / Domain 1 Cloud Concepts</p>
     <h1>Traditional IT: how a website is served</h1>
     <ul class="lede">
       <li>A <b>server</b> is a computer with <b>CPU</b> (compute), <b>RAM</b> (memory) and <b>storage</b>, usually backed by a <b>database</b>.</li>
@@ -95,9 +94,9 @@
     <div class="scroll"><svg class="diagram ti-bars" id="capSvg" viewBox="0 0 1000 300" aria-label="Monthly demand bars against a fixed capacity line"></svg></div>
     <div class="ti-legend"><span><i style="background:var(--fg-soft)"></i>Demand you served</span><span><i style="background:var(--red)"></i>Demand you had to turn away</span><span><i style="background:color-mix(in srgb,var(--yellow) 35%,transparent)"></i>Capacity paid for but idle</span><span><i style="background:var(--teal)"></i>Your fixed capacity</span></div>
     <div class="kpis">
-      <div class="kpi bad"><b id="kDrop">–</b><span>Requests turned away</span></div>
-      <div class="kpi accent"><b id="kIdle">–</b><span>Capacity sitting idle</span></div>
-      <div class="kpi"><b id="kCost">–</b><span>Bought up front</span></div>
+      <div class="kpi bad"><b id="kDrop">…</b><span>Requests turned away</span></div>
+      <div class="kpi accent"><b id="kIdle">…</b><span>Capacity sitting idle</span></div>
+      <div class="kpi"><b id="kCost">…</b><span>Bought up front</span></div>
     </div>
     <p class="hint" id="capHint"></p>
   </section>
@@ -108,7 +107,7 @@
       <li><span class="if">Name → IP address</span><span class="arrow">→</span><span class="then">DNS</span></li>
       <li><span class="if">Connects your network to other networks (the internet)</span><span class="arrow">→</span><span class="then">Router</span></li>
       <li><span class="if">Connects machines inside one network</span><span class="arrow">→</span><span class="then">Switch</span></li>
-      <li><span class="if">Does the work, holds data while working, keeps data</span><span class="arrow">→</span><span class="then">CPU · RAM · storage</span></li>
+      <li><span class="if">Does the work, holds data while working, keeps data</span><span class="arrow">→</span><span class="then">CPU, RAM, storage</span></li>
       <li><span class="if">Buy hardware up front, wait weeks, guess capacity</span><span class="arrow">→</span><span class="then">Traditional IT (the problem the cloud solves)</span></li>
     </ul>
   </section>

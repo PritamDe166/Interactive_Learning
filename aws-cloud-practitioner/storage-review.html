@@ -1,33 +1,32 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>EC2 storage review</title>
 <meta name="description" content="AWS Cloud Practitioner: EC2 instance storage section review with a one-path recap, section summary, commonly confused pairs, a drill and 20 exam-style questions.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
 <script src="../assets/js/theme.js"></script>
 <script src="../assets/js/explainer-kit.js"></script>
 <style>
-  .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 10px; }
-  .topic-links a { display: block; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--fg); text-decoration: none; }
+  .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-xs); }
+  .topic-links a { display: block; padding: var(--space-sm) var(--space-sm); border-radius: 0; background: var(--panel); color: var(--fg); text-decoration: none; }
   .topic-links a:hover { border-color: var(--orange); }
-  .topic-links a span { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .topic-links a span { display: block; font-size: 13px; color: var(--muted); margin-top: var(--space-3xs); }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">AWS CLF-C02 · EC2 instance storage · Section review</div>
+    <p class="crumbs">AWS CLF-C02 / EC2 instance storage / Section review</p>
     <h1>EC2 instance storage: review</h1>
     <ul class="lede">
       <li><b>EBS</b> is the network disk of one instance in one AZ; <b>snapshots</b> back it up and move it.</li>
@@ -49,8 +48,8 @@
   <section aria-labelledby="sumH">
     <h2 id="sumH">Section summary</h2>
     <div class="sum-grid">
-      <div class="card"><h3>EBS volumes</h3><ul><li>Network drive, one instance at a time, one AZ.</li><li>Persistent; provision GiB and IOPS, billed even unattached.</li><li>Delete on termination: root Yes, extra No.</li><li>gp3/gp2 general · io2/io1 IOPS · st1/sc1 HDD.</li></ul></div>
-      <div class="card"><h3>Snapshots</h3><ul><li>Incremental backup of a volume, Region-level.</li><li>Restore in any AZ; copy to another Region.</li><li>Archive tier: up to 75% cheaper, 24–72 h restore.</li><li>Recycle Bin rule recovers deleted snapshots/AMIs.</li></ul></div>
+      <div class="card"><h3>EBS volumes</h3><ul><li>Network drive, one instance at a time, one AZ.</li><li>Persistent; provision GiB and IOPS, billed even unattached.</li><li>Delete on termination: root Yes, extra No.</li><li>gp3/gp2 general, io2/io1 IOPS, st1/sc1 HDD.</li></ul></div>
+      <div class="card"><h3>Snapshots</h3><ul><li>Incremental backup of a volume, Region-level.</li><li>Restore in any AZ; copy to another Region.</li><li>Archive tier: up to 75% cheaper, 24 to 72 h restore.</li><li>Recycle Bin rule recovers deleted snapshots/AMIs.</li></ul></div>
       <div class="card"><h3>AMIs &amp; Image Builder</h3><ul><li>AMI = template: OS, software, config (snapshots + metadata).</li><li>Public, custom, Marketplace; Region-scoped, copyable.</li><li>Custom AMI → faster boot. Immutable.</li><li>Image Builder: build → test → distribute; free service.</li></ul></div>
       <div class="card"><h3>Instance store</h3><ul><li>Disk on the physical host; highest IOPS.</li><li>Lost on stop, terminate, hardware failure; survives reboot.</li><li>Cache, buffers, scratch; backups are yours.</li></ul></div>
       <div class="card"><h3>EFS</h3><ul><li>Managed NFS, Linux only, hundreds of instances, multi-AZ.</li><li>Pay per use, ~3× gp2 price.</li><li>Lifecycle → EFS-IA (up to 95% cheaper) / Archive.</li></ul></div>
@@ -84,7 +83,7 @@
           <tr><td>FSx for Windows vs FSx for Lustre</td><td>Windows file shares vs HPC/ML storage linked to S3</td></tr>
           <tr><td>Snapshot vs AMI</td><td>Backup of one volume's data vs template you can launch instances from</td></tr>
           <tr><td>Copy snapshot vs create volume from snapshot</td><td>To another Region (DR) vs a new volume in any AZ of the Region</td></tr>
-          <tr><td>Snapshot Standard vs Archive</td><td>Restore any time vs up to 75% cheaper, 24–72 h restore</td></tr>
+          <tr><td>Snapshot Standard vs Archive</td><td>Restore any time vs up to 75% cheaper, 24 to 72 h restore</td></tr>
           <tr><td>Recycle Bin vs Archive</td><td>Recover deleted snapshots/AMIs vs store old snapshots cheaply</td></tr>
           <tr><td>Create image vs EC2 Image Builder</td><td>One-off manual AMI vs scheduled build-test-distribute pipeline</td></tr>
           <tr><td>EFS Standard vs EFS-IA</td><td>Frequently used files vs cold files moved by lifecycle policy, up to 95% cheaper</td></tr>
@@ -121,7 +120,7 @@
     </ul>
   </section>
 
-  <footer>Questions are original, written to the official exam guide (Task 3.3: storage services; Task 2.1: shared responsibility) and the scenario patterns of public practice sets: <a href="https://docs.aws.amazon.com/aws-certification/latest/examguides/cloud-practitioner-02.html">AWS CLF-C02 exam guide</a>, <a href="https://training.resources.awscloud.com/associate-certification-articles/updated-cloud-practitioner-exam-prep-course">AWS official practice question set</a>, <a href="https://www.educative.io/blog/aws-cloud-practitioner-exam-questions-clf-c02">Educative</a>, <a href="https://www.sailor.sh/blog/aws-cloud-practitioner-practice-questions">Sailor.sh</a>. Section notes: EC2 Instance Storage 1–14.</footer>
+  <footer>Questions are original, written to the official exam guide (Task 3.3: storage services; Task 2.1: shared responsibility) and the scenario patterns of public practice sets: <a href="https://docs.aws.amazon.com/aws-certification/latest/examguides/cloud-practitioner-02.html">AWS CLF-C02 exam guide</a>, <a href="https://training.resources.awscloud.com/associate-certification-articles/updated-cloud-practitioner-exam-prep-course">AWS official practice question set</a>, <a href="https://www.educative.io/blog/aws-cloud-practitioner-exam-questions-clf-c02">Educative</a>, <a href="https://www.sailor.sh/blog/aws-cloud-practitioner-practice-questions">Sailor.sh</a>. Section notes: EC2 Instance Storage 1 to 14.</footer>
 </div>
 
 <script src="topics.js"></script>

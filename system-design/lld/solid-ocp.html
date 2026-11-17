@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Open-Closed Principle</title>
 <meta name="description" content="SOLID, O: add behaviour without editing tested code. A fee calculator moves from a switch to strategies, a repository gains caching through a decorator.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -14,26 +12,27 @@
 <script src="../../assets/js/explainer-kit.js"></script>
 <script src="../sd-series.js"></script>
 <style>
-  .chain { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0; margin-top: 12px; }
-  .layer { border: 2px solid var(--line); border-radius: 14px; padding: 10px 12px; margin: 4px; background: var(--panel); transition: border-color .25s, box-shadow .25s; min-width: 140px; }
+  .chain { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0; margin-top: var(--space-sm); }
+  .layer { border: 2px solid var(--line); border-radius: 0; padding: var(--space-xs) var(--space-sm); margin: var(--space-2xs); background: var(--panel); transition: border-color .25s, box-shadow .25s; min-width: 140px; }
   .layer .ln1 { font-family: var(--mono); font-size: 13px; color: var(--fg); }
   .layer .ln2 { font-size: 12px; color: var(--muted); }
   .layer.hot { border-color: var(--cyan); box-shadow: 0 0 0 3px var(--teal-wash); }
   .layer.core { border-color: var(--teal); }
-  .chain .arr { align-self: center; color: var(--muted); padding: 0 2px; }
-  .ocp-log { margin: 6px 0 0; min-height: 90px; white-space: pre-wrap; font-size: 13px; }
+  .chain .arr { align-self: center; color: var(--muted); padding: 0 var(--space-3xs); }
+  .ocp-log { margin: var(--space-2xs) 0 0; min-height: 90px; white-space: pre-wrap; font-size: 13px; }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← LLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">LLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
     <div class="solid-letters" aria-label="SOLID principles"><a href="solid.html" title="Overview">∗</a><a href="solid-srp.html" title="Single responsibility">S</a><b title="Open-closed">O</b><a href="solid-lsp.html" title="Liskov substitution">L</a><a href="solid-isp.html" title="Interface segregation">I</a><a href="solid-dip.html" title="Dependency inversion">D</a></div>
-    <div class="eyebrow">System Design · LLD · SOLID · O</div>
+    <p class="crumbs">System Design / LLD / SOLID / O</p>
     <h1>Open-Closed Principle</h1>
     <ul class="lede">
       <li>Code should be <b>open for extension</b> but <b>closed for modification</b>: add new behaviour by adding new code, not by editing classes that already work and are tested.</li>

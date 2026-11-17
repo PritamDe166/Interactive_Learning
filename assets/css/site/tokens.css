@@ -1,0 +1,41 @@
+/* Grid fonts, self-hosted (SIL OFL 1.1, assets/fonts/OFL.txt) */
+@font-face { font-family: "Radio Canada Big"; font-weight: 400; font-style: normal; font-display: swap; src: url("../../fonts/radio-canada-big-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Radio Canada Big"; font-weight: 700; font-style: normal; font-display: swap; src: url("../../fonts/radio-canada-big-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Radio Canada"; font-weight: 400; font-style: normal; font-display: swap; src: url("../../fonts/radio-canada-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Radio Canada"; font-weight: 500; font-style: normal; font-display: swap; src: url("../../fonts/radio-canada-latin-500-normal.woff2") format("woff2"); }
+:root {
+  color-scheme: light;
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px; --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px; --space-3xl: 96px; --space-4xl: 144px;
+  --text-xs: 0.8125rem; --text-sm: 0.875rem; --text-md: 1rem; --text-lg: 1.25rem; --text-xl: 1.5625rem; --text-2xl: 1.953rem; --text-3xl: 2.441rem;
+  --text-display-s: clamp(2.25rem, 4vw + 0.5rem, 3.75rem); --text-display: clamp(2.75rem, 5vw + 1rem, 5.25rem);
+  --text-section: clamp(2rem, 2.5vw + 1rem, 3.5rem); --text-title: clamp(1.25rem, 0.75vw + 0.875rem, 1.625rem); --text-lead: clamp(1.125rem, 0.35vw + 1rem, 1.375rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); --ease-in: cubic-bezier(0.7, 0, 0.84, 0); --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms; --dur-short: 220ms; --dur-long: 420ms;
+  --color-error: oklch(52% 0.19 27); --color-success: oklch(50% 0.12 150);
+  --container: 1440px; --gutter: 64px; --gap-columns: 32px; --section-gap-s: 120px; --section-gap: 144px; --section-gap-l: 176px;
+  --z-base: 1; --z-raised: 10; --z-dropdown: 100; --z-sticky: 200; --z-sticky-nav: 300; --z-modal: 400; --z-toast: 500; --z-tooltip: 600;
+  --color-paper: oklch(98.6% 0.005 265); --color-paper-2: oklch(95.8% 0.006 265); --color-paper-3: oklch(92.4% 0.007 265);
+  --color-ink: oklch(18% 0.009 265); --color-ink-2: oklch(32% 0.009 265); --color-muted: oklch(48% 0.012 265);
+  --color-rule: oklch(89% 0.006 265);
+  --color-accent: oklch(53% 0.215 264); --color-accent-hover: oklch(46% 0.2 264); --color-accent-ink: oklch(98.6% 0.005 265); --color-focus: oklch(53% 0.215 264);
+  --color-field: oklch(18.5% 0.009 265); --color-field-ink: oklch(97% 0.005 265);
+  --color-mark: oklch(91% 0.18 115); --color-mark-ink: oklch(18% 0.009 265);
+  --font-display: "Radio Canada Big", ui-sans-serif, system-ui, sans-serif; --font-body: "Radio Canada", ui-sans-serif, system-ui, sans-serif;
+  --font-outlier: var(--font-display);
+  --radius-card: 0; --radius-pill: 0; --rule-hair: 1px; --shadow-card: none;
+  --tracking-display: -0.035em; --display-weight: 700;
+}
+
+/* Palette: the owner's Figma reference (near-black panels on a white canvas, electric blue for actions, acid lime as the one mark).
+   Lime is a fill only (logo square, the draw band, selection); it never colours text on paper. */
+/* Dark rendering, derived per dark-mode.md: same hues, paper and ink re-spaced, accents lifted.
+   theme.js sets data-theme on <html>; light is the default on Grid pages (data-theme-default="light"). */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-paper: oklch(15.5% 0.007 265); --color-paper-2: oklch(18.5% 0.008 265); --color-paper-3: oklch(21.5% 0.009 265);
+  --color-ink: oklch(95% 0.005 265); --color-ink-2: oklch(84% 0.007 265); --color-muted: oklch(70% 0.01 265);
+  --color-rule: oklch(29% 0.009 265);
+  --color-accent: oklch(68% 0.16 264); --color-accent-hover: oklch(74% 0.14 264); --color-accent-ink: oklch(15.5% 0.007 265); --color-focus: oklch(72% 0.15 264);
+  --color-field: oklch(23% 0.01 265); --color-field-ink: oklch(97% 0.005 265);
+  --color-mark: oklch(88% 0.17 115); --color-mark-ink: oklch(15.5% 0.007 265);
+}

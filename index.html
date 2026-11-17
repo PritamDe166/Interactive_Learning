@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light" data-theme-default="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -11,53 +11,149 @@
 <meta property="og:description" content="Animated, clickable explainers for system design, AWS, Python and Angular, built while learning.">
 <meta property="og:url" content="https://seehowitworks.dev/">
 <meta property="og:type" content="website">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="assets/css/theme.css">
-<link rel="stylesheet" href="assets/css/base.css">
-<link rel="stylesheet" href="assets/css/hub.css">
+<link rel="stylesheet" href="assets/css/site/home.css">
 <script src="assets/js/theme.js"></script>
+<script>document.documentElement.classList.add('js');</script>
 </head>
 <body>
-<div class="wrap">
-  <div class="topbar">
-    <a class="back" href="about.html">About me &amp; why this exists →</a>
-    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+<a class="skip" href="#main">Skip to the subjects</a>
+
+<header class="nav">
+  <div class="container nav__in">
+    <a class="wordmark" href="index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+    <a class="find-pill" href="#find" data-find-open hidden><span>Search<span class="pill-more"> every explainer</span></span><kbd>/</kbd></a>
+    <div class="nav__end">
+      <a class="back nav__about" href="about.html">About</a>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+    </div>
   </div>
-  <header class="hub-head">
-    <div class="eyebrow">Learning in public · one diagram at a time</div>
-    <h1>See How It <span class="y">Works</span></h1>
-    <p class="lede">Animated, clickable walkthroughs of what I'm learning. Each one is a single page: play with it, then close it and draw it from memory.</p>
-    <p class="lede" style="margin-top:10px">I'm a visual learner preparing for interviews, and I built this to learn; now it's here for anyone preparing too. <a href="about.html">Read why →</a></p>
-    <div class="totals" id="totals"></div>
-  </header>
+</header>
 
-  <main class="subjects" id="subjects"></main>
-
-  <section class="recent" aria-labelledby="recentH">
-    <h3 class="section-rule" id="recentH">Latest explainers</h3>
-    <ul id="recent"></ul>
+<main id="main">
+  <section class="hero" aria-labelledby="heroH">
+    <div class="container hero__grid">
+      <div class="hero__field" aria-hidden="true"></div>
+      <div class="hero__head">
+        <h1 id="heroH">See How It Works</h1>
+        <p class="over" aria-hidden="true">See How It Works</p>
+      </div>
+      <div class="hero__text">
+        <div class="hero__lede">
+          <p class="lead">Animated, clickable walkthroughs for interview prep: system design, AWS, Python, Angular.</p>
+          <div class="hero__actions">
+            <a class="btn" href="#subjects">Browse the subjects</a>
+            <a class="link" href="#latest">See the latest</a>
+          </div>
+        </div>
+        <dl class="tally" id="totals"></dl>
+      </div>
+      <figure class="hero__shot">
+        <div class="shot" data-slot="hero" data-kind="product" data-alt="An explainer in use: the cache eviction lab mid-run, LRU, LFU and FIFO side by side">
+          <img src="assets/img/home/lru-try-it.webp" width="1864" height="1292" alt="The cache eviction lab after a run: LRU, LFU and FIFO caches side by side, LFU ahead with 8 hits to 6" fetchpriority="high">
+        </div>
+        <figcaption>From <a class="link" href="system-design/hld/cache-eviction.html">Cache eviction policies</a>: three caches, the same keys.</figcaption>
+      </figure>
+    </div>
   </section>
 
-  <footer>To add a subject, create its folder with an <code>index.html</code>, then set <code>path</code> (e.g. <code>aws/index.html</code>) on its entry in this page's <code>SUBJECTS</code> list. Add new explainers to <code>RECENT</code>.</footer>
-</div>
+  <section class="section" id="subjects-section" aria-labelledby="subjectsH">
+    <div class="container">
+      <div class="head">
+        <h2 id="subjectsH">Five subjects</h2>
+        <p>Each one is a roadmap of pages, in the order I learned them.</p>
+      </div>
+      <ul class="subjects" id="subjects"></ul>
+    </div>
+  </section>
 
+  <section class="section how" aria-labelledby="howH">
+    <div class="container">
+      <div class="head">
+        <h2 id="howH">How a page works</h2>
+        <p>Every explainer runs the same way, shown here on cache eviction.</p>
+      </div>
+      <ol class="stages">
+        <li class="stage">
+          <div class="stage__text"><h3>Read the short bullets at the top.</h3></div>
+          <figure class="stage__shot" data-kind="product"><img src="assets/img/home/lru-bullets.webp" width="1816" height="686" alt="The top of the cache eviction page: its title and four short bullets" loading="lazy"></figure>
+        </li>
+        <li class="stage">
+          <div class="stage__text"><h3>Step through the walkthrough.</h3></div>
+          <figure class="stage__shot" data-kind="product"><img src="assets/img/home/lru-walkthrough.webp" width="1768" height="924" alt="Step 5 of 7 inside an LRU cache: A is evicted and D goes in at the head of the list" loading="lazy"></figure>
+        </li>
+        <li class="stage">
+          <div class="stage__text"><h3>Play with the examples, then try the quiz.</h3></div>
+          <figure class="stage__shot" data-kind="product"><img src="assets/img/home/lru-test.webp" width="1864" height="1632" alt="The Test yourself section: a which-pattern-fits question and six explain-it-out-loud cards" loading="lazy"></figure>
+        </li>
+        <li class="stage stage--draw">
+          <div class="stage__text"><h3>Close it.</h3></div>
+          <div class="draw"><p>Then draw it from memory.</p></div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section latest" id="latest" aria-labelledby="recentH">
+    <div class="container">
+      <div class="head">
+        <h2 id="recentH">Latest explainers</h2>
+        <div class="seg" role="group" aria-label="Show explainers from" id="recentFilter" hidden></div>
+      </div>
+      <ul class="rows" id="recent"></ul>
+      <p class="more"><button class="btn" type="button" id="recentMore" hidden></button></p>
+    </div>
+  </section>
+
+  <section class="find" id="find" aria-labelledby="findH" hidden>
+    <div class="container cols">
+      <h2 id="findH">Look up a topic you&rsquo;re stuck on</h2>
+      <form role="search" id="findForm" action="#find">
+        <label for="findQ">Search page titles, summaries and headings</label>
+        <input id="findQ" name="q" type="search" autocomplete="off" spellcheck="false" placeholder="LRU, IAM, signals" aria-describedby="findHint" aria-controls="findHits">
+        <p class="hint" id="findHint" aria-live="polite"></p>
+      </form>
+      <ul class="hits" id="findHits"></ul>
+    </div>
+  </section>
+</main>
+
+<footer class="letter">
+  <div class="container cols">
+    <div class="letter__body">
+      <p>I&rsquo;m a visual learner preparing for interviews, and I built this to learn; now it&rsquo;s here for anyone preparing too.</p>
+      <p class="sign">Pritam</p>
+      <p><a class="link" href="about.html">Read why I built it</a></p>
+    </div>
+    <ul class="letter__links">
+      <li><a href="system-design/index.html">System Design</a></li>
+      <li><a href="aws-cloud-practitioner/index.html">AWS</a></li>
+      <li><a href="python-fundamentals/index.html">Python</a></li>
+      <li><a href="angular/index.html">Angular</a></li>
+      <li><a href="https://github.com/PritamDe166/Interactive_Learning">Source on GitHub</a></li>
+    </ul>
+  </div>
+</footer>
+
+<script src="assets/js/search-index.js" defer></script>
 <script>
-/* ===== Edit these two lists as you add work. ===== */
+/* ===== Edit these two lists as you add work. =====
+   To add a subject, create its folder with an index.html, then set path (e.g. aws/index.html)
+   on its entry in SUBJECTS. Add new explainers to RECENT.
+   After adding or renaming pages, run: python3 tools/build_search_index.py */
 const SUBJECTS = [
-  {name:"System Design", path:"system-design/index.html", accent:"var(--teal)", icon:"net",
-   blurb:"Two tracks. HLD: 147 sessions (H1–H147) from networking, scaling and caching to databases, distributed systems and reliability. LLD: 67 topics (L1–L67) from OOP and SOLID to design patterns, concurrency and classic problems.",
+  {name:"System Design", path:"system-design/index.html",
+   blurb:"HLD: 147 sessions (H1–H147), networking to reliability. LLD: 67 topics (L1–L67), OOP to design patterns.",
    done:21, total:147, unit:"HLD sessions", pages:32},
-  {name:"AWS", path:"aws-cloud-practitioner/index.html", accent:"var(--orange)", icon:"cloud",
-   blurb:"Cloud Practitioner (CLF-C02), one page per topic: follow each request as it travels through Regions, AZs, edge locations and services. Being rebuilt section by section.",
+  {name:"AWS", path:"aws-cloud-practitioner/index.html",
+   blurb:"Cloud Practitioner (CLF-C02): follow each request through Regions, AZs, edge locations and services.",
    done:30, total:85, unit:"topics rebuilt", pages:43},
-  {name:"Python", path:"python-fundamentals/index.html", accent:"var(--blue)", icon:"code",
-   blurb:"Fundamentals stepped line by line, with edit-and-run boxes: objects, collections, functions, files, classes, then generators, decorators, type hints and APIs.",
+  {name:"Python", path:"python-fundamentals/index.html",
+   blurb:"Fundamentals stepped line by line, with edit-and-run boxes, from objects to type hints and APIs.",
    done:20, total:20, unit:"topics", pages:20},
-  {name:"Angular", path:"angular/index.html", accent:"var(--red)", icon:"shield",
-   blurb:"Modern Angular 22 learned by building one app, CareDesk, in 15 steps: components, bindings, signals, DI, routing, guards, forms and HTTP, every snippet run for real.",
+  {name:"Angular", path:"angular/index.html",
+   blurb:"Modern Angular 22, learned by building one app, CareDesk: components to forms and HTTP.",
    done:15, total:15, unit:"topics", pages:15},
-  {name:"AI", path:null, accent:"var(--violet)", icon:"spark",
+  {name:"AI", path:null,
    blurb:"Embeddings, transformers and attention, RAG pipelines, agents and evaluation.",
    done:0, total:null, unit:"topics"}
 ];
@@ -80,32 +176,78 @@ const RECENT = [
 ];
 
 /* ===== Render ===== */
-const ICONS={
-  net:'<circle cx="5" cy="12" r="2.5"/><circle cx="19" cy="5" r="2.5"/><circle cx="19" cy="12" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M7.5 12h9M7 11l9.5-5M7 13l9.5 5"/>',
-  cloud:'<path d="M7 18h10a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.2 9.5 4.3 4.3 0 0 0 7 18z"/>',
-  code:'<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16"/>',
-  shield:'<path d="M12 3l8 3-1.2 10.5L12 21l-6.8-4.5L4 6z"/><path d="M12 7l-3.5 8M12 7l3.5 8M9.6 12.5h4.8"/>',
-  spark:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"/><circle cx="12" cy="12" r="2.2"/>'
-};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const $=id=>document.getElementById(id);
 const totalExplainers=SUBJECTS.reduce((n,s)=>n+(s.pages||s.done||0),0); /* pages: unique explainer files (one page can cover several days) */
 const activeSubjects=SUBJECTS.filter(s=>s.path).length;
-$('totals').innerHTML=`<span><b>${totalExplainers}</b> explainer${totalExplainers===1?'':'s'}</span><span><b>${activeSubjects}</b> of ${SUBJECTS.length} subjects started</span>`;
+$('totals').innerHTML=`<div><dt>explainer${totalExplainers===1?'':'s'} so far</dt><dd>${totalExplainers}</dd></div>`; /* activeSubjects: shown in the subject list as Planned */
 
 $('subjects').innerHTML=SUBJECTS.map(s=>{
   const pct=s.total?Math.round(s.done*100/s.total):0;
-  const progress=s.total?`<div class="track" aria-hidden="true"><i style="width:${Math.max(pct,s.done?2:0)}%"></i></div>`:'';
-  const count=s.path?`<span><b>${s.done}</b>${s.total?` / ${s.total} ${s.unit}`:` explainer${s.done===1?'':'s'}`}</span><span class="go">Open →</span>`:`<span>Planned</span><span>Coming soon</span>`;
-  const inner=`<div class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[s.icon]}</svg></div>
-    <h2>${esc(s.name)}</h2><p>${esc(s.blurb)}</p>${progress}<div class="meta">${count}</div>`;
+  const bar=s.total?`<span class="bar" aria-hidden="true"><i style="width:${Math.max(pct,s.done?2:0)}%"></i></span>`:'';
+  const prog=s.path
+    ?`<span class="prog"><b>${s.done}${s.total?` / ${s.total}`:''}</b><span>${esc(s.unit)}</span>${bar}</span>`
+    :`<span class="prog"><b>Planned</b><span>Not started yet</span></span>`;
+  const inner=`<h3>${esc(s.name)}</h3><p>${esc(s.blurb)}</p>${prog}`;
   return s.path
-    ? `<a class="subj" style="--acc:${s.accent}" href="${esc(s.path)}">${inner}</a>`
-    : `<div class="subj soon" style="--acc:${s.accent}">${inner}</div>`;
+    ? `<li class="subj"><a href="${esc(s.path)}">${inner}</a></li>`
+    : `<li class="subj soon"><div>${inner}</div></li>`;
 }).join('');
 
-const accentOf=name=>(SUBJECTS.find(s=>s.name===name)||{}).accent||'var(--muted)';
-$('recent').innerHTML=RECENT.map(r=>`<li><a href="${esc(r.href)}"><span class="tag" style="color:${accentOf(r.subject)}">${esc(r.subject)}</span><span class="t">${esc(r.title)}</span><span class="tag note">${esc(r.note||'')}</span></a></li>`).join('');
+/* Latest explainers: six shown, the rest one click away; filter by subject. */
+const SHOW=6;
+let recentSubject='All', recentOpen=false;
+function renderRecent(){
+  const list=RECENT.filter(r=>recentSubject==='All'||r.subject===recentSubject);
+  $('recent').innerHTML=list.map((r,i)=>`<li class="${i>=SHOW?'is-more':''}"><a href="${esc(r.href)}"><span class="t">${esc(r.title)}</span><span class="s">${esc(r.subject)}</span><span class="n">${esc(r.note||'')}</span></a></li>`).join('');
+  $('recent').classList.toggle('is-open',recentOpen);
+  const more=$('recentMore');
+  more.hidden=list.length<=SHOW;
+  more.textContent=recentOpen?'Show fewer':`Show all ${list.length}`;
+  more.setAttribute('aria-expanded',String(recentOpen));
+}
+const subjectsInRecent=['All',...new Set(RECENT.map(r=>r.subject))];
+$('recentFilter').innerHTML=subjectsInRecent.map(n=>`<button type="button" aria-pressed="${n==='All'}" data-subject="${esc(n)}">${esc(n)}</button>`).join('');
+$('recentFilter').hidden=false;
+$('recentFilter').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-subject]'); if(!b) return;
+  recentSubject=b.dataset.subject;
+  $('recentFilter').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+  renderRecent();
+});
+$('recentMore').addEventListener('click',()=>{recentOpen=!recentOpen;renderRecent();});
+renderRecent();
+
+/* Find: searches assets/js/search-index.js (built by tools/build_search_index.py). */
+window.addEventListener('DOMContentLoaded',()=>{
+  const INDEX=window.SEARCH_INDEX||[];
+  if(!INDEX.length) return;
+  $('find').hidden=false;
+  document.querySelectorAll('[data-find-open]').forEach(a=>{a.hidden=false;});
+  const q=$('findQ'), hits=$('findHits'), hint=$('findHint');
+  const norm=s=>s.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g,'');
+  const rows=INDEX.map(p=>({...p,hay:norm(`${p.t} ${p.s} ${p.k} ${p.d} ${p.w||''}`),title:norm(p.t)}));
+  const idle=`${INDEX.length} pages, searched as you type.`;
+  hint.textContent=idle;
+  function run(){
+    const words=norm(q.value).split(/\s+/).filter(Boolean);
+    if(!words.length){hits.innerHTML='';hint.textContent=idle;return;}
+    const found=rows.filter(r=>words.every(w=>r.hay.includes(w)))
+      .map(r=>({r,score:words.reduce((n,w)=>n+(r.title.includes(w)?2:0)+(r.title.startsWith(w)?1:0),0)}))
+      .sort((a,b)=>b.score-a.score).slice(0,8);
+    hits.innerHTML=found.map(({r})=>`<li><a href="${esc(r.h)}"><span class="t">${esc(r.t)}</span><span class="s">${esc(r.s)}${r.k?`, ${esc(r.k)}`:''}</span></a></li>`).join('');
+    hint.textContent=found.length?`${found.length===8?'Top 8':found.length} match${found.length===1?'':'es'}`:'No page matches that yet.';
+  }
+  q.addEventListener('input',run);
+  $('findForm').addEventListener('submit',e=>{e.preventDefault();const first=hits.querySelector('a');if(first) first.click();});
+  function openFind(e){ if(e) e.preventDefault(); $('find').scrollIntoView({block:'start'}); q.focus({preventScroll:true}); }
+  document.querySelectorAll('[data-find-open]').forEach(a=>a.addEventListener('click',openFind));
+  document.addEventListener('keydown',e=>{
+    if(e.key!=='/'||e.metaKey||e.ctrlKey||e.altKey) return;
+    const t=e.target; if(t.closest&&t.closest('input, textarea, select, [contenteditable="true"]')) return;
+    openFind(e);
+  });
+});
 </script>
 </body>
 </html>

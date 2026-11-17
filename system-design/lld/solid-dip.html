@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Dependency Inversion Principle</title>
 <meta name="description" content="SOLID, D: high-level policy and low-level details both depend on an abstraction the high-level side owns. Watch the dependency arrow flip, then wire implementations with constructor injection.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -17,21 +15,22 @@
   .proj rect { fill: transparent; stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 2 5; }
   .proj text { fill: var(--muted); font-family: var(--mono) !important; font-size: 12px; }
   .proj.hot rect { stroke: var(--cyan); }
-  .dip-log { margin: 6px 0 0; min-height: 70px; white-space: pre-wrap; font-size: 13px; }
-  select.dip-sel { font: inherit; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); }
-  select.dip-sel:disabled { opacity: .45; }
+  .dip-log { margin: var(--space-2xs) 0 0; min-height: 70px; white-space: pre-wrap; font-size: 13px; }
+  select.dip-sel { font: inherit; padding: var(--space-2xs) var(--space-xs); border-radius: 0; background: var(--panel-2); color: var(--fg); }
+  select.dip-sel:disabled { opacity: .55; cursor: not-allowed; }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← LLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">LLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
     <div class="solid-letters" aria-label="SOLID principles"><a href="solid.html" title="Overview">∗</a><a href="solid-srp.html" title="Single responsibility">S</a><a href="solid-ocp.html" title="Open-closed">O</a><a href="solid-lsp.html" title="Liskov substitution">L</a><a href="solid-isp.html" title="Interface segregation">I</a><b title="Dependency inversion">D</b></div>
-    <div class="eyebrow">System Design · LLD · SOLID · D</div>
+    <p class="crumbs">System Design / LLD / SOLID / D</p>
     <h1>Dependency Inversion Principle</h1>
     <ul class="lede">
       <li><b>High-level modules</b> (business rules) shouldn't depend on <b>low-level modules</b> (SQL, SMTP, HTTP). Both should depend on an <b>abstraction</b>.</li>

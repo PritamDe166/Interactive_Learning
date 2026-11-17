@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Reverse Proxy, Load Balancer & API Gateway</title>
 <meta name="description" content="Days 10–12: follow requests through CDN, API gateway, load balancers and service instances; compare Layer 4 and Layer 7 load balancing; see what each layer is for.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -19,12 +17,13 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← HLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">HLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Week 2 · Days 10–12 · Scaling Fundamentals</div>
+    <p class="crumbs">Week 2 / Days 10 to 12 / Scaling Fundamentals</p>
     <h1>Reverse Proxy, Load Balancer & API Gateway</h1>
     <ul class="lede"><li>Three layers sit between users and your code.</li><li><b>Reverse proxy</b>: protects and optimises traffic for a backend.</li><li><b>Load balancer</b>: spreads traffic across healthy instances.</li><li><b>API gateway</b>: applies API rules (auth, rate limits, routing) before a service is reached.</li><li>Real products often do more than one of these.</li></ul>
   </header>
@@ -58,7 +57,7 @@
       <div class="card"><div class="label">What each layer did</div><ol class="steps" id="pathSteps"></ol></div>
       <div class="card facts">
         <div><div class="label">Result</div><p id="pathResult">Pick a request above.</p></div>
-        <div><div class="label">Why this layer</div><p id="pathWhy">–</p></div>
+        <div><div class="label">Why this layer</div><p id="pathWhy">…</p></div>
       </div>
     </div>
   </div>
@@ -180,7 +179,7 @@
 
   <nav id="prevnext"></nav>
 
-  <footer>Sources: Days 10–12 notes, "Reverse Proxy, Load Balancer, and API Gateway" and "Backend Architecture Layers: CDN, Reverse Proxy, Load Balancer, and API Gateway". Algorithms are covered in <a href="load-balancing-algorithms.html">Day 13</a>.</footer>
+  <footer>Sources: Days 10 to 12 notes, "Reverse Proxy, Load Balancer, and API Gateway" and "Backend Architecture Layers: CDN, Reverse Proxy, Load Balancer, and API Gateway". Algorithms are covered in <a href="load-balancing-algorithms.html">Day 13</a>.</footer>
 </div>
 
 <script>

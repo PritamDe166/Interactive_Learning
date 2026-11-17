@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Comprehensions</title>
 <meta name="description" content="Python fundamentals: list, dict and set comprehensions and generator expressions, shown side by side with the loop they replace.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
@@ -15,10 +13,10 @@
 <script src="traces/comprehensions.js"></script>
 <style>
   .static-code { margin: 0; }
-  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
-  .cp-grid { display: grid; grid-template-columns: minmax(60px, 1fr) minmax(90px, 1.2fr) minmax(100px, 1.5fr); gap: 6px; margin-top: 12px; font-family: var(--mono); font-size: 14px; }
-  .cp-h { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
-  .cp-in, .cp-f, .cp-o { padding: 6px 10px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--line); min-height: 32px; transition: all .2s; }
+  .puzzle-area { display: grid; gap: var(--space-sm); margin-top: var(--space-sm); }
+  .cp-grid { display: grid; grid-template-columns: minmax(60px, 1fr) minmax(90px, 1.2fr) minmax(100px, 1.5fr); gap: var(--space-2xs); margin-top: var(--space-sm); font-family: var(--mono); font-size: 14px; }
+  .cp-h { font-size: 13px; color: var(--muted); }
+  .cp-in, .cp-f, .cp-o { padding: var(--space-2xs) var(--space-xs); border-radius: 0; background: var(--panel-2); min-height: 32px; transition: opacity .2s, transform .2s, background-color .2s, color .2s, border-color .2s, fill .2s, stroke .2s; }
   .cp-in.cur { border-color: var(--cyan); box-shadow: 0 0 0 3px var(--teal-wash); }
   .cp-f.ok, .cp-o.ok { color: var(--good-text); border-color: var(--teal); }
   .cp-f.bad { color: var(--bad-text); border-style: dashed; }
@@ -27,19 +25,20 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← Python Fundamentals</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">Python Fundamentals</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Python · Topic 6 · Control flow and data</div>
+    <p class="crumbs">Python / Topic 6 / Control flow and data</p>
     <h1>Comprehensions</h1>
-    <ul class="lede"><li>A <b>comprehension</b> builds a new list from an existing sequence in one expression: <span class="mono">[f * 2 for f in fees]</span>.</li><li>Read it as <b>what to keep</b> · <b>for each item</b> · <b>optional filter</b>: <span class="mono">[expr for x in items if cond]</span>.</li><li>Same idea for <b>dicts</b> <span class="mono">{k: v for ...}</span> and <b>sets</b> <span class="mono">{x for ...}</span>; with round brackets it becomes a lazy <b>generator expression</b>.</li><li>Use one when the loop only builds a collection. If it needs several statements, keep the normal loop.</li></ul>
+    <ul class="lede"><li>A <b>comprehension</b> builds a new list from an existing sequence in one expression: <span class="mono">[f * 2 for f in fees]</span>.</li><li>Read it as <b>what to keep</b>, <b>for each item</b>, <b>optional filter</b>: <span class="mono">[expr for x in items if cond]</span>.</li><li>Same idea for <b>dicts</b> <span class="mono">{k: v for ...}</span> and <b>sets</b> <span class="mono">{x for ...}</span>; with round brackets it becomes a lazy <b>generator expression</b>.</li><li>Use one when the loop only builds a collection. If it needs several statements, keep the normal loop.</li></ul>
   </header>
 
   <section aria-labelledby="storyH">
     <h2 class="stage-title" id="storyH">Walkthrough: the same list, two ways</h2>
-    <div class="stage-kind">Real trace of real code · Next ▶ moves one idea at a time</div>
+    <div class="stage-kind">Real trace of real code, Next ▶ moves one idea at a time</div>
     <div class="story wide" id="pageStory">
       <div id="pageTrace"></div>
     </div>
@@ -50,20 +49,20 @@
 
   <section aria-labelledby="runH">
     <h2 class="stage-title" id="runH">Edit and run</h2>
-    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div class="stage-kind">Change the code, Run ▶ for the output, Step through to watch it run</div>
     <div id="runner"></div>
   </section>
 
   <section aria-labelledby="predH">
     <h2 class="stage-title" id="predH">Predict the output</h2>
-    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="stage-kind">Pick a puzzle, choose your answer, then step through it</div>
     <div class="chips" id="pzChips"></div>
     <div class="puzzle-area" id="pzArea"></div>
   </section>
 
   <section aria-labelledby="pipeH">
     <h2 class="stage-title" id="pipeH">Comprehension pipeline</h2>
-    <div class="stage-kind">Pick an expression and a filter · watch each fee go through</div>
+    <div class="stage-kind">Pick an expression and a filter, watch each fee go through</div>
     <div class="two">
       <div class="chip-group" style="margin:0"><div class="label">Expression (what to keep)</div><div class="chips" id="cpE" style="margin:0"></div></div>
       <div class="chip-group" style="margin:0"><div class="label">Filter (which items)</div><div class="chips" id="cpC" style="margin:0"></div></div>

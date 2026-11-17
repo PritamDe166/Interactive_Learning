@@ -1,50 +1,49 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Template control flow</title>
 <meta name="description" content="Angular 22 built-in control flow on CareDesk: @for with track, @empty, @if, @switch and @let. See why track $index moved a nurse's note onto the wrong patient in a real run.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
 <script src="../assets/js/theme.js"></script>
 <script src="../assets/js/explainer-kit.js"></script>
 <style>
-  .ng-left { display: grid; gap: 12px; min-width: 0; align-content: start; }
-  .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 12px; }
-  .inst { display: grid; gap: 8px; }
-  .ib { position: relative; border: 2px solid var(--line); border-radius: 10px; padding: 8px 10px 8px 12px; background: var(--panel); transition: opacity .35s, transform .35s, border-color .25s, background .25s; }
+  .ng-left { display: grid; gap: var(--space-sm); min-width: 0; align-content: start; }
+  .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: var(--space-sm); }
+  .inst { display: grid; gap: var(--space-xs); }
+  .ib { position: relative; border: 2px solid var(--line); border-radius: 0; padding: var(--space-xs) var(--space-xs) var(--space-xs) var(--space-sm); background: var(--panel); transition: opacity .35s, transform .35s, border-color .25s, background .25s; }
   .ib .id { position: absolute; top: 6px; right: 8px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
   .ib .pos { font-family: var(--mono); font-size: 12px; color: var(--muted); }
-  .ib b { font-size: 16px; } .ib .bd { font-size: 11px; padding: 1px 7px; border-radius: 999px; background: var(--panel-2); margin-left: 6px; }
+  .ib b { font-size: 16px; } .ib .bd { font-size: 11px; padding: 1px var(--space-xs); border-radius: 0; background: var(--panel-2); margin-left: var(--space-2xs); }
   .ib .bd.u { background: var(--red); color: var(--on-accent); }
-  .ib .stt { font-family: var(--mono); font-size: 12px; color: var(--fg-soft); margin-top: 3px; }
+  .ib .stt { font-family: var(--mono); font-size: 12px; color: var(--fg-soft); margin-top: var(--space-3xs); }
   .ib.urg { border-left: 6px solid var(--red); }
   .ib.sel { background: var(--teal-wash); }
   .ib.gone { opacity: 0; transform: translateX(30px); }
   .ib.new { border-color: var(--cyan); }
   .ib.wrong { border-color: var(--red); box-shadow: 0 0 0 2px color-mix(in srgb, var(--red) 35%, transparent); }
   .ib.kept { border-color: var(--teal); }
-  .empty-p { font-family: var(--mono); font-size: 13px; color: var(--muted); padding: 10px; border: 1px dashed var(--line); border-radius: 10px; }
-  .lab-ctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
-  .ib input { font: inherit; font-size: 13px; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); width: 140px; max-width: 100%; }
-  .ib .row2 { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 4px; }
-  .ib .btn { padding: 4px 10px; font-size: 13px; }
+  .empty-p { font-family: var(--mono); font-size: 13px; color: var(--muted); padding: var(--space-xs); border: 1px dashed var(--line); border-radius: 0; }
+  .lab-ctl { display: flex; flex-wrap: wrap; gap: var(--space-xs); align-items: center; margin-top: var(--space-xs); }
+  .ib input { font: inherit; font-size: 13px; padding: var(--space-3xs) var(--space-xs); border-radius: 0; background: var(--panel-2); color: var(--fg); width: 140px; max-width: 100%; }
+  .ib .row2 { display: flex; gap: var(--space-2xs); flex-wrap: wrap; align-items: center; margin-top: var(--space-2xs); }
+  .ib .btn { padding: var(--space-2xs) var(--space-xs); font-size: 13px; }
   .tlog { font-family: var(--mono); font-size: 12.5px; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; min-height: 4em; color: var(--fg-soft); }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← Angular roadmap</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">Angular roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Angular 22 · Part 3 · Control flow &amp; structure · added topic</div>
+    <p class="crumbs">Angular 22 / Part 3 / Control flow &amp; structure / added topic</p>
     <h1>Template control flow</h1>
     <ul class="lede">
       <li>Templates decide <b>what exists</b> with blocks: <span class="mono">@if</span>, <span class="mono">@for</span>, <span class="mono">@switch</span>, plus <span class="mono">@let</span> for local values.</li>

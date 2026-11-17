@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>EC2 Purchasing Options</title>
 <meta name="description" content="AWS Cloud Practitioner: pick the right EC2 pricing model for a workload, compare costs, and see why Spot jobs need checkpoints.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
@@ -17,16 +15,16 @@
   .q text { fill: var(--fg); font-size: 13.5px; font-weight: 600; text-anchor: middle; }
   .q.on rect { stroke: var(--cyan); fill: var(--teal-wash); }
   .q.no rect { opacity: .55; }
-  .out rect { fill: var(--panel-2); stroke: var(--line); stroke-width: 2; stroke-dasharray: 5 4; transition: all .2s; }
+  .out rect { fill: var(--panel-2); stroke: var(--line); stroke-width: 2; stroke-dasharray: 5 4; transition: opacity .2s, transform .2s, background-color .2s, color .2s, border-color .2s, fill .2s, stroke .2s; }
   .out text { fill: var(--muted); font-size: 13px; font-weight: 600; text-anchor: middle; }
-  .out .sm { font-family: var(--mono); font-size: 10.5px; font-weight: 400; }
+  .out .sm { font-family: var(--mono); font-size: 12px; font-weight: 400; }
   .out.hit rect { stroke: var(--accent-text); stroke-dasharray: none; fill: var(--panel); }
   .out.hit text { fill: var(--fg); }
   .yn { fill: var(--muted); font-family: var(--mono); font-size: 11px; }
-  .bars { display: grid; gap: 10px; margin-top: 14px; }
-  .bar { display: grid; grid-template-columns: minmax(0, 190px) 1fr minmax(0, 90px); gap: 10px; align-items: center; font-size: 14px; }
-  .bar .track { height: 22px; background: var(--panel-2); border-radius: 6px; overflow: hidden; }
-  .bar .fill { height: 100%; background: var(--cyan); border-radius: 6px; transition: width .35s; width: 0; }
+  .bars { display: grid; gap: var(--space-xs); margin-top: var(--space-sm); }
+  .bar { display: grid; grid-template-columns: minmax(0, 190px) 1fr minmax(0, 90px); gap: var(--space-xs); align-items: center; font-size: 14px; }
+  .bar .track { height: 22px; background: var(--panel-2); border-radius: 0; overflow: hidden; }
+  .bar .fill { height: 100%; background: var(--cyan); border-radius: 0; transition: none; width: 0; }
   .bar.best .fill { background: var(--teal); }
   .bar.warn .fill { background: var(--yellow); }
   .bar .amt { font-family: var(--mono); font-size: 13px; text-align: right; font-variant-numeric: tabular-nums; }
@@ -44,12 +42,13 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">AWS CLF-C02 · EC2 · Domain 4 Billing &amp; Domain 3 Technology</div>
+    <p class="crumbs">AWS CLF-C02 / EC2 / Domain 4 Billing &amp; Domain 3 Technology</p>
     <h1>EC2 Purchasing Options</h1>
     <ul class="lede">
       <li>Same instance, different <b>price models</b>: you trade flexibility for discount.</li>
@@ -67,7 +66,7 @@
     <div class="card analogy">
       <div class="row head"><span>AWS</span><span>Closest idea you already know</span><span>The difference</span></div>
       <div class="row"><span class="aws">On-Demand</span><span class="like">Taxi meter</span><span>Full price, stop any time.</span></div>
-      <div class="row"><span class="aws">Reserved Instance</span><span class="like">1–3 year lease</span><span>Big discount for a fixed instance type; paid even if idle.</span></div>
+      <div class="row"><span class="aws">Reserved Instance</span><span class="like">1 to 3 year lease</span><span>Big discount for a fixed instance type; paid even if idle.</span></div>
       <div class="row"><span class="aws">Savings Plan</span><span class="like">Prepaid mobile plan</span><span>Commit $/hour; discount follows whatever you run.</span></div>
       <div class="row"><span class="aws">Spot</span><span class="like">Standby airline seat</span><span>Cheapest, but you can be bumped with 2 minutes' notice.</span></div>
       <div class="row"><span class="aws">Dedicated Host</span><span class="like">Renting the whole building</span><span>Whole physical server for licences and compliance.</span></div>
@@ -139,7 +138,7 @@
   <section aria-labelledby="cheatH">
     <h2 id="cheatH">Exam cheat-sheet</h2>
     <ul class="cheat">
-      <li><span class="if">Steady 24/7 for 1–3 years</span><span class="arrow">→</span><span class="then">Reserved Instance or Savings Plan</span></li>
+      <li><span class="if">Steady 24/7 for 1 to 3 years</span><span class="arrow">→</span><span class="then">Reserved Instance or Savings Plan</span></li>
       <li><span class="if">Short-term, unpredictable, can't be interrupted</span><span class="arrow">→</span><span class="then">On-Demand</span></li>
       <li><span class="if">Batch / fault-tolerant, cheapest</span><span class="arrow">→</span><span class="then">Spot</span></li>
       <li><span class="if">Per-core licence (BYOL), compliance</span><span class="arrow">→</span><span class="then">Dedicated Host</span></li>
@@ -154,13 +153,13 @@
       <table>
         <thead><tr><th>Option</th><th>Commitment</th><th>Discount vs On-Demand</th><th>Use when</th></tr></thead>
         <tbody>
-          <tr><td><b>On-Demand</b></td><td>None; per-second billing (Linux/Windows, 60 s minimum)</td><td>–</td><td>Short, spiky, unpredictable, can't be interrupted</td></tr>
+          <tr><td><b>On-Demand</b></td><td>None; per-second billing (Linux/Windows, 60 s minimum)</td><td>none</td><td>Short, spiky, unpredictable, can't be interrupted</td></tr>
           <tr><td><b>Reserved Instance</b> (Standard)</td><td>1 or 3 years; No / Partial / All Upfront</td><td>Up to ~72%</td><td>Steady 24/7 workloads, e.g. a database</td></tr>
           <tr><td><b>Convertible RI</b></td><td>1 or 3 years; can exchange type, family, OS</td><td>Up to ~66%</td><td>Long-term, but the instance type may change</td></tr>
           <tr><td><b>Savings Plan</b></td><td>$ per hour for 1 or 3 years; extra usage at On-Demand</td><td>Up to ~72% (EC2 Instance) / ~66% (Compute)</td><td>Steady spend; Compute SP also covers Fargate and Lambda</td></tr>
           <tr><td><b>Spot</b></td><td>None; can be reclaimed with a 2-minute warning</td><td>Up to ~90%</td><td>Batch, CI, image/video processing, stateless workers</td></tr>
-          <tr><td><b>Dedicated Host</b></td><td>On-Demand or 1/3-year reservation</td><td>– (most expensive)</td><td>BYOL per socket/core, compliance, host placement control</td></tr>
-          <tr><td><b>Dedicated Instance</b></td><td>None</td><td>–</td><td>Hardware not shared with other customers, no host management</td></tr>
+          <tr><td><b>Dedicated Host</b></td><td>On-Demand or 1/3-year reservation</td><td>none (most expensive)</td><td>BYOL per socket/core, compliance, host placement control</td></tr>
+          <tr><td><b>Dedicated Instance</b></td><td>None</td><td>none</td><td>Hardware not shared with other customers, no host management</td></tr>
           <tr><td><b>Capacity Reservation</b></td><td>Any duration, one AZ, cancel anytime</td><td>None: billed even if unused</td><td>Must be able to launch in a specific AZ (e.g. a sale weekend)</td></tr>
         </tbody>
       </table>

@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Functions &amp; arguments</title>
 <meta name="description" content="Python fundamentals: def and return, the call stack, positional and keyword arguments, defaults, *args and **kwargs, returning several values, and the mutable default trap.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
@@ -15,9 +13,9 @@
 <script src="traces/functions-arguments.js"></script>
 <style>
   .static-code { margin: 0; }
-  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
-  .bd-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-top: 12px; }
-  .bd-slot { border: 1.5px solid var(--line); border-radius: 10px; padding: 8px 10px; background: var(--panel-2); display: grid; gap: 2px; transition: all .25s; }
+  .puzzle-area { display: grid; gap: var(--space-sm); margin-top: var(--space-sm); }
+  .bd-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .bd-slot { border: 1.5px solid var(--line); border-radius: 0; padding: var(--space-xs) var(--space-xs); background: var(--panel-2); display: grid; gap: var(--space-3xs); transition: opacity .25s, transform .25s, background-color .25s, color .25s, border-color .25s, fill .25s, stroke .25s; }
   .bd-slot.dim { opacity: .45; }
   .bd-p { font-family: var(--mono); font-weight: 700; }
   .bd-k { font-size: 11px; color: var(--muted); }
@@ -34,12 +32,13 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← Python Fundamentals</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">Python Fundamentals</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Python · Topic 8 · Functions</div>
+    <p class="crumbs">Python / Topic 8 / Functions</p>
     <h1>Functions &amp; arguments</h1>
     <ul class="lede"><li><span class="mono">def</span> creates a <b>function object</b> and a name for it. Calling it creates a fresh <b>frame</b> holding the parameters and local variables.</li><li>Arguments bind to parameters <b>by position</b>, then <b>by keyword</b>; anything not given falls back to its <b>default</b>.</li><li><span class="mono">*args</span> collects extra positional values into a <b>tuple</b>; <span class="mono">**kwargs</span> collects extra keywords into a <b>dict</b>.</li><li><span class="mono">return a, b</span> returns <b>one tuple</b>. No return means the function returns <span class="mono">None</span>.</li><li>Defaults are created <b>once</b>, when <span class="mono">def</span> runs. A mutable default like <span class="mono">[]</span> is shared between calls.</li></ul>
   </header>
@@ -57,13 +56,13 @@
 
   <section aria-labelledby="runH">
     <h2 class="stage-title" id="runH">Edit and run</h2>
-    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div class="stage-kind">Change the code, Run ▶ for the output, Step through to watch it run</div>
     <div id="runner"></div>
   </section>
 
   <section aria-labelledby="predH">
     <h2 class="stage-title" id="predH">Predict the output</h2>
-    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="stage-kind">Pick a puzzle, choose your answer, then step through it</div>
     <div class="chips" id="pzChips"></div>
     <div class="puzzle-area" id="pzArea"></div>
   </section>
@@ -115,17 +114,17 @@
     <h2 id="quizH">Check yourself</h2>
     <p class="sub">Say the answer out loud before you open each card.</p>
     <div class="quiz">
-      <details><summary><span class="mono">def f(a, b=2): return a * b\nprint(f(3), f(3, 3), f(b=1, a=5))</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">def f(a, b=2): return a * b<br>print(f(3), f(3, 3), f(b=1, a=5))</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">6 9 5</b>. Default, positional, then keywords in any order.</p></div></details>
-      <details><summary><span class="mono">def f(*n): return len(n)\nprint(f(), f(1, 2, 3))</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">def f(*n): return len(n)<br>print(f(), f(1, 2, 3))</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">0 3</b>. With no extras, args is an empty tuple.</p></div></details>
-      <details><summary><span class="mono">def f(): return 1, 2\nprint(type(f()).__name__)</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">def f(): return 1, 2<br>print(type(f()).__name__)</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">tuple</b>. The comma makes one tuple.</p></div></details>
-      <details><summary><span class="mono">def f(x): x = x + [1]\nnums = [0]; f(nums); print(nums)</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">def f(x): x = x + [1]<br>nums = [0]; f(nums); print(nums)</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">[0]</b>. <span class="mono">x + [1]</span> makes a new list and rebinds the local x only. <span class="mono">x.append(1)</span> would change nums.</p></div></details>
-      <details><summary><span class="mono">def f(**kw): return sorted(kw)\nprint(f(b=1, a=2))</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">def f(**kw): return sorted(kw)<br>print(f(b=1, a=2))</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">['a', 'b']</b>. kwargs is a dict; sorting a dict sorts its keys.</p></div></details>
-      <details><summary><span class="mono">def f(a, *, b): return a + b\nprint(f(1, b=2))</span>, and what does <span class="mono">f(1, 2)</span> do?<span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">def f(a, *, b): return a + b<br>print(f(1, b=2))</span>, and what does <span class="mono">f(1, 2)</span> do?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">3</b>; <span class="mono">f(1, 2)</span> raises TypeError because b is keyword-only.</p></div></details>
     </div>
   </section>

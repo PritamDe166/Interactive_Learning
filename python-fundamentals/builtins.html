@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Built-in functions toolbox</title>
 <meta name="description" content="Python fundamentals: len, sum, min, max, sorted, reversed, enumerate, zip, any, all, round, abs, pow, divmod, help and dir, with real outputs.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
@@ -15,16 +13,16 @@
 <script src="traces/builtins.js"></script>
 <style>
   .static-code { margin: 0; }
-  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
-  .mf-row { display: grid; grid-template-columns: minmax(0, 1.3fr) auto minmax(0, 1.4fr); gap: 14px; align-items: center; margin-top: 14px; }
+  .puzzle-area { display: grid; gap: var(--space-sm); margin-top: var(--space-sm); }
+  .mf-row { display: grid; grid-template-columns: minmax(0, 1.3fr) auto minmax(0, 1.4fr); gap: var(--space-sm); align-items: center; margin-top: var(--space-sm); }
   @media (max-width: 640px) { .mf-row { grid-template-columns: 1fr; } }
-  .mf-lbl { font-family: var(--mono); font-size: 11px; color: var(--muted); margin: 4px 0; }
-  .mf-items { display: flex; flex-wrap: wrap; gap: 6px; }
-  .mf-it { font-family: var(--mono); font-size: 14px; padding: 4px 8px; border-radius: 6px; background: var(--panel-2); border: 1px solid var(--line); transition: all .2s; }
+  .mf-lbl { font-family: var(--mono); font-size: 11px; color: var(--muted); margin: var(--space-2xs) 0; }
+  .mf-items { display: flex; flex-wrap: wrap; gap: var(--space-2xs); }
+  .mf-it { font-family: var(--mono); font-size: 14px; padding: var(--space-2xs) var(--space-xs); border-radius: 0; background: var(--panel-2); transition: opacity .2s, transform .2s, background-color .2s, color .2s, border-color .2s, fill .2s, stroke .2s; }
   .mf-it.fed { border-color: var(--cyan); background: var(--teal-wash); }
-  .mf-box { font-family: var(--mono); font-weight: 700; font-size: 18px; padding: 18px 22px; border-radius: 14px; border: 2px dashed var(--accent-text); color: var(--accent-text); text-align: center; min-width: 110px; }
+  .mf-box { font-family: var(--mono); font-weight: 700; font-size: 18px; padding: var(--space-md) var(--space-lg); border-radius: 0; border: 2px dashed var(--accent-text); color: var(--accent-text); text-align: center; min-width: 110px; }
   .mf-box.done { border-style: solid; box-shadow: 0 0 0 4px var(--teal-wash); }
-  .mf-out { font-size: 15px; min-height: 40px; padding: 10px 12px; border-radius: 10px; background: var(--code-bg); border: 1px solid var(--line); overflow-wrap: anywhere; }
+  .mf-out { font-size: 15px; min-height: 40px; padding: var(--space-xs) var(--space-sm); border-radius: 0; background: var(--code-bg); border: 1px solid var(--line); overflow-wrap: anywhere; }
   .rg-axis { stroke: var(--muted); stroke-width: 1.5; }
   .rg-num { font-family: var(--mono); font-size: 13px; fill: var(--muted); }
   .rd-src { fill: var(--accent-text); }
@@ -37,12 +35,13 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← Python Fundamentals</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">Python Fundamentals</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Python · Topic 7 · Control flow and data</div>
+    <p class="crumbs">Python / Topic 7 / Control flow and data</p>
     <h1>Built-in functions toolbox</h1>
     <ul class="lede"><li>Built-ins are always available, no import needed. Most take <b>any iterable</b>: list, tuple, string, set, dict, range, generator.</li><li>Some return a value straight away (<span class="mono">len</span>, <span class="mono">sum</span>, <span class="mono">sorted</span>); others return a <b>lazy iterator</b> (<span class="mono">reversed</span>, <span class="mono">enumerate</span>, <span class="mono">zip</span>, <span class="mono">map</span>) you loop over or wrap in <span class="mono">list()</span>.</li><li><span class="mono">sorted()</span> returns a <b>new</b> list; <span class="mono">list.sort()</span> changes the list and returns None.</li><li><span class="mono">round()</span> rounds halves to the <b>even</b> neighbour: <span class="mono">round(2.5)</span> is 2.</li></ul>
   </header>
@@ -60,13 +59,13 @@
 
   <section aria-labelledby="runH">
     <h2 class="stage-title" id="runH">Edit and run</h2>
-    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div class="stage-kind">Change the code, Run ▶ for the output, Step through to watch it run</div>
     <div id="runner"></div>
   </section>
 
   <section aria-labelledby="predH">
     <h2 class="stage-title" id="predH">Predict the output</h2>
-    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="stage-kind">Pick a puzzle, choose your answer, then step through it</div>
     <div class="chips" id="pzChips"></div>
     <div class="puzzle-area" id="pzArea"></div>
   </section>

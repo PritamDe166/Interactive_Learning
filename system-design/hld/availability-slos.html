@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Availability, SLIs, SLOs & SLAs</title>
 <meta name="description" content="Day 6: what each extra nine costs in downtime, an error budget you can burn with incidents, and how series and redundant components combine into overall availability.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -15,30 +13,31 @@
 <script src="../sd-series.js"></script>
 <script src="foundations-flows.js"></script>
 <style>
-  .budget { position: relative; height: 26px; border-radius: 8px; background: var(--track); overflow: hidden; margin-top: 8px; }
-  .budget i { position: absolute; inset: 0 auto 0 0; background: var(--teal); transition: width .4s, background .3s; }
+  .budget { position: relative; height: 26px; border-radius: 0; background: var(--track); overflow: hidden; margin-top: var(--space-xs); }
+  .budget i { position: absolute; inset: 0 auto 0 0; background: var(--teal); transition: background .3s; }
   .budget.low i { background: var(--yellow); }
   .budget.out i { background: var(--red); }
   .budget span { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--mono); font-size: 12px; color: var(--fg); }
-  .month { display: grid; grid-template-columns: repeat(30, minmax(0, 1fr)); gap: 2px; margin-top: 10px; }
-  .month b { height: 26px; border-radius: 3px; background: var(--teal); position: relative; overflow: hidden; }
+  .month { display: grid; grid-template-columns: repeat(30, minmax(0, 1fr)); gap: var(--space-3xs); margin-top: var(--space-xs); }
+  .month b { height: 26px; border-radius: 0; background: var(--teal); position: relative; overflow: hidden; }
   .month b i { position: absolute; inset: 0 auto 0 0; background: var(--red); }
-  .chain-wrap { margin-top: 12px; }
-  .comp { display: grid; gap: 6px; }
-  .comp-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .chain-wrap { margin-top: var(--space-sm); }
+  .comp { display: grid; gap: var(--space-2xs); }
+  .comp-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-xs); }
   .comp-row .name { min-width: 120px; font-weight: 600; }
-  .comp-row select { font: 500 14px var(--display); color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
+  .comp-row select { font: 500 14px var(--display); color: var(--fg); background: var(--panel); border-radius: 0; padding: var(--space-2xs) var(--space-xs); }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← HLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">HLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Week 1 · H6 · Networking Fundamentals</div>
+    <p class="crumbs">Week 1 / H6 / Networking Fundamentals</p>
     <h1>Availability, SLIs, SLOs & SLAs</h1>
     <ul class="lede"><li><b>SLI = measure</b>: what actually happened (e.g. % of requests that succeeded).</li><li><b>SLO = target</b>: what the team aims for (e.g. 99.9% over 30 days).</li><li><b>SLA = promise</b>: what customers are contractually owed if you miss it.</li><li><b>Error budget</b> = 100% − SLO: the failure you can afford to spend on shipping changes.</li></ul>
   </header>
@@ -62,25 +61,25 @@
       </div>
     </div>
     <div class="kpis">
-      <div class="kpi bad"><b id="dYear">–</b><span>Per year</span></div>
-      <div class="kpi"><b id="dMonth">–</b><span>Per 30-day month</span></div>
-      <div class="kpi"><b id="dWeek">–</b><span>Per week</span></div>
-      <div class="kpi"><b id="dDay">–</b><span>Per day</span></div>
+      <div class="kpi bad"><b id="dYear">…</b><span>Per year</span></div>
+      <div class="kpi"><b id="dMonth">…</b><span>Per 30-day month</span></div>
+      <div class="kpi"><b id="dWeek">…</b><span>Per week</span></div>
+      <div class="kpi"><b id="dDay">…</b><span>Per day</span></div>
     </div>
     <div class="card" style="margin-top:12px">
-      <div class="label">A 30-day month, each block is a day · red = allowed downtime, drawn to scale</div>
+      <div class="label">A 30-day month, each block is a day, red = allowed downtime, drawn to scale</div>
       <div class="month" id="month"></div>
       <p class="sub" id="monthNote" style="margin:8px 0 0"></p>
     </div>
   </div>
     <div class="sub-block" aria-labelledby="ebTitle">
     <h3 class="stage-title sub" id="ebTitle">Spend the error budget</h3>
-    <div class="stage-kind">SLO 99.9% over 30 days · SLA promised to customers: 99.5%</div>
+    <div class="stage-kind">SLO 99.9% over 30 days, SLA promised to customers: 99.5%</div>
     <div class="controls">
-      <button class="btn" type="button" data-inc="blip">Network blip · 100% errors for 3 min</button>
-      <button class="btn" type="button" data-inc="deploy">Bad deploy · 100% errors for 20 min</button>
-      <button class="btn" type="button" data-inc="db">Slow DB · 5% errors for 2 h</button>
-      <button class="btn" type="button" data-inc="region">Region outage · 100% errors for 4 h</button>
+      <button class="btn" type="button" data-inc="blip">Network blip, 100% errors for 3 min</button>
+      <button class="btn" type="button" data-inc="deploy">Bad deploy, 100% errors for 20 min</button>
+      <button class="btn" type="button" data-inc="db">Slow DB, 5% errors for 2 h</button>
+      <button class="btn" type="button" data-inc="region">Region outage, 100% errors for 4 h</button>
       <button class="btn" id="ebReset" type="button">New month</button>
     </div>
     <div class="info-grid">
@@ -106,8 +105,8 @@
     <h2 class="sec-h"><span class="sec-n">2</span>Compare: recovering from a disaster (RPO, RTO)</h2>
     <h3 class="sec-h3">RPO and RTO</h3>
     <div class="cards">
-      <div class="card"><h3>RPO · how much data can we lose?</h3><p><b>Recovery point objective</b>, measured in time. "RPO 5 minutes" means after a disaster you may lose at most the last 5 minutes of writes. Set by how often you back up or replicate.</p></div>
-      <div class="card"><h3>RTO · how long can we be down?</h3><p><b>Recovery time objective.</b> "RTO 1 hour" means service must be back within an hour. Set by how much is already running in the recovery site.</p></div>
+      <div class="card"><h3>RPO, how much data can we lose?</h3><p><b>Recovery point objective</b>, measured in time. "RPO 5 minutes" means after a disaster you may lose at most the last 5 minutes of writes. Set by how often you back up or replicate.</p></div>
+      <div class="card"><h3>RTO, how long can we be down?</h3><p><b>Recovery time objective.</b> "RTO 1 hour" means service must be back within an hour. Set by how much is already running in the recovery site.</p></div>
       <div class="card"><h3>How they relate to MTTR</h3><p>MTTR is the <i>measured</i> average repair time for ordinary failures; RTO is the <i>target</i> for a disaster. Lower RPO and RTO cost more: compare the four strategies below.</p></div>
     </div>
     <h3 class="sec-h3">4 disaster-recovery strategies</h3>
@@ -116,7 +115,7 @@
     <div class="card scroll" style="margin-top:14px"><table>
       <thead><tr><th>Strategy</th><th>RPO</th><th>RTO</th><th>Cost</th></tr></thead>
       <tbody>
-        <tr><td>Backup &amp; restore</td><td>hours</td><td>hours – a day</td><td>$</td></tr>
+        <tr><td>Backup &amp; restore</td><td>hours</td><td>hours to a day</td><td>$</td></tr>
         <tr><td>Pilot light</td><td>minutes</td><td>tens of minutes</td><td>$$</td></tr>
         <tr><td>Warm standby</td><td>seconds</td><td>minutes</td><td>$$$</td></tr>
         <tr><td>Active-active</td><td>≈ 0</td><td>≈ 0</td><td>$$$$</td></tr>
@@ -128,7 +127,7 @@
     <p class="sec-sub">Add components in a chain and redundant copies in parallel; watch the total.</p>
     <div class="sub-block" aria-labelledby="compTitle">
     <h3 class="stage-title sub" id="compTitle">Build a system, see its availability</h3>
-    <div class="stage-kind">Components in a chain multiply · redundant copies add up</div>
+    <div class="stage-kind">Components in a chain multiply, redundant copies add up</div>
     <div class="card chain-wrap">
       <div class="comp" id="compRows"></div>
     </div>
@@ -136,9 +135,9 @@
       <svg class="diagram" id="chainSvg" viewBox="0 0 1000 230" aria-label="Request path through components in series, each with one or more redundant copies"></svg>
     </div>
     <div class="kpis">
-      <div class="kpi accent"><b id="cAvail">–</b><span>Whole path availability</span></div>
-      <div class="kpi bad"><b id="cDown">–</b><span>Expected downtime per year</span></div>
-      <div class="kpi"><b id="cWeak">–</b><span>Weakest link</span></div>
+      <div class="kpi accent"><b id="cAvail">…</b><span>Whole path availability</span></div>
+      <div class="kpi bad"><b id="cDown">…</b><span>Expected downtime per year</span></div>
+      <div class="kpi"><b id="cWeak">…</b><span>Weakest link</span></div>
     </div>
     <div class="notes" style="margin-top:14px">
       <div class="note"><p><b>Series multiplies:</b> a request needing three 99.9% components succeeds 99.9% × 99.9% × 99.9% ≈ <b>99.7%</b> of the time, worse than any single part. <b>Redundancy adds nines:</b> two independent 99% copies give 1 − (0.01)² = <b>99.99%</b>, provided failover works and the copies don't fail together.</p></div>

@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Single Responsibility Principle</title>
 <meta name="description" content="SOLID, S: a class should have one reason to change. A god class splits into focused classes; change requests show why.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -14,19 +12,19 @@
 <script src="../../assets/js/explainer-kit.js"></script>
 <script src="../sd-series.js"></script>
 <style>
-  .files { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; margin-top: 12px; }
-  .file { border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--panel-2); min-height: 92px; transition: border-color .25s, box-shadow .25s; }
+  .files { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .file { border: 1.5px solid var(--line); border-radius: 0; padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-height: 92px; transition: border-color .25s, box-shadow .25s; }
   .file .fname { font-family: var(--mono); font-size: 13px; color: var(--fg); }
-  .file .ftests { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .file .devs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; min-height: 26px; }
-  .file .dev { font-size: 12px; padding: 3px 8px; border-radius: 999px; background: var(--teal-wash); color: var(--fg); animation: pop .25s ease-out; }
+  .file .ftests { font-size: 12px; color: var(--muted); margin-top: var(--space-3xs); }
+  .file .devs { display: flex; flex-wrap: wrap; gap: var(--space-2xs); margin-top: var(--space-xs); min-height: 26px; }
+  .file .dev { font-size: 12px; padding: var(--space-3xs) var(--space-xs); border-radius: 0; background: var(--teal-wash); color: var(--fg); animation: pop .25s ease-out; }
   .file.touched { border-color: var(--cyan); }
   .file.conflict { border-color: var(--red); box-shadow: 0 0 0 3px color-mix(in srgb, var(--red) 18%, transparent); }
   @keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
-  .sorter { display: grid; gap: 8px; margin-top: 10px; }
-  .sorter .row { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1.6fr); gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+  .sorter { display: grid; gap: var(--space-xs); margin-top: var(--space-xs); }
+  .sorter .row { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1.6fr); gap: var(--space-xs); align-items: center; padding: var(--space-xs) var(--space-xs); border-radius: 0; background: var(--panel); }
   @media (max-width: 640px) { .sorter .row { grid-template-columns: 1fr; } }
-  .sorter select { font: inherit; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel-2); color: var(--fg); }
+  .sorter select { font: inherit; padding: var(--space-2xs) var(--space-xs); border-radius: 0; background: var(--panel-2); color: var(--fg); }
   .sorter .why { font-size: 13px; color: var(--fg-soft); }
   .sorter .row.ok { border-color: var(--teal); }
   .sorter .row.no { border-color: var(--red); }
@@ -35,13 +33,14 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← LLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">LLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
     <div class="solid-letters" aria-label="SOLID principles"><a href="solid.html" title="Overview">∗</a><b title="Single responsibility">S</b><a href="solid-ocp.html" title="Open-closed">O</a><a href="solid-lsp.html" title="Liskov substitution">L</a><a href="solid-isp.html" title="Interface segregation">I</a><a href="solid-dip.html" title="Dependency inversion">D</a></div>
-    <div class="eyebrow">System Design · LLD · SOLID · S</div>
+    <p class="crumbs">System Design / LLD / SOLID / S</p>
     <h1>Single Responsibility Principle</h1>
     <ul class="lede">
       <li>A class should have <b>one reason to change</b>.</li>

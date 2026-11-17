@@ -1,29 +1,28 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Angular</title>
 <meta name="description" content="Modern Angular (v22) explained visually: control flow, data flow, signals, DI, routing and forms.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/hub.css">
 <script src="../assets/js/theme.js"></script>
-<style>.day-card .adds{font-size:12.5px;color:var(--muted);line-height:1.4;margin:2px 0 4px}</style>
+<style>.day-card .adds{font-size:12.5px;color:var(--muted);line-height:1.4;margin:var(--space-3xs) 0 var(--space-2xs)}</style>
 </head>
 <body>
 <div class="wrap">
   <div class="topbar">
-    <a class="back" href="../index.html">← All subjects</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="../index.html">All subjects</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header class="hero">
     <div>
-      <div class="eyebrow">Modern Angular · v22 · standalone, signals, built-in control flow</div>
-      <h1><span class="y">Angular</span></h1>
+      <p class="crumbs">Modern Angular / v22 / standalone, signals, built-in control flow</p>
+      <h1>Angular</h1>
       <p class="lede">How data and control move through an Angular app, learned by building one: <b>CareDesk</b>, a small clinic portal. Each topic adds a piece, from an empty shell to login, forms and an API. Every snippet is built and run on Angular 22.</p>
       <svg class="flow" viewBox="0 0 560 90" aria-hidden="true">
         <rect class="lb" x="210" y="4" width="140" height="30" rx="9"/><text class="t-on" x="280" y="24">App</text>
@@ -36,7 +35,7 @@
     <div class="stats">
       <div class="stat"><b id="sLive">0</b><span>Explainers</span></div>
       <div class="stat"><b id="sTopics">0</b><span>Topics</span></div>
-      <div class="stat"><b id="sNext">–</b><span>Next up</span></div>
+      <div class="stat"><b id="sNext">…</b><span>Next up</span></div>
       <div class="meter">
         <div class="row"><span>Topics covered</span><span id="sPct">0%</span></div>
         <div class="track"><i id="bar" style="width:0"></i></div>

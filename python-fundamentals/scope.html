@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Scope (LEGB)</title>
 <meta name="description" content="Python fundamentals: local, enclosing, global and built-in scopes, how Python looks up a name, global and nonlocal, closures, and UnboundLocalError.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
@@ -15,26 +13,27 @@
 <script src="traces/scope.js"></script>
 <style>
   .static-code { margin: 0; }
-  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
-  .lg-box { border: 2px solid var(--line); border-radius: 14px; padding: 10px 12px 12px; margin-top: 10px; transition: all .3s; }
-  .lg-h { font-size: 14px; color: var(--fg-soft); margin-bottom: 4px; }
+  .puzzle-area { display: grid; gap: var(--space-sm); margin-top: var(--space-sm); }
+  .lg-box { border: 2px solid var(--line); border-radius: 0; padding: var(--space-xs) var(--space-sm) var(--space-sm); margin-top: var(--space-xs); transition: opacity .3s, transform .3s, background-color .3s, color .3s, border-color .3s, fill .3s, stroke .3s; }
+  .lg-h { font-size: 14px; color: var(--fg-soft); margin-bottom: var(--space-2xs); }
   .lg-h b { color: var(--accent-text); font-size: 17px; }
-  .lg-h .mono { color: var(--muted); margin-left: 8px; font-size: 13px; }
+  .lg-h .mono { color: var(--muted); margin-left: var(--space-xs); font-size: 13px; }
   .lg-box.look { border-color: var(--cyan); box-shadow: 0 0 0 3px var(--teal-wash); }
   .lg-box.miss > .lg-h { opacity: .5; text-decoration: line-through; }
   .lg-box.hit { border-color: var(--teal); background: var(--teal-wash); }
-  .lg-probe { margin-top: 8px; padding: 8px 12px; border-radius: 8px; background: var(--code-bg); border: 1px solid var(--line); display: inline-block; }
+  .lg-probe { margin-top: var(--space-xs); padding: var(--space-xs) var(--space-sm); border-radius: 0; background: var(--code-bg); border: 1px solid var(--line); display: inline-block; }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← Python Fundamentals</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">Python Fundamentals</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Python · Topic 9 · Functions</div>
+    <p class="crumbs">Python / Topic 9 / Functions</p>
     <h1>Scope (LEGB)</h1>
     <ul class="lede"><li>To find a name, Python searches four places in order: <b>L</b>ocal → <b>E</b>nclosing function → <b>G</b>lobal (module) → <b>B</b>uilt-ins. First match wins.</li><li><b>Reading</b> an outer name works automatically. <b>Assigning</b> to a name inside a function makes it <b>local</b> to that function.</li><li>To assign to a module-level name, declare <span class="mono">global</span>; for the enclosing function's name, declare <span class="mono">nonlocal</span>.</li><li>An inner function that keeps using an outer function's variable after it returns is a <b>closure</b>.</li></ul>
   </header>
@@ -52,13 +51,13 @@
 
   <section aria-labelledby="runH">
     <h2 class="stage-title" id="runH">Edit and run</h2>
-    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div class="stage-kind">Change the code, Run ▶ for the output, Step through to watch it run</div>
     <div id="runner"></div>
   </section>
 
   <section aria-labelledby="predH">
     <h2 class="stage-title" id="predH">Predict the output</h2>
-    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="stage-kind">Pick a puzzle, choose your answer, then step through it</div>
     <div class="chips" id="pzChips"></div>
     <div class="puzzle-area" id="pzArea"></div>
   </section>
@@ -115,17 +114,17 @@
     <h2 id="quizH">Check yourself</h2>
     <p class="sub">Say the answer out loud before you open each card.</p>
     <div class="quiz">
-      <details><summary><span class="mono">x = 1\ndef f(): return x\nx = 2\nprint(f())</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">x = 1<br>def f(): return x<br>x = 2<br>print(f())</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">2</b>. Names are looked up when the function runs, not when it's defined.</p></div></details>
-      <details><summary><span class="mono">def f():\n    y = 5\nf()\nprint(y)</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">def f():<br>    y = 5<br>f()<br>print(y)</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">NameError</b>. y was local to f and vanished when the call ended.</p></div></details>
-      <details><summary><span class="mono">def f():\n    global z\n    z = 3\nf(); print(z)</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">def f():<br>    global z<br>    z = 3<br>f(); print(z)</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">3</b>. global can even create a module-level name.</p></div></details>
-      <details><summary><span class="mono">def adder(n):\n    return lambda x: x + n\nadd5 = adder(5); print(add5(10))</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">def adder(n):<br>    return lambda x: x + n<br>add5 = adder(5); print(add5(10))</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">15</b>. The lambda closes over n = 5.</p></div></details>
-      <details><summary><span class="mono">x = "g"\ndef f():\n    x = "l"\n    def g(): return x\n    return g()\nprint(f())</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">x = "g"<br>def f():<br>    x = "l"<br>    def g(): return x<br>    return g()<br>print(f())</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">l</b>. Enclosing beats Global.</p></div></details>
-      <details><summary><span class="mono">if True:\n    w = 1\nprint(w)</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">if True:<br>    w = 1<br>print(w)</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">1</b>. An if block is not a scope.</p></div></details>
     </div>
   </section>

@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Client-Server & DNS</title>
 <meta name="description" content="Day 1: how a client finds a server. Watch a live DNS lookup walk resolver, root, TLD and authoritative servers, with caching, TTL and outages.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -18,12 +16,13 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← HLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">HLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Week 1 · H1 · Networking Fundamentals</div>
+    <p class="crumbs">Week 1 / H1 / Networking Fundamentals</p>
     <h1>Client-Server & DNS</h1>
     <ul class="lede"><li>The <b>client</b> asks; the <b>server</b> processes and answers.</li><li>Before asking, the client needs the server's <b>IP address</b>.</li><li><b>DNS</b> turns a name like <span class="mono">www.example.com</span> into that IP.</li><li><b>Caching</b> at every level means most lookups never travel the whole chain.</li></ul>
   </header>
@@ -71,9 +70,9 @@
     <p class="hint">Try it: look up twice. The second answer comes from the browser cache with no network trip. Then clear the device cache, and the resolver answers from its own cache.</p>
 
     <div class="kpis" aria-live="polite">
-      <div class="kpi accent"><b id="kFrom">–</b><span>Answer came from</span></div>
-      <div class="kpi"><b id="kHops">–</b><span>DNS servers asked</span></div>
-      <div class="kpi"><b id="kMs">–</b><span>Lookup time (illustrative)</span></div>
+      <div class="kpi accent"><b id="kFrom">…</b><span>Answer came from</span></div>
+      <div class="kpi"><b id="kHops">…</b><span>DNS servers asked</span></div>
+      <div class="kpi"><b id="kMs">…</b><span>Lookup time (illustrative)</span></div>
     </div>
 
     <div class="info-grid">

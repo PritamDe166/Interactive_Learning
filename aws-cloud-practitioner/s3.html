@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Amazon S3</title>
 <meta name="description" content="AWS Cloud Practitioner: who can read an S3 object, how versioning and delete markers work, and which storage class fits each access pattern.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
@@ -19,19 +17,19 @@
   .gate.on rect { stroke: var(--cyan); fill: var(--teal-wash); }
   .gate.pass rect { stroke: var(--teal); }
   .gate.stop rect { stroke: var(--red); }
-  .ptoggles { display: grid; gap: 8px; }
+  .ptoggles { display: grid; gap: var(--space-xs); }
   .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
-  .ver rect { stroke-width: 2; transition: all .25s; }
+  .ver rect { stroke-width: 2; transition: opacity .25s, transform .25s, background-color .25s, color .25s, border-color .25s, fill .25s, stroke .25s; }
   .ver.cur rect { fill: var(--teal-wash); stroke: var(--teal); }
   .ver.old rect { fill: var(--panel); stroke: var(--line); }
   .ver.marker rect { fill: var(--panel-2); stroke: var(--red); stroke-dasharray: 5 4; }
   .ver text { fill: var(--fg); font-size: 13px; font-weight: 600; text-anchor: middle; }
-  .ver .sm { fill: var(--muted); font-family: var(--mono); font-size: 10.5px; font-weight: 400; }
+  .ver .sm { fill: var(--muted); font-family: var(--mono); font-size: 12px; font-weight: 400; }
   .cls rect.bg { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; transition: stroke .2s, fill .2s; }
   .cls.on rect.bg { stroke: var(--accent-text); fill: var(--panel-2); }
   .cls rect.cost { fill: var(--cyan); opacity: .75; }
   .cls text { fill: var(--fg); font-size: 13px; font-weight: 600; }
-  .cls .sm { fill: var(--muted); font-family: var(--mono); font-size: 10.5px; font-weight: 400; }
+  .cls .sm { fill: var(--muted); font-family: var(--mono); font-size: 12px; font-weight: 400; }
   .bucket-box { fill: var(--panel); stroke: var(--teal); stroke-width: 2; }
   .obj rect { fill: var(--panel-2); stroke: var(--line); }
   .obj.marker rect { stroke: var(--red); stroke-dasharray: 5 4; }
@@ -42,12 +40,13 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">AWS CLF-C02 · Section 8 · Domains 2 &amp; 3 (Tasks 2.2, 3.6)</div>
+    <p class="crumbs">AWS CLF-C02 / Section 8 / Domains 2 &amp; 3 (Tasks 2.2, 3.6)</p>
     <h1>Amazon S3</h1>
     <ul class="lede">
       <li><b>Object storage</b>: files (objects) in <b>buckets</b>, reached by API or URL. Virtually unlimited; objects up to ~48.8 TiB.</li>

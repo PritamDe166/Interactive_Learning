@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Vertical vs Horizontal Scaling</title>
 <meta name="description" content="Day 8: scale up a single server or scale out to many, push traffic until something saturates, find the bottleneck, and kill a server to see single points of failure.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../../assets/css/theme.css">
 <link rel="stylesheet" href="../../assets/css/base.css">
 <link rel="stylesheet" href="../../assets/css/explainer.css">
@@ -15,7 +13,7 @@
 <script src="../sd-series.js"></script>
 <style>
   .u-bg { fill: var(--track); }
-  .u-fill { fill: var(--teal); transition: width .3s; }
+  .u-fill { fill: var(--teal); transition: none; }
   .u-fill.warm { fill: var(--yellow); }
   .u-fill.hot { fill: var(--red); }
   .dot { fill: var(--pill); }
@@ -26,12 +24,13 @@
 <body data-anim="continuous">
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← HLD roadmap</a>
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">HLD roadmap</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Week 2 · H8 · Scaling Fundamentals</div>
+    <p class="crumbs">Week 2 / H8 / Scaling Fundamentals</p>
     <h1>Vertical vs Horizontal Scaling</h1>
     <ul class="lede"><li><b>Scale up</b> (vertical): make one machine bigger.</li><li><b>Scale out</b> (horizontal): add more machines behind a load balancer.</li><li>Neither helps unless you scale the <b>bottleneck</b>: the component that saturates first.</li></ul>
   </header>
@@ -64,10 +63,10 @@
       <button class="btn" id="healBtn" type="button">Restart it</button>
     </div>
     <div class="kpis">
-      <div class="kpi good"><b id="kServed">–</b><span>Served per second</span></div>
-      <div class="kpi bad"><b id="kDrop">–</b><span>Failing or timing out</span></div>
-      <div class="kpi accent"><b id="kBottle">–</b><span>Bottleneck</span></div>
-      <div class="kpi"><b id="kCost">–</b><span>Relative cost</span></div>
+      <div class="kpi good"><b id="kServed">…</b><span>Served per second</span></div>
+      <div class="kpi bad"><b id="kDrop">…</b><span>Failing or timing out</span></div>
+      <div class="kpi accent"><b id="kBottle">…</b><span>Bottleneck</span></div>
+      <div class="kpi"><b id="kCost">…</b><span>Relative cost</span></div>
     </div>
     <p class="hint" id="simHint"></p>
   </div>

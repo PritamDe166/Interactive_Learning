@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Modules, packages, pip &amp; venv</title>
 <meta name="description" content="Python fundamentals: what import does, module caching, from-imports and aliases, if __name__ == &#x27;__main__&#x27;, packages, pip and virtual environments.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
@@ -15,20 +13,21 @@
 <script src="traces/modules-packages.js"></script>
 <style>
   .static-code { margin: 0; }
-  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
-  .nm-term { margin: 4px 0 0; min-height: 120px; padding: 10px 12px; border-radius: 10px; background: var(--code-bg); border: 1px solid var(--line); font-size: 13.5px; white-space: pre-wrap; }
-  .nm-cache { margin-top: 8px; font-family: var(--mono); font-size: 12.5px; color: var(--accent-text); padding: 6px 10px; border: 1px dashed var(--line); border-radius: 8px; overflow-wrap: anywhere; }
+  .puzzle-area { display: grid; gap: var(--space-sm); margin-top: var(--space-sm); }
+  .nm-term { margin: var(--space-2xs) 0 0; min-height: 120px; padding: var(--space-xs) var(--space-sm); border-radius: 0; background: var(--code-bg); border: 1px solid var(--line); font-size: 13.5px; white-space: pre-wrap; }
+  .nm-cache { margin-top: var(--space-xs); font-family: var(--mono); font-size: 12.5px; color: var(--accent-text); padding: var(--space-2xs) var(--space-xs); border: 1px dashed var(--line); border-radius: 0; overflow-wrap: anywhere; }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← Python Fundamentals</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">Python Fundamentals</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Python · Topic 13 · Going further</div>
+    <p class="crumbs">Python / Topic 13 / Going further</p>
     <h1>Modules, packages, pip &amp; venv</h1>
     <ul class="lede"><li>Every <b>.py file is a module</b>. <span class="mono">import billing</span> runs billing.py <b>once</b>, caches it in <span class="mono">sys.modules</span>, and binds the name <span class="mono">billing</span>.</li><li><span class="mono">from billing import tax</span> copies just that name into your file; <span class="mono">import numpy as np</span> picks a shorter alias.</li><li><span class="mono">__name__</span> is <span class="mono">"__main__"</span> when a file is run directly and the module's name when it's imported, hence <span class="mono">if __name__ == "__main__":</span>.</li><li>A <b>package</b> is a folder of modules. <b>pip</b> installs third-party packages; a <b>virtual environment</b> (venv) keeps each project's packages separate.</li></ul>
   </header>
@@ -46,13 +45,13 @@
 
   <section aria-labelledby="runH">
     <h2 class="stage-title" id="runH">Edit and run</h2>
-    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div class="stage-kind">Change the code, Run ▶ for the output, Step through to watch it run</div>
     <div id="runner"></div>
   </section>
 
   <section aria-labelledby="predH">
     <h2 class="stage-title" id="predH">Predict the output</h2>
-    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="stage-kind">Pick a puzzle, choose your answer, then step through it</div>
     <div class="chips" id="pzChips"></div>
     <div class="puzzle-area" id="pzArea"></div>
   </section>
@@ -101,7 +100,7 @@
     <div class="quiz">
       <details><summary>You run <span class="mono">python app.py</span>, and app.py does <span class="mono">import billing</span>. What is <span class="mono">__name__</span> inside billing.py?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">"billing"</b>. Only the started file is <span class="mono">"__main__"</span>.</p></div></details>
-      <details><summary><span class="mono">import math\nprint(math.floor(2.7), math.ceil(2.1))</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">import math<br>print(math.floor(2.7), math.ceil(2.1))</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">2 3</b>. floor rounds down, ceil rounds up.</p></div></details>
       <details><summary>Where does <span class="mono">pip install requests</span> put the package when a venv is active?<span class="go">Show answer</span></summary>
         <div class="ans"><p>Into that venv's <span class="mono">site-packages</span> folder only. Other projects (and the system Python) don't see it. Check with <span class="mono">which python</span> / <span class="mono">python -m pip --version</span>.</p></div></details>

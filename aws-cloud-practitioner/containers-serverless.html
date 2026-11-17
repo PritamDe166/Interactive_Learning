@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Containers &amp; Serverless</title>
 <meta name="description" content="AWS Cloud Practitioner: who manages what on EC2, ECS, Fargate and Lambda; how Lambda scales with events and what it costs; and how to pick a compute service.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
@@ -23,10 +21,10 @@
   .env rect { fill: var(--panel-2); stroke: var(--line); stroke-width: 2; transition: fill .25s, stroke .25s, opacity .3s; }
   .env.busy rect { fill: var(--teal-wash); stroke: var(--cyan); }
   .env.cold rect { stroke: var(--yellow); }
-  .env text { fill: var(--fg); font-family: var(--mono); font-size: 10.5px; text-anchor: middle; }
+  .env text { fill: var(--fg); font-family: var(--mono); font-size: 12px; text-anchor: middle; }
   .svc rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
   .svc text { fill: var(--fg); font-size: 13px; font-weight: 700; text-anchor: middle; }
-  .svc .sm { fill: var(--muted); font-family: var(--mono); font-size: 10.5px; font-weight: 400; }
+  .svc .sm { fill: var(--muted); font-family: var(--mono); font-size: 12px; font-weight: 400; }
   .svc.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
   .svc.fade text { opacity: .45; }
   .hostbox { fill: var(--panel); stroke: var(--accent-text); stroke-width: 1.5; stroke-dasharray: 6 4; }
@@ -37,12 +35,13 @@
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">AWS CLF-C02 · Section 10 · Domains 1, 3 &amp; 4 (Tasks 3.3, 4.1)</div>
+    <p class="crumbs">AWS CLF-C02 / Section 10 / Domains 1, 3 &amp; 4 (Tasks 3.3, 4.1)</p>
     <h1>Containers &amp; Serverless</h1>
     <ul class="lede">
       <li><b>Containers</b> package an app with its dependencies. <b>ECR</b> stores the images; <b>ECS</b> (AWS's own) or <b>EKS</b> (Kubernetes) runs them.</li>
@@ -138,7 +137,7 @@
         <tbody>
           <tr><td>Unit</td><td>Function</td><td>Container (task / pod)</td><td>Job (Docker image) in a queue</td><td>Virtual server</td></tr>
           <tr><td>Time limit</td><td><b>15 min</b></td><td>None</td><td>None</td><td>None</td></tr>
-          <tr><td>Size</td><td>128 MB – 10 GB memory; /tmp 512 MB – 10 GB</td><td>vCPU + memory per task</td><td>Any instance type</td><td>Any instance type</td></tr>
+          <tr><td>Size</td><td>128 MB to 10 GB memory; /tmp 512 MB to 10 GB</td><td>vCPU + memory per task</td><td>Any instance type</td><td>Any instance type</td></tr>
           <tr><td>Serverless?</td><td>Yes</td><td>Yes</td><td>No (managed; runs on EC2/Spot or Fargate)</td><td>No</td></tr>
           <tr><td>You pay for</td><td>Requests + GB-seconds</td><td>vCPU + GB per second</td><td>The EC2/Spot/Fargate it uses</td><td>Instance time, idle or not</td></tr>
         </tbody>

@@ -1,35 +1,34 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Regions, AZs and edge locations</title>
 <meta name="description" content="AWS Cloud Practitioner: AWS global infrastructure. Regions, Availability Zones, data centres, edge locations and points of presence, global vs regional services, and how to choose a Region.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
 <script src="../assets/js/theme.js"></script>
 <script src="../assets/js/explainer-kit.js"></script>
 <style>
-  .chooser { display: grid; gap: 12px; }
-  .chooser label { display: grid; gap: 4px; font-size: 14px; color: var(--muted); }
-  .chooser select { font: inherit; color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; }
-  .chooser .row3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px; }
-  .chooser .out { border-left: 4px solid var(--orange); padding: 8px 12px; background: var(--panel-2); border-radius: 8px; color: var(--fg-soft); }
+  .chooser { display: grid; gap: var(--space-sm); }
+  .chooser label { display: grid; gap: var(--space-2xs); font-size: 14px; color: var(--muted); }
+  .chooser select { font: inherit; color: var(--fg); background: var(--panel-2); border-radius: 0; padding: var(--space-xs) var(--space-xs); }
+  .chooser .row3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); }
+  .chooser .out { border-left: 4px solid var(--orange); padding: var(--space-xs) var(--space-sm); background: var(--panel-2); border-radius: 0; color: var(--fg-soft); }
   .chooser .out b { color: var(--fg); }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← AWS Cloud Practitioner</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">AWS CLF-C02 · Cloud &amp; AWS overview · Domain 3 Technology</div>
+    <p class="crumbs">AWS CLF-C02 / Cloud &amp; AWS overview / Domain 3 Technology</p>
     <h1>Regions, AZs &amp; edge locations</h1>
     <ul class="lede">
       <li>A <b>Region</b> is a geographic area (such as <span class="mono">ap-south-1</span>, Mumbai). Most services are <b>regional</b>: you pick the Region for each resource.</li>

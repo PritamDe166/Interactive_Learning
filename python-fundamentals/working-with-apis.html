@@ -1,12 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Working with APIs</title>
 <meta name="description" content="Python fundamentals: calling HTTP APIs with requests, query parameters, JSON bodies, status codes, raise_for_status, timeouts, and paging through results.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="../assets/css/theme.css">
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/explainer.css">
@@ -15,28 +13,29 @@
 <script src="traces/working-with-apis.js"></script>
 <style>
   .static-code { margin: 0; }
-  .puzzle-area { display: grid; gap: 14px; margin-top: 12px; }
-  .ht-lane { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; margin: 14px 0 10px; }
-  .ht-end { font-family: var(--mono); font-size: 13px; padding: 10px 12px; border-radius: 10px; border: 1.5px solid var(--line); background: var(--panel-2); }
+  .puzzle-area { display: grid; gap: var(--space-sm); margin-top: var(--space-sm); }
+  .ht-lane { display: grid; grid-template-columns: auto 1fr auto; gap: var(--space-xs); align-items: center; margin: var(--space-sm) 0 var(--space-xs); }
+  .ht-end { font-family: var(--mono); font-size: 13px; padding: var(--space-xs) var(--space-sm); border-radius: 0; border: 1.5px solid var(--line); background: var(--panel-2); }
   .ht-wire { position: relative; height: 34px; border-bottom: 2px dashed var(--line); }
-  .ht-pill { position: absolute; left: 0; top: 2px; font-family: var(--mono); font-size: 12px; padding: 4px 10px; border-radius: 999px; background: var(--cyan); color: var(--bg, #000); white-space: nowrap; transition: left .8s ease, transform .8s ease; transform: translateX(0); }
+  .ht-pill { position: absolute; left: 0; top: 2px; font-family: var(--mono); font-size: 12px; padding: var(--space-2xs) var(--space-xs); border-radius: 0; background: var(--cyan); color: var(--bg); white-space: nowrap; transition: transform .8s ease; transform: translateX(0); }
   .ht-pill.go { left: 100%; transform: translateX(-100%); }
   .ht-pill.go.back { left: 0; transform: translateX(0); }
   .ht-pill.ok { background: var(--teal); }
   .ht-pill.bad { background: var(--red); }
   .ht-pill.lost { opacity: .5; }
-  .ht-msg { margin: 4px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12.5px; min-height: 40px; }
+  .ht-msg { margin: var(--space-2xs) 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12.5px; min-height: 40px; }
 </style>
 </head>
 <body>
 <div class="wrap explainer">
   <div class="topbar">
-    <a class="back" href="index.html">← Python Fundamentals</a>
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">Python Fundamentals</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
 
   <header>
-    <div class="eyebrow">Python · Topic 20 · Going further</div>
+    <p class="crumbs">Python / Topic 20 / Going further</p>
     <h1>Working with APIs</h1>
     <ul class="lede"><li>A web API is a URL that returns <b>data</b> (usually JSON) instead of a page. You send an HTTP <b>request</b> (method, URL, headers, body) and get a <b>response</b> (status code, headers, body).</li><li>The <b>requests</b> library: <span class="mono">requests.get(url, params=…, headers=…, timeout=…)</span>, <span class="mono">requests.post(url, json=…)</span>.</li><li>Check the outcome with <span class="mono">r.status_code</span> or <span class="mono">r.raise_for_status()</span>, then decode with <span class="mono">r.json()</span>, which gives plain dicts and lists.</li><li>Always set a <b>timeout</b>, keep secrets out of code, and expect lists to come in <b>pages</b>.</li></ul>
   </header>
@@ -54,13 +53,13 @@
 
   <section aria-labelledby="runH">
     <h2 class="stage-title" id="runH">Edit and run</h2>
-    <div class="stage-kind">Change the code · Run ▶ for the output · Step through to watch it run</div>
+    <div class="stage-kind">Change the code, Run ▶ for the output, Step through to watch it run</div>
     <div id="runner"></div>
   </section>
 
   <section aria-labelledby="predH">
     <h2 class="stage-title" id="predH">Predict the output</h2>
-    <div class="stage-kind">Pick a puzzle · choose your answer · then step through it</div>
+    <div class="stage-kind">Pick a puzzle, choose your answer, then step through it</div>
     <div class="chips" id="pzChips"></div>
     <div class="puzzle-area" id="pzArea"></div>
   </section>
@@ -116,7 +115,7 @@
     <div class="quiz">
       <details><summary>What's the difference between <span class="mono">params=</span> and <span class="mono">json=</span> in requests?<span class="go">Show answer</span></summary>
         <div class="ans"><p><span class="mono">params</span> go into the <b>URL query string</b> (<span class="mono">?city=Pune</span>); <span class="mono">json</span> is serialised into the <b>request body</b> with a <span class="mono">Content-Type: application/json</span> header (typical for POST/PUT).</p></div></details>
-      <details><summary><span class="mono">import json\nprint(json.loads('{"next": null}')["next"] is None)</span><span class="go">Show answer</span></summary>
+      <details><summary><span class="mono">import json<br>print(json.loads('{"next": null}')["next"] is None)</span><span class="go">Show answer</span></summary>
         <div class="ans"><p><b class="mono">True</b>. JSON null → None.</p></div></details>
       <details><summary>Does <span class="mono">requests.get()</span> raise an exception for a 404?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>No.</b> It returns a response with <span class="mono">status_code</span> 404. Only network problems (timeouts, DNS, refused connections) raise. Call <span class="mono">r.raise_for_status()</span> to turn 4xx/5xx into an <span class="mono">HTTPError</span>.</p></div></details>
