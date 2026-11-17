@@ -1,66 +1,85 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light" data-theme-default="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>About · See How It Works</title>
 <meta name="description" content="Who built See How It Works and why: a visual learner sharing animated study pages for interview preparation.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="assets/css/theme.css">
-<link rel="stylesheet" href="assets/css/base.css">
-<link rel="stylesheet" href="assets/css/hub.css">
+<link rel="stylesheet" href="assets/css/site/home.css">
 <script src="assets/js/theme.js"></script>
-<style>
-  .about-grid { display: grid; grid-template-columns: minmax(0, 680px) 280px; gap: 56px; align-items: start; }
-  .about-photo { margin: 0; position: sticky; top: 24px; }
-  .about-photo img { width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: cover; object-position: center top; display: block; border-radius: 18px; border: 1px solid var(--line); }
-  @media (max-width: 860px) { .about-grid { grid-template-columns: 1fr; gap: 24px; } .about-photo { position: static; order: -1; max-width: 220px; } }
-  .about h2 { font-size: 22px; margin: 40px 0 10px; }
-  .about p { color: var(--fg-soft); font-size: 17px; line-height: 1.7; margin: 0 0 14px; }
-  .about p b { color: var(--fg); }
-  .about ol { color: var(--fg-soft); font-size: 17px; line-height: 1.7; padding-left: 22px; margin: 0; }
-  .about .start { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
-  .about .start a { padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; text-decoration: none; color: var(--fg); background: var(--panel); font-size: 15px; }
-  .about .start a:hover { border-color: var(--teal); }
-</style>
 </head>
 <body>
-<div class="wrap">
-  <div class="topbar">
-    <a class="back" href="index.html">← All subjects</a>
-    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
-  </div>
+<a class="skip" href="#main">Skip to the page</a>
 
-  <div class="about-grid">
-  <main class="about">
-    <div class="eyebrow">About</div>
-    <h1>Hi, I'm <span class="y">Pritam</span>.</h1>
-    <p>I'm a .NET developer and team lead with 12 years of experience, currently preparing for interviews in system design, AWS, Python and AI.</p>
-
-    <h2>Why I built this</h2>
-    <p>I'm a <b>visual learner</b>. Reading notes didn't help me picture how things work, so I started turning each topic into a small page I could click through and play with.</p>
-    <p>It helped me learn faster, so I decided to share it. If you're preparing for interviews too, I hope this is an <b>easy place to start</b>: understand a topic in a few minutes, interactively, then go deeper.</p>
-
-    <h2>How to use a page</h2>
-    <ol>
-      <li>Read the short bullets at the top.</li>
-      <li>Step through the walkthrough.</li>
-      <li>Play with the examples, then try the quiz.</li>
-    </ol>
-
-    <h2>Start here</h2>
-    <div class="start">
-      <a href="system-design/index.html">System Design</a>
-      <a href="aws-cloud-practitioner/index.html">AWS</a>
-      <a href="python-fundamentals/index.html">Python</a>
-      <a href="angular/index.html">Angular</a>
+<header class="nav">
+  <div class="container nav__in">
+    <a class="wordmark" href="index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+    <a class="find-pill" href="index.html#find"><span>Search<span class="pill-more"> every explainer</span></span><kbd>/</kbd></a>
+    <div class="nav__end">
+      <a class="back nav__about" href="index.html">All subjects</a>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
     </div>
-  </main>
-  <figure class="about-photo"><img src="assets/img/pritam.jpg?v=2" width="600" height="600" alt="Pritam in a grey checked suit"></figure>
   </div>
+</header>
 
-  <footer>Each page lists its sources. Spotted a mistake? Let me know on <a href="https://github.com/PritamDe166/Interactive_Learning">GitHub</a>.</footer>
-</div>
+<main id="main" class="about">
+  <section class="about-hero" aria-labelledby="aboutH">
+    <div class="container about-hero__grid">
+      <div class="about-hero__text">
+        <h1 id="aboutH">Hi, I&rsquo;m Pritam.</h1>
+        <p class="lead">I&rsquo;m a .NET developer and team lead with 12 years of experience, currently preparing for interviews in system design, AWS, Python and AI.</p>
+        <div class="hero__actions">
+          <a class="btn" href="index.html#subjects">Browse the subjects</a>
+        </div>
+      </div>
+      <figure class="portrait" data-slot="portrait" data-alt="The owner's portrait">
+        <img src="assets/img/pritam.jpg?v=2" width="600" height="600" alt="Pritam in a grey checked suit" fetchpriority="high" style="object-position: 50% 15%">
+      </figure>
+    </div>
+  </section>
+
+  <section class="section section--tight-top" aria-labelledby="whyH">
+    <div class="container why">
+      <h2 id="whyH">Why I built this</h2>
+      <div class="why__body">
+        <p class="why__lead">I&rsquo;m a visual learner.</p>
+        <p>Reading notes didn&rsquo;t help me picture how things work, so I started turning each topic into a small page I could click through and play with.</p>
+        <p>It helped me learn faster, so I decided to share it. If you&rsquo;re preparing for interviews too, I hope this is an <b>easy place to start</b>: understand a topic in a few minutes, interactively, then go deeper.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section how" aria-labelledby="useH">
+    <div class="container">
+      <div class="head"><h2 id="useH">How to use a page</h2></div>
+      <ol class="use">
+        <li>Read the short bullets at the top.</li>
+        <li>Step through the walkthrough.</li>
+        <li>Play with the examples, then try the quiz.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="start" aria-labelledby="startH">
+    <div class="container cols">
+      <h2 id="startH">Start here</h2>
+      <ul>
+        <li><a href="system-design/index.html">System Design</a></li>
+        <li><a href="aws-cloud-practitioner/index.html">AWS</a></li>
+        <li><a href="python-fundamentals/index.html">Python</a></li>
+        <li><a href="angular/index.html">Angular</a></li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="letter">
+  <div class="container cols">
+    <div class="letter__body">
+      <p>Each page lists its sources. Spotted a mistake? Let me know on <a class="link" href="https://github.com/PritamDe166/Interactive_Learning">GitHub</a>.</p>
+      <p class="sign">Pritam</p>
+    </div>
+  </div>
+</footer>
 </body>
 </html>
