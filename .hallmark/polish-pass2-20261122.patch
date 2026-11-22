@@ -1,0 +1,2262 @@
+diff --git a/about.html b/about.html
+index 2817cd7..3fd7b2f 100644
+--- a/about.html
++++ b/about.html
+@@ -26,8 +26,8 @@
+       <div>
+         <h2>Subjects</h2>
+         <ul>
+-          <li><a href="system-design/index.html">System Design<span class="n">32</span></a></li>
+-          <li><a href="aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++          <li><a href="system-design/index.html">System Design<span class="n">34</span></a></li>
++          <li><a href="aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+           <li><a href="python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+           <li><a href="angular/index.html">Angular<span class="n">15</span></a></li>
+           <li><span class="soon">AI<span class="n">Soon</span></span></li>
+diff --git a/angular/app-boot.html b/angular/app-boot.html
+index 737182e..529366f 100644
+--- a/angular/app-boot.html
++++ b/angular/app-boot.html
+@@ -67,7 +67,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="index.html" aria-current="true">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/angular/change-detection.html b/angular/change-detection.html
+index cacbf08..d59d40a 100644
+--- a/angular/change-detection.html
++++ b/angular/change-detection.html
+@@ -63,7 +63,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="index.html" aria-current="true">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/angular/components.html b/angular/components.html
+index 5728e1c..b306988 100644
+--- a/angular/components.html
++++ b/angular/components.html
+@@ -69,7 +69,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="index.html" aria-current="true">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/angular/control-flow.html b/angular/control-flow.html
+index 1788753..bdd6744 100644
+--- a/angular/control-flow.html
++++ b/angular/control-flow.html
+@@ -69,7 +69,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="index.html" aria-current="true">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/angular/data-binding.html b/angular/data-binding.html
+index 940152d..6e4786a 100644
+--- a/angular/data-binding.html
++++ b/angular/data-binding.html
+@@ -71,7 +71,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="index.html" aria-current="true">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/angular/guards-login.html b/angular/guards-login.html
+index 21d6a27..fd25821 100644
+--- a/angular/guards-login.html
++++ b/angular/guards-login.html
+@@ -60,7 +60,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="index.html" aria-current="true">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/angular/http.html b/angular/http.html
+index 6bb84cb..3bdf51e 100644
+--- a/angular/http.html
++++ b/angular/http.html
+@@ -68,7 +68,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="index.html" aria-current="true">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/angular/index.html b/angular/index.html
+index 42d46b3..619b9fc 100644
+--- a/angular/index.html
++++ b/angular/index.html
+@@ -46,7 +46,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="index.html" aria-current="true">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+@@ -74,7 +74,7 @@
+     </div>
+     <div class="stats">
+       <div class="stat"><b id="sLive">0</b><span>Explainers</span></div>
+-      <div class="stat"><b id="sTopics">0</b><span>Topics</span></div>
++      <div class="stat"><b id="sTopics">0</b><span>Topics planned</span></div>
+       <div class="stat"><b id="sNext">…</b><span>Next up</span></div>
+       <div class="meter">
+         <div class="row"><span>Topics covered</span><span id="sPct">0%</span></div>
+diff --git a/angular/lifecycle.html b/angular/lifecycle.html
+index a001576..e38eb7f 100644
+--- a/angular/lifecycle.html
++++ b/angular/lifecycle.html
+@@ -71,7 +71,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="index.html" aria-current="true">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/angular/parent-child.html b/angular/parent-child.html
+index 194d707..f58d4b3 100644
+--- a/angular/parent-child.html
++++ b/angular/parent-child.html
+@@ -84,7 +84,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="index.html" aria-current="true">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/angular/reactive-forms.html b/angular/reactive-forms.html
+index 081577a..f0e2418 100644
+--- a/angular/reactive-forms.html
++++ b/angular/reactive-forms.html
+@@ -63,7 +63,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="index.html" aria-current="true">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/angular/routing.html b/angular/routing.html
+index e12e4e5..d2e2a05 100644
+--- a/angular/routing.html
++++ b/angular/routing.html
+@@ -66,7 +66,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="index.html" aria-current="true">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/angular/services-di.html b/angular/services-di.html
+index 213464b..eed4ff0 100644
+--- a/angular/services-di.html
++++ b/angular/services-di.html
+@@ -63,7 +63,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="index.html" aria-current="true">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/angular/signals.html b/angular/signals.html
+index 332ff58..d1a991f 100644
+--- a/angular/signals.html
++++ b/angular/signals.html
+@@ -68,7 +68,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="index.html" aria-current="true">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/angular/template-forms.html b/angular/template-forms.html
+index 27a2970..0985e4f 100644
+--- a/angular/template-forms.html
++++ b/angular/template-forms.html
+@@ -67,7 +67,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="index.html" aria-current="true">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/angular/typescript.html b/angular/typescript.html
+index cac03ba..0bd1f5a 100644
+--- a/angular/typescript.html
++++ b/angular/typescript.html
+@@ -49,7 +49,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="index.html" aria-current="true">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/assets/css/explainer.css b/assets/css/explainer.css
+index b82ba71..83e8761 100644
+--- a/assets/css/explainer.css
++++ b/assets/css/explainer.css
+@@ -1149,7 +1149,7 @@ ul.cheat li, .cheat li { background: none; border-top: 1px solid var(--line); pa
+ /* status lines are prose, not code: body face */
+ .status-line { font-family: var(--font-body); font-size: var(--text-sm); }
+ /* top bar playback controls: one height, square, the same hairline */
+-.ac-speed select, .ac-step { min-height: 36px; border: 0; box-shadow: inset 0 0 0 1px var(--line); background: var(--bg); }
++.ac-speed select, .ac-step { min-height: 36px; border: 0; box-shadow: inset 0 0 0 1px var(--muted); background: var(--bg); }
+ .ac-speed select { padding: 0 var(--space-xs); }
+ .ac-speed select:hover, .ac-step:hover { box-shadow: inset 0 0 0 1px var(--muted); }
+ .ac-speed select:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+@@ -1159,3 +1159,58 @@ ul.cheat li, .cheat li { background: none; border-top: 1px solid var(--line); pa
+   .story > .at-stage { overflow-x: auto; overscroll-behavior-x: contain; }
+   .story > .at-stage svg { min-width: 400px; }
+ }
++
++/* =========================================================================
++   Pass 2 (Hallmark, 2026-11-22)
++   ========================================================================= */
++/* Buttons. The offset shadow marks real actions only: primary buttons and the walkthrough's
++   Back / Next / Play all. Everything else (chips, keys, presets, answers, Reset) is flat:
++   a hairline that darkens on hover. A chosen toggle is one style everywhere: a flat lime fill. */
++:root { --btn-flat-line: color-mix(in oklab, var(--fg) 30%, transparent); }
++.btn:not(.primary), .chip-btn, .ac-btn { background: var(--bg); box-shadow: inset 0 0 0 1px var(--btn-flat-line); }
++.btn:not(.primary):hover, .chip-btn:hover, .ac-btn:hover:not(:disabled) { transform: none; background: var(--bg); box-shadow: inset 0 0 0 1px var(--fg); }
++.btn:not(.primary):active, .chip-btn:active, .ac-btn:active:not(:disabled) { transform: translateY(1px); box-shadow: inset 0 0 0 1px var(--fg); }
++.btn[aria-pressed="true"], .btn.on, .chip-btn[aria-pressed="true"], .ac-btn[aria-pressed="true"],
++.btn[aria-pressed="true"]:hover, .btn.on:hover, .chip-btn[aria-pressed="true"]:hover, .ac-btn[aria-pressed="true"]:hover {
++  background: var(--color-mark); color: var(--color-mark-ink); transform: none; box-shadow: inset 0 0 0 1px var(--color-mark-ink);
++}
++.btn.right, .predict .opts .chip-btn.right { box-shadow: inset 0 0 0 1px var(--good-text); transform: none; }
++.btn.wrong, .predict .opts .chip-btn.wrong { box-shadow: inset 0 0 0 1px var(--bad-text); transform: none; }
++.btn:disabled, .btn[aria-disabled="true"], .chip-btn:disabled, .ac-btn:disabled { opacity: 0.45; background: transparent; transform: none; box-shadow: inset 0 0 0 1px var(--btn-flat-line); }
++/* the walkthrough keeps the offset style on the dark panel */
++.story-cap .btn:not(:disabled):not([aria-disabled="true"]) { background: var(--color-field-ink); color: var(--color-field); box-shadow: inset 0 0 0 2px var(--btn-line), 3px 3px 0 var(--btn-shadow); }
++.story-cap .btn:not(:disabled):not([aria-disabled="true"]):hover { transform: translate(-1px, -1px); box-shadow: inset 0 0 0 2px var(--btn-line), 4px 4px 0 var(--btn-shadow); }
++.story-cap .btn:not(:disabled):not([aria-disabled="true"]):active { transform: translate(3px, 3px); box-shadow: inset 0 0 0 2px var(--btn-line); }
++.story-cap .btn.primary:not(:disabled) { background: var(--color-accent); color: var(--color-accent-ink); }
++/* disabled on the dark panel: the same button, faded, not a grey block */
++.story-cap .btn:disabled, .story-cap .btn[aria-disabled="true"] { opacity: 1; background: transparent; color: color-mix(in oklab, var(--color-field-ink) 45%, transparent); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-field-ink) 28%, transparent); }
++/* small play buttons on the pattern cards: flat ink, no lime shadow */
++.at-play { box-shadow: none; }
++.at-play:hover { background: var(--color-ink-2); }
++:root[data-theme="dark"] .at-play:hover { background: var(--panel-2); color: var(--fg); }
++.cev-keys .btn { font-family: var(--font-body); }
++
++/* Lime is kept for the logo, the close band, chosen toggles and "hit" states in diagrams.
++   Bullets, takeaways, notes and cheat-sheet answers go back to ink. */
++ul.lede li::before { background: var(--fg); box-shadow: none; }
++.at-take { box-shadow: inset 2px 0 0 var(--fg); }
++.note { border-left-color: var(--fg); }
++.cheat li .then { box-shadow: none; font-weight: 500; }
++
++.wrap.explainer .cc-cap { justify-content: flex-start; padding-left: 0; }
++/* Compare cards: the rule above each diagram takes two lines, so diagrams in a row line up */
++@media (min-width: 61rem) { .at-grid .at-rule { min-height: calc(2lh); } }
++
++/* A part title ("Try it yourself") sits close to its first block, and the block titles under it are a step smaller */
++.wrap.explainer > .part-title + .sub + section, .wrap.explainer > .part-title + section { margin-top: var(--space-xl); }
++.wrap.explainer > .part-title ~ section .stage-title { font-size: var(--text-xl); }
++
++/* Small screens: the theme toggle shares a row with the section tabs, which scroll and fade at the edge */
++@media (max-width: 560px) {
++  .explainer > .topbar:has(.page-nav) { flex-wrap: nowrap; align-items: center; gap: var(--space-sm); }
++  .explainer > .topbar:has(.page-nav) .page-nav { order: 0; flex: 1 1 auto; min-width: 0; gap: var(--space-md); padding-top: 0;
++    mask-image: linear-gradient(to right, var(--fg) 85%, transparent); }
++  .explainer > .topbar:has(.page-nav) .theme-toggle { order: 1; flex: none; }
++}
++/* pressed toggles win over page-local styles, so the text never matches the lime fill */
++.wrap.explainer :is(.btn, .chip-btn, .ac-btn):is([aria-pressed="true"], .on) { background: var(--color-mark); color: var(--color-mark-ink); border-color: transparent; transform: none; box-shadow: inset 0 0 0 1px var(--color-mark-ink); }
+diff --git a/assets/css/hub.css b/assets/css/hub.css
+index 0d4d766..9d2c428 100644
+--- a/assets/css/hub.css
++++ b/assets/css/hub.css
+@@ -205,3 +205,16 @@ a.day-card:hover, .day-card:hover { border-color: var(--cyan); }
+ .meter .track i { background: var(--color-accent); }
+ .phase-head .num { color: var(--muted); }
+ @media (prefers-reduced-motion: reduce) { .day-card.live, .day-card.live .topic { transition: none; } }
++/* Pass 2: the whole card is the link and the arrow says so; "Open explainer" stays for screen readers only */
++.day-card.live .status { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
++.day-card.live { padding-bottom: var(--space-md); }
++.day-card.live .topic { padding-right: var(--space-lg); }
++/* week-level playbooks and atlases: a dashed ink frame, grey label (no olive text on paper) */
++.day-card.atlas-card, .day-card.atlas-card.live, .day-card.atlas-card:hover { border-color: color-mix(in oklab, var(--fg) 45%, transparent); }
++.day-card.atlas-card .day, .day-card.live.atlas-card .day { color: var(--muted); }
++/* exam domains: neutral hairline tags; the number carries the meaning (red is for errors) */
++.dom, .dom.d1, .dom.d2, .dom.d3, .dom.d4 { border-color: var(--line); color: var(--fg-soft); }
++/* subject hub cards (system-design/index.html): square, one accent */
++.subj { --acc: var(--color-accent) !important; }
++.subj .glyph { background: none; border-color: var(--line); }
++a.subj:hover { transform: none; }
+diff --git a/assets/css/site/workbench.css b/assets/css/site/workbench.css
+index 622f83b..0fdf7e5 100644
+--- a/assets/css/site/workbench.css
++++ b/assets/css/site/workbench.css
+@@ -310,3 +310,10 @@ body { font-size: var(--text-md); }
+ .btn:disabled { transform: none; box-shadow: inset 0 0 0 2px var(--btn-line); }
+ .lab__bar { gap: var(--space-md); }
+ @media (prefers-reduced-motion: reduce) { .btn { transition: none; } .btn:hover { transform: none; } }
++
++/* Pass 2 (Hallmark, 2026-11-22): a shorter narration panel, so the lab has less empty space above its diagram */
++.lab__panel { gap: var(--space-md); }
++.now { min-height: 8rem; }
++.flow { min-height: 12rem; }
++.track__foot .link { align-self: center; }
++.track__foot { align-items: center; min-height: 48px; }
+diff --git a/aws-cloud-practitioner/ami.html b/aws-cloud-practitioner/ami.html
+index 874f014..2786096 100644
+--- a/aws-cloud-practitioner/ami.html
++++ b/aws-cloud-practitioner/ami.html
+@@ -40,6 +40,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -75,7 +76,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/aws-budgets.html b/aws-cloud-practitioner/aws-budgets.html
+index 3f9addf..801800d 100644
+--- a/aws-cloud-practitioner/aws-budgets.html
++++ b/aws-cloud-practitioner/aws-budgets.html
+@@ -41,6 +41,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -76,7 +77,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/cloud-basics.html b/aws-cloud-practitioner/cloud-basics.html
+index 3cbc0d7..6a9e098 100644
+--- a/aws-cloud-practitioner/cloud-basics.html
++++ b/aws-cloud-practitioner/cloud-basics.html
+@@ -34,6 +34,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -69,7 +70,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/cloud-service-models.html b/aws-cloud-practitioner/cloud-service-models.html
+index 35cedef..5d276bf 100644
+--- a/aws-cloud-practitioner/cloud-service-models.html
++++ b/aws-cloud-practitioner/cloud-service-models.html
+@@ -49,6 +49,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -84,7 +85,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/containers-serverless.html b/aws-cloud-practitioner/containers-serverless.html
+index 957d891..4649524 100644
+--- a/aws-cloud-practitioner/containers-serverless.html
++++ b/aws-cloud-practitioner/containers-serverless.html
+@@ -50,6 +50,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -85,7 +86,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/databases-analytics.html b/aws-cloud-practitioner/databases-analytics.html
+index 175d64e..5f51d0e 100644
+--- a/aws-cloud-practitioner/databases-analytics.html
++++ b/aws-cloud-practitioner/databases-analytics.html
+@@ -48,6 +48,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -83,7 +84,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/deployment-iac.html b/aws-cloud-practitioner/deployment-iac.html
+index 50d4abc..29a89e4 100644
+--- a/aws-cloud-practitioner/deployment-iac.html
++++ b/aws-cloud-practitioner/deployment-iac.html
+@@ -39,6 +39,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -74,7 +75,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/ebs-snapshots.html b/aws-cloud-practitioner/ebs-snapshots.html
+index 1c77833..104f717 100644
+--- a/aws-cloud-practitioner/ebs-snapshots.html
++++ b/aws-cloud-practitioner/ebs-snapshots.html
+@@ -40,6 +40,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -75,7 +76,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/ebs.html b/aws-cloud-practitioner/ebs.html
+index ec0c8f8..01d6115 100644
+--- a/aws-cloud-practitioner/ebs.html
++++ b/aws-cloud-practitioner/ebs.html
+@@ -41,6 +41,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -76,7 +77,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/ec2-basics.html b/aws-cloud-practitioner/ec2-basics.html
+index 58417ee..67ea099 100644
+--- a/aws-cloud-practitioner/ec2-basics.html
++++ b/aws-cloud-practitioner/ec2-basics.html
+@@ -35,6 +35,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -70,7 +71,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/ec2-iam-roles.html b/aws-cloud-practitioner/ec2-iam-roles.html
+index e378065..afdd251 100644
+--- a/aws-cloud-practitioner/ec2-iam-roles.html
++++ b/aws-cloud-practitioner/ec2-iam-roles.html
+@@ -33,6 +33,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -68,7 +69,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/ec2-image-builder.html b/aws-cloud-practitioner/ec2-image-builder.html
+index aeca615..d8449b3 100644
+--- a/aws-cloud-practitioner/ec2-image-builder.html
++++ b/aws-cloud-practitioner/ec2-image-builder.html
+@@ -37,6 +37,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -72,7 +73,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/ec2-instance-connect.html b/aws-cloud-practitioner/ec2-instance-connect.html
+index fe025e2..ece2f1f 100644
+--- a/aws-cloud-practitioner/ec2-instance-connect.html
++++ b/aws-cloud-practitioner/ec2-instance-connect.html
+@@ -34,6 +34,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -69,7 +70,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/ec2-instance-types.html b/aws-cloud-practitioner/ec2-instance-types.html
+index f30df54..7c8b15e 100644
+--- a/aws-cloud-practitioner/ec2-instance-types.html
++++ b/aws-cloud-practitioner/ec2-instance-types.html
+@@ -39,6 +39,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -74,7 +75,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/ec2-review.html b/aws-cloud-practitioner/ec2-review.html
+index 4638b25..4610516 100644
+--- a/aws-cloud-practitioner/ec2-review.html
++++ b/aws-cloud-practitioner/ec2-review.html
+@@ -35,6 +35,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -70,7 +71,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/ec2-storage-choices.html b/aws-cloud-practitioner/ec2-storage-choices.html
+index 3c02986..e6955c2 100644
+--- a/aws-cloud-practitioner/ec2-storage-choices.html
++++ b/aws-cloud-practitioner/ec2-storage-choices.html
+@@ -38,6 +38,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -73,7 +74,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/ec2-storage.html b/aws-cloud-practitioner/ec2-storage.html
+index 927c2d0..30c17ce 100644
+--- a/aws-cloud-practitioner/ec2-storage.html
++++ b/aws-cloud-practitioner/ec2-storage.html
+@@ -34,6 +34,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -69,7 +70,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/ec2-user-data.html b/aws-cloud-practitioner/ec2-user-data.html
+index 70cc128..227a50d 100644
+--- a/aws-cloud-practitioner/ec2-user-data.html
++++ b/aws-cloud-practitioner/ec2-user-data.html
+@@ -30,6 +30,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -65,7 +66,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/efs.html b/aws-cloud-practitioner/efs.html
+index 1bd8a1e..d1d7683 100644
+--- a/aws-cloud-practitioner/efs.html
++++ b/aws-cloud-practitioner/efs.html
+@@ -40,6 +40,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -75,7 +76,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/elb-asg.html b/aws-cloud-practitioner/elb-asg.html
+index 4599f7e..58d1151 100644
+--- a/aws-cloud-practitioner/elb-asg.html
++++ b/aws-cloud-practitioner/elb-asg.html
+@@ -53,6 +53,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -88,7 +89,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/fsx.html b/aws-cloud-practitioner/fsx.html
+index 7880578..0d87372 100644
+--- a/aws-cloud-practitioner/fsx.html
++++ b/aws-cloud-practitioner/fsx.html
+@@ -29,6 +29,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -64,7 +65,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/global-infrastructure.html b/aws-cloud-practitioner/global-infrastructure.html
+index deede6f..745a473 100644
+--- a/aws-cloud-practitioner/global-infrastructure.html
++++ b/aws-cloud-practitioner/global-infrastructure.html
+@@ -51,6 +51,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -86,7 +87,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/iam-access-methods.html b/aws-cloud-practitioner/iam-access-methods.html
+index 5832e24..c033fae 100644
+--- a/aws-cloud-practitioner/iam-access-methods.html
++++ b/aws-cloud-practitioner/iam-access-methods.html
+@@ -36,6 +36,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g" open><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html" aria-current="page"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -71,7 +72,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/iam-best-practices.html b/aws-cloud-practitioner/iam-best-practices.html
+index 1f0bd3d..e438602 100644
+--- a/aws-cloud-practitioner/iam-best-practices.html
++++ b/aws-cloud-practitioner/iam-best-practices.html
+@@ -40,6 +40,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g" open><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -75,7 +76,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/iam-cloudshell.html b/aws-cloud-practitioner/iam-cloudshell.html
+index 9d597f9..a2e488c 100644
+--- a/aws-cloud-practitioner/iam-cloudshell.html
++++ b/aws-cloud-practitioner/iam-cloudshell.html
+@@ -33,6 +33,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g" open><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -68,7 +69,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/iam-policies.html b/aws-cloud-practitioner/iam-policies.html
+index 92d9fce..0e2ae8b 100644
+--- a/aws-cloud-practitioner/iam-policies.html
++++ b/aws-cloud-practitioner/iam-policies.html
+@@ -45,6 +45,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g" open><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html" aria-current="page"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -80,7 +81,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/iam-review.html b/aws-cloud-practitioner/iam-review.html
+index 4e8ef52..6c018b2 100644
+--- a/aws-cloud-practitioner/iam-review.html
++++ b/aws-cloud-practitioner/iam-review.html
+@@ -35,6 +35,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g" open><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -70,7 +71,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/iam-roles.html b/aws-cloud-practitioner/iam-roles.html
+index 1668b05..e52af79 100644
+--- a/aws-cloud-practitioner/iam-roles.html
++++ b/aws-cloud-practitioner/iam-roles.html
+@@ -29,6 +29,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g" open><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -64,7 +65,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/iam-root-vs-user.html b/aws-cloud-practitioner/iam-root-vs-user.html
+index 9ec4ef6..8267d27 100644
+--- a/aws-cloud-practitioner/iam-root-vs-user.html
++++ b/aws-cloud-practitioner/iam-root-vs-user.html
+@@ -29,6 +29,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g" open><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html" aria-current="page"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -64,7 +65,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/iam-security-tools.html b/aws-cloud-practitioner/iam-security-tools.html
+index 54f2844..2e7573c 100644
+--- a/aws-cloud-practitioner/iam-security-tools.html
++++ b/aws-cloud-practitioner/iam-security-tools.html
+@@ -44,6 +44,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g" open><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -79,7 +80,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/iam-users-groups.html b/aws-cloud-practitioner/iam-users-groups.html
+index 3b143bb..24976f6 100644
+--- a/aws-cloud-practitioner/iam-users-groups.html
++++ b/aws-cloud-practitioner/iam-users-groups.html
+@@ -39,7 +39,8 @@
+ <li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+-<details class="wb-g"><summary>IAM</summary><ul>
++<details class="wb-g" open><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html" aria-current="page"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -75,7 +76,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/iam.html b/aws-cloud-practitioner/iam.html
+index b5b1723..7becb39 100644
+--- a/aws-cloud-practitioner/iam.html
++++ b/aws-cloud-practitioner/iam.html
+@@ -34,6 +34,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -69,7 +70,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/index.html b/aws-cloud-practitioner/index.html
+index 89567c4..080d007 100644
+--- a/aws-cloud-practitioner/index.html
++++ b/aws-cloud-practitioner/index.html
+@@ -12,11 +12,7 @@
+ <script src="../assets/js/theme.js?v=20261122"></script>
+ <style>
+   .y-aws { color: var(--orange); }
+-  .dom { display: inline-block; font-family: var(--display); font-size: 13px; padding: var(--space-3xs) var(--space-xs); border-radius: 0; border: 1px solid var(--line); color: var(--muted); }
+-  .dom.d1 { border-color: var(--blue); color: var(--blue); }
+-  .dom.d2 { border-color: var(--red); color: var(--red); }
+-  .dom.d3 { border-color: var(--teal-text); color: var(--teal-text); }
+-  .dom.d4 { border-color: var(--accent-text); color: var(--accent-text); }
++  .dom { display: inline-block; font-family: var(--display); font-size: 13px; padding: var(--space-3xs) var(--space-xs); border-radius: 0; border: 1px solid var(--line); color: var(--fg-soft); }
+   .day-card .doms { display: flex; flex-wrap: wrap; gap: var(--space-2xs); margin-top: var(--space-3xs); }
+   .domains { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: var(--space-xs); margin-top: var(--space-md); }
+   .domains .stat b { font-size: 26px; }
+@@ -45,6 +41,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -80,7 +77,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+@@ -165,7 +162,7 @@ const $=id=>document.getElementById(id);
+ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ const topics=SECTIONS.flatMap(s=>s.topics.filter(t=>!t.review));
+ const live=topics.filter(t=>t.live);
+-$('sLive').textContent=live.length;
++$('sLive').textContent=SECTIONS.flatMap(s=>s.topics).filter(t=>t.live).length;
+ $('sTopics').textContent=topics.length;
+ const next=SECTIONS.find(s=>!s.topics.every(t=>t.live));
+ $('sNext').textContent=next?next.t:'Done';if($('sNext').textContent==='Done')$('sNext').nextElementSibling.textContent='Every topic built';
+diff --git a/aws-cloud-practitioner/instance-store.html b/aws-cloud-practitioner/instance-store.html
+index afc615d..b68f0e8 100644
+--- a/aws-cloud-practitioner/instance-store.html
++++ b/aws-cloud-practitioner/instance-store.html
+@@ -46,6 +46,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -81,7 +82,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/overview-review.html b/aws-cloud-practitioner/overview-review.html
+index 9df6e57..e386310 100644
+--- a/aws-cloud-practitioner/overview-review.html
++++ b/aws-cloud-practitioner/overview-review.html
+@@ -42,6 +42,7 @@
+ <li><a href="overview-review.html" aria-current="page"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -77,7 +78,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/purchasing-options.html b/aws-cloud-practitioner/purchasing-options.html
+index 555136a..fdb297a 100644
+--- a/aws-cloud-practitioner/purchasing-options.html
++++ b/aws-cloud-practitioner/purchasing-options.html
+@@ -57,6 +57,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -92,7 +93,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/regions-azs-edge.html b/aws-cloud-practitioner/regions-azs-edge.html
+index c2198a2..ddbaecf 100644
+--- a/aws-cloud-practitioner/regions-azs-edge.html
++++ b/aws-cloud-practitioner/regions-azs-edge.html
+@@ -37,6 +37,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -72,7 +73,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/s3.html b/aws-cloud-practitioner/s3.html
+index 31aa07c..3c651cb 100644
+--- a/aws-cloud-practitioner/s3.html
++++ b/aws-cloud-practitioner/s3.html
+@@ -55,6 +55,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -90,7 +91,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/security-groups.html b/aws-cloud-practitioner/security-groups.html
+index 94ebe32..c214a69 100644
+--- a/aws-cloud-practitioner/security-groups.html
++++ b/aws-cloud-practitioner/security-groups.html
+@@ -40,6 +40,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -75,7 +76,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/shared-responsibility.html b/aws-cloud-practitioner/shared-responsibility.html
+index 5e112a8..f291bea 100644
+--- a/aws-cloud-practitioner/shared-responsibility.html
++++ b/aws-cloud-practitioner/shared-responsibility.html
+@@ -54,6 +54,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -89,7 +90,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/ssh.html b/aws-cloud-practitioner/ssh.html
+index 79fa8a0..4d92147 100644
+--- a/aws-cloud-practitioner/ssh.html
++++ b/aws-cloud-practitioner/ssh.html
+@@ -34,6 +34,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -69,7 +70,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/storage-review.html b/aws-cloud-practitioner/storage-review.html
+index 0a98f78..9a6260f 100644
+--- a/aws-cloud-practitioner/storage-review.html
++++ b/aws-cloud-practitioner/storage-review.html
+@@ -35,6 +35,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -70,7 +71,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/topics.js b/aws-cloud-practitioner/topics.js
+index e549c86..8a0d0f6 100644
+--- a/aws-cloud-practitioner/topics.js
++++ b/aws-cloud-practitioner/topics.js
+@@ -17,7 +17,7 @@
+       { file: 'overview-review.html', t: 'Section review', k: 'exam summary quiz cheat sheet', review: true, live: true }
+     ] },
+     { id: 'iam', t: 'IAM', tags: ['d2'], topics: [
+-      { file: "iam-users-groups.html", t: "IAM users & groups", k: "IAM user group root least privilege global policy", live: true },
++      { file: 'iam-users-groups.html', t: 'IAM users & groups', k: 'IAM user group root least privilege global policy', live: true },
+       { file: 'iam-root-vs-user.html', t: 'Root account vs IAM user', k: 'AWS account root user MFA root-only tasks account ID', live: true },
+       { file: 'iam-policies.html', t: 'IAM policies', k: 'policy JSON effect action resource principal condition explicit deny implicit deny managed inline', live: true },
+       { file: 'iam-access-methods.html', t: 'Console, CLI, SDK & access keys', k: 'access key secret CLI SDK console temporary credentials aws configure', live: true },
+diff --git a/aws-cloud-practitioner/traditional-it.html b/aws-cloud-practitioner/traditional-it.html
+index ed33d59..d9ab4ea 100644
+--- a/aws-cloud-practitioner/traditional-it.html
++++ b/aws-cloud-practitioner/traditional-it.html
+@@ -39,6 +39,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -74,7 +75,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/aws-cloud-practitioner/what-is-cloud.html b/aws-cloud-practitioner/what-is-cloud.html
+index a55d06d..dad9242 100644
+--- a/aws-cloud-practitioner/what-is-cloud.html
++++ b/aws-cloud-practitioner/what-is-cloud.html
+@@ -44,6 +44,7 @@
+ <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+ </ul></details>
+ <details class="wb-g"><summary>IAM</summary><ul>
++<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+ <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+ <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+ <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+@@ -79,7 +80,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
++<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/index.html b/index.html
+index a773637..225fd42 100644
+--- a/index.html
++++ b/index.html
+@@ -86,7 +86,7 @@
+           </div>
+           <div class="lab__bar" id="labBar" hidden>
+             <button class="btn" type="button" data-l="reset">Start again</button>
+-            <button class="btn btn--ink" type="button" data-l="play">Play</button>
++            <button class="btn" type="button" data-l="play">Play</button>
+             <ol class="steps" id="labSteps" aria-hidden="true"></ol>
+             <span class="lab__count" id="labCount"></span>
+             <button class="btn btn--primary" type="button" data-l="next">Next step</button>
+@@ -152,17 +152,17 @@
+ const SUBJECTS = [
+   {name:"System Design", path:"system-design/index.html", note:"HLD and LLD", pages:34,
+    tracks:[
+-     {label:"HLD", title:"Design the whole system.", blurb:"Networking, scaling, caching, then distributed systems.", n:147, unit:"sessions, 21 built so far", href:"system-design/hld/index.html", cta:"Explore HLD"},
+-     {label:"LLD", title:"Make the details work.", blurb:"OOP and SOLID, design patterns, concurrency, then classic problems.", n:67, unit:"topics in the roadmap", href:"system-design/lld/index.html", cta:"Explore LLD"}]},
+-  {name:"AWS", path:"aws-cloud-practitioner/index.html", note:"CLF-C02", pages:43,
++     {label:"HLD", title:"Design the whole system.", blurb:"Networking, scaling, caching, then distributed systems.", n:21, unit:"explainers, 147 sessions planned", href:"system-design/hld/index.html", cta:"Explore HLD"},
++     {label:"LLD", title:"Make the details work.", blurb:"OOP and SOLID, design patterns, concurrency, then classic problems.", n:13, unit:"explainers, 67 topics planned", href:"system-design/lld/index.html", cta:"Explore LLD"}]},
++  {name:"AWS", path:"aws-cloud-practitioner/index.html", note:"CLF-C02", pages:34,
+    tracks:[
+-     {label:"Cloud Practitioner", title:"Follow every request through AWS.", blurb:"Regions, AZs and edge locations, then IAM, EC2, storage, S3 and databases.", n:30, unit:"of 85 topics rebuilt", href:"aws-cloud-practitioner/index.html", cta:"Explore AWS"}]},
+-  {name:"Python", path:"python-fundamentals/index.html", note:"20 of 20 topics", pages:20,
++     {label:"Cloud Practitioner", title:"Follow every request through AWS.", blurb:"Regions, AZs and edge locations, then IAM, EC2, storage, S3 and databases.", n:34, unit:"explainers, 85 topics planned", href:"aws-cloud-practitioner/index.html", cta:"Explore AWS"}]},
++  {name:"Python", path:"python-fundamentals/index.html", note:"Fundamentals", pages:20,
+    tracks:[
+-     {label:"Fundamentals", title:"Watch each line run.", blurb:"Stepped line by line with edit-and-run boxes, from objects to type hints and APIs.", n:20, unit:"topics, all built", href:"python-fundamentals/index.html", cta:"Explore Python"}]},
+-  {name:"Angular", path:"angular/index.html", note:"15 of 15 topics, Angular 22", pages:15,
++     {label:"Fundamentals", title:"Watch each line run.", blurb:"Stepped line by line with edit-and-run boxes, from objects to type hints and APIs.", n:20, unit:"explainers, every topic built", href:"python-fundamentals/index.html", cta:"Explore Python"}]},
++  {name:"Angular", path:"angular/index.html", note:"Angular 22", pages:15,
+    tracks:[
+-     {label:"Modern Angular", title:"Build one app, CareDesk.", blurb:"Components, data flow, signals, routing, forms and HTTP, in build order.", n:15, unit:"topics, all built", href:"angular/index.html", cta:"Explore Angular"}]},
++     {label:"Modern Angular", title:"Build one app, CareDesk.", blurb:"Components, data flow, signals, routing, forms and HTTP, in build order.", n:15, unit:"explainers, every topic built", href:"angular/index.html", cta:"Explore Angular"}]},
+   {name:"AI", path:null, note:"Coming soon", pages:0,
+    tracks:[]}
+ ];
+@@ -199,8 +199,8 @@ $('sideSubjects').innerHTML=SUBJECTS.map(s=>s.path
+   :`<li><span class="soon">${esc(s.name)}<span class="n">Soon</span></span></li>`).join('');
+ 
+ /* Choose your rabbit hole: one tab per subject, its tracks below */
+-const trackCard=t=>`<article class="track"><small>${esc(t.label)}</small><h3>${esc(t.title)}</h3><p>${esc(t.blurb)}</p>
+-  <div class="track__foot"><p class="track__fig"><b>${t.n}</b><span>${esc(t.unit)}</span></p><a class="btn btn--primary" href="${esc(t.href)}">${esc(t.cta)}</a></div></article>`;
++const trackCard=(t,i)=>`<article class="track"><small>${esc(t.label)}</small><h3>${esc(t.title)}</h3><p>${esc(t.blurb)}</p>
++  <div class="track__foot"><p class="track__fig"><b>${t.n}</b><span>${esc(t.unit)}</span></p><a class="${i?'link':'btn btn--primary'}" href="${esc(t.href)}">${esc(t.cta)}</a></div></article>`;
+ $('subjects').innerHTML=`<div class="tabs" role="tablist" aria-label="Subjects">${SUBJECTS.map((s,i)=>
+   `<button class="tab" type="button" role="tab" id="tab${i}" aria-controls="pane${i}" aria-selected="${i===0}" tabindex="${i===0?0:-1}"${s.path?'':' disabled'}><b>${esc(s.name)}</b><small>${s.path&&s.pages?`${s.pages} explainers, `:''}${esc(s.note)}</small></button>`).join('')}</div>
+   <div class="panes">${SUBJECTS.map((s,i)=>`<div class="pane" role="tabpanel" id="pane${i}" aria-labelledby="tab${i}"${i===0?'':' hidden'}>${s.tracks.map(trackCard).join('')}</div>`).join('')}</div>`;
+diff --git a/python-fundamentals/builtins.html b/python-fundamentals/builtins.html
+index ab0b93f..6ce43b7 100644
+--- a/python-fundamentals/builtins.html
++++ b/python-fundamentals/builtins.html
+@@ -74,7 +74,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="index.html" aria-current="true">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/python-fundamentals/classes-objects.html b/python-fundamentals/classes-objects.html
+index 22cbdf7..2061347 100644
+--- a/python-fundamentals/classes-objects.html
++++ b/python-fundamentals/classes-objects.html
+@@ -67,7 +67,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="index.html" aria-current="true">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/python-fundamentals/collections.html b/python-fundamentals/collections.html
+index 7f66dcd..0c42cf2 100644
+--- a/python-fundamentals/collections.html
++++ b/python-fundamentals/collections.html
+@@ -69,7 +69,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="index.html" aria-current="true">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/python-fundamentals/comprehensions.html b/python-fundamentals/comprehensions.html
+index 850c947..8786114 100644
+--- a/python-fundamentals/comprehensions.html
++++ b/python-fundamentals/comprehensions.html
+@@ -64,7 +64,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="index.html" aria-current="true">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/python-fundamentals/conditionals-loops.html b/python-fundamentals/conditionals-loops.html
+index 929a89b..a3a05c4 100644
+--- a/python-fundamentals/conditionals-loops.html
++++ b/python-fundamentals/conditionals-loops.html
+@@ -79,7 +79,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="index.html" aria-current="true">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/python-fundamentals/context-managers.html b/python-fundamentals/context-managers.html
+index 8581596..3fdfd61 100644
+--- a/python-fundamentals/context-managers.html
++++ b/python-fundamentals/context-managers.html
+@@ -66,7 +66,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="index.html" aria-current="true">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/python-fundamentals/decorators.html b/python-fundamentals/decorators.html
+index b7d68b1..9a0d783 100644
+--- a/python-fundamentals/decorators.html
++++ b/python-fundamentals/decorators.html
+@@ -66,7 +66,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="index.html" aria-current="true">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/python-fundamentals/errors-exceptions.html b/python-fundamentals/errors-exceptions.html
+index 1e08f2e..a5af1c8 100644
+--- a/python-fundamentals/errors-exceptions.html
++++ b/python-fundamentals/errors-exceptions.html
+@@ -62,7 +62,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="index.html" aria-current="true">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/python-fundamentals/files-csv-json.html b/python-fundamentals/files-csv-json.html
+index aa0857f..6bdf377 100644
+--- a/python-fundamentals/files-csv-json.html
++++ b/python-fundamentals/files-csv-json.html
+@@ -65,7 +65,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="index.html" aria-current="true">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/python-fundamentals/functional-tools.html b/python-fundamentals/functional-tools.html
+index a8a0bcc..1b98c98 100644
+--- a/python-fundamentals/functional-tools.html
++++ b/python-fundamentals/functional-tools.html
+@@ -63,7 +63,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="index.html" aria-current="true">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/python-fundamentals/functions-arguments.html b/python-fundamentals/functions-arguments.html
+index 89f4b7d..dae0e33 100644
+--- a/python-fundamentals/functions-arguments.html
++++ b/python-fundamentals/functions-arguments.html
+@@ -71,7 +71,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="index.html" aria-current="true">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/python-fundamentals/index.html b/python-fundamentals/index.html
+index 061a4b8..603af51 100644
+--- a/python-fundamentals/index.html
++++ b/python-fundamentals/index.html
+@@ -58,7 +58,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="index.html" aria-current="true">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+@@ -86,7 +86,7 @@
+     </div>
+     <div class="stats">
+       <div class="stat"><b id="sLive">0</b><span>Explainers</span></div>
+-      <div class="stat"><b id="sTopics">0</b><span>Topics</span></div>
++      <div class="stat"><b id="sTopics">0</b><span>Topics planned</span></div>
+       <div class="stat"><b id="sNext">…</b><span>Next up</span></div>
+       <div class="meter">
+         <div class="row"><span>Topics covered</span><span id="sPct">0%</span></div>
+diff --git a/python-fundamentals/iterators-generators.html b/python-fundamentals/iterators-generators.html
+index e72b928..3cef675 100644
+--- a/python-fundamentals/iterators-generators.html
++++ b/python-fundamentals/iterators-generators.html
+@@ -62,7 +62,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="index.html" aria-current="true">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/python-fundamentals/modules-packages.html b/python-fundamentals/modules-packages.html
+index 4390352..132e13c 100644
+--- a/python-fundamentals/modules-packages.html
++++ b/python-fundamentals/modules-packages.html
+@@ -60,7 +60,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="index.html" aria-current="true">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/python-fundamentals/oop-deeper.html b/python-fundamentals/oop-deeper.html
+index 533f96c..c196e93 100644
+--- a/python-fundamentals/oop-deeper.html
++++ b/python-fundamentals/oop-deeper.html
+@@ -63,7 +63,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="index.html" aria-current="true">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/python-fundamentals/print-input-fstrings.html b/python-fundamentals/print-input-fstrings.html
+index d0c1efb..629ecda 100644
+--- a/python-fundamentals/print-input-fstrings.html
++++ b/python-fundamentals/print-input-fstrings.html
+@@ -69,7 +69,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="index.html" aria-current="true">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/python-fundamentals/scope.html b/python-fundamentals/scope.html
+index 8da9a7d..5f1799a 100644
+--- a/python-fundamentals/scope.html
++++ b/python-fundamentals/scope.html
+@@ -66,7 +66,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="index.html" aria-current="true">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/python-fundamentals/strings.html b/python-fundamentals/strings.html
+index 8347f64..3704cad 100644
+--- a/python-fundamentals/strings.html
++++ b/python-fundamentals/strings.html
+@@ -68,7 +68,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="index.html" aria-current="true">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/python-fundamentals/type-hints.html b/python-fundamentals/type-hints.html
+index 1d90575..f0845c5 100644
+--- a/python-fundamentals/type-hints.html
++++ b/python-fundamentals/type-hints.html
+@@ -59,7 +59,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="index.html" aria-current="true">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/python-fundamentals/variables-objects.html b/python-fundamentals/variables-objects.html
+index ade0edb..6e0fd5b 100644
+--- a/python-fundamentals/variables-objects.html
++++ b/python-fundamentals/variables-objects.html
+@@ -66,7 +66,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="index.html" aria-current="true">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/python-fundamentals/working-with-apis.html b/python-fundamentals/working-with-apis.html
+index cb356d6..b240763 100644
+--- a/python-fundamentals/working-with-apis.html
++++ b/python-fundamentals/working-with-apis.html
+@@ -68,7 +68,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="index.html" aria-current="true">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/hld/availability-slos.html b/system-design/hld/availability-slos.html
+index 5804d54..2934222 100644
+--- a/system-design/hld/availability-slos.html
++++ b/system-design/hld/availability-slos.html
+@@ -89,7 +89,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/hld/cache-eviction.html b/system-design/hld/cache-eviction.html
+index 03dd21f..edcff34 100644
+--- a/system-design/hld/cache-eviction.html
++++ b/system-design/hld/cache-eviction.html
+@@ -17,7 +17,7 @@
+   .cev-lab { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-sm); margin-top: var(--space-sm); }
+   .cev-panel { background: var(--panel); border-radius: 0; padding: var(--space-sm) var(--space-sm); min-width: 0; }
+   .cev-panel h3 { margin: 0 0 var(--space-3xs); font-size: 17px; }
+-  .cev-panel .rule { margin: 0 0 var(--space-xs); font-size: 13px; color: var(--muted); }
++  .cev-panel .rule { margin: 0 0 var(--space-xs); font-size: 13px; color: var(--muted); min-height: 2lh; }
+   .cev-slots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2xs); }
+   .cev-slot { height: 56px; border-radius: 0; border: 1px dashed var(--line); display: grid; place-items: center; align-content: center; gap: var(--space-3xs); font-family: var(--mono); }
+   .cev-slot b { font-size: 19px; color: var(--fg); }
+@@ -97,7 +97,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/hld/cache-failure-modes.html b/system-design/hld/cache-failure-modes.html
+index a0229ae..7750c30 100644
+--- a/system-design/hld/cache-failure-modes.html
++++ b/system-design/hld/cache-failure-modes.html
+@@ -86,7 +86,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/hld/cache-read-strategies.html b/system-design/hld/cache-read-strategies.html
+index 599b738..e19cf52 100644
+--- a/system-design/hld/cache-read-strategies.html
++++ b/system-design/hld/cache-read-strategies.html
+@@ -83,7 +83,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/hld/cache-write-strategies.html b/system-design/hld/cache-write-strategies.html
+index 06740bd..c57d67f 100644
+--- a/system-design/hld/cache-write-strategies.html
++++ b/system-design/hld/cache-write-strategies.html
+@@ -85,7 +85,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/hld/caching-in-practice.html b/system-design/hld/caching-in-practice.html
+index d0c4462..75d050c 100644
+--- a/system-design/hld/caching-in-practice.html
++++ b/system-design/hld/caching-in-practice.html
+@@ -96,7 +96,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/hld/caching-overview.html b/system-design/hld/caching-overview.html
+index b6885ec..773619a 100644
+--- a/system-design/hld/caching-overview.html
++++ b/system-design/hld/caching-overview.html
+@@ -87,7 +87,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/hld/caching-patterns-atlas.html b/system-design/hld/caching-patterns-atlas.html
+index 29a2ac5..68c6c9b 100644
+--- a/system-design/hld/caching-patterns-atlas.html
++++ b/system-design/hld/caching-patterns-atlas.html
+@@ -74,7 +74,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/hld/cdn-http-caching.html b/system-design/hld/cdn-http-caching.html
+index b736868..d2f4a6d 100644
+--- a/system-design/hld/cdn-http-caching.html
++++ b/system-design/hld/cdn-http-caching.html
+@@ -82,7 +82,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/hld/client-server-dns.html b/system-design/hld/client-server-dns.html
+index 753fc88..0addf29 100644
+--- a/system-design/hld/client-server-dns.html
++++ b/system-design/hld/client-server-dns.html
+@@ -74,7 +74,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/hld/distributed-caching.html b/system-design/hld/distributed-caching.html
+index 52ffc0c..875b7f8 100644
+--- a/system-design/hld/distributed-caching.html
++++ b/system-design/hld/distributed-caching.html
+@@ -86,7 +86,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/hld/http.html b/system-design/hld/http.html
+index 89d9735..ebc049e 100644
+--- a/system-design/hld/http.html
++++ b/system-design/hld/http.html
+@@ -74,7 +74,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/hld/https-tls.html b/system-design/hld/https-tls.html
+index c88edeb..866ecbe 100644
+--- a/system-design/hld/https-tls.html
++++ b/system-design/hld/https-tls.html
+@@ -74,7 +74,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/hld/index.html b/system-design/hld/index.html
+index 6e40b2f..6e755d7 100644
+--- a/system-design/hld/index.html
++++ b/system-design/hld/index.html
+@@ -71,7 +71,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+@@ -92,7 +92,7 @@
+ 
+   <header class="hero">
+     <div>
+-      <p class="crumbs">High-level design / 119 days / 17 weeks</p>
++      <p class="crumbs">High-level design / 147 sessions / 21 weeks</p>
+       <h1>System Design HLD</h1>
+       <p class="lede">How the pieces of a system fit together: networking, scaling, caching, data, distributed systems and reliability. Open an explainer, play with it, then close it and draw it from memory.</p>
+       <svg class="flow" viewBox="0 0 560 90" aria-hidden="true">
+@@ -108,8 +108,8 @@
+       </svg>
+     </div>
+     <div class="stats">
+-      <div class="stat"><b id="sLive">0</b><span>Days covered</span></div>
+-      <div class="stat"><b id="sDays">0</b><span>Roadmap sessions</span></div>
++      <div class="stat"><b id="sLive">0</b><span>Explainers</span></div>
++      <div class="stat"><b id="sDays">0</b><span>Sessions planned</span></div>
+       <div class="stat"><b id="sNext">…</b><span>Next up</span></div>
+       <div class="meter">
+         <div class="row"><span>Roadmap covered</span><span id="sPct">0%</span></div>
+diff --git a/system-design/hld/latency-throughput.html b/system-design/hld/latency-throughput.html
+index 7fd9e28..eff819b 100644
+--- a/system-design/hld/latency-throughput.html
++++ b/system-design/hld/latency-throughput.html
+@@ -87,7 +87,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/hld/load-balancing-algorithms.html b/system-design/hld/load-balancing-algorithms.html
+index 91c55f4..7f86343 100644
+--- a/system-design/hld/load-balancing-algorithms.html
++++ b/system-design/hld/load-balancing-algorithms.html
+@@ -73,7 +73,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/hld/proxy-lb-gateway.html b/system-design/hld/proxy-lb-gateway.html
+index c0269ca..cc1dc07 100644
+--- a/system-design/hld/proxy-lb-gateway.html
++++ b/system-design/hld/proxy-lb-gateway.html
+@@ -75,7 +75,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/hld/scale-web-app.html b/system-design/hld/scale-web-app.html
+index c42d747..0c62d26 100644
+--- a/system-design/hld/scale-web-app.html
++++ b/system-design/hld/scale-web-app.html
+@@ -86,7 +86,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/hld/scaling.html b/system-design/hld/scaling.html
+index 976bf86..3193155 100644
+--- a/system-design/hld/scaling.html
++++ b/system-design/hld/scaling.html
+@@ -82,7 +82,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/hld/stateless.html b/system-design/hld/stateless.html
+index 53f5a24..9be4ffe 100644
+--- a/system-design/hld/stateless.html
++++ b/system-design/hld/stateless.html
+@@ -75,7 +75,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/hld/tcp-udp.html b/system-design/hld/tcp-udp.html
+index b5e7a98..99d294e 100644
+--- a/system-design/hld/tcp-udp.html
++++ b/system-design/hld/tcp-udp.html
+@@ -73,7 +73,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/hld/week-1-review.html b/system-design/hld/week-1-review.html
+index e443ee0..6670e43 100644
+--- a/system-design/hld/week-1-review.html
++++ b/system-design/hld/week-1-review.html
+@@ -94,7 +94,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/index.html b/system-design/index.html
+index e442114..65db2fe 100644
+--- a/system-design/index.html
++++ b/system-design/index.html
+@@ -72,7 +72,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+@@ -94,18 +94,18 @@
+ 
+   <a class="map-cta" href="map.html"><b>Learning map</b><span>Every HLD and LLD phase on one page, with the explainers that are ready</span></a>
+ 
+-  <footer>Update <code>done</code> and <code>pages</code> in this page's <code>TRACKS</code> list (and the System Design entry on the main hub) when you publish an explainer.</footer>
++  <!-- Maintainer note: update done and pages in this page's TRACKS list (and the System Design entry on the main hub) when you publish an explainer. -->
+ </div>
+ 
+ <script>
+ /* ===== Tracks. Keep these numbers in step with each track's roadmap. ===== */
+ const TRACKS = [
+   {name:"HLD · High-level design", path:"hld/index.html", accent:"var(--teal)", icon:"net",
+-   blurb:"119-day roadmap: networking, scaling, caching, databases, distributed systems, reliability and interview case studies.",
+-   done:13, total:119, unit:"days", pages:11},
++   blurb:"147-session roadmap: networking, scaling, caching, databases, distributed systems, reliability and interview case studies.",
++   done:21, total:147, unit:"sessions", pages:21},
+   {name:"LLD · Low-level design", path:"lld/index.html", accent:"var(--violet)", icon:"classes",
+    blurb:"Object-oriented design, interfaces, design patterns, concurrency and classic LLD problems. Topics are added as you learn them.",
+-   done:6, total:null, unit:"topics", pages:6}
++   done:13, total:67, unit:"topics", pages:13}
+ ];
+ 
+ const ICONS={
+@@ -118,7 +118,7 @@ document.getElementById('tracks').innerHTML=TRACKS.map(s=>{
+   const progress=s.total?`<div class="track" aria-hidden="true"><i style="width:${Math.max(pct,s.done?2:0)}%"></i></div>`:'';
+   const count=s.total?`<span><b>${s.done}</b> / ${s.total} ${s.unit}</span>`:`<span><b>${s.pages}</b> explainer${s.pages===1?'':'s'} · growing</span>`;
+   return `<a class="subj" style="--acc:${s.accent}" href="${esc(s.path)}"><div class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[s.icon]}</svg></div>
+-    <h2>${esc(s.name)}</h2><p>${esc(s.blurb)}</p>${progress}<div class="meta">${count}<span class="go">Open →</span></div></a>`;
++    <h2>${esc(s.name)}</h2><p>${esc(s.blurb)}</p>${progress}<div class="meta">${count}<span class="go">Open</span></div></a>`;
+ }).join('');
+ </script>
+ </body>
+diff --git a/system-design/lld/abstract-factory.html b/system-design/lld/abstract-factory.html
+index 67d0d10..8684422 100644
+--- a/system-design/lld/abstract-factory.html
++++ b/system-design/lld/abstract-factory.html
+@@ -91,7 +91,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/lld/builder.html b/system-design/lld/builder.html
+index 6db324a..0b1b819 100644
+--- a/system-design/lld/builder.html
++++ b/system-design/lld/builder.html
+@@ -90,7 +90,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/lld/design-principles.html b/system-design/lld/design-principles.html
+index 974b8aa..14dcc32 100644
+--- a/system-design/lld/design-principles.html
++++ b/system-design/lld/design-principles.html
+@@ -91,7 +91,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/lld/factory-method.html b/system-design/lld/factory-method.html
+index cd93aaa..17a9552 100644
+--- a/system-design/lld/factory-method.html
++++ b/system-design/lld/factory-method.html
+@@ -73,7 +73,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/lld/index.html b/system-design/lld/index.html
+index 7782e36..638bd4c 100644
+--- a/system-design/lld/index.html
++++ b/system-design/lld/index.html
+@@ -71,7 +71,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+@@ -106,7 +106,7 @@
+     </div>
+     <div class="stats">
+       <div class="stat"><b id="sLive">0</b><span>Explainers</span></div>
+-      <div class="stat"><b id="sTopics">0</b><span>Topics</span></div>
++      <div class="stat"><b id="sTopics">0</b><span>Topics planned</span></div>
+       <div class="stat"><b id="sNext">…</b><span>Next up</span></div>
+       <div class="meter">
+         <div class="row"><span>Topics covered</span><span id="sPct">0%</span></div>
+@@ -231,7 +231,7 @@ $('sTopics').textContent=all.length;
+ /* next up: the first topic without a page after the furthest one you've built (earlier gaps stay visible in their phase) */
+ const lastLive=Math.max(0,...all.filter(s=>s.file).map(s=>s.n));
+ const next=all.find(s=>s.n>lastLive&&!s.file)||all.find(s=>!s.file);
+-$('sNext').textContent=!all.length?'–':next?`L${next.n}`:'Done';
++$('sNext').textContent=!all.length?'–':next?`L${next.n}`:'Done';if($('sNext').textContent==='Done')$('sNext').nextElementSibling.textContent='Every topic built';
+ const pct=all.length?Math.round(live.length*100/all.length):0;
+ $('sPct').textContent=`${live.length} / ${all.length} · ${pct}%`;
+ $('bar').style.width=Math.max(pct,live.length?2:0)+'%';
+diff --git a/system-design/lld/prototype.html b/system-design/lld/prototype.html
+index 4d9a417..65a06ee 100644
+--- a/system-design/lld/prototype.html
++++ b/system-design/lld/prototype.html
+@@ -73,7 +73,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/lld/singleton.html b/system-design/lld/singleton.html
+index 6c40274..873294d 100644
+--- a/system-design/lld/singleton.html
++++ b/system-design/lld/singleton.html
+@@ -73,7 +73,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/lld/solid-dip.html b/system-design/lld/solid-dip.html
+index bd50f3e..ac16b78 100644
+--- a/system-design/lld/solid-dip.html
++++ b/system-design/lld/solid-dip.html
+@@ -81,7 +81,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/lld/solid-isp.html b/system-design/lld/solid-isp.html
+index ab4f634..62cbc18 100644
+--- a/system-design/lld/solid-isp.html
++++ b/system-design/lld/solid-isp.html
+@@ -83,7 +83,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/lld/solid-lsp.html b/system-design/lld/solid-lsp.html
+index c18da2d..9b1d7c5 100644
+--- a/system-design/lld/solid-lsp.html
++++ b/system-design/lld/solid-lsp.html
+@@ -87,7 +87,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/lld/solid-ocp.html b/system-design/lld/solid-ocp.html
+index ef9becb..898731d 100644
+--- a/system-design/lld/solid-ocp.html
++++ b/system-design/lld/solid-ocp.html
+@@ -83,7 +83,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/lld/solid-srp.html b/system-design/lld/solid-srp.html
+index 0587a88..88a666a 100644
+--- a/system-design/lld/solid-srp.html
++++ b/system-design/lld/solid-srp.html
+@@ -91,7 +91,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/lld/solid.html b/system-design/lld/solid.html
+index 2e059f3..f421e92 100644
+--- a/system-design/lld/solid.html
++++ b/system-design/lld/solid.html
+@@ -94,7 +94,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/lld/uml.html b/system-design/lld/uml.html
+index 17c73f7..fb50b83 100644
+--- a/system-design/lld/uml.html
++++ b/system-design/lld/uml.html
+@@ -108,7 +108,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+diff --git a/system-design/map.html b/system-design/map.html
+index 2a83edb..24a76ac 100644
+--- a/system-design/map.html
++++ b/system-design/map.html
+@@ -18,14 +18,15 @@
+   .seg-tabs button b { font-size: 15px; }
+   .seg-tabs button span { font-size: 12px; color: var(--muted); }
+   .seg-tabs button:hover { background: var(--panel-2); color: var(--fg); }
+-  .seg-tabs button[aria-pressed="true"] { background: var(--teal-wash); color: var(--fg); box-shadow: inset 0 0 0 1px var(--teal); }
++  .seg-tabs button[aria-pressed="true"] { background: var(--fg); color: var(--bg); box-shadow: none; }
++  .seg-tabs button[aria-pressed="true"] span { color: color-mix(in oklab, var(--bg) 72%, transparent); }
+ 
+   /* overview rail: every phase at a glance */
+   .rail { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: var(--space-xs); margin: var(--space-lg) 0 var(--space-xs); }
+   .rail a { --acc: var(--teal); display: grid; gap: var(--space-2xs); padding: var(--space-xs) var(--space-sm) var(--space-sm); border-radius: 0; background: var(--panel); color: inherit; text-decoration: none; transition: border-color .15s, transform .15s; }
+   .rail a:hover { border-color: var(--acc); transform: translateY(-2px); }
+   .rail .top { display: flex; align-items: center; gap: var(--space-xs); }
+-  .rail .n { width: 22px; height: 22px; flex: none; border-radius: 50%; display: grid; place-items: center; font: 600 12px var(--mono); color: var(--ink); background: var(--acc); }
++  .rail .n { width: 22px; height: 22px; flex: none; border-radius: 50%; display: grid; place-items: center; font: 600 12px var(--mono); color: var(--color-accent-ink); background: var(--acc); }
+   .rail .nm { font-size: 13.5px; font-weight: 600; line-height: 1.2; }
+   .rail .bar { height: 4px; border-radius: 0; background: var(--track); overflow: hidden; }
+   .rail .bar i { display: block; height: 100%; background: var(--acc); }
+@@ -149,7 +150,7 @@
+ </nav></details>
+ <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+ <li><a href="index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
++<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+ <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+ <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+ <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+@@ -274,7 +275,7 @@ const NAMES = {
+  lld:{1:"OOP pillars",2:"Relationships",3:"UML",4:"Design principles",5:"LLD interview method",6:"SOLID overview",7:"S · Single responsibility",8:"O · Open-closed",9:"L · Liskov substitution",10:"I · Interface segregation",11:"D · Dependency inversion",12:"Singleton",13:"Simple factory & factory method",14:"Abstract factory",15:"Builder",16:"Prototype",17:"Adapter",18:"Decorator",19:"Proxy",20:"Facade",21:"Composite",22:"Bridge",23:"Flyweight",24:"Strategy",25:"Observer",26:"State",27:"Chain of responsibility",28:"Command",29:"Template method",30:"Iterator",31:"Mediator",32:"Memento",33:"Visitor",34:"Null object & Interpreter",35:"Repository, Unit of Work, service layer",36:"Clean architecture in code",37:"Threads & tasks",38:"Race conditions & locks",39:"Other primitives",40:"Producer-consumer",41:"Concurrent collections",42:"Concurrency bugs",43:"Thread-safe designs",44:"Tic-tac-toe",45:"Snake & ladder",46:"Parking lot",47:"Vending machine",48:"Elevator system",49:"ATM",50:"LRU cache",51:"Rate limiter",52:"Logging framework",53:"Notification service",54:"Pub/sub system",55:"BookMyShow (movie booking)",56:"Meeting room / hotel booking",57:"Splitwise",58:"Library management",59:"Car rental",60:"Inventory & order management",61:"Cricbuzz / live score",62:"Chess",63:"Payment system",64:"Food delivery",65:"Hash map",66:"Call center",67:"Deck of cards / blackjack"}
+ };
+ 
+-const ACC=['var(--teal)','var(--blue)','var(--violet)','var(--orange)','var(--cyan)','var(--red)','var(--yellow)','var(--good-text)'];
++const ACC=['var(--color-accent)'];
+ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ 
+ /* explainer files by topic number, read from the shared series list (labels look like "H10–12 Proxy" or "L6 Overview") */
+@@ -328,7 +329,7 @@ function render(key){
+       </div></section>`;
+   }).join('');
+   const f=T.finish;
+-  html+=`<section class="ph finish" style="--acc:var(--yellow)"><div class="node" aria-hidden="true">★</div><div class="ph-box">
++  html+=`<section class="ph finish" style="--acc:var(--fg)"><div class="node" aria-hidden="true">★</div><div class="ph-box">
+     <div class="ph-top"><h2>Interview day</h2></div><p>${esc(f[2])}</p>
+     <div class="strip"><b>${esc(f[0])}</b><span>${esc(f[1])}</span></div></div></section>`;
+   document.getElementById('route').innerHTML=html;
+diff --git a/tools/build_shell.py b/tools/build_shell.py
+index 5155a98..bbf4091 100644
+--- a/tools/build_shell.py
++++ b/tools/build_shell.py
+@@ -132,11 +132,12 @@ def sidebar(page, subject, tracks, counts):
+ 
+ def main():
+     data = site()
+-    # explainer files per subject (roadmaps and the map are not counted), the same figure the home page shows
++    # explainers per subject = the pages its roadmap lists as ready (the same pages the sidebar links).
++    # Old pages kept only for redirects, roadmaps and the map are not counted. The home page
++    # (SUBJECTS in index.html) and about.html show the same figure: keep them in step.
+     counts = {}
+     for k, _, _ in SUBJECTS:
+-        counts[k] = sum(1 for d, _, fs in os.walk(os.path.join(ROOT, k)) for f in fs
+-                        if f.endswith('.html') and f not in ('index.html', 'map.html'))
++        counts[k] = len({f for _, _, _, groups in data[k] for _, pages in groups for f, _, _ in pages})
+     done = 0
+     for subject, _, _ in SUBJECTS:
+         for dirpath, _, files in os.walk(os.path.join(ROOT, subject)):

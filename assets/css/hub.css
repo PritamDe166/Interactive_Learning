@@ -185,3 +185,36 @@ a.day-card:hover, .day-card:hover { border-color: var(--cyan); }
 .phase-head { margin-top: var(--space-2xl); }
 /* readable line length on roadmaps */
 .wrap p, .wrap li > span:only-child { max-width: 70ch; }
+
+/* =========================================================================
+   Polish (Hallmark, 2026-11-22): roadmaps brought in line with design.md.
+   Ready topics are wells (no blue frame); not-built topics keep the hairline;
+   chosen states are ink, as on the home page tabs; diagram nodes are square.
+   ========================================================================= */
+.day-card.live { border-color: transparent; transition: background-color var(--dur-short) var(--ease-out); }
+.day-card.live .topic { transition: color var(--dur-short) var(--ease-out); }
+.day-card.live:hover, a.day-card.live:hover { transform: none; border-color: transparent; background: var(--panel-2); }
+.day-card.live:hover .topic { color: var(--color-accent); }
+.day-card.live:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.day-card.atlas-card.live { border-color: var(--accent-text); }
+.seg button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.seg button:hover:not([aria-pressed="true"]) { color: var(--fg); }
+.track-tabs a[aria-current="page"] { background: var(--fg); color: var(--bg); box-shadow: none; }
+.track-tabs a[aria-current="page"] span { color: color-mix(in oklab, var(--bg) 72%, transparent); }
+.hero .flow rect { rx: 0; ry: 0; }
+.meter .track i { background: var(--color-accent); }
+.phase-head .num { color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { .day-card.live, .day-card.live .topic { transition: none; } }
+/* Pass 2: the whole card is the link and the arrow says so; "Open explainer" stays for screen readers only */
+.day-card.live .status { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.day-card.live { padding-bottom: var(--space-md); }
+.day-card.live .topic { padding-right: var(--space-lg); }
+/* week-level playbooks and atlases: a dashed ink frame, grey label (no olive text on paper) */
+.day-card.atlas-card, .day-card.atlas-card.live, .day-card.atlas-card:hover { border-color: color-mix(in oklab, var(--fg) 45%, transparent); }
+.day-card.atlas-card .day, .day-card.live.atlas-card .day { color: var(--muted); }
+/* exam domains: neutral hairline tags; the number carries the meaning (red is for errors) */
+.dom, .dom.d1, .dom.d2, .dom.d3, .dom.d4 { border-color: var(--line); color: var(--fg-soft); }
+/* subject hub cards (system-design/index.html): square, one accent */
+.subj { --acc: var(--color-accent) !important; }
+.subj .glyph { background: none; border-color: var(--line); }
+a.subj:hover { transform: none; }

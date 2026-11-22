@@ -17,7 +17,7 @@
       { file: 'overview-review.html', t: 'Section review', k: 'exam summary quiz cheat sheet', review: true, live: true }
     ] },
     { id: 'iam', t: 'IAM', tags: ['d2'], topics: [
-      { file: "iam-users-groups.html", t: "IAM users & groups", k: "IAM user group root least privilege global policy", live: true },
+      { file: 'iam-users-groups.html', t: 'IAM users & groups', k: 'IAM user group root least privilege global policy', live: true },
       { file: 'iam-root-vs-user.html', t: 'Root account vs IAM user', k: 'AWS account root user MFA root-only tasks account ID', live: true },
       { file: 'iam-policies.html', t: 'IAM policies', k: 'policy JSON effect action resource principal condition explicit deny implicit deny managed inline', live: true },
       { file: 'iam-access-methods.html', t: 'Console, CLI, SDK & access keys', k: 'access key secret CLI SDK console temporary credentials aws configure', live: true },

@@ -48,7 +48,19 @@ Every page is a workbench: a dark sidebar (field) on the left, the page on paper
 - Diagrams: square nodes with a hairline. Blue fill = happening now (`.on`), lime = the answer or a hit (`.solid`, `.hit`, `.ok`), red only for errors, faded = out of play (`.dim`). Wires are grey, blue while a request travels them. Request pills are ink with paper text.
 
 ## Buttons
-Offset style everywhere: square, a 2px outline and a hard 3px shadow (ink on paper; lime on dark panels and in dark mode). Hover lifts a pixel, press sinks into the shadow, a pressed toggle stays sunk and turns lime. Primary is blue; one primary per group. Styles: end of `explainer.css` and `site/workbench.css`.
+Two kinds, by job:
+- **Actions** (primary buttons, the walkthrough's Back / Next / Play all, the home lab's controls): offset style, square, a 2px outline and a hard 3px shadow (ink on paper; lime on dark panels and in dark mode). Hover lifts a pixel, press sinks into the shadow. Primary is blue; one primary per group, the rest outline or a text link.
+- **Chips** (keys, presets, quiz answers, filters, Reset, playback controls): flat, a 1px hairline that turns ink on hover, no shadow.
+- **Chosen toggle**: one style everywhere, a flat lime fill with ink text.
+- **Disabled**: the same button, faded; on dark panels a faint outline, never a grey block.
+Styles: "Pass 2" block at the end of `explainer.css`, and `site/workbench.css`.
+
+## Colour discipline
+- Lime is for the logo, the close band, chosen toggles and "hit" states in diagrams. Bullets, takeaways, notes and cheat-sheet answers are ink.
+- Red only for errors and "watch out". Exam-domain tags and map phases are neutral or blue, never one colour per item.
+
+## Counts
+One number per subject: explainers = pages its roadmap lists as ready. `tools/build_shell.py` computes it for the sidebars; keep `SUBJECTS` in `index.html`, the sidebar in `about.html` and `TRACKS` in `system-design/index.html` in step.
 
 ## Logo
 `assets/img/logo.svg`: a lime square with an ink S drawn as a request route, from an outlined start node to a filled end node. It is the tab icon on every page (added by `tools/build_shell.py`), the square in the sidebar wordmark, and stands beside the name on the home page. Ink on lime only; never recoloured.

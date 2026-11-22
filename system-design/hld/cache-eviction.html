@@ -6,18 +6,18 @@
 <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
 <title>Cache Eviction Policies</title>
 <meta name="description" content="H18: LRU, LFU, FIFO and TTL, animated; how an LRU cache is built from a hash map and a doubly linked list; and a three-way eviction race.">
-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
-<script src="../../assets/js/theme.js?v=20261119"></script>
-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
+<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
+<script src="../../assets/js/theme.js?v=20261122"></script>
+<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
 <script src="../sd-series.js"></script>
 <script src="caching-flows.js"></script>
 <style>
   .cev-lab { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-sm); margin-top: var(--space-sm); }
   .cev-panel { background: var(--panel); border-radius: 0; padding: var(--space-sm) var(--space-sm); min-width: 0; }
   .cev-panel h3 { margin: 0 0 var(--space-3xs); font-size: 17px; }
-  .cev-panel .rule { margin: 0 0 var(--space-xs); font-size: 13px; color: var(--muted); }
+  .cev-panel .rule { margin: 0 0 var(--space-xs); font-size: 13px; color: var(--muted); min-height: 2lh; }
   .cev-slots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2xs); }
   .cev-slot { height: 56px; border-radius: 0; border: 1px dashed var(--line); display: grid; place-items: center; align-content: center; gap: var(--space-3xs); font-family: var(--mono); }
   .cev-slot b { font-size: 19px; color: var(--fg); }
@@ -30,7 +30,7 @@
   .cev-score b { color: var(--fg); font-size: 15px; }
   .cev-keys { display: flex; flex-wrap: wrap; gap: var(--space-2xs); justify-content: center; margin-top: var(--space-sm); }
   .cev-keys .btn { min-width: 44px; font-family: var(--mono); font-weight: 600; }
-  .cev-seq { font-family: var(--mono); font-size: 12.5px; color: var(--muted); text-align: center; margin: var(--space-xs) 0 0; overflow-wrap: anywhere; }
+  .cev-seq { font-family: var(--mono); font-size: 12.5px; color: var(--muted); text-align: start; margin: var(--space-xs) 0 0; overflow-wrap: anywhere; }
   .cev-seq b { color: var(--accent-text); }
   .cev-predict { display: flex; flex-wrap: wrap; gap: var(--space-2xs); align-items: center; justify-content: center; margin-top: var(--space-xs); font-size: 14px; }
   .cev-predict .btn[aria-pressed="true"] { border-color: var(--accent-text); color: var(--accent-text); }
@@ -75,6 +75,10 @@
 </ul></details>
 <h2 class="wb-track">LLD</h2>
 <a class="wb-road" href="../lld/index.html">LLD roadmap</a>
+<details class="wb-g"><summary>Phase 1: Foundations</summary><ul>
+<li><a href="../lld/uml.html"><span class="t">UML: class &amp; sequence diagrams</span><span class="n">L3</span></a></li>
+<li><a href="../lld/design-principles.html"><span class="t">Design principles: DRY, KISS, YAGNI &amp; more</span><span class="n">L4</span></a></li>
+</ul></details>
 <details class="wb-g"><summary>Phase 2: SOLID</summary><ul>
 <li><a href="../lld/solid.html"><span class="t">SOLID overview</span><span class="n">L6</span></a></li>
 <li><a href="../lld/solid-srp.html"><span class="t">S: Single responsibility</span><span class="n">L7</span></a></li>
@@ -92,8 +96,8 @@
 </ul></details>
 </nav></details>
 <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
-<li><a href="../index.html" aria-current="true">System Design<span class="n">32</span></a></li>
-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
+<li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
 <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
 <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
 <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>

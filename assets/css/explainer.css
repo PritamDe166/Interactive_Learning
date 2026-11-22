@@ -448,6 +448,8 @@ ul.cheat li > * { min-width: 0; overflow-wrap: anywhere; }
 .uml-link.dim { opacity: .25; }
 .uml-tri { fill: var(--panel); stroke: var(--fg-soft); stroke-width: 1.6; }
 .uml-open { fill: none; stroke: var(--fg-soft); stroke-width: 1.6; }
+.uml-dia { fill: var(--panel); stroke: var(--fg-soft); stroke-width: 1.6; }
+.uml-dia-fill { fill: var(--fg-soft); stroke: var(--fg-soft); stroke-width: 1.6; }
 .cs-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: var(--space-sm); }
 .cs-pair .codeblock { margin: 0; min-height: 0; overflow-x: auto; font-size: 12.5px; }
 .cs-pair .label.bad-text, .cs-pair .label.ok-text { margin-bottom: var(--space-2xs); }
@@ -1136,3 +1138,79 @@ ul.cheat li, .cheat li { background: none; border-top: 1px solid var(--line); pa
 .story-nav, .controls, .cev-keys, .cev-predict, .chips { gap: var(--space-sm); }
 .at-play { background: var(--fg); color: var(--bg); box-shadow: 2px 2px 0 var(--color-mark); }
 @media (prefers-reduced-motion: reduce) { .btn, .chip-btn, .ac-btn { transition: none; } .btn:hover, .chip-btn:hover, .ac-btn:hover { transform: none; } }
+
+/* =========================================================================
+   Polish (Hallmark, 2026-11-22): small fixes, no new layout.
+   ========================================================================= */
+/* controls and hints follow the page's left edge instead of floating in the middle */
+.wrap.explainer .controls, .wrap.explainer .lab-row, .wrap.explainer .at-legend,
+.wrap.explainer .cev-keys, .wrap.explainer .cev-predict { justify-content: flex-start; }
+.wrap.explainer .hint, .wrap.explainer .status-line { text-align: start; margin-inline: 0; }
+/* status lines are prose, not code: body face */
+.status-line { font-family: var(--font-body); font-size: var(--text-sm); }
+/* top bar playback controls: one height, square, the same hairline */
+.ac-speed select, .ac-step { min-height: 36px; border: 0; box-shadow: inset 0 0 0 1px var(--muted); background: var(--bg); }
+.ac-speed select { padding: 0 var(--space-xs); }
+.ac-speed select:hover, .ac-step:hover { box-shadow: inset 0 0 0 1px var(--muted); }
+.ac-speed select:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.ac-btn { padding: 0 var(--space-sm); font-weight: 500; }
+/* small screens: keep diagram labels readable; the well scrolls sideways instead of shrinking the text */
+@media (max-width: 560px) {
+  .story > .at-stage { overflow-x: auto; overscroll-behavior-x: contain; }
+  .story > .at-stage svg { min-width: 400px; }
+}
+
+/* =========================================================================
+   Pass 2 (Hallmark, 2026-11-22)
+   ========================================================================= */
+/* Buttons. The offset shadow marks real actions only: primary buttons and the walkthrough's
+   Back / Next / Play all. Everything else (chips, keys, presets, answers, Reset) is flat:
+   a hairline that darkens on hover. A chosen toggle is one style everywhere: a flat lime fill. */
+:root { --btn-flat-line: color-mix(in oklab, var(--fg) 30%, transparent); }
+.btn:not(.primary), .chip-btn, .ac-btn { background: var(--bg); box-shadow: inset 0 0 0 1px var(--btn-flat-line); }
+.btn:not(.primary):hover, .chip-btn:hover, .ac-btn:hover:not(:disabled) { transform: none; background: var(--bg); box-shadow: inset 0 0 0 1px var(--fg); }
+.btn:not(.primary):active, .chip-btn:active, .ac-btn:active:not(:disabled) { transform: translateY(1px); box-shadow: inset 0 0 0 1px var(--fg); }
+.btn[aria-pressed="true"], .btn.on, .chip-btn[aria-pressed="true"], .ac-btn[aria-pressed="true"],
+.btn[aria-pressed="true"]:hover, .btn.on:hover, .chip-btn[aria-pressed="true"]:hover, .ac-btn[aria-pressed="true"]:hover {
+  background: var(--color-mark); color: var(--color-mark-ink); transform: none; box-shadow: inset 0 0 0 1px var(--color-mark-ink);
+}
+.btn.right, .predict .opts .chip-btn.right { box-shadow: inset 0 0 0 1px var(--good-text); transform: none; }
+.btn.wrong, .predict .opts .chip-btn.wrong { box-shadow: inset 0 0 0 1px var(--bad-text); transform: none; }
+.btn:disabled, .btn[aria-disabled="true"], .chip-btn:disabled, .ac-btn:disabled { opacity: 0.45; background: transparent; transform: none; box-shadow: inset 0 0 0 1px var(--btn-flat-line); }
+/* the walkthrough keeps the offset style on the dark panel */
+.story-cap .btn:not(:disabled):not([aria-disabled="true"]) { background: var(--color-field-ink); color: var(--color-field); box-shadow: inset 0 0 0 2px var(--btn-line), 3px 3px 0 var(--btn-shadow); }
+.story-cap .btn:not(:disabled):not([aria-disabled="true"]):hover { transform: translate(-1px, -1px); box-shadow: inset 0 0 0 2px var(--btn-line), 4px 4px 0 var(--btn-shadow); }
+.story-cap .btn:not(:disabled):not([aria-disabled="true"]):active { transform: translate(3px, 3px); box-shadow: inset 0 0 0 2px var(--btn-line); }
+.story-cap .btn.primary:not(:disabled) { background: var(--color-accent); color: var(--color-accent-ink); }
+/* disabled on the dark panel: the same button, faded, not a grey block */
+.story-cap .btn:disabled, .story-cap .btn[aria-disabled="true"] { opacity: 1; background: transparent; color: color-mix(in oklab, var(--color-field-ink) 45%, transparent); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-field-ink) 28%, transparent); }
+/* small play buttons on the pattern cards: flat ink, no lime shadow */
+.at-play { box-shadow: none; }
+.at-play:hover { background: var(--color-ink-2); }
+:root[data-theme="dark"] .at-play:hover { background: var(--panel-2); color: var(--fg); }
+.cev-keys .btn { font-family: var(--font-body); }
+
+/* Lime is kept for the logo, the close band, chosen toggles and "hit" states in diagrams.
+   Bullets, takeaways, notes and cheat-sheet answers go back to ink. */
+ul.lede li::before { background: var(--fg); box-shadow: none; }
+.at-take { box-shadow: inset 2px 0 0 var(--fg); }
+.note { border-left-color: var(--fg); }
+.cheat li .then { box-shadow: none; font-weight: 500; }
+
+.wrap.explainer .cc-cap { justify-content: flex-start; padding-left: 0; }
+/* Compare cards: the rule above each diagram takes two lines, so diagrams in a row line up */
+@media (min-width: 61rem) { .at-grid .at-rule { min-height: calc(2lh); } }
+
+/* A part title ("Try it yourself") sits close to its first block, and the block titles under it are a step smaller */
+.wrap.explainer > .part-title + .sub + section, .wrap.explainer > .part-title + section { margin-top: var(--space-xl); }
+.wrap.explainer > .part-title ~ section .stage-title { font-size: var(--text-xl); }
+
+/* Small screens: the theme toggle shares a row with the section tabs, which scroll and fade at the edge */
+@media (max-width: 560px) {
+  .explainer > .topbar:has(.page-nav) { flex-wrap: nowrap; align-items: center; gap: var(--space-sm); }
+  .explainer > .topbar:has(.page-nav) .page-nav { order: 0; flex: 1 1 auto; min-width: 0; gap: var(--space-md); padding-top: 0;
+    mask-image: linear-gradient(to right, var(--fg) 85%, transparent); }
+  .explainer > .topbar:has(.page-nav) .theme-toggle { order: 1; flex: none; }
+}
+/* pressed toggles win over page-local styles, so the text never matches the lime fill */
+.wrap.explainer :is(.btn, .chip-btn, .ac-btn):is([aria-pressed="true"], .on) { background: var(--color-mark); color: var(--color-mark-ink); border-color: transparent; transform: none; box-shadow: inset 0 0 0 1px var(--color-mark-ink); }

@@ -32,7 +32,8 @@
        tr.n        number of steps; tr.steps the raw trace steps
      Scalars inside containers are drawn inline; names in frames point to objects.
    UML class diagrams: Kit.umlDefs(svg); Kit.classBox(svg, x, y, w, {name, stereo, fields, methods});
-   Kit.umlLink(svg, fromPt, toPt, 'uses'|'implements'|'inherits'|'creates', bends, label).
+   Kit.umlLink(svg, fromPt, toPt, 'uses'|'implements'|'inherits'|'creates'|'associates'|'aggregates'|'composes'|'line', bends, label)
+     (aggregates / composes draw the diamond at fromPt, so start from the whole).
    Kit.pyHighlight(line) / Kit.csHighlight(line) return HTML with .k/.s/.n/.c/.b token spans
    (C#: .b marks type names). Kit.codeBlock(pre, code, 'cs'|'py'|'ts'|'ng') fills a .codeblock.
    Angular: Kit.tsHighlight / Kit.ngHighlight (templates: .bd [prop], .ev (event), .tw [(model)], .ip {{ }}).
@@ -113,7 +114,9 @@
       if (svg.querySelector('#uml-tri')) return;
       const d = K.el('defs', {}, svg);
       d.innerHTML = '<marker id="uml-tri" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path class="uml-tri" d="M1 1 L11 6 L1 11 z"/></marker>'
-        + '<marker id="uml-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path class="uml-open" d="M1 1 L11 6 L1 11"/></marker>';
+        + '<marker id="uml-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path class="uml-open" d="M1 1 L11 6 L1 11"/></marker>'
+        + '<marker id="uml-dia" viewBox="0 0 20 12" refX="19" refY="6" markerWidth="20" markerHeight="12" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path class="uml-dia" d="M1 6 L10 1 L19 6 L10 11 z"/></marker>'
+        + '<marker id="uml-dia-fill" viewBox="0 0 20 12" refX="19" refY="6" markerWidth="20" markerHeight="12" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path class="uml-dia-fill" d="M1 6 L10 1 L19 6 L10 11 z"/></marker>';
     },
 
     /** UML class box. x,y = top-left. spec: { name, stereo?, fields?: [], methods?: [] }.
@@ -142,12 +145,17 @@
       return { g, h, rows, top: [x + w / 2, y], bottom: [x + w / 2, y + h], left: [x, y + h / 2], right: [x + w, y + h / 2], cx: x + w / 2, cy: y + h / 2 };
     },
 
-    /** UML relationship from point a to b. kind: 'uses' (dashed, open arrow), 'implements' (dashed, hollow triangle),
-        'inherits' (solid, hollow triangle), 'creates' (solid, open arrow). pts: optional bend points. */
+    /** UML relationship from point a to b. kind: 'uses' (dashed, open arrow = dependency), 'implements' (dashed, hollow triangle),
+        'inherits' (solid, hollow triangle), 'creates' / 'associates' (solid, open arrow = association),
+        'aggregates' (solid, hollow diamond at a = the whole), 'composes' (solid, filled diamond at a = the whole),
+        'line' (solid, no ends). Diamonds sit on a, so pass the whole first. pts: optional bend points. */
     umlLink(parent, a, b, kind = 'uses', pts = [], label) {
       const all = [a, ...pts, b];
       const g = K.el('g', { class: 'uml-link ' + kind }, parent);
-      K.el('path', { d: 'M' + all.map(p => p.join(' ')).join(' L'), 'marker-end': `url(#${kind === 'implements' || kind === 'inherits' ? 'uml-tri' : 'uml-open'})` }, g);
+      const at = { d: 'M' + all.map(p => p.join(' ')).join(' L') };
+      if (kind === 'aggregates' || kind === 'composes') at['marker-start'] = `url(#${kind === 'composes' ? 'uml-dia-fill' : 'uml-dia'})`;
+      else if (kind !== 'line') at['marker-end'] = `url(#${kind === 'implements' || kind === 'inherits' ? 'uml-tri' : 'uml-open'})`;
+      K.el('path', at, g);
       if (label) { const m = all[Math.floor((all.length - 1) / 2)], n = all[Math.floor((all.length - 1) / 2) + 1]; K.text(g, (m[0] + n[0]) / 2, (m[1] + n[1]) / 2 - 6, label, 'mlabel halo'); }
       return g;
     },

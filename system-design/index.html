@@ -6,10 +6,10 @@
 <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
 <title>System Design</title>
 <meta name="description" content="System design explainers in two tracks: high-level design (HLD) and low-level design (LLD).">
-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
-<link rel="stylesheet" href="../assets/css/hub.css?v=20261119">
-<script src="../assets/js/theme.js?v=20261119"></script>
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/hub.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
 <style>.map-cta{display:flex;flex-wrap:wrap;gap:var(--space-2xs) var(--space-sm);align-items:baseline;margin-top:var(--space-md);padding:var(--space-sm) var(--space-md);border:1px dashed var(--teal);border-radius: 0;color:inherit;text-decoration:none}.map-cta b{color:var(--teal-text);font-size:17px}.map-cta span{color:var(--fg-soft)}.map-cta:hover{background:var(--panel)}</style>
 </head>
 <body class="wb">
@@ -50,6 +50,10 @@
 </ul></details>
 <h2 class="wb-track">LLD</h2>
 <a class="wb-road" href="lld/index.html">LLD roadmap</a>
+<details class="wb-g"><summary>Phase 1: Foundations</summary><ul>
+<li><a href="lld/uml.html"><span class="t">UML: class &amp; sequence diagrams</span><span class="n">L3</span></a></li>
+<li><a href="lld/design-principles.html"><span class="t">Design principles: DRY, KISS, YAGNI &amp; more</span><span class="n">L4</span></a></li>
+</ul></details>
 <details class="wb-g"><summary>Phase 2: SOLID</summary><ul>
 <li><a href="lld/solid.html"><span class="t">SOLID overview</span><span class="n">L6</span></a></li>
 <li><a href="lld/solid-srp.html"><span class="t">S: Single responsibility</span><span class="n">L7</span></a></li>
@@ -67,8 +71,8 @@
 </ul></details>
 </nav></details>
 <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
-<li><a href="index.html" aria-current="true">System Design<span class="n">32</span></a></li>
-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
+<li><a href="index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
 <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
 <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
 <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
@@ -90,18 +94,18 @@
 
   <a class="map-cta" href="map.html"><b>Learning map</b><span>Every HLD and LLD phase on one page, with the explainers that are ready</span></a>
 
-  <footer>Update <code>done</code> and <code>pages</code> in this page's <code>TRACKS</code> list (and the System Design entry on the main hub) when you publish an explainer.</footer>
+  <!-- Maintainer note: update done and pages in this page's TRACKS list (and the System Design entry on the main hub) when you publish an explainer. -->
 </div>
 
 <script>
 /* ===== Tracks. Keep these numbers in step with each track's roadmap. ===== */
 const TRACKS = [
   {name:"HLD · High-level design", path:"hld/index.html", accent:"var(--teal)", icon:"net",
-   blurb:"119-day roadmap: networking, scaling, caching, databases, distributed systems, reliability and interview case studies.",
-   done:13, total:119, unit:"days", pages:11},
+   blurb:"147-session roadmap: networking, scaling, caching, databases, distributed systems, reliability and interview case studies.",
+   done:21, total:147, unit:"sessions", pages:21},
   {name:"LLD · Low-level design", path:"lld/index.html", accent:"var(--violet)", icon:"classes",
    blurb:"Object-oriented design, interfaces, design patterns, concurrency and classic LLD problems. Topics are added as you learn them.",
-   done:6, total:null, unit:"topics", pages:6}
+   done:13, total:67, unit:"topics", pages:13}
 ];
 
 const ICONS={
@@ -114,7 +118,7 @@ document.getElementById('tracks').innerHTML=TRACKS.map(s=>{
   const progress=s.total?`<div class="track" aria-hidden="true"><i style="width:${Math.max(pct,s.done?2:0)}%"></i></div>`:'';
   const count=s.total?`<span><b>${s.done}</b> / ${s.total} ${s.unit}</span>`:`<span><b>${s.pages}</b> explainer${s.pages===1?'':'s'} · growing</span>`;
   return `<a class="subj" style="--acc:${s.accent}" href="${esc(s.path)}"><div class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[s.icon]}</svg></div>
-    <h2>${esc(s.name)}</h2><p>${esc(s.blurb)}</p>${progress}<div class="meta">${count}<span class="go">Open →</span></div></a>`;
+    <h2>${esc(s.name)}</h2><p>${esc(s.blurb)}</p>${progress}<div class="meta">${count}<span class="go">Open</span></div></a>`;
 }).join('');
 </script>
 </body>

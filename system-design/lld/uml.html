@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>UML: Class and Sequence Diagrams</title>
+<meta name="description" content="UML for low-level design: class boxes, the six relationships (dependency, association, aggregation, composition, generalization, realization), multiplicity and sequence diagrams, built step by step.">
+<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
+<script src="../../assets/js/theme.js?v=20261122"></script>
+<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+<script src="../sd-series.js?v=20261122"></script>
+<style>
+  .um-mult { fill: var(--accent-text); font-family: var(--mono) !important; font-size: 12px; font-weight: 600; text-anchor: middle; paint-order: stroke; stroke: var(--bg); stroke-width: 4px; }
+  .um-fate { font-family: var(--display); font-size: 12px; font-weight: 700; text-anchor: middle; paint-order: stroke; stroke: var(--bg); stroke-width: 4px; }
+  .um-fate.bad { fill: var(--bad-text); } .um-fate.ok { fill: var(--good-text); }
+  .uml.um-gone { opacity: .12; transition: opacity .5s; }
+  /* sequence diagram */
+  .um-head rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; }
+  .um-head text { fill: var(--fg); font-size: 12.5px; font-weight: 700; text-anchor: middle; }
+  .um-life { stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 5 5; }
+  .um-act { fill: var(--teal-wash); stroke: var(--cyan); stroke-width: 1.2; transition: opacity .3s; }
+  .um-msg path { fill: none; stroke: var(--fg-soft); stroke-width: 1.8; }
+  .um-msg.ret path { stroke-dasharray: 6 4; }
+  .um-msg text { fill: var(--fg); font-family: var(--mono) !important; font-size: 11.5px; text-anchor: middle; paint-order: stroke; stroke: var(--bg); stroke-width: 4px; }
+  .um-msg.hot path { stroke: var(--cyan); stroke-width: 2.4; }
+  .um-msg.hot text { fill: var(--cyan); }
+  .um-fill { fill: var(--fg-soft); }
+  .um-msg, .um-frame, .um-act, .um-head { transition: opacity .3s; }
+  .um-off { opacity: 0; }
+  .um-dim { opacity: .25; }
+  .um-frame rect.box { fill: none; stroke: var(--violet); stroke-width: 1.6; }
+  .um-frame path.tab { fill: var(--panel); stroke: var(--violet); stroke-width: 1.6; }
+  .um-frame text { fill: var(--violet); font-family: var(--mono) !important; font-size: 12px; font-weight: 600; }
+  .um-frame line { stroke: var(--violet); stroke-width: 1.4; stroke-dasharray: 6 4; }
+  /* arrow builder */
+  .um-builder { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-sm); margin-top: var(--space-sm); }
+  .um-ctrls { display: flex; flex-wrap: wrap; gap: var(--space-sm) var(--space-md); }
+  .um-result { background: var(--panel); padding: var(--space-sm) var(--space-md); }
+  .um-result h4 { margin: 0 0 var(--space-3xs); font-size: 17px; }
+  .um-result p { margin: 0; color: var(--fg-soft); line-height: 1.55; }
+  .um-result.ok h4 { color: var(--good-text); } .um-result.bad h4 { color: var(--bad-text); }
+  .um-mtable { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: var(--space-sm); margin-top: var(--space-sm); }
+  .um-mtable .card { padding: var(--space-sm) var(--space-md); background: var(--panel); }
+  .um-mtable .card p { margin: 0 0 var(--space-2xs); line-height: 1.55; }
+  .um-mtable .card .mono { overflow-wrap: anywhere; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>System Design pages</summary>
+<nav aria-label="System Design pages">
+<h2 class="wb-track">HLD</h2>
+<a class="wb-road" href="../hld/index.html">HLD roadmap</a>
+<details class="wb-g"><summary>Week 1: Networking</summary><ul>
+<li><a href="../hld/client-server-dns.html"><span class="t">Client-server &amp; DNS</span><span class="n">H1</span></a></li>
+<li><a href="../hld/http.html"><span class="t">HTTP</span><span class="n">H2</span></a></li>
+<li><a href="../hld/tcp-udp.html"><span class="t">TCP &amp; UDP</span><span class="n">H3</span></a></li>
+<li><a href="../hld/https-tls.html"><span class="t">HTTPS &amp; TLS</span><span class="n">H4</span></a></li>
+<li><a href="../hld/latency-throughput.html"><span class="t">Latency &amp; throughput</span><span class="n">H5</span></a></li>
+<li><a href="../hld/availability-slos.html"><span class="t">Availability, SLOs &amp; recovery</span><span class="n">H6</span></a></li>
+<li><a href="../hld/week-1-review.html"><span class="t">Review: journey of a request</span><span class="n">H7</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Week 2: Scaling</summary><ul>
+<li><a href="../hld/scaling.html"><span class="t">Vertical vs horizontal scaling</span><span class="n">H8</span></a></li>
+<li><a href="../hld/stateless.html"><span class="t">Stateless applications</span><span class="n">H9</span></a></li>
+<li><a href="../hld/proxy-lb-gateway.html"><span class="t">Reverse proxy, API gateway &amp; load balancers</span><span class="n">H10–12</span></a></li>
+<li><a href="../hld/load-balancing-algorithms.html"><span class="t">Load-balancing algorithms</span><span class="n">H13</span></a></li>
+<li><a href="../hld/scale-web-app.html"><span class="t">Design: scale a web app to millions</span><span class="n">H14</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Week 3: Caching</summary><ul>
+<li><a href="../hld/caching-overview.html"><span class="t">Why caching exists</span><span class="n">H15</span></a></li>
+<li><a href="../hld/cache-read-strategies.html"><span class="t">Read strategies</span><span class="n">H16</span></a></li>
+<li><a href="../hld/cache-write-strategies.html"><span class="t">Write strategies &amp; invalidation</span><span class="n">H17</span></a></li>
+<li><a href="../hld/cache-eviction.html"><span class="t">Eviction policies</span><span class="n">H18</span></a></li>
+<li><a href="../hld/distributed-caching.html"><span class="t">Distributed caching</span><span class="n">H19</span></a></li>
+<li><a href="../hld/cache-failure-modes.html"><span class="t">Caching failure modes</span><span class="n">H20</span></a></li>
+<li><a href="../hld/cdn-http-caching.html"><span class="t">CDN &amp; HTTP caching</span><span class="n">H21</span></a></li>
+<li><a href="../hld/caching-in-practice.html"><span class="t">Caching in practice: the interview playbook</span></a></li>
+<li><a href="../hld/caching-patterns-atlas.html"><span class="t">All caching patterns at a glance</span></a></li>
+</ul></details>
+<h2 class="wb-track">LLD</h2>
+<a class="wb-road" href="index.html">LLD roadmap</a>
+<details class="wb-g" open><summary>Phase 1: Foundations</summary><ul>
+<li><a href="uml.html" aria-current="page"><span class="t">UML: class &amp; sequence diagrams</span><span class="n">L3</span></a></li>
+<li><a href="design-principles.html"><span class="t">Design principles: DRY, KISS, YAGNI &amp; more</span><span class="n">L4</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Phase 2: SOLID</summary><ul>
+<li><a href="solid.html"><span class="t">SOLID overview</span><span class="n">L6</span></a></li>
+<li><a href="solid-srp.html"><span class="t">S: Single responsibility</span><span class="n">L7</span></a></li>
+<li><a href="solid-ocp.html"><span class="t">O: Open-closed</span><span class="n">L8</span></a></li>
+<li><a href="solid-lsp.html"><span class="t">L: Liskov substitution</span><span class="n">L9</span></a></li>
+<li><a href="solid-isp.html"><span class="t">I: Interface segregation</span><span class="n">L10</span></a></li>
+<li><a href="solid-dip.html"><span class="t">D: Dependency inversion</span><span class="n">L11</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Phase 3: Creational patterns</summary><ul>
+<li><a href="singleton.html"><span class="t">Singleton</span><span class="n">L12</span></a></li>
+<li><a href="factory-method.html"><span class="t">Simple factory &amp; factory method</span><span class="n">L13</span></a></li>
+<li><a href="abstract-factory.html"><span class="t">Abstract factory</span><span class="n">L14</span></a></li>
+<li><a href="builder.html"><span class="t">Builder</span><span class="n">L15</span></a></li>
+<li><a href="prototype.html"><span class="t">Prototype</span><span class="n">L16</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+<li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">LLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <p class="crumbs">System Design / LLD / Foundations / L3</p>
+    <h1>UML: Class and Sequence Diagrams</h1>
+    <ul class="lede">
+      <li>UML is the standard picture language for designs. LLD mostly needs two diagrams: <b>class diagrams</b> (structure) and <b>sequence diagrams</b> (who calls whom, in order).</li>
+      <li>A class box has three parts: <b>name</b>, <b>attributes</b>, <b>operations</b>, with <b>+ − # ~</b> for visibility.</li>
+      <li>Six relationships, weakest to strongest: <b>dependency</b>, <b>association</b>, <b>aggregation</b>, <b>composition</b>, <b>generalization</b> (inheritance) and <b>realization</b> (implements).</li>
+      <li><b>Arrowheads point at what is depended on</b>; <b>diamonds sit on the whole</b>. Filled diamond = the parts die with the whole.</li>
+      <li><b>Multiplicity</b> (<span class="mono">1</span>, <span class="mono">0..1</span>, <span class="mono">*</span>, <span class="mono">1..*</span>) says how many objects take part at each end.</li>
+    </ul>
+  </header>
+
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn: build a clinic's class diagram, then follow one call</h2>
+    <p class="sec-sub">Each step adds one relationship and shows the C# that produces it.</p>
+    <div class="sub-block" aria-labelledby="classH">
+      <h3 class="stage-title sub" id="classH">Walkthrough 1: the class diagram, one arrow at a time</h3>
+      <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+      <div class="story wide" id="classStory">
+        <div class="scroll"><svg class="diagram" id="classSvg" style="min-width:0" viewBox="0 0 760 410" role="img" aria-label="Class diagram of a clinic: Clinic, Department, Doctor, BookingService, Appointment, Patient, Person, INotifier and SmsNotifier, joined by the six UML relationships"></svg></div>
+      </div>
+      <div id="classCode" style="margin-top:12px"></div>
+    </div>
+    <div class="sub-block" aria-labelledby="seqH">
+      <h3 class="stage-title sub" id="seqH">Walkthrough 2: the sequence diagram for "book an appointment"</h3>
+      <div class="stage-kind">Time runs top to bottom · the code line that sends each message lights up</div>
+      <div class="story wide" id="seqStory">
+        <div class="scroll"><svg class="diagram" id="seqSvg" style="min-width:0" viewBox="0 0 760 430" role="img" aria-label="Sequence diagram: Patient, AppointmentsController, BookingService, SlotRepository and EventBus exchanging messages, with an alt fragment for slot free or taken"></svg></div>
+      </div>
+      <div id="seqCode" style="margin-top:12px"></div>
+    </div>
+  </section>
+
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">2</span>Try it yourself</h2>
+    <p class="sec-sub">Draw the arrows yourself, then read multiplicities as sentences and code.</p>
+    <div class="sub-block" aria-labelledby="buildH">
+      <h3 class="stage-title sub" id="buildH">1. Draw the arrow</h3>
+      <div class="stage-kind">Pick a challenge · choose the line and the two ends · then check</div>
+      <div class="chips" id="chal" style="margin-top:6px"></div>
+      <div class="um-builder">
+        <div class="um-ctrls">
+          <div class="chip-group" style="margin:0"><div class="label">Line</div><div class="seg" id="bLine" role="group" aria-label="Line style"><button type="button" data-v="solid" aria-pressed="true">Solid ───</button><button type="button" data-v="dashed" aria-pressed="false">Dashed - - -</button></div></div>
+          <div class="chip-group" style="margin:0"><div class="label">End at A (left)</div><div class="seg" id="bSrc" role="group" aria-label="End at A"><button type="button" data-v="none" aria-pressed="true">Nothing</button><button type="button" data-v="hollow" aria-pressed="false">◇ Hollow diamond</button><button type="button" data-v="filled" aria-pressed="false">◆ Filled diamond</button></div></div>
+          <div class="chip-group" style="margin:0"><div class="label">End at B (right)</div><div class="seg" id="bTgt" role="group" aria-label="End at B"><button type="button" data-v="none" aria-pressed="true">Nothing</button><button type="button" data-v="open" aria-pressed="false">&gt; Open arrow</button><button type="button" data-v="tri" aria-pressed="false">▷ Hollow triangle</button></div></div>
+        </div>
+        <div class="scroll"><svg class="diagram" id="bSvg" style="min-width:0" viewBox="0 0 640 130" role="img" aria-label="The relationship you drew between class A and class B"></svg></div>
+        <div class="um-result" id="bOut"><h4>…</h4><p></p></div>
+        <div class="controls"><button class="btn primary" type="button" id="bCheck">Check against the challenge</button><button class="btn" type="button" id="bShow">Show the answer</button></div>
+        <p class="status-line" id="bStatus">Pick a challenge first, or just experiment with the controls.</p>
+      </div>
+    </div>
+    <div class="sub-block" aria-labelledby="multH">
+      <h3 class="stage-title sub" id="multH">2. Multiplicity reader</h3>
+      <div class="stage-kind">Set the number at each end · read the two sentences and the C# it implies</div>
+      <div class="controls" style="flex-wrap:wrap;gap:14px">
+        <div class="chip-group" style="margin:0"><div class="label">Near Patient</div><div class="seg" id="mL" role="group" aria-label="Multiplicity near Patient"><button type="button" data-v="1" aria-pressed="true">1</button><button type="button" data-v="0..1" aria-pressed="false">0..1</button><button type="button" data-v="*" aria-pressed="false">*</button><button type="button" data-v="1..*" aria-pressed="false">1..*</button></div></div>
+        <div class="chip-group" style="margin:0"><div class="label">Near Appointment</div><div class="seg" id="mR" role="group" aria-label="Multiplicity near Appointment"><button type="button" data-v="1" aria-pressed="false">1</button><button type="button" data-v="0..1" aria-pressed="false">0..1</button><button type="button" data-v="*" aria-pressed="true">*</button><button type="button" data-v="1..*" aria-pressed="false">1..*</button></div></div>
+      </div>
+      <div class="scroll"><svg class="diagram" id="mSvg" style="min-width:0" viewBox="0 0 640 110" role="img" aria-label="Association between Patient and Appointment with the chosen multiplicities"></svg></div>
+      <div class="um-mtable" id="mOut"></div>
+      <p class="status-line" id="mStatus">Read each number from the far end: the number next to a class says how many of <i>that</i> class one object on the other side has.</p>
+    </div>
+  </section>
+
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">3</span>Revise in two minutes</h2>
+    <div class="sub-block" aria-labelledby="cheatH">
+    <h3 class="sec-h3" id="cheatH">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">Class uses another only as a parameter or local</span><span class="arrow">→</span><span class="then">dependency: dashed line, open arrow <span class="mono">A ..&gt; B</span></span></li>
+      <li><span class="if">Class keeps a reference in a field or property</span><span class="arrow">→</span><span class="then">association: solid line, arrow shows who knows whom <span class="mono">A --&gt; B</span></span></li>
+      <li><span class="if">Whole has parts that live on or are shared</span><span class="arrow">→</span><span class="then">aggregation: hollow diamond on the whole <span class="mono">Whole o-- Part</span></span></li>
+      <li><span class="if">Whole creates and owns its parts; they die with it</span><span class="arrow">→</span><span class="then">composition: filled diamond on the whole <span class="mono">Whole *-- Part</span></span></li>
+      <li><span class="if"><span class="mono">class B : A</span> (is-a)</span><span class="arrow">→</span><span class="then">generalization: solid line, hollow triangle at the parent <span class="mono">A &lt;|-- B</span></span></li>
+      <li><span class="if"><span class="mono">class B : IA</span> (implements)</span><span class="arrow">→</span><span class="then">realization: dashed line, hollow triangle at the interface <span class="mono">IA &lt;|.. B</span></span></li>
+      <li><span class="if">Not sure if it's aggregation</span><span class="arrow">→</span><span class="then">draw a plain association and say the lifetime out loud</span></li>
+      <li><span class="if">Sequence: caller waits for the result</span><span class="arrow">→</span><span class="then">solid line, filled arrowhead; reply is a dashed line</span></li>
+      <li><span class="if">Sequence: publish an event, don't wait</span><span class="arrow">→</span><span class="then">solid line, open arrowhead (async)</span></li>
+      <li><span class="if">Sequence: if / else, optional step, loop</span><span class="arrow">→</span><span class="then"><span class="mono">alt</span> / <span class="mono">opt</span> / <span class="mono">loop</span> frames with a <span class="mono">[guard]</span></span></li>
+    </ul>
+    </div>
+    <div class="sub-block" aria-labelledby="refH">
+    <h3 class="sec-h3" id="refH">Reference: the six relationships</h3>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Relationship</th><th>Line and end</th><th>Means</th><th>Typical C#</th><th>Mermaid</th></tr></thead>
+        <tbody>
+          <tr><td>Dependency</td><td>dashed, open arrow at the used class</td><td>uses temporarily</td><td>parameter, local, static call</td><td class="mono">A ..&gt; B</td></tr>
+          <tr><td>Association</td><td>solid, optional open arrow (navigability)</td><td>knows / holds a reference</td><td>field or property</td><td class="mono">A --&gt; B</td></tr>
+          <tr><td>Aggregation</td><td>solid, hollow diamond at the whole</td><td>has parts that can live on, may be shared</td><td>collection of objects passed in</td><td class="mono">A o-- B</td></tr>
+          <tr><td>Composition</td><td>solid, filled diamond at the whole</td><td>owns parts exclusively, same lifetime</td><td>whole creates parts, never hands them out to own</td><td class="mono">A *-- B</td></tr>
+          <tr><td>Generalization</td><td>solid, hollow triangle at the parent</td><td>is-a, inherits</td><td class="mono">class B : A</td><td class="mono">A &lt;|-- B</td></tr>
+          <tr><td>Realization</td><td>dashed, hollow triangle at the interface</td><td>implements a contract</td><td class="mono">class B : IA</td><td class="mono">IA &lt;|.. B</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3 class="sec-h3" style="margin-top:18px">Reference: class box and sequence notation</h3>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Notation</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">+ − # ~</td><td>public, private, protected, package (closest C#: <span class="mono">internal</span>)</td></tr>
+          <tr><td><u>underlined</u> member</td><td>static</td></tr>
+          <tr><td><i>italic</i> name, or <span class="mono">{abstract}</span></td><td>abstract class or operation</td></tr>
+          <tr><td class="mono">«interface»</td><td>interface (stereotype above the name)</td></tr>
+          <tr><td class="mono">1 · 0..1 · * · 1..* · 2..5</td><td>exactly one · optional · zero or more · at least one · range</td></tr>
+          <tr><td>lifeline (dashed vertical line)</td><td>a participant over time</td></tr>
+          <tr><td>activation bar (thin rectangle)</td><td>the participant is executing</td></tr>
+          <tr><td>solid line, filled head</td><td>synchronous call (caller waits)</td></tr>
+          <tr><td>solid line, open head</td><td>asynchronous message (caller continues)</td></tr>
+          <tr><td>dashed line, open head</td><td>reply / return (optional when obvious)</td></tr>
+          <tr><td class="mono">alt · opt · loop · par · break · ref</td><td>if-else · if · repeat · parallel · exit early · see another diagram</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><p><b>14 diagrams, two families:</b> UML 2.5 has 7 structural diagrams (class, object, component, package, deployment, composite structure, profile) and 7 behavioural ones (sequence, activity, state machine, use case, communication, timing, interaction overview). State machines pair with the State pattern; use cases list who can do what.</p></div>
+      <div class="note"><p><b>Aggregation is loosely defined.</b> UML gives "shared aggregation" almost no extra meaning over an association, so many designers skip the hollow diamond. Composition has a clear meaning: exclusive ownership and a shared lifetime.</p></div>
+      <div class="note"><p><b>Draw just enough.</b> In an LLD interview, show key attributes, the operations that matter, interfaces for the parts that vary, and deliberate relationships. Skip getters, setters and private helpers.</p></div>
+    </div>
+    </div>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">4</span>Test yourself</h2>
+    <h3 class="sec-h3">Which relationship is it?</h3>
+    <div id="drill"></div>
+    <h3 class="sec-h3">Explain it out loud</h3>
+    <p class="sub">Answer before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Which end does the diamond go on, and which way does the inheritance triangle point?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>The diamond sits on the <b>whole</b> (the owner). The triangle points at the <b>parent class or interface</b>. Rule of thumb: arrowheads point at what is depended on.</p></div></details>
+      <details><summary>Aggregation vs composition: what single question decides it?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>"If I delete the whole, do the parts go too, and can a part belong to two wholes?" Parts die and are exclusive → <b>composition</b>. Parts survive or are shared → <b>aggregation</b> (or a plain association).</p></div></details>
+      <details><summary>What's the difference between dependency and association?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>A <b>dependency</b> is temporary: the other class appears as a parameter, local variable or static call. An <b>association</b> is structural: the class keeps a reference in a field or property.</p></div></details>
+      <details><summary>Read <span class="mono">Order "1" *-- "1..*" OrderLine</span> aloud.<span class="go">Show answer</span></summary>
+        <div class="ans"><p>An order is composed of <b>one or more</b> order lines; each order line belongs to <b>exactly one</b> order and is deleted with it.</p></div></details>
+      <details><summary>How do you show a call that doesn't wait for a reply in a sequence diagram?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>An <b>asynchronous message</b>: solid line with an <b>open</b> arrowhead. A synchronous call has a <b>filled</b> arrowhead; replies are dashed.</p></div></details>
+      <details><summary>Which two diagrams would you draw first in an LLD interview, and in what order?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>The <b>class diagram</b> first (entities, relationships, multiplicities, interfaces), then a <b>sequence diagram</b> for one or two core flows, before writing the core code.</p></div></details>
+    </div>
+  </section>
+
+  <nav id="prevnext"></nav>
+
+  <footer>Sources: OMG Unified Modeling Language 2.5.1; Martin Fowler, <i>UML Distilled</i>; Mermaid class and sequence diagram documentation; Microsoft Learn notes on combined fragments in sequence diagrams. Class names, the clinic model and the C# fragments are illustrative (method bodies are elided).</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  /* ================= Walkthrough 1: class diagram ================= */
+  const sv = $('classSvg');
+  K.umlDefs(sv);
+  const LINKS = K.el('g', {}, sv), BOX = K.el('g', {}, sv), FX = K.el('g', {}, sv);
+  const W = 170;
+  const B = {
+    clinic: K.classBox(BOX, 20, 20, W, { name: 'Clinic', fields: ['- name: string'], methods: ['+ OpenDepartment(name)'] }),
+    dept: K.classBox(BOX, 295, 20, W, { name: 'Department', fields: ['- name: string'], methods: ['+ Assign(doctor)'] }),
+    doctor: K.classBox(BOX, 570, 20, W, { name: 'Doctor', fields: ['- name: string'] }),
+    booking: K.classBox(BOX, 20, 172, W, { name: 'BookingService', fields: ['- notifier: INotifier'], methods: ['+ Book(patient, slot)'] }),
+    appt: K.classBox(BOX, 295, 160, W, { name: 'Appointment', fields: ['- id: Guid', '- startsAt: DateTime', '- status: Status'], methods: ['+ Cancel(reason)'] }),
+    patient: K.classBox(BOX, 570, 172, W, { name: 'Patient', fields: ['- mrn: string'] }),
+    person: K.classBox(BOX, 570, 325, W, { name: 'Person', fields: ['+ Name: string'] }),
+    inotifier: K.classBox(BOX, 20, 325, W, { name: 'INotifier', stereo: 'interface', methods: ['+ Send(to, text)'] }, 'iface'),
+    sms: K.classBox(BOX, 295, 330, W, { name: 'SmsNotifier', methods: ['+ Send(to, text)'] })
+  };
+  const mult = (x, y, t) => K.text(LINKS, x, y, t, 'um-mult');
+  const L = {
+    dep: { l: K.umlLink(LINKS, [190, 212], [295, 212], 'uses', [], 'uses in Book()'), m: [], boxes: ['booking', 'appt'] },
+    assoc: { l: K.umlLink(LINKS, [465, 200], [570, 200], 'associates'), m: [mult(478, 192, '*'), mult(558, 192, '1')], boxes: ['appt', 'patient'] },
+    agg: { l: K.umlLink(LINKS, [465, 47], [570, 47], 'aggregates'), m: [mult(486, 39, '0..*'), mult(552, 39, '0..*')], boxes: ['dept', 'doctor'] },
+    comp: { l: K.umlLink(LINKS, [190, 61], [295, 61], 'composes'), m: [mult(204, 53, '1'), mult(276, 53, '1..*')], boxes: ['clinic', 'dept'] },
+    gen: { l: K.umlLink(LINKS, [655, 227], [655, 325], 'inherits'), m: [], boxes: ['patient', 'person'] },
+    real: { l: K.umlLink(LINKS, [295, 357], [190, 357], 'implements'), m: [], boxes: ['inotifier', 'sms'] },
+    hold: { l: K.umlLink(LINKS, [105, 254], [105, 325], 'associates'), m: [], boxes: ['booking', 'inotifier'] }
+  };
+  const fates = [];
+  function fate(box, text, tone) { const b = B[box]; fates.push(K.text(FX, b.cx, b.top[1] + b.h + 16, text, 'um-fate ' + tone)); }
+
+  const CODE = [
+    { file: 'Appointment.cs', marks: { 3: 'hot', 4: 'hot', 5: 'hot', 6: 'ok' }, code:
+`public class Appointment
+{
+    private Guid _id;               // - id: Guid
+    private DateTime _startsAt;     // - startsAt: DateTime
+    private Status _status;         // - status: Status
+    public void Cancel(string reason) { /* ... */ }   // + Cancel(reason)
+}` },
+    { file: 'BookingService.cs', marks: { 3: 'hot', 5: 'hot' }, code:
+`public class BookingService
+{
+    public Appointment Book(Patient patient, Slot slot)
+    {
+        var appointment = new Appointment(patient, slot);   // used inside the method only
+        return appointment;                                  // no Appointment field is kept
+    }
+}` },
+    { file: 'Appointment.cs', marks: { 3: 'hot', 7: 'ok' }, code:
+`public class Appointment
+{
+    public Patient Patient { get; }          // a reference kept in a property: association, "1"
+
+    public Appointment(Patient patient, Slot slot) { Patient = patient; /* ... */ }
+}
+
+public class Patient { /* no list of appointments: the arrow points one way */ }` },
+    { file: 'Department.cs', marks: { 3: 'hot', 4: 'hot', 8: 'ok', 9: 'ok' }, code:
+`public class Department
+{
+    private readonly List<Doctor> _doctors = new();
+    public void Assign(Doctor doctor) => _doctors.Add(doctor);   // created elsewhere, passed in
+}
+
+var drRao = new Doctor("Dr Rao");
+cardiology.Assign(drRao);
+oncology.Assign(drRao);      // shared: one doctor, two departments` },
+    { file: 'Clinic.cs', marks: { 3: 'hot', 5: 'hot' }, code:
+`public class Clinic
+{
+    private readonly List<Department> _departments = new();
+
+    public void OpenDepartment(string name) => _departments.Add(new Department(name));
+    // the whole creates its parts and keeps them to itself:
+    // when the Clinic object goes, its Departments go with it
+}` },
+    { file: 'Person.cs', marks: { 2: 'hot' }, code:
+`public abstract class Person { public string Name { get; init; } = ""; }
+public class Patient : Person { public string Mrn { get; init; } = ""; }   // Patient is a Person` },
+    { file: 'Notifiers.cs', marks: { 3: 'hot', 5: 'ok' }, code:
+`public interface INotifier { void Send(string to, string text); }
+
+public class SmsNotifier : INotifier { public void Send(string to, string text) { /* ... */ } }
+
+public class BookingService(INotifier notifier)   // kept as a field: association to the interface
+{ /* ... */ }` },
+    { file: 'clinic.mmd (Mermaid)', lang: 'txt', code:
+`classDiagram
+  Clinic "1" *-- "1..*" Department
+  Department o-- "0..*" Doctor
+  BookingService ..> Appointment
+  Appointment "*" --> "1" Patient
+  Person <|-- Patient
+  INotifier <|.. SmsNotifier
+  BookingService --> INotifier` }
+  ];
+  const STEP_LINKS = [[], ['dep'], ['assoc'], ['agg'], ['comp'], ['gen'], ['real', 'hold'], []];
+  const ORDER = ['dep', 'assoc', 'agg', 'comp', 'gen', 'real', 'hold'];
+  function showClass(i) {
+    FX.textContent = ''; fates.length = 0;
+    const cur = STEP_LINKS[i], all = i === 7;
+    const introduced = new Set(); STEP_LINKS.slice(0, i + 1).forEach(a => a.forEach(k => introduced.add(k)));
+    const focus = new Set(i === 0 ? ['appt'] : cur.flatMap(k => L[k].boxes));
+    Object.entries(B).forEach(([k, b]) => {
+      b.g.classList.toggle('dim', !all && !focus.has(k));
+      b.g.classList.toggle('on', !all && focus.has(k));
+      b.g.classList.remove('bad', 'ok', 'um-gone');
+      b.rows.forEach(r => r.classList.toggle('hot', i === 0 && k === 'appt'));
+    });
+    ORDER.forEach(k => {
+      const shown = all || introduced.has(k), hot = cur.includes(k);
+      L[k].l.classList.toggle('gone', !shown);
+      L[k].l.classList.toggle('hot', hot);
+      L[k].l.classList.toggle('dim', shown && !hot && !all);
+      L[k].m.forEach(t => { t.style.opacity = shown ? (hot || all ? 1 : .25) : 0; });
+    });
+    if (i === 3) { fate('dept', 'Department deleted', 'bad'); B.dept.g.classList.add('um-gone'); fate('doctor', 'Doctor still exists', 'ok'); B.doctor.g.classList.add('ok'); }
+    if (i === 4) { B.clinic.g.classList.add('um-gone'); B.dept.g.classList.add('um-gone'); fate('clinic', 'Clinic deleted', 'bad'); fate('dept', 'its Departments go too', 'bad'); fate('doctor', 'Doctors survive (aggregation)', 'ok'); B.doctor.g.classList.remove('dim'); B.doctor.g.classList.add('ok'); }
+    const c = CODE[i];
+    K.codeCard($('classCode'), { file: c.file, lang: c.lang || 'cs', code: c.code, marks: c.marks || {}, caption: ['Attributes become fields; operations become methods. Visibility markers map to C# access modifiers.', 'Appointment only appears inside a method: a dependency (dashed arrow).', 'A property holding a Patient: an association, with multiplicity at each end.', 'Doctors are created outside and can be shared: aggregation (hollow diamond on Department).', 'Departments are created by the Clinic and owned by it: composition (filled diamond on Clinic).', 'Inheritance: solid line, hollow triangle pointing at the parent.', 'Implementing an interface: dashed line, hollow triangle at the interface. Holding one: association.', 'The same diagram in Mermaid syntax: paste it into a Markdown note to render it.'][i] });
+  }
+  async function deleteWhole(box, run) {
+    const b = B[box], p = K.pill(FX, 'delete', 'bad');
+    await K.move(p, [b.cx, b.top[1] - 4], [b.cx, b.cy], 700, run);
+    p.remove();
+  }
+  K.story({
+    root: $('classStory'), show: showClass, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'One class, three compartments', text: 'A class box has a <b>name</b>, then <b>attributes</b>, then <b>operations</b>. <span class="mono">-</span> is private, <span class="mono">+</span> public, <span class="mono">#</span> protected, <span class="mono">~</span> package (≈ <span class="mono">internal</span>). Only the name is required: show just the members that matter.' },
+      { title: 'Dependency: "uses for a moment"', text: '<span class="mono">BookingService.Book()</span> creates and returns an Appointment but keeps <b>no field</b> of that type. That\'s a <b>dependency</b>: a <b>dashed line with an open arrow</b> pointing at the class being used. The weakest link.' },
+      { title: 'Association: "holds a reference"', text: 'An Appointment keeps its Patient in a property, so the link is <b>structural</b>: a <b>solid line</b>. The arrow says Appointment knows Patient, not the other way round. <span class="mono">*</span> and <span class="mono">1</span> are the <b>multiplicities</b>: many appointments, one patient each.' },
+      { title: 'Aggregation: parts that live on', text: 'A Department has Doctors, but doctors are hired independently and can work in two departments. That\'s <b>aggregation</b>: a <b>hollow diamond on the whole</b>. Delete a department and the doctors are still there.', play: run => deleteWhole('dept', run) },
+      { title: 'Composition: parts that die with the whole', text: 'A Clinic <b>creates</b> its Departments and nobody else owns them. That\'s <b>composition</b>: a <b>filled diamond on the whole</b>. Delete the clinic and its departments go too, while the doctors, linked by aggregation, survive.', tip: 'The test question: "if I delete the whole, do the parts go too, and can a part belong to two wholes?"', play: run => deleteWhole('clinic', run) },
+      { title: 'Generalization: is-a', text: '<span class="mono">Patient : Person</span>. A <b>solid line with a hollow triangle</b> pointing at the <b>parent</b>. A Patient can be used anywhere a Person is expected.' },
+      { title: 'Realization: implements an interface', text: '<span class="mono">SmsNotifier : INotifier</span>. A <b>dashed line with a hollow triangle</b> at the <b>interface</b>. BookingService holds an <span class="mono">INotifier</span> field: an association to the abstraction, not to SMS.' },
+      { title: 'Read the whole diagram', text: 'Seven links, six kinds. Two rules read every one of them: <b>arrowheads point at what is depended on</b>, and <b>diamonds sit on the whole</b>. Solid lines are structural; dashed lines are weaker (dependency) or contractual (realization).', tip: 'Choose each relationship out loud: "composition, because a department doesn\'t exist without its clinic". The reasoning scores more than the notation.' }
+    ]
+  });
+
+  /* ================= Walkthrough 2: sequence diagram ================= */
+  const sq = $('seqSvg');
+  const defs = K.el('defs', {}, sq);
+  defs.innerHTML = '<marker id="um-sync" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" orient="auto" markerUnits="userSpaceOnUse"><path class="um-fill" d="M1 1 L11 6 L1 11 z"/></marker>'
+    + '<marker id="um-open" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" orient="auto" markerUnits="userSpaceOnUse"><path class="uml-open" d="M1 1 L11 6 L1 11"/></marker>';
+  const PX = { pat: 62, ctl: 205, svc: 370, repo: 535, bus: 690 };
+  const NAMES = { pat: 'Patient', ctl: 'Controller', svc: 'BookingService', repo: 'SlotRepository', bus: 'EventBus' };
+  const FR = K.el('g', {}, sq), ACT = K.el('g', {}, sq), MS = K.el('g', {}, sq);
+  const heads = {};
+  Object.entries(PX).forEach(([k, x]) => {
+    const g = K.el('g', { class: 'um-head' }, sq);
+    const w = Math.max(84, NAMES[k].length * 8 + 18);
+    K.el('rect', { x: x - w / 2, y: 12, width: w, height: 32 }, g);
+    K.text(g, x, 33, NAMES[k]);
+    K.el('line', { x1: x, y1: 44, x2: x, y2: 420, class: 'um-life' }, g);
+    heads[k] = g;
+  });
+  const act = (k, y1, y2) => K.el('rect', { x: PX[k] - 5, y: y1, width: 10, height: y2 - y1, class: 'um-act' }, ACT);
+  const A = { ctl: act('ctl', 70, 392), svc: act('svc', 104, 352), repo1: act('repo', 138, 168), repo2: act('repo', 224, 244), bus: act('bus', 252, 270) };
+  function msg(from, to, y, label, kind) {
+    const g = K.el('g', { class: 'um-msg' + (kind === 'ret' ? ' ret' : '') }, MS);
+    const dir = PX[to] > PX[from] ? 1 : -1;
+    const x1 = PX[from] + dir * 5, x2 = PX[to] - dir * 5;
+    K.el('path', { d: `M${x1} ${y} L${x2} ${y}`, 'marker-end': `url(#${kind === 'sync' ? 'um-sync' : 'um-open'})` }, g);
+    K.text(g, (x1 + x2) / 2, y - 6, label);
+    return g;
+  }
+  const M = [
+    msg('pat', 'ctl', 70, 'POST /appointments', 'sync'),
+    msg('ctl', 'svc', 104, 'Book(patientId, slotId)', 'sync'),
+    msg('svc', 'repo', 138, 'GetSlot(slotId)', 'sync'),
+    msg('repo', 'svc', 168, 'slot', 'ret'),
+    msg('svc', 'repo', 224, 'Reserve(slot)', 'sync'),
+    msg('svc', 'bus', 252, 'Publish(BookingConfirmed)', 'async'),
+    msg('svc', 'ctl', 284, 'Booked', 'ret'),
+    msg('ctl', 'pat', 306, '201 Created', 'ret'),
+    msg('svc', 'ctl', 352, 'SlotUnavailable', 'ret'),
+    msg('ctl', 'pat', 384, '409 Conflict', 'ret')
+  ];
+  const frame = K.el('g', { class: 'um-frame' }, FR);
+  K.el('rect', { x: 8, y: 190, width: 742, height: 218, class: 'box' }, frame);
+  K.el('path', { d: 'M8 190 h40 v12 l-8 8 h-32 z', class: 'tab' }, frame);
+  K.text(frame, 14, 205, 'alt').style.textAnchor = 'start';
+  K.text(frame, 382, 205, '[slot.IsFree]').style.textAnchor = 'start';
+  K.el('line', { x1: 8, y1: 322, x2: 750, y2: 322 }, frame);
+  K.text(frame, 382, 340, '[else]').style.textAnchor = 'start';
+
+  const SEQ_CODE =
+`// AppointmentsController
+public async Task<IResult> Post(BookRequest r)
+{
+    var result = await _booking.Book(r.PatientId, r.SlotId);
+    return result.Booked ? Results.Created($"/appointments/{result.Id}", result)
+                         : Results.Conflict();
+}
+
+// BookingService
+public async Task<BookingResult> Book(int patientId, int slotId)
+{
+    var slot = await _slots.GetSlot(slotId);
+    if (slot.IsFree)
+    {
+        await _slots.Reserve(slot);
+        _bus.Publish(new BookingConfirmed(patientId, slot.Id));  // no reply awaited
+        return BookingResult.Booked(slot);
+    }
+    return BookingResult.SlotUnavailable;
+}`;
+  // per step: visible messages, hot messages, code marks, frame state, activations visible
+  const SEQ = [
+    { vis: [], hot: [], marks: {}, frame: 'off', act: [] },
+    { vis: [0, 1], hot: [0, 1], marks: { 2: 'hot', 4: 'hot', 10: 'hot' }, frame: 'off', act: ['ctl', 'svc'] },
+    { vis: [0, 1, 2, 3], hot: [2, 3], marks: { 12: 'hot' }, frame: 'off', act: ['ctl', 'svc', 'repo1'] },
+    { vis: [0, 1, 2, 3, 4, 6, 7], hot: [4, 6, 7], marks: { 13: 'hot', 15: 'hot', 17: 'ok', 5: 'ok' }, frame: 'on', act: ['ctl', 'svc', 'repo1', 'repo2'] },
+    { vis: [0, 1, 2, 3, 4, 5, 6, 7], hot: [5], marks: { 16: 'hot' }, frame: 'on', act: ['ctl', 'svc', 'repo1', 'repo2', 'bus'] },
+    { vis: [0, 1, 2, 3, 8, 9], hot: [8, 9], marks: { 19: 'bad', 6: 'bad' }, frame: 'else', act: ['ctl', 'svc', 'repo1'] },
+    { vis: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], hot: [], marks: {}, frame: 'all', act: ['ctl', 'svc', 'repo1', 'repo2', 'bus'] }
+  ];
+  function showSeq(i) {
+    const s = SEQ[i];
+    M.forEach((m, k) => { m.classList.toggle('um-off', !s.vis.includes(k)); m.classList.toggle('hot', s.hot.includes(k)); m.classList.toggle('um-dim', s.vis.includes(k) && s.hot.length > 0 && !s.hot.includes(k)); });
+    Object.entries(A).forEach(([k, r]) => r.classList.toggle('um-off', !s.act.includes(k)));
+    frame.classList.toggle('um-off', s.frame === 'off');
+    frame.classList.toggle('um-dim', false);
+    Object.values(heads).forEach(h => h.classList.toggle('um-dim', false));
+    if (i === 0) Object.values(heads).forEach(h => h.classList.remove('um-dim'));
+    K.codeCard($('seqCode'), { file: 'Booking flow (C#)', lang: 'cs', code: SEQ_CODE, marks: s.marks, dim: Object.keys(s.marks).length > 0,
+      caption: ['Five participants, one lifeline each. Nothing has happened yet.', 'Each awaited call is a synchronous message: filled arrowhead, activation bar while it runs.', 'The reply is a dashed line. It\'s optional when the return is obvious.', 'The if becomes an alt frame; this is the [slot.IsFree] operand.', 'Publish is fire-and-continue: an asynchronous message with an open arrowhead.', 'The else operand: only one operand of an alt runs for a given request.', 'The whole interaction: one diagram, both outcomes.'][i] });
+  }
+  async function draw(ids, run) {
+    for (const k of ids) { const m = M[k]; m.classList.remove('um-off', 'um-dim'); m.classList.add('hot'); m.style.opacity = 0; await K.sleep(80, run); m.style.opacity = ''; await K.sleep(520, run); }
+  }
+  K.story({
+    root: $('seqStory'), show: showSeq, tipLabel: 'Interview tip',
+    steps: [
+      { title: 'Lifelines: who takes part', text: 'Each participant gets a box and a dashed <b>lifeline</b>. <b>Time runs downwards</b>: vertical position shows order, not duration.' },
+      { title: 'Synchronous calls', text: 'The patient posts a booking; the controller calls <span class="mono">Book()</span>. A <b>solid line with a filled arrowhead</b> is a call where the caller <b>waits</b>. The thin <b>activation bars</b> show who is busy.', play: run => draw([0, 1], run) },
+      { title: 'A call and its reply', text: 'BookingService asks the repository for the slot. The answer comes back as a <b>dashed reply</b> arrow. Replies are optional when the return value is obvious.', play: run => draw([2, 3], run) },
+      { title: 'alt: the if-branch', text: 'The <span class="mono">if (slot.IsFree)</span> becomes an <b>alt</b> frame with a <b>[guard]</b>. In the first operand the slot is reserved and <span class="mono">201 Created</span> goes back to the patient.', play: run => draw([4, 6, 7], run) },
+      { title: 'An asynchronous message', text: 'Publishing <span class="mono">BookingConfirmed</span> doesn\'t wait for anyone to send the SMS. That\'s an <b>asynchronous</b> message: <b>open arrowhead</b>, and the sender carries on immediately.', play: run => draw([5], run) },
+      { title: '[else]: the other operand', text: 'If the slot is taken, the service returns <span class="mono">SlotUnavailable</span> and the controller answers <span class="mono">409 Conflict</span>. For any one request, <b>only one operand of an alt runs</b>.', play: run => draw([8, 9], run) },
+      { title: 'Other frames you\'ll use', text: '<b>opt</b> = an if without else, <b>loop</b> = repeat while a guard holds, <b>par</b> = operands in parallel, <b>break</b> = leave early, <b>ref</b> = "see another diagram". Same box, different label.', tip: 'Draw the sequence for one core flow only (book, park, pay). It shows you know which object owns each step.' }
+    ]
+  });
+
+  /* ================= Try 1: draw the arrow ================= */
+  const bs = $('bSvg'); K.umlDefs(bs);
+  let st = { line: 'solid', src: 'none', tgt: 'none' }, chal = null;
+  const CH = [
+    { a: 'Order', b: 'OrderLine', t: 'An Order owns its OrderLines; deleting the order deletes them', ans: { line: 'solid', src: 'filled', tgt: 'none' }, name: 'Composition' },
+    { a: 'SmsNotifier', b: 'INotifier', t: 'SmsNotifier implements INotifier', ans: { line: 'dashed', src: 'none', tgt: 'tri' }, name: 'Realization' },
+    { a: 'CardPayment', b: 'Payment', t: 'CardPayment inherits from the abstract Payment', ans: { line: 'solid', src: 'none', tgt: 'tri' }, name: 'Generalization' },
+    { a: 'InvoicePrinter', b: 'Invoice', t: 'InvoicePrinter.Print(Invoice invoice) only uses Invoice as a parameter', ans: { line: 'dashed', src: 'none', tgt: 'open' }, name: 'Dependency' },
+    { a: 'Team', b: 'Player', t: 'A Team has Players who move between teams and outlive any team', ans: { line: 'solid', src: 'hollow', tgt: 'none' }, name: 'Aggregation' },
+    { a: 'Appointment', b: 'Patient', t: 'An Appointment keeps a reference to its Patient (Patient knows nothing of it)', ans: { line: 'solid', src: 'none', tgt: 'open' }, name: 'Association' }
+  ];
+  $('chal').innerHTML = CH.map((c, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${c.name === 'Association' ? 'Appointment → Patient' : c.a + ' / ' + c.b}</button>`).join('');
+  function classify(s) {
+    if (s.src !== 'none') {
+      if (s.line === 'dashed') return { ok: false, name: 'Not a UML relationship', why: 'Diamonds always go on a <b>solid</b> line: aggregation and composition are kinds of association.' };
+      if (s.tgt === 'tri') return { ok: false, name: 'Not a UML relationship', why: 'A diamond (whole–part) and a triangle (inheritance) can\'t share one line. Pick one meaning.' };
+      return s.src === 'filled'
+        ? { ok: true, name: 'Composition', why: 'A <b>owns</b> B exclusively: A creates B, and B is destroyed with A.' + (s.tgt === 'open' ? ' The open arrow adds navigability: A can reach B.' : '') }
+        : { ok: true, name: 'Aggregation', why: 'A <b>has</b> B as a part, but B can live on without A and may be shared.' + (s.tgt === 'open' ? ' The open arrow adds navigability.' : '') };
+    }
+    if (s.tgt === 'tri') return s.line === 'solid'
+      ? { ok: true, name: 'Generalization (inheritance)', why: 'A <b>is a</b> B: <span class="mono">class A : B</span>. The triangle points at the parent.' }
+      : { ok: true, name: 'Realization (implements)', why: 'A <b>implements</b> the interface B: <span class="mono">class A : IB</span>.' };
+    if (s.tgt === 'open') return s.line === 'solid'
+      ? { ok: true, name: 'Association (navigable)', why: 'A <b>holds a reference</b> to B in a field or property; the arrow says A knows B.' }
+      : { ok: true, name: 'Dependency', why: 'A <b>uses</b> B temporarily: a parameter, local variable or static call.' };
+    return s.line === 'solid'
+      ? { ok: true, name: 'Association (direction not shown)', why: 'A plain line says the classes are linked, without saying which one holds the reference.' }
+      : { ok: false, name: 'Incomplete', why: 'A dashed line needs an arrowhead: open for a dependency, hollow triangle for a realization.' };
+  }
+  function drawB() {
+    bs.querySelectorAll('g.dyn').forEach(n => n.remove());
+    const g = K.el('g', { class: 'dyn' }, bs);
+    const a = K.classBox(g, 20, 35, 180, { name: chal ? chal.a : 'A' }), b = K.classBox(g, 440, 35, 180, { name: chal ? chal.b : 'B' });
+    const lk = K.el('g', { class: 'uml-link hot' + (st.line === 'dashed' ? ' uses' : '') }, g);
+    const at = { d: `M200 49 L440 49` };
+    if (st.src !== 'none') at['marker-start'] = `url(#${st.src === 'filled' ? 'uml-dia-fill' : 'uml-dia'})`;
+    if (st.tgt !== 'none') at['marker-end'] = `url(#${st.tgt === 'tri' ? 'uml-tri' : 'uml-open'})`;
+    K.el('path', at, lk);
+    const r = classify(st);
+    K.text(g, 320, 98, r.name, 'mlabel ' + (r.ok ? 'accent' : 'bad'));
+    const out = $('bOut'); out.className = 'um-result ' + (r.ok ? '' : 'bad');
+    out.querySelector('h4').textContent = r.name; out.querySelector('p').innerHTML = r.why;
+  }
+  const setSeg = (el, v) => el.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.v === v)));
+  K.seg($('bLine'), v => { st.line = v; drawB(); });
+  K.seg($('bSrc'), v => { st.src = v; drawB(); });
+  K.seg($('bTgt'), v => { st.tgt = v; drawB(); });
+  $('chal').addEventListener('click', e => {
+    const btn = e.target.closest('button[data-i]'); if (!btn) return;
+    chal = CH[+btn.dataset.i];
+    $('chal').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === btn)));
+    $('bStatus').innerHTML = `<b>Challenge:</b> ${chal.t}. A = <span class="mono">${chal.a}</span> (left), B = <span class="mono">${chal.b}</span> (right).`;
+    drawB();
+  });
+  $('bCheck').addEventListener('click', () => {
+    if (!chal) { $('bStatus').textContent = 'Pick a challenge first.'; return; }
+    const ok = st.line === chal.ans.line && st.src === chal.ans.src && (st.tgt === chal.ans.tgt || (chal.name === 'Composition' || chal.name === 'Aggregation') && st.tgt === 'open');
+    $('bStatus').innerHTML = ok ? `<b class="ok-text">Correct: ${chal.name}.</b> ${chal.t}.` : `<b class="bad-text">Not yet.</b> You drew <b>${classify(st).name}</b>; the challenge needs a different line or end. Try again or show the answer.`;
+  });
+  $('bShow').addEventListener('click', () => {
+    if (!chal) { $('bStatus').textContent = 'Pick a challenge first.'; return; }
+    st = { ...chal.ans }; setSeg($('bLine'), st.line); setSeg($('bSrc'), st.src); setSeg($('bTgt'), st.tgt); drawB();
+    $('bStatus').innerHTML = `<b>${chal.name}.</b> ${classify(st).why}`;
+  });
+  drawB();
+
+  /* ================= Try 2: multiplicity reader ================= */
+  let mL = '1', mR = '*';
+  const WORD = { '1': 'exactly one', '0..1': 'zero or one', '*': 'zero or more', '1..*': 'one or more' };
+  const CS = (m, t, prop) => m === '1' ? `public ${t} ${prop} { get; }        // required, set in the constructor`
+    : m === '0..1' ? `public ${t}? ${prop} { get; set; }   // optional (nullable)`
+    : m === '*' ? `public List<${t}> ${prop}s { get; } = new();   // may be empty`
+    : `public List<${t}> ${prop}s { get; } = new();   // validate: at least one`;
+  function drawM() {
+    const s = $('mSvg'); s.textContent = '';
+    const p = K.classBox(s, 20, 30, 170, { name: 'Patient' }), a = K.classBox(s, 450, 30, 170, { name: 'Appointment' });
+    K.umlLink(s, [190, 44], [450, 44], 'line');
+    K.text(s, 212, 36, mL, 'um-mult'); K.text(s, 426, 36, mR, 'um-mult');
+    K.text(s, 320, 84, `Patient "${mL}" -- "${mR}" Appointment`, 'mlabel muted');
+    const plural = m => (m === '1' || m === '0..1') ? '' : 's';
+    $('mOut').innerHTML =
+      `<div class="card"><p>Each <b>Patient</b> has <b>${WORD[mR]}</b> appointment${plural(mR)}.</p><p class="mono">${CS(mR, 'Appointment', 'Appointment').replace(/</g, '&lt;')}</p><p class="muted" style="font-size:13px">in <span class="mono">Patient</span> (if Patient navigates to Appointment)</p></div>`
+      + `<div class="card"><p>Each <b>Appointment</b> belongs to <b>${WORD[mL]}</b> patient${plural(mL)}.</p><p class="mono">${CS(mL, 'Patient', 'Patient').replace(/</g, '&lt;')}</p><p class="muted" style="font-size:13px">in <span class="mono">Appointment</span></p></div>`;
+    const real = mL === '1' && (mR === '*' || mR === '1..*');
+    $('mStatus').innerHTML = real ? '<b class="ok-text">This matches a real clinic:</b> one patient per appointment; a patient can have many (or, with <span class="mono">1..*</span>, at least one).'
+      : mL === '1..*' || mL === '*' ? 'Several patients on <b>one</b> appointment? That\'s a group session, not a normal booking. Multiplicity is where business rules show up in a class diagram.'
+      : mL === '0..1' ? 'An appointment with <b>no</b> patient: maybe an open slot. If so, it might be a separate <span class="mono">Slot</span> class.'
+      : 'Read each number from the far end: the number next to a class says how many of <i>that</i> class one object on the other side has.';
+  }
+  K.seg($('mL'), v => { mL = v; drawM(); });
+  K.seg($('mR'), v => { mR = v; drawM(); });
+  drawM();
+
+  /* ================= Test: drill ================= */
+  const O = ['Dependency', 'Association', 'Aggregation', 'Composition', 'Generalization', 'Realization'];
+  SD.page({ track: 'lld', drill: { opts: O, items: [
+    { q: '<span class="mono">class ReportService { public void Export(CsvWriter w) { ... } }</span>', a: O[0], why: 'CsvWriter only appears as a parameter: a temporary use, drawn as a dashed arrow.' },
+    { q: '<span class="mono">class House { private readonly List&lt;Room&gt; _rooms = new() { new Room("Kitchen") }; }</span> Rooms are never handed out.', a: O[3], why: 'The house creates its rooms and owns them; they go when the house goes. Filled diamond on House.' },
+    { q: '<span class="mono">class Ward { public void Admit(Nurse n) =&gt; _nurses.Add(n); }</span> Nurses rotate between wards.', a: O[2], why: 'The ward has nurses, but they exist independently and move between wards. Hollow diamond on Ward.' },
+    { q: '<span class="mono">class Prescription { public Doctor PrescribedBy { get; } }</span>', a: O[1], why: 'A reference kept in a property, with no ownership: a plain association.' },
+    { q: '<span class="mono">class EmailNotifier : INotifier</span>', a: O[5], why: 'Implementing an interface: dashed line, hollow triangle at INotifier.' },
+    { q: '<span class="mono">class Surgeon : Doctor</span>', a: O[4], why: 'Inheritance (is-a): solid line, hollow triangle at Doctor.' },
+    { q: '<span class="mono">var total = TaxCalculator.Compute(order);</span> inside a method, nothing stored.', a: O[0], why: 'A static call is a dependency: no field, no lasting link.' },
+    { q: 'An Order and its OrderLines: lines are created by <span class="mono">order.AddLine()</span> and deleted with the order.', a: O[3], why: 'Exclusive ownership and a shared lifetime: composition.' }
+  ] } });
+})();
+</script>
+</body>
+</html>

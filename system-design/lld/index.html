@@ -6,10 +6,10 @@
 <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
 <title>System Design: LLD</title>
 <meta name="description" content="Low-level design (LLD): interactive explainers for object-oriented design, patterns and LLD problems.">
-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
-<link rel="stylesheet" href="../../assets/css/hub.css?v=20261119">
-<script src="../../assets/js/theme.js?v=20261119"></script>
+<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../../assets/css/hub.css?v=20261122">
+<script src="../../assets/js/theme.js?v=20261122"></script>
 </head>
 <body class="wb">
 <!-- shell:start -->
@@ -49,6 +49,10 @@
 </ul></details>
 <h2 class="wb-track">LLD</h2>
 <a class="wb-road" href="index.html" aria-current="page">LLD roadmap</a>
+<details class="wb-g"><summary>Phase 1: Foundations</summary><ul>
+<li><a href="uml.html"><span class="t">UML: class &amp; sequence diagrams</span><span class="n">L3</span></a></li>
+<li><a href="design-principles.html"><span class="t">Design principles: DRY, KISS, YAGNI &amp; more</span><span class="n">L4</span></a></li>
+</ul></details>
 <details class="wb-g"><summary>Phase 2: SOLID</summary><ul>
 <li><a href="solid.html"><span class="t">SOLID overview</span><span class="n">L6</span></a></li>
 <li><a href="solid-srp.html"><span class="t">S: Single responsibility</span><span class="n">L7</span></a></li>
@@ -66,8 +70,8 @@
 </ul></details>
 </nav></details>
 <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
-<li><a href="../index.html" aria-current="true">System Design<span class="n">32</span></a></li>
-<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
+<li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
 <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
 <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
 <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
@@ -102,7 +106,7 @@
     </div>
     <div class="stats">
       <div class="stat"><b id="sLive">0</b><span>Explainers</span></div>
-      <div class="stat"><b id="sTopics">0</b><span>Topics</span></div>
+      <div class="stat"><b id="sTopics">0</b><span>Topics planned</span></div>
       <div class="stat"><b id="sNext">…</b><span>Next up</span></div>
       <div class="meter">
         <div class="row"><span>Topics covered</span><span id="sPct">0%</span></div>
@@ -136,8 +140,8 @@ const PARTS = [
  {part:"Phase 1", name:"Object-oriented foundations", sections:[
   {n:1,t:"OOP pillars",k:"Encapsulation, abstraction, inheritance, polymorphism (overloading vs overriding); interface vs abstract class in C#"},
   {n:2,t:"Relationships",k:"Association, aggregation, composition, dependency, inheritance; is-a vs has-a; composition over inheritance"},
-  {n:3,t:"UML",k:"Class diagram notation, multiplicity, arrow types; sequence diagram basics"},
-  {n:4,t:"Design principles",k:"DRY, KISS, YAGNI, Law of Demeter, high cohesion / low coupling, program to an interface"},
+  {n:3,t:"UML",k:"Class diagram notation, multiplicity, arrow types; sequence diagram basics",file:"uml.html"},
+  {n:4,t:"Design principles",k:"DRY, KISS, YAGNI, Law of Demeter, high cohesion / low coupling, program to an interface",file:"design-principles.html"},
   {n:5,t:"LLD interview method",k:"Clarify requirements → find entities → relationships → class diagram → interfaces → patterns → code core flows → concurrency & edge cases; time budget"}
  ]},
  {part:"Phase 2", name:"SOLID", sections:[
@@ -227,7 +231,7 @@ $('sTopics').textContent=all.length;
 /* next up: the first topic without a page after the furthest one you've built (earlier gaps stay visible in their phase) */
 const lastLive=Math.max(0,...all.filter(s=>s.file).map(s=>s.n));
 const next=all.find(s=>s.n>lastLive&&!s.file)||all.find(s=>!s.file);
-$('sNext').textContent=!all.length?'–':next?`L${next.n}`:'Done';
+$('sNext').textContent=!all.length?'–':next?`L${next.n}`:'Done';if($('sNext').textContent==='Done')$('sNext').nextElementSibling.textContent='Every topic built';
 const pct=all.length?Math.round(live.length*100/all.length):0;
 $('sPct').textContent=`${live.length} / ${all.length} · ${pct}%`;
 $('bar').style.width=Math.max(pct,live.length?2:0)+'%';

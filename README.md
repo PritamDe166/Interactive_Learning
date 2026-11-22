@@ -38,6 +38,7 @@ Interactive_explainations/
 │   │   └── caching-flows.js  (shared caching cards and quiz scenarios)
 │   └── lld/                        # low-level design
 │       ├── index.html              # L1–L67 roadmap (same numbering as Notion)
+│       ├── uml.html, design-principles.html  # L3–L4 foundations (class + sequence diagrams; change-ripple lab)
 │       ├── solid*.html             # L6–L11
 │       └── singleton.html, factory-method.html, abstract-factory.html, builder.html, prototype.html  # L12–L16 creational patterns
 ├── aws-cloud-practitioner/         # CLF-C02, one page per topic (topics.js holds the map)
@@ -54,6 +55,7 @@ Interactive_explainations/
 - **Angular pages** use the same colour key everywhere: cyan = data down (`input()`, `[prop]`), orange = events up (`output()`, `(event)`), violet = two-way (`model()`, `[(x)]`). Kit helpers: `codeCard`, `compBox`, `ngWire`, `tsHighlight`, `ngHighlight`. All 15 pages build one running example, **CareDesk** (a clinic portal); `angular/caredesk.js` holds the step list and draws the "Building CareDesk" strip (`<div class="cd-trail" data-stage="N">`). Every snippet is built and run in a real Angular project before it goes on a page.
 - **Pattern atlas pages** (`Kit.atlas`): cards styled after "N patterns" infographics. Each card has a numbered colour badge, a one-line rule, a mini diagram, its phases as a numbered list (readable without playing), a bold takeaway and Use when / Watch out lines. Nothing moves until the learner presses **▶ Play** on a card; it plays once (the current phase is highlighted) and offers ↺ Replay. Tag filter chips appear only with `filters: true`. Mini diagrams use the `m` helper (`box`, `db`, `tile`, `wire`, `send`, `slots`, `badge`, `state`, `link`, `text`, `label`); see the Kit header. Link an atlas or playbook from the HLD roadmap with `atlas:{file, t, s?}` (or an array) on the week; it shows as a dashed card and does not count as a day. Example: `system-design/hld/caching-patterns-atlas.html`.
 - **System Design page layout** (every HLD and LLD page): header lede → week strip (`#series`) → numbered section menu pinned in the top bar (`#pageNav`, `Kit.pageNav`, built from `section[data-nav]`) → **1 Learn** → **2 Compare** → **3 Try it** → **4 Revise** (cheat-sheet, reference) → **5 Test** (drill + quiz cards) → previous / next. Sections a page doesn't need are left out, but the order never changes. Pages call `SD.page({ track: 'hld' | 'lld', drill? })`; caching pages call `CF.page(...)`, which uses the same strip and links. Pattern cards for Weeks 1–2 live in `foundations-flows.js` (`FF.cards`, `FF.drill`), for Week 3 in `caching-flows.js`.
+- **UML in diagrams**: `Kit.classBox` + `Kit.umlLink` draw class diagrams. Link kinds: `uses` (dependency), `associates`/`creates` (association), `aggregates` / `composes` (diamond drawn at the first point, so start from the whole), `inherits`, `implements`, `line`.
 - Pages one folder deep reference assets as `../assets/...`; pages two deep (`system-design/hld/`, `system-design/lld/`) use `../../assets/...`; the root hub uses `assets/...`.
 
 ## Adding an explainer

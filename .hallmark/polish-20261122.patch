@@ -1,0 +1,2704 @@
+diff --git a/_template/explainer.html b/_template/explainer.html
+index e56c9e9..e5101c6 100644
+--- a/_template/explainer.html
++++ b/_template/explainer.html
+@@ -18,11 +18,11 @@
+ -->
+ <title>Explainer Title</title>
+ <meta name="description" content="One sentence on what this explainer shows.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ </head>
+ <body>
+ <!-- After copying this page into a subject folder, run: python3 tools/build_shell.py (adds the sidebar) -->
+diff --git a/about.html b/about.html
+index 9934855..2817cd7 100644
+--- a/about.html
++++ b/about.html
+@@ -6,8 +6,8 @@
+ <link rel="icon" href="assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>About · See How It Works</title>
+ <meta name="description" content="Who built See How It Works and why: a visual learner sharing animated study pages for interview preparation.">
+-<link rel="stylesheet" href="assets/css/site/workbench.css?v=20261119">
+-<script src="assets/js/theme.js?v=20261119"></script>
++<link rel="stylesheet" href="assets/css/site/workbench.css?v=20261122">
++<script src="assets/js/theme.js?v=20261122"></script>
+ </head>
+ <body>
+ <a class="skip" href="#main">Skip to the page</a>
+diff --git a/angular/app-boot.html b/angular/app-boot.html
+index f1c8264..8952b52 100644
+--- a/angular/app-boot.html
++++ b/angular/app-boot.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>How an Angular app boots</title>
+ <meta name="description" content="Angular 22: from ng new to pixels. Follow CareDesk from the CLI through index.html, main.ts and bootstrapApplication until the App component fills app-root.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .ng-left { display: grid; gap: var(--space-sm); min-width: 0; align-content: start; }
+   .lane-h rect { fill: var(--panel-2); stroke: var(--line); stroke-width: 1.5; }
+diff --git a/angular/change-detection.html b/angular/change-detection.html
+index 842abbd..a2d27c9 100644
+--- a/angular/change-detection.html
++++ b/angular/change-detection.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Change detection</title>
+ <meta name="description" content="Angular 22 change detection, recorded from CareDesk: zoneless and OnPush by default. See which components refresh after a click, a keystroke, a new input or a signal change, and why a plain field set in a timer never shows.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .ng-left { display: grid; gap: var(--space-sm); min-width: 0; align-content: start; }
+   .cdt .tl { stroke: var(--line); stroke-width: 2; }
+diff --git a/angular/components.html b/angular/components.html
+index 987c7f9..8177a42 100644
+--- a/angular/components.html
++++ b/angular/components.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Components & templates</title>
+ <meta name="description" content="Angular 22 components: split CareDesk into Header, PatientList and PatientCard. Selector, imports, template, scoped styles, and the component tree behind the page.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .ng-left { display: grid; gap: var(--space-sm); min-width: 0; align-content: start; }
+   .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: var(--space-sm); }
+diff --git a/angular/control-flow.html b/angular/control-flow.html
+index 7791c21..5648915 100644
+--- a/angular/control-flow.html
++++ b/angular/control-flow.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Template control flow</title>
+ <meta name="description" content="Angular 22 built-in control flow on CareDesk: @for with track, @empty, @if, @switch and @let. See why track $index moved a nurse's note onto the wrong patient in a real run.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .ng-left { display: grid; gap: var(--space-sm); min-width: 0; align-content: start; }
+   .split { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: var(--space-sm); }
+diff --git a/angular/data-binding.html b/angular/data-binding.html
+index 8582576..171152d 100644
+--- a/angular/data-binding.html
++++ b/angular/data-binding.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Data binding</title>
+ <meta name="description" content="Angular 22 data binding on CareDesk's PatientCard: interpolation, property, class, style and attribute bindings flow from class to DOM; events flow back; ngModel does both.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .ng-left { display: grid; gap: var(--space-sm); min-width: 0; align-content: start; }
+   .bx rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; }
+diff --git a/angular/guards-login.html b/angular/guards-login.html
+index 8af28e8..67f26e0 100644
+--- a/angular/guards-login.html
++++ b/angular/guards-login.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Route guards & login flow</title>
+ <meta name="description" content="Angular 22 route guards on CareDesk: a functional authGuard that redirects to a login page with a returnUrl, an AuthStore holding a demo token, and an HTTP interceptor that attaches it, with results from a real run.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .ng-left { display: grid; gap: var(--space-sm); min-width: 0; align-content: start; }
+   .gf .node.gate rect { stroke: var(--yellow); stroke-width: 2.5; }
+diff --git a/angular/http.html b/angular/http.html
+index 449e774..3e88d4b 100644
+--- a/angular/http.html
++++ b/angular/http.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>HTTP, resource & RxJS basics</title>
+ <meta name="description" content="Angular 22 HTTP on CareDesk: load patients with httpResource (loading, error, retry as signals), keep a local copy with linkedSignal, post bookings with HttpClient, and the RxJS basics: cold Observables, subscribe and pipe.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .ng-left { display: grid; gap: var(--space-sm); min-width: 0; align-content: start; }
+   .hx .node.cur rect { stroke: var(--cyan); stroke-width: 3.5; fill: var(--teal-wash); }
+diff --git a/angular/index.html b/angular/index.html
+index 23719ec..b8c5132 100644
+--- a/angular/index.html
++++ b/angular/index.html
+@@ -6,10 +6,10 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Angular</title>
+ <meta name="description" content="Modern Angular (v22) explained visually: control flow, data flow, signals, DI, routing and forms.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/hub.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/hub.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
+ <style>.day-card .adds{font-size:12.5px;color:var(--muted);line-height:1.4;margin:var(--space-3xs) 0 var(--space-2xs)}</style>
+ </head>
+ <body class="wb">
+@@ -139,7 +139,7 @@ const live=all.filter(s=>s.file);
+ $('sLive').textContent=live.length;
+ $('sTopics').textContent=all.length;
+ const next=all.find(s=>!s.file);
+-$('sNext').textContent=!all.length?'–':next?`Topic ${all.indexOf(next)+1}`:'Done';
++$('sNext').textContent=!all.length?'–':next?`Topic ${all.indexOf(next)+1}`:'Done';if($('sNext').textContent==='Done')$('sNext').nextElementSibling.textContent='Every topic built';
+ const pct=all.length?Math.round(live.length*100/all.length):0;
+ $('sPct').textContent=`${live.length} / ${all.length} · ${pct}%`;
+ $('bar').style.width=Math.max(pct,live.length?2:0)+'%';
+diff --git a/angular/lifecycle.html b/angular/lifecycle.html
+index a61074b..9d2295c 100644
+--- a/angular/lifecycle.html
++++ b/angular/lifecycle.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Lifecycle hooks</title>
+ <meta name="description" content="Angular 22 lifecycle hooks, recorded from CareDesk's PatientCard: which hooks run when a card is created, checked, given a new input and destroyed, and why a forgotten clearInterval leaks.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .ng-left { display: grid; gap: var(--space-sm); min-width: 0; align-content: start; }
+   .hg { width: 100%; border-collapse: separate; border-spacing: 3px; font-size: 12px; min-width: 560px; }
+diff --git a/angular/parent-child.html b/angular/parent-child.html
+index e6dbcf4..2440506 100644
+--- a/angular/parent-child.html
++++ b/angular/parent-child.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Parent ↔ child data flow</title>
+ <meta name="description" content="Angular 22: CareDesk's PatientList hands a patient down to PatientCard with input(), the card reports back with output(), and a nurse's note syncs both ways with model(). Plus why mutating an object inside a signal does nothing.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .ng-left { display: grid; gap: var(--space-sm); min-width: 0; align-content: start; }
+   .story.ng-story { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); }
+diff --git a/angular/reactive-forms.html b/angular/reactive-forms.html
+index ffb4ca1..0c984db 100644
+--- a/angular/reactive-forms.html
++++ b/angular/reactive-forms.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Reactive forms & Signal Forms</title>
+ <meta name="description" content="Angular 22 reactive forms on CareDesk's patient registration: a typed FormGroup built in the class, bound with formControlName, validated, previewed with valueChanges. Then the same form with the new Signal Forms API.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .ng-left { display: grid; gap: var(--space-sm); min-width: 0; align-content: start; }
+   .fm .node rect { transition: stroke .2s, fill .2s, opacity .3s; }
+diff --git a/angular/routing.html b/angular/routing.html
+index 8bbbf13..4342573 100644
+--- a/angular/routing.html
++++ b/angular/routing.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Routing</title>
+ <meta name="description" content="Angular 22 routing on CareDesk: a route table, router-outlet, routerLink, route parameters as inputs, lazy loading, redirects, wildcards and routerLinkActive, with every result from a real run.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .ng-left { display: grid; gap: var(--space-sm); min-width: 0; align-content: start; }
+   .rt .url rect { fill: var(--panel-2); stroke: var(--line); stroke-width: 1.5; }
+diff --git a/angular/services-di.html b/angular/services-di.html
+index 695e4af..6e83600 100644
+--- a/angular/services-di.html
++++ b/angular/services-di.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Services & dependency injection</title>
+ <meta name="description" content="Angular 22 services and dependency injection on CareDesk: a PatientStore shared by the header and the list with @Service and inject(). Watch lookups walk the injector tree, and see a component-level provider split the state.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .ng-left { display: grid; gap: var(--space-sm); min-width: 0; align-content: start; }
+   .inj .tl { stroke: var(--line); stroke-width: 2; }
+diff --git a/angular/signals.html b/angular/signals.html
+index 8867386..84a1ef2 100644
+--- a/angular/signals.html
++++ b/angular/signals.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Signals</title>
+ <meta name="description" content="Angular 22 signals on CareDesk's patient list: signal, computed, linkedSignal and effect as a dependency graph. Watch a search keystroke mark dependants dirty and pull fresh values, with logs from a real run.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .ng-left { display: grid; gap: var(--space-sm); min-width: 0; align-content: start; }
+   .sg .edge { stroke: var(--line); stroke-width: 2; fill: none; transition: stroke .2s, stroke-width .2s; }
+diff --git a/angular/template-forms.html b/angular/template-forms.html
+index a19215c..2f17598 100644
+--- a/angular/template-forms.html
++++ b/angular/template-forms.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Template-driven forms</title>
+ <meta name="description" content="Angular 22 template-driven forms on CareDesk's booking form: ngForm, ngModel, name, validators, and the valid/invalid, pristine/dirty, untouched/touched states, recorded from a real run.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .ng-left { display: grid; gap: var(--space-sm); min-width: 0; align-content: start; }
+   .fm .node rect { transition: stroke .2s, fill .2s; }
+diff --git a/angular/typescript.html b/angular/typescript.html
+index 3061e5b..4faa68b 100644
+--- a/angular/typescript.html
++++ b/angular/typescript.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>TypeScript for Angular</title>
+ <meta name="description" content="The TypeScript you need for Angular 22, built around CareDesk's Patient type: interfaces, union types, optional fields, generics, classes, decorators, and what disappears at run time.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .ng-left { display: grid; gap: var(--space-sm); min-width: 0; align-content: start; }
+ </style>
+diff --git a/assets/css/explainer.css b/assets/css/explainer.css
+index e4c11bd..3ec7a7c 100644
+--- a/assets/css/explainer.css
++++ b/assets/css/explainer.css
+@@ -1136,3 +1136,24 @@ ul.cheat li, .cheat li { background: none; border-top: 1px solid var(--line); pa
+ .story-nav, .controls, .cev-keys, .cev-predict, .chips { gap: var(--space-sm); }
+ .at-play { background: var(--fg); color: var(--bg); box-shadow: 2px 2px 0 var(--color-mark); }
+ @media (prefers-reduced-motion: reduce) { .btn, .chip-btn, .ac-btn { transition: none; } .btn:hover, .chip-btn:hover, .ac-btn:hover { transform: none; } }
++
++/* =========================================================================
++   Polish (Hallmark, 2026-11-22): small fixes, no new layout.
++   ========================================================================= */
++/* controls and hints follow the page's left edge instead of floating in the middle */
++.wrap.explainer .controls, .wrap.explainer .lab-row, .wrap.explainer .at-legend,
++.wrap.explainer .cev-keys, .wrap.explainer .cev-predict { justify-content: flex-start; }
++.wrap.explainer .hint, .wrap.explainer .status-line { text-align: start; margin-inline: 0; }
++/* status lines are prose, not code: body face */
++.status-line { font-family: var(--font-body); font-size: var(--text-sm); }
++/* top bar playback controls: one height, square, the same hairline */
++.ac-speed select, .ac-step { min-height: 36px; border: 0; box-shadow: inset 0 0 0 1px var(--line); background: var(--bg); }
++.ac-speed select { padding: 0 var(--space-xs); }
++.ac-speed select:hover, .ac-step:hover { box-shadow: inset 0 0 0 1px var(--muted); }
++.ac-speed select:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
++.ac-btn { padding: 0 var(--space-sm); font-weight: 500; }
++/* small screens: keep diagram labels readable; the well scrolls sideways instead of shrinking the text */
++@media (max-width: 560px) {
++  .story > .at-stage { overflow-x: auto; overscroll-behavior-x: contain; }
++  .story > .at-stage svg { min-width: 400px; }
++}
+diff --git a/assets/css/hub.css b/assets/css/hub.css
+index afdf51f..0d4d766 100644
+--- a/assets/css/hub.css
++++ b/assets/css/hub.css
+@@ -185,3 +185,23 @@ a.day-card:hover, .day-card:hover { border-color: var(--cyan); }
+ .phase-head { margin-top: var(--space-2xl); }
+ /* readable line length on roadmaps */
+ .wrap p, .wrap li > span:only-child { max-width: 70ch; }
++
++/* =========================================================================
++   Polish (Hallmark, 2026-11-22): roadmaps brought in line with design.md.
++   Ready topics are wells (no blue frame); not-built topics keep the hairline;
++   chosen states are ink, as on the home page tabs; diagram nodes are square.
++   ========================================================================= */
++.day-card.live { border-color: transparent; transition: background-color var(--dur-short) var(--ease-out); }
++.day-card.live .topic { transition: color var(--dur-short) var(--ease-out); }
++.day-card.live:hover, a.day-card.live:hover { transform: none; border-color: transparent; background: var(--panel-2); }
++.day-card.live:hover .topic { color: var(--color-accent); }
++.day-card.live:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
++.day-card.atlas-card.live { border-color: var(--accent-text); }
++.seg button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
++.seg button:hover:not([aria-pressed="true"]) { color: var(--fg); }
++.track-tabs a[aria-current="page"] { background: var(--fg); color: var(--bg); box-shadow: none; }
++.track-tabs a[aria-current="page"] span { color: color-mix(in oklab, var(--bg) 72%, transparent); }
++.hero .flow rect { rx: 0; ry: 0; }
++.meter .track i { background: var(--color-accent); }
++.phase-head .num { color: var(--muted); }
++@media (prefers-reduced-motion: reduce) { .day-card.live, .day-card.live .topic { transition: none; } }
+diff --git a/assets/css/site/home.css b/assets/css/site/home.css
+index 7a9469b..356b6cf 100644
+--- a/assets/css/site/home.css
++++ b/assets/css/site/home.css
+@@ -18,8 +18,8 @@
+ /* Hallmark · dropped "4 of 5 subjects started" from the hero · hero review asked for one figure; the subject list shows AI as planned */
+ /* Hallmark · reworded the hero line to name interview prep and the four subjects · hero review: the line never said who the site is for */
+ /* Hallmark · dropped the footer's "To add a subject…" note from view · it is a note to the site's owner, kept as an HTML comment beside the SUBJECTS list */
+-@import url("./tokens.css?v=20261119");
+-@import url("./base.css?v=20261119");
++@import url("./tokens.css?v=20261122");
++@import url("./base.css?v=20261122");
+ 
+ /* ---------- the page ---------- */
+ body { font-size: 1.0625rem; line-height: 1.5; }
+diff --git a/assets/css/site/workbench.css b/assets/css/site/workbench.css
+index 2a7adb6..622f83b 100644
+--- a/assets/css/site/workbench.css
++++ b/assets/css/site/workbench.css
+@@ -3,8 +3,8 @@
+  * axes: light/grotesk-sans/cool · posture: full-palette · modes: light+dark · v2.0.0 */
+ /* Hallmark · pre-emit critique: P4 H4 E4 S5 R4 V4 · weakest: P, a hub argues little; the lab makes the argument, a system you step through instead of a wall of text */
+ /* Hallmark · source: the owner's Figma mockup (IMG_0702, IMG_0703) · dropped its tracked-caps labels and glued arrows (54, 67, 63) */
+-@import url("./tokens.css?v=20261119");
+-@import url("./base.css?v=20261119");
++@import url("./tokens.css?v=20261122");
++@import url("./base.css?v=20261122");
+ 
+ body { font-size: var(--text-md); }
+ 
+@@ -26,8 +26,8 @@ body { font-size: var(--text-md); }
+ .skip:focus-visible { transform: none; }
+ 
+ /* ---------- the shell ---------- */
+-.shell { display: grid; grid-template-columns: 256px minmax(0, 1fr); min-height: 100dvh; }
+-.side { position: fixed; inset: 0 auto 0 0; width: 256px; z-index: var(--z-sticky-nav); display: flex; flex-direction: column; gap: var(--space-xl); padding: var(--space-lg); background: var(--color-field); color: var(--color-field-ink); --color-focus: var(--color-field-ink); overflow-y: auto; }
++.shell { display: grid; grid-template-columns: 264px minmax(0, 1fr); min-height: 100dvh; }
++.side { position: fixed; inset: 0 auto 0 0; width: 264px; z-index: var(--z-sticky-nav); display: flex; flex-direction: column; gap: var(--space-xl); padding: var(--space-lg) var(--space-md); background: var(--color-field); color: var(--color-field-ink); --color-focus: var(--color-field-ink); overflow-y: auto; }
+ .wordmark { display: inline-grid; grid-template-columns: auto auto; column-gap: var(--space-sm); justify-self: start; align-self: start; font: var(--display-weight) var(--text-md)/0.92 var(--font-display); letter-spacing: -0.01em; color: inherit; text-decoration: none; }
+ .wordmark::before { content: ""; grid-row: span 2; width: 1.85em; aspect-ratio: 1; background: var(--color-mark) url("../../img/logo.svg") center / 100% no-repeat; }
+ .wordmark span + span { font-weight: 400; }
+@@ -129,7 +129,7 @@ body { font-size: var(--text-md); }
+ .seg input:checked + label { background: var(--color-mark); color: var(--color-mark-ink); }
+ .seg input:focus-visible + label { outline: 2px solid var(--color-field-ink); outline-offset: 2px; }
+ .seg input:disabled + label { opacity: 0.55; cursor: not-allowed; }
+-.now { display: grid; gap: var(--space-xs); padding-top: var(--space-md); border-top: 1px solid color-mix(in oklab, var(--color-field-ink) 22%, transparent); min-height: 9.5rem; }
++.now { display: grid; gap: var(--space-xs); padding-top: var(--space-md); border-top: 1px solid color-mix(in oklab, var(--color-field-ink) 22%, transparent); min-height: 9.5rem; align-content: start; }
+ .now h4 { margin: 0; font: var(--display-weight) var(--text-lg)/1.2 var(--font-display); letter-spacing: -0.015em; }
+ .lab__panel .open { margin-top: auto; color: var(--color-mark); font-weight: 500; font-size: var(--text-sm); text-decoration: underline var(--rule-hair); text-underline-offset: 0.25em; }
+ .lab__panel .open:focus-visible { outline: 2px solid var(--color-field-ink); outline-offset: 2px; }
+@@ -144,7 +144,7 @@ body { font-size: var(--text-md); }
+ .tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--space-2xs); margin: 0; padding: 0; }
+ .tab { display: grid; gap: var(--space-3xs); align-content: start; min-height: 72px; padding: var(--space-sm) var(--space-md); border: 0; border-radius: 0; background: var(--color-paper-2); color: var(--color-ink); font: inherit; text-align: start; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out); }
+ .tab b { font-weight: 500; }
+-.tab small { font-size: var(--text-xs); color: var(--color-muted); }
++.tab small { font-size: var(--text-xs); color: var(--color-muted); text-wrap: balance; }
+ .tab:hover { background: var(--color-paper-3); }
+ .tab:active { transform: translateY(1px); }
+ .tab[aria-selected="true"] { background: var(--color-ink); color: var(--color-paper); }
+@@ -164,11 +164,11 @@ body { font-size: var(--text-md); }
+ 
+ /* fresh from the lab */
+ .fresh { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-lg); }
+-.card { min-width: 0; display: grid; grid-template-rows: auto auto auto; gap: var(--space-xs); color: var(--color-ink); text-decoration: none; }
++.card { min-width: 0; display: grid; grid-template-rows: auto auto auto; align-content: start; gap: var(--space-xs); color: var(--color-ink); text-decoration: none; }
+ .card__fig { color: var(--color-ink); display: grid; place-items: center; aspect-ratio: 16 / 9; padding: var(--space-md); background: var(--color-paper-2); transition: background-color var(--dur-short) var(--ease-out); }
+ .card--dark .card__fig { background: var(--color-field); color: var(--color-field-ink); }
+ .card:hover .card__fig { background: var(--color-paper-3); }
+-.card--dark:hover .card__fig { background: var(--color-ink-2); color: var(--color-field-ink); }
++.card--dark:hover .card__fig { background: color-mix(in oklab, var(--color-field) 88%, var(--color-field-ink)); color: var(--color-field-ink); }
+ .card:hover .card__t { color: var(--color-accent); }
+ .card:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 4px; }
+ .card__s { font-size: var(--text-xs); color: var(--color-muted); }
+@@ -224,6 +224,9 @@ body { font-size: var(--text-md); }
+   .flow { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-lg); min-height: 0; }
+   .wire { width: 1px; height: var(--space-lg); justify-self: center; }
+   .wire span { left: var(--space-xs); bottom: auto; top: 0; transform: none; }
++  .wire.is-on { width: 2px; height: var(--space-lg); }
++  .sec__head, .lab__title { flex-direction: column; align-items: start; gap: var(--space-xs); }
++  .sec__head p { text-align: start; }
+   .pill { display: none !important; }
+   .tabs { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+   .fresh { grid-template-columns: minmax(0, 1fr); }
+@@ -282,7 +285,7 @@ body { font-size: var(--text-md); }
+ .head .head__line { margin-top: var(--space-md); font: var(--display-weight) var(--text-xl)/1.15 var(--font-display); letter-spacing: -0.015em; color: var(--color-ink); }
+ .head .head__line + p { margin-top: var(--space-xs); }
+ /* the mark stands beside the name, as tall as its two lines */
+-.head__name { display: flex; align-items: center; gap: clamp(1rem, 1.6vw, 1.75rem); }
++.head__name { display: flex; align-items: center; gap: var(--space-md); }
+ .head__mark { flex: none; width: clamp(5.25rem, 9.4vw + 1.75rem, 11.7rem); height: auto; aspect-ratio: 1; }
+ 
+ /* ---------- buttons: offset style (same as the explainers) ---------- */
+diff --git a/assets/css/theme.css b/assets/css/theme.css
+index 557ead5..385410a 100644
+--- a/assets/css/theme.css
++++ b/assets/css/theme.css
+@@ -9,7 +9,7 @@
+    <html data-theme="dark">.
+    Rule: components use these tokens, never raw colour values.
+    ========================================================================= */
+-@import url("site/tokens.css?v=20261119");
++@import url("site/tokens.css?v=20261122");
+ 
+ @font-face { font-family: "JetBrains Mono"; font-weight: 400; font-style: normal; font-display: swap; src: url("../fonts/jetbrains-mono-latin-400-normal.woff2") format("woff2"); }
+ @font-face { font-family: "JetBrains Mono"; font-weight: 500; font-style: normal; font-display: swap; src: url("../fonts/jetbrains-mono-latin-500-normal.woff2") format("woff2"); }
+diff --git a/aws-cloud-practitioner/ami.html b/aws-cloud-practitioner/ami.html
+index 3fcd4b6..841bf80 100644
+--- a/aws-cloud-practitioner/ami.html
++++ b/aws-cloud-practitioner/ami.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>AMIs</title>
+ <meta name="description" content="AWS Cloud Practitioner: an Amazon Machine Image is a template for launching EC2 instances, built on EBS snapshots, usable across AZs and copyable to other Regions.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .race { display: grid; gap: var(--space-sm); }
+   .lane .t { font-size: 14px; margin-bottom: var(--space-2xs); }
+diff --git a/aws-cloud-practitioner/aws-budgets.html b/aws-cloud-practitioner/aws-budgets.html
+index f5b0538..96cc338 100644
+--- a/aws-cloud-practitioner/aws-budgets.html
++++ b/aws-cloud-practitioner/aws-budgets.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>AWS Budgets and billing alerts</title>
+ <meta name="description" content="AWS Cloud Practitioner: set up billing access, read the bill by service, watch Free Tier usage and create zero-spend and monthly cost budgets that email you before a lab gets expensive.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .bud .ax { stroke: var(--line); }
+   .bud .act { fill: none; stroke: var(--fg); stroke-width: 2.5; }
+diff --git a/aws-cloud-practitioner/cloud-basics.html b/aws-cloud-practitioner/cloud-basics.html
+index 6ea9234..a225e9e 100644
+--- a/aws-cloud-practitioner/cloud-basics.html
++++ b/aws-cloud-practitioner/cloud-basics.html
+@@ -6,10 +6,10 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Cloud Computing Basics</title>
+ <meta name="description" content="This page has been split into one explainer per topic.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
+ <style>
+   .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: var(--space-xs); margin-top: var(--space-md); }
+   .topic-links a { display: block; padding: var(--space-sm) var(--space-md); border-radius: 0; background: var(--panel); color: var(--fg); text-decoration: none; font-weight: 600; }
+diff --git a/aws-cloud-practitioner/cloud-service-models.html b/aws-cloud-practitioner/cloud-service-models.html
+index 0b85421..b385c50 100644
+--- a/aws-cloud-practitioner/cloud-service-models.html
++++ b/aws-cloud-practitioner/cloud-service-models.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>IaaS, PaaS, SaaS and pricing</title>
+ <meta name="description" content="AWS Cloud Practitioner: who manages which layer in on-premises, IaaS, PaaS and SaaS, with AWS examples, and the three things cloud pricing charges for.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .sm-split { stroke: var(--red); stroke-width: 2.5; stroke-dasharray: 7 6; }
+   .sm-tag { font-family: var(--display); font-size: 12.5px; }
+diff --git a/aws-cloud-practitioner/containers-serverless.html b/aws-cloud-practitioner/containers-serverless.html
+index 09f3dc0..280602f 100644
+--- a/aws-cloud-practitioner/containers-serverless.html
++++ b/aws-cloud-practitioner/containers-serverless.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Containers &amp; Serverless</title>
+ <meta name="description" content="AWS Cloud Practitioner: who manages what on EC2, ECS, Fargate and Lambda; how Lambda scales with events and what it costs; and how to pick a compute service.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .layer rect { stroke-width: 2; transition: fill .35s, stroke .35s; }
+   .layer.aws rect { fill: var(--teal-wash); stroke: var(--teal); }
+diff --git a/aws-cloud-practitioner/databases-analytics.html b/aws-cloud-practitioner/databases-analytics.html
+index da6f2f2..23b52f0 100644
+--- a/aws-cloud-practitioner/databases-analytics.html
++++ b/aws-cloud-practitioner/databases-analytics.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Databases &amp; Analytics</title>
+ <meta name="description" content="AWS Cloud Practitioner: RDS Multi-AZ vs read replicas under failure, choosing the right AWS database, and how data flows through Kinesis, Glue, Athena, Redshift, EMR and QuickSight.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .svc rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s, opacity .2s; }
+   .svc text { fill: var(--fg); font-size: 13px; font-weight: 700; text-anchor: middle; }
+diff --git a/aws-cloud-practitioner/deployment-iac.html b/aws-cloud-practitioner/deployment-iac.html
+index 3bdd76a..3b6f099 100644
+--- a/aws-cloud-practitioner/deployment-iac.html
++++ b/aws-cloud-practitioner/deployment-iac.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Deployment &amp; Infrastructure as Code</title>
+ <meta name="description" content="AWS Cloud Practitioner: CloudFormation stacks and drift, a CodePipeline from commit to deploy, and reaching EC2 with SSH, Instance Connect or Session Manager.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .stage rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+   .stage text { fill: var(--fg); font-size: 13.5px; font-weight: 700; text-anchor: middle; }
+diff --git a/aws-cloud-practitioner/ebs-snapshots.html b/aws-cloud-practitioner/ebs-snapshots.html
+index 491a95c..9c387f5 100644
+--- a/aws-cloud-practitioner/ebs-snapshots.html
++++ b/aws-cloud-practitioner/ebs-snapshots.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>EBS snapshots</title>
+ <meta name="description" content="AWS Cloud Practitioner: EBS snapshots are incremental point-in-time backups used to restore volumes in another AZ, copy across Regions, archive cheaply and recover from the Recycle Bin.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .blk { display: grid; grid-template-columns: repeat(8, 30px); gap: var(--space-2xs); margin: var(--space-2xs) 0 var(--space-sm); }
+   .blk span { width: 30px; height: 30px; border-radius: 0; background: var(--panel-2); display: grid; place-items: center; font: 600 11px var(--mono); color: var(--muted); }
+diff --git a/aws-cloud-practitioner/ebs.html b/aws-cloud-practitioner/ebs.html
+index 4cff86b..61d5f12 100644
+--- a/aws-cloud-practitioner/ebs.html
++++ b/aws-cloud-practitioner/ebs.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>EBS volumes</title>
+ <meta name="description" content="AWS Cloud Practitioner: Amazon EBS volumes are network drives for EC2, locked to one Availability Zone, persistent, detachable, with Delete on termination rules.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .lab-ctl { display: flex; flex-wrap: wrap; gap: var(--space-xs); align-items: center; margin-bottom: var(--space-sm); }
+   .lab-ctl select { font: inherit; color: var(--fg); background: var(--panel-2); border-radius: 0; padding: var(--space-xs) var(--space-xs); }
+diff --git a/aws-cloud-practitioner/ec2-basics.html b/aws-cloud-practitioner/ec2-basics.html
+index 799dadf..2e92fb3 100644
+--- a/aws-cloud-practitioner/ec2-basics.html
++++ b/aws-cloud-practitioner/ec2-basics.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>EC2 basics</title>
+ <meta name="description" content="AWS Cloud Practitioner: what Amazon EC2 is and the choices behind every instance (AMI, instance type, storage, key pair, security group, user data), shown as a request reaching a web server.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .wiz { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: var(--space-sm); }
+   .wiz label.f { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+diff --git a/aws-cloud-practitioner/ec2-iam-roles.html b/aws-cloud-practitioner/ec2-iam-roles.html
+index 228f547..9c52eb2 100644
+--- a/aws-cloud-practitioner/ec2-iam-roles.html
++++ b/aws-cloud-practitioner/ec2-iam-roles.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>IAM roles for EC2</title>
+ <meta name="description" content="AWS Cloud Practitioner: give an EC2 instance AWS permissions by attaching an IAM role (instance profile). The CLI picks up temporary credentials automatically; never run aws configure with personal keys on an instance.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .term { background: var(--code-bg); border: 1px solid var(--line); border-radius: 0; padding: var(--space-xs) var(--space-sm); font-family: var(--mono); font-size: 13px; color: var(--fg-soft); min-height: 120px; max-height: 300px; overflow-y: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+   .term .p { color: var(--good-text); } .term .e { color: var(--bad-text); } .term .h { color: var(--accent-text); }
+diff --git a/aws-cloud-practitioner/ec2-image-builder.html b/aws-cloud-practitioner/ec2-image-builder.html
+index edd2b59..b7c6c81 100644
+--- a/aws-cloud-practitioner/ec2-image-builder.html
++++ b/aws-cloud-practitioner/ec2-image-builder.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>EC2 Image Builder</title>
+ <meta name="description" content="AWS Cloud Practitioner: EC2 Image Builder automates building, testing and distributing AMIs on a schedule; the service is free, you pay for the instances and storage it uses.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .pl { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-xs); }
+   .pl label.f { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+diff --git a/aws-cloud-practitioner/ec2-instance-connect.html b/aws-cloud-practitioner/ec2-instance-connect.html
+index 62cd1b9..7677456 100644
+--- a/aws-cloud-practitioner/ec2-instance-connect.html
++++ b/aws-cloud-practitioner/ec2-instance-connect.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>EC2 Instance Connect</title>
+ <meta name="description" content="AWS Cloud Practitioner: EC2 Instance Connect opens an SSH session in the browser by pushing a one-time key; it still needs port 22 open to AWS's Instance Connect addresses.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .ck { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: var(--space-sm); }
+   .ck label.f { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+diff --git a/aws-cloud-practitioner/ec2-instance-types.html b/aws-cloud-practitioner/ec2-instance-types.html
+index 7c962e8..3983d7a 100644
+--- a/aws-cloud-practitioner/ec2-instance-types.html
++++ b/aws-cloud-practitioner/ec2-instance-types.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>EC2 instance types</title>
+ <meta name="description" content="AWS Cloud Practitioner: EC2 instance families (general purpose, compute, memory, storage optimized, accelerated) and how to read a name like m5.2xlarge.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .slot rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; }
+   .slot.on rect { stroke: var(--cyan); fill: var(--teal-wash); }
+diff --git a/aws-cloud-practitioner/ec2-review.html b/aws-cloud-practitioner/ec2-review.html
+index bdad2c5..f82d3e6 100644
+--- a/aws-cloud-practitioner/ec2-review.html
++++ b/aws-cloud-practitioner/ec2-review.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>EC2 review</title>
+ <meta name="description" content="AWS Cloud Practitioner: EC2 section review with a one-path recap, section summary, commonly confused pairs, a mixed drill and 20 exam-style questions.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-xs); }
+   .topic-links a { display: block; padding: var(--space-sm) var(--space-sm); border-radius: 0; background: var(--panel); color: var(--fg); text-decoration: none; }
+diff --git a/aws-cloud-practitioner/ec2-storage-choices.html b/aws-cloud-practitioner/ec2-storage-choices.html
+index d28c345..16abc0b 100644
+--- a/aws-cloud-practitioner/ec2-storage-choices.html
++++ b/aws-cloud-practitioner/ec2-storage-choices.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Choosing EC2 storage</title>
+ <meta name="description" content="AWS Cloud Practitioner: choose between EBS, instance store, EFS, FSx for Windows and FSx for Lustre with a decision walker, and see who is responsible for what in EC2 storage.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .wk .q { font-size: 17px; font-weight: 600; margin: var(--space-2xs) 0 var(--space-sm); }
+   .wk .opts { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+diff --git a/aws-cloud-practitioner/ec2-storage.html b/aws-cloud-practitioner/ec2-storage.html
+index 5b68be3..f5b475e 100644
+--- a/aws-cloud-practitioner/ec2-storage.html
++++ b/aws-cloud-practitioner/ec2-storage.html
+@@ -6,10 +6,10 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>EC2 Instance Storage</title>
+ <meta name="description" content="This page has been split into one explainer per topic.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
+ <style>
+   .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: var(--space-xs); margin-top: var(--space-md); }
+   .topic-links a { display: block; padding: var(--space-sm) var(--space-md); border-radius: 0; background: var(--panel); color: var(--fg); text-decoration: none; font-weight: 600; }
+diff --git a/aws-cloud-practitioner/ec2-user-data.html b/aws-cloud-practitioner/ec2-user-data.html
+index eb34ca2..a58b1ea 100644
+--- a/aws-cloud-practitioner/ec2-user-data.html
++++ b/aws-cloud-practitioner/ec2-user-data.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>EC2 user data and instance lifecycle</title>
+ <meta name="description" content="AWS Cloud Practitioner: bootstrap an EC2 web server with user data (runs once, as root, at first launch) and follow it through pending, running, stop, start and terminate: public IP, EBS and billing at each state.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>.life-btns { display: flex; flex-wrap: wrap; gap: var(--space-xs); }</style>
+ </head>
+ <body class="wb">
+diff --git a/aws-cloud-practitioner/efs.html b/aws-cloud-practitioner/efs.html
+index 60db661..41067c2 100644
+--- a/aws-cloud-practitioner/efs.html
++++ b/aws-cloud-practitioner/efs.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>EFS and EFS-IA</title>
+ <meta name="description" content="AWS Cloud Practitioner: Amazon EFS is a managed NFS file system shared by many Linux instances across AZs, pay per use, with Infrequent Access and Archive storage classes.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .pl { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+   .pl label.f { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+diff --git a/aws-cloud-practitioner/elb-asg.html b/aws-cloud-practitioner/elb-asg.html
+index 2675a45..6859dd0 100644
+--- a/aws-cloud-practitioner/elb-asg.html
++++ b/aws-cloud-practitioner/elb-asg.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Elastic Load Balancing &amp; Auto Scaling</title>
+ <meta name="description" content="AWS Cloud Practitioner: run a day of traffic through an Auto Scaling group behind a load balancer, pick ALB, NLB or GWLB, and separate scalability, elasticity, agility and high availability.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .slot { fill: var(--panel-2); stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 4 4; }
+   .inst { transition: fill .25s, opacity .25s; }
+diff --git a/aws-cloud-practitioner/fsx.html b/aws-cloud-practitioner/fsx.html
+index 487ad6d..9bac310 100644
+--- a/aws-cloud-practitioner/fsx.html
++++ b/aws-cloud-practitioner/fsx.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Amazon FSx</title>
+ <meta name="description" content="AWS Cloud Practitioner: Amazon FSx runs managed third-party file systems: FSx for Windows File Server (SMB, NTFS, Active Directory) and FSx for Lustre (high performance computing), plus NetApp ONTAP and OpenZFS.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ </head>
+ <body class="wb">
+ <!-- shell:start -->
+diff --git a/aws-cloud-practitioner/global-infrastructure.html b/aws-cloud-practitioner/global-infrastructure.html
+index 6b76204..2d1694a 100644
+--- a/aws-cloud-practitioner/global-infrastructure.html
++++ b/aws-cloud-practitioner/global-infrastructure.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Global Infrastructure</title>
+ <meta name="description" content="AWS Cloud Practitioner: Route 53 routing policies with users around the world, CloudFront vs Global Accelerator vs S3 Transfer Acceleration, and picking the right global service.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .usr circle { fill: var(--accent-text); }
+   .usr text, .rg text { fill: var(--fg); font-size: 12.5px; font-weight: 600; text-anchor: middle; }
+diff --git a/aws-cloud-practitioner/iam-access-methods.html b/aws-cloud-practitioner/iam-access-methods.html
+index 4e125f1..92b7496 100644
+--- a/aws-cloud-practitioner/iam-access-methods.html
++++ b/aws-cloud-practitioner/iam-access-methods.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Console, CLI, SDK and access keys</title>
+ <meta name="description" content="AWS Cloud Practitioner: the three ways to reach AWS (Management Console, CLI, SDKs), access keys, long-term versus temporary credentials, and why every route goes through the same IAM check.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .tl { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-3xs); margin-top: var(--space-xs); }
+   .tl i { height: 26px; border-radius: 0; background: var(--track); display: grid; place-items: center; font-style: normal; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+diff --git a/aws-cloud-practitioner/iam-best-practices.html b/aws-cloud-practitioner/iam-best-practices.html
+index 9eebd0a..0a65834 100644
+--- a/aws-cloud-practitioner/iam-best-practices.html
++++ b/aws-cloud-practitioner/iam-best-practices.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>IAM best practices</title>
+ <meta name="description" content="AWS Cloud Practitioner: IAM guidelines and best practices (root protection, MFA, password policy, groups, roles, key hygiene, audits) and the shared responsibility model for IAM.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .hard { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: var(--space-xs) var(--space-md); }
+   .atk-res { list-style: none; margin: var(--space-xs) 0 0; padding: 0; display: grid; gap: var(--space-2xs); font-size: 14.5px; }
+diff --git a/aws-cloud-practitioner/iam-cloudshell.html b/aws-cloud-practitioner/iam-cloudshell.html
+index 6ea5566..bfc1562 100644
+--- a/aws-cloud-practitioner/iam-cloudshell.html
++++ b/aws-cloud-practitioner/iam-cloudshell.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>AWS CloudShell</title>
+ <meta name="description" content="AWS Cloud Practitioner: AWS CloudShell, a browser terminal with the AWS CLI preinstalled that runs as your console identity, with per-Region storage.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .term { background: var(--code-bg); border: 1px solid var(--line); border-radius: 0; padding: var(--space-xs) var(--space-sm); font-family: var(--mono); font-size: 13px; color: var(--fg-soft); min-height: 120px; white-space: pre-wrap; overflow-wrap: anywhere; }
+   .term .p { color: var(--good-text); } .term .e { color: var(--bad-text); }
+diff --git a/aws-cloud-practitioner/iam-policies.html b/aws-cloud-practitioner/iam-policies.html
+index 833535b..fc60399 100644
+--- a/aws-cloud-practitioner/iam-policies.html
++++ b/aws-cloud-practitioner/iam-policies.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>IAM policies</title>
+ <meta name="description" content="AWS Cloud Practitioner: the parts of an IAM policy (Version, Statement, Effect, Action, Resource, Principal, Condition) and how AWS evaluates a request: default deny, explicit deny, allow.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .pol-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--space-sm); align-items: start; }
+   @media (max-width: 880px) { .pol-grid { grid-template-columns: minmax(0, 1fr); } }
+diff --git a/aws-cloud-practitioner/iam-review.html b/aws-cloud-practitioner/iam-review.html
+index a039cf2..04b0fb5 100644
+--- a/aws-cloud-practitioner/iam-review.html
++++ b/aws-cloud-practitioner/iam-review.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>IAM review</title>
+ <meta name="description" content="AWS Cloud Practitioner: IAM section review with a one-path recap, section summary, commonly confused pairs, a mixed drill and 20 exam-style questions.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-xs); }
+   .topic-links a { display: block; padding: var(--space-sm) var(--space-sm); border-radius: 0; background: var(--panel); color: var(--fg); text-decoration: none; }
+diff --git a/aws-cloud-practitioner/iam-roles.html b/aws-cloud-practitioner/iam-roles.html
+index 46cf756..0cceccf 100644
+--- a/aws-cloud-practitioner/iam-roles.html
++++ b/aws-cloud-practitioner/iam-roles.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>IAM roles</title>
+ <meta name="description" content="AWS Cloud Practitioner: IAM roles. An EC2 instance or Lambda function assumes a role, gets temporary credentials from STS, and calls AWS without stored keys. Trust policy, permissions policy, cross-account and federation.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ </head>
+ <body class="wb">
+ <!-- shell:start -->
+diff --git a/aws-cloud-practitioner/iam-root-vs-user.html b/aws-cloud-practitioner/iam-root-vs-user.html
+index 85d3b12..3b21233 100644
+--- a/aws-cloud-practitioner/iam-root-vs-user.html
++++ b/aws-cloud-practitioner/iam-root-vs-user.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Root account vs IAM user</title>
+ <meta name="description" content="AWS Cloud Practitioner: what an AWS account is, the root user versus IAM users, tasks only the root user can perform, and why separate identities contain a leak.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ </head>
+ <body class="wb">
+ <!-- shell:start -->
+diff --git a/aws-cloud-practitioner/iam-security-tools.html b/aws-cloud-practitioner/iam-security-tools.html
+index e66c9f1..93fa6ef 100644
+--- a/aws-cloud-practitioner/iam-security-tools.html
++++ b/aws-cloud-practitioner/iam-security-tools.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>IAM security tools</title>
+ <meta name="description" content="AWS Cloud Practitioner: IAM credential report (account-wide CSV of credential status) and IAM Access Advisor (services each identity can use and when it last used them), used to apply least privilege.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .tool-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: var(--space-sm); align-items: start; }
+   @media (max-width: 880px) { .tool-grid { grid-template-columns: minmax(0, 1fr); } }
+diff --git a/aws-cloud-practitioner/iam-users-groups.html b/aws-cloud-practitioner/iam-users-groups.html
+index db32f3c..567d326 100644
+--- a/aws-cloud-practitioner/iam-users-groups.html
++++ b/aws-cloud-practitioner/iam-users-groups.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>IAM users and groups</title>
+ <meta name="description" content="AWS Cloud Practitioner: what IAM is, the root user, IAM users, IAM groups, policies attached to groups, and least privilege, shown as a request passing through IAM.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .mx { width: 100%; border-collapse: collapse; font-size: 14px; }
+   .mx th, .mx td { padding: var(--space-xs) var(--space-xs); border-bottom: 1px solid var(--line); text-align: center; }
+diff --git a/aws-cloud-practitioner/iam.html b/aws-cloud-practitioner/iam.html
+index c0fd22c..9557c00 100644
+--- a/aws-cloud-practitioner/iam.html
++++ b/aws-cloud-practitioner/iam.html
+@@ -6,10 +6,10 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>IAM: Users, Groups, Policies &amp; Roles</title>
+ <meta name="description" content="This page has been split into one explainer per topic.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
+ <style>
+   .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: var(--space-xs); margin-top: var(--space-md); }
+   .topic-links a { display: block; padding: var(--space-sm) var(--space-md); border-radius: 0; background: var(--panel); color: var(--fg); text-decoration: none; font-weight: 600; }
+diff --git a/aws-cloud-practitioner/index.html b/aws-cloud-practitioner/index.html
+index df908f2..9642bb1 100644
+--- a/aws-cloud-practitioner/index.html
++++ b/aws-cloud-practitioner/index.html
+@@ -6,10 +6,10 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>AWS Cloud Practitioner Explainers</title>
+ <meta name="description" content="Interactive, animated explainers for the AWS Certified Cloud Practitioner (CLF-C02) exam, following the course section by section.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/hub.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/hub.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
+ <style>
+   .y-aws { color: var(--orange); }
+   .dom { display: inline-block; font-family: var(--display); font-size: 13px; padding: var(--space-3xs) var(--space-xs); border-radius: 0; border: 1px solid var(--line); color: var(--muted); }
+@@ -168,7 +168,7 @@ const live=topics.filter(t=>t.live);
+ $('sLive').textContent=live.length;
+ $('sTopics').textContent=topics.length;
+ const next=SECTIONS.find(s=>!s.topics.every(t=>t.live));
+-$('sNext').textContent=next?next.t:'Done';
++$('sNext').textContent=next?next.t:'Done';if($('sNext').textContent==='Done')$('sNext').nextElementSibling.textContent='Every topic built';
+ const pct=Math.round(live.length*100/topics.length);
+ $('sPct').textContent=`${live.length} / ${topics.length} · ${pct}%`;
+ $('bar').style.width=Math.max(pct,live.length?2:0)+'%';
+diff --git a/aws-cloud-practitioner/instance-store.html b/aws-cloud-practitioner/instance-store.html
+index 6d28ab7..8ad64c0 100644
+--- a/aws-cloud-practitioner/instance-store.html
++++ b/aws-cloud-practitioner/instance-store.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>EC2 instance store</title>
+ <meta name="description" content="AWS Cloud Practitioner: EC2 instance store is a disk physically attached to the host, very fast but ephemeral: data is lost on stop, terminate or hardware failure.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .stores { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+   .store { border-radius: 0; padding: var(--space-sm) var(--space-sm); background: var(--panel-2); }
+diff --git a/aws-cloud-practitioner/overview-review.html b/aws-cloud-practitioner/overview-review.html
+index c4e2708..774609a 100644
+--- a/aws-cloud-practitioner/overview-review.html
++++ b/aws-cloud-practitioner/overview-review.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Cloud overview review</title>
+ <meta name="description" content="AWS Cloud Practitioner: review of the cloud and AWS overview section, with a mixed scenario drill, cheat-sheet and quiz.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .pick { display: grid; gap: var(--space-xs); }
+   .pick .q { font-size: 16px; color: var(--fg); }
+diff --git a/aws-cloud-practitioner/purchasing-options.html b/aws-cloud-practitioner/purchasing-options.html
+index 56151cf..2762c2f 100644
+--- a/aws-cloud-practitioner/purchasing-options.html
++++ b/aws-cloud-practitioner/purchasing-options.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>EC2 Purchasing Options</title>
+ <meta name="description" content="AWS Cloud Practitioner: pick the right EC2 pricing model for a workload, compare costs, and see why Spot jobs need checkpoints.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .q rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+   .q text { fill: var(--fg); font-size: 13.5px; font-weight: 600; text-anchor: middle; }
+diff --git a/aws-cloud-practitioner/regions-azs-edge.html b/aws-cloud-practitioner/regions-azs-edge.html
+index daf1b4b..a3719f7 100644
+--- a/aws-cloud-practitioner/regions-azs-edge.html
++++ b/aws-cloud-practitioner/regions-azs-edge.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Regions, AZs and edge locations</title>
+ <meta name="description" content="AWS Cloud Practitioner: AWS global infrastructure. Regions, Availability Zones, data centres, edge locations and points of presence, global vs regional services, and how to choose a Region.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .chooser { display: grid; gap: var(--space-sm); }
+   .chooser label { display: grid; gap: var(--space-2xs); font-size: 14px; color: var(--muted); }
+diff --git a/aws-cloud-practitioner/s3.html b/aws-cloud-practitioner/s3.html
+index 3c3c654..0db096a 100644
+--- a/aws-cloud-practitioner/s3.html
++++ b/aws-cloud-practitioner/s3.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Amazon S3</title>
+ <meta name="description" content="AWS Cloud Practitioner: who can read an S3 object, how versioning and delete markers work, and which storage class fits each access pattern.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .gate rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+   .gate text { fill: var(--fg); font-size: 13px; font-weight: 600; text-anchor: middle; }
+diff --git a/aws-cloud-practitioner/security-groups.html b/aws-cloud-practitioner/security-groups.html
+index 38c62f5..fbc6dc1 100644
+--- a/aws-cloud-practitioner/security-groups.html
++++ b/aws-cloud-practitioner/security-groups.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Security groups and classic ports</title>
+ <meta name="description" content="AWS Cloud Practitioner: EC2 security groups as a stateful, allow-only firewall in front of instances; inbound vs outbound, CIDR and security-group sources, timeout vs connection refused, and the classic ports 21, 22, 80, 443, 3389.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .wall { fill: var(--teal-wash); stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 6 5; }
+   .wall-label { fill: var(--cyan); font-family: var(--display); font-size: 12px; text-anchor: middle; }
+diff --git a/aws-cloud-practitioner/shared-responsibility.html b/aws-cloud-practitioner/shared-responsibility.html
+index 8cfee6f..72d7a11 100644
+--- a/aws-cloud-practitioner/shared-responsibility.html
++++ b/aws-cloud-practitioner/shared-responsibility.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Shared Responsibility Model</title>
+ <meta name="description" content="AWS Cloud Practitioner: pick EC2, RDS, Lambda, S3 or IAM and watch each security duty slide between AWS and you; then judge real incidents.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .col-head { font-family: var(--display); font-size: 13px; text-anchor: middle; }
+   .col-bg { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; }
+diff --git a/aws-cloud-practitioner/ssh.html b/aws-cloud-practitioner/ssh.html
+index fd13592..525be85 100644
+--- a/aws-cloud-practitioner/ssh.html
++++ b/aws-cloud-practitioner/ssh.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>SSH into EC2</title>
+ <meta name="description" content="AWS Cloud Practitioner: connect to a Linux EC2 instance with SSH on port 22 using a key pair; the .pem private key, chmod 400, ec2-user, PuTTY and .ppk, RDP for Windows, and the common errors.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .term { background: var(--code-bg); border: 1px solid var(--line); border-radius: 0; padding: var(--space-xs) var(--space-sm); font-family: var(--mono); font-size: 13px; color: var(--fg-soft); min-height: 110px; white-space: pre-wrap; overflow-wrap: anywhere; }
+   .term .p { color: var(--good-text); } .term .e { color: var(--bad-text); } .term .h { color: var(--accent-text); }
+diff --git a/aws-cloud-practitioner/storage-review.html b/aws-cloud-practitioner/storage-review.html
+index b998d30..2a20c9a 100644
+--- a/aws-cloud-practitioner/storage-review.html
++++ b/aws-cloud-practitioner/storage-review.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>EC2 storage review</title>
+ <meta name="description" content="AWS Cloud Practitioner: EC2 instance storage section review with a one-path recap, section summary, commonly confused pairs, a drill and 20 exam-style questions.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-xs); }
+   .topic-links a { display: block; padding: var(--space-sm) var(--space-sm); border-radius: 0; background: var(--panel); color: var(--fg); text-decoration: none; }
+diff --git a/aws-cloud-practitioner/traditional-it.html b/aws-cloud-practitioner/traditional-it.html
+index 31d9d47..dee50d0 100644
+--- a/aws-cloud-practitioner/traditional-it.html
++++ b/aws-cloud-practitioner/traditional-it.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Traditional IT</title>
+ <meta name="description" content="AWS Cloud Practitioner: how a website is served from your own data centre (DNS, router, switch, server, database) and why running it yourself is hard.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .ti-bars rect.dem { fill: var(--fg-soft); }
+   .ti-bars rect.drop { fill: var(--red); }
+diff --git a/aws-cloud-practitioner/what-is-cloud.html b/aws-cloud-practitioner/what-is-cloud.html
+index 96b5504..1d6db07 100644
+--- a/aws-cloud-practitioner/what-is-cloud.html
++++ b/aws-cloud-practitioner/what-is-cloud.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>What is cloud computing</title>
+ <meta name="description" content="AWS Cloud Practitioner: what cloud computing is, its five characteristics, the six advantages AWS lists, and private, public and hybrid cloud.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <style>
+   .wc-chart .dem { fill: none; stroke: var(--fg); stroke-width: 2.5; }
+   .wc-chart .cap { fill: none; stroke: var(--teal); stroke-width: 3; }
+diff --git a/index.html b/index.html
+index c70f27c..88fd564 100644
+--- a/index.html
++++ b/index.html
+@@ -12,8 +12,8 @@
+ <meta property="og:description" content="Animated, clickable explainers for system design, AWS, Python and Angular, built while learning.">
+ <meta property="og:url" content="https://seehowitworks.dev/">
+ <meta property="og:type" content="website">
+-<link rel="stylesheet" href="assets/css/site/workbench.css?v=20261119">
+-<script src="assets/js/theme.js?v=20261119"></script>
++<link rel="stylesheet" href="assets/css/site/workbench.css?v=20261122">
++<script src="assets/js/theme.js?v=20261122"></script>
+ <script>document.documentElement.classList.add('js');</script>
+ </head>
+ <body>
+@@ -66,7 +66,7 @@
+     <main class="main__in" id="main">
+       <section class="head" aria-labelledby="heroH">
+         <div>
+-          <div class="head__name"><img class="head__mark" src="assets/img/logo.svg?v=20261119" width="64" height="64" alt=""><h1 id="heroH"><span>See How</span> <span>It Works</span></h1></div>
++          <div class="head__name"><img class="head__mark" src="assets/img/logo.svg?v=20261122" width="64" height="64" alt=""><h1 id="heroH"><span>See How</span> <span>It Works</span></h1></div>
+           <p class="head__line">Big ideas. Broken down.</p>
+           <p>Animated, clickable walkthroughs of system design, AWS, Python and Angular. Follow the flow, change a variable, make it click.</p>
+         </div>
+@@ -141,7 +141,7 @@
+   </div>
+ </div>
+ 
+-<script src="assets/js/search-index.js?v=20261119" defer></script>
++<script src="assets/js/search-index.js?v=20261122" defer></script>
+ <script>
+ /* ===== Edit these two lists as you add work. =====
+    To add a subject, create its folder with an index.html, then set path (e.g. aws/index.html)
+diff --git a/python-fundamentals/builtins.html b/python-fundamentals/builtins.html
+index 1bd9a38..f11f1ec 100644
+--- a/python-fundamentals/builtins.html
++++ b/python-fundamentals/builtins.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Built-in functions toolbox</title>
+ <meta name="description" content="Python fundamentals: len, sum, min, max, sorted, reversed, enumerate, zip, any, all, round, abs, pow, divmod, help and dir, with real outputs.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="traces/builtins.js"></script>
+ <style>
+   .static-code { margin: 0; }
+diff --git a/python-fundamentals/classes-objects.html b/python-fundamentals/classes-objects.html
+index a553c1e..4403a26 100644
+--- a/python-fundamentals/classes-objects.html
++++ b/python-fundamentals/classes-objects.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Classes &amp; objects</title>
+ <meta name="description" content="Python fundamentals: classes as blueprints, __init__ and self, instance vs class attributes, methods, inheritance with super(), and how attribute lookup works.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="traces/classes-objects.js"></script>
+ <style>
+   .static-code { margin: 0; }
+diff --git a/python-fundamentals/collections.html b/python-fundamentals/collections.html
+index 8dd9b43..d2b9ef7 100644
+--- a/python-fundamentals/collections.html
++++ b/python-fundamentals/collections.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Collections: list, tuple, set, dict</title>
+ <meta name="description" content="Python fundamentals: lists, tuples, sets and dictionaries drawn as objects in memory, with indexing, unpacking, set operations and dict lookups.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="traces/collections.js"></script>
+ <style>
+   .static-code { margin: 0; }
+diff --git a/python-fundamentals/comprehensions.html b/python-fundamentals/comprehensions.html
+index ffd2b26..b8d90d4 100644
+--- a/python-fundamentals/comprehensions.html
++++ b/python-fundamentals/comprehensions.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Comprehensions</title>
+ <meta name="description" content="Python fundamentals: list, dict and set comprehensions and generator expressions, shown side by side with the loop they replace.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="traces/comprehensions.js"></script>
+ <style>
+   .static-code { margin: 0; }
+diff --git a/python-fundamentals/conditionals-loops.html b/python-fundamentals/conditionals-loops.html
+index 64b485f..8cc30b4 100644
+--- a/python-fundamentals/conditionals-loops.html
++++ b/python-fundamentals/conditionals-loops.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Conditionals &amp; loops</title>
+ <meta name="description" content="Python fundamentals: if/elif/else, for loops over sequences and range(), while loops, break, continue and the loop else clause, stepped line by line.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="traces/conditionals-loops.js"></script>
+ <style>
+   .static-code { margin: 0; }
+diff --git a/python-fundamentals/context-managers.html b/python-fundamentals/context-managers.html
+index 3e51642..9216d58 100644
+--- a/python-fundamentals/context-managers.html
++++ b/python-fundamentals/context-managers.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Context managers</title>
+ <meta name="description" content="Python fundamentals: the with statement, __enter__ and __exit__, guaranteed cleanup when errors happen, and writing your own with contextlib.contextmanager.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="traces/context-managers.js"></script>
+ <style>
+   .static-code { margin: 0; }
+diff --git a/python-fundamentals/decorators.html b/python-fundamentals/decorators.html
+index 46281f2..40097ff 100644
+--- a/python-fundamentals/decorators.html
++++ b/python-fundamentals/decorators.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Decorators</title>
+ <meta name="description" content="Python fundamentals: functions as objects, wrapper functions, the @ syntax, functools.wraps, decorators with arguments, and stacking decorators.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="traces/decorators.js"></script>
+ <style>
+   .static-code { margin: 0; }
+diff --git a/python-fundamentals/errors-exceptions.html b/python-fundamentals/errors-exceptions.html
+index 8af1290..3751fe4 100644
+--- a/python-fundamentals/errors-exceptions.html
++++ b/python-fundamentals/errors-exceptions.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Errors &amp; exceptions</title>
+ <meta name="description" content="Python fundamentals: reading a traceback, try/except/else/finally, catching specific exceptions, raising your own, and how an exception travels up the call stack.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="traces/errors-exceptions.js"></script>
+ <style>
+   .static-code { margin: 0; }
+diff --git a/python-fundamentals/files-csv-json.html b/python-fundamentals/files-csv-json.html
+index 6a7d6f2..28e0a0f 100644
+--- a/python-fundamentals/files-csv-json.html
++++ b/python-fundamentals/files-csv-json.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Files, CSV &amp; JSON</title>
+ <meta name="description" content="Python fundamentals: open() modes, the with statement, reading line by line, csv.reader and DictReader, csv.writer, and converting between Python objects and JSON.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="traces/files-csv-json.js"></script>
+ <style>
+   .static-code { margin: 0; }
+diff --git a/python-fundamentals/functional-tools.html b/python-fundamentals/functional-tools.html
+index 2172769..00617a9 100644
+--- a/python-fundamentals/functional-tools.html
++++ b/python-fundamentals/functional-tools.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Functional tools &amp; itertools</title>
+ <meta name="description" content="Python fundamentals: lambda, sorted with key=, map, filter, functools.reduce, and itertools helpers like chain, groupby and islice.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="traces/functional-tools.js"></script>
+ <style>
+   .static-code { margin: 0; }
+diff --git a/python-fundamentals/functions-arguments.html b/python-fundamentals/functions-arguments.html
+index c484a48..8d70033 100644
+--- a/python-fundamentals/functions-arguments.html
++++ b/python-fundamentals/functions-arguments.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Functions &amp; arguments</title>
+ <meta name="description" content="Python fundamentals: def and return, the call stack, positional and keyword arguments, defaults, *args and **kwargs, returning several values, and the mutable default trap.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="traces/functions-arguments.js"></script>
+ <style>
+   .static-code { margin: 0; }
+diff --git a/python-fundamentals/index.html b/python-fundamentals/index.html
+index 68cd923..6d38e9e 100644
+--- a/python-fundamentals/index.html
++++ b/python-fundamentals/index.html
+@@ -6,10 +6,10 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Python Fundamentals Explainers</title>
+ <meta name="description" content="Interactive, step-through explainers for Python fundamentals: see names, objects, frames and output change line by line.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/hub.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/hub.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
+ <style>
+   .y-py { color: var(--blue); }
+   .dom { display: inline-block; font-family: var(--mono); font-size: 12px; letter-spacing: .03em; padding: var(--space-3xs) var(--space-xs); border-radius: 0; border: 1px solid var(--line); color: var(--muted); }
+@@ -156,7 +156,7 @@ const live=all.filter(s=>s.file);
+ $('sLive').textContent=live.length;
+ $('sTopics').textContent=all.length;
+ const next=all.find(s=>!s.file);
+-$('sNext').textContent=next?`Topic ${all.indexOf(next)+1}`:'Done';
++$('sNext').textContent=next?`Topic ${all.indexOf(next)+1}`:'Done';if($('sNext').textContent==='Done')$('sNext').nextElementSibling.textContent='Every topic built';
+ const pct=Math.round(live.length*100/all.length);
+ $('sPct').textContent=`${live.length} / ${all.length} · ${pct}%`;
+ $('bar').style.width=Math.max(pct,live.length?2:0)+'%';
+diff --git a/python-fundamentals/iterators-generators.html b/python-fundamentals/iterators-generators.html
+index 89dc48d..5647add 100644
+--- a/python-fundamentals/iterators-generators.html
++++ b/python-fundamentals/iterators-generators.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Iterators &amp; generators</title>
+ <meta name="description" content="Python fundamentals: the iterator protocol (iter and next), StopIteration, generator functions with yield, generator expressions, and why lazy evaluation saves memory.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="traces/iterators-generators.js"></script>
+ <style>
+   .static-code { margin: 0; }
+diff --git a/python-fundamentals/modules-packages.html b/python-fundamentals/modules-packages.html
+index 0da64f1..655089f 100644
+--- a/python-fundamentals/modules-packages.html
++++ b/python-fundamentals/modules-packages.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Modules, packages, pip &amp; venv</title>
+ <meta name="description" content="Python fundamentals: what import does, module caching, from-imports and aliases, if __name__ == &#x27;__main__&#x27;, packages, pip and virtual environments.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="traces/modules-packages.js"></script>
+ <style>
+   .static-code { margin: 0; }
+diff --git a/python-fundamentals/oop-deeper.html b/python-fundamentals/oop-deeper.html
+index 1b2267e..666aec4 100644
+--- a/python-fundamentals/oop-deeper.html
++++ b/python-fundamentals/oop-deeper.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>OOP deeper: dunders, properties, dataclasses</title>
+ <meta name="description" content="Python fundamentals: special (dunder) methods like __repr__, __str__, __eq__ and __add__, @property, @classmethod and @staticmethod, polymorphism, and @dataclass.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="traces/oop-deeper.js"></script>
+ <style>
+   .static-code { margin: 0; }
+diff --git a/python-fundamentals/print-input-fstrings.html b/python-fundamentals/print-input-fstrings.html
+index a59b4bb..5c69b13 100644
+--- a/python-fundamentals/print-input-fstrings.html
++++ b/python-fundamentals/print-input-fstrings.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>print, input &amp; f-strings</title>
+ <meta name="description" content="Python fundamentals: how print() assembles output with sep and end, why input() always returns text, and how f-strings and format specs build strings.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="traces/print-input-fstrings.js"></script>
+ <style>
+   .static-code { margin: 0; }
+diff --git a/python-fundamentals/scope.html b/python-fundamentals/scope.html
+index 549a1bf..af37950 100644
+--- a/python-fundamentals/scope.html
++++ b/python-fundamentals/scope.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Scope (LEGB)</title>
+ <meta name="description" content="Python fundamentals: local, enclosing, global and built-in scopes, how Python looks up a name, global and nonlocal, closures, and UnboundLocalError.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="traces/scope.js"></script>
+ <style>
+   .static-code { margin: 0; }
+diff --git a/python-fundamentals/strings.html b/python-fundamentals/strings.html
+index 88955f1..c72a98f 100644
+--- a/python-fundamentals/strings.html
++++ b/python-fundamentals/strings.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Strings in depth</title>
+ <meta name="description" content="Python fundamentals: string indexing with positive and negative positions, slicing with start:stop:step, common methods, and why strings are immutable.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="traces/strings.js"></script>
+ <style>
+   .static-code { margin: 0; }
+diff --git a/python-fundamentals/type-hints.html b/python-fundamentals/type-hints.html
+index 4d5ac8f..2ce8fe2 100644
+--- a/python-fundamentals/type-hints.html
++++ b/python-fundamentals/type-hints.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Type hints</title>
+ <meta name="description" content="Python fundamentals: annotating variables, parameters and return values, built-in generics like list[int], X | None, and what a type checker such as mypy catches that Python itself doesn&#x27;t.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="traces/type-hints.js"></script>
+ <style>
+   .static-code { margin: 0; }
+diff --git a/python-fundamentals/variables-objects.html b/python-fundamentals/variables-objects.html
+index 248fe55..6c362fc 100644
+--- a/python-fundamentals/variables-objects.html
++++ b/python-fundamentals/variables-objects.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Variables, Objects &amp; Types</title>
+ <meta name="description" content="Python fundamentals: names are labels that point to objects. Step through real code to see objects, references, mutability, aliasing and type conversion.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="traces/variables-objects.js"></script>
+ <style>
+   .mach .box rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+diff --git a/python-fundamentals/working-with-apis.html b/python-fundamentals/working-with-apis.html
+index 9a50490..fa9b643 100644
+--- a/python-fundamentals/working-with-apis.html
++++ b/python-fundamentals/working-with-apis.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Working with APIs</title>
+ <meta name="description" content="Python fundamentals: calling HTTP APIs with requests, query parameters, JSON bodies, status codes, raise_for_status, timeouts, and paging through results.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/explainer.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
+-<script src="../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
++<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="traces/working-with-apis.js"></script>
+ <style>
+   .static-code { margin: 0; }
+diff --git a/system-design/hld/availability-slos.html b/system-design/hld/availability-slos.html
+index 04a0b33..54c4b1f 100644
+--- a/system-design/hld/availability-slos.html
++++ b/system-design/hld/availability-slos.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Availability, SLIs, SLOs & SLAs</title>
+ <meta name="description" content="Day 6: what each extra nine costs in downtime, an error budget you can burn with incidents, and how series and redundant components combine into overall availability.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <script src="foundations-flows.js"></script>
+ <style>
+diff --git a/system-design/hld/cache-eviction.html b/system-design/hld/cache-eviction.html
+index 599aa79..54a8087 100644
+--- a/system-design/hld/cache-eviction.html
++++ b/system-design/hld/cache-eviction.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Cache Eviction Policies</title>
+ <meta name="description" content="H18: LRU, LFU, FIFO and TTL, animated; how an LRU cache is built from a hash map and a doubly linked list; and a three-way eviction race.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <script src="caching-flows.js"></script>
+ <style>
+@@ -30,7 +30,7 @@
+   .cev-score b { color: var(--fg); font-size: 15px; }
+   .cev-keys { display: flex; flex-wrap: wrap; gap: var(--space-2xs); justify-content: center; margin-top: var(--space-sm); }
+   .cev-keys .btn { min-width: 44px; font-family: var(--mono); font-weight: 600; }
+-  .cev-seq { font-family: var(--mono); font-size: 12.5px; color: var(--muted); text-align: center; margin: var(--space-xs) 0 0; overflow-wrap: anywhere; }
++  .cev-seq { font-family: var(--mono); font-size: 12.5px; color: var(--muted); text-align: start; margin: var(--space-xs) 0 0; overflow-wrap: anywhere; }
+   .cev-seq b { color: var(--accent-text); }
+   .cev-predict { display: flex; flex-wrap: wrap; gap: var(--space-2xs); align-items: center; justify-content: center; margin-top: var(--space-xs); font-size: 14px; }
+   .cev-predict .btn[aria-pressed="true"] { border-color: var(--accent-text); color: var(--accent-text); }
+diff --git a/system-design/hld/cache-failure-modes.html b/system-design/hld/cache-failure-modes.html
+index 57915cb..6539a19 100644
+--- a/system-design/hld/cache-failure-modes.html
++++ b/system-design/hld/cache-failure-modes.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Caching Failure Modes</title>
+ <meta name="description" content="H20: cache stampede, avalanche, penetration, hot keys and stale data, animated with their fixes; plus a simulator that charts database load when a hot key or many keys expire.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <script src="caching-flows.js"></script>
+ <style>
+diff --git a/system-design/hld/cache-read-strategies.html b/system-design/hld/cache-read-strategies.html
+index f4051d3..0c8f644 100644
+--- a/system-design/hld/cache-read-strategies.html
++++ b/system-design/hld/cache-read-strategies.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Cache Read Strategies</title>
+ <meta name="description" content="H16: cache-aside, read-through and refresh-ahead, animated step by step, with a request lab where you change the TTL and watch the hit ratio.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <script src="caching-flows.js"></script>
+ <style>
+diff --git a/system-design/hld/cache-write-strategies.html b/system-design/hld/cache-write-strategies.html
+index 5e1921e..ab3598f 100644
+--- a/system-design/hld/cache-write-strategies.html
++++ b/system-design/hld/cache-write-strategies.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Cache Write Strategies &amp; Invalidation</title>
+ <meta name="description" content="H17: write-through, write-behind, write-around and invalidate-on-write, animated, plus a race replayer that shows why you delete the cache key instead of overwriting it.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <script src="caching-flows.js"></script>
+ <style>
+diff --git a/system-design/hld/caching-in-practice.html b/system-design/hld/caching-in-practice.html
+index f3dfc32..fab1e7e 100644
+--- a/system-design/hld/caching-in-practice.html
++++ b/system-design/hld/caching-in-practice.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Caching in Practice: the Interview Playbook</title>
+ <meta name="description" content="Week 3 playbook: a worked caching design step by step, clearing caches across servers, services and regions, CDN cache keys and Vary, cache leaks, big keys, warming, Redis beyond caching, a cache sizing calculator, a CDN cache-key lab, the metrics to watch and an answer template.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <script src="caching-flows.js"></script>
+ <style>
+diff --git a/system-design/hld/caching-overview.html b/system-design/hld/caching-overview.html
+index cd51995..4e4eade 100644
+--- a/system-design/hld/caching-overview.html
++++ b/system-design/hld/caching-overview.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Why Caching Exists</title>
+ <meta name="description" content="Day 15: why caches exist, how hits and misses work, the hit ratio, where caches live from browser to database, and why we don't cache everything. With a live hit-ratio simulator.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <style>
+   .cz-strip { display: grid; grid-template-columns: repeat(40, minmax(0, 1fr)); gap: var(--space-3xs); margin-top: var(--space-sm); }
+diff --git a/system-design/hld/caching-patterns-atlas.html b/system-design/hld/caching-patterns-atlas.html
+index 31e1adf..d35d3f8 100644
+--- a/system-design/hld/caching-patterns-atlas.html
++++ b/system-design/hld/caching-patterns-atlas.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Cache Patterns at a Glance</title>
+ <meta name="description" content="Week 3 at a glance: all 14 caching patterns as infographic cards with animated diagrams, a cheat-sheet and a 'which one fits?' drill.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <script src="caching-flows.js"></script>
+ </head>
+diff --git a/system-design/hld/cdn-http-caching.html b/system-design/hld/cdn-http-caching.html
+index 5f8227d..6fabcf2 100644
+--- a/system-design/hld/cdn-http-caching.html
++++ b/system-design/hld/cdn-http-caching.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>CDN &amp; HTTP Caching</title>
+ <meta name="description" content="H21: pull vs push CDNs, Cache-Control, ETag and 304, versioned file names and purges, animated; plus a header lab that shows which cache answers your next request.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <script src="caching-flows.js"></script>
+ <style>
+diff --git a/system-design/hld/client-server-dns.html b/system-design/hld/client-server-dns.html
+index 9f1dadd..bc99bac 100644
+--- a/system-design/hld/client-server-dns.html
++++ b/system-design/hld/client-server-dns.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Client-Server & DNS</title>
+ <meta name="description" content="Day 1: how a client finds a server. Watch a live DNS lookup walk resolver, root, TLD and authoritative servers, with caching, TTL and outages.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <script src="foundations-flows.js"></script>
+ </head>
+diff --git a/system-design/hld/distributed-caching.html b/system-design/hld/distributed-caching.html
+index 7802e3d..dc95267 100644
+--- a/system-design/hld/distributed-caching.html
++++ b/system-design/hld/distributed-caching.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Distributed Caching</title>
+ <meta name="description" content="H19: in-process vs distributed caches, L1 + L2, Redis cluster hash slots, replication and persistence, animated; plus a lab showing how many keys move when you add a cache node.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <script src="caching-flows.js"></script>
+ <style>
+diff --git a/system-design/hld/http.html b/system-design/hld/http.html
+index bf2efca..0401113 100644
+--- a/system-design/hld/http.html
++++ b/system-design/hld/http.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>HTTP Requests & Status Codes</title>
+ <meta name="description" content="Day 2: HTTP request and response anatomy, methods and idempotency you can test by sending twice, and which component returns each status code.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <script src="foundations-flows.js"></script>
+ </head>
+diff --git a/system-design/hld/https-tls.html b/system-design/hld/https-tls.html
+index 4b129af..1d710af 100644
+--- a/system-design/hld/https-tls.html
++++ b/system-design/hld/https-tls.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>HTTPS & the TLS Handshake</title>
+ <meta name="description" content="Day 4: TLS 1.2 vs TLS 1.3 handshakes on a timeline showing where encryption starts, and a certificate validator you can break.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <script src="foundations-flows.js"></script>
+ </head>
+diff --git a/system-design/hld/index.html b/system-design/hld/index.html
+index 9b53d6b..1fe57a5 100644
+--- a/system-design/hld/index.html
++++ b/system-design/hld/index.html
+@@ -6,10 +6,10 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>System Design: HLD</title>
+ <meta name="description" content="High-level design (HLD): interactive, animated explainers for the 147-session (H1–H147) system design roadmap.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/hub.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/hub.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
+ </head>
+ <body class="wb">
+ <!-- shell:start -->
+diff --git a/system-design/hld/latency-throughput.html b/system-design/hld/latency-throughput.html
+index 031ceb4..faa2b4f 100644
+--- a/system-design/hld/latency-throughput.html
++++ b/system-design/hld/latency-throughput.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Latency, Percentiles & Queueing</title>
+ <meta name="description" content="Day 5: latency vs throughput, why p95/p99 beat averages, and a live queue that shows latency exploding as a server nears saturation, with Little's Law.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <style>
+   .bar-rect { fill: var(--teal); }
+diff --git a/system-design/hld/load-balancing-algorithms.html b/system-design/hld/load-balancing-algorithms.html
+index 8b36f62..4111b22 100644
+--- a/system-design/hld/load-balancing-algorithms.html
++++ b/system-design/hld/load-balancing-algorithms.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Load Balancing Algorithms</title>
+ <meta name="description" content="Day 13: watch seven static and dynamic load balancing algorithms route live requests across three servers.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ </head>
+ <body data-anim="continuous" class="wb">
+diff --git a/system-design/hld/proxy-lb-gateway.html b/system-design/hld/proxy-lb-gateway.html
+index 2687054..ede218f 100644
+--- a/system-design/hld/proxy-lb-gateway.html
++++ b/system-design/hld/proxy-lb-gateway.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Reverse Proxy, Load Balancer & API Gateway</title>
+ <meta name="description" content="Days 10–12: follow requests through CDN, API gateway, load balancers and service instances; compare Layer 4 and Layer 7 load balancing; see what each layer is for.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <script src="foundations-flows.js"></script>
+ <style>.dead rect { stroke: var(--red) !important; stroke-dasharray: 6 4; }</style>
+diff --git a/system-design/hld/scale-web-app.html b/system-design/hld/scale-web-app.html
+index c82f73c..2cc69fe 100644
+--- a/system-design/hld/scale-web-app.html
++++ b/system-design/hld/scale-web-app.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Design: Scale a Web App to Millions</title>
+ <meta name="description" content="H14 design: grow one web app from a single server to millions of users, one layer at a time: separate database, load balancer and stateless servers, cache and CDN, read replicas, queues, redundancy and multiple regions. With a scale-ladder calculator and an answer template.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <style>
+   .ladder { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: var(--space-xs); }
+diff --git a/system-design/hld/scaling.html b/system-design/hld/scaling.html
+index 61e0937..f38da39 100644
+--- a/system-design/hld/scaling.html
++++ b/system-design/hld/scaling.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Vertical vs Horizontal Scaling</title>
+ <meta name="description" content="Day 8: scale up a single server or scale out to many, push traffic until something saturates, find the bottleneck, and kill a server to see single points of failure.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <style>
+   .u-bg { fill: var(--track); }
+diff --git a/system-design/hld/stateless.html b/system-design/hld/stateless.html
+index 0da7c16..5b0ce44 100644
+--- a/system-design/hld/stateless.html
++++ b/system-design/hld/stateless.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Stateless Applications</title>
+ <meta name="description" content="Day 9: a shopping cart under three designs — server memory, sticky sessions, and external state in Redis — with crashes and load balancing that show why stateless servers scale.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <script src="foundations-flows.js"></script>
+ <style>.dead rect { stroke: var(--red) !important; stroke-dasharray: 6 4; }</style>
+diff --git a/system-design/hld/tcp-udp.html b/system-design/hld/tcp-udp.html
+index 01892bd..3464435 100644
+--- a/system-design/hld/tcp-udp.html
++++ b/system-design/hld/tcp-udp.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>TCP vs UDP</title>
+ <meta name="description" content="Day 3: a side-by-side race of TCP and UDP sending the same five packets with one lost, showing the three-way handshake, duplicate ACKs, retransmission and in-order delivery.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ </head>
+ <body data-anim="continuous" class="wb">
+diff --git a/system-design/hld/week-1-review.html b/system-design/hld/week-1-review.html
+index 0e1fae3..198649c 100644
+--- a/system-design/hld/week-1-review.html
++++ b/system-design/hld/week-1-review.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Week 1 Review: Journey of a Request</title>
+ <meta name="description" content="Day 7: the whole of Week 1 in two views — a timeline of DNS, TCP, TLS and HTTP costs you can tune, and the protocol stack showing how a request is wrapped layer by layer.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <style>
+   .gantt-bar { rx: 6; }
+diff --git a/system-design/index.html b/system-design/index.html
+index 89d157b..1cee582 100644
+--- a/system-design/index.html
++++ b/system-design/index.html
+@@ -6,10 +6,10 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>System Design</title>
+ <meta name="description" content="System design explainers in two tracks: high-level design (HLD) and low-level design (LLD).">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/hub.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/hub.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
+ <style>.map-cta{display:flex;flex-wrap:wrap;gap:var(--space-2xs) var(--space-sm);align-items:baseline;margin-top:var(--space-md);padding:var(--space-sm) var(--space-md);border:1px dashed var(--teal);border-radius: 0;color:inherit;text-decoration:none}.map-cta b{color:var(--teal-text);font-size:17px}.map-cta span{color:var(--fg-soft)}.map-cta:hover{background:var(--panel)}</style>
+ </head>
+ <body class="wb">
+diff --git a/system-design/lld/abstract-factory.html b/system-design/lld/abstract-factory.html
+index 54e12d6..e9699df 100644
+--- a/system-design/lld/abstract-factory.html
++++ b/system-design/lld/abstract-factory.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Abstract Factory</title>
+ <meta name="description" content="Creational pattern L14: create families of related objects that must match. File storage, message queue and secrets for Azure, AWS or local development come from one factory, so you can't mix them by accident.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <style>
+   .slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+diff --git a/system-design/lld/builder.html b/system-design/lld/builder.html
+index 849470c..8650fd5 100644
+--- a/system-design/lld/builder.html
++++ b/system-design/lld/builder.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Builder</title>
+ <meta name="description" content="Creational pattern L15: build a complex object step by step. An appointment with many optional parts moves from telescoping constructors to a fluent builder that validates in Build(), plus a director for presets and when C# object initializers are enough.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <style>
+   .result { margin-top: var(--space-xs); border: 2px solid var(--line); border-radius: 0; padding: var(--space-sm) var(--space-sm); background: var(--panel); min-height: 60px; transition: border-color .25s; }
+diff --git a/system-design/lld/factory-method.html b/system-design/lld/factory-method.html
+index 55d16df..13c7e7c 100644
+--- a/system-design/lld/factory-method.html
++++ b/system-design/lld/factory-method.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Simple Factory &amp; Factory Method</title>
+ <meta name="description" content="Creational pattern L13: stop scattering new. Appointment reminders move from new-in-every-caller to a simple factory, then to the factory method pattern, then to keyed DI services in .NET.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ </head>
+ <body class="wb">
+diff --git a/system-design/lld/index.html b/system-design/lld/index.html
+index d67cb9b..a029950 100644
+--- a/system-design/lld/index.html
++++ b/system-design/lld/index.html
+@@ -6,10 +6,10 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>System Design: LLD</title>
+ <meta name="description" content="Low-level design (LLD): interactive explainers for object-oriented design, patterns and LLD problems.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/hub.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/hub.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
+ </head>
+ <body class="wb">
+ <!-- shell:start -->
+diff --git a/system-design/lld/prototype.html b/system-design/lld/prototype.html
+index 82b66dc..895e556 100644
+--- a/system-design/lld/prototype.html
++++ b/system-design/lld/prototype.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Prototype</title>
+ <meta name="description" content="Creational pattern L16: create new objects by copying a configured one. See in a memory diagram why assignment isn't a copy, how MemberwiseClone and record with-expressions share lists, and what a deep copy changes.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ </head>
+ <body class="wb">
+diff --git a/system-design/lld/singleton.html b/system-design/lld/singleton.html
+index e7c9817..a405efc 100644
+--- a/system-design/lld/singleton.html
++++ b/system-design/lld/singleton.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Singleton</title>
+ <meta name="description" content="Creational pattern L12: one instance shared by everyone. Watch two threads race through a naive singleton, fix it with lock, double-checked locking and Lazy&lt;T&gt;, then see why a DI singleton is usually better and how a captive dependency bites.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ </head>
+ <body class="wb">
+diff --git a/system-design/lld/solid-dip.html b/system-design/lld/solid-dip.html
+index aa24117..5317cc2 100644
+--- a/system-design/lld/solid-dip.html
++++ b/system-design/lld/solid-dip.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Dependency Inversion Principle</title>
+ <meta name="description" content="SOLID, D: high-level policy and low-level details both depend on an abstraction the high-level side owns. Watch the dependency arrow flip, then wire implementations with constructor injection.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <style>
+   .proj rect { fill: transparent; stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 2 5; }
+diff --git a/system-design/lld/solid-isp.html b/system-design/lld/solid-isp.html
+index df9a884..0fe162a 100644
+--- a/system-design/lld/solid-isp.html
++++ b/system-design/lld/solid-isp.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Interface Segregation Principle</title>
+ <meta name="description" content="SOLID, I: no client should depend on methods it doesn't use. A fat repository interface is split into role interfaces; .NET's read-only collection interfaces show the same idea.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <style>
+   .least { display: grid; gap: var(--space-xs); margin-top: var(--space-xs); }
+diff --git a/system-design/lld/solid-lsp.html b/system-design/lld/solid-lsp.html
+index 8da01e9..1b5b2ef 100644
+--- a/system-design/lld/solid-lsp.html
++++ b/system-design/lld/solid-lsp.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Liskov Substitution Principle</title>
+ <meta name="description" content="SOLID, L: a subtype must work anywhere its base type is expected. Parent and Child, Rectangle and Square, contract rules and a substitution tester.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <style>
+   .suite { display: grid; gap: var(--space-2xs); margin-top: var(--space-xs); }
+diff --git a/system-design/lld/solid-ocp.html b/system-design/lld/solid-ocp.html
+index 07aad2f..015dc3d 100644
+--- a/system-design/lld/solid-ocp.html
++++ b/system-design/lld/solid-ocp.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Open-Closed Principle</title>
+ <meta name="description" content="SOLID, O: add behaviour without editing tested code. A fee calculator moves from a switch to strategies, a repository gains caching through a decorator.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <style>
+   .chain { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0; margin-top: var(--space-sm); }
+diff --git a/system-design/lld/solid-srp.html b/system-design/lld/solid-srp.html
+index d77df0a..d364643 100644
+--- a/system-design/lld/solid-srp.html
++++ b/system-design/lld/solid-srp.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>Single Responsibility Principle</title>
+ <meta name="description" content="SOLID, S: a class should have one reason to change. A god class splits into focused classes; change requests show why.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <style>
+   .files { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+diff --git a/system-design/lld/solid.html b/system-design/lld/solid.html
+index 0bb9e0a..203e7fc 100644
+--- a/system-design/lld/solid.html
++++ b/system-design/lld/solid.html
+@@ -6,11 +6,11 @@
+ <link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>SOLID Principles</title>
+ <meta name="description" content="SOLID overview: five object-oriented design guidelines shown in one appointment-booking class diagram, with a spot-the-violation game.">
+-<link rel="stylesheet" href="../../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261119">
+-<script src="../../assets/js/theme.js?v=20261119"></script>
+-<script src="../../assets/js/explainer-kit.js?v=20261119"></script>
++<link rel="stylesheet" href="../../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261122">
++<script src="../../assets/js/theme.js?v=20261122"></script>
++<script src="../../assets/js/explainer-kit.js?v=20261122"></script>
+ <script src="../sd-series.js"></script>
+ <style>
+   .pcards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: var(--space-xs); margin-top: var(--space-xs); }
+diff --git a/system-design/map.html b/system-design/map.html
+index 2166e72..2814284 100644
+--- a/system-design/map.html
++++ b/system-design/map.html
+@@ -6,10 +6,10 @@
+ <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+ <title>System Design: learning map</title>
+ <meta name="description" content="Bird's-eye map of the system design roadmap: every HLD and LLD phase, the topics inside it, and which explainers are ready.">
+-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
+-<link rel="stylesheet" href="../assets/css/hub.css?v=20261119">
+-<script src="../assets/js/theme.js?v=20261119"></script>
++<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
++<link rel="stylesheet" href="../assets/css/hub.css?v=20261122">
++<script src="../assets/js/theme.js?v=20261122"></script>
+ <style>
+   .map-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-md); }
+   .map-head .lede { max-width: 640px; }

@@ -6,10 +6,10 @@
 <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
 <title>System Design: learning map</title>
 <meta name="description" content="Bird's-eye map of the system design roadmap: every HLD and LLD phase, the topics inside it, and which explainers are ready.">
-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
-<link rel="stylesheet" href="../assets/css/hub.css?v=20261119">
-<script src="../assets/js/theme.js?v=20261119"></script>
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/hub.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
 <style>
   .map-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-md); }
   .map-head .lede { max-width: 640px; }
@@ -18,14 +18,15 @@
   .seg-tabs button b { font-size: 15px; }
   .seg-tabs button span { font-size: 12px; color: var(--muted); }
   .seg-tabs button:hover { background: var(--panel-2); color: var(--fg); }
-  .seg-tabs button[aria-pressed="true"] { background: var(--teal-wash); color: var(--fg); box-shadow: inset 0 0 0 1px var(--teal); }
+  .seg-tabs button[aria-pressed="true"] { background: var(--fg); color: var(--bg); box-shadow: none; }
+  .seg-tabs button[aria-pressed="true"] span { color: color-mix(in oklab, var(--bg) 72%, transparent); }
 
   /* overview rail: every phase at a glance */
   .rail { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: var(--space-xs); margin: var(--space-lg) 0 var(--space-xs); }
   .rail a { --acc: var(--teal); display: grid; gap: var(--space-2xs); padding: var(--space-xs) var(--space-sm) var(--space-sm); border-radius: 0; background: var(--panel); color: inherit; text-decoration: none; transition: border-color .15s, transform .15s; }
   .rail a:hover { border-color: var(--acc); transform: translateY(-2px); }
   .rail .top { display: flex; align-items: center; gap: var(--space-xs); }
-  .rail .n { width: 22px; height: 22px; flex: none; border-radius: 50%; display: grid; place-items: center; font: 600 12px var(--mono); color: var(--ink); background: var(--acc); }
+  .rail .n { width: 22px; height: 22px; flex: none; border-radius: 50%; display: grid; place-items: center; font: 600 12px var(--mono); color: var(--color-accent-ink); background: var(--acc); }
   .rail .nm { font-size: 13.5px; font-weight: 600; line-height: 1.2; }
   .rail .bar { height: 4px; border-radius: 0; background: var(--track); overflow: hidden; }
   .rail .bar i { display: block; height: 100%; background: var(--acc); }
@@ -127,6 +128,10 @@
 </ul></details>
 <h2 class="wb-track">LLD</h2>
 <a class="wb-road" href="lld/index.html">LLD roadmap</a>
+<details class="wb-g"><summary>Phase 1: Foundations</summary><ul>
+<li><a href="lld/uml.html"><span class="t">UML: class &amp; sequence diagrams</span><span class="n">L3</span></a></li>
+<li><a href="lld/design-principles.html"><span class="t">Design principles: DRY, KISS, YAGNI &amp; more</span><span class="n">L4</span></a></li>
+</ul></details>
 <details class="wb-g"><summary>Phase 2: SOLID</summary><ul>
 <li><a href="lld/solid.html"><span class="t">SOLID overview</span><span class="n">L6</span></a></li>
 <li><a href="lld/solid-srp.html"><span class="t">S: Single responsibility</span><span class="n">L7</span></a></li>
@@ -144,8 +149,8 @@
 </ul></details>
 </nav></details>
 <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
-<li><a href="index.html" aria-current="true">System Design<span class="n">32</span></a></li>
-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
+<li><a href="index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
 <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
 <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
 <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
@@ -270,7 +275,7 @@ const NAMES = {
  lld:{1:"OOP pillars",2:"Relationships",3:"UML",4:"Design principles",5:"LLD interview method",6:"SOLID overview",7:"S · Single responsibility",8:"O · Open-closed",9:"L · Liskov substitution",10:"I · Interface segregation",11:"D · Dependency inversion",12:"Singleton",13:"Simple factory & factory method",14:"Abstract factory",15:"Builder",16:"Prototype",17:"Adapter",18:"Decorator",19:"Proxy",20:"Facade",21:"Composite",22:"Bridge",23:"Flyweight",24:"Strategy",25:"Observer",26:"State",27:"Chain of responsibility",28:"Command",29:"Template method",30:"Iterator",31:"Mediator",32:"Memento",33:"Visitor",34:"Null object & Interpreter",35:"Repository, Unit of Work, service layer",36:"Clean architecture in code",37:"Threads & tasks",38:"Race conditions & locks",39:"Other primitives",40:"Producer-consumer",41:"Concurrent collections",42:"Concurrency bugs",43:"Thread-safe designs",44:"Tic-tac-toe",45:"Snake & ladder",46:"Parking lot",47:"Vending machine",48:"Elevator system",49:"ATM",50:"LRU cache",51:"Rate limiter",52:"Logging framework",53:"Notification service",54:"Pub/sub system",55:"BookMyShow (movie booking)",56:"Meeting room / hotel booking",57:"Splitwise",58:"Library management",59:"Car rental",60:"Inventory & order management",61:"Cricbuzz / live score",62:"Chess",63:"Payment system",64:"Food delivery",65:"Hash map",66:"Call center",67:"Deck of cards / blackjack"}
 };
 
-const ACC=['var(--teal)','var(--blue)','var(--violet)','var(--orange)','var(--cyan)','var(--red)','var(--yellow)','var(--good-text)'];
+const ACC=['var(--color-accent)'];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 /* explainer files by topic number, read from the shared series list (labels look like "H10–12 Proxy" or "L6 Overview") */
@@ -324,7 +329,7 @@ function render(key){
       </div></section>`;
   }).join('');
   const f=T.finish;
-  html+=`<section class="ph finish" style="--acc:var(--yellow)"><div class="node" aria-hidden="true">★</div><div class="ph-box">
+  html+=`<section class="ph finish" style="--acc:var(--fg)"><div class="node" aria-hidden="true">★</div><div class="ph-box">
     <div class="ph-top"><h2>Interview day</h2></div><p>${esc(f[2])}</p>
     <div class="strip"><b>${esc(f[0])}</b><span>${esc(f[1])}</span></div></div></section>`;
   document.getElementById('route').innerHTML=html;

@@ -12,8 +12,8 @@
 <meta property="og:description" content="Animated, clickable explainers for system design, AWS, Python and Angular, built while learning.">
 <meta property="og:url" content="https://seehowitworks.dev/">
 <meta property="og:type" content="website">
-<link rel="stylesheet" href="assets/css/site/workbench.css?v=20261119">
-<script src="assets/js/theme.js?v=20261119"></script>
+<link rel="stylesheet" href="assets/css/site/workbench.css?v=20261122">
+<script src="assets/js/theme.js?v=20261122"></script>
 <script>document.documentElement.classList.add('js');</script>
 </head>
 <body>
@@ -66,7 +66,7 @@
     <main class="main__in" id="main">
       <section class="head" aria-labelledby="heroH">
         <div>
-          <div class="head__name"><img class="head__mark" src="assets/img/logo.svg?v=20261119" width="64" height="64" alt=""><h1 id="heroH"><span>See How</span> <span>It Works</span></h1></div>
+          <div class="head__name"><img class="head__mark" src="assets/img/logo.svg?v=20261122" width="64" height="64" alt=""><h1 id="heroH"><span>See How</span> <span>It Works</span></h1></div>
           <p class="head__line">Big ideas. Broken down.</p>
           <p>Animated, clickable walkthroughs of system design, AWS, Python and Angular. Follow the flow, change a variable, make it click.</p>
         </div>
@@ -86,7 +86,7 @@
           </div>
           <div class="lab__bar" id="labBar" hidden>
             <button class="btn" type="button" data-l="reset">Start again</button>
-            <button class="btn btn--ink" type="button" data-l="play">Play</button>
+            <button class="btn" type="button" data-l="play">Play</button>
             <ol class="steps" id="labSteps" aria-hidden="true"></ol>
             <span class="lab__count" id="labCount"></span>
             <button class="btn btn--primary" type="button" data-l="next">Next step</button>
@@ -141,7 +141,7 @@
   </div>
 </div>
 
-<script src="assets/js/search-index.js?v=20261119" defer></script>
+<script src="assets/js/search-index.js?v=20261122" defer></script>
 <script>
 /* ===== Edit these two lists as you add work. =====
    To add a subject, create its folder with an index.html, then set path (e.g. aws/index.html)
@@ -150,23 +150,25 @@
    After adding or renaming pages, run: python3 tools/build_search_index.py
    and python3 tools/build_shell.py (refreshes the sidebar on every explainer page). */
 const SUBJECTS = [
-  {name:"System Design", path:"system-design/index.html", note:"HLD and LLD", pages:32,
+  {name:"System Design", path:"system-design/index.html", note:"HLD and LLD", pages:34,
    tracks:[
-     {label:"HLD", title:"Design the whole system.", blurb:"Networking, scaling, caching, then distributed systems.", n:147, unit:"sessions, 21 built so far", href:"system-design/hld/index.html", cta:"Explore HLD"},
-     {label:"LLD", title:"Make the details work.", blurb:"OOP and SOLID, design patterns, concurrency, then classic problems.", n:67, unit:"topics in the roadmap", href:"system-design/lld/index.html", cta:"Explore LLD"}]},
-  {name:"AWS", path:"aws-cloud-practitioner/index.html", note:"CLF-C02", pages:43,
+     {label:"HLD", title:"Design the whole system.", blurb:"Networking, scaling, caching, then distributed systems.", n:21, unit:"explainers, 147 sessions planned", href:"system-design/hld/index.html", cta:"Explore HLD"},
+     {label:"LLD", title:"Make the details work.", blurb:"OOP and SOLID, design patterns, concurrency, then classic problems.", n:13, unit:"explainers, 67 topics planned", href:"system-design/lld/index.html", cta:"Explore LLD"}]},
+  {name:"AWS", path:"aws-cloud-practitioner/index.html", note:"CLF-C02", pages:34,
    tracks:[
-     {label:"Cloud Practitioner", title:"Follow every request through AWS.", blurb:"Regions, AZs and edge locations, then IAM, EC2, storage, S3 and databases.", n:30, unit:"of 85 topics rebuilt", href:"aws-cloud-practitioner/index.html", cta:"Explore AWS"}]},
-  {name:"Python", path:"python-fundamentals/index.html", note:"20 of 20 topics", pages:20,
+     {label:"Cloud Practitioner", title:"Follow every request through AWS.", blurb:"Regions, AZs and edge locations, then IAM, EC2, storage, S3 and databases.", n:34, unit:"explainers, 85 topics planned", href:"aws-cloud-practitioner/index.html", cta:"Explore AWS"}]},
+  {name:"Python", path:"python-fundamentals/index.html", note:"Fundamentals", pages:20,
    tracks:[
-     {label:"Fundamentals", title:"Watch each line run.", blurb:"Stepped line by line with edit-and-run boxes, from objects to type hints and APIs.", n:20, unit:"topics, all built", href:"python-fundamentals/index.html", cta:"Explore Python"}]},
-  {name:"Angular", path:"angular/index.html", note:"15 of 15 topics, Angular 22", pages:15,
+     {label:"Fundamentals", title:"Watch each line run.", blurb:"Stepped line by line with edit-and-run boxes, from objects to type hints and APIs.", n:20, unit:"explainers, every topic built", href:"python-fundamentals/index.html", cta:"Explore Python"}]},
+  {name:"Angular", path:"angular/index.html", note:"Angular 22", pages:15,
    tracks:[
-     {label:"Modern Angular", title:"Build one app, CareDesk.", blurb:"Components, data flow, signals, routing, forms and HTTP, in build order.", n:15, unit:"topics, all built", href:"angular/index.html", cta:"Explore Angular"}]},
+     {label:"Modern Angular", title:"Build one app, CareDesk.", blurb:"Components, data flow, signals, routing, forms and HTTP, in build order.", n:15, unit:"explainers, every topic built", href:"angular/index.html", cta:"Explore Angular"}]},
   {name:"AI", path:null, note:"Coming soon", pages:0,
    tracks:[]}
 ];
 const RECENT = [
+  {subject:"System Design", title:"Design principles: DRY, KISS, YAGNI, Law of Demeter, change ripple lab", note:"LLD L4", href:"system-design/lld/design-principles.html", fig:["Change","1 class|on","done"]},
+  {subject:"System Design", title:"UML: class & sequence diagrams, draw-the-arrow builder", note:"LLD L3", href:"system-design/lld/uml.html", fig:["Clinic|mark","Department"], dark:true},
   {subject:"System Design", title:"LLD creational patterns: Singleton, Factory method, Abstract factory, Builder, Prototype", note:"LLD L12 to L16", href:"system-design/lld/singleton.html", fig:["Factory|mark","Product A / B"], dark:true},
   {subject:"System Design", title:"Caching in practice: worked design, sizing calculator, CDN cache-key lab", note:"HLD Week 3 playbook", href:"system-design/hld/caching-in-practice.html", fig:["Client","Cache|on","Database"]},
   {subject:"System Design", title:"CDN & HTTP caching: Cache-Control, ETag, header lab", note:"HLD Day 21", href:"system-design/hld/cdn-http-caching.html", fig:["Browser","Edge / CDN|mark","Origin"]},
@@ -197,8 +199,8 @@ $('sideSubjects').innerHTML=SUBJECTS.map(s=>s.path
   :`<li><span class="soon">${esc(s.name)}<span class="n">Soon</span></span></li>`).join('');
 
 /* Choose your rabbit hole: one tab per subject, its tracks below */
-const trackCard=t=>`<article class="track"><small>${esc(t.label)}</small><h3>${esc(t.title)}</h3><p>${esc(t.blurb)}</p>
-  <div class="track__foot"><p class="track__fig"><b>${t.n}</b><span>${esc(t.unit)}</span></p><a class="btn btn--primary" href="${esc(t.href)}">${esc(t.cta)}</a></div></article>`;
+const trackCard=(t,i)=>`<article class="track"><small>${esc(t.label)}</small><h3>${esc(t.title)}</h3><p>${esc(t.blurb)}</p>
+  <div class="track__foot"><p class="track__fig"><b>${t.n}</b><span>${esc(t.unit)}</span></p><a class="${i?'link':'btn btn--primary'}" href="${esc(t.href)}">${esc(t.cta)}</a></div></article>`;
 $('subjects').innerHTML=`<div class="tabs" role="tablist" aria-label="Subjects">${SUBJECTS.map((s,i)=>
   `<button class="tab" type="button" role="tab" id="tab${i}" aria-controls="pane${i}" aria-selected="${i===0}" tabindex="${i===0?0:-1}"${s.path?'':' disabled'}><b>${esc(s.name)}</b><small>${s.path&&s.pages?`${s.pages} explainers, `:''}${esc(s.note)}</small></button>`).join('')}</div>
   <div class="panes">${SUBJECTS.map((s,i)=>`<div class="pane" role="tabpanel" id="pane${i}" aria-labelledby="tab${i}"${i===0?'':' hidden'}>${s.tracks.map(trackCard).join('')}</div>`).join('')}</div>`;

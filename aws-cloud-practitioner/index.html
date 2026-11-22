@@ -6,17 +6,13 @@
 <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
 <title>AWS Cloud Practitioner Explainers</title>
 <meta name="description" content="Interactive, animated explainers for the AWS Certified Cloud Practitioner (CLF-C02) exam, following the course section by section.">
-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
-<link rel="stylesheet" href="../assets/css/hub.css?v=20261119">
-<script src="../assets/js/theme.js?v=20261119"></script>
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/hub.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
 <style>
   .y-aws { color: var(--orange); }
-  .dom { display: inline-block; font-family: var(--display); font-size: 13px; padding: var(--space-3xs) var(--space-xs); border-radius: 0; border: 1px solid var(--line); color: var(--muted); }
-  .dom.d1 { border-color: var(--blue); color: var(--blue); }
-  .dom.d2 { border-color: var(--red); color: var(--red); }
-  .dom.d3 { border-color: var(--teal-text); color: var(--teal-text); }
-  .dom.d4 { border-color: var(--accent-text); color: var(--accent-text); }
+  .dom { display: inline-block; font-family: var(--display); font-size: 13px; padding: var(--space-3xs) var(--space-xs); border-radius: 0; border: 1px solid var(--line); color: var(--fg-soft); }
   .day-card .doms { display: flex; flex-wrap: wrap; gap: var(--space-2xs); margin-top: var(--space-3xs); }
   .domains { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: var(--space-xs); margin-top: var(--space-md); }
   .domains .stat b { font-size: 26px; }
@@ -45,6 +41,7 @@
 <li><a href="overview-review.html"><span class="t">Section review</span></a></li>
 </ul></details>
 <details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
 <li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
 <li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
 <li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
@@ -79,8 +76,8 @@
 </ul></details>
 </nav></details>
 <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
-<li><a href="../system-design/index.html">System Design<span class="n">32</span></a></li>
-<li><a href="index.html" aria-current="true">AWS<span class="n">43</span></a></li>
+<li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
 <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
 <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
 <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
@@ -165,10 +162,10 @@ const $=id=>document.getElementById(id);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const topics=SECTIONS.flatMap(s=>s.topics.filter(t=>!t.review));
 const live=topics.filter(t=>t.live);
-$('sLive').textContent=live.length;
+$('sLive').textContent=SECTIONS.flatMap(s=>s.topics).filter(t=>t.live).length;
 $('sTopics').textContent=topics.length;
 const next=SECTIONS.find(s=>!s.topics.every(t=>t.live));
-$('sNext').textContent=next?next.t:'Done';
+$('sNext').textContent=next?next.t:'Done';if($('sNext').textContent==='Done')$('sNext').nextElementSibling.textContent='Every topic built';
 const pct=Math.round(live.length*100/topics.length);
 $('sPct').textContent=`${live.length} / ${topics.length} · ${pct}%`;
 $('bar').style.width=Math.max(pct,live.length?2:0)+'%';

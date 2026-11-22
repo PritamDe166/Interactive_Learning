@@ -6,10 +6,10 @@
 <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
 <title>Angular</title>
 <meta name="description" content="Modern Angular (v22) explained visually: control flow, data flow, signals, DI, routing and forms.">
-<link rel="stylesheet" href="../assets/css/theme.css?v=20261119">
-<link rel="stylesheet" href="../assets/css/base.css?v=20261119">
-<link rel="stylesheet" href="../assets/css/hub.css?v=20261119">
-<script src="../assets/js/theme.js?v=20261119"></script>
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/hub.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
 <style>.day-card .adds{font-size:12.5px;color:var(--muted);line-height:1.4;margin:var(--space-3xs) 0 var(--space-2xs)}</style>
 </head>
 <body class="wb">
@@ -45,8 +45,8 @@
 </ul></details>
 </nav></details>
 <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
-<li><a href="../system-design/index.html">System Design<span class="n">32</span></a></li>
-<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">43</span></a></li>
+<li><a href="../system-design/index.html">System Design<span class="n">34</span></a></li>
+<li><a href="../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
 <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
 <li><a href="index.html" aria-current="true">Angular<span class="n">15</span></a></li>
 <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
@@ -74,7 +74,7 @@
     </div>
     <div class="stats">
       <div class="stat"><b id="sLive">0</b><span>Explainers</span></div>
-      <div class="stat"><b id="sTopics">0</b><span>Topics</span></div>
+      <div class="stat"><b id="sTopics">0</b><span>Topics planned</span></div>
       <div class="stat"><b id="sNext">…</b><span>Next up</span></div>
       <div class="meter">
         <div class="row"><span>Topics covered</span><span id="sPct">0%</span></div>
@@ -139,7 +139,7 @@ const live=all.filter(s=>s.file);
 $('sLive').textContent=live.length;
 $('sTopics').textContent=all.length;
 const next=all.find(s=>!s.file);
-$('sNext').textContent=!all.length?'–':next?`Topic ${all.indexOf(next)+1}`:'Done';
+$('sNext').textContent=!all.length?'–':next?`Topic ${all.indexOf(next)+1}`:'Done';if($('sNext').textContent==='Done')$('sNext').nextElementSibling.textContent='Every topic built';
 const pct=all.length?Math.round(live.length*100/all.length):0;
 $('sPct').textContent=`${live.length} / ${all.length} · ${pct}%`;
 $('bar').style.width=Math.max(pct,live.length?2:0)+'%';

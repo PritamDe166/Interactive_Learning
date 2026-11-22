@@ -132,11 +132,12 @@ def sidebar(page, subject, tracks, counts):
 
 def main():
     data = site()
-    # explainer files per subject (roadmaps and the map are not counted), the same figure the home page shows
+    # explainers per subject = the pages its roadmap lists as ready (the same pages the sidebar links).
+    # Old pages kept only for redirects, roadmaps and the map are not counted. The home page
+    # (SUBJECTS in index.html) and about.html show the same figure: keep them in step.
     counts = {}
     for k, _, _ in SUBJECTS:
-        counts[k] = sum(1 for d, _, fs in os.walk(os.path.join(ROOT, k)) for f in fs
-                        if f.endswith('.html') and f not in ('index.html', 'map.html'))
+        counts[k] = len({f for _, _, _, groups in data[k] for _, pages in groups for f, _, _ in pages})
     done = 0
     for subject, _, _ in SUBJECTS:
         for dirpath, _, files in os.walk(os.path.join(ROOT, subject)):

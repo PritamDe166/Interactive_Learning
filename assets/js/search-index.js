@@ -193,6 +193,14 @@ window.SEARCH_INDEX = [
 "w": "Build a complex object step by step through readable method calls, then get the finished object from Build() . It replaces telescoping constructors : new Appointment(p, d, t, 30, true, null, \"R12\", 2, false) . Which true is which? Build() is the one place to validate the combination , so the object you get back is always valid and can be immutable. You use builders daily: StringBuilder , WebApplication.CreateBuilder() , DbContextOptionsBuilder , UriBuilder . 1 Learn: from a constructor puzzle to"
 },
 {
+"t": "Design Principles",
+"s": "System Design",
+"k": "LLD",
+"h": "system-design/lld/design-principles.html",
+"d": "DRY, KISS, YAGNI, Law of Demeter, cohesion and coupling, program to an interface and composition over inheritance, shown as how far one change request spreads through the code.",
+"w": "Every principle answers one question: when a requirement changes, how many classes do I have to edit? DRY : one place per piece of knowledge. Law of Demeter : talk to your friends, not their friends. Program to an interface : depend on what, not who. Composition over inheritance : combine small parts instead of multiplying subclasses. High cohesion, low coupling are the measures; the other principles are ways to improve them. KISS and YAGNI are the brakes: don't add abstractions or features unti"
+},
+{
 "t": "Simple Factory & Factory Method",
 "s": "System Design",
 "k": "LLD",
@@ -271,6 +279,14 @@ window.SEARCH_INDEX = [
 "h": "system-design/lld/solid.html",
 "d": "SOLID overview: five object-oriented design guidelines shown in one appointment-booking class diagram, with a spot-the-violation game.",
 "w": "Five guidelines for object-oriented code that is easy to change, test and extend . S ingle responsibility, O pen-closed, L iskov substitution, I nterface segregation, D ependency inversion. They work together: small focused classes, talking through interfaces , with implementations plugged in from outside. They are guidelines, not rules . Applied mechanically they produce over-engineered code; the goal is simple code that is safe to change. The five, one page each Walkthrough: all five in one de"
+},
+{
+"t": "UML: Class and Sequence Diagrams",
+"s": "System Design",
+"k": "LLD",
+"h": "system-design/lld/uml.html",
+"d": "UML for low-level design: class boxes, the six relationships (dependency, association, aggregation, composition, generalization, realization), multiplicity and sequence diagrams, built step by step.",
+"w": "UML is the standard picture language for designs. LLD mostly needs two diagrams: class diagrams (structure) and sequence diagrams (who calls whom, in order). A class box has three parts: name , attributes , operations , with + − # ~ for visibility. Six relationships, weakest to strongest: dependency , association , aggregation , composition , generalization (inheritance) and realization (implements). Arrowheads point at what is depended on ; diamonds sit on the whole . Filled diamond = the parts"
 },
 {
 "t": "System Design",

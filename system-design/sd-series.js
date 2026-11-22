@@ -33,6 +33,9 @@
       ['caching-patterns-atlas.html', 'All patterns', 'All caching patterns at a glance']] }
   ];
   const LLD = [
+    { g: 'Phase 1 · Foundations', pages: [
+      ['uml.html', 'L3 UML', 'UML: class & sequence diagrams'],
+      ['design-principles.html', 'L4 Principles', 'Design principles: DRY, KISS, YAGNI & more']] },
     { g: 'Phase 2 · SOLID', pages: [
       ['solid.html', 'L6 Overview', 'SOLID overview'],
       ['solid-srp.html', 'L7 S', 'S · Single responsibility'],

@@ -3,8 +3,8 @@
  * axes: light/grotesk-sans/cool · posture: full-palette · modes: light+dark · v2.0.0 */
 /* Hallmark · pre-emit critique: P4 H4 E4 S5 R4 V4 · weakest: P, a hub argues little; the lab makes the argument, a system you step through instead of a wall of text */
 /* Hallmark · source: the owner's Figma mockup (IMG_0702, IMG_0703) · dropped its tracked-caps labels and glued arrows (54, 67, 63) */
-@import url("./tokens.css?v=20261119");
-@import url("./base.css?v=20261119");
+@import url("./tokens.css?v=20261122");
+@import url("./base.css?v=20261122");
 
 body { font-size: var(--text-md); }
 
@@ -26,8 +26,8 @@ body { font-size: var(--text-md); }
 .skip:focus-visible { transform: none; }
 
 /* ---------- the shell ---------- */
-.shell { display: grid; grid-template-columns: 256px minmax(0, 1fr); min-height: 100dvh; }
-.side { position: fixed; inset: 0 auto 0 0; width: 256px; z-index: var(--z-sticky-nav); display: flex; flex-direction: column; gap: var(--space-xl); padding: var(--space-lg); background: var(--color-field); color: var(--color-field-ink); --color-focus: var(--color-field-ink); overflow-y: auto; }
+.shell { display: grid; grid-template-columns: 264px minmax(0, 1fr); min-height: 100dvh; }
+.side { position: fixed; inset: 0 auto 0 0; width: 264px; z-index: var(--z-sticky-nav); display: flex; flex-direction: column; gap: var(--space-xl); padding: var(--space-lg) var(--space-md); background: var(--color-field); color: var(--color-field-ink); --color-focus: var(--color-field-ink); overflow-y: auto; }
 .wordmark { display: inline-grid; grid-template-columns: auto auto; column-gap: var(--space-sm); justify-self: start; align-self: start; font: var(--display-weight) var(--text-md)/0.92 var(--font-display); letter-spacing: -0.01em; color: inherit; text-decoration: none; }
 .wordmark::before { content: ""; grid-row: span 2; width: 1.85em; aspect-ratio: 1; background: var(--color-mark) url("../../img/logo.svg") center / 100% no-repeat; }
 .wordmark span + span { font-weight: 400; }
@@ -129,7 +129,7 @@ body { font-size: var(--text-md); }
 .seg input:checked + label { background: var(--color-mark); color: var(--color-mark-ink); }
 .seg input:focus-visible + label { outline: 2px solid var(--color-field-ink); outline-offset: 2px; }
 .seg input:disabled + label { opacity: 0.55; cursor: not-allowed; }
-.now { display: grid; gap: var(--space-xs); padding-top: var(--space-md); border-top: 1px solid color-mix(in oklab, var(--color-field-ink) 22%, transparent); min-height: 9.5rem; }
+.now { display: grid; gap: var(--space-xs); padding-top: var(--space-md); border-top: 1px solid color-mix(in oklab, var(--color-field-ink) 22%, transparent); min-height: 9.5rem; align-content: start; }
 .now h4 { margin: 0; font: var(--display-weight) var(--text-lg)/1.2 var(--font-display); letter-spacing: -0.015em; }
 .lab__panel .open { margin-top: auto; color: var(--color-mark); font-weight: 500; font-size: var(--text-sm); text-decoration: underline var(--rule-hair); text-underline-offset: 0.25em; }
 .lab__panel .open:focus-visible { outline: 2px solid var(--color-field-ink); outline-offset: 2px; }
@@ -144,7 +144,7 @@ body { font-size: var(--text-md); }
 .tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--space-2xs); margin: 0; padding: 0; }
 .tab { display: grid; gap: var(--space-3xs); align-content: start; min-height: 72px; padding: var(--space-sm) var(--space-md); border: 0; border-radius: 0; background: var(--color-paper-2); color: var(--color-ink); font: inherit; text-align: start; cursor: pointer; transition: background-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out); }
 .tab b { font-weight: 500; }
-.tab small { font-size: var(--text-xs); color: var(--color-muted); }
+.tab small { font-size: var(--text-xs); color: var(--color-muted); text-wrap: balance; }
 .tab:hover { background: var(--color-paper-3); }
 .tab:active { transform: translateY(1px); }
 .tab[aria-selected="true"] { background: var(--color-ink); color: var(--color-paper); }
@@ -164,11 +164,11 @@ body { font-size: var(--text-md); }
 
 /* fresh from the lab */
 .fresh { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-lg); }
-.card { min-width: 0; display: grid; grid-template-rows: auto auto auto; gap: var(--space-xs); color: var(--color-ink); text-decoration: none; }
+.card { min-width: 0; display: grid; grid-template-rows: auto auto auto; align-content: start; gap: var(--space-xs); color: var(--color-ink); text-decoration: none; }
 .card__fig { color: var(--color-ink); display: grid; place-items: center; aspect-ratio: 16 / 9; padding: var(--space-md); background: var(--color-paper-2); transition: background-color var(--dur-short) var(--ease-out); }
 .card--dark .card__fig { background: var(--color-field); color: var(--color-field-ink); }
 .card:hover .card__fig { background: var(--color-paper-3); }
-.card--dark:hover .card__fig { background: var(--color-ink-2); color: var(--color-field-ink); }
+.card--dark:hover .card__fig { background: color-mix(in oklab, var(--color-field) 88%, var(--color-field-ink)); color: var(--color-field-ink); }
 .card:hover .card__t { color: var(--color-accent); }
 .card:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 4px; }
 .card__s { font-size: var(--text-xs); color: var(--color-muted); }
@@ -224,6 +224,9 @@ body { font-size: var(--text-md); }
   .flow { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-lg); min-height: 0; }
   .wire { width: 1px; height: var(--space-lg); justify-self: center; }
   .wire span { left: var(--space-xs); bottom: auto; top: 0; transform: none; }
+  .wire.is-on { width: 2px; height: var(--space-lg); }
+  .sec__head, .lab__title { flex-direction: column; align-items: start; gap: var(--space-xs); }
+  .sec__head p { text-align: start; }
   .pill { display: none !important; }
   .tabs { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .fresh { grid-template-columns: minmax(0, 1fr); }
@@ -282,7 +285,7 @@ body { font-size: var(--text-md); }
 .head .head__line { margin-top: var(--space-md); font: var(--display-weight) var(--text-xl)/1.15 var(--font-display); letter-spacing: -0.015em; color: var(--color-ink); }
 .head .head__line + p { margin-top: var(--space-xs); }
 /* the mark stands beside the name, as tall as its two lines */
-.head__name { display: flex; align-items: center; gap: clamp(1rem, 1.6vw, 1.75rem); }
+.head__name { display: flex; align-items: center; gap: var(--space-md); }
 .head__mark { flex: none; width: clamp(5.25rem, 9.4vw + 1.75rem, 11.7rem); height: auto; aspect-ratio: 1; }
 
 /* ---------- buttons: offset style (same as the explainers) ---------- */
@@ -307,3 +310,10 @@ body { font-size: var(--text-md); }
 .btn:disabled { transform: none; box-shadow: inset 0 0 0 2px var(--btn-line); }
 .lab__bar { gap: var(--space-md); }
 @media (prefers-reduced-motion: reduce) { .btn { transition: none; } .btn:hover { transform: none; } }
+
+/* Pass 2 (Hallmark, 2026-11-22): a shorter narration panel, so the lab has less empty space above its diagram */
+.lab__panel { gap: var(--space-md); }
+.now { min-height: 8rem; }
+.flow { min-height: 12rem; }
+.track__foot .link { align-self: center; }
+.track__foot { align-items: center; min-height: 48px; }
