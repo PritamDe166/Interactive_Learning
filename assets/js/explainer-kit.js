@@ -855,6 +855,7 @@
      Each card reads like an infographic panel: numbered badge, name, one-line rule, a mini diagram,
      the phases as a numbered list (readable without playing), a bold takeaway and Use when / Watch out.
      Nothing moves until the learner presses ▶ Play on a card; it plays once and offers ↺ Replay.
+     Next ▸ plays one phase per press (the diagram keeps its state) and ends with ↺ Start over.
      The phase being played is highlighted in the list. Global Speed / Pause apply.
 
      Mini-diagram helper m = Kit.mini(svg) (viewBox units, default 360×150):
@@ -886,7 +887,7 @@
       card.innerHTML = `<header class="at-head"><span class="at-num">${i + 1}</span><h3>${c.name}</h3></header>
         <p class="at-rule">${c.rule}</p>
         <div class="at-view"><svg class="at-svg" viewBox="0 0 ${vw} ${vh}" role="img" aria-label="${(c.alt || plain).replace(/"/g, '')}"></svg>
-          <button type="button" class="at-play" data-a="play" aria-label="Play the ${plain} animation">▶ Play</button></div>
+          <div class="at-ctrl"><button type="button" class="at-play at-next" data-a="step" aria-label="Play the next step of the ${plain} animation">Next ▸</button><button type="button" class="at-play" data-a="play" aria-label="Play the ${plain} animation">▶ Play</button></div></div>
         <ol class="at-steps"></ol>
         ${c.takeaway ? `<p class="at-take">${c.takeaway}</p>` : ''}
         <dl class="at-meta">${c.use ? `<div><dt class="at-good">Use when</dt><dd>${c.use}</dd></div>` : ''}${c.avoid ? `<div><dt class="at-bad">Watch out</dt><dd>${c.avoid}</dd></div>` : ''}</dl>
@@ -895,22 +896,32 @@
       const m = K.mini(card.querySelector('svg'));
       const phases = c.build(m) || [];
       card.querySelector('.at-steps').innerHTML = phases.map(p => `<li><span>${p.cap}</span></li>`).join('');
-      const st = { c, card, m, phases, ch: 'atlas-' + c.id + '-' + i, playing: false, btn: card.querySelector('.at-play'), items: card.querySelectorAll('.at-steps li') };
+      const st = { c, card, m, phases, ch: 'atlas-' + c.id + '-' + i, playing: false, k: -1, btn: card.querySelector('[data-a=play]'), nxt: card.querySelector('[data-a=step]'), items: card.querySelectorAll('.at-steps li') };
       m._st = st;
       if (c.reset) c.reset(m);
       states.push(st);
     });
 
     function mark(st, k) { st.items.forEach((li, j) => { li.classList.toggle('now', j === k); li.classList.toggle('done', k >= 0 && j < k); }); }
+    function nextLabel(st) { st.nxt.textContent = st.k >= st.phases.length ? '↺ Start over' : st.k < 0 ? 'Next ▸' : `Step ${st.k + 1} of ${st.phases.length} ▸`; }
     async function play(st) {
       const run = K.newRun(st.ch);
       st.m.reset(); if (st.c.reset) st.c.reset(st.m);
-      st.card.classList.add('playing'); st.btn.textContent = '■ Stop';
+      st.card.classList.add('playing'); st.btn.textContent = '■ Stop'; st.nxt.disabled = true;
       try {
         for (let k = 0; k < st.phases.length; k++) { mark(st, k); await st.phases[k].go(run); await st.m.sleep(650, run); }
-        mark(st, st.phases.length); st.btn.textContent = '↺ Replay';
-      } catch (e) { if (!(e instanceof Stop)) throw e; st.btn.textContent = '▶ Play'; mark(st, -1); }
-      st.card.classList.remove('playing');
+        mark(st, st.phases.length); st.btn.textContent = '↺ Replay'; st.k = st.phases.length;
+      } catch (e) { if (!(e instanceof Stop)) throw e; st.btn.textContent = '▶ Play'; mark(st, -1); st.k = -1; }
+      st.card.classList.remove('playing'); st.nxt.disabled = false; nextLabel(st);
+    }
+    // one phase per press: the diagram keeps its state between presses, the list highlights the phase
+    async function step(st) {
+      if (st.k < 0 || st.k >= st.phases.length) { st.m.reset(); if (st.c.reset) st.c.reset(st.m); st.k = 0; mark(st, -1); st.btn.textContent = '▶ Play'; }
+      const run = K.newRun(st.ch), k = st.k;
+      st.card.classList.add('playing'); st.nxt.disabled = true; st.btn.textContent = '■ Stop';
+      try { mark(st, k); await st.phases[k].go(run); st.k = k + 1; if (st.k >= st.phases.length) { mark(st, st.phases.length); st.btn.textContent = '↺ Replay'; } else st.btn.textContent = '▶ Play'; }
+      catch (e) { if (!(e instanceof Stop)) throw e; st.k = -1; mark(st, -1); st.btn.textContent = '▶ Play'; }
+      st.card.classList.remove('playing'); st.nxt.disabled = false; nextLabel(st);
     }
 
     el.addEventListener('click', e => {
@@ -921,10 +932,10 @@
         states.forEach(st => { st.card.hidden = !!t && !st.card.dataset.tags.split('|').includes(t); });
         return;
       }
-      if (b.dataset.a !== 'play') return;
+      if (b.dataset.a !== 'play' && b.dataset.a !== 'step') return;
       const st = states.find(s => s.card === b.closest('.at-card'));
-      if (st.card.classList.contains('playing')) { K.cancel(st.ch); return; }
-      play(st);
+      if (st.card.classList.contains('playing')) { if (b.dataset.a === 'play') K.cancel(st.ch); return; }
+      if (b.dataset.a === 'step') step(st); else play(st);
     });
     return { cards: states };
   };
