@@ -75,6 +75,7 @@
 <li><a href="cache-eviction.html"><span class="t">Eviction policies</span><span class="n">H18</span></a></li>
 <li><a href="distributed-caching.html"><span class="t">Distributed caching</span><span class="n">H19</span></a></li>
 <li><a href="redis-cluster-explained.html" aria-current="page"><span class="t">Redis from zero: keys, nodes, slots, replicas</span><span class="n">H19</span></a></li>
+<li><a href="redis-hash-slots.html"><span class="t">How a key becomes a hash slot (CRC16)</span><span class="n">H19</span></a></li>
 <li><a href="cache-failure-modes.html"><span class="t">Caching failure modes</span><span class="n">H20</span></a></li>
 <li><a href="cdn-http-caching.html"><span class="t">CDN &amp; HTTP caching</span><span class="n">H21</span></a></li>
 <li><a href="caching-in-practice.html"><span class="t">Caching in practice: the interview playbook</span></a></li>
@@ -105,7 +106,7 @@
 </ul></details>
 </nav></details>
 <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
-<li><a href="../index.html" aria-current="true">System Design<span class="n">37</span></a></li>
+<li><a href="../index.html" aria-current="true">System Design<span class="n">38</span></a></li>
 <li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
 <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
 <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
@@ -148,6 +149,7 @@
       <h3 class="stage-title sub" id="p2H">Part 2 · Splitting keys across nodes: hash slots</h3>
       <div class="stage-kind">How every app server knows which node holds a key, without asking around</div>
       <div class="story" id="s2"><div class="scroll"><svg class="diagram" id="v2" style="min-width:0" viewBox="0 0 760 340" role="img" aria-label="Three Redis nodes, a bar of 16,384 hash slots split into ranges, and keys placed on the node that owns their slot"></svg></div></div>
+      <div class="note" style="margin-top:12px"><p><b>Deep dive: how does CRC16(key) mod 16384 work?</b> Bytes, the 16-bit CRC, keeping 14 bits, hash tags and why not <span class="mono">GetHashCode()</span>, animated with a hash lab: <a href="redis-hash-slots.html">How a key becomes a hash slot →</a></p></div>
     </div>
 
     <div class="sub-block" aria-labelledby="p3H" style="margin-top:22px">
@@ -184,7 +186,7 @@
 
   <section id="try" data-nav="Try it">
     <h2 class="sec-h"><span class="sec-n">3</span>Try it: a pocket Redis Cluster</h2>
-    <p class="sec-sub">Type any key. The page computes its slot with the same CRC16 Redis uses (checked against a real cluster), then shows which node owns it. Then add a node, crash one, or use an out-of-date slot map.</p>
+    <p class="sec-sub">Type any key. The page computes its slot with the same CRC16 Redis uses (checked against a real cluster), then shows which node owns it. Then add a node, crash one, or use an out-of-date slot map. To see the hashing itself, use the <a href="redis-hash-slots.html">hash lab</a>.</p>
     <div class="sub-block" aria-labelledby="pgH">
       <h3 class="stage-title sub" id="pgH">Cluster playground</h3>
       <div class="stage-kind">Type a key · predict its node · then change the cluster</div>
@@ -208,6 +210,7 @@
     <h3 class="sec-h3" id="cheatH">Cheat-sheet</h3>
     <ul class="cheat">
       <li><span class="if">"Where does key X live?"</span><span class="arrow">→</span><span class="then">slot = <span class="mono">CRC16(X) mod 16384</span>; the node owning that slot range has it</span></li>
+      <li><span class="if">"How is the slot computed?"</span><span class="arrow">→</span><span class="then">CRC16 (XMODEM) of the key, or of its <span class="mono">{tag}</span>; keep the low 14 bits (<span class="mono">&amp; 0x3FFF</span>), giving 0–16383 (<a href="redis-hash-slots.html">step by step</a>)</span></li>
       <li><span class="if">Data outgrows one node's memory</span><span class="arrow">→</span><span class="then">add primaries; move some slots to them (resharding)</span></li>
       <li><span class="if">A node must not take the cache down with it</span><span class="arrow">→</span><span class="then">a replica per primary, on another machine</span></li>
       <li><span class="if">App asked the wrong node</span><span class="arrow">→</span><span class="then"><span class="mono">MOVED slot host:port</span>; the client updates its map and retries</span></li>
@@ -391,7 +394,7 @@
     { title: 'The question every app server must answer', text: ['With several nodes, each holds only some of the keys.', 'Before every GET or SET, the app must know <b>which node</b> to ask.', 'All app servers must give the same answer, without asking around.'] },
     { title: 'First idea: hash % number of nodes', text: ['Turn the key into a number with a hash function.', 'Take the remainder by the node count: that\'s the node.', 'Fast, local and consistent… until the node count changes.'] },
     { title: 'Why % N breaks when you add a node', text: ['Change 3 to 4 and most keys get a different remainder.', 'They are now looked for on the wrong node.', 'Red outlines are keys that moved: each one is a cache miss.'] },
-    { title: 'Redis\'s idea: 16,384 hash slots', text: ['Redis puts a fixed layer in between: <b>16,384 slots</b>.', 'Every key maps to one slot with <span class="mono">CRC16(key) mod 16384</span>.', 'That number <b>never changes</b>, whatever the cluster looks like.'] },
+    { title: 'Redis\'s idea: 16,384 hash slots', text: ['Redis puts a fixed layer in between: <b>16,384 slots</b>.', 'Every key maps to one slot with <span class="mono">CRC16(key) mod 16384</span>.', 'That number <b>never changes</b>, whatever the cluster looks like.', 'How the hash works, byte by byte: <a href="redis-hash-slots.html">How a key becomes a hash slot</a>.'] },
     { title: 'Nodes own ranges of slots', text: ['Each node owns a range: A 0–5460, B 5461–10922, C 10923–16383 (real cluster).', 'The app downloads this <b>slot map</b> once.', 'It computes the slot itself and goes straight to the right node.'] },
     { title: 'Adding a node moves slots, not everything', text: ['Redis moves <b>some slots</b> from A, B and C to the new node D.', 'Only the keys inside those slots move with them.', 'Every other key stays put, so the cache stays warm.'], tip: 'Contrast with % N: "slots move ~1/(N+1) of the keys; modulo moves most of them".' },
     { title: 'Asked the wrong node? MOVED', text: ['The app\'s slot map is out of date and it asks the wrong node.', 'The node doesn\'t fetch the key for it; it replies <span class="mono">MOVED &lt;slot&gt; &lt;address&gt;</span>.', 'The client retries there and updates its map.'] },

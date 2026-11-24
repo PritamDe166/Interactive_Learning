@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>How a Key Becomes a Hash Slot: CRC16 in Redis Cluster</title>
+<meta name="description" content="How Redis Cluster turns a key into one of 16,384 hash slots: the key's bytes, the CRC16 checksum, keeping the low 14 bits, hash tags, and why .NET GetHashCode() can't be used. Step-by-step animation and a hash lab, with numbers from real Redis.">
+<link rel="stylesheet" href="../../assets/css/theme.css?v=20261124">
+<link rel="stylesheet" href="../../assets/css/base.css?v=20261124">
+<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261124">
+<script src="../../assets/js/theme.js?v=20261124"></script>
+<script src="../../assets/js/explainer-kit.js?v=20261124"></script>
+<script src="../sd-series.js?v=20261124"></script>
+<style>
+  .rz-t { fill: var(--fg); font-family: var(--mono) !important; font-size: 12px; }
+  .rz-t.mid { text-anchor: middle; }
+  .rz-t.b { font-family: var(--display) !important; font-weight: 700; font-size: 13px; }
+  .rz-t.muted { fill: var(--muted); } .rz-t.bad { fill: var(--bad-text); font-weight: 600; } .rz-t.ok { fill: var(--good-text); font-weight: 600; } .rz-t.acc { fill: var(--accent-text); font-weight: 600; }
+  .rz-t.halo { paint-order: stroke; stroke: var(--bg); stroke-width: 4px; }
+  .rz-box { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; }
+  .rz-box.hot { stroke: var(--cyan); stroke-width: 2.6; }
+  .rz-box.bad { stroke: var(--red); stroke-width: 2.6; }
+  .rz-box.ok { stroke: var(--teal); stroke-width: 2.6; }
+  .rz-row { fill: var(--bg); stroke: var(--line); stroke-width: 1; }
+  .rz-row.hot { stroke: var(--cyan); stroke-width: 2; }
+  .rz-line { fill: none; stroke: var(--fg-soft); stroke-width: 1.8; }
+  .rz-line.dash { stroke-dasharray: 6 4; }
+  .rz-line.hot { stroke: var(--cyan); stroke-width: 2.4; }
+  .rz-line.bad { stroke: var(--red); stroke-width: 2.2; }
+  .rz-line.ok { stroke: var(--teal); stroke-width: 2.2; }
+  .rz-head { fill: var(--fg-soft); } .rz-head.hot { fill: var(--cyan); } .rz-head.bad { fill: var(--red); } .rz-head.ok { fill: var(--teal); }
+  .rz-mem { fill: var(--chip-bg); stroke: var(--line); }
+  .rz-fade { opacity: .25; }
+  .rz-dead { opacity: .35; }
+  .rz-chip { stroke: var(--bg); stroke-width: 1.5; }
+  .rz-chip.moved { stroke: var(--red); stroke-width: 3; }
+  .rz-play { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-sm); margin-top: var(--space-sm); }
+  .rz-in { display: flex; flex-wrap: wrap; gap: var(--space-xs); align-items: center; }
+  .rz-in input { font-family: var(--mono); font-size: 15px; padding: 8px 10px; min-width: 0; width: min(100%, 320px); background: var(--bg); color: var(--fg); border: 0; box-shadow: inset 0 0 0 1px var(--line); }
+  .rz-in input:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  .rz-out { background: var(--panel); padding: var(--space-sm) var(--space-md); line-height: 1.6; }
+  .rz-out code { overflow-wrap: anywhere; }
+  .rz-byte { fill: var(--panel); stroke: var(--line); stroke-width: 1.2; }
+  .rz-byte.hot { stroke: var(--cyan); stroke-width: 2.2; }
+  .rz-bit { fill: var(--panel); stroke: var(--line); stroke-width: 1.2; }
+  .rz-bit.one { fill: color-mix(in oklab, var(--cyan) 30%, var(--panel)); }
+  .rz-bit.diff { stroke: var(--red); stroke-width: 2.6; }
+  .rz-in2 { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-xs) var(--space-sm); align-items: center; }
+  .rz-in2 input { font-family: var(--mono); font-size: 15px; padding: 8px 10px; min-width: 0; width: min(100%, 320px); background: var(--bg); color: var(--fg); border: 0; box-shadow: inset 0 0 0 1px var(--line); }
+  .rz-in2 input:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>System Design pages</summary>
+<nav aria-label="System Design pages">
+<h2 class="wb-track">HLD</h2>
+<a class="wb-road" href="index.html">HLD roadmap</a>
+<details class="wb-g"><summary>Week 1: Networking</summary><ul>
+<li><a href="client-server-dns.html"><span class="t">Client-server &amp; DNS</span><span class="n">H1</span></a></li>
+<li><a href="http.html"><span class="t">HTTP</span><span class="n">H2</span></a></li>
+<li><a href="tcp-udp.html"><span class="t">TCP &amp; UDP</span><span class="n">H3</span></a></li>
+<li><a href="https-tls.html"><span class="t">HTTPS &amp; TLS</span><span class="n">H4</span></a></li>
+<li><a href="latency-throughput.html"><span class="t">Latency &amp; throughput</span><span class="n">H5</span></a></li>
+<li><a href="availability-slos.html"><span class="t">Availability, SLOs &amp; recovery</span><span class="n">H6</span></a></li>
+<li><a href="week-1-review.html"><span class="t">Review: journey of a request</span><span class="n">H7</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Week 2: Scaling</summary><ul>
+<li><a href="scaling.html"><span class="t">Vertical vs horizontal scaling</span><span class="n">H8</span></a></li>
+<li><a href="stateless.html"><span class="t">Stateless applications</span><span class="n">H9</span></a></li>
+<li><a href="proxy-lb-gateway.html"><span class="t">Reverse proxy, API gateway &amp; load balancers</span><span class="n">H10–12</span></a></li>
+<li><a href="load-balancing-algorithms.html"><span class="t">Load-balancing algorithms</span><span class="n">H13</span></a></li>
+<li><a href="scale-web-app.html"><span class="t">Design: scale a web app to millions</span><span class="n">H14</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Week 3: Caching</summary><ul>
+<li><a href="caching-overview.html"><span class="t">Why caching exists</span><span class="n">H15</span></a></li>
+<li><a href="cache-read-strategies.html"><span class="t">Read strategies</span><span class="n">H16</span></a></li>
+<li><a href="cache-write-strategies.html"><span class="t">Write strategies &amp; invalidation</span><span class="n">H17</span></a></li>
+<li><a href="cache-eviction.html"><span class="t">Eviction policies</span><span class="n">H18</span></a></li>
+<li><a href="distributed-caching.html"><span class="t">Distributed caching</span><span class="n">H19</span></a></li>
+<li><a href="redis-cluster-explained.html"><span class="t">Redis from zero: keys, nodes, slots, replicas</span><span class="n">H19</span></a></li>
+<li><a href="redis-hash-slots.html" aria-current="page"><span class="t">How a key becomes a hash slot (CRC16)</span><span class="n">H19</span></a></li>
+<li><a href="cache-failure-modes.html"><span class="t">Caching failure modes</span><span class="n">H20</span></a></li>
+<li><a href="cdn-http-caching.html"><span class="t">CDN &amp; HTTP caching</span><span class="n">H21</span></a></li>
+<li><a href="caching-in-practice.html"><span class="t">Caching in practice: the interview playbook</span></a></li>
+<li><a href="caching-patterns-atlas.html"><span class="t">All caching patterns at a glance</span></a></li>
+</ul></details>
+<h2 class="wb-track">LLD</h2>
+<a class="wb-road" href="../lld/index.html">LLD roadmap</a>
+<details class="wb-g"><summary>Phase 1: Foundations</summary><ul>
+<li><a href="../lld/oop-pillars.html"><span class="t">OOP pillars in C#</span><span class="n">L1</span></a></li>
+<li><a href="../lld/relationships.html"><span class="t">Class relationships</span><span class="n">L2</span></a></li>
+<li><a href="../lld/uml.html"><span class="t">UML: class &amp; sequence diagrams</span><span class="n">L3</span></a></li>
+<li><a href="../lld/design-principles.html"><span class="t">Design principles: DRY, KISS, YAGNI &amp; more</span><span class="n">L4</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Phase 2: SOLID</summary><ul>
+<li><a href="../lld/solid.html"><span class="t">SOLID overview</span><span class="n">L6</span></a></li>
+<li><a href="../lld/solid-srp.html"><span class="t">S: Single responsibility</span><span class="n">L7</span></a></li>
+<li><a href="../lld/solid-ocp.html"><span class="t">O: Open-closed</span><span class="n">L8</span></a></li>
+<li><a href="../lld/solid-lsp.html"><span class="t">L: Liskov substitution</span><span class="n">L9</span></a></li>
+<li><a href="../lld/solid-isp.html"><span class="t">I: Interface segregation</span><span class="n">L10</span></a></li>
+<li><a href="../lld/solid-dip.html"><span class="t">D: Dependency inversion</span><span class="n">L11</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Phase 3: Creational patterns</summary><ul>
+<li><a href="../lld/singleton.html"><span class="t">Singleton</span><span class="n">L12</span></a></li>
+<li><a href="../lld/factory-method.html"><span class="t">Simple factory &amp; factory method</span><span class="n">L13</span></a></li>
+<li><a href="../lld/abstract-factory.html"><span class="t">Abstract factory</span><span class="n">L14</span></a></li>
+<li><a href="../lld/builder.html"><span class="t">Builder</span><span class="n">L15</span></a></li>
+<li><a href="../lld/prototype.html"><span class="t">Prototype</span><span class="n">L16</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../index.html" aria-current="true">System Design<span class="n">38</span></a></li>
+<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+<li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">HLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <p class="crumbs">System Design / HLD / Week 3 / H19 deep dive</p>
+    <h1>How a Key Becomes a Hash Slot: CRC16 in Redis Cluster</h1>
+    <ul class="lede">
+      <li>Redis Cluster puts every key in one of <b>16,384 hash slots</b> with <span class="mono">CRC16(key) mod 16384</span>.</li>
+      <li><b>CRC16</b> reads the key's <b>bytes</b> and folds them into one <b>16-bit number</b> (0 to 65,535).</li>
+      <li><b>mod 16384</b> keeps the lowest <b>14 bits</b>: that number is the slot.</li>
+      <li>Every client in every language gets the same slot, which is why Redis uses a fixed formula and not .NET's <span class="mono">GetHashCode()</span>.</li>
+    </ul>
+  </header>
+
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn it step by step</h2>
+    <p class="sec-sub">A close-up of one step from <a href="redis-cluster-explained.html">Redis from zero</a> (Part 2): the formula that decides which slot, and so which node, holds a key. Every number comes from real Redis or a real .NET run.</p>
+    <div class="sub-block" aria-labelledby="p2bH">
+      <h3 class="stage-title sub" id="p2bH">Watch patient:42 become slot 13565</h3>
+      <div class="stage-kind">What CRC16(key) mod 16384 actually does, byte by byte and bit by bit</div>
+      <div class="story" id="s2b"><div class="scroll"><svg class="diagram" id="v2b" style="min-width:0" viewBox="0 0 760 330" role="img" aria-label="The bytes of a key flow into a CRC16 box, which produces a 16-bit number; the top 2 bits are dropped to leave a 14-bit slot number"></svg></div></div>
+    </div>
+
+  </section>
+
+  <section id="compare" data-nav="Compare">
+    <h2 class="sec-h"><span class="sec-n">2</span>In terms you already know</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Here</th><th>What it does</th><th>Closest thing you know</th></tr></thead>
+        <tbody>
+          <tr><td>CRC16</td><td>Turns the key's bytes into a 16-bit number, the same on every machine</td><td>A checksum, like the CRC a ZIP file or network packet carries to detect damage</td></tr>
+          <tr><td><span class="mono">mod 16384</span></td><td>Keeps the lowest 14 bits: the slot number</td><td><span class="mono">hash &amp; 0x3FFF</span> in C#</td></tr>
+          <tr><td>Hash slot</td><td>One of 16,384 fixed buckets a node can own</td><td>The partition number a SQL Server partition function returns</td></tr>
+          <tr><td>Fixed hash vs <span class="mono">GetHashCode()</span></td><td>CRC16 never changes; .NET string hash codes change on every process start</td><td>Fine for a <span class="mono">Dictionary</span> inside one process, useless across servers</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">3</span>Try it: the hash lab</h2>
+    <p class="sec-sub">The lab runs the same CRC16 Redis uses (checked against <span class="mono">CLUSTER KEYSLOT</span>). Try a key with a hash tag, or two IDs that differ by one digit.</p>
+    <div class="sub-block" aria-labelledby="hlH">
+      <h3 class="stage-title sub" id="hlH">Hash lab: watch a key become a slot</h3>
+      <div class="stage-kind">Type a key · see its bytes, its 16 CRC bits and its slot · compare with a near-identical key</div>
+      <div class="rz-play">
+        <div class="rz-in2"><label for="hlKey" class="sub" style="margin:0">Key</label><input id="hlKey" value="patient:42" spellcheck="false" autocomplete="off"><label for="hlKey2" class="sub" style="margin:0">Compare with</label><input id="hlKey2" value="patient:43" spellcheck="false" autocomplete="off"></div>
+        <div class="chips" id="hlChips" style="margin:0"></div>
+        <div class="scroll"><svg class="diagram" id="hlSvg" style="min-width:0" viewBox="0 0 760 300" role="img" aria-label="Bytes of the key, its 16-bit CRC16 with the top two bits dropped, and the resulting slot for two keys"></svg></div>
+        <div class="rz-out" id="hlOut"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">4</span>Revise in two minutes</h2>
+    <div class="sub-block" aria-labelledby="cheatH">
+    <h3 class="sec-h3" id="cheatH">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">"How is the slot computed?"</span><span class="arrow">→</span><span class="then">CRC16 (XMODEM) of the key's bytes, then keep the low 14 bits: <span class="mono">crc16(key) &amp; 0x3FFF</span></span></li>
+      <li><span class="if">Key contains <span class="mono">{…}</span> with text inside</span><span class="arrow">→</span><span class="then">only that text is hashed, so related keys share a slot</span></li>
+      <li><span class="if">Key contains empty <span class="mono">{}</span></span><span class="arrow">→</span><span class="then">ignored: the whole key is hashed</span></li>
+      <li><span class="if">"Why not GetHashCode()?"</span><span class="arrow">→</span><span class="then">randomised per process in .NET; every client must compute the same slot</span></li>
+      <li><span class="if">"Why 16,384?"</span><span class="arrow">→</span><span class="then">2¹⁴: the slot bitmap nodes gossip is 2 KB; plenty for ~1,000 primaries</span></li>
+    </ul>
+    </div>
+    <div class="sub-block" aria-labelledby="refH">
+    <h3 class="sec-h3" id="refH">Reference: real outputs</h3>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Command</th><th>Real output</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">CLUSTER KEYSLOT patient:42</td><td class="mono">13565</td><td>CRC16 29949, low 14 bits</td></tr>
+          <tr><td class="mono">CLUSTER KEYSLOT patient:43<br>CLUSTER KEYSLOT Patient:42</td><td class="mono">9436<br>3568</td><td>one character changes the slot completely</td></tr>
+          <tr><td class="mono">CLUSTER KEYSLOT {patient:42}:visits</td><td class="mono">13565</td><td>hash tag: only <span class="mono">patient:42</span> is hashed</td></tr>
+          <tr><td class="mono">CLUSTER KEYSLOT a{}b</td><td class="mono">13694</td><td>empty braces: the whole key is hashed</td></tr>
+          <tr><td class="mono">"patient:42".GetHashCode() (.NET 10, 3 runs)</td><td class="mono">-794386515<br>1920957983<br>591493584</td><td>randomised per process, so no use for routing</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><p><b>The exact CRC16:</b> Redis uses the XMODEM variant (polynomial 0x1021, start value 0, no final XOR). Clients in every language ship the same function, which is how they all compute the same slot without asking the server.</p></div>
+      <div class="note"><p><b>CRC16 is not a security hash.</b> It is fast and spreads keys evenly, but it is easy to find keys that land in a chosen slot. That doesn't matter for placing cache keys.</p></div>
+    </div>
+    <h3 class="sec-h3" style="margin-top:18px">In code</h3>
+    <div id="code"></div>
+    </div>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">5</span>Test yourself</h2>
+    <h3 class="sec-h3">Which step is this?</h3>
+    <div id="drill"></div>
+    <h3 class="sec-h3">Explain it out loud</h3>
+    <p class="sub">Answer before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Walk through how <code>patient:42</code> becomes slot 13565.<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Take the key's 10 bytes, run CRC16 (XMODEM) over them to get <b>29949</b>, then keep the lowest 14 bits (mod 16384): 29949 − 16384 = <b>13565</b>. The node that owns slot 13565 holds the key.</p></div></details>
+      <details><summary>Why can't Redis clients use .NET's <code>GetHashCode()</code>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>.NET randomises string hash codes per process, so the same key gives different numbers on different servers and after every restart. Every client must compute the <b>same</b> slot, so Redis defines a fixed function: CRC16.</p></div></details>
+      <details><summary>What do <code>{order:9}:lines</code> and <code>a{}b</code> hash?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>The first hashes only <code>order:9</code>, so it shares a slot with every other <code>{order:9}</code> key. The second has empty braces, which are ignored, so the whole key <code>a{}b</code> is hashed (slot 13694).</p></div></details>
+    </div>
+  </section>
+
+  <nav id="prevnext"></nav>
+
+  <footer>Sources: Redis documentation (Redis Cluster specification: key distribution model, hash tags, CRC16 reference implementation). Slot numbers are from <span class="mono">CLUSTER KEYSLOT</span> on a real Redis 7.0.15 node; the page's CRC16 matches it for every key tested. GetHashCode values are from three runs of a .NET 10.0.115 console app. The C# CRC16 below matches the page's function for every key tested.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  /* ---------- shared bits ---------- */
+  function crc16(s) { const b = new TextEncoder().encode(s); let c = 0; for (const x of b) { c ^= x << 8; for (let i = 0; i < 8; i++) c = (c & 0x8000) ? ((c << 1) ^ 0x1021) & 0xffff : (c << 1) & 0xffff; } return c; }
+  function hashPart(k) { const s = k.indexOf('{'); if (s > -1) { const e = k.indexOf('}', s + 1); if (e > s + 1) return k.slice(s + 1, e); } return k; }
+  const slotOf = k => crc16(hashPart(k)) % 16384;
+  const TONE = { A: 'var(--cyan)', B: 'var(--violet)', C: 'var(--orange)', D: 'var(--yellow)' };
+  const MAP3 = [['A', 0, 5460], ['B', 5461, 10922], ['C', 10923, 16383]];
+  const MAP4 = [['D', 0, 1364], ['A', 1365, 5460], ['D', 5461, 6826], ['B', 6827, 10922], ['D', 10923, 12287], ['C', 12288, 16383]];
+  const ownerOf = (slot, map) => map.find(([, a, b]) => slot >= a && slot <= b)[0];
+  const KEYS = Array.from({ length: 16 }, (_, i) => 'patient:' + (i + 1)).concat(['patient:42']);
+  function arrowDefs(svg) {
+    const d = K.el('defs', {}, svg);
+    d.innerHTML = ['', 'hot', 'bad', 'ok'].map(t => `<marker id="rz-a${t}-${svg.id}" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="10" markerHeight="10" orient="auto" markerUnits="userSpaceOnUse"><path class="rz-head ${t}" d="M1 1 L11 6 L1 11 z"/></marker>`).join('');
+  }
+  const mk = (svg) => {
+    let L;
+    const api = {
+      clear() { if (L) L.remove(); L = K.el('g', {}, svg); return L; },
+      get L() { return L; },
+      t(x, y, s, c) { return K.text(L, x, y, s, 'rz-t ' + (c || '')); },
+      box(x, y, w, h, c) { return K.el('rect', { x, y, width: w, height: h, class: 'rz-box ' + (c || '') }, L); },
+      line(pts, c) { const tone = (c || '').split(' ').find(z => ['hot', 'bad', 'ok'].includes(z)) || ''; return K.el('path', { d: 'M' + pts.map(p => p.join(' ')).join(' L'), class: 'rz-line ' + (c || ''), 'marker-end': `url(#rz-a${tone}-${svg.id})` }, L); },
+      plain(pts, c) { return K.el('path', { d: 'M' + pts.map(p => p.join(' ')).join(' L'), class: 'rz-line ' + (c || '') }, L); }
+    };
+    return api;
+  };
+
+  /* ================= Part 2b: inside CRC16 ================= */
+  function crcSteps(s) { const b = [...new TextEncoder().encode(s)]; let c = 0; const reg = []; for (const x of b) { c ^= x << 8; for (let i = 0; i < 8; i++) c = (c & 0x8000) ? ((c << 1) ^ 0x1021) & 0xffff : (c << 1) & 0xffff; reg.push(c); } return { b, reg }; }
+  const bits16 = n => n.toString(2).padStart(16, '0');
+  const hex = (n, w) => n.toString(16).toUpperCase().padStart(w, '0');
+  function drawBytes(H, key, y, o = {}) {
+    const { b } = crcSteps(key), chars = [...key];
+    const n = Math.min(b.length, 20), w = Math.min(46, 680 / n), x0 = 380 - (n * w) / 2;
+    const tagPart = hashPart(key), ts = key.indexOf('{' + tagPart + '}') + 1, tagged = tagPart !== key;
+    for (let i = 0; i < n; i++) {
+      const x = x0 + i * w, inTag = !tagged || (i >= ts && i < ts + tagPart.length);
+      const r = K.el('rect', { x: x + 2, y, width: w - 4, height: 40, class: 'rz-byte' + (o.hot === i ? ' hot' : '') + (inTag ? '' : ' rz-fade') }, H.L);
+      H.t(x + w / 2, y + 17, chars[i] || '·', 'mid b' + (inTag ? '' : ' muted'));
+      H.t(x + w / 2, y + 33, hex(b[i], 2), 'mid ' + (inTag ? 'acc' : 'muted'));
+    }
+    if (b.length > n) H.t(x0 + n * w + 6, y + 25, '…', 'muted');
+    return { x0, w, n };
+  }
+  function drawBits(H, v, y, o = {}) {
+    const bs = bits16(v), w = 40, x0 = 60;
+    for (let i = 0; i < 16; i++) {
+      const drop = o.drop && i < 2, diff = o.cmp !== undefined && bs[i] !== bits16(o.cmp)[i];
+      K.el('rect', { x: x0 + i * w + 1, y, width: w - 2, height: 30, class: 'rz-bit' + (bs[i] === '1' ? ' one' : '') + (diff ? ' diff' : '') + (drop ? ' rz-fade' : '') }, H.L);
+      H.t(x0 + i * w + w / 2, y + 20, bs[i], 'mid b' + (drop ? ' muted' : ''));
+    }
+    if (o.labels) { H.t(x0 + w / 2, y + 46, 'bit 15', 'mid muted'); H.t(x0 + 15 * w + w / 2, y + 46, 'bit 0', 'mid muted'); }
+    if (o.drop) { H.plain([[x0 + 2 * w, y - 8], [x0 + 2 * w, y + 38]], 'bad dash'); H.t(x0 + w, y - 12, 'dropped', 'mid bad'); H.t(x0 + 9 * w, y - 12, 'kept: 14 bits = the slot (0 … 16383)', 'mid ok'); }
+    return { x0, w };
+  }
+  const v2b = $('v2b'); arrowDefs(v2b); const H = mk(v2b);
+  const KEY = 'patient:42', CK = crcSteps(KEY), C42 = CK.reg[CK.reg.length - 1];
+  function mixer(val, label) { H.box(250, 110, 260, 56, 'hot'); H.t(380, 132, 'CRC16 (XMODEM)', 'mid b'); H.t(380, 154, label || `register = ${val} (0x${hex(val, 4)})`, 'mid acc'); }
+  const S2B = [
+    () => { drawBytes(H, KEY, 40); H.t(380, 28, 'the key "patient:42" as UTF-8 bytes (hex under each character)', 'mid muted');
+      H.t(380, 130, '10 characters → 10 bytes: 70 61 74 69 65 6E 74 3A 34 32', 'mid acc'); H.t(380, 160, 'a hash function never sees "text", only these numbers', 'mid b');
+      H.t(380, 290, 'change one character and you change one of these numbers', 'mid muted'); },
+    () => { drawBytes(H, KEY, 30); H.line([[380, 74], [380, 108]], 'hot'); mixer(C42);
+      H.t(380, 196, 'each byte is folded into a 16-bit register: shift, and XOR with 0x1021 when a 1 falls off', 'mid'); H.t(380, 218, 'after the last byte the register holds the answer', 'mid muted');
+      H.t(380, 260, `CRC16("patient:42") = ${C42}`, 'mid acc halo'); H.t(380, 284, 'always the same number, always between 0 and 65,535', 'mid b'); },
+    () => { H.t(380, 30, `CRC16("patient:42") = ${C42} = 0x${hex(C42, 4)}`, 'mid acc'); drawBits(H, C42, 70, { labels: true });
+      H.t(380, 170, '16 bits, so 2¹⁶ = 65,536 possible values (0 … 65,535)', 'mid b'); H.t(380, 196, 'shaded cells are the 1 bits', 'mid muted'); },
+    () => { H.t(380, 30, `${C42} mod 16384`, 'mid acc'); drawBits(H, C42, 80, { drop: true });
+      H.t(380, 160, '16384 = 2¹⁴, so "mod 16384" just keeps the lowest 14 bits', 'mid b'); H.t(380, 186, `${C42} − 16384 = ${C42 % 16384}  →  slot ${C42 % 16384}`, 'mid acc');
+      H.t(380, 222, 'CLUSTER KEYSLOT patient:42  →  13565 (real Redis agrees)', 'mid ok'); H.t(380, 260, 'in code: slot = crc16(key) & 0x3FFF', 'mid muted'); },
+    () => { const K3 = ['patient:42', 'patient:43', 'Patient:42']; H.t(380, 26, 'one character apart, far apart in the slot space', 'mid b');
+      K3.forEach((k, i) => { const c = crcSteps(k).reg.slice(-1)[0], y = 46 + i * 66; H.t(20, y + 20, k, 'b'); drawBitsSmall(c, y, i ? C42 : undefined); H.t(740, y + 20, 'slot ' + (c % 16384), 'acc').style.textAnchor = 'end'; });
+      const d = [...bits16(C42)].filter((x, i) => x !== bits16(crcSteps('patient:43').reg.slice(-1)[0])[i]).length;
+      H.t(380, 262, `42 → 43 flips ${d} of the 16 bits (red outlines)`, 'mid acc'); H.t(380, 288, 'the slot jumps by thousands, so neighbouring IDs don\'t pile onto one node', 'mid muted'); },
+    () => { drawBytes(H, '{patient:42}:visits', 40); H.t(380, 28, 'hash tag: only the part inside { } is fed to CRC16', 'mid muted');
+      H.t(380, 130, 'CRC16("patient:42") → slot 13565, same as the plain key', 'mid acc'); H.t(380, 160, 'so {patient:42}:profile and {patient:42}:visits share a slot', 'mid b');
+      H.t(380, 210, 'empty braces don\'t count: a{}b hashes the whole key → slot 13694 (real run)', 'mid muted'); },
+    () => { H.t(380, 34, '"patient:42".GetHashCode() in .NET 10, three runs of the same program:', 'mid b');
+      ['-794386515', '1920957983', '591493584'].forEach((v, i) => H.t(380, 64 + i * 22, `run ${i + 1}:  ${v}`, 'mid bad'));
+      H.t(380, 150, 'CRC16("patient:42") in Redis, Java, Python, Node or C#:', 'mid b'); H.t(380, 176, 'always 29949  →  slot 13565', 'mid ok');
+      H.t(380, 230, '.NET randomises string hashes per process (protects dictionaries from attack)', 'mid muted'); H.t(380, 252, 'a cluster needs every machine and every language to agree, so it uses a fixed formula', 'mid muted'); }
+  ];
+  function drawBitsSmall(v, y, cmp) { const bs = bits16(v), w = 30, x0 = 140; for (let i = 0; i < 16; i++) { const diff = cmp !== undefined && bs[i] !== bits16(cmp)[i]; K.el('rect', { x: x0 + i * w + 1, y, width: w - 2, height: 28, class: 'rz-bit' + (bs[i] === '1' ? ' one' : '') + (diff ? ' diff' : '') + (i < 2 ? ' rz-fade' : '') }, H.L); H.t(x0 + i * w + w / 2, y + 19, bs[i], 'mid' + (i < 2 ? ' muted' : '')); } }
+  async function p2bMix(run) { H.clear(); const g = drawBytes(H, KEY, 30); H.line([[380, 74], [380, 108]], 'hot');
+    for (let i = 0; i < CK.b.length; i++) { const p = K.pill(H.L, hex(CK.b[i], 2)); await K.move(p, [g.x0 + i * g.w + g.w / 2, 72], [380, 112], 320, run); p.remove();
+      const L = H.L; const box = K.el('g', {}, L); K.el('rect', { x: 252, y: 112, width: 256, height: 52, class: 'rz-box hot' }, box); K.text(box, 380, 132, 'CRC16 (XMODEM)', 'rz-t mid b'); K.text(box, 380, 154, `after byte ${i + 1}: ${CK.reg[i]} (0x${hex(CK.reg[i], 4)})`, 'rz-t mid acc'); await K.sleep(260, run); box.remove(); } }
+  K.story({ root: $('s2b'), show: i => { H.clear(); S2B[i](); }, tipLabel: 'Interview tip', steps: [
+    { title: 'A key is just bytes', text: ['The hash never sees "patient:42" as text.', 'It sees 10 bytes: one number per character (shown in hex).', 'Change any character and one of those numbers changes.'] },
+    { title: 'CRC16 folds the bytes into one 16-bit number', text: ['CRC16 keeps a 16-bit "register" that starts at 0.', 'Each byte is mixed in: shift left, and XOR with the fixed pattern 0x1021 whenever a 1 falls off the top.', 'After the last byte the register is the hash: <b>29949</b> for patient:42.', 'Play the step to watch the register change after every byte (real values).'], play: p2bMix },
+    { title: 'Sixteen bits', text: ['29949 written in binary is 0111 0100 1111 1101.', '16 bits give 65,536 possible values (0 to 65,535).', 'Every byte affects the result, so changing any character changes these bits.'] },
+    { title: 'mod 16384 = keep the last 14 bits', text: ['16,384 is 2¹⁴, so dividing by it and keeping the remainder just drops the top 2 bits.', '29949 − 16384 = <b>13565</b>: patient:42 lives in slot 13565.', 'Real Redis agrees: <span class="mono">CLUSTER KEYSLOT patient:42</span> returns 13565.'], tip: '"Slot = CRC16 of the key (or its hash tag), keep the low 14 bits, so 0 to 16383."' },
+    { title: 'Tiny change, very different slot', text: ['patient:43 and Patient:42 each differ from patient:42 by one character.', 'Only a few bits change, but the slot still jumps by thousands: 13565, 9436, 3568.', 'Across many keys the slots come out evenly spread: 100,000 patient keys split almost exactly into thirds.'] },
+    { title: 'Hash tags change what is hashed', text: ['If a key has {…} with something inside, only that part goes into CRC16.', '{patient:42}:visits hashes "patient:42", so it shares slot 13565 with the patient\'s other keys.', 'Empty braces don\'t count: a{}b hashes the whole key.'] },
+    { title: 'Why not .NET\'s GetHashCode()?', text: ['.NET randomises string hash codes per process, so the same key gives a different number every run (real output in the diagram).', 'That\'s fine inside one process, but useless when many servers must agree.', 'CRC16 is a fixed formula: every client in every language gets 29949.'] }
+  ] });
+
+  /* ================= Hash lab ================= */
+  const hl = $('hlSvg'); arrowDefs(hl); const HL = mk(hl);
+  $('hlChips').innerHTML = [['patient:42', 'patient:43'], ['patient:42', 'Patient:42'], ['{patient:42}:visits', '{patient:42}:profile'], ['session:abc', 'session:abd']].map(([a, b]) => `<button class="chip-btn" type="button" data-a="${a}" data-b="${b}">${a} vs ${b}</button>`).join('');
+  function hlRender() {
+    const a = $('hlKey').value, b = $('hlKey2').value; HL.clear();
+    if (!a) { $('hlOut').innerHTML = 'Type a key.'; return; }
+    const ca = crc16(hashPart(a)), cb = b ? crc16(hashPart(b)) : undefined;
+    drawBytesOn(HL, a, 12);
+    const rows = [[a, ca, undefined, 80]].concat(b ? [[b, cb, ca, 170]] : []);
+    rows.forEach(([k, c, cmp, y]) => {
+      HL.t(20, y - 6, k.length > 26 ? k.slice(0, 25) + '…' : k, 'b');
+      const bs = bits16(c), w = 30, x0 = 140;
+      for (let i = 0; i < 16; i++) { const diff = cmp !== undefined && bs[i] !== bits16(cmp)[i]; K.el('rect', { x: x0 + i * w + 1, y, width: w - 2, height: 28, class: 'rz-bit' + (bs[i] === '1' ? ' one' : '') + (diff ? ' diff' : '') + (i < 2 ? ' rz-fade' : '') }, HL.L); HL.t(x0 + i * w + w / 2, y + 19, bs[i], 'mid' + (i < 2 ? ' muted' : '')); }
+      HL.t(20, y + 19, 'CRC16 ' + c, 'muted'); const sl = c % 16384, ow = ownerOf(sl, MAP3);
+      const t = HL.t(740, y + 12, 'slot ' + sl, 'acc'); t.style.textAnchor = 'end'; const t2 = HL.t(740, y + 30, 'node ' + ow, 'muted'); t2.style.textAnchor = 'end';
+    });
+    // slot bar
+    MAP3.forEach(([n, s0, s1]) => { const x = 40 + s0 / 16384 * 680, w = (s1 - s0 + 1) / 16384 * 680; K.el('rect', { x, y: 250, width: w - 1.5, height: 18, fill: TONE[n], opacity: .55 }, HL.L); });
+    [[ca, 'hot', a], ...(b ? [[cb, 'bad', b]] : [])].forEach(([c, cls]) => { const x = 40 + (c % 16384) / 16384 * 680; HL.plain([[x, 242], [x, 276]], cls); });
+    HL.t(40, 290, '0', 'muted'); HL.t(720, 290, '16383', 'muted').style.textAnchor = 'end';
+    const pa = hashPart(a);
+    let out = `<b>${esc(a)}</b>` + (pa !== a ? ` → hash tag, CRC16 reads only <code>${esc(pa)}</code>` : '') + ` → CRC16 = <b>${ca}</b> (binary <code>${bits16(ca)}</code>) → keep the low 14 bits → <b>slot ${ca % 16384}</b>.`;
+    if (b) { const d = [...bits16(ca)].filter((x, i) => x !== bits16(cb)[i]).length; out += `<br><b>${esc(b)}</b> → CRC16 = ${cb} → slot ${cb % 16384}. ` + (ca % 16384 === cb % 16384 ? '<b class="ok-text">Same slot</b>, so multi-key commands on both work.' : `${d} of 16 bits differ (red outlines), so they land ${Math.abs(ca % 16384 - cb % 16384).toLocaleString()} slots apart.`); }
+    $('hlOut').innerHTML = out;
+  }
+  function esc(t) { return String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+  function drawBytesOn(M, key, y) {
+    const b = [...new TextEncoder().encode(key)], chars = [...key], n = Math.min(b.length, 22), w = Math.min(40, 680 / n), x0 = 380 - (n * w) / 2;
+    const tagPart = hashPart(key), ts = key.indexOf('{' + tagPart + '}') + 1, tagged = tagPart !== key;
+    for (let i = 0; i < n; i++) { const x = x0 + i * w, inTag = !tagged || (i >= ts && i < ts + tagPart.length);
+      K.el('rect', { x: x + 2, y, width: w - 4, height: 36, class: 'rz-byte' + (inTag ? '' : ' rz-fade') }, M.L); M.t(x + w / 2, y + 15, chars[i] || '·', 'mid b'); M.t(x + w / 2, y + 30, hex(b[i], 2), 'mid ' + (inTag ? 'acc' : 'muted')); }
+    if (b.length > n) M.t(x0 + n * w + 6, y + 22, '…', 'muted');
+  }
+  $('hlKey').addEventListener('input', hlRender); $('hlKey2').addEventListener('input', hlRender);
+  $('hlChips').addEventListener('click', e => { const c = e.target.closest('button[data-a]'); if (!c) return; $('hlKey').value = c.dataset.a; $('hlKey2').value = c.dataset.b; hlRender(); });
+  hlRender();
+
+
+  K.codeCard($('code'), { file: 'Crc16.cs', lang: 'cs', marks: { 6: 'hot', 9: 'ok' }, code:
+`static ushort Crc16(ReadOnlySpan<byte> data) {   // XMODEM: poly 0x1021, start 0
+    ushort crc = 0;
+    foreach (byte b in data) {
+        crc ^= (ushort)(b << 8);
+        for (int i = 0; i < 8; i++)
+            crc = (crc & 0x8000) != 0 ? (ushort)((crc << 1) ^ 0x1021) : (ushort)(crc << 1);
+    }
+    return crc;
+}
+int slot = Crc16(Encoding.UTF8.GetBytes("patient:42")) & 0x3FFF;   // 13565` });
+
+  const O = ['Bytes', 'CRC16', 'Low 14 bits', 'Hash tag', 'GetHashCode'];
+  SD.page({ track: 'hld', drill: { opts: O, items: [
+    { q: '<span class="mono">70 61 74 69 65 6E 74 3A 34 32</span> for patient:42.', a: O[0], why: 'The hash works on the key\'s UTF-8 bytes, not on "text".' },
+    { q: 'A 16-bit register folds each byte in, ending at 29949.', a: O[1], why: 'CRC16 (XMODEM) turns the bytes into one number 0–65,535.' },
+    { q: '29949 becomes 13565.', a: O[2], why: 'mod 16384 keeps the lowest 14 bits; that is the slot.' },
+    { q: '<span class="mono">{patient:42}:visits</span> lands in the same slot as patient:42.', a: O[3], why: 'Only the part inside the braces is hashed.' },
+    { q: 'Gives a different number for the same key every time the app restarts.', a: O[4], why: '.NET randomises string hash codes per process.' }
+  ] } });
+})();
+</script>
+</body>
+</html>

@@ -145,6 +145,14 @@ window.SEARCH_INDEX = [
 "w": "Redis is a program that keeps a big dictionary in memory and lets all your app servers read and write it over the network. A key is the name you store a value under ( patient:42 ). A node is one running Redis server. One node runs out of memory and is a single point of failure . Redis Cluster fixes both: split the keys across nodes, and keep a copy of each node. Every key belongs to one of 16,384 hash slots ; each node owns a range of slots. Adding a node moves slots, not every key. Every primar"
 },
 {
+"t": "How a Key Becomes a Hash Slot: CRC16 in Redis Cluster",
+"s": "System Design",
+"k": "HLD",
+"h": "system-design/hld/redis-hash-slots.html",
+"d": "How Redis Cluster turns a key into one of 16,384 hash slots: the key's bytes, the CRC16 checksum, keeping the low 14 bits, hash tags, and why .NET GetHashCode() can't be used. Step-by-step animation and a hash lab, with numbers from real Redis.",
+"w": "Redis Cluster puts every key in one of 16,384 hash slots with CRC16(key) mod 16384 . CRC16 reads the key's bytes and folds them into one 16-bit number (0 to 65,535). mod 16384 keeps the lowest 14 bits : that number is the slot. Every client in every language gets the same slot, which is why Redis uses a fixed formula and not .NET's GetHashCode() . Watch patient:42 become slot 13565 2 In terms you already know 3 Try it: the hash lab Hash lab: watch a key become a slot Reference: real outputs In c"
+},
+{
 "t": "Design: Scale a Web App to Millions",
 "s": "System Design",
 "k": "HLD",

@@ -36,6 +36,7 @@ Interactive_explainations/
 │   │   ├── caching-in-practice.html  (Week 3 playbook: worked design, sizing calculator, CDN cache-key lab, dashboard drill)
 │   │   ├── cache-*.html, distributed-caching.html, cdn-http-caching.html  (Week 3 topic pages)
 │   │   ├── redis-cluster-explained.html  (H19 deep dive for beginners: keys, nodes, hash slots, failover; pocket-cluster playground)
+│   │   ├── redis-hash-slots.html  (H19 deep dive: how CRC16(key) mod 16384 picks a slot; hash lab)
 │   │   └── caching-flows.js  (shared caching cards and quiz scenarios)
 │   └── lld/                        # low-level design
 │       ├── index.html              # L1–L67 roadmap (same numbering as Notion)

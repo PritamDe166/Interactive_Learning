@@ -43,6 +43,7 @@
 <li><a href="cache-eviction.html"><span class="t">Eviction policies</span><span class="n">H18</span></a></li>
 <li><a href="distributed-caching.html"><span class="t">Distributed caching</span><span class="n">H19</span></a></li>
 <li><a href="redis-cluster-explained.html"><span class="t">Redis from zero: keys, nodes, slots, replicas</span><span class="n">H19</span></a></li>
+<li><a href="redis-hash-slots.html"><span class="t">How a key becomes a hash slot (CRC16)</span><span class="n">H19</span></a></li>
 <li><a href="cache-failure-modes.html"><span class="t">Caching failure modes</span><span class="n">H20</span></a></li>
 <li><a href="cdn-http-caching.html"><span class="t">CDN &amp; HTTP caching</span><span class="n">H21</span></a></li>
 <li><a href="caching-in-practice.html"><span class="t">Caching in practice: the interview playbook</span></a></li>
@@ -73,7 +74,7 @@
 </ul></details>
 </nav></details>
 <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
-<li><a href="../index.html" aria-current="true">System Design<span class="n">37</span></a></li>
+<li><a href="../index.html" aria-current="true">System Design<span class="n">38</span></a></li>
 <li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
 <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
 <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
@@ -162,7 +163,7 @@ const ROADMAP = [
    {d:12,t:"Load balancers",s:"L4 vs L7; health checks, connection draining; active-passive vs active-active ; hardware / software / DNS LB",file:"proxy-lb-gateway.html#h12"},
    {d:13,t:"LB algorithms",s:"Round robin, weighted RR, IP hash, random, least connections, least response time, power of two choices , consistent hashing",file:"load-balancing-algorithms.html"},
    {d:14,t:"Design: scale a web app to millions",s:"Scale a web app from 1 user to millions",review:true,file:"scale-web-app.html"}]},
-  {w:3,name:"Caching & CDN",atlas:[{file:"caching-in-practice.html",t:"Playbook: worked design, sizing, CDN keys, invalidation across servers",s:"Open playbook"},{file:"caching-patterns-atlas.html",t:"14 cache patterns: read, write, eviction, failure, CDN",s:"Open pattern atlas"},{file:"redis-cluster-explained.html",t:"Redis from zero: keys, nodes, hash slots, replicas and failover (H19 deep dive)",s:"Open Redis deep dive"}],days:[
+  {w:3,name:"Caching & CDN",atlas:[{file:"caching-in-practice.html",t:"Playbook: worked design, sizing, CDN keys, invalidation across servers",s:"Open playbook"},{file:"caching-patterns-atlas.html",t:"14 cache patterns: read, write, eviction, failure, CDN",s:"Open pattern atlas"},{file:"redis-cluster-explained.html",t:"Redis from zero: keys, nodes, hash slots, replicas and failover (H19 deep dive)",s:"Open Redis deep dive"},{file:"redis-hash-slots.html",t:"How a key becomes a hash slot: bytes, CRC16, 14 bits, hash tags (H19 deep dive)",s:"Open hashing deep dive"}],days:[
    {d:15,t:"Why caching",s:"Hit/miss/hit ratio; cache layers (browser → CDN → proxy → in-process → Redis → DB buffer pool); what not to cache",file:"caching-overview.html"},
    {d:16,t:"Read strategies",s:"Cache-aside, read-through, refresh-ahead; TTL choice; cache key design; serialization; caching at the query level vs the object level",file:"cache-read-strategies.html"},
    {d:17,t:"Write strategies & invalidation",s:"Write-through, write-behind, write-around ; delete vs update key; stale-data races",file:"cache-write-strategies.html"},

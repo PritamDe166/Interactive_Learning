@@ -150,9 +150,9 @@
    After adding or renaming pages, run: python3 tools/build_search_index.py
    and python3 tools/build_shell.py (refreshes the sidebar on every explainer page). */
 const SUBJECTS = [
-  {name:"System Design", path:"system-design/index.html", note:"HLD and LLD", pages:37,
+  {name:"System Design", path:"system-design/index.html", note:"HLD and LLD", pages:38,
    tracks:[
-     {label:"HLD", title:"Design the whole system.", blurb:"Networking, scaling, caching, then distributed systems.", n:21, unit:"explainers, 147 sessions planned", href:"system-design/hld/index.html", cta:"Explore HLD"},
+     {label:"HLD", title:"Design the whole system.", blurb:"Networking, scaling, caching, then distributed systems.", n:22, unit:"explainers, 147 sessions planned", href:"system-design/hld/index.html", cta:"Explore HLD"},
      {label:"LLD", title:"Make the details work.", blurb:"OOP and SOLID, design patterns, concurrency, then classic problems.", n:13, unit:"explainers, 67 topics planned", href:"system-design/lld/index.html", cta:"Explore LLD"}]},
   {name:"AWS", path:"aws-cloud-practitioner/index.html", note:"CLF-C02", pages:34,
    tracks:[
@@ -167,6 +167,7 @@ const SUBJECTS = [
    tracks:[]}
 ];
 const RECENT = [
+  {subject:"System Design", title:"How a key becomes a hash slot: CRC16, 14 bits and a hash lab", note:"H19 deep dive", href:"system-design/hld/redis-hash-slots.html", fig:["CRC16 29949|mark","slot 13565"]},
   {subject:"System Design", title:"Redis from zero: keys, nodes, hash slots, replicas and a pocket cluster", note:"H19 deep dive", href:"system-design/hld/redis-cluster-explained.html", fig:["slot 13565|mark","node C"]},
   {subject:"System Design", title:"Class relationships: objects, references and a GC reachability lab", note:"LLD L2", href:"system-design/lld/relationships.html", fig:["Clinic|mark","Dept"]},
   {subject:"System Design", title:"OOP pillars in C#: override vs new, constructor order, access modifier map", note:"LLD L1", href:"system-design/lld/oop-pillars.html", fig:["Report r","LabReport|on"], dark:true},
