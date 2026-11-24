@@ -65,6 +65,8 @@
 <h2 class="wb-track">LLD</h2>
 <a class="wb-road" href="../lld/index.html">LLD roadmap</a>
 <details class="wb-g"><summary>Phase 1: Foundations</summary><ul>
+<li><a href="../lld/oop-pillars.html"><span class="t">OOP pillars in C#</span><span class="n">L1</span></a></li>
+<li><a href="../lld/relationships.html"><span class="t">Class relationships</span><span class="n">L2</span></a></li>
 <li><a href="../lld/uml.html"><span class="t">UML: class &amp; sequence diagrams</span><span class="n">L3</span></a></li>
 <li><a href="../lld/design-principles.html"><span class="t">Design principles: DRY, KISS, YAGNI &amp; more</span><span class="n">L4</span></a></li>
 </ul></details>
@@ -85,7 +87,7 @@
 </ul></details>
 </nav></details>
 <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
-<li><a href="../index.html" aria-current="true">System Design<span class="n">34</span></a></li>
+<li><a href="../index.html" aria-current="true">System Design<span class="n">36</span></a></li>
 <li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
 <li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
 <li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
@@ -118,6 +120,13 @@
     <h2 class="sec-h"><span class="sec-n">1</span>Learn it step by step</h2>
     <p class="sec-sub">A stampede and three ways to stop it. Press <b>Next ▶</b> to go one step at a time, or <b>Play all</b> to watch the whole story.</p>
     <div class="story" id="story"></div>
+    <div class="sub-block" aria-labelledby="raceH" style="margin-top:22px">
+      <h3 class="stage-title sub" id="raceH">Stale data: the cache-aside race</h3>
+      <div class="stage-kind">Even "update the DB, then delete the key" can leave an old value behind · time runs downwards</div>
+      <div class="story" id="raceStory">
+        <div class="scroll"><svg class="diagram" id="raceSvg" style="min-width:0" viewBox="0 0 760 380" role="img" aria-label="Sequence of a reader and a writer racing: the reader's slow cache fill lands after the writer's delete and leaves a stale price in the cache"></svg></div>
+      </div>
+    </div>
   </section>
 
   <section id="compare" data-nav="Compare">
@@ -175,6 +184,11 @@
         </tbody>
       </table>
     </div>
+    <div class="note"><b>Probabilistic early refresh (XFetch):</b> each read refreshes the value early if <code>now − delta × beta × ln(random()) ≥ expiry</code>, where <code>delta</code> is how long a rebuild takes and <code>beta</code> ≈ 1. Far from expiry almost nobody refreshes; close to it, one request does it first. No locks needed.</div>
+    <div class="note"><b>TTL jitter is mainly an avalanche fix.</b> For one hot key it only shifts the moment of expiry; use single-flight, stale-while-revalidate or early refresh for that.</div>
+    <div class="note"><b>Same ideas, other names:</b> some sources say <i>cache breakdown</i> for one hot key expiring (our stampede), keep <i>penetration</i> for keys that never exist, and <i>avalanche</i> for mass expiry or cache loss.</div>
+    <div class="note"><b>Big keys</b> (a multi-MB value, a list with millions of items) block a Redis node while they're read, deleted or migrated. Split them, and delete with <code>UNLINK</code> (async) rather than <code>DEL</code>.</div>
+    <div class="note"><b>When the cache itself is slow or down:</b> short timeouts, a circuit breaker that skips the cache for a while, rate limits in front of the database, and retries with exponential backoff <i>and jitter</i> so clients don't all retry in the same instant.</div>
     <div class="note">Avalanche, penetration, hot keys and stale-while-revalidate are the usual follow-ups to a stampede question.</div>
     <div class="note">.NET's <code>HybridCache</code> and ASP.NET Core output caching both collapse concurrent misses for the same key within one process. With many servers you can still get one load per server.</div>
   </section>
@@ -196,6 +210,8 @@
         <div class="ans"><p><b>It says "definitely not present" or "maybe present".</b> Definite misses skip the DB. It can give false positives, never false negatives, and can't easily delete.</p></div></details>
       <details><summary>Why add jitter instead of just a longer TTL?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>A longer TTL only moves the cliff.</b> Jitter spreads expiries out so they never line up.</p></div></details>
+      <details><summary>"Update the DB, then delete the key" — how can the cache still end up stale?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>A reader misses, reads the <b>old</b> row, and is slow to write it back. Meanwhile a writer updates the DB and deletes the key. The reader's late <code>SET</code> puts the old value back. Fixes: always set a <b>TTL</b>, a <b>delayed second delete</b>, <b>version checks</b> on write, or invalidation from the DB's change stream (CDC).</p></div></details>
       <details><summary>The cache cluster restarts during peak. What protects the database?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>Replicas and persistence</b> so the cache comes back warm, plus rate limiting / circuit breakers on the DB path so a cold cache can't flood it.</p></div></details>
     </div>
@@ -293,6 +309,52 @@
   $('rRate').addEventListener('input', paint); $('rSrv').addEventListener('input', paint);
   $('fixes').addEventListener('change', e => { const f = e.target.dataset.f; if (f) { fx[f] = e.target.checked; paint(); } });
   paint();
+})();
+</script>
+<script>
+(function () {
+  const K = Kit, $ = id => document.getElementById(id);
+  const sv = $('raceSvg');
+  const defs = K.el('defs', {}, sv);
+  defs.innerHTML = '<marker id="rc-arr" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="11" markerHeight="11" orient="auto" markerUnits="userSpaceOnUse"><path d="M1 1 L11 6 L1 11 z" style="fill:var(--fg-soft)"/></marker>';
+  const X = { R: 90, C: 290, D: 480, W: 670 }, NM = { R: 'Reader', C: 'Cache', D: 'Database', W: 'Writer' };
+  Object.entries(X).forEach(([k, x]) => {
+    K.node(sv, x, 30, 120, 34, NM[k]);
+    K.el('line', { x1: x, y1: 48, x2: x, y2: 372, stroke: 'var(--line)', 'stroke-width': 1.5, 'stroke-dasharray': '5 5' }, sv);
+  });
+  const MSG = [
+    ['R', 'C', 90, 'GET price:7', ''],
+    ['C', 'R', 118, 'miss', 'muted'],
+    ['R', 'D', 150, 'SELECT → ₹499 (old)', ''],
+    ['W', 'D', 190, 'UPDATE ₹449', 'teal'],
+    ['W', 'C', 228, 'DEL price:7', 'teal'],
+    ['R', 'C', 276, 'SET price:7 = ₹499', 'bad'],
+    ['R', 'C', 334, 'every GET → ₹499 until TTL', 'bad']
+  ];
+  const G = MSG.map(([a, b, y, label, tone]) => {
+    const g = K.el('g', {}, sv), dir = X[b] > X[a] ? 1 : -1;
+    K.el('path', { d: `M${X[a] + dir * 4} ${y} L${X[b] - dir * 4} ${y}`, fill: 'none', stroke: tone === 'bad' ? 'var(--red)' : tone === 'teal' ? 'var(--teal)' : 'var(--fg-soft)', 'stroke-width': 2, 'stroke-dasharray': tone === 'muted' ? '6 4' : '', 'marker-end': 'url(#rc-arr)' }, g);
+    K.text(g, (X[a] + X[b]) / 2, y - 7, label, 'mlabel ' + (tone === 'bad' ? 'bad' : ''));
+    return g;
+  });
+  const slow = K.text(sv, X.R - 4, 222, 'slow… (GC pause, network)', 'mlabel muted');
+  const stuck = K.text(sv, X.C, 306, 'cache: ₹499 · DB: ₹449', 'mlabel bad');
+  const FIX = K.text(sv, 380, 364, '', 'mlabel accent');
+  const VIS = [[0, 1], [0, 1, 2], [0, 1, 2, 3, 4], [0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5, 6], [0, 1, 2, 3, 4, 5, 6]];
+  function show(i) {
+    G.forEach((g, k) => { g.style.opacity = VIS[i].includes(k) ? (VIS[i].length - 1 === k || (i === 2 && k >= 3) ? 1 : .35) : 0; });
+    slow.style.opacity = i >= 2 && i <= 3 ? 1 : 0;
+    stuck.style.opacity = i >= 3 ? 1 : 0;
+    FIX.textContent = i === 5 ? 'fix: TTL on every key · delayed second DEL · version check on SET · CDC invalidation' : '';
+  }
+  K.story({ root: $('raceStory'), show, tipLabel: 'Interview tip', steps: [
+    { title: 'A reader misses', text: 'The reader asks the cache for <span class="mono">price:7</span>. It isn\'t there, so cache-aside says: read the database, then fill the cache.' },
+    { title: 'It reads the old value', text: 'The database still says <b>₹499</b>. Before the reader writes it back, something slows it down: a GC pause, a busy thread pool, a slow network.' },
+    { title: 'A writer updates and deletes', text: 'Meanwhile a writer sets the price to <b>₹449</b> and deletes the cache key. That\'s the textbook-correct write path.' },
+    { title: 'The late SET wins', text: 'Now the reader\'s delayed <span class="mono">SET price:7 = ₹499</span> lands <b>after</b> the delete. The cache holds the old price again, and nobody will delete it.' },
+    { title: 'Everyone reads the stale value', text: 'Every request gets ₹499 until the entry expires. Without a TTL, that\'s forever.' },
+    { title: 'How to close the window', text: 'Always set a <b>TTL</b> (bounds the damage). Add a <b>delayed second delete</b> after the write. Store a <b>version</b> with the value and refuse to overwrite newer with older. Or invalidate from the database\'s <b>change stream</b> (CDC), which also catches writes made outside the app.', tip: 'For money and stock at checkout, read from the database: don\'t cache what must be exact.' }
+  ] });
 })();
 </script>
 </body>

@@ -34,6 +34,8 @@
   ];
   const LLD = [
     { g: 'Phase 1 · Foundations', pages: [
+      ['oop-pillars.html', 'L1 OOP', 'OOP pillars in C#'],
+      ['relationships.html', 'L2 Relationships', 'Class relationships'],
       ['uml.html', 'L3 UML', 'UML: class & sequence diagrams'],
       ['design-principles.html', 'L4 Principles', 'Design principles: DRY, KISS, YAGNI & more']] },
     { g: 'Phase 2 · SOLID', pages: [

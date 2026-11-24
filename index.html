@@ -150,7 +150,7 @@
    After adding or renaming pages, run: python3 tools/build_search_index.py
    and python3 tools/build_shell.py (refreshes the sidebar on every explainer page). */
 const SUBJECTS = [
-  {name:"System Design", path:"system-design/index.html", note:"HLD and LLD", pages:34,
+  {name:"System Design", path:"system-design/index.html", note:"HLD and LLD", pages:36,
    tracks:[
      {label:"HLD", title:"Design the whole system.", blurb:"Networking, scaling, caching, then distributed systems.", n:21, unit:"explainers, 147 sessions planned", href:"system-design/hld/index.html", cta:"Explore HLD"},
      {label:"LLD", title:"Make the details work.", blurb:"OOP and SOLID, design patterns, concurrency, then classic problems.", n:13, unit:"explainers, 67 topics planned", href:"system-design/lld/index.html", cta:"Explore LLD"}]},
@@ -167,6 +167,8 @@ const SUBJECTS = [
    tracks:[]}
 ];
 const RECENT = [
+  {subject:"System Design", title:"Class relationships: objects, references and a GC reachability lab", note:"LLD L2", href:"system-design/lld/relationships.html", fig:["Clinic|mark","Dept"]},
+  {subject:"System Design", title:"OOP pillars in C#: override vs new, constructor order, access modifier map", note:"LLD L1", href:"system-design/lld/oop-pillars.html", fig:["Report r","LabReport|on"], dark:true},
   {subject:"System Design", title:"Design principles: DRY, KISS, YAGNI, Law of Demeter, change ripple lab", note:"LLD L4", href:"system-design/lld/design-principles.html", fig:["Change","1 class|on","done"]},
   {subject:"System Design", title:"UML: class & sequence diagrams, draw-the-arrow builder", note:"LLD L3", href:"system-design/lld/uml.html", fig:["Clinic|mark","Department"], dark:true},
   {subject:"System Design", title:"LLD creational patterns: Singleton, Factory method, Abstract factory, Builder, Prototype", note:"LLD L12 to L16", href:"system-design/lld/singleton.html", fig:["Factory|mark","Product A / B"], dark:true},

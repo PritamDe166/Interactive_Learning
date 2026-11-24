@@ -172,7 +172,7 @@
     /* ---- failure modes ---- */
     stampede: { name: 'Cache stampede', tone: 'red', tags: ['failure'],
       rule: 'A hot key expires and many requests miss at once; every one of them runs the same expensive DB query.',
-      takeaway: 'Fix: single-flight (one loader, others wait), stale-while-revalidate, TTL jitter.',
+      takeaway: 'Fix: single-flight (one loader, others wait), stale-while-revalidate, early refresh.',
       use: '(failure mode) Expect it on any hot key with a TTL.', avoid: 'HybridCache single-flight is per server, not cluster-wide.',
       vb: [360, 160],
       build(m) { const ys = [24, 58, 92, 126]; ys.forEach((y, i) => m.box('r' + i, 36, y, 'req ' + (i + 1), { w: 50, h: 22 })); m.box('cache', 190, 30, 'Cache', { icon: 'ram', w: 84 }); m.db('db', 305, 104, 'Database');
@@ -544,7 +544,7 @@
     { q: 'A small cache serves a stable set of hot keys, but a nightly job reads every record once.', a: 'lfu', why: 'The scan reads each key once; LFU evicts those first and keeps the hot set.' },
     { q: 'Recently viewed items are likely to be viewed again soon; popularity changes through the day.', a: 'lru', why: 'LRU follows recency and adapts as popularity shifts.' },
     { q: 'Doctor availability changes every few minutes; a little staleness is OK but never more than a minute.', a: 'ttl', why: 'A 60-second TTL caps staleness even if an invalidation is missed.' },
-    { q: 'At 00:00 a sale starts, the product key expires, and the database CPU jumps to 100% for a few seconds.', a: 'stampede', why: 'Many concurrent misses on one key: single-flight, stale-while-revalidate or TTL jitter.' },
+    { q: 'At 00:00 a sale starts, the product key expires, and the database CPU jumps to 100% for a few seconds.', a: 'stampede', why: 'Many concurrent misses on one key: single-flight, stale-while-revalidate or early refresh.' },
     { q: 'A dashboard can show numbers a few seconds old, but must never block a user while it refreshes.', a: 'swr', why: 'Serve the stale copy instantly and refresh once in the background.' },
     { q: 'A scraper requests random patient IDs; none exist, and every request reaches SQL Server.', a: 'penetration', why: 'Cache the "not found" briefly or keep a Bloom filter of valid IDs; also rate-limit the client.' },
     { q: 'A nightly import caches 2 million rows with a 24-hour TTL; the next night the database falls over at the same minute.', a: 'avalanche', why: 'Everything expires together. Add random jitter to the TTL and warm gradually.' },

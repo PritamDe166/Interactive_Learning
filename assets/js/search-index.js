@@ -22,7 +22,7 @@ window.SEARCH_INDEX = [
 "k": "HLD",
 "h": "system-design/hld/cache-failure-modes.html",
 "d": "H20: cache stampede, avalanche, penetration, hot keys and stale data, animated with their fixes; plus a simulator that charts database load when a hot key or many keys expire.",
-"w": "A cache hides load from the database, until the moment it stops hiding it . Stampede : one hot key expires and every request reloads it at once. Avalanche : many keys expire together, or a cache node dies. Penetration : lookups for keys that don't exist always reach the database. Hot key and stale data round out the set; each has a standard fix. 2 Compare: 6 patterns side by side 3 Try it: Stampede & avalanche simulator"
+"w": "A cache hides load from the database, until the moment it stops hiding it . Stampede : one hot key expires and every request reloads it at once. Avalanche : many keys expire together, or a cache node dies. Penetration : lookups for keys that don't exist always reach the database. Hot key and stale data round out the set; each has a standard fix. Stale data: the cache-aside race 2 Compare: 6 patterns side by side 3 Try it: Stampede & avalanche simulator"
 },
 {
 "t": "Cache Read Strategies",
@@ -86,7 +86,7 @@ window.SEARCH_INDEX = [
 "k": "HLD",
 "h": "system-design/hld/distributed-caching.html",
 "d": "H19: in-process vs distributed caches, L1 + L2, Redis cluster hash slots, replication and persistence, animated; plus a lab showing how many keys move when you add a cache node.",
-"w": "An in-process cache lives inside each server: fastest, but every server has its own copy. A distributed cache (Redis) is shared by all servers: one copy, one network hop away. L1 + L2 combines both: a tiny local cache in front of Redis. Redis grows with sharding (16,384 hash slots), survives failures with replicas , and restarts warm with persistence . 2 Compare: 6 patterns side by side 3 Try it: Add a cache node In .NET terms"
+"w": "An in-process cache lives inside each server: fastest, but every server has its own copy. A distributed cache (Redis) is shared by all servers: one copy, one network hop away. L1 + L2 combines both: a tiny local cache in front of Redis. Redis grows with sharding (16,384 hash slots), survives failures with replicas , and restarts warm with persistence . How keys find their node: the hash ring 2 Compare: 6 patterns side by side 3 Try it: Add a cache node In .NET terms Redis data types you'll actua"
 },
 {
 "t": "HTTP Requests & Status Codes",
@@ -217,12 +217,28 @@ window.SEARCH_INDEX = [
 "w": "System Design LLD No LLD topics yet"
 },
 {
+"t": "OOP Pillars in C#",
+"s": "System Design",
+"k": "LLD",
+"h": "system-design/lld/oop-pillars.html",
+"d": "Encapsulation, abstraction, inheritance and polymorphism in C#, shown as what the runtime actually does: guarded state, constructor order, virtual dispatch vs method hiding, overloading, class vs struct and interfaces.",
+"w": "Encapsulation : state stays private; the only way in is a method that enforces the rules. Abstraction : callers see what an object does, not how (interfaces, abstract classes). Inheritance : one base class, many interfaces; constructors run base first . Polymorphism : with override the object decides at runtime; with new the variable's type decides; overloads are picked by the compiler . Interview favourites: interface vs abstract class, protected internal vs private protected , class vs struct."
+},
+{
 "t": "Prototype",
 "s": "System Design",
 "k": "LLD",
 "h": "system-design/lld/prototype.html",
 "d": "Creational pattern L16: create new objects by copying a configured one. See in a memory diagram why assignment isn't a copy, how MemberwiseClone and record with-expressions share lists, and what a deep copy changes.",
 "w": "Create a new object by copying an existing, already configured one (the prototype) instead of building it from scratch. Worth it when setting an object up is expensive (loaded from a database, many steps) and you need many slightly different copies. The whole pattern hinges on one question: shallow or deep copy? Get it wrong and editing the copy silently changes the original. In C#: MemberwiseClone() and record with expressions are both shallow . 1 Learn: what a copy really copies Walkthrough: c"
+},
+{
+"t": "Class Relationships",
+"s": "System Design",
+"k": "LLD",
+"h": "system-design/lld/relationships.html",
+"d": "Dependency, association, aggregation, composition and inheritance in C#, shown as objects, references and garbage collection: who creates a part, who else holds it, and whether it outlives the whole. Plus composition over inheritance.",
+"w": "Five relationships, loosest to tightest: dependency (uses briefly), association (keeps a reference), aggregation (has parts that live on), composition (owns parts that go with it), inheritance (is a kind of). Decide by lifetime and ownership : who creates the part, who else holds it, does it outlive the whole? In .NET, \"dies with the whole\" means nothing else references it , so the garbage collector reclaims it. is-a → inheritance; has-a → composition. Favour composition : combine parts instead "
 },
 {
 "t": "Singleton",

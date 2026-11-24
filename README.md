@@ -38,6 +38,7 @@ Interactive_explainations/
 │   │   └── caching-flows.js  (shared caching cards and quiz scenarios)
 │   └── lld/                        # low-level design
 │       ├── index.html              # L1–L67 roadmap (same numbering as Notion)
+│       ├── oop-pillars.html, relationships.html  # L1–L2 foundations (dispatch predictor; GC reachability lab)
 │       ├── uml.html, design-principles.html  # L3–L4 foundations (class + sequence diagrams; change-ripple lab)
 │       ├── solid*.html             # L6–L11
 │       └── singleton.html, factory-method.html, abstract-factory.html, builder.html, prototype.html  # L12–L16 creational patterns

@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>OOP Pillars in C#</title>
+<meta name="description" content="Encapsulation, abstraction, inheritance and polymorphism in C#, shown as what the runtime actually does: guarded state, constructor order, virtual dispatch vs method hiding, overloading, class vs struct and interfaces.">
+<link rel="stylesheet" href="../../assets/css/theme.css?v=20261124">
+<link rel="stylesheet" href="../../assets/css/base.css?v=20261124">
+<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261124">
+<script src="../../assets/js/theme.js?v=20261124"></script>
+<script src="../../assets/js/explainer-kit.js?v=20261124"></script>
+<script src="../sd-series.js?v=20261124"></script>
+<style>
+  .op-wall { fill: none; stroke: var(--fg-soft); stroke-width: 3; }
+  .op-inner { fill: var(--teal-wash); stroke: var(--line); stroke-width: 1.5; }
+  .op-row { fill: var(--panel); stroke: var(--line); stroke-width: 1.2; }
+  .op-row.hot { stroke: var(--cyan); stroke-width: 2.4; }
+  .op-row.dim { opacity: .35; }
+  .op-t { fill: var(--fg); font-family: var(--mono) !important; font-size: 12px; }
+  .op-t.mid { text-anchor: middle; }
+  .op-t.b { font-weight: 700; font-family: var(--display) !important; font-size: 13px; }
+  .op-t.muted { fill: var(--muted); } .op-t.bad { fill: var(--bad-text); font-weight: 600; } .op-t.ok { fill: var(--good-text); font-weight: 600; } .op-t.acc { fill: var(--accent-text); font-weight: 600; }
+  .op-arrow { fill: none; stroke: var(--fg-soft); stroke-width: 2; }
+  .op-arrow.hot { stroke: var(--cyan); stroke-width: 2.6; }
+  .op-arrow.bad { stroke: var(--red); stroke-width: 2.4; }
+  .op-arrow.ok { stroke: var(--teal); stroke-width: 2.4; }
+  .op-arrow.dash { stroke-dasharray: 6 4; }
+  .op-head { fill: var(--fg-soft); } .op-head.hot { fill: var(--cyan); } .op-head.bad { fill: var(--red); } .op-head.ok { fill: var(--teal); }
+  .op-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .op-cell { background: var(--panel); padding: var(--space-xs) var(--space-sm); border-left: 4px solid var(--line); }
+  .op-cell b { display: block; font-size: 14px; }
+  .op-cell span { font-size: 13px; color: var(--fg-soft); }
+  .op-cell.yes { border-left-color: var(--teal); } .op-cell.no { border-left-color: var(--red); }
+  .op-cell.no span { color: var(--bad-text); font-family: var(--mono); font-size: 12px; overflow-wrap: anywhere; }
+  .op-out { background: var(--panel); padding: var(--space-sm) var(--space-md); margin-top: var(--space-sm); }
+  .op-out code { overflow-wrap: anywhere; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>System Design pages</summary>
+<nav aria-label="System Design pages">
+<h2 class="wb-track">HLD</h2>
+<a class="wb-road" href="../hld/index.html">HLD roadmap</a>
+<details class="wb-g"><summary>Week 1: Networking</summary><ul>
+<li><a href="../hld/client-server-dns.html"><span class="t">Client-server &amp; DNS</span><span class="n">H1</span></a></li>
+<li><a href="../hld/http.html"><span class="t">HTTP</span><span class="n">H2</span></a></li>
+<li><a href="../hld/tcp-udp.html"><span class="t">TCP &amp; UDP</span><span class="n">H3</span></a></li>
+<li><a href="../hld/https-tls.html"><span class="t">HTTPS &amp; TLS</span><span class="n">H4</span></a></li>
+<li><a href="../hld/latency-throughput.html"><span class="t">Latency &amp; throughput</span><span class="n">H5</span></a></li>
+<li><a href="../hld/availability-slos.html"><span class="t">Availability, SLOs &amp; recovery</span><span class="n">H6</span></a></li>
+<li><a href="../hld/week-1-review.html"><span class="t">Review: journey of a request</span><span class="n">H7</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Week 2: Scaling</summary><ul>
+<li><a href="../hld/scaling.html"><span class="t">Vertical vs horizontal scaling</span><span class="n">H8</span></a></li>
+<li><a href="../hld/stateless.html"><span class="t">Stateless applications</span><span class="n">H9</span></a></li>
+<li><a href="../hld/proxy-lb-gateway.html"><span class="t">Reverse proxy, API gateway &amp; load balancers</span><span class="n">H10–12</span></a></li>
+<li><a href="../hld/load-balancing-algorithms.html"><span class="t">Load-balancing algorithms</span><span class="n">H13</span></a></li>
+<li><a href="../hld/scale-web-app.html"><span class="t">Design: scale a web app to millions</span><span class="n">H14</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Week 3: Caching</summary><ul>
+<li><a href="../hld/caching-overview.html"><span class="t">Why caching exists</span><span class="n">H15</span></a></li>
+<li><a href="../hld/cache-read-strategies.html"><span class="t">Read strategies</span><span class="n">H16</span></a></li>
+<li><a href="../hld/cache-write-strategies.html"><span class="t">Write strategies &amp; invalidation</span><span class="n">H17</span></a></li>
+<li><a href="../hld/cache-eviction.html"><span class="t">Eviction policies</span><span class="n">H18</span></a></li>
+<li><a href="../hld/distributed-caching.html"><span class="t">Distributed caching</span><span class="n">H19</span></a></li>
+<li><a href="../hld/cache-failure-modes.html"><span class="t">Caching failure modes</span><span class="n">H20</span></a></li>
+<li><a href="../hld/cdn-http-caching.html"><span class="t">CDN &amp; HTTP caching</span><span class="n">H21</span></a></li>
+<li><a href="../hld/caching-in-practice.html"><span class="t">Caching in practice: the interview playbook</span></a></li>
+<li><a href="../hld/caching-patterns-atlas.html"><span class="t">All caching patterns at a glance</span></a></li>
+</ul></details>
+<h2 class="wb-track">LLD</h2>
+<a class="wb-road" href="index.html">LLD roadmap</a>
+<details class="wb-g" open><summary>Phase 1: Foundations</summary><ul>
+<li><a href="oop-pillars.html" aria-current="page"><span class="t">OOP pillars in C#</span><span class="n">L1</span></a></li>
+<li><a href="relationships.html"><span class="t">Class relationships</span><span class="n">L2</span></a></li>
+<li><a href="uml.html"><span class="t">UML: class &amp; sequence diagrams</span><span class="n">L3</span></a></li>
+<li><a href="design-principles.html"><span class="t">Design principles: DRY, KISS, YAGNI &amp; more</span><span class="n">L4</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Phase 2: SOLID</summary><ul>
+<li><a href="solid.html"><span class="t">SOLID overview</span><span class="n">L6</span></a></li>
+<li><a href="solid-srp.html"><span class="t">S: Single responsibility</span><span class="n">L7</span></a></li>
+<li><a href="solid-ocp.html"><span class="t">O: Open-closed</span><span class="n">L8</span></a></li>
+<li><a href="solid-lsp.html"><span class="t">L: Liskov substitution</span><span class="n">L9</span></a></li>
+<li><a href="solid-isp.html"><span class="t">I: Interface segregation</span><span class="n">L10</span></a></li>
+<li><a href="solid-dip.html"><span class="t">D: Dependency inversion</span><span class="n">L11</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Phase 3: Creational patterns</summary><ul>
+<li><a href="singleton.html"><span class="t">Singleton</span><span class="n">L12</span></a></li>
+<li><a href="factory-method.html"><span class="t">Simple factory &amp; factory method</span><span class="n">L13</span></a></li>
+<li><a href="abstract-factory.html"><span class="t">Abstract factory</span><span class="n">L14</span></a></li>
+<li><a href="builder.html"><span class="t">Builder</span><span class="n">L15</span></a></li>
+<li><a href="prototype.html"><span class="t">Prototype</span><span class="n">L16</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../index.html" aria-current="true">System Design<span class="n">36</span></a></li>
+<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+<li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">LLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <p class="crumbs">System Design / LLD / Foundations / L1</p>
+    <h1>OOP Pillars in C#</h1>
+    <ul class="lede">
+      <li><b>Encapsulation</b>: state stays private; the only way in is a method that enforces the rules.</li>
+      <li><b>Abstraction</b>: callers see <i>what</i> an object does, not <i>how</i> (interfaces, abstract classes).</li>
+      <li><b>Inheritance</b>: one base class, many interfaces; <b>constructors run base first</b>.</li>
+      <li><b>Polymorphism</b>: with <span class="mono">override</span> the <b>object</b> decides at runtime; with <span class="mono">new</span> the <b>variable's type</b> decides; overloads are picked by the <b>compiler</b>.</li>
+      <li>Interview favourites: interface vs abstract class, <span class="mono">protected internal</span> vs <span class="mono">private protected</span>, class vs struct.</li>
+    </ul>
+  </header>
+
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn: what the runtime actually does</h2>
+    <p class="sec-sub">Each step pairs a picture of the objects with the C# that produced it. Outputs are from a real run.</p>
+    <div class="sub-block" aria-labelledby="storyH">
+      <h3 class="stage-title sub" id="storyH">Walkthrough: four pillars, eight steps</h3>
+      <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+      <div class="story wide" id="opStory">
+        <div class="scroll"><svg class="diagram" id="opSvg" style="min-width:0" viewBox="0 0 760 330" role="img" aria-label="Objects, variables and method tables illustrating each OOP pillar"></svg></div>
+      </div>
+      <div id="opCode" style="margin-top:12px"></div>
+    </div>
+  </section>
+
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">2</span>Try it yourself</h2>
+    <p class="sec-sub">Predict which method runs, then check who can see each access modifier.</p>
+    <div class="sub-block" aria-labelledby="dispH">
+      <h3 class="stage-title sub" id="dispH">1. Who decides: the variable or the object?</h3>
+      <div class="stage-kind">Pick the variable type, the object, the method and the keyword on LabReport.Footer · predict · reveal</div>
+      <div class="controls" style="flex-wrap:wrap;gap:14px">
+        <div class="chip-group" style="margin:0"><div class="label">Variable</div><div class="seg" id="dVar" role="group" aria-label="Variable type"><button type="button" data-v="Report" aria-pressed="true">Report r</button><button type="button" data-v="LabReport" aria-pressed="false">LabReport r</button></div></div>
+        <div class="chip-group" style="margin:0"><div class="label">Object</div><div class="seg" id="dObj" role="group" aria-label="Object"><button type="button" data-v="Report" aria-pressed="false">new Report()</button><button type="button" data-v="LabReport" aria-pressed="true">new LabReport()</button></div></div>
+        <div class="chip-group" style="margin:0"><div class="label">Call</div><div class="seg" id="dCall" role="group" aria-label="Method"><button type="button" data-v="Title" aria-pressed="false">r.Title()</button><button type="button" data-v="Footer" aria-pressed="true">r.Footer()</button></div></div>
+        <div class="chip-group" style="margin:0"><div class="label">LabReport.Footer is declared with</div><div class="seg" id="dKw" role="group" aria-label="Keyword"><button type="button" data-v="new" aria-pressed="true">new</button><button type="button" data-v="override" aria-pressed="false">override (base is virtual)</button></div></div>
+      </div>
+      <div id="dCode" style="margin-top:10px"></div>
+      <p class="sub" style="margin:10px 0 4px">Your prediction: what does the call return?</p>
+      <div class="chips" id="dPred"></div>
+      <div class="op-out" id="dOut"><b>Make a prediction to see the answer.</b></div>
+    </div>
+    <div class="sub-block" aria-labelledby="accH">
+      <h3 class="stage-title sub" id="accH">2. Access modifier map</h3>
+      <div class="stage-kind">Pick a modifier on a member of <span class="mono">Base</span> (in assembly Lib) · see where it compiles · errors are real compiler output</div>
+      <div class="seg" id="aMod" role="group" aria-label="Modifier" style="flex-wrap:wrap"><button type="button" data-v="public" aria-pressed="false">public</button><button type="button" data-v="private" aria-pressed="false">private</button><button type="button" data-v="protected" aria-pressed="false">protected</button><button type="button" data-v="internal" aria-pressed="false">internal</button><button type="button" data-v="protected internal" aria-pressed="true">protected internal</button><button type="button" data-v="private protected" aria-pressed="false">private protected</button></div>
+      <div class="op-grid" id="aGrid"></div>
+      <p class="status-line" id="aStatus"></p>
+    </div>
+  </section>
+
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">3</span>Revise in two minutes</h2>
+    <div class="sub-block" aria-labelledby="cheatH">
+    <h3 class="sec-h3" id="cheatH">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">Public setter with no rule</span><span class="arrow">→</span><span class="then">not encapsulation: make it a method that validates</span></li>
+      <li><span class="if">Callers shouldn't know how it works</span><span class="arrow">→</span><span class="then">abstraction: an interface or abstract class in front</span></li>
+      <li><span class="if">Related classes share code and state, a few steps differ</span><span class="arrow">→</span><span class="then">abstract base class (template method)</span></li>
+      <li><span class="if">Unrelated classes share a capability, or you need to swap / fake it</span><span class="arrow">→</span><span class="then">interface</span></li>
+      <li><span class="if">Behaviour must follow the real object</span><span class="arrow">→</span><span class="then"><span class="mono">virtual</span> in the base + <span class="mono">override</span></span></li>
+      <li><span class="if">You see <span class="mono">new</span> on a method, or warning CS0108</span><span class="arrow">→</span><span class="then">hiding: the variable's type decides; usually a bug</span></li>
+      <li><span class="if">Same name, different parameters</span><span class="arrow">→</span><span class="then">overloading, chosen at compile time</span></li>
+      <li><span class="if">Subclasses only, and only in this assembly</span><span class="arrow">→</span><span class="then"><span class="mono">private protected</span> (intersection)</span></li>
+      <li><span class="if">Subclasses anywhere, or anyone in this assembly</span><span class="arrow">→</span><span class="then"><span class="mono">protected internal</span> (union)</span></li>
+      <li><span class="if">Small immutable value with no identity</span><span class="arrow">→</span><span class="then"><span class="mono">struct</span> / <span class="mono">record struct</span>; entities are classes</span></li>
+    </ul>
+    </div>
+    <div class="sub-block" aria-labelledby="refH">
+    <h3 class="sec-h3" id="refH">Reference</h3>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>Interface</th><th>Abstract class</th></tr></thead>
+        <tbody>
+          <tr><td>Says</td><td>"can do" (a capability)</td><td>"is a kind of" (a partial base)</td></tr>
+          <tr><td>Instance fields</td><td>No</td><td>Yes</td></tr>
+          <tr><td>Constructors</td><td>No</td><td>Yes (run before the subclass's)</td></tr>
+          <tr><td>Method bodies</td><td>Default methods since C# 8 (.NET Core 3.0+)</td><td>Any mix of abstract and concrete</td></tr>
+          <tr><td>Per class</td><td>Many</td><td>One</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="scroll card table-card" style="margin-top:14px">
+      <table>
+        <thead><tr><th></th><th>Overloading</th><th>Overriding</th><th>Hiding (<span class="mono">new</span>)</th></tr></thead>
+        <tbody>
+          <tr><td>Signature</td><td>different parameters</td><td>same</td><td>same</td></tr>
+          <tr><td>Decided by</td><td>compiler, from the arguments</td><td>runtime type of the object</td><td>compile-time type of the variable</td></tr>
+          <tr><td>Keywords</td><td>none</td><td><span class="mono">virtual</span>/<span class="mono">abstract</span> + <span class="mono">override</span></td><td><span class="mono">new</span> (else warning CS0108)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="scroll card table-card" style="margin-top:14px">
+      <table>
+        <thead><tr><th></th><th>class</th><th>struct</th></tr></thead>
+        <tbody>
+          <tr><td>Kind</td><td>reference type</td><td>value type</td></tr>
+          <tr><td><span class="mono">var b = a;</span></td><td>copies the reference: one shared object</td><td>copies the value: two independent copies</td></tr>
+          <tr><td>Inheritance</td><td>yes</td><td>no (interfaces only)</td></tr>
+          <tr><td>Use for</td><td>entities with identity and behaviour</td><td>small immutable values (Money, Point, DateRange)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><p><b>Defaults:</b> members are <span class="mono">private</span> unless stated; top-level types are <span class="mono">internal</span>. A <span class="mono">static class</span> can't be instantiated or inherited; a <span class="mono">sealed class</span> can't be inherited, and <span class="mono">sealed override</span> stops one method being overridden further.</p></div>
+      <div class="note"><p><b>Encapsulation vs abstraction:</b> encapsulation protects <i>data</i> (private state, guarded changes); abstraction hides <i>complexity</i> (a small contract in front of the details). They work together.</p></div>
+      <div class="note"><p><b>Covariant returns</b> (C# 9): an override may return a more derived type than the base method declared.</p></div>
+    </div>
+    </div>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">4</span>Test yourself</h2>
+    <h3 class="sec-h3">Which pillar or feature is it?</h3>
+    <div id="drill"></div>
+    <h3 class="sec-h3">Explain it out loud</h3>
+    <p class="sub">Answer before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Encapsulation vs abstraction in one sentence each?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Encapsulation</b>: private state that changes only through methods with rules. <b>Abstraction</b>: callers use a small contract and don't know how it works inside.</p></div></details>
+      <details><summary>LabReport declares <code>new Footer()</code>. What does this return?<span class="mono">Report r = new LabReport(); r.Footer();</span><span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Report.Footer()</b> ("generic footer"). With hiding, the variable's compile-time type decides. If Footer were <span class="mono">virtual</span> and LabReport used <span class="mono">override</span>, you'd get "lab footer".</p></div></details>
+      <details><summary>In what order do constructors run for <code>new UrgentSmsNotifier()</code>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Base first</b>: Notifier, then SmsNotifier, then UrgentSmsNotifier. <span class="mono">: base(...)</span> chooses which base constructor and passes its arguments.</p></div></details>
+      <details><summary>When would you choose an abstract class over an interface?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>When <b>related</b> classes share code or state and a constructor, with a few steps left abstract. Choose an interface for a capability unrelated classes share, or to swap implementations and fake them in tests.</p></div></details>
+      <details><summary><code>protected internal</code> vs <code>private protected</code>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><span class="mono">protected internal</span> = same assembly <b>or</b> any subclass (union). <span class="mono">private protected</span> = subclasses <b>in the same assembly</b> only (intersection).</p></div></details>
+      <details><summary>Why can't you call a default interface method through the class variable?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>The class didn't implement it, so it's only a member of the interface: <span class="mono">svc.Audit()</span> gives CS1061; <span class="mono">((IAuditable)svc).Audit()</span> works.</p></div></details>
+    </div>
+  </section>
+
+  <nav id="prevnext"></nav>
+
+  <footer>Sources: Microsoft Learn (C# object-oriented programming, access modifiers, interfaces and default interface methods, versioning with override and new keywords, value types). Every output, warning and compiler error on this page is from a real build and run on the .NET 10 SDK (10.0.115). Class names are illustrative.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const sv = $('opSvg');
+  const defs = K.el('defs', {}, sv);
+  defs.innerHTML = ['', 'hot', 'bad', 'ok'].map(t => `<marker id="op-a${t}" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="10" markerHeight="10" orient="auto" markerUnits="userSpaceOnUse"><path class="op-head ${t}" d="M1 1 L11 6 L1 11 z"/></marker>`).join('');
+  K.umlDefs(sv);
+  let L;
+  const T = (x, y, s, cls) => K.text(L, x, y, s, 'op-t ' + (cls || ''));
+  const box = (x, y, w, h, cls) => K.el('rect', { x, y, width: w, height: h, class: cls || 'op-row', rx: 4 }, L);
+  const arrow = (pts, cls) => K.el('path', { d: 'M' + pts.map(p => p.join(' ')).join(' L'), class: 'op-arrow ' + (cls || ''), 'marker-end': `url(#op-a${(cls || '').split(' ').find(c => ['hot', 'bad', 'ok'].includes(c)) || ''})` }, L);
+  function clear() { if (L) L.remove(); L = K.el('g', {}, sv); }
+
+  const SCENES = [
+    function encaps() {
+      box(300, 50, 300, 230, 'op-wall'); T(450, 75, 'PatientAccount object', 'mid b');
+      box(370, 130, 200, 60, 'op-inner'); T(470, 156, 'private _balance', 'mid'); T(470, 176, '500', 'mid acc');
+      box(282, 140, 36, 40, 'op-row hot'); T(300, 132, 'Pay()', 'mid acc');
+      arrow([[90, 150], [282, 150]], 'ok'); T(60, 140, 'Pay(500) ✓', 'ok');
+      arrow([[90, 172], [282, 172]], 'bad'); T(60, 196, 'Pay(-50) ✗ throws', 'bad'); T(60, 214, 'ArgumentOutOfRangeException', 'muted');
+      arrow([[470, 10], [470, 48]], 'bad dash'); T(482, 26, 'acct._balance = 1  ✗ CS0122', 'bad');
+      T(450, 255, 'the only way in is a method with a rule', 'mid muted');
+    },
+    function abstr() {
+      T(90, 60, 'Caller', 'mid b'); box(30, 70, 120, 40, 'op-row'); T(90, 95, 'BookingService', 'mid');
+      box(260, 40, 440, 260, 'op-wall'); T(480, 64, 'SmsNotifier object (seen as Notifier)', 'mid b');
+      box(280, 80, 160, 34, 'op-row hot'); T(360, 102, '+ Send(text)', 'mid');
+      arrow([[150, 92], [280, 97]], 'hot');
+      [['# Validate(text)', 140], ['# Deliver(text)', 180], ['- _phone', 220], ['HTTP call to SMS provider', 260]].forEach(([s, y]) => { box(460, y - 20, 225, 30, 'op-row dim'); T(572, y, s, 'mid muted'); });
+      T(350, 145, 'public face', 'mid acc'); T(350, 165, 'is all callers see', 'mid muted');
+      T(550, 296, 'hidden: can change without touching callers', 'mid muted');
+    },
+    function inherit() {
+      const rows = [['Notifier', 'abstract', 30], ['SmsNotifier', '', 130], ['UrgentSmsNotifier', 'sealed', 230]];
+      rows.forEach(([n, st, y], i) => { box(70, y, 210, 56, 'op-row' + (i === 2 ? ' hot' : '')); T(175, y + (st ? 24 : 33), n, 'mid b'); if (st) T(175, y + 44, '«' + st + '»', 'mid muted'); });
+      K.umlLink(L, [175, 130], [175, 86], 'inherits'); K.umlLink(L, [175, 230], [175, 186], 'inherits');
+      T(520, 40, 'new UrgentSmsNotifier(phone) prints:', 'mid b');
+      [['1  Notifier ctor (base runs first)', 80], ['2  SmsNotifier ctor', 110], ['3  (UrgentSmsNotifier body)', 140]].forEach(([s, y]) => T(360, y, s));
+      T(360, 190, ': base(phone) passes arguments up', 'acc'); T(360, 215, 'base.Deliver(...) calls the parent version', 'acc');
+      T(360, 260, 'class X : UrgentSmsNotifier  ✗ CS0509 (sealed)', 'bad');
+    },
+    function override_() { dispatch('Title'); },
+    function hide() { dispatch('Footer'); },
+    function overload() {
+      T(150, 60, 'Call site', 'mid b'); box(40, 80, 220, 36, 'op-row hot'); T(150, 103, 'Fee(500)', 'mid'); box(40, 190, 220, 36, 'op-row hot'); T(150, 213, 'Fee(500, true)', 'mid');
+      T(560, 60, 'FeeCalculator', 'mid b');
+      box(400, 80, 320, 36, 'op-row'); T(560, 103, 'Fee(decimal baseFee)', 'mid');
+      box(400, 190, 320, 36, 'op-row'); T(560, 213, 'Fee(decimal baseFee, bool senior)', 'mid');
+      arrow([[260, 98], [400, 98]], 'hot'); arrow([[260, 208], [400, 208]], 'hot');
+      T(330, 150, 'compiler matches arguments', 'mid acc'); T(330, 168, 'before the program runs', 'mid muted');
+      T(560, 140, '→ 500', 'mid ok'); T(560, 250, '→ 400.0', 'mid ok');
+    },
+    function classStruct() {
+      T(190, 40, 'class PointClass', 'mid b'); T(570, 40, 'struct PointStruct', 'mid b');
+      box(60, 70, 80, 34, 'op-row'); T(100, 92, 'a', 'mid'); box(60, 130, 80, 34, 'op-row'); T(100, 152, 'b', 'mid');
+      box(230, 95, 130, 50, 'op-row hot'); T(295, 125, 'X = 99', 'mid acc');
+      arrow([[140, 87], [230, 110]], 'hot'); arrow([[140, 147], [230, 132]], 'hot');
+      T(190, 200, 'var b = a; b.X = 99;', 'mid'); T(190, 222, 'a.X → 99 (one shared object)', 'mid bad');
+      box(450, 80, 110, 50, 'op-row'); T(505, 100, 's1', 'mid b'); T(505, 120, 'X = 1', 'mid ok');
+      box(590, 80, 110, 50, 'op-row hot'); T(645, 100, 's2', 'mid b'); T(645, 120, 'X = 99', 'mid acc');
+      T(575, 200, 'var s2 = s1; s2.X = 99;', 'mid'); T(575, 222, 's1.X → 1 (the value was copied)', 'mid ok');
+      T(380, 290, 'class = reference type · struct = value type', 'mid muted');
+    },
+    function ifaces() {
+      box(60, 40, 220, 56, 'op-row'); T(170, 62, '«interface»', 'mid muted'); T(170, 82, 'ILoggable: Log(m)', 'mid b');
+      box(460, 40, 260, 70, 'op-row hot'); T(590, 62, '«interface»', 'mid muted'); T(590, 82, 'IAuditable', 'mid b'); T(590, 100, 'Audit(m) { default body }', 'mid acc');
+      box(260, 190, 240, 50, 'op-row'); T(380, 220, 'BillingService', 'mid b');
+      K.umlLink(L, [330, 190], [190, 96], 'implements'); K.umlLink(L, [430, 190], [560, 110], 'implements');
+      T(380, 275, 'svc.Audit("x")  ✗ CS1061', 'mid bad'); T(380, 300, '((IAuditable)svc).Audit("x")  ✓', 'mid ok');
+      T(110, 150, 'one base class, many interfaces', 'mid muted');
+    }
+  ];
+  function dispatch(m) {
+    T(110, 40, 'Stack (variable)', 'mid b'); box(30, 60, 160, 50, 'op-row'); T(110, 82, 'Report r', 'mid'); T(110, 100, 'compile-time type', 'mid muted');
+    T(470, 40, 'Heap (object)', 'mid b'); box(330, 60, 280, 50, 'op-row'); T(470, 90, 'LabReport object', 'mid b');
+    arrow([[190, 85], [330, 85]]);
+    T(470, 140, 'LabReport method table', 'mid b');
+    box(330, 152, 280, 34, 'op-row' + (m === 'Title' ? ' hot' : '')); T(470, 174, 'Title()  → LabReport.Title  (override)', 'mid');
+    box(330, 194, 280, 34, 'op-row' + (m === 'Title' ? ' dim' : ' dim')); T(470, 216, 'Footer() (new) → LabReport.Footer', 'mid muted');
+    box(30, 160, 160, 60, 'op-row' + (m === 'Footer' ? ' hot' : '')); T(110, 184, 'Report.Footer()', 'mid'); T(110, 204, 'non-virtual', 'mid muted');
+    T(110, 40 + 230, 'r.' + m + '()', 'mid b');
+    if (m === 'Title') { arrow([[110, 110], [110, 132], [320, 132], [330, 165]], 'hot'); T(680, 174, '"Lab report"', 'mid ok'); T(470, 290, 'virtual: follow the reference, then the object\'s method table', 'mid acc'); }
+    else { arrow([[110, 110], [110, 158]], 'hot'); T(110, 250, '"generic footer"', 'mid ok'); T(470, 290, 'new: the compiler binds to the variable\'s type, Report', 'mid acc'); T(470, 310, 'LabReport.Footer only runs through a LabReport variable', 'mid muted'); }
+  }
+  const CODE = [
+    { f: 'PatientAccount.cs', m: { 3: 'hot', 7: 'ok', 8: 'ok' }, c: `public class PatientAccount
+{
+    private decimal _balance;                 // hidden state
+    public decimal Balance => _balance;       // read-only view
+    public void Pay(decimal amount)
+    {
+        if (amount <= 0) throw new ArgumentOutOfRangeException(nameof(amount));
+        _balance += amount;                   // the only way in, with a rule
+    }
+}` },
+    { f: 'Notifier.cs', m: { 3: 'hot', 5: 'bad' }, c: `public abstract class Notifier
+{
+    public void Send(string text) { if (Validate(text)) Deliver(text); }   // the "what"
+    protected virtual bool Validate(string text) => !string.IsNullOrWhiteSpace(text);
+    protected abstract void Deliver(string text);                        // the "how"
+}
+// new Notifier()  →  CS0144: Cannot create an instance of the abstract type or interface 'Notifier'` },
+    { f: 'Notifiers.cs', m: { 3: 'hot', 4: 'ok' }, c: `public sealed class UrgentSmsNotifier : SmsNotifier
+{
+    public UrgentSmsNotifier(string phone) : base(phone) { }
+    protected override void Deliver(string text) => base.Deliver("URGENT " + text);
+}
+// output: 3 SMS to +91-90000-00001: URGENT Lab result ready` },
+    { f: 'Report.cs', m: { 3: 'hot', 7: 'hot', 10: 'ok' }, c: `public class Report
+{
+    public virtual string Title() => "Report";
+    public string Footer() => "generic footer";
+}
+public class LabReport : Report
+{
+    public override string Title() => "Lab report";   // overriding
+    public new string Footer() => "lab footer";       // hiding
+}
+Report r = new LabReport();
+r.Title();    // "Lab report"` },
+    { f: 'Report.cs', m: { 4: 'hot', 8: 'bad', 11: 'ok' }, c: `public class Report
+{
+    public virtual string Title() => "Report";
+    public string Footer() => "generic footer";
+}
+public class LabReport : Report
+{
+    public override string Title() => "Lab report";
+    public new string Footer() => "lab footer";       // without 'new': warning CS0108
+}
+Report r = new LabReport();
+r.Footer();   // "generic footer"` },
+    { f: 'FeeCalculator.cs', m: { 1: 'hot', 2: 'hot' }, c: `public decimal Fee(decimal baseFee) => baseFee;
+public decimal Fee(decimal baseFee, bool senior) => senior ? baseFee * 0.8m : baseFee;
+// Fee(500) = 500, Fee(500, true) = 400.0` },
+    { f: 'Points.cs', m: { 3: 'bad', 4: 'ok' }, c: `public class  PointClass  { public int X; }
+public struct PointStruct { public int X; }
+var a  = new PointClass  { X = 1 }; var b  = a;  b.X  = 99;   // a.X  = 99
+var s1 = new PointStruct { X = 1 }; var s2 = s1; s2.X = 99;   // s1.X = 1` },
+    { f: 'BillingService.cs', m: { 4: 'hot', 9: 'bad', 10: 'ok' }, c: `public interface ILoggable { void Log(string m); }
+public interface IAuditable
+{
+    void Audit(string m) => Console.WriteLine($"[default audit] {m}");   // C# 8+
+}
+public class BillingService : ILoggable, IAuditable
+{
+    public void Log(string m) => Console.WriteLine($"[log] {m}");
+}
+// svc.Audit("x");           CS1061: 'BillingService' does not contain a definition for 'Audit'
+((IAuditable)svc).Audit("invoice created");   // [default audit] invoice created` }
+  ];
+  function show(i) { clear(); SCENES[i](); const c = CODE[i]; K.codeCard($('opCode'), { file: c.f, lang: 'cs', code: c.c, marks: c.m }); }
+  K.story({ root: $('opStory'), show, tipLabel: 'Interview tip', steps: [
+    { title: 'Encapsulation: a wall with one door', text: 'The balance is <b>private</b>. The only way to change it is <span class="mono">Pay()</span>, which rejects bad amounts. Touching the field from outside doesn\'t even compile (<b>CS0122</b>).', tip: 'A public setter with no rule is not encapsulation, it\'s a field with extra steps.' },
+    { title: 'Abstraction: a small public face', text: 'The caller sees <span class="mono">Send(text)</span> and nothing else. Validation, delivery and the SMS provider sit behind it and can change without touching callers. An abstract class can\'t be created directly (<b>CS0144</b>).' },
+    { title: 'Inheritance: is-a, and base runs first', text: 'UrgentSmsNotifier <b>is a</b> SmsNotifier, which <b>is a</b> Notifier. Creating one runs constructors <b>base first</b>. <span class="mono">: base(phone)</span> passes arguments up; <span class="mono">base.Deliver()</span> reuses the parent\'s code. <span class="mono">sealed</span> ends the chain.' },
+    { title: 'Polymorphism: override, the object decides', text: 'The variable is typed <span class="mono">Report</span>, but the object is a <span class="mono">LabReport</span>. For a <span class="mono">virtual</span> method the runtime follows the reference to the object and uses <b>its</b> method table: <span class="mono">"Lab report"</span>.' },
+    { title: 'Hiding with new: the variable decides', text: '<span class="mono">Footer()</span> isn\'t virtual; LabReport declares a <b>new</b> one. The compiler binds the call to the variable\'s type, so you get <span class="mono">"generic footer"</span>. Leave out <span class="mono">new</span> and you get warning <b>CS0108</b>.', tip: 'Classic interview trap. Hiding is almost always a bug in a design: make the base method virtual and override it.' },
+    { title: 'Overloading: the compiler picks', text: 'Same name, different parameter lists. The <b>compiler</b> chooses from the arguments before the program runs: <span class="mono">Fee(500)</span> → 500, <span class="mono">Fee(500, true)</span> → 400.0.' },
+    { title: 'class vs struct: share or copy', text: 'Assigning a <b>class</b> copies the reference, so both variables see one object. Assigning a <b>struct</b> copies the value. Use structs for small immutable values (Money, Point), classes for entities with identity.' },
+    { title: 'Interfaces: many per class', text: 'A class has one base class but can implement many interfaces. Since C# 8 an interface can carry a <b>default method</b>. The class didn\'t implement <span class="mono">Audit</span>, so it\'s only reachable through the interface type.' }
+  ] });
+
+  /* ---------- Try 1: dispatch predictor ---------- */
+  const st = { v: 'Report', o: 'LabReport', c: 'Footer', k: 'new' }; let pred = null;
+  function answer() {
+    if (st.v === 'LabReport' && st.o === 'Report') return { err: "CS0266: Cannot implicitly convert type 'Report' to 'LabReport'. An explicit conversion exists (are you missing a cast?)" };
+    if (st.c === 'Title') return { out: st.o === 'LabReport' ? 'Lab report' : 'Report', why: 'Title() is virtual and overridden, so the <b>object</b> (' + st.o + ') decides.' };
+    if (st.k === 'override') return { out: st.o === 'LabReport' ? 'lab footer' : 'generic footer', why: 'With virtual/override, the <b>object</b> (' + st.o + ') decides.' };
+    return { out: st.v === 'LabReport' ? 'lab footer' : 'generic footer', why: 'With <span class="mono">new</span>, the <b>variable\'s type</b> (' + st.v + ') decides, whatever the object is.' };
+  }
+  function renderD() {
+    const base = st.k === 'new' ? 'public string Footer() => "generic footer";' : 'public virtual string Footer() => "generic footer";';
+    const der = st.k === 'new' ? 'public new string Footer() => "lab footer";' : 'public override string Footer() => "lab footer";';
+    K.codeCard($('dCode'), { file: 'Program.cs', lang: 'cs', code: `public class Report\n{\n    public virtual string Title() => "Report";\n    ${base}\n}\npublic class LabReport : Report\n{\n    public override string Title() => "Lab report";\n    ${der}\n}\n\n${st.v} r = new ${st.o}();\nConsole.WriteLine(r.${st.c}());`, marks: st.c === 'Title' ? { 3: 'hot', 8: 'hot', 13: 'hot' } : { 4: 'hot', 9: 'hot', 13: 'hot' } });
+    $('dPred').innerHTML = ['Report', 'Lab report', 'generic footer', 'lab footer', "won't compile"].map(o => `<button class="chip-btn" type="button" data-o="${o}" aria-pressed="${pred === o}">${o}</button>`).join('');
+    if (!pred) { $('dOut').innerHTML = '<b>Make a prediction to see the answer.</b>'; return; }
+    const a = answer(), actual = a.err ? "won't compile" : a.out, ok = pred === actual;
+    $('dOut').innerHTML = `<b class="${ok ? 'ok-text' : 'bad-text'}">${ok ? 'Correct.' : 'Not quite.'}</b> ` + (a.err ? `It doesn't compile: <code>${a.err}</code> A Report isn't necessarily a LabReport.` : `It prints <code>${a.out}</code>. ${a.why}`) + ' <span class="muted">(real run)</span>';
+  }
+  [['dVar', 'v'], ['dObj', 'o'], ['dCall', 'c'], ['dKw', 'k']].forEach(([id, key]) => K.seg($(id), v => { st[key] = v; pred = null; renderD(); }));
+  $('dPred').addEventListener('click', e => { const b = e.target.closest('button[data-o]'); if (!b) return; pred = b.dataset.o; renderD(); });
+  renderD();
+
+  /* ---------- Try 2: access modifier map ---------- */
+  const LOC = ['Same class', 'Subclass, same assembly', 'Other class, same assembly', 'Subclass, other assembly', 'Other class, other assembly'];
+  const OK = {
+    'public': [1, 1, 1, 1, 1], 'private': [1, 0, 0, 0, 0], 'protected': [1, 1, 0, 1, 0],
+    'internal': [1, 1, 1, 0, 0], 'protected internal': [1, 1, 1, 1, 0], 'private protected': [1, 1, 0, 0, 0]
+  };
+  const ERR = (loc, mod) => loc === 3 ? "CS0103: The name '…' does not exist in the current context" : "CS0122: '…' is inaccessible due to its protection level";
+  const WHY = { 'public': 'Visible everywhere.', 'private': 'Only the declaring class. The default for members.', 'protected': 'The class and its subclasses, in any assembly.', 'internal': 'Anything in the same assembly. The default for top-level types.', 'protected internal': 'The <b>union</b>: anything in the same assembly, <b>or</b> a subclass anywhere.', 'private protected': 'The <b>intersection</b>: subclasses, and only those in the same assembly (C# 7.2+).' };
+  function renderA(mod) {
+    $('aGrid').innerHTML = LOC.map((l, i) => OK[mod][i] ? `<div class="op-cell yes"><b>✓ ${l}</b><span>compiles</span></div>` : `<div class="op-cell no"><b>✗ ${l}</b><span>${ERR(i, mod)}</span></div>`).join('');
+    $('aStatus').innerHTML = `<span class="mono">${mod}</span>: ${WHY[mod]}`;
+  }
+  K.seg($('aMod'), renderA); renderA('protected internal');
+
+  /* ---------- Test ---------- */
+  const O = ['Encapsulation', 'Abstraction', 'Inheritance', 'Polymorphism (override)', 'Method hiding (new)', 'Overloading'];
+  SD.page({ track: 'lld', drill: { opts: O, items: [
+    { q: '<span class="mono">Stock</span> has a private quantity and a <span class="mono">Reserve(n)</span> method that refuses to go below zero.', a: O[0], why: 'Private state, changed only through a method that enforces the rule.' },
+    { q: 'Controllers call <span class="mono">IPaymentGateway.Charge()</span> without knowing whether it\'s Razorpay or Stripe behind it.', a: O[1], why: 'A small contract hides how the work is done.' },
+    { q: '<span class="mono">Shape s = new Circle(); s.Area();</span> uses Circle\'s formula because <span class="mono">Area</span> is <span class="mono">virtual</span>.', a: O[3], why: 'The runtime type of the object picks the method.' },
+    { q: '<span class="mono">Shape s = new Circle(); s.Describe();</span> prints Shape\'s text because Circle declared <span class="mono">public new string Describe()</span>.', a: O[4], why: 'With new, the variable\'s compile-time type decides.' },
+    { q: '<span class="mono">Log(string)</span>, <span class="mono">Log(string, Exception)</span> and <span class="mono">Log(string, params object[])</span> in one class.', a: O[5], why: 'Same name, different parameters, chosen by the compiler.' },
+    { q: '<span class="mono">class Surgeon : Doctor</span> reuses Doctor\'s properties and constructor via <span class="mono">: base(name)</span>.', a: O[2], why: 'Is-a: the subclass reuses and extends the base.' },
+    { q: 'A <span class="mono">Money</span> type exposes no setters; <span class="mono">Add()</span> returns a new Money and rejects mixed currencies.', a: O[0], why: 'The object protects its own invariants.' },
+    { q: 'Each <span class="mono">Notification</span> subclass overrides <span class="mono">Render()</span>, and a loop over <span class="mono">List&lt;Notification&gt;</span> calls the right one.', a: O[3], why: 'One call, different behaviour per object: runtime polymorphism.' }
+  ] } });
+})();
+</script>
+</body>
+</html>

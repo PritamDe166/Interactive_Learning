@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>Class Relationships</title>
+<meta name="description" content="Dependency, association, aggregation, composition and inheritance in C#, shown as objects, references and garbage collection: who creates a part, who else holds it, and whether it outlives the whole. Plus composition over inheritance.">
+<link rel="stylesheet" href="../../assets/css/theme.css?v=20261124">
+<link rel="stylesheet" href="../../assets/css/base.css?v=20261124">
+<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261124">
+<script src="../../assets/js/theme.js?v=20261124"></script>
+<script src="../../assets/js/explainer-kit.js?v=20261124"></script>
+<script src="../sd-series.js?v=20261124"></script>
+<style>
+  .rl-root rect { fill: var(--chip-bg); stroke: var(--fg-soft); stroke-width: 1.5; stroke-dasharray: 4 3; }
+  .rl-root text { fill: var(--fg); font-family: var(--mono) !important; font-size: 12px; text-anchor: middle; }
+  .rl-ref { fill: none; stroke: var(--muted); stroke-width: 1.6; stroke-dasharray: 5 4; }
+  .rl-ref.cut { opacity: 0; }
+  .node.rl-gone { opacity: .15; transition: opacity .5s; }
+  .node.rl-gone rect { stroke-dasharray: 5 4; }
+  .rl-tag { font-family: var(--display); font-size: 12px; font-weight: 700; text-anchor: middle; paint-order: stroke; stroke: var(--bg); stroke-width: 4px; }
+  .rl-tag.bad { fill: var(--bad-text); } .rl-tag.ok { fill: var(--good-text); } .rl-tag.muted { fill: var(--muted); } .rl-tag.acc { fill: var(--accent-text); }
+  .rl-part { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; }
+  .rl-part.hot { stroke: var(--cyan); stroke-width: 2.4; }
+  .rl-t { fill: var(--fg); font-family: var(--mono) !important; font-size: 12px; text-anchor: middle; }
+  .rl-t.b { font-family: var(--display) !important; font-weight: 700; font-size: 13px; }
+  .rl-log { white-space: pre-line; overflow-wrap: anywhere; min-height: 3em; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>System Design pages</summary>
+<nav aria-label="System Design pages">
+<h2 class="wb-track">HLD</h2>
+<a class="wb-road" href="../hld/index.html">HLD roadmap</a>
+<details class="wb-g"><summary>Week 1: Networking</summary><ul>
+<li><a href="../hld/client-server-dns.html"><span class="t">Client-server &amp; DNS</span><span class="n">H1</span></a></li>
+<li><a href="../hld/http.html"><span class="t">HTTP</span><span class="n">H2</span></a></li>
+<li><a href="../hld/tcp-udp.html"><span class="t">TCP &amp; UDP</span><span class="n">H3</span></a></li>
+<li><a href="../hld/https-tls.html"><span class="t">HTTPS &amp; TLS</span><span class="n">H4</span></a></li>
+<li><a href="../hld/latency-throughput.html"><span class="t">Latency &amp; throughput</span><span class="n">H5</span></a></li>
+<li><a href="../hld/availability-slos.html"><span class="t">Availability, SLOs &amp; recovery</span><span class="n">H6</span></a></li>
+<li><a href="../hld/week-1-review.html"><span class="t">Review: journey of a request</span><span class="n">H7</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Week 2: Scaling</summary><ul>
+<li><a href="../hld/scaling.html"><span class="t">Vertical vs horizontal scaling</span><span class="n">H8</span></a></li>
+<li><a href="../hld/stateless.html"><span class="t">Stateless applications</span><span class="n">H9</span></a></li>
+<li><a href="../hld/proxy-lb-gateway.html"><span class="t">Reverse proxy, API gateway &amp; load balancers</span><span class="n">H10–12</span></a></li>
+<li><a href="../hld/load-balancing-algorithms.html"><span class="t">Load-balancing algorithms</span><span class="n">H13</span></a></li>
+<li><a href="../hld/scale-web-app.html"><span class="t">Design: scale a web app to millions</span><span class="n">H14</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Week 3: Caching</summary><ul>
+<li><a href="../hld/caching-overview.html"><span class="t">Why caching exists</span><span class="n">H15</span></a></li>
+<li><a href="../hld/cache-read-strategies.html"><span class="t">Read strategies</span><span class="n">H16</span></a></li>
+<li><a href="../hld/cache-write-strategies.html"><span class="t">Write strategies &amp; invalidation</span><span class="n">H17</span></a></li>
+<li><a href="../hld/cache-eviction.html"><span class="t">Eviction policies</span><span class="n">H18</span></a></li>
+<li><a href="../hld/distributed-caching.html"><span class="t">Distributed caching</span><span class="n">H19</span></a></li>
+<li><a href="../hld/cache-failure-modes.html"><span class="t">Caching failure modes</span><span class="n">H20</span></a></li>
+<li><a href="../hld/cdn-http-caching.html"><span class="t">CDN &amp; HTTP caching</span><span class="n">H21</span></a></li>
+<li><a href="../hld/caching-in-practice.html"><span class="t">Caching in practice: the interview playbook</span></a></li>
+<li><a href="../hld/caching-patterns-atlas.html"><span class="t">All caching patterns at a glance</span></a></li>
+</ul></details>
+<h2 class="wb-track">LLD</h2>
+<a class="wb-road" href="index.html">LLD roadmap</a>
+<details class="wb-g" open><summary>Phase 1: Foundations</summary><ul>
+<li><a href="oop-pillars.html"><span class="t">OOP pillars in C#</span><span class="n">L1</span></a></li>
+<li><a href="relationships.html" aria-current="page"><span class="t">Class relationships</span><span class="n">L2</span></a></li>
+<li><a href="uml.html"><span class="t">UML: class &amp; sequence diagrams</span><span class="n">L3</span></a></li>
+<li><a href="design-principles.html"><span class="t">Design principles: DRY, KISS, YAGNI &amp; more</span><span class="n">L4</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Phase 2: SOLID</summary><ul>
+<li><a href="solid.html"><span class="t">SOLID overview</span><span class="n">L6</span></a></li>
+<li><a href="solid-srp.html"><span class="t">S: Single responsibility</span><span class="n">L7</span></a></li>
+<li><a href="solid-ocp.html"><span class="t">O: Open-closed</span><span class="n">L8</span></a></li>
+<li><a href="solid-lsp.html"><span class="t">L: Liskov substitution</span><span class="n">L9</span></a></li>
+<li><a href="solid-isp.html"><span class="t">I: Interface segregation</span><span class="n">L10</span></a></li>
+<li><a href="solid-dip.html"><span class="t">D: Dependency inversion</span><span class="n">L11</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Phase 3: Creational patterns</summary><ul>
+<li><a href="singleton.html"><span class="t">Singleton</span><span class="n">L12</span></a></li>
+<li><a href="factory-method.html"><span class="t">Simple factory &amp; factory method</span><span class="n">L13</span></a></li>
+<li><a href="abstract-factory.html"><span class="t">Abstract factory</span><span class="n">L14</span></a></li>
+<li><a href="builder.html"><span class="t">Builder</span><span class="n">L15</span></a></li>
+<li><a href="prototype.html"><span class="t">Prototype</span><span class="n">L16</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../index.html" aria-current="true">System Design<span class="n">36</span></a></li>
+<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+<li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">LLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <p class="crumbs">System Design / LLD / Foundations / L2</p>
+    <h1>Class Relationships</h1>
+    <ul class="lede">
+      <li>Five relationships, loosest to tightest: <b>dependency</b> (uses briefly), <b>association</b> (keeps a reference), <b>aggregation</b> (has parts that live on), <b>composition</b> (owns parts that go with it), <b>inheritance</b> (is a kind of).</li>
+      <li>Decide by <b>lifetime and ownership</b>: who creates the part, who else holds it, does it outlive the whole?</li>
+      <li>In .NET, "dies with the whole" means <b>nothing else references it</b>, so the garbage collector reclaims it.</li>
+      <li><b>is-a</b> → inheritance; <b>has-a</b> → composition. <b>Favour composition</b>: combine parts instead of multiplying subclasses.</li>
+    </ul>
+  </header>
+
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn: objects, references and who outlives whom</h2>
+    <p class="sec-sub">Dashed boxes are variables (GC roots); solid boxes are objects on the heap. Outputs are from a real run. For the diagram notation, see L3 UML.</p>
+    <div class="sub-block" aria-labelledby="storyH">
+      <h3 class="stage-title sub" id="storyH">Walkthrough: a clinic in memory</h3>
+      <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+      <div class="story wide" id="rlStory">
+        <div class="scroll"><svg class="diagram" id="rlSvg" style="min-width:0" viewBox="0 0 760 340" role="img" aria-label="Heap objects of a clinic app and the references between them"></svg></div>
+      </div>
+      <div id="rlCode" style="margin-top:12px"></div>
+    </div>
+  </section>
+
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">2</span>Try it yourself</h2>
+    <p class="sec-sub">Cut references, run the garbage collector and see which objects survive.</p>
+    <div class="sub-block" aria-labelledby="labH">
+      <h3 class="stage-title sub" id="labH">Reachability lab</h3>
+      <div class="stage-kind">Toggle references off · predict which objects get collected · press Run GC</div>
+      <div class="chips" id="labCuts"></div>
+      <div class="controls"><button class="btn primary" type="button" id="labGc">Run GC</button><button class="btn" type="button" id="labReset">Reset</button></div>
+      <div class="scroll"><svg class="diagram" id="labSvg" style="min-width:0" viewBox="0 0 760 340" role="img" aria-label="Object graph showing which objects are still reachable after references are removed"></svg></div>
+      <p class="status-line rl-log" id="labLog">All references in place. Pick one or more to cut, then Run GC.</p>
+    </div>
+  </section>
+
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">3</span>Revise in two minutes</h2>
+    <div class="sub-block" aria-labelledby="cheatH">
+    <h3 class="sec-h3" id="cheatH">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">Only a parameter, local or static call</span><span class="arrow">→</span><span class="then">dependency</span></li>
+      <li><span class="if">Kept in a field or property, nobody owns anybody</span><span class="arrow">→</span><span class="then">association (injected services too)</span></li>
+      <li><span class="if">Parts created elsewhere, passed in, can be shared</span><span class="arrow">→</span><span class="then">aggregation (department ↔ doctors)</span></li>
+      <li><span class="if">Whole creates its parts and keeps them to itself</span><span class="arrow">→</span><span class="then">composition (order → order lines)</span></li>
+      <li><span class="if">Passes "B is a kind of A" and keeps A's promises</span><span class="arrow">→</span><span class="then">inheritance</span></li>
+      <li><span class="if">You'd override something to throw <span class="mono">NotImplementedException</span></span><span class="arrow">→</span><span class="then">not really is-a: use composition</span></li>
+      <li><span class="if">Subclasses multiply (channel × style)</span><span class="arrow">→</span><span class="then">composition over inheritance: hold the parts</span></li>
+      <li><span class="if">Composite parts hold files or connections</span><span class="arrow">→</span><span class="then">the whole implements <span class="mono">IDisposable</span> and disposes them</span></li>
+    </ul>
+    </div>
+    <div class="sub-block" aria-labelledby="refH">
+    <h3 class="sec-h3" id="refH">Reference</h3>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Relationship</th><th>Identifying question</th><th>C# shape</th><th>Database shape</th><th>UML</th></tr></thead>
+        <tbody>
+          <tr><td>Dependency</td><td>Only used inside a method?</td><td>parameter, local, static call</td><td>none</td><td>dashed arrow</td></tr>
+          <tr><td>Association</td><td>Keeps a reference, no ownership?</td><td>field or property</td><td>foreign key</td><td>solid line / arrow</td></tr>
+          <tr><td>Aggregation</td><td>Parts created elsewhere, may be shared, outlive the whole?</td><td>collection of objects passed in</td><td>nullable FK or link table</td><td>hollow diamond on the whole</td></tr>
+          <tr><td>Composition</td><td>Whole creates parts, nobody else holds them, they go with it?</td><td>parts created inside, kept private</td><td>required FK, <span class="mono">ON DELETE CASCADE</span></td><td>filled diamond on the whole</td></tr>
+          <tr><td>Inheritance</td><td>Truly a kind of, substitutable?</td><td><span class="mono">class B : A</span></td><td>TPH / TPT / TPC mapping</td><td>hollow triangle</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><p><b>Inheritance makes one object; composition makes several.</b> A <span class="mono">Patient : Person</span> is a single heap object containing Person's fields plus Patient's. A <span class="mono">Car</span> with an <span class="mono">Engine</span> is two objects and a reference, so the engine can be swapped or faked.</p></div>
+      <div class="note"><p><b>GC timing isn't deterministic.</b> Unreachable objects are reclaimed at the collector's next run, not at the moment the whole "dies". Use <span class="mono">IDisposable</span> / <span class="mono">using</span> for anything that must be released at a known time.</p></div>
+      <div class="note"><p><b>Aggregation is loosely defined</b> in UML; many designers draw a plain association instead. Composition has a clear meaning: exclusive ownership and a shared lifetime.</p></div>
+    </div>
+    </div>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">4</span>Test yourself</h2>
+    <h3 class="sec-h3">Which relationship is it?</h3>
+    <div id="drill"></div>
+    <h3 class="sec-h3">Explain it out loud</h3>
+    <p class="sub">Answer before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Aggregation vs composition: one question that decides it?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>"If I delete the whole, do the parts go too, and can a part belong to two wholes?" Parts go and are exclusive → <b>composition</b>. Parts survive or are shared → <b>aggregation</b>.</p></div></details>
+      <details><summary>Dependency vs association?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>A <b>dependency</b> is temporary: a parameter, local variable or static call. An <b>association</b> is structural: a reference kept in a field or property.</p></div></details>
+      <details><summary>You set <code>asha = null</code>. Is the Patient object collected?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>No</b>, as long as an Appointment still references it: an association keeps the patient reachable. Try it in the lab.</p></div></details>
+      <details><summary>Why shouldn't <code>Stack</code> inherit from <code>List</code>?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>It would expose <span class="mono">Insert</span>, <span class="mono">RemoveAt</span> and the indexer, letting callers break last-in-first-out. A stack <b>has</b> a list and exposes only Push, Pop and Peek.</p></div></details>
+      <details><summary>How does composition usually look in the database?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>A required foreign key with <span class="mono">ON DELETE CASCADE</span> (order → order lines). Aggregation is a nullable foreign key or a link table.</p></div></details>
+      <details><summary>Give two advantages of composition over inheritance.<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Parts can be <b>swapped at runtime</b> and <b>faked in tests</b>, and variations <b>add</b> classes instead of <b>multiplying</b> them. A base-class change doesn't ripple into every subclass.</p></div></details>
+    </div>
+  </section>
+
+  <nav id="prevnext"></nav>
+
+  <footer>Sources: Microsoft Learn (inheritance in C#, fundamentals of garbage collection, IDisposable); Gamma et al., <i>Design Patterns</i> ("favour object composition over class inheritance"); OMG UML 2.5.1. Outputs are from a real build and run on the .NET 10 SDK (10.0.115), using <span class="mono">WeakReference</span> after <span class="mono">GC.Collect()</span> to check which objects were reclaimed. Class names are illustrative.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const H = 44;
+  // ---------- graph model ----------
+  const OBJ = { clinic: [270, 60, 'Clinic', 'Indiranagar'], card: [480, 40, 'Department', 'Cardiology'], onc: [480, 130, 'Department', 'Oncology'], rao: [680, 85, 'Doctor', 'Dr Rao', 140], appt: [270, 250, 'Appointment', '25 Nov 10:00'], asha: [480, 250, 'Patient', 'Asha'] };
+  const ROOTS = { rClinic: [70, 60, 'clinic', 'clinic'], rRao: [70, 140, 'drRao', 'rao'], rAppt: [70, 230, 'appt', 'appt'], rAsha: [70, 300, 'asha', 'asha'] };
+  const LINKS = [['clinic', 'card', 'composes'], ['clinic', 'onc', 'composes'], ['card', 'rao', 'aggregates'], ['onc', 'rao', 'aggregates'], ['appt', 'asha', 'associates']];
+  function clip(n, t) { const dx = t[0] - n.x, dy = t[1] - n.y, hw = n.w / 2, hh = H / 2; const s = Math.min(dx ? hw / Math.abs(dx) : Infinity, dy ? hh / Math.abs(dy) : Infinity); return [+(n.x + dx * s).toFixed(1), +(n.y + dy * s).toFixed(1)]; }
+  function graph(svg, opt = {}) {
+    svg.querySelectorAll('g.rl-layer').forEach(g => g.remove());
+    const E = K.el('g', { class: 'rl-layer' }, svg), N = K.el('g', { class: 'rl-layer' }, svg), T = K.el('g', { class: 'rl-layer' }, svg);
+    const nodes = {}, links = {}, roots = {};
+    Object.entries(OBJ).forEach(([id, [x, y, t, s, w]]) => { nodes[id] = { x, y, w: w || 150 }; nodes[id].el = K.node(N, x, y, nodes[id].w, H, t, s); });
+    Object.entries(ROOTS).forEach(([id, [x, y, name, to]]) => {
+      const g = K.el('g', { class: 'rl-root' }, N); K.el('rect', { x: x - 45, y: y - 15, width: 90, height: 30 }, g); K.text(g, x, y + 4, name);
+      const p = clip(nodes[to], [x + 45, y]);
+      roots[id] = K.el('path', { d: `M${x + 45} ${y} L${p[0]} ${p[1]}`, class: 'rl-ref', 'marker-end': 'url(#uml-open)' }, E);
+    });
+    LINKS.forEach(([a, b, k]) => { links[a + '>' + b] = K.umlLink(E, clip(nodes[a], [nodes[b].x, nodes[b].y]), clip(nodes[b], [nodes[a].x, nodes[a].y]), opt.plain ? 'associates' : k); });
+    return { nodes, links, roots, T, E, N };
+  }
+
+  // ---------- walkthrough ----------
+  const sv = $('rlSvg'); K.umlDefs(sv);
+  let G;
+  const tag = (x, y, s, c) => K.text(G.T, x, y, s, 'rl-tag ' + (c || 'muted'));
+  function focus(nodeIds, linkIds) {
+    Object.entries(G.nodes).forEach(([id, n]) => { n.el.g.classList.toggle('dim', !nodeIds.includes(id)); n.el.g.classList.toggle('on', nodeIds.includes(id)); });
+    Object.entries(G.links).forEach(([id, l]) => { l.classList.toggle('dim', !linkIds.includes(id)); l.classList.toggle('hot', linkIds.includes(id)); });
+  }
+  const STEPS = [
+    () => { G = graph(sv, { plain: true }); tag(380, 330, 'objects live on the heap; variables (dashed) are where references start', 'muted'); },
+    () => { G = graph(sv); focus([], []); Object.values(G.roots).forEach(r => r.style.opacity = .3); drawDep(false); },
+    () => { G = graph(sv); focus(['appt', 'asha'], ['appt>asha']); tag(356, 242, '*', 'acc'); tag(396, 242, '1', 'acc'); tag(375, 300, 'a reference kept in a property', 'acc'); },
+    () => { G = graph(sv); focus(['card', 'onc', 'rao'], ['card>rao', 'onc>rao']); tag(680, 140, 'one doctor, two departments', 'acc'); tag(680, 160, 'created elsewhere', 'muted'); },
+    () => { G = graph(sv); focus(['clinic', 'card', 'onc'], ['clinic>card', 'clinic>onc']); tag(270, 110, 'created by the clinic', 'acc'); tag(270, 128, 'held by nobody else', 'muted'); },
+    () => { G = graph(sv); afterGc(); },
+    () => { drawInherit(); },
+    () => { drawCompose('email'); }
+  ];
+  function afterGc() {
+    G.roots.rClinic.classList.add('cut');
+    ['clinic', 'card', 'onc'].forEach(id => G.nodes[id].el.g.classList.add('rl-gone'));
+    G.links['clinic>card'].classList.add('dim'); G.links['clinic>onc'].classList.add('dim'); G.links['card>rao'].classList.add('dim'); G.links['onc>rao'].classList.add('dim');
+    G.nodes.rao.el.g.classList.add('ok');
+    tag(380, 190, 'collected: Clinic, Cardiology, Oncology', 'bad'); tag(680, 140, 'still reachable from drRao', 'ok');
+  }
+  function drawDep(active) {
+    const P = K.node(G.T, 640, 230, 150, H, 'InvoicePrinter'), I = K.node(G.T, 640, 305, 150, 36, 'Invoice', '1200');
+    P.g.classList.add('on'); I.g.classList.add('on');
+    const l = K.umlLink(G.T, [640, 252], [640, 287], 'uses'); l.style.opacity = active ? 1 : .25;
+    tag(520, 305, active ? 'Print(invoice) running' : 'no field kept', active ? 'acc' : 'muted');
+    return l;
+  }
+  function drawInherit() {
+    sv.querySelectorAll('g.rl-layer').forEach(g => g.remove());
+    const L = K.el('g', { class: 'rl-layer' }, sv);
+    K.text(L, 190, 40, 'Inheritance: Patient : Person', 'rl-t b');
+    K.text(L, 190, 60, 'one object', 'rl-tag acc');
+    K.el('rect', { x: 80, y: 80, width: 220, height: 140, class: 'rl-part hot', rx: 4 }, L);
+    K.el('rect', { x: 95, y: 100, width: 190, height: 46, class: 'rl-part' }, L); K.text(L, 190, 128, 'Person part: Name', 'rl-t');
+    K.el('rect', { x: 95, y: 156, width: 190, height: 46, class: 'rl-part' }, L); K.text(L, 190, 184, 'Patient part: Mrn', 'rl-t');
+    K.text(L, 190, 250, 'fixed at compile time', 'rl-tag muted');
+    K.text(L, 560, 40, 'Composition: Car has an Engine', 'rl-t b');
+    K.text(L, 560, 60, 'two objects + a reference', 'rl-tag acc');
+    const car = K.node(L, 480, 140, 150, 60, 'Car', 'IEngine _engine'), eng = K.node(L, 660, 140, 140, 60, 'PetrolEngine');
+    K.umlLink(L, [555, 140], [590, 140], 'composes');
+    K.text(L, 570, 250, 'swap PetrolEngine for ElectricEngine,', 'rl-tag muted'); K.text(L, 570, 268, 'or a fake in tests', 'rl-tag muted');
+  }
+  let notifierLink;
+  function drawCompose(ch) {
+    sv.querySelectorAll('g.rl-layer').forEach(g => g.remove());
+    const L = K.el('g', { class: 'rl-layer' }, sv);
+    const n = K.node(L, 160, 160, 210, 60, 'Notifier', 'IChannel · IFormatter'); n.g.classList.add('on');
+    const e = K.node(L, 560, 70, 170, H, 'EmailChannel'), s = K.node(L, 560, 160, 170, H, 'SmsChannel'), f = K.node(L, 560, 260, 170, H, 'UrgentFormatter');
+    const target = ch === 'email' ? [475, 70] : [475, 160];
+    notifierLink = K.umlLink(L, [265, 150], target, 'composes'); notifierLink.classList.add('hot');
+    K.umlLink(L, [265, 175], [475, 255], 'composes');
+    (ch === 'email' ? s : e).g.classList.add('dim');
+    K.text(L, 160, 230, ch === 'email' ? '[email] asha@clinic.test: URGENT Lab result ready' : '[sms] +91-90000-00000: URGENT Lab result ready', 'rl-tag ok');
+    K.text(L, 380, 325, 'add WhatsApp = one new IChannel class, not one per style', 'rl-tag acc');
+  }
+  const CODE = [
+    { f: 'Program.cs', m: { 1: 'hot', 2: 'hot', 3: 'hot', 4: 'hot' }, c: `var clinic = new Clinic("Indiranagar");
+var drRao  = new Doctor("Dr Rao");
+var asha   = new Patient("Asha");
+var appt   = new Appointment(asha, new DateTime(2026, 11, 25, 10, 0, 0));` },
+    { f: 'InvoicePrinter.cs', m: { 3: 'hot' }, c: `public class InvoicePrinter
+{
+    public void Print(Invoice i) => Console.WriteLine($"printed invoice for {i.Total}");
+}
+// output: Dependency: printed invoice for 1200` },
+    { f: 'Appointment.cs', m: { 3: 'hot' }, c: `public class Appointment
+{
+    public Patient Patient { get; }        // association: kept in a property
+    public DateTime At { get; }
+    public Appointment(Patient patient, DateTime at) { Patient = patient; At = at; }
+}` },
+    { f: 'Department.cs', m: { 4: 'hot', 7: 'ok', 8: 'ok' }, c: `public class Department
+{
+    private readonly List<Doctor> _doctors = new();
+    public void Assign(Doctor d) => _doctors.Add(d);   // created elsewhere, passed in
+}
+
+cardiology.Assign(drRao);
+oncology.Assign(drRao);                                // shared by two departments` },
+    { f: 'Clinic.cs', m: { 3: 'hot', 5: 'hot' }, c: `public class Clinic
+{
+    private readonly List<Department> _departments = new();
+    public Department OpenDepartment(string name)
+    { var d = new Department(name); _departments.Add(d); return d; }   // the whole creates the part
+}` },
+    { f: 'Program.cs (real run)', lang: 'txt', m: { 2: 'ok' }, c: `Composition: Indiranagar has 1 department(s); aggregation: Cardiology has 1 doctor(s)
+After the clinic is gone: clinic alive=False, department alive=False, Dr Rao still usable` },
+    { f: 'Person.cs', m: { 2: 'hot' }, c: `public class Person  { public string Name { get; } public Person(string name) => Name = name; }
+public class Patient : Person { public Patient(string name) : base(name) { } }   // is-a: one object
+
+public class Car(IEngine engine) { private readonly IEngine _engine = engine; }  // has-a: two objects` },
+    { f: 'Notifier.cs', m: { 3: 'hot', 5: 'ok', 6: 'ok' }, c: `public class Notifier(IChannel channel, IFormatter formatter)
+{
+    private IChannel _channel = channel;
+    public void Send(string to, string text) => _channel.Deliver(to, formatter.Format(text));
+    public void SwitchChannel(IChannel c) => _channel = c;     // behaviour changes at runtime
+}` }
+  ];
+  function show(i) { STEPS[i](); const c = CODE[i]; K.codeCard($('rlCode'), { file: c.f, lang: c.lang || 'cs', code: c.c, marks: c.m }); }
+  async function playDep(run) { show(1); const l = drawDep(true); l.classList.add('hot'); await K.sleep(1400, run); }
+  async function playGc(run) {
+    G = graph(sv);
+    const p = K.pill(G.T, 'clinic = null', 'bad'); await K.move(p, [70, 20], [70, 60], 600, run); p.remove();
+    G.roots.rClinic.classList.add('cut'); await K.sleep(400, run);
+    const g = K.pill(G.T, 'GC.Collect()'); await K.move(g, [380, 330], [380, 190], 700, run); g.remove();
+    afterGc(); await K.sleep(500, run);
+  }
+  async function playSwap(run) { drawCompose('email'); await K.sleep(900, run); const p = K.pill(sv, 'SwitchChannel(sms)'); await K.move(p, [160, 300], [400, 120], 700, run); p.remove(); drawCompose('sms'); await K.sleep(600, run); }
+  K.story({ root: $('rlStory'), show, tipLabel: 'Interview tip', steps: [
+    { title: 'Objects and the references between them', text: 'Each <span class="mono">new</span> puts an object on the heap. Variables (dashed) hold references to them; objects can hold references to each other. Which references exist, and who created them, <b>is</b> the relationship.' },
+    { title: 'Dependency: a reference only during a call', text: '<span class="mono">InvoicePrinter.Print(invoice)</span> uses the invoice while the method runs and keeps <b>no field</b>. When the call ends, the link is gone. The loosest relationship.', play: playDep },
+    { title: 'Association: a reference kept in a field', text: 'An Appointment keeps its Patient in a property for its whole life. Nobody owns anybody: the patient existed before the appointment and can outlive it. <b>Multiplicity</b>: many appointments, one patient each.' },
+    { title: 'Aggregation: parts created elsewhere, shared', text: 'Doctors are hired by the hospital and <b>passed in</b> to departments; Dr Rao works in two. The department <b>has</b> doctors but doesn\'t own their lifetime.' },
+    { title: 'Composition: the whole creates and keeps its parts', text: 'The clinic <b>creates</b> its departments and nobody else holds them. They exist only as part of this clinic.', tip: 'The test: "if I delete the whole, do the parts go too, and can a part belong to two wholes?"' },
+    { title: 'Drop the clinic and run the GC', text: 'Set <span class="mono">clinic = null</span>. The clinic and its departments are now unreachable, so the collector reclaims them (real run: <span class="mono">alive=False</span>). Dr Rao is still reachable from <span class="mono">drRao</span>, so he survives. That\'s the lifetime difference between composition and aggregation.', play: playGc },
+    { title: 'is-a makes one object; has-a makes two', text: 'Inheritance is fixed at compile time: a Patient <b>is</b> one object with Person\'s fields inside. Composition is two objects and a reference, so the part can be <b>swapped</b> or <b>faked</b>.' },
+    { title: 'Composition over inheritance', text: 'Instead of <span class="mono">UrgentEmailNotifier</span>, <span class="mono">UrgentSmsNotifier</span>… hold an <span class="mono">IChannel</span> and an <span class="mono">IFormatter</span>. Swap the channel at runtime; adding WhatsApp is <b>one</b> class.', play: playSwap }
+  ] });
+
+  // ---------- reachability lab ----------
+  const lab = $('labSvg'); K.umlDefs(lab);
+  const CUTS = [
+    ['rClinic', 'clinic = null'], ['rRao', 'drRao = null'], ['rAsha', 'asha = null'], ['rAppt', 'appt = null'],
+    ['clinic>card', 'close Cardiology (remove from clinic)'], ['card>rao', 'unassign Dr Rao from Cardiology'], ['onc>rao', 'unassign Dr Rao from Oncology']
+  ];
+  let cut = new Set(), LG;
+  $('labCuts').innerHTML = CUTS.map(([id, t]) => `<button class="chip-btn" type="button" data-id="${id}" aria-pressed="false">${t}</button>`).join('');
+  function drawLab(collected) {
+    LG = graph(lab);
+    Object.entries(LG.roots).forEach(([id, r]) => r.classList.toggle('cut', cut.has(id)));
+    Object.entries(LG.links).forEach(([id, l]) => l.style.opacity = cut.has(id) ? 0 : 1);
+    if (collected) Object.keys(OBJ).forEach(id => LG.nodes[id].el.g.classList.toggle('rl-gone', collected.includes(id)));
+  }
+  function reachable() {
+    const seen = new Set(), stack = Object.entries(ROOTS).filter(([id]) => !cut.has(id)).map(([, v]) => v[3]);
+    while (stack.length) { const n = stack.pop(); if (seen.has(n)) continue; seen.add(n); LINKS.forEach(([a, b]) => { if (a === n && !cut.has(a + '>' + b)) stack.push(b); }); }
+    return seen;
+  }
+  const NAME = { clinic: 'Clinic', card: 'Cardiology', onc: 'Oncology', rao: 'Dr Rao', appt: 'Appointment', asha: 'Patient Asha' };
+  $('labCuts').addEventListener('click', e => {
+    const b = e.target.closest('button[data-id]'); if (!b) return;
+    cut.has(b.dataset.id) ? cut.delete(b.dataset.id) : cut.add(b.dataset.id);
+    b.setAttribute('aria-pressed', String(cut.has(b.dataset.id)));
+    drawLab(null); $('labLog').textContent = cut.size ? 'References cut: ' + [...cut].map(id => CUTS.find(c => c[0] === id)[1]).join(', ') + '.\nWhich objects will the GC reclaim? Press Run GC.' : 'All references in place. Pick one or more to cut, then Run GC.';
+  });
+  $('labGc').addEventListener('click', () => {
+    const r = reachable(), gone = Object.keys(OBJ).filter(id => !r.has(id));
+    drawLab(gone);
+    let why = '';
+    if (cut.has('rAsha') && r.has('asha')) why += '\n• Asha survives: the Appointment still references her (association keeps her reachable).';
+    if (cut.has('rRao') && r.has('rao')) why += '\n• Dr Rao survives: a department still holds him (aggregation keeps him reachable).';
+    if (cut.has('rClinic') && r.has('rao')) why += '\n• The clinic took its departments with it (composition), but not the doctor.';
+    if (gone.includes('rao')) why += '\n• Dr Rao is gone: no variable and no department references him any more.';
+    $('labLog').textContent = (gone.length ? 'GC reclaimed: ' + gone.map(id => NAME[id]).join(', ') : 'GC reclaimed nothing: every object is still reachable from a variable.') + why;
+  });
+  $('labReset').addEventListener('click', () => { cut = new Set(); $('labCuts').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', 'false')); drawLab(null); $('labLog').textContent = 'All references in place. Pick one or more to cut, then Run GC.'; });
+  drawLab(null);
+
+  // ---------- test ----------
+  const O = ['Dependency', 'Association', 'Aggregation', 'Composition', 'Inheritance'];
+  SD.page({ track: 'lld', drill: { opts: O, items: [
+    { q: 'An <span class="mono">Order</span> creates its <span class="mono">OrderLine</span>s in <span class="mono">AddLine()</span>; deleting the order deletes them.', a: O[3], why: 'The whole creates and owns the parts; they share its lifetime.' },
+    { q: 'A <span class="mono">Playlist</span> holds <span class="mono">Song</span>s that also appear in other playlists.', a: O[2], why: 'Parts created elsewhere and shared; they outlive any one playlist.' },
+    { q: '<span class="mono">ReportService.Export(CsvWriter w)</span> uses the writer and keeps nothing.', a: O[0], why: 'Only a parameter: a temporary use.' },
+    { q: '<span class="mono">Prescription</span> has a <span class="mono">Doctor PrescribedBy { get; }</span> property.', a: O[1], why: 'A kept reference, no ownership: association.' },
+    { q: '<span class="mono">class Surgeon : Doctor</span>, and every Surgeon can do everything a Doctor can.', a: O[4], why: 'A real, substitutable is-a.' },
+    { q: 'A <span class="mono">House</span> builds its <span class="mono">Room</span>s in its constructor and never exposes them for others to keep.', a: O[3], why: 'Exclusive ownership and a shared lifetime.' },
+    { q: '<span class="mono">BookingService(INotifier notifier)</span> stores the injected notifier in a field.', a: O[1], why: 'A reference kept in a field: association to the interface.' },
+    { q: 'A <span class="mono">Ward</span> has <span class="mono">Nurse</span>s who rotate between wards.', a: O[2], why: 'Parts with their own lifetime, shared over time.' }
+  ] } });
+})();
+</script>
+</body>
+</html>
