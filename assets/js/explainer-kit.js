@@ -21,6 +21,8 @@
      Kit.story({ root, steps, show })
        root  : an element with class "story"; Kit fills the caption + nav
        steps : [{ title, text, tip?, play?: async run => {} }]
+               text is shown as a bulleted list, one point per sentence
+               (Kit.points splits it); pass an array to choose the points yourself
        tipLabel: label before each step's tip (default 'Exam tip')
        show(i): draw the finished state of step i instantly (used for Back,
                 dot jumps and after each play). Keep it declarative.
@@ -574,12 +576,50 @@
       return { load, run: () => go(false), step: () => go(true) };
     },
 
+    /** split a step's text into short points: an array is used as is; a string
+        is split into sentences (never inside a tag, parentheses or quotes, and
+        not after e.g. / i.e. / vs. / initials). Text that already has block
+        markup is left as one item. */
+    points(text) {
+      if (Array.isArray(text)) return text;
+      const s = String(text || '').trim();
+      if (!s || /<(ul|ol|p|br|div|table)\b/i.test(s)) return s ? [s] : [];
+      const VOID = /^(br|img|hr|wbr|input)$/i, ABBR = /(?:^|[\s(])(e\.g|i\.e|vs|etc|approx|cf|Mr|Mrs|Dr|St|No|Fig|incl|esp|min|max|sec|ms)$/i;
+      const out = []; let start = 0, depth = 0, paren = 0, dq = false;
+      for (let i = 0; i < s.length; i++) {
+        const c = s[i];
+        if (c === '<') { const j = s.indexOf('>', i); if (j < 0) break; const tag = s.slice(i + 1, j); const m = tag.match(/^\/?\s*([a-z0-9]+)/i);
+          if (m && !tag.endsWith('/') && !VOID.test(m[1])) depth += tag[0] === '/' ? -1 : 1; i = j; continue; }
+        if (depth > 0) continue;
+        if (c === '(') paren++; else if (c === ')') paren = Math.max(0, paren - 1);
+        else if (c === '"' || c === '“' || c === '”') dq = c === '“' ? true : c === '”' ? false : !dq;
+        if (paren || dq || !/[.!?]/.test(c)) continue;
+        let k = i + 1; while (s[k] === '"' || s[k] === '”' || s[k] === ')') k++;
+        if (!/\s/.test(s[k] || '')) continue;
+        let n = k; while (/\s/.test(s[n] || '')) n++;
+        if (n >= s.length || !/[A-Z0-9<"“‘'(]/.test(s[n])) continue;
+        const before = s.slice(start, i);
+        if (c === '.' && (ABBR.test(before) || /(?:^|[\s(])[A-Z]$/.test(before))) continue;
+        out.push(s.slice(start, k).trim()); start = n; i = n - 1;
+      }
+      const last = s.slice(start).trim(); if (last) out.push(last);
+      // a very short sentence reads better joined to its neighbour:
+      // a question ("Unsure?") leads into the next one, a remark ("Never do it.") ends the previous one
+      const len = t => t.replace(/<[^>]*>/g, '').length;
+      for (let i = 0; i < out.length && out.length > 1; i++) {
+        if (len(out[i]) >= 26) continue;
+        if ((/\?$/.test(out[i]) || i === 0) && i + 1 < out.length) { out[i + 1] = out[i] + ' ' + out[i + 1]; out.splice(i, 1); i--; }
+        else if (i > 0) { out[i - 1] += ' ' + out[i]; out.splice(i, 1); i--; }
+      }
+      return out;
+    },
+
     /** narrated walkthrough; see header */
     story({ root, steps, show, tipLabel = 'Exam tip' }) {
       const ch = 'story-' + (root.id || Math.random().toString(36).slice(2));
       const cap = document.createElement('div');
       cap.className = 'story-cap';
-      cap.innerHTML = `<div class="count"></div><h3></h3><p class="txt"></p><p class="tip" hidden></p>
+      cap.innerHTML = `<div class="count"></div><h3></h3><div class="txt"></div><p class="tip" hidden></p>
         <div class="story-nav"><button class="btn" type="button" data-a="back">◀ Back</button><button class="btn primary" type="button" data-a="next">Next ▶</button><button class="btn" type="button" data-a="auto">Play all</button></div>
         <div class="story-dots" role="group" aria-label="Steps"></div>`;
       root.appendChild(cap);
@@ -591,7 +631,8 @@
         const st = steps[cur];
         $c('.count').textContent = `Step ${cur + 1} of ${steps.length}`;
         $c('h3').innerHTML = st.title;
-        $c('.txt').innerHTML = st.text;
+        const pts = K.points(st.text);
+        $c('.txt').innerHTML = pts.length > 1 ? '<ul class="txt-list">' + pts.map(t => `<li>${t}</li>`).join('') + '</ul>' : (pts[0] || '');
         const tip = $c('.tip'); tip.hidden = !st.tip; tip.innerHTML = st.tip ? `<b>${tipLabel}:</b> ` + st.tip : '';
         $c('[data-a=back]').disabled = cur === 0;
         $c('[data-a=next]').textContent = cur === steps.length - 1 ? 'Start again ↺' : 'Next ▶';
