@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>Redis from Zero: Keys, Nodes, Slots and Replicas</title>
+<meta name="description" content="Redis for beginners, built up step by step: what Redis is, what a key and a node are, why one node isn't enough, how Redis Cluster splits keys into 16,384 hash slots, and how replicas take over when a node crashes. Numbers from a real Redis cluster.">
+<link rel="stylesheet" href="../../assets/css/theme.css?v=20261124">
+<link rel="stylesheet" href="../../assets/css/base.css?v=20261124">
+<link rel="stylesheet" href="../../assets/css/explainer.css?v=20261124">
+<script src="../../assets/js/theme.js?v=20261124"></script>
+<script src="../../assets/js/explainer-kit.js?v=20261124"></script>
+<script src="../sd-series.js?v=20261124"></script>
+<style>
+  .rz-t { fill: var(--fg); font-family: var(--mono) !important; font-size: 12px; }
+  .rz-t.mid { text-anchor: middle; }
+  .rz-t.b { font-family: var(--display) !important; font-weight: 700; font-size: 13px; }
+  .rz-t.muted { fill: var(--muted); } .rz-t.bad { fill: var(--bad-text); font-weight: 600; } .rz-t.ok { fill: var(--good-text); font-weight: 600; } .rz-t.acc { fill: var(--accent-text); font-weight: 600; }
+  .rz-t.halo { paint-order: stroke; stroke: var(--bg); stroke-width: 4px; }
+  .rz-box { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; }
+  .rz-box.hot { stroke: var(--cyan); stroke-width: 2.6; }
+  .rz-box.bad { stroke: var(--red); stroke-width: 2.6; }
+  .rz-box.ok { stroke: var(--teal); stroke-width: 2.6; }
+  .rz-row { fill: var(--bg); stroke: var(--line); stroke-width: 1; }
+  .rz-row.hot { stroke: var(--cyan); stroke-width: 2; }
+  .rz-line { fill: none; stroke: var(--fg-soft); stroke-width: 1.8; }
+  .rz-line.dash { stroke-dasharray: 6 4; }
+  .rz-line.hot { stroke: var(--cyan); stroke-width: 2.4; }
+  .rz-line.bad { stroke: var(--red); stroke-width: 2.2; }
+  .rz-line.ok { stroke: var(--teal); stroke-width: 2.2; }
+  .rz-head { fill: var(--fg-soft); } .rz-head.hot { fill: var(--cyan); } .rz-head.bad { fill: var(--red); } .rz-head.ok { fill: var(--teal); }
+  .rz-mem { fill: var(--chip-bg); stroke: var(--line); }
+  .rz-fade { opacity: .25; }
+  .rz-dead { opacity: .35; }
+  .rz-chip { stroke: var(--bg); stroke-width: 1.5; }
+  .rz-chip.moved { stroke: var(--red); stroke-width: 3; }
+  .rz-play { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-sm); margin-top: var(--space-sm); }
+  .rz-in { display: flex; flex-wrap: wrap; gap: var(--space-xs); align-items: center; }
+  .rz-in input { font-family: var(--mono); font-size: 15px; padding: 8px 10px; min-width: 0; width: min(100%, 320px); background: var(--bg); color: var(--fg); border: 0; box-shadow: inset 0 0 0 1px var(--line); }
+  .rz-in input:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  .rz-out { background: var(--panel); padding: var(--space-sm) var(--space-md); line-height: 1.6; }
+  .rz-out code { overflow-wrap: anywhere; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>System Design pages</summary>
+<nav aria-label="System Design pages">
+<h2 class="wb-track">HLD</h2>
+<a class="wb-road" href="index.html">HLD roadmap</a>
+<details class="wb-g"><summary>Week 1: Networking</summary><ul>
+<li><a href="client-server-dns.html"><span class="t">Client-server &amp; DNS</span><span class="n">H1</span></a></li>
+<li><a href="http.html"><span class="t">HTTP</span><span class="n">H2</span></a></li>
+<li><a href="tcp-udp.html"><span class="t">TCP &amp; UDP</span><span class="n">H3</span></a></li>
+<li><a href="https-tls.html"><span class="t">HTTPS &amp; TLS</span><span class="n">H4</span></a></li>
+<li><a href="latency-throughput.html"><span class="t">Latency &amp; throughput</span><span class="n">H5</span></a></li>
+<li><a href="availability-slos.html"><span class="t">Availability, SLOs &amp; recovery</span><span class="n">H6</span></a></li>
+<li><a href="week-1-review.html"><span class="t">Review: journey of a request</span><span class="n">H7</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Week 2: Scaling</summary><ul>
+<li><a href="scaling.html"><span class="t">Vertical vs horizontal scaling</span><span class="n">H8</span></a></li>
+<li><a href="stateless.html"><span class="t">Stateless applications</span><span class="n">H9</span></a></li>
+<li><a href="proxy-lb-gateway.html"><span class="t">Reverse proxy, API gateway &amp; load balancers</span><span class="n">H10–12</span></a></li>
+<li><a href="load-balancing-algorithms.html"><span class="t">Load-balancing algorithms</span><span class="n">H13</span></a></li>
+<li><a href="scale-web-app.html"><span class="t">Design: scale a web app to millions</span><span class="n">H14</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Week 3: Caching</summary><ul>
+<li><a href="caching-overview.html"><span class="t">Why caching exists</span><span class="n">H15</span></a></li>
+<li><a href="cache-read-strategies.html"><span class="t">Read strategies</span><span class="n">H16</span></a></li>
+<li><a href="cache-write-strategies.html"><span class="t">Write strategies &amp; invalidation</span><span class="n">H17</span></a></li>
+<li><a href="cache-eviction.html"><span class="t">Eviction policies</span><span class="n">H18</span></a></li>
+<li><a href="distributed-caching.html"><span class="t">Distributed caching</span><span class="n">H19</span></a></li>
+<li><a href="redis-cluster-explained.html" aria-current="page"><span class="t">Redis from zero: keys, nodes, slots, replicas</span><span class="n">H19</span></a></li>
+<li><a href="cache-failure-modes.html"><span class="t">Caching failure modes</span><span class="n">H20</span></a></li>
+<li><a href="cdn-http-caching.html"><span class="t">CDN &amp; HTTP caching</span><span class="n">H21</span></a></li>
+<li><a href="caching-in-practice.html"><span class="t">Caching in practice: the interview playbook</span></a></li>
+<li><a href="caching-patterns-atlas.html"><span class="t">All caching patterns at a glance</span></a></li>
+</ul></details>
+<h2 class="wb-track">LLD</h2>
+<a class="wb-road" href="../lld/index.html">LLD roadmap</a>
+<details class="wb-g"><summary>Phase 1: Foundations</summary><ul>
+<li><a href="../lld/oop-pillars.html"><span class="t">OOP pillars in C#</span><span class="n">L1</span></a></li>
+<li><a href="../lld/relationships.html"><span class="t">Class relationships</span><span class="n">L2</span></a></li>
+<li><a href="../lld/uml.html"><span class="t">UML: class &amp; sequence diagrams</span><span class="n">L3</span></a></li>
+<li><a href="../lld/design-principles.html"><span class="t">Design principles: DRY, KISS, YAGNI &amp; more</span><span class="n">L4</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Phase 2: SOLID</summary><ul>
+<li><a href="../lld/solid.html"><span class="t">SOLID overview</span><span class="n">L6</span></a></li>
+<li><a href="../lld/solid-srp.html"><span class="t">S: Single responsibility</span><span class="n">L7</span></a></li>
+<li><a href="../lld/solid-ocp.html"><span class="t">O: Open-closed</span><span class="n">L8</span></a></li>
+<li><a href="../lld/solid-lsp.html"><span class="t">L: Liskov substitution</span><span class="n">L9</span></a></li>
+<li><a href="../lld/solid-isp.html"><span class="t">I: Interface segregation</span><span class="n">L10</span></a></li>
+<li><a href="../lld/solid-dip.html"><span class="t">D: Dependency inversion</span><span class="n">L11</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Phase 3: Creational patterns</summary><ul>
+<li><a href="../lld/singleton.html"><span class="t">Singleton</span><span class="n">L12</span></a></li>
+<li><a href="../lld/factory-method.html"><span class="t">Simple factory &amp; factory method</span><span class="n">L13</span></a></li>
+<li><a href="../lld/abstract-factory.html"><span class="t">Abstract factory</span><span class="n">L14</span></a></li>
+<li><a href="../lld/builder.html"><span class="t">Builder</span><span class="n">L15</span></a></li>
+<li><a href="../lld/prototype.html"><span class="t">Prototype</span><span class="n">L16</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../index.html" aria-current="true">System Design<span class="n">37</span></a></li>
+<li><a href="../../aws-cloud-practitioner/index.html">AWS<span class="n">34</span></a></li>
+<li><a href="../../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">HLD roadmap</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <p class="crumbs">System Design / HLD / Week 3 / H19 deep dive</p>
+    <h1>Redis from Zero: Keys, Nodes, Slots and Replicas</h1>
+    <ul class="lede">
+      <li><b>Redis</b> is a program that keeps a big dictionary <b>in memory</b> and lets all your app servers read and write it over the network.</li>
+      <li>A <b>key</b> is the name you store a value under (<span class="mono">patient:42</span>). A <b>node</b> is one running Redis server.</li>
+      <li>One node runs out of <b>memory</b> and is a <b>single point of failure</b>. Redis Cluster fixes both: split the keys across nodes, and keep a copy of each node.</li>
+      <li>Every key belongs to one of <b>16,384 hash slots</b>; each node owns a range of slots. Adding a node moves slots, not every key.</li>
+      <li>Every <b>primary</b> node has a <b>replica</b>. If the primary crashes, the replica takes over its slots in seconds.</li>
+    </ul>
+  </header>
+
+  <nav id="series"></nav>
+  <nav id="pageNav"></nav>
+
+  <section id="learn" data-nav="Learn">
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn it in three parts</h2>
+    <p class="sec-sub">Part 1 explains Redis on one machine. Part 2 splits the data across machines. Part 3 survives a crash. Every number comes from a real Redis 7 cluster.</p>
+
+    <div class="sub-block" aria-labelledby="p1H">
+      <h3 class="stage-title sub" id="p1H">Part 1 · What Redis is, and what a key and a node are</h3>
+      <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+      <div class="story" id="s1"><div class="scroll"><svg class="diagram" id="v1" style="min-width:0" viewBox="0 0 760 330" role="img" aria-label="App servers, a Redis node holding keys and values in memory, and a SQL Server database"></svg></div></div>
+    </div>
+
+    <div class="sub-block" aria-labelledby="p2H" style="margin-top:22px">
+      <h3 class="stage-title sub" id="p2H">Part 2 · Splitting keys across nodes: hash slots</h3>
+      <div class="stage-kind">How every app server knows which node holds a key, without asking around</div>
+      <div class="story" id="s2"><div class="scroll"><svg class="diagram" id="v2" style="min-width:0" viewBox="0 0 760 340" role="img" aria-label="Three Redis nodes, a bar of 16,384 hash slots split into ranges, and keys placed on the node that owns their slot"></svg></div></div>
+    </div>
+
+    <div class="sub-block" aria-labelledby="p3H" style="margin-top:22px">
+      <h3 class="stage-title sub" id="p3H">Part 3 · Surviving a crash: replicas and failover</h3>
+      <div class="stage-kind">What happens, second by second, when a node dies</div>
+      <div class="story" id="s3"><div class="scroll"><svg class="diagram" id="v3" style="min-width:0" viewBox="0 0 760 330" role="img" aria-label="Three primary nodes with replicas; one primary crashes and its replica is promoted"></svg></div></div>
+    </div>
+  </section>
+
+  <section id="compare" data-nav="Compare">
+    <h2 class="sec-h"><span class="sec-n">2</span>In terms you already know</h2>
+    <p class="sec-sub">Rough matches from .NET and SQL Server. They aren't identical, but they make the new words easier to hold on to.</p>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Redis word</th><th>What it means</th><th>Closest thing you know</th></tr></thead>
+        <tbody>
+          <tr><td>Redis</td><td>A server program holding key → value pairs in RAM</td><td>A <span class="mono">Dictionary&lt;string, string&gt;</span> that lives in another process and every app server shares over TCP</td></tr>
+          <tr><td>Key</td><td>The name you store a value under</td><td>The dictionary key; like a primary key, but you choose the format (<span class="mono">patient:42</span>)</td></tr>
+          <tr><td>Node</td><td>One running <span class="mono">redis-server</span> process, with its own address</td><td>One SQL Server instance</td></tr>
+          <tr><td>Sharding</td><td>Splitting the keys across several nodes</td><td>Table partitioning, but across separate servers</td></tr>
+          <tr><td>Hash slot</td><td>One of 16,384 fixed buckets; each key belongs to exactly one</td><td>The partition number a partition function returns</td></tr>
+          <tr><td>Primary / replica</td><td>The node that takes writes / a copy that follows it</td><td>Always On primary / secondary replica with <b>asynchronous</b> commit</td></tr>
+          <tr><td>Failover</td><td>A replica is promoted when its primary dies</td><td>Automatic failover in an availability group</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="try" data-nav="Try it">
+    <h2 class="sec-h"><span class="sec-n">3</span>Try it: a pocket Redis Cluster</h2>
+    <p class="sec-sub">Type any key. The page computes its slot with the same CRC16 Redis uses (checked against a real cluster), then shows which node owns it. Then add a node, crash one, or use an out-of-date slot map.</p>
+    <div class="sub-block" aria-labelledby="pgH">
+      <h3 class="stage-title sub" id="pgH">Cluster playground</h3>
+      <div class="stage-kind">Type a key · predict its node · then change the cluster</div>
+      <div class="rz-play">
+        <div class="rz-in"><label for="pgKey" class="sub" style="margin:0">Key</label><input id="pgKey" value="patient:42" spellcheck="false" autocomplete="off"><div class="chips" id="pgChips" style="margin:0"></div></div>
+        <div class="controls" style="flex-wrap:wrap;gap:14px">
+          <div class="chip-group" style="margin:0"><div class="label">Cluster</div><div class="seg" id="pgSize" role="group" aria-label="Cluster size"><button type="button" data-v="3" aria-pressed="true">3 primaries</button><button type="button" data-v="4" aria-pressed="false">after adding node D</button></div></div>
+          <div class="chip-group" style="margin:0"><div class="label">App's slot map</div><div class="seg" id="pgMap" role="group" aria-label="Slot map"><button type="button" data-v="fresh" aria-pressed="true">up to date</button><button type="button" data-v="stale" aria-pressed="false">stale (from before D)</button></div></div>
+          <button class="btn" type="button" id="pgCrash">Crash the owner node</button>
+          <button class="btn" type="button" id="pgReset">Reset</button>
+        </div>
+        <div class="scroll"><svg class="diagram" id="pgSvg" style="min-width:0" viewBox="0 0 760 300" role="img" aria-label="Slot bar and nodes showing which node owns the typed key"></svg></div>
+        <div class="rz-out" id="pgOut"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="revise" data-nav="Revise">
+    <h2 class="sec-h"><span class="sec-n">4</span>Revise in two minutes</h2>
+    <div class="sub-block" aria-labelledby="cheatH">
+    <h3 class="sec-h3" id="cheatH">Cheat-sheet</h3>
+    <ul class="cheat">
+      <li><span class="if">"Where does key X live?"</span><span class="arrow">→</span><span class="then">slot = <span class="mono">CRC16(X) mod 16384</span>; the node owning that slot range has it</span></li>
+      <li><span class="if">Data outgrows one node's memory</span><span class="arrow">→</span><span class="then">add primaries; move some slots to them (resharding)</span></li>
+      <li><span class="if">A node must not take the cache down with it</span><span class="arrow">→</span><span class="then">a replica per primary, on another machine</span></li>
+      <li><span class="if">App asked the wrong node</span><span class="arrow">→</span><span class="then"><span class="mono">MOVED slot host:port</span>; the client updates its map and retries</span></li>
+      <li><span class="if">Need several keys in one command</span><span class="arrow">→</span><span class="then">put them in one slot with a hash tag: <span class="mono">{patient:42}:visits</span></span></li>
+      <li><span class="if">Writes must never be lost</span><span class="arrow">→</span><span class="then">not Redis Cluster alone: replication is asynchronous</span></li>
+      <li><span class="if">Smallest sensible cluster</span><span class="arrow">→</span><span class="then">3 primaries + 3 replicas = 6 nodes</span></li>
+    </ul>
+    </div>
+    <div class="sub-block" aria-labelledby="refH">
+    <h3 class="sec-h3" id="refH">Reference: from the real cluster used for this page</h3>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Command</th><th>Real output</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">--cluster create … --cluster-replicas 1</td><td class="mono">Master[0] -&gt; Slots 0 - 5460<br>Master[1] -&gt; Slots 5461 - 10922<br>Master[2] -&gt; Slots 10923 - 16383</td><td>6 nodes: 3 primaries split the slots, 3 replicas</td></tr>
+          <tr><td class="mono">CLUSTER KEYSLOT patient:42</td><td class="mono">13565</td><td>owned by the third primary</td></tr>
+          <tr><td class="mono">GET patient:42</td><td class="mono">MOVED 13565 127.0.0.1:7002</td><td>asked the wrong node: go there</td></tr>
+          <tr><td class="mono">MGET patient:42 patient:7</td><td class="mono">CROSSSLOT Keys in request don't hash to the same slot</td><td>multi-key commands need one slot</td></tr>
+          <tr><td class="mono">KEYSLOT {patient:42}:visits</td><td class="mono">13565</td><td>hash tag: only <span class="mono">patient:42</span> is hashed</td></tr>
+          <tr><td class="mono">--cluster rebalance (4th node)</td><td class="mono">Moving 1366 slots from …:7001<br>Moving 1365 slots from …:7002<br>Moving 1365 slots from …:7000</td><td>node D gets 4,096 slots; 5 of 17 sample keys moved</td></tr>
+          <tr><td>Primary shut down</td><td class="mono">Marking node … as failing (quorum reached)<br>Failover election won: I'm the new master.</td><td>4.8 s, then 5.7 s with <span class="mono">cluster-node-timeout 3000</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><p><b>Why 16,384 slots?</b> Nodes regularly send each other a bitmap of the slots they own. 16,384 bits is 2 KB per message; 65,536 would be 8 KB. Clusters are designed for up to about 1,000 primaries, so 16,384 slots is plenty.</p></div>
+      <div class="note"><p><b>Timing in production:</b> the default <span class="mono">cluster-node-timeout</span> is 15,000 ms, so expect a failover in roughly 15–20 seconds rather than the 5.7 s measured here with a 3 s timeout. Until then, keys in the dead node's slots can't be read or written.</p></div>
+      <div class="note"><p><b>Redis Cluster vs Sentinel:</b> Sentinel gives automatic failover for <i>one</i> primary and its replicas (no sharding). Redis Cluster does sharding <i>and</i> failover, so you don't run Sentinel with it.</p></div>
+    </div>
+    <h3 class="sec-h3" style="margin-top:18px">In .NET</h3>
+    <div id="dotnet"></div>
+    </div>
+  </section>
+
+  <section id="test" data-nav="Test">
+    <h2 class="sec-h"><span class="sec-n">5</span>Test yourself</h2>
+    <h3 class="sec-h3">Which idea is this?</h3>
+    <div id="drill"></div>
+    <h3 class="sec-h3">Explain it out loud</h3>
+    <p class="sub">Answer before you open each card.</p>
+    <div class="quiz">
+      <details><summary>What is a node, and why isn't one enough?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>A node is one running Redis server. One node can only hold as many keys as its machine's <b>memory</b>, and if it dies <b>every</b> cached key is gone at once.</p></div></details>
+      <details><summary>Why not just use <code>hash(key) % N</code> to pick a node?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Changing N changes the answer for most keys, so adding one node turns most of the cache into misses. Slots fix the key → slot mapping forever and only move <b>whole slots</b> between nodes.</p></div></details>
+      <details><summary>How does an app server know which node to ask?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>The client library downloads the <b>slot map</b> (which node owns which slot range), computes the key's slot itself and goes straight there. If the map is out of date, the node replies <code>MOVED</code> and the client updates its map.</p></div></details>
+      <details><summary>A primary crashes. What happens, in order?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Other nodes stop getting replies to their pings → after the node timeout a majority of primaries mark it failing → its replica asks for votes, wins, and becomes primary for those slots → clients learn the new map. Until then, those slots are unavailable.</p></div></details>
+      <details><summary>Can Redis Cluster lose a write it already said OK to?<span class="go">Show answer</span></summary>
+        <div class="ans"><p><b>Yes.</b> The primary replies OK before copying to its replica. If it crashes in between, the promoted replica never had that write. Fine for a cache (the database is the source of truth), not for money.</p></div></details>
+      <details><summary>What is a hash tag for?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>To put related keys in <b>one slot</b> so multi-key commands work: in <code>{patient:42}:profile</code> and <code>{patient:42}:visits</code> only <code>patient:42</code> is hashed, so both land in slot 13565.</p></div></details>
+    </div>
+  </section>
+
+  <nav id="prevnext"></nav>
+
+  <footer>Sources: Redis documentation (Redis Cluster specification; "Scale with Redis Cluster"; Redis University, Redis at Scale: clustering, sharding and hash slots). Slot numbers, slot ranges, rebalance moves, MOVED / CROSSSLOT errors and failover log lines are from a real Redis 7.0.15 cluster (6 nodes, then 7) run for this page; the playground's CRC16 matches <span class="mono">CLUSTER KEYSLOT</span> for every key tested. The .NET snippet is illustrative and was not run. Database timings are illustrative.</footer>
+</div>
+
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  /* ---------- shared bits ---------- */
+  function crc16(s) { const b = new TextEncoder().encode(s); let c = 0; for (const x of b) { c ^= x << 8; for (let i = 0; i < 8; i++) c = (c & 0x8000) ? ((c << 1) ^ 0x1021) & 0xffff : (c << 1) & 0xffff; } return c; }
+  function hashPart(k) { const s = k.indexOf('{'); if (s > -1) { const e = k.indexOf('}', s + 1); if (e > s + 1) return k.slice(s + 1, e); } return k; }
+  const slotOf = k => crc16(hashPart(k)) % 16384;
+  const TONE = { A: 'var(--cyan)', B: 'var(--violet)', C: 'var(--orange)', D: 'var(--yellow)' };
+  const MAP3 = [['A', 0, 5460], ['B', 5461, 10922], ['C', 10923, 16383]];
+  const MAP4 = [['D', 0, 1364], ['A', 1365, 5460], ['D', 5461, 6826], ['B', 6827, 10922], ['D', 10923, 12287], ['C', 12288, 16383]];
+  const ownerOf = (slot, map) => map.find(([, a, b]) => slot >= a && slot <= b)[0];
+  const KEYS = Array.from({ length: 16 }, (_, i) => 'patient:' + (i + 1)).concat(['patient:42']);
+  function arrowDefs(svg) {
+    const d = K.el('defs', {}, svg);
+    d.innerHTML = ['', 'hot', 'bad', 'ok'].map(t => `<marker id="rz-a${t}-${svg.id}" viewBox="0 0 12 12" refX="11" refY="6" markerWidth="10" markerHeight="10" orient="auto" markerUnits="userSpaceOnUse"><path class="rz-head ${t}" d="M1 1 L11 6 L1 11 z"/></marker>`).join('');
+  }
+  const mk = (svg) => {
+    let L;
+    const api = {
+      clear() { if (L) L.remove(); L = K.el('g', {}, svg); return L; },
+      get L() { return L; },
+      t(x, y, s, c) { return K.text(L, x, y, s, 'rz-t ' + (c || '')); },
+      box(x, y, w, h, c) { return K.el('rect', { x, y, width: w, height: h, class: 'rz-box ' + (c || '') }, L); },
+      line(pts, c) { const tone = (c || '').split(' ').find(z => ['hot', 'bad', 'ok'].includes(z)) || ''; return K.el('path', { d: 'M' + pts.map(p => p.join(' ')).join(' L'), class: 'rz-line ' + (c || ''), 'marker-end': `url(#rz-a${tone}-${svg.id})` }, L); },
+      plain(pts, c) { return K.el('path', { d: 'M' + pts.map(p => p.join(' ')).join(' L'), class: 'rz-line ' + (c || '') }, L); }
+    };
+    return api;
+  };
+
+  /* ================= Part 1 ================= */
+  const v1 = $('v1'); arrowDefs(v1); const P = mk(v1);
+  const APPS = [[80, 70], [80, 165], [80, 260]];
+  function apps(fade) { APPS.forEach(([x, y], i) => { const b = P.box(x - 60, y - 22, 120, 44, fade ? 'rz-fade' : ''); P.t(x, y + 4, 'App server ' + (i + 1), 'mid b' + (fade ? ' muted' : '')); }); }
+  function db(c) { P.box(610, 140, 130, 54, c || ''); P.t(675, 163, 'SQL Server', 'mid b'); P.t(675, 181, 'patients table', 'mid muted'); }
+  const ROWS = [['patient:42', '{"name":"Asha"}'], ['price:7', '499'], ['session:abc', '{"user":"asha"}']];
+  function redis(opt = {}) {
+    P.box(255, 70, 270, 190, opt.c || 'hot');
+    P.t(390, 92, opt.title || 'Redis node', 'mid b');
+    P.t(390, 110, 'cache-1:6379 · data in RAM', 'mid muted');
+    P.t(300, 134, 'key', 'muted'); P.t(410, 134, 'value', 'muted');
+    ROWS.forEach(([k, v], i) => { K.el('rect', { x: 270, y: 142 + i * 34, width: 240, height: 28, class: 'rz-row' + (opt.hotRow === i ? ' hot' : '') }, P.L); P.t(280, 161 + i * 34, k); P.t(395, 161 + i * 34, v, 'acc'); });
+  }
+  const S1 = [
+    () => { apps(); db('bad'); APPS.forEach(([x, y]) => P.line([[x + 60, y], [610, 167]], 'bad')); P.t(390, 40, 'every request for patient 42 runs a SQL query', 'mid bad halo'); P.t(675, 220, '3 identical queries', 'mid bad'); P.t(675, 238, '(5–50 ms each,', 'mid muted'); P.t(675, 254, 'illustrative)', 'mid muted'); },
+    () => { apps(); db(); redis(); P.t(390, 290, 'a separate server program that keeps key → value pairs in memory', 'mid acc'); P.t(390, 310, 'RAM is fast: a lookup takes well under a millisecond', 'mid muted'); },
+    () => { apps(); db('rz-fade'); redis({ hotRow: 0 }); P.line([[140, 70], [255, 150]], 'hot'); P.t(170, 50, 'SET patient:42 {…}', 'acc halo'); P.line([[140, 260], [255, 210]], 'ok'); P.t(20, 300, 'GET patient:42 → {"name":"Asha"}', 'ok halo'); P.t(390, 322, 'the key is a name you choose; "type:id" is the convention', 'mid muted'); },
+    () => { apps(true); db('rz-fade'); redis({ title: 'this whole box = one node' }); P.t(390, 290, 'node = one running redis-server process with its own address', 'mid acc'); P.t(390, 310, '(usually its own VM or container)', 'mid muted'); },
+    () => { apps(true); db('bad'); redis({ c: 'bad' });
+      K.el('rect', { x: 270, y: 245, width: 240, height: 10, class: 'rz-mem' }, P.L); K.el('rect', { x: 270, y: 245, width: 232, height: 10, fill: 'var(--red)', opacity: .7 }, P.L);
+      P.t(390, 274, 'RAM 97% full', 'mid bad');
+      P.t(390, 298, '1) all keys must fit in this one machine\'s memory', 'mid bad'); P.t(390, 318, '2) if this node dies, every key is gone at once and the DB is flooded', 'mid bad'); }
+  ];
+  async function p1Query(run) { P.clear(); S1[0](); for (const [x, y] of APPS) { const p = K.pill(P.L, 'SELECT', 'bad'); await K.move(p, [x + 60, y], [610, 167], 600, run); p.remove(); } }
+  async function p1SetGet(run) { P.clear(); apps(); db('rz-fade'); redis();
+    let p = K.pill(P.L, 'SET patient:42'); await K.move(p, [140, 70], [255, 150], 800, run); p.remove(); P.clear(); S1[2]();
+    p = K.pill(P.L, 'GET patient:42', 'ok'); await K.move(p, [140, 260], [255, 210], 700, run); p.remove(); p = K.pill(P.L, '{"name":"Asha"}', 'ok'); await K.move(p, [255, 210], [140, 260], 700, run); p.remove(); }
+  K.story({ root: $('s1'), show: i => { P.clear(); S1[i](); }, tipLabel: 'Interview tip', steps: [
+    { title: 'The problem: the same query again and again', text: 'Three app servers behind a load balancer all need patient 42. Without a cache, <b>each</b> request runs the same SQL query. Multiply by thousands of users and the database is the bottleneck.', play: p1Query },
+    { title: 'Redis: a dictionary in memory, on the network', text: 'Redis is a <b>server program</b>. It keeps <b>key → value</b> pairs in RAM and answers commands over TCP. Think of a <span class="mono">Dictionary&lt;string, string&gt;</span> that every app server can reach.' },
+    { title: 'Keys and values: SET and GET', text: 'App server 1 stores the patient with <span class="mono">SET patient:42 {…}</span>. App server 3 reads it with <span class="mono">GET patient:42</span> and gets the same value. The <b>key</b> is just a name; the <b>value</b> is usually JSON.', play: p1SetGet },
+    { title: 'What "node" means', text: 'A <b>node</b> is one running Redis server: one process with its own address (host and port). So far we have exactly <b>one</b> node holding <b>all</b> the keys.' },
+    { title: 'Why one node isn\'t enough', text: 'Two limits. <b>Size</b>: every key has to fit in one machine\'s RAM. <b>Survival</b>: if that one node dies, the whole cache is gone and every request falls back to the database at once. Part 2 fixes size; Part 3 fixes survival.', tip: 'Say both reasons in an interview: "shard for capacity, replicate for availability".' }
+  ] });
+
+  /* ================= Part 2 ================= */
+  const v2 = $('v2'); arrowDefs(v2); const Q = mk(v2);
+  const NX = { A: 120, B: 300, C: 480, D: 660 };
+  function nodes(list, opt = {}) {
+    list.forEach(n => { const c = (opt.hot === n ? 'hot' : '') + (opt.fade && opt.fade.includes(n) ? ' rz-fade' : ''); const r = Q.box(NX[n] - 75, 20, 150, 50, c); r.style.stroke = opt.hot === n ? '' : TONE[n]; Q.t(NX[n], 42, 'node ' + n, 'mid b'); Q.t(NX[n], 60, { A: 'port 7000', B: 'port 7001', C: 'port 7002', D: 'port 7006' }[n], 'mid muted'); });
+  }
+  function chips(owner, moved) {
+    const per = {}; KEYS.forEach((k, i) => { const o = owner(k); per[o] = (per[o] || 0) + 1; const j = per[o] - 1;
+      const x = NX[o] - 60 + (j % 5) * 30, y = 92 + Math.floor(j / 5) * 22;
+      K.el('rect', { x: x - 12, y: y - 8, width: 26, height: 16, fill: TONE[o], class: 'rz-chip' + (moved && moved(k) ? ' moved' : ''), opacity: k === 'patient:42' ? 1 : .75 }, Q.L);
+      if (k === 'patient:42') Q.t(x + 1, y + 4, '42', 'mid b');
+    });
+  }
+  function bar(map, y, marker) {
+    map.forEach(([n, a, b]) => { const x = 40 + a / 16384 * 680, w = (b - a + 1) / 16384 * 680; K.el('rect', { x, y, width: Math.max(w - 1.5, 1), height: 26, fill: TONE[n], opacity: .7 }, Q.L); if (w > 60) Q.t(x + w / 2, y + 17, `${n} ${a}–${b}`, 'mid'); });
+    Q.t(40, y + 42, '0', 'muted'); Q.t(720, y + 42, '16383', 'muted').style.textAnchor = 'end';
+    if (marker !== undefined) { const x = 40 + marker / 16384 * 680; Q.plain([[x, y - 10], [x, y + 34]], 'hot'); Q.t(x, y - 14, 'slot ' + marker, 'mid acc halo'); }
+  }
+  const mod = (k, n) => 'ABCD'[crc16(k) % n];
+  const S42 = slotOf('patient:42');
+  const S2 = [
+    () => { nodes(['A', 'B', 'C']); Q.t(380, 140, 'Three nodes, each holding a third of the keys.', 'mid b'); Q.t(380, 170, 'Every app server must answer the same question the same way:', 'mid'); Q.t(380, 196, '"which node holds patient:42?"', 'mid acc'); Q.t(380, 222, 'without asking every node first (that would be slow)', 'mid muted'); },
+    () => { nodes(['A', 'B', 'C'], { hot: mod('patient:42', 3) }); chips(k => mod(k, 3)); const h = crc16('patient:42'); Q.t(380, 200, `first idea: hash the key, then take the remainder`, 'mid b'); Q.t(380, 226, `CRC16("patient:42") = ${h}   →   ${h} % 3 = ${h % 3}   →   node ${mod('patient:42', 3)}`, 'mid acc'); Q.t(380, 252, 'every app server computes this locally and gets the same answer', 'mid muted'); },
+    () => { nodes(['A', 'B', 'C', 'D']); chips(k => mod(k, 4), k => mod(k, 3) !== mod(k, 4)); const m = KEYS.filter(k => mod(k, 3) !== mod(k, 4)).length; Q.t(380, 220, `add node D and use % 4: ${m} of ${KEYS.length} keys now point at a different node`, 'mid bad'); Q.t(380, 246, 'every moved key is a cache miss: the database gets hammered right after you scale', 'mid muted'); },
+    () => { nodes(['A', 'B', 'C'], { fade: ['A', 'B', 'C'] }); K.el('rect', { x: 40, y: 140, width: 680, height: 26, class: 'rz-mem' }, Q.L); Q.t(380, 157, '16,384 slots, numbered 0 … 16383', 'mid'); Q.t(40, 182, '0', 'muted'); Q.t(720, 182, '16383', 'muted').style.textAnchor = 'end'; const mx = 40 + S42 / 16384 * 680; Q.plain([[mx, 130], [mx, 174]], 'hot'); Q.t(mx, 126, 'slot ' + S42, 'mid acc halo');
+      Q.t(380, 225, `slot = CRC16("patient:42") mod 16384 = ${S42}`, 'mid acc'); Q.t(380, 251, 'the slot number of a key never changes, however many nodes you have', 'mid b'); Q.t(380, 277, 'think of 16,384 numbered drawers: each key always goes in the same drawer', 'mid muted'); },
+    () => { nodes(['A', 'B', 'C'], { hot: 'C' }); chips(k => ownerOf(slotOf(k), MAP3)); bar(MAP3, 200, S42); Q.t(380, 280, 'each node owns a range of drawers; the app keeps this "slot map"', 'mid b'); Q.t(380, 304, `slot ${S42} is in C's range, so patient:42 lives on node C`, 'mid acc'); },
+    () => { nodes(['A', 'B', 'C', 'D']); chips(k => ownerOf(slotOf(k), MAP4), k => ownerOf(slotOf(k), MAP3) !== ownerOf(slotOf(k), MAP4)); bar(MAP4, 200, S42); const m = KEYS.filter(k => ownerOf(slotOf(k), MAP3) !== ownerOf(slotOf(k), MAP4)).length; Q.t(380, 280, `D takes 1,365 or so drawers from each node (4,096 in total). Only keys in those drawers move:`, 'mid b'); Q.t(380, 304, `${m} of ${KEYS.length} keys (real run). patient:42 stays on C.`, 'mid acc'); },
+    () => { nodes(['A', 'B', 'C', 'D'], { hot: 'D' }); Q.box(20, 120, 150, 44); Q.t(95, 146, 'App server', 'mid b'); Q.line([[170, 132], [440, 72]], 'bad'); Q.t(300, 96, '1', 'acc halo'); Q.line([[445, 72], [172, 150]], 'bad dash'); Q.t(300, 128, '2', 'bad halo'); Q.line([[170, 158], [620, 72]], 'ok'); Q.t(470, 108, '3', 'ok halo'); Q.t(30, 196, '1  GET patient:4 → node C (the old map says C)'); Q.t(30, 216, '2  C replies: MOVED 10927 127.0.0.1:7006', 'bad'); Q.t(30, 236, '3  the client retries on D and updates its map', 'ok'); Q.t(380, 280, 'nodes never forward requests: a wrong guess gets a MOVED reply (real output)', 'mid b'); Q.t(380, 304, 'the .NET / Java / Node clients follow MOVED and refresh their map automatically', 'mid muted'); },
+    () => { nodes(['A', 'B', 'C'], { hot: 'C' }); Q.t(380, 120, 'MGET patient:42 patient:7', 'mid'); Q.t(380, 142, "CROSSSLOT Keys in request don't hash to the same slot", 'mid bad'); Q.t(380, 186, '{patient:42}:profile  →  slot 13565', 'mid acc'); Q.t(380, 208, '{patient:42}:visits   →  slot 13565', 'mid acc'); Q.t(380, 250, 'hash tag: only the part inside { } is hashed, so related keys share a slot', 'mid b'); Q.t(380, 274, 'use it for one entity\'s keys; don\'t tag every key the same (one hot node)', 'mid muted'); }
+  ];
+  K.story({ root: $('s2'), show: i => { Q.clear(); S2[i](); }, tipLabel: 'Interview tip', steps: [
+    { title: 'The question every app server must answer', text: 'With several nodes, each holds only some keys. Before every GET or SET, the app needs to know <b>which node</b> to ask, and all app servers must agree.' },
+    { title: 'First idea: hash % number of nodes', text: 'Turn the key into a number with a hash function, then take the remainder by the node count. Fast, local and consistent… until the node count changes.' },
+    { title: 'Why % N breaks when you add a node', text: 'Change 3 to 4 and most keys get a different remainder, so they\'re looked for on the wrong node. Red outlines are keys that moved. Each one is now a cache miss.' },
+    { title: 'Redis\'s idea: 16,384 hash slots', text: 'Redis puts a fixed layer in between. Every key maps to one of <b>16,384 slots</b> with <span class="mono">CRC16(key) mod 16384</span>. That number <b>never changes</b>, whatever the cluster looks like.' },
+    { title: 'Nodes own ranges of slots', text: 'A real 3-node cluster split the slots like this: A 0–5460, B 5461–10922, C 10923–16383. The app downloads this <b>slot map</b> once, computes the slot itself and goes straight to the right node.' },
+    { title: 'Adding a node moves slots, not everything', text: 'To add node D, Redis moves <b>some slots</b> from A, B and C to D, with the keys inside them. Every other key stays where it was, so the cache stays warm.', tip: 'Contrast with % N: "slots move ~1/(N+1) of the keys; modulo moves most of them".' },
+    { title: 'Asked the wrong node? MOVED', text: 'If an app\'s map is out of date, the node doesn\'t fetch the key for it. It replies <span class="mono">MOVED &lt;slot&gt; &lt;address&gt;</span>; the client retries there and updates its map.' },
+    { title: 'Several keys in one command: hash tags', text: 'A multi-key command must touch <b>one slot</b>. Put the shared part in braces, <span class="mono">{patient:42}:visits</span>, and only that part is hashed.' }
+  ] });
+
+  /* ================= Part 3 ================= */
+  const v3 = $('v3'); arrowDefs(v3); const R = mk(v3);
+  const PX = { A: 260, B: 450, C: 640 };
+  function cluster(o = {}) {
+    R.box(20, 128, 110, 44, o.appC || ''); R.t(75, 154, 'App', 'mid b');
+    Object.entries(PX).forEach(([n, x]) => {
+      const dead = o.dead === n, prom = o.promoted === n;
+      const p = R.box(x - 70, 40, 140, 50, dead ? 'bad rz-dead' : (o.hot === n ? 'hot' : '')); if (!dead && o.hot !== n) p.style.stroke = TONE[n];
+      R.t(x, 62, dead ? `primary ${n} ✕` : `primary ${n}`, 'mid b' + (dead ? ' bad' : '')); R.t(x, 80, n === 'A' ? 'slots 0–5460' : n === 'B' ? 'slots 5461–10922' : 'slots 10923–16383', 'mid muted');
+      const r = R.box(x - 70, 210, 140, 50, prom ? 'ok' : ''); R.t(x, 232, prom ? `${n}′ now PRIMARY` : `replica ${n}′`, 'mid b' + (prom ? ' ok' : '')); R.t(x, 250, prom ? 'slots 10923–16383' : 'copy of ' + n, 'mid muted');
+      if (!o.noCopy) R.line([[x, 90], [x, 208]], 'dash' + (dead ? ' rz-fade' : ''));
+    });
+  }
+  const S3 = [
+    () => { cluster(); R.t(380, 300, 'each primary has a replica on a different machine; the replica copies every write', 'mid acc'); R.t(380, 320, 'smallest sensible cluster: 3 primaries + 3 replicas = 6 nodes', 'mid muted'); },
+    () => { cluster({ hot: 'C' }); R.t(380, 120, 'SET → OK comes back BEFORE the copy reaches the replica', 'mid acc halo'); R.t(380, 300, 'replication is asynchronous: fast, but there is a short gap', 'mid b'); },
+    () => { cluster({ dead: 'C' }); R.plain([[330, 65], [570, 65]], 'dash'); R.t(500, 110, 'PING …  no PONG', 'mid bad halo'); R.t(380, 300, '0.0 s  node C stops (real run: shutdown)', 'mid bad'); R.t(380, 320, 'nodes ping each other all the time; C stops answering', 'mid muted'); },
+    () => { cluster({ dead: 'C' }); R.t(380, 120, 'A and B: "C has missed pings for longer than node-timeout"', 'mid halo'); R.t(380, 300, '4.8 s  "Marking node … as failing (quorum reached)"', 'mid bad'); R.t(380, 320, 'a majority of primaries must agree, so one flaky link can\'t trigger a failover', 'mid muted'); },
+    () => { cluster({ dead: 'C', promoted: 'C' }); R.line([[600, 210], [470, 90]], 'ok'); R.line([[600, 210], [290, 90]], 'ok'); R.t(470, 160, 'vote for me?', 'mid ok halo'); R.t(380, 300, "5.7 s  \"Failover election won: I'm the new master.\"", 'mid ok'); R.t(380, 320, 'C′ now owns C\'s slots; GET patient:42 works again (real run)', 'mid muted'); },
+    () => { cluster({ dead: 'C', promoted: 'C' }); R.t(380, 125, 'a write C said OK to, but hadn\'t copied yet → gone', 'mid bad halo'); R.t(380, 300, 'fine for a cache: the database still has the truth', 'mid ok'); R.t(380, 320, 'not fine as the only copy of payments or bookings', 'mid bad'); }
+  ];
+  async function p3Async(run) { R.clear(); S3[1]();
+    let p = K.pill(R.L, 'SET patient:42'); await K.move(p, [130, 140], [570, 70], 800, run); p.remove();
+    p = K.pill(R.L, 'OK', 'ok'); await K.move(p, [570, 75], [130, 155], 700, run); p.remove();
+    p = K.pill(R.L, 'copy'); await K.move(p, [640, 92], [640, 205], 700, run); p.remove(); }
+  async function p3Crash(run) { R.clear(); cluster(); await K.sleep(400, run); R.clear(); S3[2](); for (const x of [260, 450]) { const p = K.pill(R.L, 'PING', 'bad'); await K.move(p, [x + 70, 60], [570, 60], 500, run); p.remove(); } }
+  K.story({ root: $('s3'), show: i => { R.clear(); S3[i](); }, tipLabel: 'Interview tip', steps: [
+    { title: 'Give every primary a replica', text: 'A <b>primary</b> takes the reads and writes for its slots. A <b>replica</b> on another machine keeps a copy of everything it has. Like an Always On secondary.' },
+    { title: 'The copy is asynchronous', text: 'The primary answers <b>OK</b> to the app first and sends the change to its replica just after. That keeps writes fast, but leaves a tiny window where only the primary has the data.', play: p3Async },
+    { title: 'A primary crashes', text: 'Nodes constantly ping each other over a separate "cluster bus". When primary C dies, its pings go unanswered. For now, keys in C\'s slots (like <span class="mono">patient:42</span>) can\'t be served.', play: p3Crash },
+    { title: 'The others agree it\'s down', text: 'Once C has been silent longer than <span class="mono">cluster-node-timeout</span>, a <b>majority of primaries</b> mark it as failing. In the real run that took 4.8 s with a 3 s timeout.' },
+    { title: 'The replica is promoted', text: 'C′ asks the other primaries for votes, wins the election and becomes the primary for C\'s slots. Clients learn the new address (MOVED again) and <span class="mono">patient:42</span> is readable 5.7 s after the crash.', tip: 'With the default 15 s timeout, say "roughly 15–20 seconds of unavailability for those slots".' },
+    { title: 'The catch: a few writes can be lost', text: 'Anything C had said OK to but not yet copied never reached C′. For a cache that\'s fine, because the database is the source of truth. It\'s why Redis Cluster isn\'t the only home for data you can\'t lose.' }
+  ] });
+
+  /* ================= Playground ================= */
+  const pg = $('pgSvg'); arrowDefs(pg); const G = mk(pg);
+  const st = { size: '3', map: 'fresh', crashed: null };
+  const ADDR = { A: '127.0.0.1:7000', B: '127.0.0.1:7001', C: '127.0.0.1:7002', D: '127.0.0.1:7006' };
+  $('pgChips').innerHTML = ['patient:42', 'patient:4', 'session:abc', '{patient:42}:visits', 'price:7'].map(k => `<button class="chip-btn" type="button" data-k="${k}">${k}</button>`).join('');
+  function render() {
+    const key = $('pgKey').value || '';
+    G.clear();
+    const map = st.size === '4' ? MAP4 : MAP3, names = st.size === '4' ? ['A', 'B', 'C', 'D'] : ['A', 'B', 'C'];
+    if (!key) { $('pgOut').innerHTML = 'Type a key.'; return; }
+    const part = hashPart(key), c = crc16(part), slot = c % 16384, owner = ownerOf(slot, map);
+    const staleOwner = ownerOf(slot, MAP3), guess = st.map === 'stale' && st.size === '4' ? staleOwner : owner;
+    // bar
+    map.forEach(([n, a, b]) => { const x = 40 + a / 16384 * 680, w = (b - a + 1) / 16384 * 680; K.el('rect', { x, y: 30, width: Math.max(w - 1.5, 1), height: 24, fill: TONE[n], opacity: .7 }, G.L); if (w > 70) G.t(x + w / 2, 46, `${n} ${a}–${b}`, 'mid'); });
+    const mx = 40 + slot / 16384 * 680; G.plain([[mx, 20], [mx, 62]], 'hot'); G.t(mx, 16, 'slot ' + slot, 'mid acc halo');
+    // nodes
+    const gap = 680 / names.length;
+    const pos = {}; names.forEach((n, i) => { const x = 40 + gap * i + gap / 2; pos[n] = x;
+      const dead = st.crashed === n, isOwner = n === owner;
+      const b = G.box(x - 65, 120, 130, 50, dead ? 'bad rz-dead' : isOwner ? 'hot' : ''); if (!dead && !isOwner) b.style.stroke = TONE[n];
+      G.t(x, 142, dead ? `node ${n} ✕` : `node ${n}`, 'mid b' + (dead ? ' bad' : '')); G.t(x, 160, ADDR[n].replace('127.0.0.1', 'local'), 'mid muted');
+      const promoted = st.crashed === n;
+      const r = G.box(x - 55, 215, 110, 40, promoted ? 'ok' : ''); G.t(x, 240, promoted ? `${n}′ PRIMARY` : `replica ${n}′`, 'mid' + (promoted ? ' ok' : ' muted'));
+    });
+    G.plain([[mx, 62], [pos[owner], 118]], 'hot');
+    let out = `<b>${key}</b>` + (part !== key ? ` → hash tag: only <code>${part}</code> is hashed` : '') + ` → CRC16 = ${c} → <b>slot ${slot}</b> → owned by <b>node ${owner}</b> (${ADDR[owner]}).`;
+    if (guess !== owner) out += `<br>The app's <b>stale</b> map says node ${guess}, so it asks there first and gets <code>MOVED ${slot} ${ADDR[owner]}</code>. It retries on ${owner} and refreshes its map.`;
+    else if (st.map === 'stale' && st.size === '4') out += `<br>The stale map still has this slot on node ${owner}, so no redirect is needed: only keys in moved slots get MOVED.`;
+    if (st.crashed) out += st.crashed === owner ? `<br><b class="bad-text">Node ${owner} crashed.</b> Keys in its slots are unavailable until replica ${owner}′ is promoted (5.7 s in the real run with a 3 s timeout; ~15–20 s with the default 15 s).` + (crashDone ? ` <b class="ok-text">${owner}′ is now primary and serves slot ${slot}.</b> Writes ${owner} hadn't copied yet are lost.` : '') : `<br>Node ${st.crashed} crashed, but this key lives on ${owner}, so it's unaffected.`;
+    $('pgOut').innerHTML = out;
+  }
+  let crashDone = false, crashTimer;
+  $('pgKey').addEventListener('input', render);
+  $('pgChips').addEventListener('click', e => { const b = e.target.closest('button[data-k]'); if (!b) return; $('pgKey').value = b.dataset.k; render(); });
+  K.seg($('pgSize'), v => { st.size = v; st.crashed = null; render(); });
+  K.seg($('pgMap'), v => { st.map = v; render(); });
+  $('pgCrash').addEventListener('click', () => {
+    const key = $('pgKey').value || 'patient:42', map = st.size === '4' ? MAP4 : MAP3;
+    st.crashed = ownerOf(slotOf(key), map); crashDone = false; clearTimeout(crashTimer); render();
+    crashTimer = setTimeout(() => { crashDone = true; render(); }, 1800);
+  });
+  $('pgReset').addEventListener('click', () => { st.crashed = null; crashDone = false; clearTimeout(crashTimer); render(); });
+  render();
+
+  /* ================= .NET + Test ================= */
+  K.codeCard($('dotnet'), { file: 'Program.cs (StackExchange.Redis, illustrative)', lang: 'cs', marks: { 1: 'hot', 5: 'ok' }, code:
+`var mux = await ConnectionMultiplexer.ConnectAsync("cache-1:7000,cache-2:7001,cache-3:7002");
+var db  = mux.GetDatabase();
+// the client downloads the slot map, computes each key's slot itself
+// and talks straight to the right node; it follows MOVED for you
+await db.StringSetAsync("patient:42", json, TimeSpan.FromMinutes(10));
+var cached = await db.StringGetAsync("patient:42");` });
+
+  const O = ['Key', 'Node', 'Hash slot', 'Slot map', 'MOVED', 'Hash tag', 'Replica', 'Failover'];
+  SD.page({ track: 'hld', drill: { opts: O, items: [
+    { q: 'The name <span class="mono">appointment:1001</span> you store a value under.', a: O[0], why: 'A key is the name; the value is what\'s stored under it.' },
+    { q: 'One running <span class="mono">redis-server</span> process at <span class="mono">cache-2:7001</span>.', a: O[1], why: 'A node is one running Redis server with its own address.' },
+    { q: 'The number 0–16383 that <span class="mono">CRC16(key) mod 16384</span> gives you.', a: O[2], why: 'Every key belongs to exactly one of the 16,384 hash slots.' },
+    { q: 'The table a client keeps of which node owns slots 0–5460, 5461–10922 and so on.', a: O[3], why: 'Clients route requests themselves using the slot map.' },
+    { q: 'A node answers <span class="mono">MOVED 13565 127.0.0.1:7002</span>.', a: O[4], why: 'You asked the wrong node; retry at that address and update your map.' },
+    { q: 'Writing <span class="mono">{order:9}:lines</span> and <span class="mono">{order:9}:total</span> so both land in one slot.', a: O[5], why: 'Only the part in braces is hashed.' },
+    { q: 'A second machine that keeps a copy of everything primary B has.', a: O[6], why: 'A replica copies its primary asynchronously.' },
+    { q: 'Primary B stops answering; B′ wins a vote and takes over B\'s slots.', a: O[7], why: 'Failover: a replica is promoted when its primary is marked failing.' }
+  ] } });
+})();
+</script>
+</body>
+</html>

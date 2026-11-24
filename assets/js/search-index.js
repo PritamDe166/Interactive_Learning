@@ -137,6 +137,14 @@ window.SEARCH_INDEX = [
 "w": "Three layers sit between users and your code. Reverse proxy : protects and optimises traffic for a backend. Load balancer : spreads traffic across healthy instances. API gateway : applies API rules (auth, rate limits, routing) before a service is reached. Real products often do more than one of these. 1 Learn: what each layer adds Each layer adds capabilities Reverse proxy Load balancer API gateway Follow a request through production 2 Compare: proxies, L4 vs L7, gateway patterns and HA Forward "
 },
 {
+"t": "Redis from Zero: Keys, Nodes, Slots and Replicas",
+"s": "System Design",
+"k": "HLD",
+"h": "system-design/hld/redis-cluster-explained.html",
+"d": "Redis for beginners, built up step by step: what Redis is, what a key and a node are, why one node isn't enough, how Redis Cluster splits keys into 16,384 hash slots, and how replicas take over when a node crashes. Numbers from a real Redis cluster.",
+"w": "Redis is a program that keeps a big dictionary in memory and lets all your app servers read and write it over the network. A key is the name you store a value under ( patient:42 ). A node is one running Redis server. One node runs out of memory and is a single point of failure . Redis Cluster fixes both: split the keys across nodes, and keep a copy of each node. Every key belongs to one of 16,384 hash slots ; each node owns a range of slots. Adding a node moves slots, not every key. Every primar"
+},
+{
 "t": "Design: Scale a Web App to Millions",
 "s": "System Design",
 "k": "HLD",

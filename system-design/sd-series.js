@@ -27,6 +27,7 @@
       ['cache-write-strategies.html', 'H17 Write', 'Write strategies & invalidation'],
       ['cache-eviction.html', 'H18 Eviction', 'Eviction policies'],
       ['distributed-caching.html', 'H19 Distributed', 'Distributed caching'],
+      ['redis-cluster-explained.html', 'H19 Redis deep dive', 'Redis from zero: keys, nodes, slots, replicas'],
       ['cache-failure-modes.html', 'H20 Failures', 'Caching failure modes'],
       ['cdn-http-caching.html', 'H21 CDN & HTTP', 'CDN & HTTP caching'],
       ['caching-in-practice.html', 'Playbook', 'Caching in practice: the interview playbook'],

@@ -35,6 +35,7 @@ Interactive_explainations/
 │   │   ├── caching-patterns-atlas.html  (week-level pattern atlas, Kit.atlas)
 │   │   ├── caching-in-practice.html  (Week 3 playbook: worked design, sizing calculator, CDN cache-key lab, dashboard drill)
 │   │   ├── cache-*.html, distributed-caching.html, cdn-http-caching.html  (Week 3 topic pages)
+│   │   ├── redis-cluster-explained.html  (H19 deep dive for beginners: keys, nodes, hash slots, failover; pocket-cluster playground)
 │   │   └── caching-flows.js  (shared caching cards and quiz scenarios)
 │   └── lld/                        # low-level design
 │       ├── index.html              # L1–L67 roadmap (same numbering as Notion)
