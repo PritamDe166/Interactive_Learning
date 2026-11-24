@@ -192,6 +192,8 @@
       <li><span class="if">Key contains <span class="mono">{…}</span> with text inside</span><span class="arrow">→</span><span class="then">only that text is hashed, so related keys share a slot</span></li>
       <li><span class="if">Key contains empty <span class="mono">{}</span></span><span class="arrow">→</span><span class="then">ignored: the whole key is hashed</span></li>
       <li><span class="if">"Why not GetHashCode()?"</span><span class="arrow">→</span><span class="then">randomised per process in .NET; every client must compute the same slot</span></li>
+      <li><span class="if">"Only 16,384 slots: how do a million keys fit?"</span><span class="arrow">→</span><span class="then">a slot is a bucket: 1,000,000 keys ≈ 61 per slot; capacity comes from each node's memory</span></li>
+      <li><span class="if">Every key tagged the same (<span class="mono">{patients}:1</span> …)</span><span class="arrow">→</span><span class="then">one slot, one node: tag per entity, never one tag for everything</span></li>
       <li><span class="if">"Why 16,384?"</span><span class="arrow">→</span><span class="then">2¹⁴: the slot bitmap nodes gossip is 2 KB; plenty for ~1,000 primaries</span></li>
     </ul>
     </div>
@@ -204,6 +206,8 @@
           <tr><td class="mono">CLUSTER KEYSLOT patient:42</td><td class="mono">13565</td><td>CRC16 29949, low 14 bits</td></tr>
           <tr><td class="mono">CLUSTER KEYSLOT patient:43<br>CLUSTER KEYSLOT Patient:42</td><td class="mono">9436<br>3568</td><td>one character changes the slot completely</td></tr>
           <tr><td class="mono">CLUSTER KEYSLOT {patient:42}:visits</td><td class="mono">13565</td><td>hash tag: only <span class="mono">patient:42</span> is hashed</td></tr>
+          <tr><td class="mono">CLUSTER KEYSLOT patient:49162<br>CLUSTER KEYSLOT patient:58123</td><td class="mono">13565<br>13565</td><td>different keys, same slot as patient:42 (a slot holds many keys)</td></tr>
+          <tr><td class="mono">CLUSTER KEYSLOT {patients}:1<br>CLUSTER KEYSLOT {patients}:999999</td><td class="mono">9854<br>9854</td><td>same tag on every key: all in one slot</td></tr>
           <tr><td class="mono">CLUSTER KEYSLOT a{}b</td><td class="mono">13694</td><td>empty braces: the whole key is hashed</td></tr>
           <tr><td class="mono">"patient:42".GetHashCode() (.NET 10, 3 runs)</td><td class="mono">-794386515<br>1920957983<br>591493584</td><td>randomised per process, so no use for routing</td></tr>
         </tbody>
@@ -231,12 +235,18 @@
         <div class="ans"><p>.NET randomises string hash codes per process, so the same key gives different numbers on different servers and after every restart. Every client must compute the <b>same</b> slot, so Redis defines a fixed function: CRC16.</p></div></details>
       <details><summary>What do <code>{order:9}:lines</code> and <code>a{}b</code> hash?<span class="go">Show answer</span></summary>
         <div class="ans"><p>The first hashes only <code>order:9</code>, so it shares a slot with every other <code>{order:9}</code> key. The second has empty braces, which are ignored, so the whole key <code>a{}b</code> is hashed (slot 13694).</p></div></details>
+      <details><summary>There are only 16,384 slots. How can you store 1,000,000 patients?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>A slot is a bucket, not one record. One million keys is about <b>61 keys per slot</b> (41 to 80 in a real count), each still a separate key. What limits storage is each node's memory; add primaries and move slots to them.</p></div></details>
+      <details><summary>Someone names keys <code>{patients}:1</code> … <code>{patients}:1000000</code>. What goes wrong?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>Every key hashes only <code>patients</code>, so all of them land in <b>slot 9854</b> on one node. That node fills up and takes all the traffic. Tag per entity (<code>{patient:42}:…</code>), not one tag for everything.</p></div></details>
+      <details><summary>Why do 1,000,000 patient keys split almost exactly into thirds on 3 nodes?<span class="go">Show answer</span></summary>
+        <div class="ans"><p>CRC16 scatters the keys over all 16,384 slots fairly evenly, and each node owns about a third of the slots. A real count gave 333,253 / 333,420 / 333,327.</p></div></details>
     </div>
   </section>
 
   <nav id="prevnext"></nav>
 
-  <footer>Sources: Redis documentation (Redis Cluster specification: key distribution model, hash tags, CRC16 reference implementation). Slot numbers are from <span class="mono">CLUSTER KEYSLOT</span> on a real Redis 7.0.15 node; the page's CRC16 matches it for every key tested. GetHashCode values are from three runs of a .NET 10.0.115 console app. The C# CRC16 below matches the page's function for every key tested.</footer>
+  <footer>Sources: Redis documentation (Redis Cluster specification: key distribution model, hash tags, CRC16 reference implementation). Slot numbers are from <span class="mono">CLUSTER KEYSLOT</span> on a real Redis 7.0.15 node; the per-slot and per-node counts for patient:1 … patient:1000000 use the same CRC16; the page's CRC16 matches it for every key tested. GetHashCode values are from three runs of a .NET 10.0.115 console app. The C# CRC16 below matches the page's function for every key tested.</footer>
 </div>
 
 <script>
@@ -315,9 +325,17 @@
       K3.forEach((k, i) => { const c = crcSteps(k).reg.slice(-1)[0], y = 46 + i * 66; H.t(20, y + 20, k, 'b'); drawBitsSmall(c, y, i ? C42 : undefined); H.t(740, y + 20, 'slot ' + (c % 16384), 'acc').style.textAnchor = 'end'; });
       const d = [...bits16(C42)].filter((x, i) => x !== bits16(crcSteps('patient:43').reg.slice(-1)[0])[i]).length;
       H.t(380, 262, `42 → 43 flips ${d} of the 16 bits (red outlines)`, 'mid acc'); H.t(380, 288, 'the slot jumps by thousands, so neighbouring IDs don\'t pile onto one node', 'mid muted'); },
+    () => { MAP3.forEach(([n, a, b]) => { const x = 40 + a / 16384 * 680, w = (b - a + 1) / 16384 * 680; K.el('rect', { x, y: 34, width: w - 1.5, height: 22, fill: TONE[n], opacity: .55 }, H.L); H.t(x + w / 2, 49, `node ${n}: ${a}–${b}`, 'mid'); });
+      const mx = 40 + 13565 / 16384 * 680; H.plain([[mx, 26], [mx, 64]], 'hot'); H.t(mx, 20, 'slot 13565', 'mid acc halo'); H.plain([[mx, 64], [560, 96]], 'hot dash'); H.plain([[mx, 64], [200, 96]], 'hot dash');
+      H.box(200, 96, 360, 122, 'hot'); H.t(380, 116, 'inside slot 13565 (patient:1 … patient:1000000)', 'mid b');
+      [['patient:42', 'patient:49162'], ['patient:58123', 'patient:64877'], ['patient:75836', '… and 59 more']].forEach(([a, b], i) => { H.t(225, 142 + i * 22, a, 'acc'); H.t(395, 142 + i * 22, b, i === 2 ? 'muted' : 'acc'); });
+      H.t(380, 208, '64 separate keys share this one slot', 'mid ok');
+      H.t(380, 248, '1,000,000 keys ÷ 16,384 slots ≈ 61 keys per slot (fewest 41, most 80)', 'mid b'); H.t(380, 272, 'per node: 333,253 · 333,420 · 333,327 keys', 'mid acc');
+      H.t(380, 304, 'the real limit is each node\'s memory: add primaries and give them some slots', 'mid muted'); },
     () => { drawBytes(H, '{patient:42}:visits', 40); H.t(380, 28, 'hash tag: only the part inside { } is fed to CRC16', 'mid muted');
       H.t(380, 130, 'CRC16("patient:42") → slot 13565, same as the plain key', 'mid acc'); H.t(380, 160, 'so {patient:42}:profile and {patient:42}:visits share a slot', 'mid b');
-      H.t(380, 210, 'empty braces don\'t count: a{}b hashes the whole key → slot 13694 (real run)', 'mid muted'); },
+      H.t(380, 210, 'empty braces don\'t count: a{}b hashes the whole key → slot 13694 (real run)', 'mid muted');
+      H.t(380, 254, 'trap: {patients}:1 … {patients}:999999 all hash "patients" → slot 9854', 'mid bad'); H.t(380, 278, 'one slot, one node: a million keys that can\'t spread', 'mid bad'); },
     () => { H.t(380, 34, '"patient:42".GetHashCode() in .NET 10, three runs of the same program:', 'mid b');
       ['-794386515', '1920957983', '591493584'].forEach((v, i) => H.t(380, 64 + i * 22, `run ${i + 1}:  ${v}`, 'mid bad'));
       H.t(380, 150, 'CRC16("patient:42") in Redis, Java, Python, Node or C#:', 'mid b'); H.t(380, 176, 'always 29949  →  slot 13565', 'mid ok');
@@ -333,7 +351,8 @@
     { title: 'Sixteen bits', text: ['29949 written in binary is 0111 0100 1111 1101.', '16 bits give 65,536 possible values (0 to 65,535).', 'Every byte affects the result, so changing any character changes these bits.'] },
     { title: 'mod 16384 = keep the last 14 bits', text: ['16,384 is 2¹⁴, so dividing by it and keeping the remainder just drops the top 2 bits.', '29949 − 16384 = <b>13565</b>: patient:42 lives in slot 13565.', 'Real Redis agrees: <span class="mono">CLUSTER KEYSLOT patient:42</span> returns 13565.'], tip: '"Slot = CRC16 of the key (or its hash tag), keep the low 14 bits, so 0 to 16383."' },
     { title: 'Tiny change, very different slot', text: ['patient:43 and Patient:42 each differ from patient:42 by one character.', 'Only a few bits change, but the slot still jumps by thousands: 13565, 9436, 3568.', 'Across many keys the slots come out evenly spread: 100,000 patient keys split almost exactly into thirds.'] },
-    { title: 'Hash tags change what is hashed', text: ['If a key has {…} with something inside, only that part goes into CRC16.', '{patient:42}:visits hashes "patient:42", so it shares slot 13565 with the patient\'s other keys.', 'Empty braces don\'t count: a{}b hashes the whole key.'] },
+    { title: 'A slot holds many keys', text: ['16,384 is the number of <b>buckets</b>, not a limit on keys.', 'With patient:1 … patient:1000000, each slot holds about 61 keys (41 to 80); slot 13565 holds 64, patient:42 among them.', 'Inside the slot each key is still its own entry, found by its full name.', 'What limits storage is each node\'s memory: add primaries and move some slots to them.'], tip: '"Slots are buckets: a million keys is about 61 per slot. Capacity comes from nodes, not slots."' },
+    { title: 'Hash tags change what is hashed', text: ['If a key has {…} with something inside, only that part goes into CRC16.', '{patient:42}:visits hashes "patient:42", so it shares slot 13565 with the patient\'s other keys.', 'Empty braces don\'t count: a{}b hashes the whole key.', 'Trap: give every key the <b>same</b> tag ({patients}:1, {patients}:2 …) and they all land in one slot on one node.'] },
     { title: 'Why not .NET\'s GetHashCode()?', text: ['.NET randomises string hash codes per process, so the same key gives a different number every run (real output in the diagram).', 'That\'s fine inside one process, but useless when many servers must agree.', 'CRC16 is a fixed formula: every client in every language gets 29949.'] }
   ] });
 
@@ -393,7 +412,8 @@ int slot = Crc16(Encoding.UTF8.GetBytes("patient:42")) & 0x3FFF;   // 13565` });
     { q: 'A 16-bit register folds each byte in, ending at 29949.', a: O[1], why: 'CRC16 (XMODEM) turns the bytes into one number 0–65,535.' },
     { q: '29949 becomes 13565.', a: O[2], why: 'mod 16384 keeps the lowest 14 bits; that is the slot.' },
     { q: '<span class="mono">{patient:42}:visits</span> lands in the same slot as patient:42.', a: O[3], why: 'Only the part inside the braces is hashed.' },
-    { q: 'Gives a different number for the same key every time the app restarts.', a: O[4], why: '.NET randomises string hash codes per process.' }
+    { q: 'Gives a different number for the same key every time the app restarts.', a: O[4], why: '.NET randomises string hash codes per process.' },
+    { q: '<span class="mono">{patients}:1</span> and <span class="mono">{patients}:999999</span> both land in slot 9854.', a: O[3], why: 'Same tag, so the same text is hashed: one slot for all of them.' }
   ] } });
 })();
 </script>
