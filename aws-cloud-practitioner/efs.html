@@ -96,7 +96,7 @@
       <li><b>Amazon EFS</b> (Elastic File System) is a managed <b>NFS network file system</b>: one shared folder for many instances.</li>
       <li><b>Hundreds of Linux instances</b> in <b>different AZs</b> mount it at once and see the same files.</li>
       <li><b>No capacity planning</b>: it grows and shrinks, and you pay per GB actually stored (pricier per GB than EBS).</li>
-      <li>A <b>lifecycle policy</b> moves cold files to <b>EFS-IA</b> (up to 95% cheaper) and <b>Archive</b>, invisibly to apps.</li>
+      <li>A <b>lifecycle policy</b> moves cold files (files nobody has opened for a while) to <b>EFS-IA</b> (Infrequent Access, up to 95% cheaper) and to <b>Archive</b>. Apps do not notice the move.</li>
     </ul>
   </header>
   <div class="aws-trail"></div>
@@ -122,12 +122,12 @@
     <h2 id="rmH">Points to remember</h2>
     <div class="remember"><ol>
       <li><b>EFS = managed NFS</b> (network file system) that can be mounted on <b>hundreds of EC2 instances at the same time</b>.</li>
-      <li>Works <b>across multiple AZs</b> in a Region (Regional file system), through one <b>mount target</b> per AZ protected by a <b>security group</b> (NFS port 2049).</li>
-      <li><b>Linux instances only</b> (POSIX/NFS). Windows file shares → <b>FSx for Windows File Server</b>.</li>
+      <li>It works <b>across multiple AZs</b> in a Region (a Regional file system). Each AZ has one <b>mount target</b> (a network endpoint). Each mount target is protected by a <b>security group</b> that allows NFS on port 2049.</li>
+      <li><b>Linux instances only</b> (EFS uses NFS and POSIX, the Linux/Unix file standard). Windows file shares → <b>FSx for Windows File Server</b>.</li>
       <li><b>Highly available, scalable</b>, <b>pay per use</b>: no capacity to provision; 20 GB stored = 20 GB billed.</li>
       <li>Costs roughly <b>3× an EBS gp2 volume</b> per GB, the price of being shared and multi-AZ.</li>
-      <li><b>EFS vs EBS</b>: EBS = one instance, one AZ; moving it across AZs makes a <b>copy</b> via snapshot. EFS = <b>shared, live</b>, already in every AZ.</li>
-      <li>Storage classes: <b>Standard</b> (frequent), <b>Infrequent Access (EFS-IA)</b> up to <b>95% cheaper</b>, <b>Archive</b> up to 50% cheaper than IA (rarely read).</li>
+      <li><b>EFS vs EBS</b>: an EBS volume serves one instance in one AZ; to move it to another AZ you make a <b>copy</b> with a snapshot. EFS is shared and live, and is already in every AZ.</li>
+      <li>Storage classes: <b>Standard</b> is for files used often. <b>Infrequent Access (EFS-IA)</b> is up to <b>95% cheaper</b> than Standard. <b>Archive</b> is for files rarely read and is up to 50% cheaper than IA.</li>
       <li>A <b>lifecycle policy</b> (e.g. "not accessed for 60 days → IA") moves files automatically and moves them back on access. <b>Transparent to applications</b>; IA/Archive charge per GB read.</li>
       <li><b>One Zone</b> classes also exist: cheaper, data in a single AZ (dev/test, or data you can recreate).</li>
     </ol></div>
@@ -200,7 +200,7 @@
     </div>
     <div class="notes" style="margin-top:14px">
       <div class="note"><p><b>EFS-IA is "up to 95%" cheaper</b> than Standard (older material says 92%). Source: AWS EFS storage classes page.</p></div>
-      <div class="note"><p><b>EFS Archive</b> (since Nov 2023): for files read a few times a year, up to 50% cheaper than IA; Regional file systems only. And <b>One Zone</b> storage classes.</p></div>
+      <div class="note"><p><b>EFS Archive</b> (since Nov 2023) is for files read a few times a year. It is up to 50% cheaper than IA and is available only on Regional file systems. EFS also offers <b>One Zone</b> storage classes.</p></div>
     </div>
   </section>
 

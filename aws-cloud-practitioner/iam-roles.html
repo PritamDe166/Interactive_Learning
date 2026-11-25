@@ -82,10 +82,10 @@
     <p class="crumbs">AWS CLF-C02 / IAM / Domain 2 Security &amp; Compliance (Task 2.3)</p>
     <h1>IAM roles for AWS services</h1>
     <ul class="lede">
-      <li>An <b>IAM role</b> is an identity with permissions but <b>no password and no long-term keys</b>. Something <b>assumes</b> it and gets <b>temporary credentials</b>.</li>
+      <li>An <b>IAM role</b> is an identity with permissions but <b>no password and no long-term keys</b>. A user, application or AWS service can assume the role (take it on for a while) and gets <b>temporary credentials</b>.</li>
       <li>AWS services use roles to act on your behalf: an <b>EC2 instance</b> reading S3, a <b>Lambda</b> function writing to DynamoDB, <b>CloudFormation</b> creating resources.</li>
       <li>A role has two policies: a <b>trust policy</b> (who may assume it) and <b>permissions policies</b> (what it may do).</li>
-      <li>Roles also give <b>another AWS account</b> or <b>federated users</b> (company directory, IAM Identity Center) access without creating IAM users.</li>
+      <li>Roles also give access to <b>another AWS account</b>, or to <b>federated users</b> (people who sign in through a company directory or IAM Identity Center), without creating IAM users.</li>
     </ul>
   </header>
   <div class="aws-trail"></div>
@@ -111,7 +111,7 @@
   <section aria-labelledby="rmH">
     <h2 id="rmH">Points to remember</h2>
     <div class="remember"><ol>
-      <li>A <b>role</b> = permissions without long-term credentials. Whoever <b>assumes</b> it receives <b>temporary credentials</b> (key ID + secret + session token) from <b>AWS STS</b> that expire automatically.</li>
+      <li>A <b>role</b> is a set of permissions without long-term credentials. Whoever <b>assumes</b> it receives <b>temporary credentials</b> (key ID, secret and session token) from <b>AWS STS</b> (Security Token Service). These credentials expire automatically.</li>
       <li><b>User vs role</b>: a user is one person/workload with long-term credentials; a role is <b>assumed</b> by whoever is trusted, for a session.</li>
       <li><b>Trust policy</b> = who can assume (the "trusted entity": an AWS service, another account, a federated user). <b>Permissions policy</b> = what the role can do. A role needs <b>both</b>.</li>
       <li>Common service roles: <b>EC2 instance role</b> (attached via an instance profile), <b>Lambda execution role</b>, <b>CloudFormation</b> service role.</li>

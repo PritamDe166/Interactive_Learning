@@ -4,7 +4,7 @@ SPEC = {
  "desc": "Python fundamentals: if/elif/else, for loops over sequences and range(), while loops, break, continue and the loop else clause, stepped line by line.",
  "lede": [
   "<b>if / elif / else</b> checks conditions top to bottom and runs <b>only the first</b> branch that is true.",
-  "A <b>for</b> loop takes items one at a time from any sequence (list, string, <span class=\"mono\">range()</span>); a <b>while</b> loop repeats as long as a condition stays true.",
+  "A <b>for</b> loop takes items one at a time from any sequence (list, string, <span class=\\\"mono\\\">range()</span>). A <b>while</b> loop repeats as long as a condition stays true.",
   "<b>continue</b> skips to the next item; <b>break</b> leaves the loop completely.",
   "Indentation is the syntax: the indented lines under a colon <b>are</b> the block."
  ],
@@ -30,8 +30,8 @@ while n > 0:
   {"at": {"after": 5, "n": 1}, "title": "45: the fail branch", "text": "Second item: <span class=\"mono\">score = 45</span>. The condition is true, so the indented block runs and prints <span class=\"mono\">1 fail</span>."},
   {"at": {"after": 6, "n": 1}, "title": "continue skips the rest", "text": "<span class=\"mono\">continue</span> jumps straight back to the <span class=\"mono\">for</span> line. <span class=\"mono\">passed += 1</span> does <b>not</b> run for 45.", "tip": "Use <span class=\"mono\">break</span> instead and the loop would stop completely: 91 and 60 would never be looked at."},
   {"at": {"after": 8, "n": 1}, "title": "91: a second if", "text": "These are two separate <span class=\"mono\">if</span> statements, not if/elif, so after the first check fails Python still checks <span class=\"mono\">score &gt;= 90</span>, which is true: <span class=\"mono\">2 top</span>."},
-  {"at": {"after": 10}, "title": "The loop ends by itself", "text": "After the last item (60) the sequence is used up and execution continues after the loop. Three scores passed. <b>i</b> and <b>score</b> still exist: Python has no block scope."},
-  {"at": {"after": 13, "n": 1}, "title": "while checks before every round", "text": "<span class=\"mono\">while n &gt; 0</span> is tested, it's true, the body prints <span class=\"mono\">T-minus 2</span>…"},
+  {"at": {"after": 10}, "title": "The loop ends by itself", "text": "After the last item (60) the sequence is used up and execution continues after the loop. Three scores passed. <b>i</b> and <b>score</b> still exist after the loop. In Python a loop does not create its own scope (a separate area for names), so its names stay."},
+  {"at": {"after": 13, "n": 1}, "title": "while checks before every round", "text": "Python tests <span class=\\\"mono\\\">while n &gt; 0</span>. It is true, so the body runs and prints <span class=\\\"mono\\\">T-minus 2</span>…"},
   {"at": "end", "title": "…until the condition turns false", "text": "<span class=\"mono\">n -= 1</span> moves toward the exit. When <span class=\"mono\">n</span> becomes 0 the test fails and the loop stops. Forget that line and the loop never ends."}
  ]},
  "walk_out": "1 fail / 2 top / passed: 3 / T-minus 2 / T-minus 1",
@@ -149,11 +149,11 @@ while n > 0:
  "ref_title": "Reference: truthiness and match",
  "ref_html": '''    <div class="two">
       <div class="card"><div class="label">Falsy values (everything else is truthy)</div><p class="mono" style="margin:6px 0 0">False · None · 0 · 0.0 · "" · [] · () · {} · set() · range(0)</p><p class="muted" style="margin:8px 0 0">So <span class="mono">if items:</span> means "if the list isn't empty".</p></div>
-      <div class="card"><div class="label">match / case (Python 3.10+)</div><pre class="codeblock" style="min-height:0;margin:6px 0 0"><span class="ln"><span class="k">match</span> status:</span><span class="ln">    <span class="k">case</span> <span class="s">"urgent"</span>: ...</span><span class="ln">    <span class="k">case</span> <span class="s">"ok"</span> | <span class="s">"done"</span>: ...</span><span class="ln">    <span class="k">case</span> _: ...</span></pre><p class="muted" style="margin:8px 0 0">Like a switch, but it can also match shapes (tuples, dicts, classes). No fall-through.</p></div>
+      <div class="card"><div class="label">match / case (Python 3.10+)</div><pre class="codeblock" style="min-height:0;margin:6px 0 0"><span class="ln"><span class="k">match</span> status:</span><span class="ln">    <span class="k">case</span> <span class="s">"urgent"</span>: ...</span><span class="ln">    <span class="k">case</span> <span class="s">"ok"</span> | <span class="s">"done"</span>: ...</span><span class="ln">    <span class="k">case</span> _: ...</span></pre><p class="muted" style="margin:8px 0 0">It works like a switch, but it can also match the shape of a value (tuples, dicts, classes). There is no fall-through: only the first matching case runs.</p></div>
     </div>''',
  "notes": [
-  ["Corrected", "<b>Redundant <span class=\"mono\">elif</span> checks.</b> After <span class=\"mono\">if num &lt; 60</span> fails, the next <span class=\"mono\">elif</span> already knows num ≥ 60, so <span class=\"mono\">num &gt;= 60 and</span> is redundant. Write <span class=\"mono\">elif num &lt; 70:</span>, or <span class=\"mono\">elif 60 &lt;= num &lt; 70:</span> if you want it explicit."],
-  ["Added", "<b>Validate the input range:</b> the same exercise prints \"Grade A\" for 150 and \"Failed\" for -5. Check <span class=\"mono\">0 &lt;= num &lt;= 100</span> first."],
+  ["Corrected", "<b>Redundant <span class=\"mono\">elif</span> checks.</b> After <span class=\\\"mono\\\">if num &lt; 60</span> fails, Python already knows num ≥ 60 when it reaches the next <span class=\\\"mono\\\">elif</span>. So writing <span class=\\\"mono\\\">num &gt;= 60 and</span> ... in that elif is redundant (not needed). Write <span class=\"mono\">elif num &lt; 70:</span>, or <span class=\"mono\">elif 60 &lt;= num &lt; 70:</span> if you want it explicit."],
+  ["Added", "<b>Validate the input range:</b> the grading example prints \"Grade A\" for 150 and \"Failed\" for -5. Check <span class=\"mono\">0 &lt;= num &lt;= 100</span> first."],
   ["Added", "<b>Also covered here:</b> <span class=\"mono\">break</span>, <span class=\"mono\">continue</span>, the loop <span class=\"mono\">else</span>, <span class=\"mono\">enumerate()</span> and <span class=\"mono\">match</span>."],
   ["Added", "<b>Sum loops:</b> <span class=\"mono\">current_sum = current_sum + i</span> works, but Python has <span class=\"mono\">sum(list_of_numbers)</span> and <span class=\"mono\">sum(range(1, n + 1))</span>. Write the loop to learn, use the built-in in real code."]
  ],

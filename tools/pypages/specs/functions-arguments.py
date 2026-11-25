@@ -29,7 +29,7 @@ SPEC = {
  "desc": "Python fundamentals: def and return, the call stack, positional and keyword arguments, defaults, *args and **kwargs, returning several values, and the mutable default trap.",
  "lede": [
   "<span class=\"mono\">def</span> creates a <b>function object</b> and a name for it. Calling it creates a fresh <b>frame</b> holding the parameters and local variables.",
-  "Arguments bind to parameters <b>by position</b>, then <b>by keyword</b>; anything not given falls back to its <b>default</b>.",
+  "Python matches arguments to parameters first <b>by position</b>, then <b>by keyword</b>. Any parameter you don't give uses its <b>default</b> value.",
   "<span class=\"mono\">*args</span> collects extra positional values into a <b>tuple</b>; <span class=\"mono\">**kwargs</span> collects extra keywords into a <b>dict</b>.",
   "<span class=\"mono\">return a, b</span> returns <b>one tuple</b>. No return means the function returns <span class=\"mono\">None</span>.",
   "Defaults are created <b>once</b>, when <span class=\"mono\">def</span> runs. A mutable default like <span class=\"mono\">[]</span> is shared between calls."
@@ -61,7 +61,7 @@ print(add_visit("x"), add_visit("y"))''',
   {"at": {"event": "call", "n": 3}, "title": "*fees and **info collect extras", "text": "After <span class=\"mono\">name</span> takes \"Asha\", the leftover positional values <b>400, 600</b> are packed into a <b>tuple</b> <span class=\"mono\">fees</span>. The unknown keyword <span class=\"mono\">city=\"Pune\"</span> goes into a <b>dict</b> <span class=\"mono\">info</span>."},
   {"at": 18, "title": "Returning several values = one tuple", "text": "<span class=\"mono\">return name, total, info</span> built a single tuple, and the caller unpacked it into three names. Your repo's <span class=\"mono\">calculator_func</span> does the same."},
   {"at": {"event": "return", "n": 4}, "title": "The mutable default trap", "text": "<span class=\"mono\">add_visit(\"x\")</span> appended to the default list, the one created at <span class=\"mono\">def</span> time. Watch the next call: it gets the <b>same</b> list, not a fresh one."},
-  {"at": "end", "title": "…both calls share one list", "text": "The second call returned the same list, now <span class=\"mono\">['x', 'y']</span>, so both printed values show both names. The fix: <span class=\"mono\">def add_visit(name, log=None):</span> then <span class=\"mono\">if log is None: log = []</span>.", "tip": "Linters flag this pattern (Ruff B006). Use None as the default for lists, dicts and sets."}
+  {"at": "end", "title": "…both calls share one list", "text": "The second call returned the same list, now <span class=\"mono\">['x', 'y']</span>, so both printed values show both names. The fix: <span class=\"mono\">def add_visit(name, log=None):</span> then <span class=\"mono\">if log is None: log = []</span>.", "tip": "Linters (tools that check code for common mistakes) flag this pattern (Ruff B006). Use None as the default for lists, dicts and sets."}
  ]},
  "walk_out": "1180.0 1050.0 Asha 1000 {'city': 'Pune'} / ['x', 'y'] ['x', 'y']",
  "puzzles": [
@@ -134,7 +134,7 @@ print(add_visit("x"), add_visit("y"))''',
  "ref_html": '''    <div class="card">
       <pre class="codeblock" style="min-height:0;margin:0"><span class="ln"><span class="k">def</span> f(pos_only, /, normal, default=<span class="n">1</span>, *args, kw_only, kw_default=<span class="n">2</span>, **kwargs):</span></pre>
       <ul class="cheat" style="margin-top:10px">
-        <li><span>before <span class="mono">/</span></span><span>positional only (3.8+); rarely needed in your own code</span></li>
+        <li><span>before <span class="mono">/</span></span><span>positional only (3.8+): callers can't pass these by name. Rarely needed in your own code</span></li>
         <li><span><span class="mono">normal</span>, <span class="mono">default=1</span></span><span>by position or keyword; defaults must come after non-defaults</span></li>
         <li><span><span class="mono">*args</span> or a bare <span class="mono">*</span></span><span>everything after it must be passed by keyword</span></li>
         <li><span><span class="mono">**kwargs</span></span><span>always last</span></li>
@@ -142,9 +142,9 @@ print(add_visit("x"), add_visit("y"))''',
       </ul>
     </div>''',
  "notes": [
-  ["Corrected", "<b>Boundary values.</b> A grading function that uses <span class=\"mono\">&gt;</span> returns the lower grade for exactly 80 and 60 (see puzzle 1). Use <span class=\"mono\">&gt;=</span> boundaries, and since <span class=\"mono\">elif</span> already excludes the first case, <span class=\"mono\">num &lt; 80 and</span> isn't needed."],
+  ["Corrected", "<b>Boundary values.</b> A grading function that uses <span class=\"mono\">&gt;</span> returns the lower grade for exactly 80 and 60 (see puzzle 1). Use <span class=\\\"mono\\\">&gt;=</span> at the boundaries. Because <span class=\\\"mono\\\">elif</span> already rules out the first case, the extra check <span class=\\\"mono\\\">num &lt; 80 and</span> ... isn't needed."],
   ["Corrected", "<b>Returning inside a loop.</b> A <span class=\"mono\">return</span> inside the <span class=\"mono\">for</span> loop ends the function after the first item, so only the first keyword is reported (puzzle 2)."],
-  ["Corrected", "<b>Annotations should match what's returned.</b> A function annotated <span class=\"mono\">-&gt; int</span> that returns four numbers should be <span class=\"mono\">-&gt; tuple[int, int, int, float]</span>. Also guard division: <span class=\"mono\">a / b</span> fails when b is 0, and averaging an empty list raises <span class=\"mono\">ZeroDivisionError</span>."],
+  ["Corrected", "<b>Annotations should match what's returned.</b> A function annotated <span class=\"mono\">-&gt; int</span> that returns four numbers should be <span class=\"mono\">-&gt; tuple[int, int, int, float]</span>. Also protect divisions: <span class=\\\"mono\\\">a / b</span> fails when b is 0. Averaging an empty list raises <span class=\\\"mono\\\">ZeroDivisionError</span>."],
   ["Updated", "<b><span class=\"mono\">Union[str, None]</span></b> is written <span class=\"mono\">str | None</span> since Python 3.10, with no import from <span class=\"mono\">typing</span>. More in Type hints."],
   ["Added", "<b>Mutable default arguments</b> are the classic Python function bug: the walkthrough's last two steps show it happening."]
  ],

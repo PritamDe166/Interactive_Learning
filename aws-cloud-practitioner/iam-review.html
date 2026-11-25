@@ -89,7 +89,7 @@
     <h1>IAM: review</h1>
     <ul class="lede">
       <li>IAM decides <b>who</b> gets in and <b>what</b> they can do, for every console click, CLI command and SDK call.</li>
-      <li>Identities: <b>root user</b> (one, locked away), <b>IAM users</b> (people), <b>groups</b> (sets of users), <b>roles</b> (assumed, temporary).</li>
+      <li>Identities: the <b>root user</b> (only one, kept safe and rarely used), <b>IAM users</b> (people), <b>groups</b> (sets of users), and <b>roles</b> (taken on for a while to get temporary credentials).</li>
       <li>Permissions come from <b>JSON policies</b>: default deny, explicit Deny wins, Allow grants.</li>
       <li>Keep it safe: <b>MFA</b>, password policy, least privilege, roles instead of keys, regular <b>audits</b>. That configuration is <b>your</b> responsibility.</li>
     </ul>
@@ -107,12 +107,12 @@
   <section aria-labelledby="sumH">
     <h2 id="sumH">Section summary</h2>
     <div class="sum-grid">
-      <div class="card"><h3>Users &amp; groups</h3><ul><li>IAM is global; authentication + authorization.</li><li>One user per person; groups contain users only, no nesting; a user can be in many groups.</li><li>Policies on groups are inherited; default deny; least privilege.</li></ul></div>
-      <div class="card"><h3>Root vs IAM user</h3><ul><li>Exactly one root user, full access, MFA, no access keys.</li><li>Root-only: close account, change account email/root password, restore locked-out admin, IAM billing access, S3 MFA Delete, RI Marketplace seller.</li><li>IAM users belong to one account.</li></ul></div>
-      <div class="card"><h3>Policies</h3><ul><li>Version 2012-10-17; Statement: Effect, Action, Resource, optional Sid, Condition.</li><li>Principal in resource-based policies.</li><li>Default deny → explicit Deny wins → Allow. Permissions add up.</li><li>AWS managed / customer managed / inline. SCPs and boundaries only limit.</li></ul></div>
-      <div class="card"><h3>Access methods</h3><ul><li>Console (password + MFA), CLI, SDK: same APIs, same IAM check.</li><li>Access key = key ID + secret; never commit; max two per user; rotate.</li><li>Prefer temporary credentials; <code>aws sts get-caller-identity</code>.</li><li>CloudShell: browser CLI as your identity, per-Region storage (out of exam scope).</li></ul></div>
+      <div class="card"><h3>Users &amp; groups</h3><ul><li>IAM is global. It handles authentication (who you are) and authorization (what you may do).</li><li>Create one user per person. Groups contain only users, not other groups. A user can be in many groups.</li><li>Policies on groups are inherited; default deny; least privilege.</li></ul></div>
+      <div class="card"><h3>Root vs IAM user</h3><ul><li>Exactly one root user, full access, MFA, no access keys.</li><li>Root-only tasks: close the account, change the account email or root password, restore an admin who is locked out, activate IAM access to billing, configure S3 MFA Delete, and register as a Reserved Instance (RI) Marketplace seller.</li><li>IAM users belong to one account.</li></ul></div>
+      <div class="card"><h3>Policies</h3><ul><li>Version 2012-10-17; Statement: Effect, Action, Resource, optional Sid, Condition.</li><li>Principal in resource-based policies.</li><li>Everything is denied by default. An explicit Deny always wins. Otherwise, an Allow grants access. Permissions add up.</li><li>AWS managed / customer managed / inline. SCPs and boundaries only limit.</li></ul></div>
+      <div class="card"><h3>Access methods</h3><ul><li>Console (password + MFA), CLI, SDK: same APIs, same IAM check.</li><li>An access key is a key ID plus a secret. Never commit it to Git. Each user can have at most two keys. Rotate them regularly.</li><li>Prefer temporary credentials; <code>aws sts get-caller-identity</code>.</li><li>CloudShell: browser CLI as your identity, per-Region storage (out of exam scope).</li></ul></div>
       <div class="card"><h3>Roles</h3><ul><li>No long-term credentials; assumed for temporary credentials from STS.</li><li>Trust policy (who) + permissions policy (what).</li><li>EC2 instance role, Lambda execution role, CloudFormation, cross-account, federation.</li></ul></div>
-      <div class="card"><h3>Tools &amp; best practices</h3><ul><li>Credential report: account-wide CSV of credential status.</li><li>Access Advisor: services used and when, per user/group/role/policy.</li><li>MFA, password policy, roles, key hygiene, Secrets Manager.</li><li>AWS runs IAM; you configure it.</li></ul></div>
+      <div class="card"><h3>Tools &amp; best practices</h3><ul><li>Credential report: account-wide CSV of credential status.</li><li>Access Advisor: services used and when, per user/group/role/policy.</li><li>Use MFA, a password policy and roles; take care of access keys (rotate them, delete unused ones); store secrets in Secrets Manager.</li><li>AWS runs IAM; you configure it.</li></ul></div>
     </div>
   </section>
 
@@ -143,7 +143,7 @@
           <tr><td>Trust policy vs permissions policy</td><td>Who can assume the role vs what it can do</td></tr>
           <tr><td>Credential report vs Access Advisor</td><td>Credential status for the account vs service usage for one entity</td></tr>
           <tr><td>IAM vs IAM Identity Center</td><td>Identities in one account vs single sign-on for people across accounts</td></tr>
-          <tr><td>SCP vs IAM policy</td><td>A guardrail that grants nothing vs a policy that grants permissions</td></tr>
+          <tr><td>SCP vs IAM policy</td><td>An SCP sets a limit and grants nothing; an IAM policy grants permissions.</td></tr>
           <tr><td>Root user vs admin IAM user</td><td>Unrestricted account owner vs day-to-day administrator</td></tr>
           <tr><td>Access key vs password</td><td>Programmatic credential (CLI/SDK) vs console credential</td></tr>
         </tbody>

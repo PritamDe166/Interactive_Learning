@@ -133,8 +133,8 @@
     <h1>How a Key Becomes a Hash Slot: CRC16 in Redis Cluster</h1>
     <ul class="lede">
       <li>Redis Cluster puts every key in one of <b>16,384 hash slots</b> with <span class="mono">CRC16(key) mod 16384</span>.</li>
-      <li><b>CRC16</b> reads the key's <b>bytes</b> and folds them into one <b>16-bit number</b> (0 to 65,535).</li>
-      <li><b>mod 16384</b> keeps the lowest <b>14 bits</b>: that number is the slot.</li>
+      <li><b>CRC16</b> reads the key's <b>bytes</b> and combines them into one <b>16-bit number</b> (0 to 65,535).</li>
+      <li><b>mod 16384</b> (divide by 16384 and keep the remainder) keeps the lowest <b>14 bits</b>: that number is the slot.</li>
       <li>Every client in every language gets the same slot, which is why Redis uses a fixed formula and not .NET's <span class="mono">GetHashCode()</span>.</li>
     </ul>
   </header>
@@ -194,7 +194,7 @@
       <li><span class="if">"Why not GetHashCode()?"</span><span class="arrow">→</span><span class="then">randomised per process in .NET; every client must compute the same slot</span></li>
       <li><span class="if">"Only 16,384 slots: how do a million keys fit?"</span><span class="arrow">→</span><span class="then">a slot is a bucket: 1,000,000 keys ≈ 61 per slot; capacity comes from each node's memory</span></li>
       <li><span class="if">Every key tagged the same (<span class="mono">{patients}:1</span> …)</span><span class="arrow">→</span><span class="then">one slot, one node: tag per entity, never one tag for everything</span></li>
-      <li><span class="if">"Why 16,384?"</span><span class="arrow">→</span><span class="then">2¹⁴: the slot bitmap nodes gossip is 2 KB; plenty for ~1,000 primaries</span></li>
+      <li><span class="if">"Why 16,384?"</span><span class="arrow">→</span>It is 2¹⁴. Nodes regularly send each other a bitmap (one bit per slot) of the slots they own, and at this size it is only 2 KB. That is plenty for ~1,000 primaries</li>
     </ul>
     </div>
     <div class="sub-block" aria-labelledby="refH">
@@ -347,7 +347,7 @@
       const L = H.L; const box = K.el('g', {}, L); K.el('rect', { x: 252, y: 112, width: 256, height: 52, class: 'rz-box hot' }, box); K.text(box, 380, 132, 'CRC16 (XMODEM)', 'rz-t mid b'); K.text(box, 380, 154, `after byte ${i + 1}: ${CK.reg[i]} (0x${hex(CK.reg[i], 4)})`, 'rz-t mid acc'); await K.sleep(260, run); box.remove(); } }
   K.story({ root: $('s2b'), show: i => { H.clear(); S2B[i](); }, tipLabel: 'Interview tip', steps: [
     { title: 'A key is just bytes', text: ['The hash never sees "patient:42" as text.', 'It sees 10 bytes: one number per character (shown in hex).', 'Change any character and one of those numbers changes.'] },
-    { title: 'CRC16 folds the bytes into one 16-bit number', text: ['CRC16 keeps a 16-bit "register" that starts at 0.', 'Each byte is mixed in: shift left, and XOR with the fixed pattern 0x1021 whenever a 1 falls off the top.', 'After the last byte the register is the hash: <b>29949</b> for patient:42.', 'Play the step to watch the register change after every byte (real values).'], play: p2bMix },
+    { title: 'CRC16 folds the bytes into one 16-bit number', text: ['CRC16 keeps a 16-bit "register" that starts at 0.', 'Each byte is mixed in, bit by bit: shift the register left, and whenever the bit shifted out on the left is 1, XOR (a bit-by-bit \'exclusive or\') the register with the fixed pattern 0x1021.', 'After the last byte the register is the hash: <b>29949</b> for patient:42.', 'Play the step to watch the register change after every byte (real values).'], play: p2bMix },
     { title: 'Sixteen bits', text: ['29949 written in binary is 0111 0100 1111 1101.', '16 bits give 65,536 possible values (0 to 65,535).', 'Every byte affects the result, so changing any character changes these bits.'] },
     { title: 'mod 16384 = keep the last 14 bits', text: ['16,384 is 2¹⁴, so dividing by it and keeping the remainder just drops the top 2 bits.', '29949 − 16384 = <b>13565</b>: patient:42 lives in slot 13565.', 'Real Redis agrees: <span class="mono">CLUSTER KEYSLOT patient:42</span> returns 13565.'], tip: '"Slot = CRC16 of the key (or its hash tag), keep the low 14 bits, so 0 to 16383."' },
     { title: 'Tiny change, very different slot', text: ['patient:43 and Patient:42 each differ from patient:42 by one character.', 'Only a few bits change, but the slot still jumps by thousands: 13565, 9436, 3568.', 'Across many keys the slots come out evenly spread: 100,000 patient keys split almost exactly into thirds.'] },

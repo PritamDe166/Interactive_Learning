@@ -110,7 +110,7 @@
     <ul class="lede">
       <li>A <b>cache</b> keeps a temporary copy of data or a computed result in a <b>faster, closer</b> place so it can be <b>reused</b>.</li>
       <li>A <b>hit</b> is served from the copy; a <b>miss</b> goes to the source and fills the cache. <b>Hit ratio</b> = hits ÷ requests.</li>
-      <li>It cuts <b>latency</b>, <b>database load</b> and <b>cost</b> (paid APIs, LLM calls), and raises <b>throughput</b>.</li>
+      <li>A cache cuts <b>latency</b> (waiting time), <b>database load</b> and <b>cost</b> (paid APIs, LLM calls). It also raises <b>throughput</b> (requests handled per second).</li>
       <li>Caches live at every layer: <b>browser, CDN, proxy, distributed cache, in-process</b>.</li>
       <li>You can't cache everything: memory is limited, the cache isn't the <b>source of truth</b>, and copies go <b>stale</b>.</li>
     </ul>
@@ -135,7 +135,7 @@
       <div class="row head"><span>Idea</span><span>You've seen it as</span><span>Note</span></div>
       <div class="row"><span class="aws">In-process cache</span><span class="like"><code>IMemoryCache</code> / IIS output caching</span><span>Lives in one server's RAM; each server has its own copy.</span></div>
       <div class="row"><span class="aws">Distributed cache</span><span class="like"><code>IDistributedCache</code> backed by Redis</span><span>One shared cache for all app servers; a network hop, but far faster than the database.</span></div>
-      <div class="row"><span class="aws">Why RAM beats disk</span><span class="like">SQL Server's buffer pool keeping hot pages in memory</span><span>Same idea, one level up: keep the <i>answer</i>, not just the pages.</span></div>
+      <div class="row"><span class="aws">Why RAM beats disk</span><span class="like">SQL Server's buffer pool keeping hot pages in memory</span><span>Same idea at a higher level: a cache keeps the finished <i>answer</i> in memory, not just the database pages used to build it.</span></div>
     </div>
   </div>
   </section>
@@ -237,8 +237,8 @@
       <div class="note"><p><b>An in-process cache lives in the process's RAM (heap)</b>, not "in the CPU cache". CPU caches (L1/L2/L3) are managed by the hardware; your code can't put entries there. It is still the fastest option because there's no network hop.</p></div>
       <div class="note"><p><b>Forward vs reverse proxy.</b> A <b>forward proxy</b> sits on the <b>client</b> side (an office or ISP); a <b>reverse proxy</b> sits in front of the <b>origin</b>. Both can cache.</p></div>
       <div class="note"><p>"Writes go to the database, not the cache" is true for <b>cache-aside</b> (Day 16). <b>Write-through</b> and <b>write-behind</b> (Days 17 to 18) write to the cache as part of the write.</p></div>
-      <div class="note"><p>Browser and CDN caches commonly use <b>disk/SSD</b> as well as memory, so "disk is rarely used for caching" applies to server-side caches. "The DB crashes at around a million requests" is illustrative: the real limit depends on the query, hardware and connection pool.</p></div>
-      <div class="note"><p><b>TTL</b> (time to live) is the usual way to bound staleness, and a <b>cache stampede</b> (many misses at once when a hot key expires) is Day 20.</p></div>
+      <div class="note"><p>Browser and CDN caches often use <b>disk/SSD</b> as well as memory. The rule "disk is rarely used for caching" is only true for server-side caches. Numbers like "the DB crashes at around a million requests" are only examples. The real limit depends on the query, hardware and connection pool.</p></div>
+      <div class="note"><p><b>TTL</b> (time to live) is the usual way to limit how old cached data can get. Cache stampede (many misses at once when a hot key expires) is covered on Day 20.</p></div>
     </div>
   </div>
   </section>
@@ -322,7 +322,7 @@
       text: 'Of 100 requests, the cache answered 80 and 20 went to the database. <b>Hit ratio = hits ÷ total = 80%</b>. A higher ratio means less database load and lower average latency. Cache size, TTL and how the cache chooses what to evict all move it.',
       tip: 'Interview: always say how you\'d measure a cache (hit ratio, latency, DB load).' },
     { title: 'Not just speed: cost',
-      text: 'Some work is <b>expensive</b>, not just slow: an LLM call that burns tokens, ML inference, a paid geocoding API, a heavy report. Same input, same answer, so <b>cache the result</b> and stop paying for it twice. It also keeps you under the provider\'s rate limits.',
+      text: 'Some work is <b>expensive</b>, not just slow: an LLM call that uses paid tokens, ML inference, a paid geocoding API, a heavy report. Same input, same answer, so <b>cache the result</b> and stop paying for it twice. It also keeps you under the provider\'s rate limits.',
       play: async run => { base(5); net.badge('rd'); net.badge('llm'); await net.send(['app', 'llm', 'app'], { run, tone: 'yellow', label: 'summarise #12' }); net.badge('llm', '$0.02', 'info'); await net.send(['app', 'rd'], { run, tone: 'green', label: 'SET' }); await net.send(['app', 'rd', 'app'], { run, tone: 'green', label: 'HIT, free' }); net.badge('llm', '$ saved', 'ok'); } },
     { title: 'Caches live at every layer',
       text: 'The <b>browser</b> keeps photos you\'ve seen. A <b>CDN edge</b> near you keeps popular static files. The <b>reverse proxy</b> can cache whole responses. The app has its own <b>in-process</b> cache, then the shared <b>distributed cache</b>. The first layer holding the data answers; only a miss at every layer reaches the database.',
@@ -331,7 +331,7 @@
       text: 'An admin drops the price to ₹1,299 in the <b>database</b>, the <b>source of truth</b>. The cache still holds ₹1,499 until its entry expires: a <b>stale</b> read. Fine for a description for a few minutes; never for a bank balance. Data that changes every second gains little from a cache. And RAM is small and costly, so you can\'t copy the whole database anyway.',
       play: async run => { base(7); await net.send(['app', 'db'], { run, tone: 'cyan', label: 'UPDATE price' }); await net.send(['u', 'cdn', 'px', 'app', 'rd', 'app'], { run, tone: 'red', label: '₹1,499 (old)' }); } },
     { title: 'The whole picture',
-      text: 'Cache = <b>reuse</b> a copy from somewhere <b>faster and closer</b>. Hits are cheap; misses fill it. Use it for hot, expensive or far-away data, at the layer closest to the user that makes sense. Bound staleness with a <b>TTL</b>, and keep the database as the source of truth. Next: how the app reads and writes through a cache (cache-aside, write-through, write-behind).' }
+      text: 'Cache = <b>reuse</b> a copy from somewhere <b>faster and closer</b>. Hits are cheap. Misses go to the database and fill the cache. Use it for hot, expensive or far-away data, at the layer closest to the user that makes sense. Bound staleness with a <b>TTL</b>, and keep the database as the source of truth. Next: how the app reads and writes through a cache (cache-aside, write-through, write-behind).' }
   ];
   K.story({ root: $('story'), steps: STEPS, show: base, tipLabel: 'Interview tip' });
 

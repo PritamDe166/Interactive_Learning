@@ -94,7 +94,7 @@
   <header>
     <p class="crumbs">Week 1 / H2 / Networking Fundamentals</p>
     <h1>HTTP Requests & Status Codes</h1>
-    <ul class="lede"><li>A <b>request</b> says <b>what to do</b> (method) to <b>which resource</b> (path).</li><li>It carries metadata (<b>headers</b>) and optional data (<b>body</b>).</li><li>The <b>response</b> answers with a <b>status code</b>, headers and an optional body.</li><li>It all travels over the connection that DNS, TCP and TLS set up first.</li></ul>
+    <ul class="lede"><li>A <b>request</b> says <b>what to do</b> (method) to <b>which resource</b> (path).</li><li>It carries metadata (<b>headers</b>) and optional data (<b>body</b>).</li><li>The <b>response</b> answers with a <b>status code</b>, headers and an optional body.</li><li>The request and response travel over a connection. First DNS finds the server's IP, then TCP and TLS set up the connection.</li></ul>
   </header>
 
   <nav id="series"></nav>
@@ -136,15 +136,15 @@ Location: /patients/124
         <tbody>
           <tr><td>GET</td><td>Read a resource</td><td class="ok-text">Yes</td><td class="ok-text">Yes</td><td>Cacheable; never change data in a GET handler</td></tr>
           <tr><td>HEAD</td><td>Like GET, headers only</td><td class="ok-text">Yes</td><td class="ok-text">Yes</td><td>Check size or freshness without downloading</td></tr>
-          <tr><td>OPTIONS</td><td>Ask what is allowed</td><td class="ok-text">Yes</td><td class="ok-text">Yes</td><td>Used by browsers for CORS preflight</td></tr>
+          <tr><td>OPTIONS</td><td>Ask what is allowed</td><td class="ok-text">Yes</td><td class="ok-text">Yes</td><td>Used by browsers for a CORS preflight: a check, before a cross-site request, that the server allows it</td></tr>
           <tr><td>POST</td><td>Create, or run an action</td><td class="bad-text">No</td><td class="bad-text">No</td><td>Make it safe to retry with an idempotency key</td></tr>
           <tr><td>PUT</td><td>Replace the whole resource</td><td class="bad-text">No</td><td class="ok-text">Yes</td><td>Can also create at a client-chosen URL</td></tr>
-          <tr><td>PATCH</td><td>Change part of a resource</td><td class="bad-text">No</td><td>Depends</td><td>"Set age = 41" is; "append to list" is not</td></tr>
+          <tr><td>PATCH</td><td>Change part of a resource</td><td class="bad-text">No</td><td>Depends</td><td>"Set age = 41" is idempotent (repeating it changes nothing more); "append to list" is not (each repeat adds another item)</td></tr>
           <tr><td>DELETE</td><td>Remove a resource</td><td class="bad-text">No</td><td class="ok-text">Yes</td><td>Second call may return 404, but the state is the same</td></tr>
         </tbody>
       </table>
     </div>
-    <div class="note"><p><b>Safe</b> means "doesn't change server state". Every safe method is idempotent, but not the other way round: PUT and DELETE change state, yet repeating them changes nothing further.</p></div>
+    <div class="note"><p><b>Safe</b> means "doesn't change server state". Idempotent means "repeating the request leaves the same final state". Every safe method is idempotent, but not the other way round: PUT and DELETE change state, yet repeating them changes nothing further.</p></div>
   </div>
     <h3 class="sec-h3">HTTP/1.1 vs 2 vs 3</h3>
     <p class="sub">Same requests, three ways to carry them. Press <b>▶ Play</b> on a card. The transport details are on <a href="tcp-udp.html">H3 TCP &amp; UDP</a>.</p>
@@ -215,7 +215,7 @@ Location: /patients/124
       <div><div class="label">Typical fix or client action</div><p id="scFix">…</p></div>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><p><b>1xx and 3xx in practice.</b> 1xx: <span class="mono">100 Continue</span>, <span class="mono">101 Switching Protocols</span> (WebSocket upgrade). 3xx: <span class="mono">301</span>/<span class="mono">308</span> permanent move, <span class="mono">302</span>/<span class="mono">307</span> temporary move (307/308 keep the method and body), <span class="mono">304 Not Modified</span> (your cached copy is still valid).</p></div>
+      <div class="note"><p><b>1xx and 3xx in practice.</b> 1xx: <span class="mono">100 Continue</span>, <span class="mono">101 Switching Protocols</span> (WebSocket upgrade). 3xx codes: <span class="mono">301</span> and <span class="mono">308</span> mean a permanent move. <span class="mono">302</span> and <span class="mono">307</span> mean a temporary move. 307 and 308 keep the original method and body. <span class="mono">304 Not Modified</span> means your cached copy is still valid.</p></div>
       <div class="note"><p><b>401 is misnamed.</b> Its official name is "Unauthorized", but it means <i>not authenticated</i>: who are you? <b>403</b> means "I know who you are, and you're not allowed".</p></div>
     </div>
   </div>
@@ -257,7 +257,7 @@ Location: /patients/124
       <details><summary>Creating a patient with an email that already exists. Which code?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>409 Conflict.</b> The request is valid but clashes with the current state of the data.</p></div></details>
       <details><summary>Why should a GET handler never change data?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>GET is safe and cacheable.</b> Browsers prefetch it, crawlers follow it and caches replay it, so side effects would fire unexpectedly.</p></div></details>
+        <div class="ans"><p><b>GET is safe and cacheable.</b> Browsers load GET links early (prefetch), search crawlers follow them and caches repeat them. So any data change in a GET handler (a side effect) would happen when nobody expected it.</p></div></details>
     </div>
   </div>
   </section>

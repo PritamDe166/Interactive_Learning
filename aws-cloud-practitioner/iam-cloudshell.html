@@ -108,7 +108,7 @@
       <li>Browser-based shell, opened from the console toolbar; <b>AWS CLI v2 preinstalled</b>.</li>
       <li>Uses your <b>console identity's credentials</b>; IAM permissions still apply. <code>aws sts get-caller-identity</code> shows who you are.</li>
       <li><b>Region-aware</b>: starts in the console's Region; use <code>--region</code> for others. Not available in every Region.</li>
-      <li><b>1 GB persistent <code>$HOME</code> per Region</b>, kept for <b>120 days</b> after last use. Files outside <code>$HOME</code> don't persist; VPC environments have no persistent storage.</li>
+      <li>You get 1 GB of storage in your home folder (<code>$HOME</code>) in each Region, kept for <b>120 days</b> after you last use it. Files outside $HOME are deleted when the session ends. CloudShell VPC environments (shells that run inside your own private network) have no persistent storage.</li>
       <li>Upload and download files from the <b>Actions</b> menu; tabs and split panes are supported.</li>
       <li>Limits: about 10 concurrent shells per Region, sessions end after inactivity and after about 12 hours. Not for production jobs or secrets.</li>
       <li>Exam: <b>out of scope</b> for CLF-C02 (listed with developer tools). Learn it as a lab convenience.</li>

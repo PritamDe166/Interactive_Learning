@@ -103,10 +103,10 @@
     <p class="crumbs">AWS CLF-C02 / Section 10 / Domains 1, 3 &amp; 4 (Tasks 3.3, 4.1)</p>
     <h1>Containers &amp; Serverless</h1>
     <ul class="lede">
-      <li><b>Containers</b> package an app with its dependencies. <b>ECR</b> stores the images; <b>ECS</b> (AWS's own) or <b>EKS</b> (Kubernetes) runs them.</li>
+      <li><b>Containers</b> package an app with its dependencies. Amazon <b>ECR</b> (Elastic Container Registry) stores the container images. Amazon <b>ECS</b> (Elastic Container Service, AWS's own container service) or Amazon <b>EKS</b> (Elastic Kubernetes Service) runs them.</li>
       <li><b>Fargate</b> runs those containers with <b>no servers to manage</b>.</li>
       <li><b>Lambda</b> runs short functions on events, scales automatically, and costs nothing when idle.</li>
-      <li><b>API Gateway</b> turns Lambda into an HTTP API. <b>Batch</b> runs long jobs; <b>Lightsail</b> is the simple fixed-price option.</li>
+      <li><b>API Gateway</b> turns Lambda into an HTTP API. AWS <b>Batch</b> runs long jobs. Amazon <b>Lightsail</b> is the simple option with a fixed monthly price.</li>
     </ul>
   </header>
 
@@ -157,7 +157,7 @@
     <div class="scroll">
       <svg class="diagram" id="lam" viewBox="0 0 1000 330" aria-label="Event sources on the left, Lambda execution environments in the middle, targets on the right"></svg>
     </div>
-    <p class="status-line" id="lamStatus">Each event runs in an execution environment. A new one starts cold; warm ones are reused.</p>
+    <p class="status-line" id="lamStatus">Each event runs in an execution environment (a small temporary space that runs your function). A brand-new environment takes extra time to start: this is a 'cold start'. Environments that already ran ('warm' ones) are reused and start faster.</p>
     <div class="ranges">
       <div class="range"><label for="inv">Invocations per month <output id="invO"></output></label><input type="range" id="inv" min="0" max="40" value="6"></div>
       <div class="range"><label for="mem">Memory <output id="memO"></output></label><input type="range" id="mem" min="0" max="6" value="2"></div>
@@ -205,12 +205,12 @@
     <div class="cards" style="margin-top:14px">
       <div class="card"><h3>API Gateway</h3><p>Managed, serverless front door for APIs: REST and WebSocket, authentication, <b>throttling</b>, <b>API keys</b>, monitoring. "Serverless API" = API Gateway + Lambda (+ DynamoDB).</p></div>
       <div class="card"><h3>Lambda essentials</h3><p>Languages: Node.js, Python, Java, .NET, Ruby, plus custom runtimes. Permissions come from its <b>execution role</b>; logs go to <b>CloudWatch</b>. EventBridge schedule + Lambda = serverless cron.</p></div>
-      <div class="card"><h3>Lightsail</h3><p>Bundled server, storage, database and networking at a <b>fixed monthly price</b> for people new to cloud: WordPress, simple web apps, dev/test. No auto scaling. Usually the distractor.</p></div>
+      <div class="card"><h3>Lightsail</h3><p>Bundled server, storage, database and networking at a <b>fixed monthly price</b> for people new to cloud: WordPress, simple web apps, dev/test. No auto scaling. In exam questions it is usually a wrong answer put there to distract you.</p></div>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><p><b>$1 buys about 60,000 GB-seconds</b> of Lambda, not 600,000 ($0.0000166667 per GB-s on x86). Requests cost $0.20 per million. Free tier each month: 1M requests + 400,000 GB-seconds.</p></div>
+      <div class="note"><p>A GB-second is 1 GB of memory used for 1 second. <b>$1 buys about 60,000 GB-seconds</b> of Lambda, not 600,000 ($0.0000166667 per GB-s on x86). Requests cost $0.20 per million. Free tier each month: 1M requests and 400,000 GB-seconds.</p></div>
       <div class="note"><p><b>Lightsail starts at $5/month with a public IPv4 address.</b> The $3.50 bundle is IPv6-only. Managed databases start at $15/month.</p></div>
-      <div class="note"><p><b>"Serverless" ≠ "managed".</b> Batch and ECS on EC2 are managed but run on instances you pay for while they're up. Serverless (Lambda, Fargate, API Gateway, S3, DynamoDB) means no servers to see, automatic scaling, pay for use.</p></div>
+      <div class="note"><p>"Serverless" is not the same as "managed". Batch and ECS on EC2 are managed, but they run on instances that you pay for while they are running. Serverless services (Lambda, Fargate, API Gateway, S3, DynamoDB) have three properties: you see no servers, scaling is automatic, and you pay only for what you use.</p></div>
       <div class="note"><p><b>Newer options beyond exam scope:</b> ECS Managed Instances (AWS manages the EC2 for you), ECS Anywhere (on-premises), Lambda function URLs and Lambda Managed Instances. For the exam: Lambda max <b>15 minutes</b>, Kubernetes → <b>EKS</b>, "no servers for containers" → <b>Fargate</b>. Elastic Beanstalk is in <a href="deployment-iac.html">Deployment &amp; IaC</a>.</p></div>
     </div>
   </section>
@@ -308,7 +308,7 @@
         text: '<b>Amazon EKS</b> is managed <b>Kubernetes</b>. Containers run as <b>pods</b> on EC2 nodes or on Fargate. Choose it when you already use Kubernetes or need to stay portable across clouds; otherwise ECS is simpler.',
         tip: 'The word "Kubernetes" in a question → EKS.' },
       { title: 'Lambda: just a function, run by events',
-        text: 'For small pieces of work, skip servers and containers entirely. A <b>Lambda</b> function runs when an <b>event</b> happens (a file lands in S3, a message arrives, a schedule fires), scales automatically to thousands of parallel runs, and stops. Max <b>15 minutes</b> per run.',
+        text: 'For small pieces of work, skip servers and containers entirely. A <b>Lambda</b> function runs when an <b>event</b> happens, for example a file arrives in S3, a message arrives, or a schedule fires. It scales automatically to thousands of parallel runs. Then it stops. Max <b>15 minutes</b> per run.',
         play: flow },
       { title: 'API Gateway: put an HTTP API in front',
         text: 'A Lambda function has no URL of its own. <b>API Gateway</b> gives it one, plus authentication, throttling and API keys (the jobs an API gateway or middleware does in ASP.NET). API Gateway + Lambda + DynamoDB is the classic <b>serverless API</b>.',

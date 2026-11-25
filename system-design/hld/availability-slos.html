@@ -109,7 +109,7 @@
   <header>
     <p class="crumbs">Week 1 / H6 / Networking Fundamentals</p>
     <h1>Availability, SLIs, SLOs & SLAs</h1>
-    <ul class="lede"><li><b>SLI = measure</b>: what actually happened (e.g. % of requests that succeeded).</li><li><b>SLO = target</b>: what the team aims for (e.g. 99.9% over 30 days).</li><li><b>SLA = promise</b>: what customers are contractually owed if you miss it.</li><li><b>Error budget</b> = 100% − SLO: the failure you can afford to spend on shipping changes.</li></ul>
+    <ul class="lede"><li><b>SLI = measure</b>: what actually happened (e.g. % of requests that succeeded).</li><li><b>SLO = target</b>: what the team aims for (e.g. 99.9% over 30 days).</li><li><b>SLA = promise</b>: what customers are contractually owed if you miss it.</li><li><b>Error budget</b> = 100% − SLO: the amount of failure you are allowed. The team can 'spend' it on the risk of shipping changes.</li></ul>
   </header>
 
   <nav id="series"></nav>
@@ -167,7 +167,7 @@
         <div class="card"><div class="label">Incidents this month</div><ul class="log" id="incLog"><li>None yet. Click an incident above.</li></ul></div>
       </div>
     </div>
-    <div class="note"><span class="flag add">Why SLO is stricter than SLA</span><p>The internal target (99.9%) trips long before the contract (99.5%) does. When the error budget runs out, the team slows risky releases <i>before</i> customers are owed service credits.</p></div>
+    <div class="note"><span class="flag add">Why SLO is stricter than SLA</span><p>The internal target (99.9%) is missed long before the contract (99.5%) is broken. When the error budget runs out, the team slows risky releases <i>before</i> customers are owed service credits.</p></div>
   </div>
   </section>
 
@@ -177,7 +177,7 @@
     <div class="cards">
       <div class="card"><h3>RPO, how much data can we lose?</h3><p><b>Recovery point objective</b>, measured in time. "RPO 5 minutes" means after a disaster you may lose at most the last 5 minutes of writes. Set by how often you back up or replicate.</p></div>
       <div class="card"><h3>RTO, how long can we be down?</h3><p><b>Recovery time objective.</b> "RTO 1 hour" means service must be back within an hour. Set by how much is already running in the recovery site.</p></div>
-      <div class="card"><h3>How they relate to MTTR</h3><p>MTTR is the <i>measured</i> average repair time for ordinary failures; RTO is the <i>target</i> for a disaster. Lower RPO and RTO cost more: compare the four strategies below.</p></div>
+      <div class="card"><h3>How they relate to MTTR</h3><p>MTTR (mean time to recover) is the <i>measured</i> average time to repair ordinary failures. RTO is the <i>target</i> for a disaster. Lower RPO and RTO cost more: compare the four strategies below.</p></div>
     </div>
     <h3 class="sec-h3">4 disaster-recovery strategies</h3>
     <p class="sub">From cheapest and slowest to most expensive and instant. Press <b>▶ Play</b> on a card.</p>
@@ -210,7 +210,7 @@
       <div class="kpi"><b id="cWeak">…</b><span>Weakest link</span></div>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><p><b>Series multiplies:</b> a request needing three 99.9% components succeeds 99.9% × 99.9% × 99.9% ≈ <b>99.7%</b> of the time, worse than any single part. <b>Redundancy adds nines:</b> two independent 99% copies give 1 − (0.01)² = <b>99.99%</b>, provided failover works and the copies don't fail together.</p></div>
+      <div class="note"><p><b>Series multiplies:</b> a request needing three 99.9% components succeeds 99.9% × 99.9% × 99.9% ≈ <b>99.7%</b> of the time, worse than any single part. Redundancy adds nines (more 9s in the percentage). Two independent 99% copies give 1 − (0.01)² = <b>99.99%</b>. This only holds if failover (switching to the healthy copy) works and the copies don't fail at the same time.</p></div>
       <div class="note"><p><b>Availability = MTBF ÷ (MTBF + MTTR).</b> MTBF is the mean time between failures, MTTR the mean time to recover. Halving recovery time helps as much as halving failures, which is why fast rollbacks and alerts matter.</p></div>
       <div class="note"><p><b>Two ways to measure:</b> time-based ("up 99.9% of minutes") or request-based ("99.9% of requests succeeded"). Request-based SLIs reflect what users actually felt, including partial outages.</p></div>
     </div>
@@ -223,7 +223,7 @@
     <ul class="cheat">
       <li><span class="if">99.9% vs 99.99% per month</span><span class="arrow">→</span><span class="then">~43 min vs ~4.3 min of downtime</span></li>
       <li><span class="if">SLI / SLO / SLA</span><span class="arrow">→</span><span class="then">What you measure / your internal target / the contract with penalties</span></li>
-      <li><span class="if">Error budget</span><span class="arrow">→</span><span class="then">100% − SLO; spend it on releases, freeze when it is gone</span></li>
+      <li><span class="if">Error budget</span><span class="arrow">→</span>100% − SLO. Use it on releases; when it is gone, freeze (stop) risky releases.</li>
       <li><span class="if">Components in a chain</span><span class="arrow">→</span><span class="then">Multiply: 99.9% × 99.9% × 99.9% ≈ 99.7%</span></li>
       <li><span class="if">Redundant copies in parallel</span><span class="arrow">→</span><span class="then">1 − (1 − a)ⁿ: two 99% copies ≈ 99.99%</span></li>
       <li><span class="if">Availability from failures</span><span class="arrow">→</span><span class="then">MTBF ÷ (MTBF + MTTR): faster repair helps as much as fewer failures</span></li>
@@ -246,7 +246,7 @@
       <details><summary>What is the monthly error budget for a 99.9% SLO?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>0.1% ≈ 43.2 minutes</b> of full downtime in a 30-day month, or the request-weighted equivalent.</p></div></details>
       <details><summary>Why not aim for 100%?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>Each nine costs far more</b> and users can't tell 99.999% from 100% through their own Wi-Fi. A budget lets teams trade reliability for speed deliberately.</p></div></details>
+        <div class="ans"><p>Each extra nine costs far more. Users can't tell 99.999% from 100%, because their own Wi-Fi fails more often than that. A budget lets teams trade reliability for speed deliberately.</p></div></details>
       <details><summary>Your API is 99.99% but depends on a 99.9% database. Best case for the API?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>About 99.89%.</b> Series availability multiplies, so the API can't beat its weakest required dependency.</p></div></details>
       <details><summary>The site returns pages fast, but with the wrong prices. Available? Reliable?<span class="go">Show answer</span></summary>

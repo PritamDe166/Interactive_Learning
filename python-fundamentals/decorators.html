@@ -82,7 +82,7 @@
   <header>
     <p class="crumbs">Python / Topic 16 / Going further</p>
     <h1>Decorators</h1>
-    <ul class="lede"><li>A <b>decorator</b> is a function that takes a function and returns a <b>replacement</b>, usually a wrapper that adds behaviour before and after the original.</li><li><span class="mono">@log_calls</span> above <span class="mono">def f</span> is shorthand for <span class="mono">f = log_calls(f)</span>, run <b>once</b>, when the def runs.</li><li>The wrapper uses <span class="mono">*args, **kwargs</span> to accept any arguments and a <b>closure</b> to remember the original function.</li><li>Always add <span class="mono">@functools.wraps(func)</span> so the wrapper keeps the original's name and docstring. Used everywhere: logging, timing, caching, permissions, web routes.</li></ul>
+    <ul class="lede"><li>A <b>decorator</b> is a function that takes a function and returns a <b>replacement</b>, usually a wrapper that adds behaviour before and after the original.</li><li>Writing <span class="mono">@log_calls</span> above <span class="mono">def f</span> is shorthand for <span class="mono">f = log_calls(f)</span>. Python runs it <b>once</b>, at the moment the def runs.</li><li>The wrapper uses <span class="mono">*args, **kwargs</span> to accept any arguments. It is a <b>closure</b>: an inner function that remembers the original function from the outer one.</li><li>Always add <span class="mono">@functools.wraps(func)</span> so the wrapper keeps the original's name and docstring. Decorators are used everywhere: logging, timing, caching, permissions, web routes.</li></ul>
   </header>
 
   <section aria-labelledby="storyH">
@@ -130,7 +130,7 @@
       <li><span class="if">Keep the name and docstring</span><span class="arrow">→</span><span class="then"><span class="mono">@functools.wraps(func)</span></span></li>
       <li><span class="if">Decorator that takes settings</span><span class="arrow">→</span><span class="then">Three levels: <span class="mono">def require_role(role): def decorator(func): def wrapper(...)</span></span></li>
       <li><span class="if">Cache pure function results</span><span class="arrow">→</span><span class="then"><span class="mono">@functools.cache</span> / <span class="mono">@lru_cache(maxsize=…)</span></span></li>
-      <li><span class="if">Several decorators</span><span class="arrow">→</span><span class="then">Bottom one wraps first; top one runs first</span></li>
+      <li><span class="if">Several decorators</span><span class="arrow">→</span>The bottom one (closest to def) wraps the function first. The top one is the outermost wrapper, so its code runs first when you call the function.</li>
     </ul>
   </section>
 
@@ -143,7 +143,7 @@
           <tr><td class="mono">@property</td><td>built-in</td><td>method read like an attribute (OOP deeper)</td></tr>
           <tr><td class="mono">@classmethod / @staticmethod</td><td>built-in</td><td>method gets the class / nothing instead of self</td></tr>
           <tr><td class="mono">@dataclass</td><td>dataclasses</td><td>writes __init__, __repr__, __eq__ for you</td></tr>
-          <tr><td class="mono">@functools.cache / lru_cache</td><td>functools</td><td>memoise results</td></tr>
+          <tr><td class="mono">@functools.cache / lru_cache</td><td>functools</td><td>memoise results (remember each result, so a repeat call with the same arguments returns it at once)</td></tr>
           <tr><td class="mono">@contextlib.contextmanager</td><td>contextlib</td><td>turns a generator into a with-block helper</td></tr>
           <tr><td class="mono">@app.get("/patients")</td><td>FastAPI / Flask</td><td>registers a function as a web route</td></tr>
           <tr><td class="mono">@pytest.fixture</td><td>pytest</td><td>marks reusable test setup</td></tr>
@@ -153,7 +153,7 @@
     <div class="notes" style="margin-top:14px">
       <div class="note"><p><b>Builds on closures.</b> Decorators build directly on closures from the Scope page.</p></div>
       <div class="note"><p><b>Coming from .NET:</b> the effect resembles an ASP.NET action filter or middleware, but a Python decorator is just a function call at definition time. There is no attribute metadata involved.</p></div>
-      <div class="note"><p><b>Keep wrappers thin:</b> they run on every call. Put heavy setup outside the wrapper, in the decorator body, which runs only once.</p></div>
+      <div class="note"><p>Keep wrappers small and fast: they run on every call. Put heavy setup outside the wrapper, in the decorator body, which runs only once.</p></div>
     </div>
   </section>
 

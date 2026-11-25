@@ -114,7 +114,7 @@
   <header>
     <p class="crumbs">Week 1 / H7 / Review</p>
     <h1>Journey of a Request</h1>
-    <ul class="lede"><li>Everything from Week 1 in two pictures.</li><li>The <b>timeline</b>: what happens and how long it takes. <b>DNS</b> finds, <b>TCP</b> connects, <b>TLS</b> secures, <b>HTTP</b> asks.</li><li>The <b>stack</b>: what carries it. Each layer wraps the one above.</li></ul>
+    <ul class="lede"><li>Everything from Week 1 in two pictures.</li><li>The <b>timeline</b>: what happens and how long it takes. <b>DNS</b> finds, <b>TCP</b> connects, <b>TLS</b> secures, <b>HTTP</b> asks.</li><li>The <b>stack</b>: what carries the request. Each layer puts the data from the layer above inside its own envelope (wraps it).</li></ul>
   </header>
 
   <nav id="series"></nav>
@@ -151,7 +151,7 @@
   </div>
     <div class="sub-block" aria-labelledby="stTitle">
     <h3 class="stage-title sub" id="stTitle">Stack: how the request is wrapped</h3>
-    <div class="stage-kind">Encapsulation on the way down, unwrapping on the way up</div>
+    <div class="stage-kind">On the sender, each layer wraps the data in its own header (encapsulation); on the receiver, each layer removes it again</div>
     <div class="controls">
       <button class="btn primary" id="stPlay" type="button">Send the request</button>
       <div class="seg" id="stackSeg" role="group" aria-label="Protocol stack">
@@ -214,7 +214,7 @@
         <tr><td>Find the server</td><td><a href="client-server-dns.html">H1 DNS</a></td><td>Resolver walks root → TLD → authoritative; TTL caching; GeoDNS / failover routing</td></tr>
         <tr><td>Speak the protocol</td><td><a href="http.html">H2 HTTP</a></td><td>Methods, idempotency, status codes; HTTP/1.1 vs 2 vs 3</td></tr>
         <tr><td>Connect</td><td><a href="tcp-udp.html">H3 TCP &amp; UDP</a></td><td>3-way handshake, reliability, head-of-line blocking</td></tr>
-        <tr><td>Encrypt</td><td><a href="https-tls.html">H4 TLS</a></td><td>1-RTT TLS 1.3, certificate chain, termination, mTLS, HSTS</td></tr>
+        <tr><td>Encrypt</td><td><a href="https-tls.html">H4 TLS</a></td><td>TLS 1.3 needs 1 RTT (one round trip), certificate chain, termination, mTLS, HSTS</td></tr>
         <tr><td>Measure</td><td><a href="latency-throughput.html">H5 Latency</a></td><td>p99 not averages, Little's Law, latency numbers</td></tr>
         <tr><td>Promise</td><td><a href="availability-slos.html">H6 Availability</a></td><td>Nines, SLO / error budget, series vs parallel, RPO / RTO</td></tr>
       </tbody></table></div>
@@ -229,7 +229,7 @@
       <details><summary>Explain the lifecycle of an HTTPS request in four steps.<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>DNS</b> finds the IP → <b>TCP</b> three-way handshake → <b>TLS</b> handshake (identity + keys) → <b>HTTP</b> request and response over the encrypted channel.</p></div></details>
       <details><summary>Users in the US say your Bengaluru-hosted API is slow, but server time is 20 ms. Why?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>Round trips × distance.</b> At ~230 ms RTT, TCP + TLS + HTTP cost ~0.7 s before any server work. Fixes: CDN/edge, connection reuse, TLS 1.3, HTTP/3, or a US region.</p></div></details>
+        <div class="ans"><p>Each round trip is long because of distance. At ~230 ms RTT (round-trip time), TCP + TLS + HTTP cost ~0.7 s before any server work. Fixes: CDN/edge, connection reuse, TLS 1.3, HTTP/3, or a US region.</p></div></details>
       <details><summary>Why does reusing connections matter so much?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>It skips the TCP and TLS handshakes</b>, which are pure round trips. That's why browsers keep connections alive and services use pools.</p></div></details>
       <details><summary>Which layer adds the IP addresses, and which adds the ports?<span class="go">Show answer</span></summary>
@@ -296,7 +296,7 @@
     const share = setup / total;
     $('tlHint').innerHTML = rtt >= 200 && !$('reuse').checked ? `At this distance, <b>${Math.round(share * 100)}%</b> of the wait happens before the request even leaves. Try "Reuse open connection" or "HTTP/3".`
       : $('reuse').checked ? 'A reused connection pays only for the request itself. That is why keep-alive and connection pools matter.'
-      : 'Switch the distance to US East to see handshakes dominate.';
+      : 'Switch the distance to US East to see that handshakes take most of the time.';
     g.dataset.total = total; g.dataset.scale = scale;
     return { X0, X1, scale, total };
   }

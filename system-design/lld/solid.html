@@ -118,7 +118,7 @@
       <li>Five guidelines for object-oriented code that is <b>easy to change, test and extend</b>.</li>
       <li><b>S</b>ingle responsibility, <b>O</b>pen-closed, <b>L</b>iskov substitution, <b>I</b>nterface segregation, <b>D</b>ependency inversion.</li>
       <li>They work together: small focused classes, talking through <b>interfaces</b>, with implementations <b>plugged in</b> from outside.</li>
-      <li>They are <b>guidelines, not rules</b>. Applied mechanically they produce over-engineered code; the goal is simple code that is safe to change.</li>
+      <li>They are <b>guidelines, not rules</b>. If you apply them everywhere without thinking, you get code with too many classes and interfaces (over-engineered). The goal is simple code that is safe to change.</li>
     </ul>
   </header>
 
@@ -194,7 +194,7 @@
       </table>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><p><b>The cautions:</b> you can follow every principle and still write bad code; over-applied interface segregation ends in one method per interface; most projects have one implementation per interface, so the main practical win of interfaces is <b>mocking in tests</b>, not swapping databases.</p></div>
+      <div class="note"><p><b>The cautions:</b> 1) You can follow every principle and still write bad code. 2) Too much interface segregation ends with one method per interface. 3) Most projects have one implementation per interface, so the main practical benefit of interfaces is <b>mocking in tests</b>, not swapping databases.</p></div>
       <div class="note"><p><b>Where the name comes from:</b> the principles were collected by Robert C. Martin around 2000; Michael Feathers coined the SOLID acronym. Liskov substitution is from Barbara Liskov (1987).</p></div>
     </div>
   </div>
@@ -213,7 +213,7 @@
       <details><summary>A subclass overrides a method with <span class="mono">throw new NotImplementedException()</span>. Which principles are in trouble?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>L</b>: the child can't stand in for the parent. Often <b>I</b> too: the base type or interface promises more than every implementer can do.</p></div></details>
       <details><summary>Why is SOLID called "guidelines, not rules"?<span class="go">Show answer</span></summary>
-        <div class="ans"><p>Followed to the letter they can still produce bad, over-abstracted code. The speaker's main advice: <b>keep it simple</b> and apply the principles where change is actually expected.</p></div></details>
+        <div class="ans"><p>Followed to the letter they can still produce bad, over-abstracted code. The main advice from the study notes: <b>keep it simple</b>, and apply the principles where change is actually expected.</p></div></details>
       <details><summary>What is the most common real benefit of depending on interfaces?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>Testability</b>: you can inject a fake or mock. Swapping the real implementation (e.g. a different database) is rarer than people expect.</p></div></details>
       <details><summary>In an interview, how would you show SOLID rather than recite it?<span class="go">Show answer</span></summary>
@@ -293,7 +293,7 @@
         play: async run => { const p = K.pill(FX, 'Send()'); await K.move(p, [booking.right[0], booking.cy], [notifier.cx, notifier.top[1] - 4], 600, run); await K.move(p, [notifier.cx, notifier.bottom[1]], [sms.cx, sms.top[1]], 500, run); p.remove(); } },
       { title: 'I · readers and writers split', text: 'The repository implements two small interfaces. <span class="mono">ReportService</span> depends only on <span class="mono">IAppointmentReader</span>, so it can\'t accidentally write, and a read-only fake for tests needs just one method.' },
       { title: 'D · services point at interfaces', text: 'Every arrow from a service ends at an <b>interface</b>, never at <span class="mono">SqlAppointmentRepository</span> or <span class="mono">EmailNotifier</span>. The concrete classes are injected through constructors (ASP.NET Core DI).', tip: 'Draw this kind of diagram in LLD interviews: services on top, interfaces in the middle, implementations at the bottom. It shows D, I and O at a glance.' },
-      { title: 'And keep it simple', text: 'This design earns its interfaces: there really are two notifiers, and fakes make the services testable. If you only ever had one implementation and no tests, fewer abstractions would be better. That\'s the "guidelines, not rules" point.' }
+      { title: 'And keep it simple', text: 'Here the interfaces are worth having: there really are two notifiers, and fakes make the services testable. If you only ever had one implementation and no tests, fewer abstractions would be better. That\'s the "guidelines, not rules" point.' }
     ]
   });
 

@@ -97,7 +97,7 @@
       <li>A class that has <b>exactly one instance</b> and a single global way to reach it: a private constructor plus a static <span class="mono">Instance</span>.</li>
       <li>Fits things that really are one-per-app: configuration, a cache, a connection pool, a logger.</li>
       <li>The hard part is <b>thread safety</b>: two requests arriving together can create two instances.</li>
-      <li>In ASP.NET Core you rarely hand-write one: <span class="mono">services.AddSingleton&lt;…&gt;()</span> gives one instance without the global, untestable static.</li>
+      <li>In ASP.NET Core you rarely write one yourself. <span class="mono">services.AddSingleton&lt;…&gt;()</span> gives you one instance, without a global static property that makes testing hard.</li>
     </ul>
   </header>
 
@@ -139,7 +139,7 @@
           <tr><td>Double-checked locking</td><td class="ok-text">Yes (field <span class="mono">volatile</span>)</td><td>first call</td><td>lock only while creating</td><td>Works, easy to get subtly wrong</td></tr>
           <tr><td><span class="mono">static readonly</span> field</td><td class="ok-text">Yes (runtime guarantees it)</td><td>when the type is first used</td><td>none</td><td>Simplest when creation is cheap</td></tr>
           <tr><td><span class="mono">Lazy&lt;T&gt;</span></td><td class="ok-text">Yes (default mode)</td><td>first <span class="mono">.Value</span></td><td>tiny</td><td>Best hand-written version</td></tr>
-          <tr><td>DI <span class="mono">AddSingleton</span></td><td class="ok-text">Creation: yes. Your state: your job</td><td>first resolve</td><td>none</td><td><b>Default choice in ASP.NET Core</b></td></tr>
+          <tr><td>DI <span class="mono">AddSingleton</span></td><td class="ok-text">Creation is thread-safe. Any data the object changes is your job to protect</td><td>first resolve</td><td>none</td><td><b>Default choice in ASP.NET Core</b></td></tr>
         </tbody>
       </table>
     </div>
@@ -189,14 +189,14 @@
         <thead><tr><th>Lifetime</th><th>One instance per…</th><th>Typical use</th><th>Rule</th></tr></thead>
         <tbody>
           <tr><td>Singleton</td><td>application</td><td>config, caches, <span class="mono">IHttpClientFactory</span>, loggers</td><td>must be thread-safe; may only depend on singletons</td></tr>
-          <tr><td>Scoped</td><td>request (scope)</td><td><span class="mono">DbContext</span>, unit of work, current user</td><td>never captured by a singleton</td></tr>
+          <tr><td>Scoped</td><td>request (scope)</td><td><span class="mono">DbContext</span>, unit of work, current user</td><td>must never be injected into (and held by) a singleton</td></tr>
           <tr><td>Transient</td><td>resolve</td><td>light, stateless helpers</td><td>cheap to create</td></tr>
         </tbody>
       </table>
     </div>
     <div class="notes" style="margin-top:14px">
       <div class="note"><p><b>Captive dependency:</b> a singleton that receives a scoped service keeps the first request's instance forever. ASP.NET Core checks this in Development (scope validation) and throws "Cannot consume scoped service … from singleton".</p></div>
-      <div class="note"><p><b>Why <span class="mono">volatile</span> in double-checked locking:</b> without it another thread could, in theory, see the reference before the object is fully built. .NET's memory model makes the plain version work on today's runtimes, but <span class="mono">volatile</span> (or <span class="mono">Lazy&lt;T&gt;</span>) says what you mean.</p></div>
+      <div class="note"><p><b>Why <span class="mono">volatile</span> in double-checked locking:</b> without it another thread could, in theory, see the reference before the object is fully built. On today's .NET runtimes, the rules for how threads see memory (the memory model) make the version without <span class="mono">volatile</span> work. But volatile (or <span class="mono">Lazy&lt;T&gt;</span>) makes your intent clear.</p></div>
     </div>
   </section>
 
@@ -355,7 +355,7 @@ var calc = new PriceCalculator(new FakeConfig { Discount = true });`, 'cs');
       { title: 'Two requests at the same moment', text: 'A web server runs requests in parallel. Both threads check <span class="mono">instance == null</span> before either has assigned it, so <b>both create an AppConfig</b>. The second overwrites the first.', play: run => replay('naive', run), tip: 'Draw this timeline when asked "is your singleton thread-safe?". It shows you understand the race, not just the fix.' },
       { title: 'Fix 1: lock around the check', text: 'Only one thread can be inside the lock, so thread 2 waits and then finds the instance. Correct, but <b>every</b> call pays for the lock, forever.', play: run => replay('lock', run) },
       { title: 'Fix 2: double-checked locking', text: 'Check without the lock first; only if it\'s null, take the lock and <b>check again</b>. Once the instance exists, calls never lock. Mark the field <span class="mono">volatile</span>.', play: run => replay('dcl', run) },
-      { title: 'Fix 3: Lazy<T> (or static readonly)', text: '<span class="mono">Lazy&lt;T&gt;</span> runs the factory once even with many threads, and you write no locking code. A <span class="mono">static readonly</span> field is also safe: the runtime runs type initialisers once.', play: run => replay('lazy', run) },
+      { title: 'Fix 3: Lazy<T> (or static readonly)', text: '<span class="mono">Lazy&lt;T&gt;</span> runs the factory once even with many threads, and you write no locking code. A <span class="mono">static readonly</span> field is also safe: the runtime runs a class\'s static setup code (its type initialiser) only once.', play: run => replay('lazy', run) },
       { title: 'Usually better: let DI own it', text: 'Register <span class="mono">AddSingleton&lt;IAppConfig, AppConfig&gt;()</span>. Still one instance, but consumers receive <span class="mono">IAppConfig</span> in their constructor, so a test can pass a <b>FakeConfig</b>. No hidden global.', tip: 'Good answer: "I\'d use a DI singleton; the pattern\'s goal is one instance, not a static property."' },
       { title: 'Trap: captive dependency', text: 'A singleton must only depend on singletons. If <span class="mono">PriceCache</span> (singleton) takes <span class="mono">AppDbContext</span> (scoped), it keeps the first request\'s context forever and shares it across threads.' }
     ]

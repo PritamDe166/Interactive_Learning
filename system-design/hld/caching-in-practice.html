@@ -197,7 +197,7 @@
       <li><span><b>Read pattern.</b> Usually cache-aside with a TTL. Name the key, e.g. <code>product:{id}:v3</code>.</span></li>
       <li><span><b>Write and invalidation.</b> Update the DB, then delete the key. Across servers: pub/sub. Across services: change events (outbox).</span></li>
       <li><span><b>Size and eviction.</b> Hot data × overhead × replicas ÷ 0.7 headroom; allkeys-lru or LFU; keep values small.</span></li>
-      <li><span><b>Failures.</b> Stampede (single-flight, SWR), avalanche (TTL jitter), penetration (cache NULL), hot key (L1), cache down (fall back to the DB with rate limits).</span></li>
+      <li><span><b>Failures.</b> Stampede: single-flight or SWR (stale-while-revalidate). Avalanche: TTL jitter. Penetration: cache NULL for missing IDs. Hot key: L1 copy on each server. Cache down: fall back to the DB with rate limits.</span></li>
       <li><span><b>Measure.</b> Hit ratio, evictions, memory, p99, DB load, origin offload at the CDN.</span></li>
     </ol>
 
@@ -318,7 +318,7 @@
         set(m) { L(m, 0); note.textContent = 'DB overloaded'; },
         async play(m, r) { L(m, 0); await m.send(['u', 'app', 'db'], { run: r, label: 'GET /p/12', tone: 'red' }); note.textContent = 'DB overloaded'; } },
       { title: 'Layer 1 · Browser and CDN for what everyone shares',
-        text: 'Images, JS and CSS get fingerprinted names and <code>max-age=1 year</code>. The public product HTML gets <code>s-maxage=60</code> so the CDN answers most visitors. Logged-in parts (cart, "Hi Asha") load separately and are <code>private</code>.',
+        text: 'Images, JS and CSS get fingerprinted names (a hash of the content in the file name, so a new version gets a new name) and <code>max-age=1 year</code>. The public product HTML gets <code>s-maxage=60</code> so the CDN answers most visitors. Logged-in parts (cart, "Hi Asha") load separately and are <code>private</code>.',
         set(m) { L(m, 1); note.textContent = '~60% answered at the edge'; },
         async play(m, r) { L(m, 1); await m.send(['u', 'cdn'], { run: r, label: 'GET' }); await m.send(['cdn', 'u'], { run: r, tone: 'teal', label: 'HIT' }); note.textContent = '~60% answered at the edge'; } },
       { title: 'Layer 2 · Redis, cache-aside',
@@ -335,7 +335,7 @@
         set(m) { L(m, 4); m.badge('bus', 'ProductChanged', 'yellow'); note.textContent = 'stale for < 1 s in Redis + L1'; },
         async play(m, r) { L(m, 4); await m.send(['app', 'db'], { run: r, label: 'UPDATE', tone: 'yellow' }); await m.send(['db', 'bus'], { run: r, tone: 'yellow' }); m.badge('bus', 'ProductChanged', 'yellow'); await m.send(['bus', 'redis'], { run: r, tone: 'yellow', label: 'DEL' }); m.badge('redis', 'dropped', 'muted'); await m.send(['redis', 'app', 'l1'], { run: r, tone: 'violet', label: 'drop L1' }); m.badge('l1', 'dropped', 'muted'); note.textContent = 'stale for < 1 s in Redis + L1'; } },
       { title: 'Layer 5 · Plan for the failures',
-        text: '<b>Stampede</b>: single-flight per key. <b>Avalanche</b>: TTL jitter. <b>Missing IDs</b>: cache "not found" for 60 s. <b>Redis down</b>: fall back to the DB through a rate limiter and circuit breaker so it isn\'t flattened.',
+        text: '<b>Stampede</b>: single-flight per key. <b>Avalanche</b>: TTL jitter. <b>Missing IDs</b>: cache "not found" for 60 s. <b>Redis down</b>: fall back to the DB through a rate limiter and a circuit breaker, so the database is not overloaded.',
         set(m) { L(m, 5); m.badge('app', 'single-flight · breaker', 'violet'); note.textContent = 'a cache failure is slow, not fatal'; } },
       { title: 'Layer 6 · Say what you would measure',
         text: 'Hit ratio per layer, evictions, Redis memory and p99, DB queries per second, and CDN origin offload. Then size it: 2 M products × 4 KB × 20% hot is ~1.6 GB of data; with overhead, one replica and headroom, about 7 GB, so one small cluster is plenty.',

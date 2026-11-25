@@ -94,7 +94,7 @@
   <header>
     <p class="crumbs">Week 1 / H4 / Networking Fundamentals</p>
     <h1>HTTPS & the TLS Handshake</h1>
-    <ul class="lede"><li><b>HTTPS = HTTP over TLS.</b></li><li>Job 1: <b>prove the server's identity</b> with a certificate.</li><li>Job 2: <b>agree on shared keys</b> during the handshake.</li><li>After that, everything is encrypted with fast <b>symmetric</b> crypto.</li></ul>
+    <ul class="lede"><li><b>HTTPS = HTTP over TLS.</b></li><li>Job 1: <b>prove the server's identity</b> with a certificate.</li><li>Job 2: <b>agree on shared keys</b> during the handshake.</li><li>After that, everything is encrypted with fast <b>symmetric</b> crypto: both sides use the same shared key.</li></ul>
   </header>
 
   <nav id="series"></nav>
@@ -137,7 +137,7 @@
       <div class="kpi"><b id="kFs">…</b><span>Forward secrecy</span></div>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><p><b>In TLS 1.3, key agreement happens first, not after certificate validation.</b> The key shares ride in ClientHello and ServerHello, so both sides derive handshake keys immediately and the certificate is sent <i>encrypted</i>. The order certificate → validate → key establishment is TLS 1.2.</p></div>
+      <div class="note"><p><b>In TLS 1.3, key agreement happens first, not after certificate validation.</b> The key shares are sent inside the first two messages, ClientHello (from the client) and ServerHello (from the server). So both sides can calculate the handshake keys at once, and the certificate is sent <i>encrypted</i>. In TLS 1.2 the order is different: first the certificate is sent, then it is validated, and only then are the keys agreed.</p></div>
       <div class="note"><p><b>In TLS 1.3 the server sends Finished first</b>, in its very first reply. The client sends its Finished after checking the certificate. Client-first is the TLS 1.2 order.</p></div>
       <div class="note"><p><b>0-RTT resumption:</b> a returning client can send its request inside the first TLS message. It's fastest, but an attacker could <i>replay</i> that early request, so servers allow it only for safe, idempotent requests such as GET.</p></div>
     </div>
@@ -188,7 +188,7 @@
       <li><span class="if">Why both key types?</span><span class="arrow">→</span><span class="then">Asymmetric to agree a key and prove identity; symmetric (AES-GCM) for the data: much faster</span></li>
       <li><span class="if">TLS 1.3 vs 1.2</span><span class="arrow">→</span><span class="then">1 round trip instead of 2; 0-RTT on resume (replay risk: only for safe requests)</span></li>
       <li><span class="if">Browser trusts a certificate when…</span><span class="arrow">→</span><span class="then">Chain reaches a trusted root CA, name matches (SAN), not expired or revoked</span></li>
-      <li><span class="if">One server, many HTTPS sites</span><span class="arrow">→</span><span class="then">SNI tells the server which certificate to send</span></li>
+      <li><span class="if">One server, many HTTPS sites</span><span class="arrow">→</span>SNI (Server Name Indication: the client sends the hostname in its first message) tells the server which certificate to send</li>
       <li><span class="if">LB must route by path</span><span class="arrow">→</span><span class="then">Terminate TLS at the LB (re-encrypt if every hop must be encrypted)</span></li>
       <li><span class="if">Service must know which service is calling</span><span class="arrow">→</span><span class="then">mTLS: both sides present certificates</span></li>
       <li><span class="if">Never allow plain HTTP</span><span class="arrow">→</span><span class="then">HSTS header (+ preload list)</span></li>
@@ -217,7 +217,7 @@
       <details><summary>Why is a TLS 1.3 handshake faster than TLS 1.2?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>One round trip instead of two:</b> the client guesses the key exchange and sends its key share in the first message.</p></div></details>
       <details><summary>An attacker records today's encrypted traffic and steals the server's private key next year. Can they decrypt it?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>Not with ephemeral (EC)DHE</b>, which TLS 1.3 always uses: the session keys were never derived from the long-term key. That's forward secrecy.</p></div></details>
+        <div class="ans"><p>No. TLS 1.3 always uses ephemeral (EC)DHE, a new key exchange for every connection. The session keys were never made from the server's long-term private key, so stealing that key later does not help. That's forward secrecy. That's forward secrecy.</p></div></details>
       <details><summary>Why are POST requests not sent as 0-RTT early data?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>Early data can be replayed</b> by an attacker. Replaying a payment POST could charge twice.</p></div></details>
       <details><summary>The browser says "Your connection is not private" but the dates look fine. Two likely causes?<span class="go">Show answer</span></summary>

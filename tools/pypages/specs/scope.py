@@ -40,7 +40,7 @@ print(count, tick(), tick())''',
   {"at": {"event": "return", "n": 4}, "title": "make_counter returns a function", "text": "<span class=\"mono\">make_counter</span> created <span class=\"mono\">n = 0</span> and a function <span class=\"mono\">step</span> that uses <span class=\"mono\">n</span>, then returned <span class=\"mono\">step</span>. Its frame is about to end…"},
   {"at": {"event": "call", "n": 5}, "title": "…but n survives: a closure", "text": "<span class=\"mono\">tick</span> points to the inner <span class=\"mono\">step</span> function, which still remembers <span class=\"mono\">n</span> from the finished <span class=\"mono\">make_counter</span> call. That remembered environment is the <b>closure</b>."},
   {"at": {"event": "return", "n": 5}, "title": "nonlocal updates the enclosing n", "text": "<span class=\"mono\">nonlocal n</span> means \"the n from the enclosing function\", so <span class=\"mono\">n += 1</span> updates it to 1 instead of creating a new local."},
-  {"at": "end", "title": "State kept between calls", "text": "The second <span class=\"mono\">tick()</span> returns 2: the closure's <span class=\"mono\">n</span> persisted. This is how decorators and callback factories keep state without globals."}
+  {"at": "end", "title": "State kept between calls", "text": "The second <span class=\"mono\">tick()</span> returns 2: the closure's <span class=\"mono\">n</span> persisted. This is how decorators and functions that build other functions keep state without globals."}
  ]},
  "walk_out": "Asha Rao Pune 2 / 1 1 2",
  "puzzles": [
@@ -121,7 +121,7 @@ print(count, tick(), tick())''',
  "notes": [
   ["Corrected", "<b>Where a variable lives.</b> A variable created in the outer function and only read by the inner one belongs to the <b>enclosing</b> scope, not the inner function."],
   ["Corrected", "<b>A function that's never called never runs.</b> Defining <span class=\"mono\">local_scope()</span> does nothing until you call it. And PEP 8 uses snake_case for function names (<span class=\"mono\">fetch_global_var</span>, not <span class=\"mono\">fetchGlobalVar</span>)."],
-  ["Added", "<b>UnboundLocalError</b> (puzzle 2) is the error you hit when you forget <span class=\"mono\">global</span>/<span class=\"mono\">nonlocal</span>; the repo shows the fix but not the failure. Since 3.12 the message says \"cannot access local variable … where it is not associated with a value\"."],
+  ["Added", "<b>UnboundLocalError</b> (puzzle 2) is the error you get when you forget <span class=\\\"mono\\\">global</span>/<span class=\\\"mono\\\">nonlocal</span>. The example code shows the fix but not the failure. Since 3.12 the message says \"cannot access local variable … where it is not associated with a value\"."],
   ["Added", "<b>Use global sparingly.</b> Functions that take inputs and return outputs are easier to test. Closures (shown in the walkthrough) are the foundation for decorators."]
  ],
  "quiz": [

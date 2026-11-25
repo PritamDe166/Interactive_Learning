@@ -75,7 +75,7 @@
   <header>
     <p class="crumbs">Python / Topic 19 / Going further</p>
     <h1>Type hints</h1>
-    <ul class="lede"><li>Type hints describe what a value <b>should</b> be: <span class="mono">def with_tax(amount: float) -&gt; float:</span>.</li><li>Python <b>does not check them at run time</b>. They're read by your editor and by type checkers such as <b>mypy</b> or <b>pyright</b> before the code runs.</li><li>Modern syntax: <span class="mono">list[int]</span>, <span class="mono">dict[str, float]</span>, <span class="mono">str | None</span> (3.10+). No <span class="mono">typing</span> import needed for these.</li><li>Hints document intent, power autocomplete, and catch whole classes of bugs (None, wrong types, typos) early: the closest Python gets to C#'s compiler checks.</li></ul>
+    <ul class="lede"><li>Type hints describe what a value <b>should</b> be: <span class="mono">def with_tax(amount: float) -&gt; float:</span>.</li><li>Python <b>does not check them at run time</b>. They're read by your editor and by type checkers such as <b>mypy</b> or <b>pyright</b> before the code runs.</li><li>Modern syntax: <span class="mono">list[int]</span>, <span class="mono">dict[str, float]</span>, <span class="mono">str | None</span> (3.10+). No <span class="mono">typing</span> import needed for these.</li><li>Hints show what you intended and help editor autocomplete. They also catch whole groups of bugs early (None, wrong types, typos). This is the closest Python gets to C#'s compiler checks.</li></ul>
   </header>
 
   <section aria-labelledby="storyH">
@@ -120,9 +120,9 @@
       <li><span class="if">Function signature</span><span class="arrow">→</span><span class="then"><span class="mono">def f(x: int, name: str = "") -&gt; bool:</span></span></li>
       <li><span class="if">Collections</span><span class="arrow">→</span><span class="then"><span class="mono">list[int]</span>, <span class="mono">dict[str, float]</span>, <span class="mono">tuple[int, str]</span>, <span class="mono">set[str]</span></span></li>
       <li><span class="if">Might be missing</span><span class="arrow">→</span><span class="then"><span class="mono">str | None</span>, then check <span class="mono">if x is not None</span></span></li>
-      <li><span class="if">Either type</span><span class="arrow">→</span><span class="then"><span class="mono">int | str</span> + <span class="mono">isinstance</span> to narrow</span></li>
+      <li><span class="if">Either type</span><span class="arrow">→</span>int | str, then use isinstance to narrow it (find out which type it really is)</li>
       <li><span class="if">Dict with fixed keys (JSON rows)</span><span class="arrow">→</span><span class="then"><span class="mono">TypedDict</span>, or a dataclass / Pydantic model</span></li>
-      <li><span class="if">Any object with a .send() method</span><span class="arrow">→</span><span class="then"><span class="mono">typing.Protocol</span> (structural typing)</span></li>
+      <li><span class="if">Any object with a .send() method</span><span class="arrow">→</span>typing.Protocol (structural typing: a type matches if it has the right methods, whatever its class)</li>
       <li><span class="if">Check the whole project</span><span class="arrow">→</span><span class="then"><span class="mono">pip install mypy</span> → <span class="mono">mypy .</span>; or pyright / your editor's checker</span></li>
     </ul>
   </section>
@@ -144,8 +144,8 @@
     </div>
     <div class="notes" style="margin-top:14px">
       <div class="note"><p><b>Modern hint syntax.</b> Since Python 3.10 write <span class="mono">str | None</span> instead of <span class="mono">Union[str, None]</span>. A function annotated <span class="mono">-&gt; int</span> that returns a tuple is exactly the kind of mistake mypy reports.</p></div>
-      <div class="note"><p><b>Why hints matter beyond readability:</b> tool-calling libraries for AI agents and FastAPI/Pydantic build JSON schemas from them.</p></div>
-      <div class="note"><p><b>Python 3.14</b> evaluates annotations lazily (PEP 649/749), so a class can refer to itself or to classes defined later without quotes or <span class="mono">from __future__ import annotations</span>.</p></div>
+      <div class="note"><p><b>Why hints matter beyond readability:</b> tool-calling libraries for AI agents and FastAPI/Pydantic build JSON schemas (descriptions of the expected data) from them.</p></div>
+      <div class="note"><p><b>Python 3.14</b> evaluates annotations lazily (only when something reads them) (PEP 649/749). So a class can refer to itself, or to classes defined later, without quotes or <span class="mono">from __future__ import annotations</span>.</p></div>
     </div>
   </section>
 

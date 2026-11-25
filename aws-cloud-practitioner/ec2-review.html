@@ -89,7 +89,7 @@
     <h1>EC2: review</h1>
     <ul class="lede">
       <li><b>EC2</b> rents virtual servers (IaaS): AMI + instance type + storage + security group + key pair + user data.</li>
-      <li>Requests reach the <b>public IP</b>, pass the <b>security group</b> (stateful, allow-only), and hit the software on the instance.</li>
+      <li>Requests reach the <b>public IP</b>, pass the <b>security group</b>, and arrive at the software on the instance. The security group is stateful (replies to allowed traffic are allowed back out) and has allow rules only.</li>
       <li>Get in with <b>SSH 22</b>, <b>Instance Connect</b> or <b>RDP 3389</b>; give the instance AWS access with an <b>IAM role</b>.</li>
       <li>Pay with <b>On-Demand, Reserved, Savings Plans, Spot, Dedicated</b> or <b>Capacity Reservations</b>, and set a <b>budget</b> first.</li>
     </ul>
@@ -110,9 +110,9 @@
       <div class="card"><h3>Budgets</h3><ul><li>AWS Budgets emails on actual or forecasted cost/usage.</li><li>Zero-spend and monthly cost budgets.</li><li>Root activates IAM access to billing.</li><li>EBS, public IPv4, NAT Gateway bill too.</li></ul></div>
       <div class="card"><h3>EC2 basics &amp; user data</h3><ul><li>IaaS; AMI, type, storage, SG, key pair, user data.</li><li>User data: once, first boot, as root.</li><li>Stop: EBS kept, new public IP on start. Terminate: gone, root EBS deleted.</li><li>Elastic IP keeps a fixed public IPv4.</li></ul></div>
       <div class="card"><h3>Instance types</h3><ul><li><code>m5.2xlarge</code> = family, generation, size.</li><li>General (T, M), Compute (C), Memory (R, X), Storage (I, D, H), Accelerated (P, G).</li></ul></div>
-      <div class="card"><h3>Security groups</h3><ul><li>Allow-only, stateful; inbound blocked, outbound allowed by default.</li><li>Sources: CIDR or another SG; Region/VPC scoped; many-to-many.</li><li>Timeout = SG; refused = app. Ports 21, 22, 80, 443, 3389.</li></ul></div>
-      <div class="card"><h3>Connecting &amp; roles</h3><ul><li>SSH 22 with .pem (chmod 400, ec2-user); PuTTY .ppk; RDP 3389 for Windows.</li><li>Instance Connect: browser, temporary key, still port 22.</li><li>IAM role via instance profile; never aws configure with your keys.</li></ul></div>
-      <div class="card"><h3>Purchasing &amp; responsibility</h3><ul><li>On-Demand, Reserved (1/3 yr, ~72%), Convertible, Savings Plans ($/h), Spot (~90%, interruptible), Dedicated Host (BYOL), Dedicated Instance, Capacity Reservation (no discount).</li><li>You: SG rules, OS patches, software, IAM roles, data. AWS: hardware, host isolation, network.</li></ul></div>
+      <div class="card"><h3>Security groups</h3><ul><li>Allow-only, stateful; inbound blocked, outbound allowed by default.</li><li>A rule's source can be a CIDR (an IP address range) or another security group (SG). A security group belongs to one Region and VPC. One instance can have many security groups, and one group can be used by many instances.</li><li>If the connection times out, the security group (SG) is blocking it. If the connection is refused, it reached the instance but the application is not listening. Ports 21, 22, 80, 443, 3389.</li></ul></div>
+      <div class="card"><h3>Connecting &amp; roles</h3><ul><li>Connect to Linux with SSH on port 22 using a .pem key (set it with chmod 400, log in as ec2-user), or with PuTTY using a .ppk key. Connect to Windows with RDP on port 3389.</li><li>Instance Connect: browser, temporary key, still port 22.</li><li>IAM role via instance profile; never aws configure with your keys.</li></ul></div>
+      <div class="card"><h3>Purchasing &amp; responsibility</h3><ul><li>Purchasing options: On-Demand. Reserved (1 or 3 years, up to about 72% off). Convertible Reserved. Savings Plans (commit to $ per hour). Spot (up to about 90% off, but can be interrupted). Dedicated Host (lets you BYOL: bring your own licence). Dedicated Instance. Capacity Reservation (no discount).</li><li>You: SG rules, OS patches, software, IAM roles, data. AWS: hardware, host isolation, network.</li></ul></div>
     </div>
   </section>
 
@@ -140,11 +140,11 @@
           <tr><td>Stop vs terminate</td><td>Stop keeps EBS and lets you start again (new public IP); terminate deletes the instance (and root volume by default)</td></tr>
           <tr><td>Public vs private IPv4</td><td>Public reaches it from the internet and changes on stop/start; private is inside AWS and stays</td></tr>
           <tr><td>Timeout vs connection refused</td><td>Blocked before arrival (security group) vs arrived but nothing listening (application)</td></tr>
-          <tr><td>Security group vs NACL</td><td>Instance-level, stateful, allow-only vs subnet-level, stateless, allow and deny (VPC section)</td></tr>
+          <tr><td>Security group vs NACL</td><td>A security group works at the instance level, is stateful and has allow rules only. A NACL (network access control list) works at the subnet level, is stateless and has allow and deny rules (see the VPC section).</td></tr>
           <tr><td>SSH vs RDP</td><td>Linux, port 22, key pair vs Windows, port 3389</td></tr>
           <tr><td>Reserved Instance vs Savings Plan</td><td>Commit to an instance configuration vs commit to $ per hour of compute</td></tr>
           <tr><td>Standard vs Convertible RI</td><td>Bigger discount, fixed vs smaller discount, can change type/family</td></tr>
-          <tr><td>Dedicated Host vs Dedicated Instance</td><td>Whole physical server with host visibility (BYOL) vs hardware not shared with other customers, no host control</td></tr>
+          <tr><td>Dedicated Host vs Dedicated Instance</td><td>Dedicated Host: a whole physical server for you, and you can see the host details (useful to BYOL, bring your own licence). Dedicated Instance: the hardware is not shared with other customers, but you have no control over the host.</td></tr>
           <tr><td>Capacity Reservation vs Reserved Instance</td><td>Capacity guarantee in one AZ, no discount vs discount for a 1/3-year commitment</td></tr>
           <tr><td>Spot vs On-Demand</td><td>Up to ~90% cheaper but interruptible vs full price, never interrupted by AWS</td></tr>
         </tbody>

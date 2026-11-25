@@ -93,7 +93,7 @@
     <p class="crumbs">AWS CLF-C02 / IAM / Domain 2 Security &amp; Compliance (Tasks 2.1, 2.3)</p>
     <h1>IAM best practices &amp; shared responsibility</h1>
     <ul class="lede">
-      <li>Lock the <b>root user</b> away (MFA, no access keys). Give <b>each person their own identity</b>; never share.</li>
+      <li>Protect the <b>root user</b> and don't use it day to day: turn on MFA and create no access keys for it. Give <b>each person their own identity</b>; never share.</li>
       <li>Manage permissions through <b>groups</b> with <b>least privilege</b>; use <b>roles</b> for AWS services.</li>
       <li>Enforce a <b>password policy</b> and <b>MFA</b>; keep <b>access keys</b> secret and rotated, or avoid them.</li>
       <li><b>Audit</b> with the credential report and Access Advisor. AWS runs IAM; <b>configuring it well is your responsibility</b>.</li>
@@ -114,11 +114,11 @@
     <div class="remember"><ol>
       <li><b>Don't use the root user</b> for daily work. MFA on root, <b>no root access keys</b>, credentials stored safely.</li>
       <li><b>One identity per person.</b> Never share users, passwords, keys or MFA devices. (At company scale AWS recommends <b>IAM Identity Center</b> for people.)</li>
-      <li><b>Groups</b> for permissions; <b>least privilege</b>; review and remove what's unused.</li>
-      <li><b>Password policy</b>: minimum length, upper/lower case, numbers, symbols, expiry (1 to 1,095 days), prevent reuse (last 1 to 24). Default: 8 to 128 characters, 3 of 4 character types. It <b>doesn't apply to root or to access keys</b>, and there's <b>no lockout</b> setting.</li>
-      <li><b>MFA</b> = password (something you know) + device (something you have). Types: <b>passkeys / FIDO security keys</b> (phishing-resistant, preferred), <b>virtual authenticator apps</b>, <b>hardware TOTP tokens</b>. Up to <b>8</b> devices per user. SMS MFA is no longer offered.</li>
+      <li>Give permissions through groups. Use <b>least privilege</b> (only the permissions needed). Regularly review permissions and remove the ones that are not used.</li>
+      <li><b>Password policy</b>: you can set a minimum length and require upper/lower case, numbers and symbols. You can set expiry (1 to 1,095 days) and prevent reuse of the last 1 to 24 passwords. Default: 8 to 128 characters, 3 of 4 character types. It <b>doesn't apply to root or to access keys</b>, and there's <b>no lockout</b> setting.</li>
+      <li><b>MFA</b> = password (something you know) + device (something you have). Types: passkeys or FIDO security keys (a standard for login keys; they can't be tricked by fake login pages, so they are preferred), <b>virtual authenticator apps</b>, and <b>hardware TOTP tokens</b> (devices that show a new code every 30 seconds or so). Up to <b>8</b> devices per user. SMS MFA is no longer offered.</li>
       <li><b>Roles</b> for AWS services (EC2, Lambda, CloudFormation): no keys on servers.</li>
-      <li><b>Access keys</b>: secret like a password; never commit or share; rotate; delete unused. Prefer temporary credentials.</li>
+      <li><b>Access keys</b>: keep them secret, like a password. Never commit them to Git or share them. Rotate them, and delete keys you don't use. Prefer temporary credentials.</li>
       <li><b>Audit</b>: credential report (account credentials) and Access Advisor (unused permissions).</li>
       <li>Store app secrets in <b>AWS Secrets Manager</b> or <b>Systems Manager Parameter Store</b>, never in code.</li>
       <li><b>Shared responsibility for IAM</b>: AWS runs the IAM service and its infrastructure; <b>you</b> create users, groups, roles and policies, enable MFA, rotate keys, review access and apply least privilege.</li>
@@ -240,13 +240,13 @@
       text: 'If the team shares one login, a leak can\'t be traced or revoked without locking everyone out. With <b>one user per person</b> you see exactly who did what and disable only that user.',
       play: async run => { base(3); await atkTo(run, 'own', 'shared login'); } },
     { title: 'Groups and least privilege',
-      text: 'A developer\'s account is compromised. Because the Developers group can only read EC2 and S3, the attacker can\'t delete databases, create users or run up a bill. <b>Least privilege limits the blast radius.</b>',
+      text: 'A developer\'s account is compromised. Because the Developers group can only read EC2 and S3, the attacker can\'t delete databases, create users or run up a bill. <b>Least privilege limits the damage an attacker can do with a stolen account.</b>',
       play: async run => { base(4); await atkTo(run, 'lp', 'dev account'); } },
     { title: 'Roles, not keys',
       text: 'A web server is hacked. It uses an <b>IAM role</b>, so there are no long-term keys on disk to steal, only temporary credentials that expire. Keep any access keys you must have out of code and Git, and rotate them.',
       play: async run => { base(5); await atkTo(run, 'role', 'server files'); } },
     { title: 'Audit what slipped through',
-      text: 'Every month, download the <b>credential report</b> (MFA, old keys, stale users) and check <b>Access Advisor</b> (unused permissions). Store app secrets in <b>Secrets Manager</b>, not code.' },
+      text: 'Every month, download the <b>credential report</b> (it shows MFA status, old keys and users who no longer sign in) and check <b>Access Advisor</b> (it shows unused permissions). Store app secrets in <b>Secrets Manager</b>, not code.' },
     { title: 'Whose job is all this?',
       text: 'Under the <b>shared responsibility model</b>, AWS runs IAM itself, securely and reliably. Everything you just saw (users, groups, policies, MFA, keys, reviews) is <b>security in the cloud</b>: the customer\'s job.',
       tip: '"Who is responsible for IAM configuration / enabling MFA?" → the customer.' }

@@ -102,7 +102,7 @@
   <header>
     <p class="crumbs">Week 2 / H8 / Scaling Fundamentals</p>
     <h1>Vertical vs Horizontal Scaling</h1>
-    <ul class="lede"><li><b>Scale up</b> (vertical): make one machine bigger.</li><li><b>Scale out</b> (horizontal): add more machines behind a load balancer.</li><li>Neither helps unless you scale the <b>bottleneck</b>: the component that saturates first.</li></ul>
+    <ul class="lede"><li><b>Scale up</b> (vertical): make one machine bigger.</li><li><b>Scale out</b> (horizontal): add more machines behind a load balancer.</li><li>Neither helps unless you scale the <b>bottleneck</b>: the component that reaches its full capacity first.</li></ul>
   </header>
 
   <nav id="series"></nav>
@@ -151,7 +151,7 @@
         <thead><tr><th></th><th>Vertical (scale up)</th><th>Horizontal (scale out)</th></tr></thead>
         <tbody>
           <tr><td>How</td><td>More CPU, RAM, disk on one machine</td><td>More machines, traffic spread by a load balancer</td></tr>
-          <tr><td>Ceiling</td><td>Largest machine you can buy</td><td>Far higher, often until a shared dependency saturates</td></tr>
+          <tr><td>Ceiling</td><td>Largest machine you can buy</td><td>Far higher, often until something all servers share (such as the database) is full</td></tr>
           <tr><td>Failure</td><td>One machine = single point of failure</td><td>Lose one, the rest keep serving</td></tr>
           <tr><td>Change</td><td>Resize usually means a restart</td><td>Add or remove instances live; autoscaling</td></tr>
           <tr><td>Complexity</td><td>Low: no distributed state</td><td>Higher: needs a load balancer and stateless apps</td></tr>
@@ -160,7 +160,7 @@
       </table>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><p><b>Bigger isn't linear.</b> Doubling cores rarely doubles throughput: locks, memory bandwidth and garbage collection eat into it. The simulator models this with a 0.9 exponent.</p></div>
+      <div class="note"><p><b>Bigger isn't linear.</b> Doubling cores rarely doubles throughput, because locks, memory bandwidth and garbage collection take away part of the gain. The simulator models this with a 0.9 exponent.</p></div>
       <div class="note"><p><b>Autoscaling</b> adds or removes instances on a metric (CPU, request count, queue depth). It only works if any instance can serve any request, which is tomorrow's topic: <a href="stateless.html">stateless applications</a>.</p></div>
       <div class="note"><p><b>Fixing a database bottleneck</b> means different tools: caching (Week 3), read replicas (Week 7) and sharding (Week 8). Adding app servers just sends more traffic to the same database.</p></div>
     </div>
@@ -197,7 +197,7 @@
       <details><summary>Horizontal scaling creates which new problem?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>Where does state live?</b> A user's next request may land on a different server. That leads to stateless design.</p></div></details>
       <details><summary>Which metrics tell you what the bottleneck is?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>Utilisation and saturation per resource:</b> CPU, memory, connection pools, DB load, disk I/O, queue depth and rising p99.</p></div></details>
+        <div class="ans"><p>For each resource, check how busy it is (utilisation) and whether work is waiting (saturation): CPU, memory, connection pools, DB load, disk I/O, queue depth, and a rising p99 (the latency of the slowest 1% of requests).</p></div></details>
       <details><summary>What usually happens during a vertical resize?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>A restart</b>, so a short outage unless something else takes the traffic meanwhile.</p></div></details>
     </div>

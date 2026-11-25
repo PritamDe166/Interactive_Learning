@@ -197,7 +197,7 @@
     <ul class="cheat">
       <li><span class="if">Identical servers, stateless app</span><span class="arrow">→</span><span class="then">Round robin</span></li>
       <li><span class="if">Mixed server sizes</span><span class="arrow">→</span><span class="then">Weighted round robin</span></li>
-      <li><span class="if">Same client or key → same server</span><span class="arrow">→</span><span class="then">Hash (IP or URL); consistent hashing if servers change often</span></li>
+      <li><span class="if">Same client or key <span class="arrow">→</span> same server</span>→Hash (IP or URL). If servers are added or removed often, use consistent hashing, which moves only a few keys when the server count changes</li>
       <li><span class="if">Requests vary a lot in duration</span><span class="arrow">→</span><span class="then">Least connections</span></li>
       <li><span class="if">Servers can degrade without warning</span><span class="arrow">→</span><span class="then">Least response time</span></li>
       <li><span class="if">Many balancers, large fleet</span><span class="arrow">→</span><span class="then">Power of two choices</span></li>
@@ -244,7 +244,7 @@ const ALGOS=[
  {id:'sticky',name:'Sticky Round Robin',kind:'static',by:'Remembering which server each user got',
   pick:'A new user is assigned a server at random. Every later request from that user goes back to the same server.',
   strength:"Keeps a user's session data and warm cache on one server.",
-  weak:'New users land randomly, so load drifts uneven. If a server dies, its users lose their sessions.',
+  weak:'New users are placed randomly, so over time some servers get more load than others. If a server dies, its users lose their sessions.',
   when:'You need session affinity, such as in-memory session state you cannot move yet.'},
  {id:'wrr',name:'Weighted Round Robin',kind:'static',by:'Share proportional to a set weight',
   pick:'Each server gets a share of requests in proportion to its weight. Here A : B : C = 3 : 2 : 1.',
@@ -253,8 +253,8 @@ const ALGOS=[
   when:'Servers differ in size, such as new 16-core nodes alongside an older 4-core one.'},
  {id:'hash',name:'Hash',kind:'static',by:'hash(client IP or URL) mod N',
   pick:'hash(client IP) mod 3 picks the server, so the same client always lands on the same server.',
-  strength:'Gives affinity without storing a session table.',
-  weak:'An even spread depends on the hash and the keys. Changing the server count remaps most keys.',
+  strength:'Sends the same client or URL to the same server (affinity) without storing a session table.',
+  weak:'Whether load is spread evenly depends on the hash function and on which keys arrive. Changing the server count remaps most keys.',
   when:'The same key should always hit the same node, like a cache shard or per-user affinity.'},
  {id:'lc',name:'Least Connections',kind:'dynamic',by:'Fewest open connections right now',
   pick:'Sends each request to the server with the fewest open connections at that moment.',
@@ -268,8 +268,8 @@ const ALGOS=[
   when:'User-facing latency matters most and backends can degrade without warning.'},
  {id:'p2c',name:'Power of Two Choices',kind:'dynamic',by:'Two random servers, the less busy wins',
   pick:'Picks two servers at random and sends the request to the one with fewer open requests.',
-  strength:'Nearly as good as checking every server, at a fraction of the cost, and many independent balancers don\'t all pile onto the same "least loaded" server.',
-  weak:'Random sampling can miss the single best server; with only two or three servers it is barely different from least connections.',
+  strength:'Nearly as good as checking every server, at a small part of the cost. Also, when many balancers work independently, they don\'t all send traffic to the same "least loaded" server at once.',
+  weak:'Because it picks two servers at random, it can miss the single best server. With only two or three servers, it is almost the same as least connections.',
   when:'Large fleets or many balancers sharing the same backends (Envoy, NGINX and HAProxy support it).'}
 ];
 const CLIENTS=[{n:'Alice',ip:'10.0.0.12',y:100},{n:'Bob',ip:'10.0.0.37',y:205},{n:'Carol',ip:'10.0.0.58',y:315},{n:'Dave',ip:'10.0.0.91',y:420}];

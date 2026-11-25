@@ -136,7 +136,7 @@
     <h2 id="rmH">Points to remember</h2>
     <div class="remember"><ol>
       <li>Nine layers: networking, storage, servers, virtualisation, OS, middleware, runtime, application, data. The models differ in <b>who manages which</b>.</li>
-      <li><b>IaaS</b>: provider runs hardware and virtualisation; you manage OS and up. AWS example: <b>EC2</b>. Most control; easiest lift-and-shift.</li>
+      <li><b>IaaS</b>: provider runs hardware and virtualisation; you manage OS and up. AWS example: <b>EC2</b>. It gives you the most control, and it is the easiest lift-and-shift (moving an existing server to the cloud without changing it).</li>
       <li><b>PaaS</b>: provider also runs OS, middleware and runtime; you bring code and data. AWS example: <b>Elastic Beanstalk</b>.</li>
       <li><b>SaaS</b>: a finished app (Gmail, Zoom, Dropbox). You still manage users, access, settings and the data you put in.</li>
       <li>Most AWS services are managed <b>building blocks</b>, not SaaS.</li>
@@ -306,7 +306,7 @@
   function show(i) { W.net.reset(); W.set(ORDER[i] || 'iaas'); if (i === 0) { LAY.forEach(([id]) => { W.net.nodes[id].g.setAttribute('class', 'nf-node k-plain'); W.net.nodes[id].sub(''); }); } if (i === 5) { W.net.focus(['user', 'data', 'app']); W.net.badge('data', 'still yours to secure', 'bad'); } }
   const STEPS = [
     { title: 'Every request passes nine layers',
-      text: 'When a patient opens the booking page, the request goes through <b>networking</b>, onto <b>storage</b> and a physical <b>server</b>, through the <b>virtualisation</b> layer into an <b>operating system</b>, through <b>middleware</b> and a <b>runtime</b> (such as .NET) into your <b>app</b>, which reads your <b>data</b>. Someone has to manage each layer.',
+      text: 'When a patient opens the booking page, the request travels through nine layers. First <b>networking</b>, <b>storage</b> and a physical <b>server</b>. Then the <b>virtualisation</b> layer and an <b>operating system</b>. Then <b>middleware</b> and a <b>runtime</b> (such as .NET). Finally your <b>app</b>, which reads your <b>data</b>. Someone has to manage each layer.',
       play: async run => { show(0); await W.net.send(W.route, { run, label: 'GET /book' }); } },
     { title: 'On-premises: every layer is yours',
       text: 'In your own data centre you buy the network gear and servers, run the hypervisor, patch Windows Server, install IIS and .NET, deploy the app and back up the database. All nine layers are <b>orange</b>.',
@@ -320,7 +320,7 @@
       tip: 'PaaS = "just deploy the code". AWS example: Elastic Beanstalk.',
       play: async run => { show(3); await W.net.send(W.route, { run }); } },
     { title: 'SaaS: use a finished application',
-      text: '<b>Software as a Service.</b> The whole app is the provider\'s: Gmail, Zoom, Dropbox. You sign in and use it. The line has moved almost all the way to the right.',
+      text: '<b>Software as a Service.</b> The whole app is the provider\'s: Gmail, Zoom, Dropbox. You sign in and use it. The line between your layers and the provider\'s layers has moved almost all the way to the right: the provider manages nearly everything.',
       play: async run => { show(4); await W.net.send(W.route, { run }); } },
     { title: 'But some things are always yours',
       text: 'Even with SaaS you decide <b>who has access</b>, <b>how it is configured</b> and <b>what data you put in</b>. A leaked password or a document shared with "anyone with the link" is your problem, not the provider\'s. This idea returns as the <b>shared responsibility model</b>.',

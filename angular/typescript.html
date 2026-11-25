@@ -68,7 +68,7 @@
     <ul class="lede">
       <li>TypeScript is <b>JavaScript plus types</b>. Types are checked when you build, then <b>erased</b>: the browser runs plain JavaScript.</li>
       <li>An <span class="mono">interface</span> describes the <b>shape</b> of data, like a C# DTO without behaviour.</li>
-      <li><b>Union types</b> (<span class="mono">'routine' | 'urgent'</span>) and <b>optional fields</b> (<span class="mono">phone?</span>) catch whole classes of bugs.</li>
+      <li><b>Union types</b> (<span class="mono">'routine' | 'urgent'</span>) and <b>optional fields</b> (<span class="mono">phone?</span>) catch entire kinds of bugs at build time.</li>
       <li><b>Generics</b> appear everywhere in Angular: <span class="mono">signal&lt;Patient[]&gt;</span>, <span class="mono">input&lt;Patient&gt;</span>, <span class="mono">output&lt;string&gt;</span>.</li>
       <li>Angular checks <b>templates</b> with the same types, so a typo in HTML fails the build.</li>
     </ul>
@@ -119,7 +119,7 @@
       <li><span class="if">A field with a fixed set of values</span><span class="arrow">→</span><span class="then">union of literals: <span class="mono">type Triage = 'routine' | 'urgent'</span></span></li>
       <li><span class="if">A field that may be missing</span><span class="arrow">→</span><span class="then"><span class="mono">phone?: string</span>, then read it with <span class="mono">p.phone?.length</span> or check first</span></li>
       <li><span class="if">TS2564 "has no initializer"</span><span class="arrow">→</span><span class="then">give a default, make it optional (<span class="mono">?</span>), or in Angular use <span class="mono">input.required()</span></span></li>
-      <li><span class="if">Tempted to write <span class="mono">any</span></span><span class="arrow">→</span><span class="then">use <span class="mono">unknown</span> and narrow it; <span class="mono">any</span> switches checking off</span></li>
+      <li><span class="if">Tempted to write <span class="mono">any</span></span><span class="arrow">→</span>Use unknown and narrow it (check its type first, for example with typeof). any switches type checking off.</li>
       <li><span class="if">Member only the template uses</span><span class="arrow">→</span><span class="then"><span class="mono">protected</span> (what <span class="mono">ng new</span> generates for <span class="mono">title</span>)</span></li>
     </ul>
   </section>
@@ -145,7 +145,7 @@
       <div class="note"><p><b>"String" vs "string".</b> Use lowercase <span class="mono">string</span>, <span class="mono">number</span>, <span class="mono">boolean</span>: the capitalised names are JavaScript wrapper objects. The types you'll use most in Angular also include interfaces, unions, literal types, <span class="mono">unknown</span> and <span class="mono">undefined</span>.</p></div>
       <div class="note"><p><b>Classes aren't a TypeScript invention.</b> <span class="mono">class</span>, modules and <span class="mono">let</span>/<span class="mono">const</span> are standard JavaScript (ES2015+). TypeScript adds types, access modifiers (<span class="mono">private</span>, <span class="mono">protected</span>, <span class="mono">readonly</span>), interfaces and decorators on top.</p></div>
       <div class="note"><p><b>Uninitialised fields are <span class="mono">undefined</span>, not null.</b> In the real run, <span class="mono">new PatientCard().patient</span> printed <span class="mono">undefined</span>. With strict mode (on in Angular projects), a field without a default must be marked optional or the build fails with TS2564.</p></div>
-      <div class="note"><p><b>Compiler versions.</b> Angular 22 uses TypeScript 6.0 (strict mode is now the default). TypeScript 7.0, a native Go rewrite of the compiler, reached general availability in July 2026; Angular adopts new TypeScript versions in its own releases, so use the version <span class="mono">ng new</span> installs.</p></div>
+      <div class="note"><p><b>Compiler versions.</b> Angular 22 uses TypeScript 6.0 (strict mode is now the default). TypeScript 7.0, a native Go rewrite of the compiler, reached general availability in July 2026. Angular adopts new TypeScript versions in its own releases. So use the version that <span class="mono">ng new</span> installs.</p></div>
     </div>
   </section>
 
@@ -250,7 +250,7 @@ class PatientCard {
   K.story({
     root: $('tsStory'), show, tipLabel: 'Interview tip',
     steps: [
-      { title: 'The problem: JavaScript finds typos late', text: 'In plain JavaScript an object is just a bag of fields. Misspell <span class="mono">name</span> and nothing complains until the code <b>runs</b>, in a user\'s browser. That crash is real output.' },
+      { title: 'The problem: JavaScript finds typos late', text: 'In plain JavaScript, an object is just a set of fields with no fixed shape. Misspell <span class="mono">name</span> and nothing complains until the code <b>runs</b>, in a user\'s browser. That crash is real output.' },
       { title: 'Describe the shape with an interface', text: 'CareDesk\'s first file is <span class="mono">patient.ts</span>. <span class="mono">interface Patient</span> lists the fields and their types. It\'s <b>structural</b>: any object with these fields is a Patient, no <span class="mono">implements</span> or <span class="mono">new</span> needed.' },
       { title: 'Union types limit the values', text: '<span class="mono">type Triage = \'routine\' | \'urgent\'</span> allows exactly two strings. A patient marked <span class="mono">\'critical\'</span> is rejected at build time, and your editor autocompletes the valid ones.' },
       { title: 'Optional fields: ? means "may be undefined"', text: 'Not every patient gives a phone number, so <span class="mono">phone?: string</span>. TypeScript then refuses <span class="mono">p.phone.length</span> until you handle the missing case, for example with optional chaining <span class="mono">?.</span>.' },

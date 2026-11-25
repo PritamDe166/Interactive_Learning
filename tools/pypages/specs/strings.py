@@ -26,7 +26,7 @@ SPEC = {
  "desc": "Python fundamentals: string indexing with positive and negative positions, slicing with start:stop:step, common methods, and why strings are immutable.",
  "lede": [
   "A <b>str</b> is an ordered sequence of characters. Each one has a position: <b>0</b> from the left, <b>-1</b> from the right.",
-  "<b>Slicing</b> <span class=\"mono\">s[start:stop:step]</span> copies a part; <b>stop is excluded</b> and missing values mean \"from the start\" / \"to the end\".",
+  "<b>Slicing</b> <span class=\\\"mono\\\">s[start:stop:step]</span> copies a part of the string. The stop position is not included. If you leave out start, it means \"from the start\"; if you leave out stop, it means \"to the end\".",
   "Strings are <b>immutable</b>: methods like <span class=\"mono\">upper()</span>, <span class=\"mono\">strip()</span> and <span class=\"mono\">replace()</span> return a <b>new</b> string and leave the original alone.",
   "<span class=\"mono\">split()</span> turns text into a list; <span class=\"mono\">\"sep\".join(list)</span> turns a list back into text."
  ],
@@ -46,7 +46,7 @@ print(line)
 print(dept.find("x"), dept.replace("Cardio", "Neuro"))''',
  "steps": [
   {"at": {"after": 1}, "title": "Text with untidy spaces", "text": "A string arriving from a form often has stray spaces. <span class=\"mono\">raw</span> points to a str object holding them, quotes and all."},
-  {"at": {"after": 2}, "title": "Methods return new strings", "text": "<span class=\"mono\">raw.strip()</span> makes a new string without the outer spaces, and <span class=\"mono\">.title()</span> makes another with a capital first letter. Chaining works because each call returns a str. <b>raw is untouched</b>."},
+  {"at": {"after": 2}, "title": "Methods return new strings", "text": "<span class=\"mono\">raw.strip()</span> makes a new string without the outer spaces, and <span class=\"mono\">.title()</span> makes another with a capital first letter. You can chain methods (call one right after another, like raw.strip().title()) because each call returns a str. <b>raw is untouched</b>."},
   {"at": {"after": 3}, "title": "Indexing: 0 from the left, -1 from the right", "text": "<span class=\"mono\">dept[0]</span> is <span class=\"mono\">C</span>; <span class=\"mono\">dept[-1]</span> is the last character, <span class=\"mono\">y</span>. Negative indexes count back from the end, so you never need <span class=\"mono\">len(dept) - 1</span>."},
   {"at": {"after": 4}, "title": "Slicing: stop is excluded", "text": "<span class=\"mono\">dept[0:6]</span> takes positions 0 to 5 → <span class=\"mono\">Cardio</span>. <span class=\"mono\">dept[6:]</span> runs from 6 to the end → <span class=\"mono\">logy</span>. The two halves always join back into the original.", "tip": "Think of the indexes as <b>gaps between characters</b>: the slice cuts at gap 0 and gap 6."},
   {"at": {"after": 5}, "title": "A step of -1 reverses", "text": "The third number is the <b>step</b>. <span class=\"mono\">[::-1]</span> walks from the end to the start: <span class=\"mono\">ygoloidraC</span>."},
@@ -181,7 +181,7 @@ print(dept.find("x"), dept.replace("Cardio", "Neuro"))''',
     </div>''',
  "notes": [
   ["Added", "<b>Why it matters:</b> slicing and string methods are among the most-used Python skills."],
-  ["Added", "<b>strip() removes characters, not a word.</b> <span class=\"mono\">\"report.csv\".strip(\".csv\")</span> gives <span class=\"mono\">'report'</span> by luck but <span class=\"mono\">\"vacs.csv\".strip(\".csv\")</span> gives <span class=\"mono\">''</span>. Use <span class=\"mono\">removesuffix(\".csv\")</span>."],
+  ["Added", "<b>strip() removes characters, not a word.</b> strip(\".csv\") removes any of the characters '.', 'c', 's', 'v' from both ends, not the word \".csv\". <span class=\\\"mono\\\">\"report.csv\".strip(\".csv\")</span> gives <span class=\\\"mono\\\">'report'</span> only by luck, but <span class=\\\"mono\\\">\"vacs.csv\".strip(\".csv\")</span> gives 'a'. Use <span class=\"mono\">removesuffix(\".csv\")</span>."],
   ["Added", "<b>Comparing text from users:</b> normalise first with <span class=\"mono\">s.strip().lower()</span> (or <span class=\"mono\">casefold()</span> for non-English text) before using <span class=\"mono\">==</span>."],
   ["Added", "<b>Multi-line strings</b> use triple quotes <span class=\"mono\">\"\"\"...\"\"\"</span>; the newlines are part of the value. Adjacent literals join automatically: <span class=\"mono\">\"ab\" \"cd\"</span> is <span class=\"mono\">'abcd'</span>."]
  ],

@@ -18,7 +18,7 @@ SPEC = {
  "lede": [
   "A <b>comprehension</b> builds a new list from an existing sequence in one expression: <span class=\"mono\">[f * 2 for f in fees]</span>.",
   "Read it as <b>what to keep</b> · <b>for each item</b> · <b>optional filter</b>: <span class=\"mono\">[expr for x in items if cond]</span>.",
-  "Same idea for <b>dicts</b> <span class=\"mono\">{k: v for ...}</span> and <b>sets</b> <span class=\"mono\">{x for ...}</span>; with round brackets it becomes a lazy <b>generator expression</b>.",
+  "The same idea works for <b>dicts</b> <span class=\\\"mono\\\">{k: v for ...}</span> and <b>sets</b> <span class=\\\"mono\\\">{x for ...}</span>. With round brackets it becomes a <b>generator expression</b>. It is lazy: it makes one value at a time instead of building the whole list.",
   "Use one when the loop only builds a collection. If it needs several statements, keep the normal loop."
  ],
  "walk": {"title": "the same list, two ways", "code":
@@ -42,8 +42,8 @@ print(lengths, units, total)''',
   {"at": {"after": 6}, "title": "Add a filter with if", "text": "An <span class=\"mono\">if</span> at the end <b>drops</b> items: only fees ≥ 500 are kept. The result can be shorter than the input."},
   {"at": {"after": 7}, "title": "if/else goes at the front", "text": "To <b>choose a value</b> for every item, put a conditional expression in the expression part: <span class=\"mono\">\"high\" if f &gt;= 500 else \"low\"</span>. Every item produces an output, so the length stays 4.", "tip": "Filter: <span class=\"mono\">[x for x in xs if c]</span>. Choose: <span class=\"mono\">[a if c else b for x in xs]</span>. Mixing them up is the most common syntax error here."},
   {"at": {"after": 8}, "title": "Dict comprehension", "text": "Curly braces with <span class=\"mono\">key: value</span> build a dict. Here each name maps to its length."},
-  {"at": {"after": 9}, "title": "Set comprehension", "text": "Curly braces <b>without</b> a colon make a set, so duplicates collapse: four fees, but only the distinct remainders survive."},
-  {"at": {"after": 10}, "title": "Generator expression", "text": "Inside <span class=\"mono\">sum(...)</span> the brackets disappear: this is a <b>generator expression</b>. It hands values to sum() one at a time without building a list first. Great for big data."},
+  {"at": {"after": 9}, "title": "Set comprehension", "text": "Curly braces <b>without</b> a colon make a set, so duplicates are removed. Each item here is f % 3, the remainder after dividing by 3. There are four fees, but only the different remainders are kept."},
+  {"at": {"after": 10}, "title": "Generator expression", "text": "Inside <span class=\"mono\">sum(...)</span> the brackets disappear: this is a <b>generator expression</b>. It hands values to sum() one at a time without building a list first. This saves memory when there are many items."},
   {"at": "end", "title": "Same results", "text": "<span class=\"mono\">doubled == doubled2</span> is True: same contents, different objects. Comprehensions are usually a little faster and much easier to read once you know the shape."}
  ]},
  "walk_out": "True [1200, 800] / ['low', 'high', 'low', 'high'] / {'Asha': 4, 'Ravi': 4} {0, 2} 2000",
@@ -130,7 +130,7 @@ print(lengths, units, total)''',
     </div>''',
  "notes": [
   ["Added", "<b>Why it matters.</b> Beginner code often builds lists with <span class=\"mono\">append</span> in loops; comprehensions do the same in one line and are everywhere in real Python code."],
-  ["Added", "<b>Own scope:</b> the loop variable of a comprehension does <b>not</b> leak out (unlike a for loop). Since Python 3.12 list/dict/set comprehensions are inlined for speed (PEP 709), but this rule hasn't changed."],
+  ["Added", "<b>Own scope:</b> the loop variable of a comprehension is <b>not</b> visible after the comprehension ends (unlike a for loop). Since Python 3.12, list/dict/set comprehensions are inlined (run directly inside the surrounding code) for speed (PEP 709), but the loop variable still does not leak out."],
   ["Added", "<b>Readability rule:</b> one <span class=\"mono\">for</span> and one <span class=\"mono\">if</span> is easy to read. Two nested <span class=\"mono\">for</span>s is the usual limit; beyond that, write a loop or a helper function."]
  ],
  "quiz": [

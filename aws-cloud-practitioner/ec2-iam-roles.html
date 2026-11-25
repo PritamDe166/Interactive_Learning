@@ -87,8 +87,8 @@
     <h1>IAM roles for EC2</h1>
     <ul class="lede">
       <li>Software on an instance that calls AWS (CLI, SDK) needs credentials. The right way: <b>attach an IAM role</b> to the instance.</li>
-      <li>The role reaches the instance through an <b>instance profile</b>; the CLI and SDK fetch its <b>temporary credentials</b> automatically, so <b>no <span class="mono">aws configure</span></b>.</li>
-      <li><b>Never</b> type your personal access keys into an instance: anyone who gets onto the box can copy them.</li>
+      <li>The role reaches the instance through an <b>instance profile</b> (a container that holds the role). The CLI and SDK fetch the role's <b>temporary credentials</b> automatically, so you do not need to run aws configure.</li>
+      <li><b>Never</b> type your personal access keys into an instance: anyone who gets onto the server can copy them.</li>
       <li>The role can do only what its <b>permissions policy</b> allows. Remove the policy and the same command gets <b>AccessDenied</b>.</li>
     </ul>
   </header>
@@ -108,10 +108,10 @@
       <li>Workloads on EC2 get AWS permissions from an <b>IAM role</b> attached to the instance, never from stored access keys.</li>
       <li>The role is wrapped in an <b>instance profile</b>; the console creates it for you when you attach the role.</li>
       <li>On the instance, the CLI/SDK read <b>temporary credentials</b> from the <b>instance metadata service</b> and refresh them automatically.</li>
-      <li>The role needs a <b>trust policy</b> for <code>ec2.amazonaws.com</code> and <b>permissions policies</b> (course: <code>IAMReadOnlyAccess</code> on <code>DemoRoleForEC2</code>).</li>
+      <li>The role needs a <b>trust policy</b> (which says who may use the role, here <code>ec2.amazonaws.com</code>) and <b>permissions policies</b> (which say what it may do). In the course, <code>DemoRoleForEC2</code> has <code>IAMReadOnlyAccess</code>.</li>
       <li>Attach: <b>Instance → Actions → Security → Modify IAM role</b>. One role per instance at a time; you can change it while it runs.</li>
-      <li>Remove the policy → <b>AccessDenied</b>; add it back → may take a few seconds to <b>propagate</b>.</li>
-      <li>Anyone who can run commands on the instance can use its role: keep the OS patched and the role <b>least-privilege</b>.</li>
+      <li>If you remove the policy, the command returns <b>AccessDenied</b>. If you add it back, it may take a few seconds before the change takes effect.</li>
+      <li>Anyone who can run commands on the instance can use its role. So keep the OS patched and give the role least privilege (only the permissions it really needs).</li>
       <li>Never put keys in <b>user data</b>, scripts, code or config files on the instance.</li>
     </ol></div>
   </section>
@@ -203,7 +203,7 @@
       text: 'The CLI checks environment variables, config files, and the <b>instance metadata service</b>, a local endpoint every instance has. With no role attached, metadata has no credentials to give.',
       play: async run => { base(1); await net.send(['ec2', 'imds'], { run, tone: 'cyan', label: 'creds?' }); net.badge('imds', 'none', 'bad'); } },
     { title: 'Tempting, and wrong: aws configure',
-      text: 'The CLI suggests <code>aws configure</code>. Typing <b>your own access keys</b> here would work, but they\'d sit on disk where any intruder, script or backup can copy them, valid until you notice. <b>Never do it.</b>' },
+      text: 'The CLI suggests <code>aws configure</code>. Typing <b>your own access keys</b> here would work. But the keys would be saved on disk, where any intruder, script or backup could copy them. They stay valid until you notice and remove them. <b>Never do it.</b>' },
     { title: 'Attach the role',
       text: 'In the console: <b>Actions → Security → Modify IAM role → DemoRoleForEC2</b>. The role (trusted by EC2, with <b>IAMReadOnlyAccess</b>) reaches the instance through an <b>instance profile</b>.' },
     { title: 'Metadata now hands out temporary credentials',

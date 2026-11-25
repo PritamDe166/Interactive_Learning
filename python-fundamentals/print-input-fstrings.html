@@ -85,7 +85,7 @@
   <header>
     <p class="crumbs">Python / Topic 2 / Values and text</p>
     <h1>print, input &amp; f-strings</h1>
-    <ul class="lede"><li><b>print()</b> turns each argument into text, joins them with <b>sep</b> (a space) and finishes with <b>end</b> (a newline).</li><li><b>input()</b> shows a prompt and always returns a <b>str</b>, even when the user types a number.</li><li><b>f-strings</b> (<span class="mono">f"Hi {name}"</span>) evaluate the code inside <span class="mono">{}</span> and drop the result into the text.</li><li>After a colon, a <b>format spec</b> controls the look: <span class="mono">{fee:,.2f}</span> → <span class="mono">1,234.50</span>.</li></ul>
+    <ul class="lede"><li><b>print()</b> turns each argument into text, joins them with <b>sep</b> (by default a space) and finishes with <b>end</b> (by default a newline).</li><li><b>input()</b> shows a prompt and always returns a <b>str</b>, even when the user types a number.</li><li><b>f-strings</b> (<span class="mono">f"Hi {name}"</span>) evaluate the code inside <span class="mono">{}</span> and drop the result into the text.</li><li>After a colon, a <b>format spec</b> controls the look: <span class="mono">{fee:,.2f}</span> → <span class="mono">1,234.50</span>.</li></ul>
   </header>
 
   <section aria-labelledby="storyH">
@@ -145,7 +145,7 @@
       <li><span class="if">Building text with variables</span><span class="arrow">→</span><span class="then">f-string: <span class="mono">f"{name} is {age}"</span></span></li>
       <li><span class="if">Number from the user</span><span class="arrow">→</span><span class="then"><span class="mono">int(input(...))</span> or <span class="mono">float(input(...))</span></span></li>
       <li><span class="if">Money / decimals</span><span class="arrow">→</span><span class="then"><span class="mono">{x:,.2f}</span> → 1,234.50</span></li>
-      <li><span class="if">Backslashes in paths</span><span class="arrow">→</span><span class="then">Raw string <span class="mono">r"C:\new"</span> or use <span class="mono">/</span></span></li>
+      <li><span class="if">Backslashes in paths</span><span class="arrow">→</span>A backslash starts an escape like \n, so use a raw string r"C:\new" or use /</li>
     </ul>
   </section>
 

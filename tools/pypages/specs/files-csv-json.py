@@ -24,7 +24,7 @@ SPEC = {
  "lede": [
   "<span class=\"mono\">open(path, mode)</span> returns a <b>file object</b>. Mode <b>\"r\"</b> reads, <b>\"w\"</b> <b>erases</b> then writes, <b>\"a\"</b> appends to the end.",
   "Always use <span class=\"mono\">with open(...) as f:</span>. The file is <b>closed automatically</b> when the block ends, even after an error.",
-  "Pass <span class=\"mono\">encoding=\"utf-8\"</span>, and <span class=\"mono\">newline=\"\"</span> for CSV files.",
+  "Always pass <span class=\\\"mono\\\">encoding=\"utf-8\"</span>. For CSV files, also pass <span class=\\\"mono\\\">newline=\"\"</span>.",
   "<b>csv.DictReader</b> turns each row into a dict keyed by the header. Values are always <b>strings</b>.",
   "<b>json</b>: <span class=\"mono\">dump/load</span> work with files, <span class=\"mono\">dumps/loads</span> with strings (the s is for string)."
  ],
@@ -49,12 +49,12 @@ data = json.loads(text)
 print(data["visits"][1]["name"], type(text).__name__)''',
  "steps": [
   {"at": {"after": 2}, "title": "open in \"w\" mode", "text": "<span class=\"mono\">\"w\"</span> creates <span class=\"mono\">notes.txt</span>, or <b>empties it</b> if it already exists. <span class=\"mono\">f</span> is the file object; <span class=\"mono\">with</span> will close it for us."},
-  {"at": {"after": 4}, "title": "write() doesn't add newlines", "text": "Each <span class=\"mono\">write</span> appends text at the cursor. You add <span class=\"mono\">\\n</span> yourself; print() adds it for you, write() never does."},
+  {"at": {"after": 4}, "title": "write() doesn't add newlines", "text": "Each <span class=\"mono\">write</span> appends text at the cursor. You must add \\n yourself. print() adds a newline for you, but write() never does."},
   {"at": {"after": 6}, "title": "The with block ended: file closed", "text": "Leaving the block closed the first file. Reopening with <span class=\"mono\">\"a\"</span> puts the cursor at the <b>end</b>, so Meera is added after the existing lines."},
   {"at": {"after": 9, "n": 3}, "title": "Read line by line", "text": "Looping over a file gives one line at a time, <b>including</b> its <span class=\"mono\">\\n</span>, so <span class=\"mono\">strip()</span> removes it. This uses little memory even for huge files.", "tip": "<span class=\"mono\">f.read()</span> gives the whole file as one string; <span class=\"mono\">f.readlines()</span> a list of lines."},
   {"at": {"after": 12}, "title": "csv.writer writes rows", "text": "<span class=\"mono\">writerows</span> takes a list of lists and handles commas and quoting for you. <span class=\"mono\">newline=\"\"</span> stops blank lines appearing between rows on Windows."},
   {"at": {"after": 14}, "title": "DictReader: rows become dicts", "text": "<span class=\"mono\">DictReader</span> uses the first row as keys. <span class=\"mono\">rows</span> is now a list of dicts, one per patient. Notice <span class=\"mono\">'450'</span> is a <b>string</b>: CSV has no types."},
-  {"at": {"after": 15}, "title": "Convert before doing maths", "text": "<span class=\"mono\">int(r[\"fee\"])</span> converts each fee; the generator expression feeds sum(): 1250."},
+  {"at": {"after": 15}, "title": "Convert before doing maths", "text": "<span class=\\\"mono\\\">int(r[\"fee\"])</span> converts each fee from text to a number. The generator expression passes these numbers to sum(), which gives 1250."},
   {"at": {"after": 16}, "title": "json.dumps: Python → JSON text", "text": "<span class=\"mono\">dumps</span> turns dicts and lists into one <b>string</b> of JSON, ready to save or send to an API. <span class=\"mono\">json.dump(obj, f)</span> writes it straight to a file."},
   {"at": "end", "title": "json.loads: JSON text → Python", "text": "<span class=\"mono\">loads</span> parses the string back into new dicts and lists, so you can index into it: <span class=\"mono\">data[\"visits\"][1][\"name\"]</span> → Ravi."}
  ]},
@@ -119,7 +119,7 @@ print(data["visits"][1]["name"], type(text).__name__)''',
     show();'''},
   {"id": "pj", "title": "Python ⇄ JSON", "kind": "json.dumps then json.loads · results from real Python",
    "html": '''    <div class="scroll card table-card"><table><thead><tr><th>Python object</th><th>json.dumps(obj)</th><th>json.loads(...) back</th></tr></thead><tbody id="pjBody"></tbody></table></div>
-    <p class="status-line">Round trips aren't always exact: tuples come back as lists and int keys as strings.</p>''',
+    <p class="status-line">Converting to JSON and back (a round trip) doesn't always give the same thing: tuples come back as lists, and int keys come back as strings.</p>''',
    "js": '''    const JS = __JS__;
     const e = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
     $('pjBody').innerHTML = JS.map(r => `<tr><td class="mono">${e(r.py)}</td><td class="mono ${r.json.startsWith('TypeError') ? 'bad-text' : ''}">${e(r.json)}</td><td class="mono">${e(r.back) || '—'}</td></tr>`).join('');'''.replace('__JS__', json.dumps(JS, ensure_ascii=False))}
@@ -156,7 +156,7 @@ print(data["visits"][1]["name"], type(text).__name__)''',
     </div>''',
  "notes": [
   ["Corrected", "<b>Opening with \"w\" erases the file.</b> A script that opens <span class=\"mono\">notes.txt</span> with <span class=\"mono\">\"w\"</span> replaces everything already in it with what it writes. Easy to lose data this way: use \"a\", or write to a new file."],
-  ["Corrected", "<b>Looping over a CSV header gives columns, not rows.</b> <span class=\"mono\">for row in header</span> loops over the column names; name it <span class=\"mono\">for column in header</span>."],
+  ["Corrected", "<b>Looping over a CSV header gives columns, not rows.</b> If header is the CSV's first row, <span class=\\\"mono\\\">for row in header</span> loops over the column names, not over rows. So name the variable for what it holds: <span class=\\\"mono\\\">for column in header</span>."],
   ["Corrected", "<b>Relative paths depend on where you run Python.</b> A path like <span class=\"mono\">\"files/data.csv\"</span> only works from one folder. Build the path from the script's location with <span class=\"mono\">pathlib.Path(__file__).parent</span>."],
   ["Updated", "<b>Always pass <span class=\"mono\">encoding=</span>.</b> Before Python 3.15 the default depended on the OS (often cp1252 on Windows), so non-English names could break. Python 3.15 (Oct 2026) makes UTF-8 the default (PEP 686), but passing <span class=\"mono\">encoding=\"utf-8\"</span> keeps older versions safe."],
   ["Added", "<b>Naming:</b> functions like <span class=\"mono\">ReadCsvAsDictionaries</span> use PascalCase; PEP 8 uses snake_case for functions (<span class=\"mono\">read_csv_as_dicts</span>) and PascalCase for classes."]
@@ -165,7 +165,7 @@ print(data["visits"][1]["name"], type(text).__name__)''',
   {"q": "What does <span class=\"mono\">with</span> guarantee?", "a": "The file is <b>closed</b> when the block ends, whether it ends normally, with return, or with an exception. It's a <b>context manager</b> (its own page in Part 5)."},
   {"q": "<span class=\"mono\">import json; print(json.loads('[1, \"a\", null]'))</span>", "code": "import json; print(json.loads('[1, \"a\", null]'))", "expect": "[1, 'a', None]", "a": "<b class=\"mono\">[1, 'a', None]</b>. JSON null becomes None."},
   {"q": "<span class=\"mono\">import csv, io\\nprint(next(csv.reader(io.StringIO('a,\"b,c\",d'))))</span>", "code": "import csv, io\nprint(next(csv.reader(io.StringIO('a,\"b,c\",d'))))", "expect": "['a', 'b,c', 'd']", "a": "<b class=\"mono\">['a', 'b,c', 'd']</b>. The csv module handles quoted commas; <span class=\"mono\">split(\",\")</span> wouldn't."},
-  {"q": "<span class=\"mono\">import json; print(json.dumps({\"b\": 1, \"a\": 2}, sort_keys=True))</span>", "code": "import json; print(json.dumps({\"b\": 1, \"a\": 2}, sort_keys=True))", "expect": "{\"a\": 2, \"b\": 1}", "a": "<b class=\"mono\">{\"a\": 2, \"b\": 1}</b>. sort_keys gives stable output, handy for diffs and tests."},
+  {"q": "<span class=\"mono\">import json; print(json.dumps({\"b\": 1, \"a\": 2}, sort_keys=True))</span>", "code": "import json; print(json.dumps({\"b\": 1, \"a\": 2}, sort_keys=True))", "expect": "{\"a\": 2, \"b\": 1}", "a": "<b class=\\\"mono\\\">{\"a\": 2, \"b\": 1}</b>. sort_keys always puts the keys in the same order, which is handy when comparing outputs (diffs) and in tests."},
   {"q": "<span class=\"mono\">open(\"missing.txt\")</span> raises…?", "code": "open(\"missing.txt\")", "expect": "FileNotFoundError", "a": "<b class=\"mono\">FileNotFoundError</b>. Catch it with try/except, or check <span class=\"mono\">Path(p).exists()</span> first."},
   {"q": "<span class=\"mono\">import io; f = io.StringIO(\"a\\nb\\n\"); print([l.strip() for l in f])</span>", "code": "import io; f = io.StringIO(\"a\\nb\\n\"); print([l.strip() for l in f])", "expect": "['a', 'b']", "a": "<b class=\"mono\">['a', 'b']</b>. Iterating a file-like object gives lines."}
  ],

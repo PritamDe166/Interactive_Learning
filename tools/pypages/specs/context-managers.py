@@ -29,10 +29,10 @@ SPEC = {
  "title": "Context managers", "title_plain": "Context managers",
  "desc": "Python fundamentals: the with statement, __enter__ and __exit__, guaranteed cleanup when errors happen, and writing your own with contextlib.contextmanager.",
  "lede": [
-  "<span class=\"mono\">with X as v:</span> calls <span class=\"mono\">X.__enter__()</span> before the block (its return value becomes <span class=\"mono\">v</span>) and <span class=\"mono\">X.__exit__()</span> after it, <b>no matter how</b> the block ends.",
-  "That makes <span class=\"mono\">with</span> the standard way to <b>acquire and release</b>: files, locks, database transactions, network connections, temporary settings.",
-  "<span class=\"mono\">__exit__</span> receives the exception (if any). Returning a true value <b>swallows</b> it; usually you return False and let it propagate.",
-  "<span class=\"mono\">@contextmanager</span> lets you write one as a generator: code before <span class=\"mono\">yield</span> is enter, code after (in <span class=\"mono\">finally</span>) is exit."
+  "<span class=\\\"mono\\\">with X as <span class=\\\"mono\\\">v</span>:</span> first calls <span class=\\\"mono\\\">X.__enter__()</span>, and its return value becomes v. Then the block runs. Then Python calls <span class=\\\"mono\\\">X.__exit__()</span>, <b>no matter how</b> the block ends.",
+  "So <span class=\\\"mono\\\">with</span> is the standard way to get a resource and then give it back (<b>acquire and release</b>). Examples: files, locks, database transactions, network connections, temporary settings.",
+  "<span class=\"mono\">__exit__</span> receives the exception (if any). If __exit__ returns a true value, the exception is swallowed (stopped and hidden). Usually you return False, so the exception propagates (keeps moving up to the caller).",
+  "<span class=\\\"mono\\\">@contextmanager</span> lets you write a context manager as a generator (a function with <span class=\\\"mono\\\">yield</span>). The code before yield is the enter part. The code after yield (put it in <span class=\\\"mono\\\">finally</span>) is the exit part."
  ],
  "walk": {"title": "a lock and a booking", "code":
 '''from contextlib import contextmanager
@@ -65,9 +65,9 @@ except ValueError as e:
  "steps": [
   {"at": {"event": "call", "n": 2}, "title": "with calls __enter__", "text": "<span class=\"mono\">with Timer() as t</span> creates the object, then calls its <span class=\"mono\">__enter__</span>. Whatever it returns (here <span class=\"mono\">self</span>) is bound to <span class=\"mono\">t</span>."},
   {"at": {"after": 12}, "title": "The body runs", "text": "Ordinary code inside the block: <span class=\"mono\">working</span>."},
-  {"at": {"event": "call", "n": 3}, "title": "Leaving the block calls __exit__", "text": "As soon as the block ends, Python calls <span class=\"mono\">__exit__(exc_type, exc, tb)</span>. No error happened, so all three are <span class=\"mono\">None</span>."},
+  {"at": {"event": "call", "n": 3}, "title": "Leaving the block calls __exit__", "text": "As soon as the block ends, Python calls <span class=\\\"mono\\\">__exit__(exc_type, exc, tb)</span>: the exception's type, the exception object and its traceback. No error happened, so all three are <span class=\"mono\">None</span>."},
   {"at": {"event": "call", "n": 4}, "title": "A generator-based manager", "text": "<span class=\"mono\">@contextmanager</span> wraps the <span class=\"mono\">booking</span> generator. Entering the with block runs it up to <span class=\"mono\">yield</span>."},
-  {"at": {"after": 24}, "title": "yield's value goes to as", "text": "The yielded string became <span class=\"mono\">b</span>. The generator is paused inside <span class=\"mono\">try</span>, holding the \"lock\"."},
+  {"at": {"after": 24}, "title": "yield's value goes to as", "text": "The yielded string became <span class=\"mono\">b</span>. The generator is paused inside <span class=\\\"mono\\\">try</span>. The \"lock\" is still taken."},
   {"at": {"event": "exception", "n": 1}, "title": "An error inside the block", "text": "<span class=\"mono\">raise ValueError</span> interrupts the block. Python doesn't jump straight to <span class=\"mono\">except</span>: first it gives the context manager a chance to clean up."},
   {"at": {"after": 20}, "title": "finally releases the lock", "text": "The exception is thrown <b>into</b> the paused generator at the <span class=\"mono\">yield</span>, so its <span class=\"mono\">finally</span> runs: <span class=\"mono\">unlock 9:00</span>. Cleanup happened even though the block failed.", "tip": "Without try/finally around the yield, an exception would skip your cleanup code."},
   {"at": "end", "title": "Then the exception continues", "text": "The manager didn't suppress the error, so it reaches the outer <span class=\"mono\">except</span>. Order: lock → body → unlock → caught."}

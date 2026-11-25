@@ -138,7 +138,7 @@
       <li><span class="if">Use a component in another one</span><span class="arrow">→</span><span class="then">write its selector in the template <b>and</b> add the class to <span class="mono">imports</span></span></li>
       <li><span class="if">NG8001 "is not a known element"</span><span class="arrow">→</span><span class="then">you forgot the <span class="mono">imports</span> entry (or misspelled the selector)</span></li>
       <li><span class="if">Small template</span><span class="arrow">→</span><span class="then"><span class="mono">template: `...`</span> inline; otherwise <span class="mono">templateUrl</span></span></li>
-      <li><span class="if">Style the component's own tag</span><span class="arrow">→</span><span class="then"><span class="mono">:host { display: block; }</span> (custom elements are inline by default)</span></li>
+      <li><span class="if">Style the component's own tag</span><span class="arrow">→</span>:host { display: block; }. Custom elements are inline by default (they sit inside a line of text like a &lt;span&gt;), so block makes them take the full width.</li>
       <li><span class="if">Style used everywhere</span><span class="arrow">→</span><span class="then"><span class="mono">src/styles.css</span>; component CSS stays inside its component</span></li>
     </ul>
   </section>
@@ -164,7 +164,7 @@
     </div>
     <div class="notes" style="margin-top:14px">
       <div class="note"><p><b>Import path.</b> <span class="mono">Component</span> comes from <span class="mono">import { Component } from '@angular/core';</span>.</p></div>
-      <div class="note"><p><b>No <span class="mono">declarations</span> array.</b> Older apps registered each component in <span class="mono">app.module.ts</span>. Standalone components (the default since v19) are used by importing them in the component whose template uses them.</p></div>
+      <div class="note"><p><b>No <span class="mono">declarations</span> array.</b> Older apps registered each component in <span class="mono">app.module.ts</span>. Standalone components are the default since v19. To use one, add it to the imports of the component whose template uses it.</p></div>
       <div class="note"><p><b>File names.</b> <span class="mono">ng g c patient-card</span> now creates <span class="mono">patient-card.ts</span> with <span class="mono">class PatientCard</span>. The older <span class="mono">user.component.ts</span> / <span class="mono">UserComponent</span> naming is the pre-v20 style; both work.</p></div>
       <div class="note"><p><b>How scoping works.</b> Angular adds attributes such as <span class="mono">_ngcontent-ng-c3110745158</span> to each element of a component and rewrites its CSS to <span class="mono">article[_ngcontent-ng-c3110745158]</span>. That's why PatientList's <span class="mono">h3</span> rule didn't colour the card's name in the real build.</p></div>
     </div>
@@ -341,14 +341,14 @@ h3[_ngcontent-ng-c3223816692] { color: crimson; }     ← patient-list.css
   K.story({
     root: $('cmpStory'), show, tipLabel: 'Interview tip',
     steps: [
-      { title: 'Where we left off: one big App', text: 'After step 2, everything CareDesk shows lives in <span class="mono">app.html</span>. Fine for a title, but a real portal has a header, a list, cards, forms… One template for all of it becomes hard to read, test and reuse.' },
+      { title: 'Where we left off: one big App', text: 'After step 2, everything CareDesk shows lives in <span class="mono">app.html</span>. One template is fine for a title. But a real portal has a header, a list, cards, forms and more. One template for all of it becomes hard to read, test and reuse.' },
       { title: 'Generate a component', text: '<span class="mono">ng generate component header</span> (short: <span class="mono">ng g c</span>) creates a folder with the class, template, styles and a test. We also generate <span class="mono">patient-list</span> and <span class="mono">patient-card</span>.' },
       { title: 'Anatomy of a component', text: 'The class holds data and behaviour. <span class="mono">@Component</span> tells Angular its <b>selector</b> (the tag), its template and styles, and what it <span class="mono">imports</span>. The header now owns the title.' },
       { title: 'Use it by its selector', text: 'App\'s template writes <span class="mono">&lt;app-header /&gt;</span>, and App lists <span class="mono">Header</span> in its <span class="mono">imports</span>. Angular renders Header\'s template inside that tag. The tree gets its first child.', tip: 'Standalone components are self-describing: each one imports exactly what its template uses. Forgetting gives NG8001.' },
       { title: 'Children can have children', text: '<span class="mono">PatientList</span> shows the "Waiting room" heading and uses <span class="mono">&lt;app-patient-card /&gt;</span>, so it imports <span class="mono">PatientCard</span>. The tree is now App → Header, PatientList → PatientCard.' },
       { title: 'Each component owns its template data', text: 'PatientCard\'s template reads <span class="mono">patient.name</span> from its own class. For now the patient is hard-coded to Asha; on step 5 the list will hand each card its patient through an input.' },
       { title: 'Styles stay inside the component', text: 'PatientList\'s CSS colours <span class="mono">h2</span> and <span class="mono">h3</span> red. Angular rewrote the rule with an attribute unique to PatientList, so "Waiting room" turned red but the card\'s <span class="mono">h3</span> ("Asha") did not. That\'s the real compiled CSS and DOM.' },
-      { title: ':host styles the component\'s own tag', text: 'The browser treats <span class="mono">&lt;app-header&gt;</span> as an unknown inline element. <span class="mono">:host</span> targets it from inside Header\'s CSS: here <span class="mono">display: block</span> and a teal line under the header.' },
+      { title: ':host styles the component\'s own tag', text: 'The browser treats <span class="mono">&lt;app-header&gt;</span> as an unknown inline element. <span class="mono">:host</span> selects the &lt;app-header&gt; tag from inside Header\'s CSS. Here it sets <span class="mono">display: block</span> and adds a teal line under the header.' },
       { title: 'The page is the tree, rendered', text: 'In the browser\'s Elements panel you see each selector tag with its template inside. Step 3 of CareDesk is done: three components, each with one job.' }
     ]
   });

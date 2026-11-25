@@ -109,7 +109,7 @@
     <p class="crumbs">System Design / LLD / Foundations / L2</p>
     <h1>Class Relationships</h1>
     <ul class="lede">
-      <li>Five relationships, loosest to tightest: <b>dependency</b> (uses briefly), <b>association</b> (keeps a reference), <b>aggregation</b> (has parts that live on), <b>composition</b> (owns parts that go with it), <b>inheritance</b> (is a kind of).</li>
+      <li>There are five relationships, from loosest to tightest. Dependency: uses another object briefly. Association: keeps a reference to it. Aggregation: has parts that keep living after the whole is gone. Composition: owns parts that are deleted with the whole. Inheritance: is a kind of another class.</li>
       <li>Decide by <b>lifetime and ownership</b>: who creates the part, who else holds it, does it outlive the whole?</li>
       <li>In .NET, "dies with the whole" means <b>nothing else references it</b>, so the garbage collector reclaims it.</li>
       <li><b>is-a</b> → inheritance; <b>has-a</b> → composition. <b>Favour composition</b>: combine parts instead of multiplying subclasses.</li>
@@ -121,7 +121,7 @@
 
   <section id="learn" data-nav="Learn">
     <h2 class="sec-h"><span class="sec-n">1</span>Learn: objects, references and who outlives whom</h2>
-    <p class="sec-sub">Dashed boxes are variables (GC roots); solid boxes are objects on the heap. Outputs are from a real run. For the diagram notation, see L3 UML.</p>
+    <p class="sec-sub">Dashed boxes are variables (GC roots: the starting points the garbage collector checks). Solid boxes are objects on the heap (the memory where objects live). Outputs are from a real run. For the diagram notation, see L3 UML.</p>
     <div class="sub-block" aria-labelledby="storyH">
       <h3 class="stage-title sub" id="storyH">Walkthrough: a clinic in memory</h3>
       <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
@@ -154,7 +154,7 @@
       <li><span class="if">Kept in a field or property, nobody owns anybody</span><span class="arrow">→</span><span class="then">association (injected services too)</span></li>
       <li><span class="if">Parts created elsewhere, passed in, can be shared</span><span class="arrow">→</span><span class="then">aggregation (department ↔ doctors)</span></li>
       <li><span class="if">Whole creates its parts and keeps them to itself</span><span class="arrow">→</span><span class="then">composition (order → order lines)</span></li>
-      <li><span class="if">Passes "B is a kind of A" and keeps A's promises</span><span class="arrow">→</span><span class="then">inheritance</span></li>
+      <li>"B is a kind of A" is true, and B can be used anywhere an A is expected without surprises<span class="arrow">→</span><span class="then">inheritance</span></li>
       <li><span class="if">You'd override something to throw <span class="mono">NotImplementedException</span></span><span class="arrow">→</span><span class="then">not really is-a: use composition</span></li>
       <li><span class="if">Subclasses multiply (channel × style)</span><span class="arrow">→</span><span class="then">composition over inheritance: hold the parts</span></li>
       <li><span class="if">Composite parts hold files or connections</span><span class="arrow">→</span><span class="then">the whole implements <span class="mono">IDisposable</span> and disposes them</span></li>
@@ -170,7 +170,7 @@
           <tr><td>Association</td><td>Keeps a reference, no ownership?</td><td>field or property</td><td>foreign key</td><td>solid line / arrow</td></tr>
           <tr><td>Aggregation</td><td>Parts created elsewhere, may be shared, outlive the whole?</td><td>collection of objects passed in</td><td>nullable FK or link table</td><td>hollow diamond on the whole</td></tr>
           <tr><td>Composition</td><td>Whole creates parts, nobody else holds them, they go with it?</td><td>parts created inside, kept private</td><td>required FK, <span class="mono">ON DELETE CASCADE</span></td><td>filled diamond on the whole</td></tr>
-          <tr><td>Inheritance</td><td>Truly a kind of, substitutable?</td><td><span class="mono">class B : A</span></td><td>TPH / TPT / TPC mapping</td><td>hollow triangle</td></tr>
+          <tr><td>Inheritance</td><td>Truly a kind of, substitutable?</td><td><span class="mono">class B : A</span></td><td>TPH / TPT / TPC mapping (EF Core: table per hierarchy, table per type, table per concrete type)</td><td>hollow triangle</td></tr>
         </tbody>
       </table>
     </div>
@@ -346,9 +346,9 @@ public class Car(IEngine engine) { private readonly IEngine _engine = engine; } 
   }
   async function playSwap(run) { drawCompose('email'); await K.sleep(900, run); const p = K.pill(sv, 'SwitchChannel(sms)'); await K.move(p, [160, 300], [400, 120], 700, run); p.remove(); drawCompose('sms'); await K.sleep(600, run); }
   K.story({ root: $('rlStory'), show, tipLabel: 'Interview tip', steps: [
-    { title: 'Objects and the references between them', text: 'Each <span class="mono">new</span> puts an object on the heap. Variables (dashed) hold references to them; objects can hold references to each other. Which references exist, and who created them, <b>is</b> the relationship.' },
+    { title: 'Objects and the references between them', text: 'Each <span class="mono">new</span> puts an object on the heap. Variables (dashed) hold references to them; objects can hold references to each other. The relationship between two classes <b>is</b> defined by which references exist and who created the objects.' },
     { title: 'Dependency: a reference only during a call', text: '<span class="mono">InvoicePrinter.Print(invoice)</span> uses the invoice while the method runs and keeps <b>no field</b>. When the call ends, the link is gone. The loosest relationship.', play: playDep },
-    { title: 'Association: a reference kept in a field', text: 'An Appointment keeps its Patient in a property for its whole life. Nobody owns anybody: the patient existed before the appointment and can outlive it. <b>Multiplicity</b>: many appointments, one patient each.' },
+    { title: 'Association: a reference kept in a field', text: 'An Appointment keeps its Patient in a property for its whole life. Nobody owns anybody: the patient existed before the appointment and can outlive it. <b>Multiplicity</b> (how many objects are on each side): many appointments, each with one patient.' },
     { title: 'Aggregation: parts created elsewhere, shared', text: 'Doctors are hired by the hospital and <b>passed in</b> to departments; Dr Rao works in two. The department <b>has</b> doctors but doesn\'t own their lifetime.' },
     { title: 'Composition: the whole creates and keeps its parts', text: 'The clinic <b>creates</b> its departments and nobody else holds them. They exist only as part of this clinic.', tip: 'The test: "if I delete the whole, do the parts go too, and can a part belong to two wholes?"' },
     { title: 'Drop the clinic and run the GC', text: 'Set <span class="mono">clinic = null</span>. The clinic and its departments are now unreachable, so the collector reclaims them (real run: <span class="mono">alive=False</span>). Dr Rao is still reachable from <span class="mono">drRao</span>, so he survives. That\'s the lifetime difference between composition and aggregation.', play: playGc },

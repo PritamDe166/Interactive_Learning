@@ -110,7 +110,7 @@
     <h2 id="rmH">Points to remember</h2>
     <div class="remember"><ol>
       <li>A <b>Region</b> is a geographic area with a code (us-east-1, ap-south-1). Most services are <b>regional</b>: resources live in the Region you choose.</li>
-      <li>Each Region has <b>three or more Availability Zones</b>. An AZ = <b>one or more discrete data centres</b> with redundant power, networking and connectivity, isolated from other AZs and linked by low-latency networking.</li>
+      <li>Each Region has <b>three or more Availability Zones</b>. An AZ is one or more separate data centres. Each AZ has backup (redundant) power, networking and connectivity. It is isolated from the other AZs but linked to them by low-latency (fast) networking.</li>
       <li><b>Multi-AZ</b> deployment = high availability inside a Region. Multi-Region = protection against a whole-Region disaster.</li>
       <li><b>Edge locations</b> (points of presence) sit close to users and serve <b>CloudFront</b> caching; you don't run EC2 there.</li>
       <li>Choose a Region by <b>compliance</b> (data residency) first, then <b>latency</b>, <b>service availability</b> and <b>price</b>.</li>
@@ -321,7 +321,7 @@
       text: 'A power failure takes out <b>AZ a</b>. The load balancer\'s health checks see it and send everything to <b>AZ b</b>. Bookings keep working. With only one AZ, the clinic would be offline.',
       play: async run => { base(4); for (let k = 0; k < 2; k++) await net.send(['mum', 'lb', 'w2'], { run }); } },
     { title: 'Far-away patients wait longer',
-      text: 'A patient in <b>London</b> going straight to Mumbai crosses many public-internet hops: about <b>300 ms</b> for each round trip. Every image, every script, every page pays that price.',
+      text: 'A patient in <b>London</b> going straight to Mumbai crosses many public-internet hops: about <b>300 ms</b> for each round trip. Every image, every script and every page has that delay.',
       play: async run => { base(5); await net.send(['lon', 'lb', 'w1'], { run, tone: 'red', label: 'GET /logo.png' }); } },
     { title: 'Edge location: first request (cache miss)',
       text: 'AWS has <b>edge locations</b> in hundreds of cities, London included. With <b>CloudFront</b>, the London patient talks to the nearby edge. The first time, the edge doesn\'t have the file, so it fetches it from Mumbai over AWS\'s own network and <b>keeps a copy</b>.',

@@ -95,7 +95,7 @@
     <ul class="lede">
       <li>An <b>AMI</b> is the <b>template</b> an EC2 instance is launched from: OS, installed software, configuration.</li>
       <li>Sources: <b>public</b> (e.g. Amazon Linux from AWS), <b>your own custom</b> AMIs, or <b>AWS Marketplace</b> (vendors, sometimes paid).</li>
-      <li>A custom AMI = <b>EBS snapshots</b> of the instance's volumes + launch metadata. Software baked in means <b>faster boots</b>.</li>
+      <li>A custom AMI = <b>EBS snapshots</b> of the instance's volumes + launch metadata. When the software is already installed in the AMI, new instances start up faster.</li>
       <li>An AMI belongs to <b>one Region</b>: use it in any AZ there; <b>copy</b> it to use in another Region.</li>
     </ul>
   </header>
@@ -125,7 +125,7 @@
       <li><b>AMI = Amazon Machine Image</b>: a reusable template for launching EC2 instances.</li>
       <li>Three sources: <b>Public</b> (AWS, e.g. Amazon Linux 2023), <b>Custom</b> (you make and maintain it), <b>AWS Marketplace</b> (vendor-built, may cost extra).</li>
       <li>Why custom: <b>faster boot and setup</b> (software pre-installed), <b>consistent</b> servers, repeatable deployments (Auto Scaling launches from an AMI).</li>
-      <li>Process: launch → customise → (ideally) <b>stop</b> for data integrity → <b>Create image</b> → status <code>pending</code> → <code>available</code> → launch from <b>My AMIs</b>.</li>
+      <li>Process: launch an instance and customise it. Ideally <b>stop</b> it, so the data is consistent. Click <b>Create image</b>. The status shows <code>pending</code>, then <code>available</code>. Then launch new instances from <b>My AMIs</b>.</li>
       <li>Creating an AMI <b>also creates EBS snapshots</b> of every volume attached to the instance. Deleting those snapshots breaks the AMI.</li>
       <li>An AMI is <b>Region-scoped</b>: launch in any AZ of that Region; <b>copy the AMI</b> to use it in another Region.</li>
       <li>AMIs are <b>immutable</b>: to change one, launch from it, change the instance, create a <b>new</b> AMI.</li>
@@ -160,7 +160,7 @@
     <details class="console-steps"><summary>Bake and launch a custom AMI (from the course hands-on)</summary>
       <ol>
         <li>Launch an instance: <b>Amazon Linux</b>, t2.micro/t3.micro, the security group that allows HTTP. In <b>User data</b>, paste the script that installs and starts <code>httpd</code> but <b>leave out</b> the line that writes <code>index.html</code>.</li>
-        <li>Wait 1 to 2 minutes (running ≠ ready). Open <code>http://&lt;public IP&gt;</code>: the Apache test page appears.</li>
+        <li>Wait 1 to 2 minutes: the status "running" does not mean the software is ready yet. Open <code>http://&lt;public IP&gt;</code>: the Apache test page appears.</li>
         <li>Select the instance → <b>Actions → Image and templates → Create image</b>, name it <code>demo image</code> → Create.</li>
         <li><b>AMIs</b> page: status <code>pending</code>, then <code>available</code>.</li>
         <li>Select the AMI → <b>Launch instance from AMI</b> (or in the wizard: <b>My AMIs</b>). In User data paste only the line that writes "Hello World" to <code>index.html</code>.</li>
@@ -271,7 +271,7 @@
     { title: 'Three kinds of AMI',
       text: '<b>Public</b>: published by AWS or others (Amazon Linux, Ubuntu, Windows). <b>Custom</b>: yours, which you maintain and patch. <b>AWS Marketplace</b>: built by vendors (firewalls, databases), sometimes with a licence fee. AMIs are <b>immutable</b>: a change means a new AMI.' },
     { title: 'The whole picture',
-      text: 'Bake once (custom AMI = snapshots + metadata), launch many in <b>any AZ</b>, <b>copy</b> to other Regions. To automate the baking and testing, use <b>EC2 Image Builder</b> (next).' }
+      text: 'Build the custom AMI once (it is snapshots plus metadata). Then launch many instances from it in <b>any AZ</b>, and <b>copy</b> it to other Regions when needed. To automate the baking and testing, use <b>EC2 Image Builder</b> (next).' }
   ];
   K.story({ root: $('story'), steps: STEPS, show: base });
 

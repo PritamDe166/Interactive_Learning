@@ -87,7 +87,7 @@
     <h1>Template control flow</h1>
     <ul class="lede">
       <li>Templates decide <b>what exists</b> with blocks: <span class="mono">@if</span>, <span class="mono">@for</span>, <span class="mono">@switch</span>, plus <span class="mono">@let</span> for local values.</li>
-      <li><span class="mono">@for</span> needs a <span class="mono">track</span> expression: how Angular matches items to the DOM it already built.</li>
+      <li><span class="mono">@for</span> needs a <span class="mono">track</span> expression. Angular uses it to match each item to the DOM it already built for that item.</li>
       <li>Track by a <b>stable id</b> (<span class="mono">track p.id</span>). Tracking by <span class="mono">$index</span> can move state to the wrong item.</li>
       <li><span class="mono">@empty</span> renders when the list is empty; <span class="mono">@else</span> pairs with <span class="mono">@if</span>.</li>
       <li>These replace <span class="mono">*ngIf</span>, <span class="mono">*ngFor</span> and <span class="mono">[ngSwitch]</span>, deprecated since v20.</li>
@@ -125,7 +125,7 @@
       <li><span class="if">Show something conditionally</span><span class="arrow">→</span><span class="then"><span class="mono">@if (cond) { … } @else if (…) { … } @else { … }</span></span></li>
       <li><span class="if">Need the value you tested</span><span class="arrow">→</span><span class="then"><span class="mono">@if (first(); as p) { {{ p.name }} }</span></span></li>
       <li><span class="if">Loop over items</span><span class="arrow">→</span><span class="then"><span class="mono">@for (p of list(); track p.id) { … } @empty { … }</span></span></li>
-      <li><span class="if">Items have an id</span><span class="arrow">→</span><span class="then"><span class="mono">track p.id</span>. No id and static list → <span class="mono">track $index</span></span></li>
+      <li><span class="if">Items have an id</span><span class="arrow">→</span>Use track p.id. If there is no id and the list never changes order, use track $index.</li>
       <li><span class="if">Position, first/last, odd/even</span><span class="arrow">→</span><span class="then"><span class="mono">$index</span>, <span class="mono">$count</span>, <span class="mono">$first</span>, <span class="mono">$last</span>, <span class="mono">$even</span>, <span class="mono">$odd</span></span></li>
       <li><span class="if">One value, several cases</span><span class="arrow">→</span><span class="then"><span class="mono">@switch (x) { @case ('a') { … } @default { … } }</span></span></li>
       <li><span class="if">Reuse an expression in the template</span><span class="arrow">→</span><span class="then"><span class="mono">@let total = patients().length;</span></span></li>
@@ -162,7 +162,7 @@
     <p class="sub">Answer out loud before you open each card.</p>
     <div class="quiz">
       <details><summary>What does <span class="mono">track</span> do in <span class="mono">@for</span>?<span class="go">Show answer</span></summary>
-        <div class="ans"><p>It gives each item an identity so Angular can match new data to the DOM and component instances it already created: keep, move, create or destroy only what changed.</p></div></details>
+        <div class="ans"><p>It gives each item an identity. Angular uses it to match new data to the DOM and component instances it already created. Then it keeps, moves, creates or destroys only what changed.</p></div></details>
       <details><summary>Why was <span class="mono">track $index</span> dangerous in CareDesk?<span class="go">Show answer</span></summary>
         <div class="ans"><p>Discharging Asha shifted everyone up a position. The card instance at position 1, which held Asha's "Selected" state and note "needs ECG", was reused for Ravi, so Ravi showed Asha's state.</p></div></details>
       <details><summary>What's wrong with <span class="mono">track p</span> (the object)?<span class="go">Show answer</span></summary>
@@ -258,9 +258,9 @@ byId(_: number, p: Patient) { return p.id; }`, marks: { 1: 'bad', 2: 'bad', 5: '
       { title: '@switch: one value, several looks', text: 'Inside the card, <span class="mono">@switch (patient().triage)</span> picks a badge. Cases are checked against the <span class="mono">Triage</span> type from step 2.' },
       { title: '@let: name an expression', text: '<span class="mono">@let total = patients().length;</span> declares a read-only template variable. The loop\'s <span class="mono">$index</span>, <span class="mono">$count</span>, <span class="mono">$first</span>, <span class="mono">$last</span>, <span class="mono">$even</span> and <span class="mono">$odd</span> work the same way.' },
       { title: 'Why track matters: by id', text: 'Asha is selected with the note "needs ECG". Discharge her. With <span class="mono">track p.id</span>, Angular matched Ravi and Meera to their existing instances (B, C) and destroyed only A. Their state is untouched.', play: async run => { await animate(run, marked(), S[5].inst); } },
-      { title: 'track $index: state on the wrong patient', text: 'Same action with <span class="mono">track $index</span>. Position 1 still exists, so instance A was <b>reused for Ravi</b>; the last instance was destroyed instead. In the real run Ravi\'s card showed "Selected" and "needs ECG". In a clinic that\'s a safety bug.', play: async run => { await animate(run, marked(), S[6].inst); } },
-      { title: 'track p: fine until data is re-fetched', text: 'Tracking by the object itself survived the discharge, but when the same patients came back as fresh objects (as after an API refresh), every card was destroyed and recreated and Angular logged NG0956.', play: async run => { await animate(run, marked(), S[7].inst); } },
-      { title: 'The old way', text: '<span class="mono">*ngFor</span>, <span class="mono">*ngIf</span> and <span class="mono">[ngSwitch]</span> still compile but are deprecated since v20 and need imports. The blocks need none, read like code, and are faster. Step 9 of CareDesk is done: the whole waiting room on screen.' }
+      { title: 'track $index: state on the wrong patient', text: 'Same action with <span class="mono">track $index</span>. Angular matches cards by position. Position 1 still exists, so Angular reused instance A for Ravi. It destroyed the last instance instead. In the real run Ravi\'s card showed "Selected" and "needs ECG". In a clinic that\'s a safety bug.', play: async run => { await animate(run, marked(), S[6].inst); } },
+      { title: 'track p: fine until data is re-fetched', text: 'Tracking by the object itself worked for the discharge. But then the same patients came back as fresh objects, as happens after an API refresh. Every card was destroyed and recreated, and Angular logged NG0956.', play: async run => { await animate(run, marked(), S[7].inst); } },
+      { title: 'The old way', text: '<span class="mono">*ngFor</span>, <span class="mono">*ngIf</span> and <span class="mono">[ngSwitch]</span> still compile but are deprecated since v20 and need imports. The new blocks need no imports, read like normal code, and are faster. Step 9 of CareDesk is done: the whole waiting room on screen.' }
     ]
   });
 

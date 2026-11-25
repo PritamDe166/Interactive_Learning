@@ -17,7 +17,7 @@
         ]; } },
     dnsweighted: { name: 'Weighted', tone: 'teal', tags: ['DNS routing'],
       rule: 'Each answer has a <b>weight</b>: e.g. 90% of lookups get the current version, 10% get the new one.',
-      takeaway: 'A cheap canary or gradual migration, but resolvers cache answers, so the split is approximate.', use: 'Canary releases, moving traffic between data centres step by step.', avoid: 'Instant rollback: cached answers keep flowing until the TTL ends.',
+      takeaway: 'A cheap way to do a canary release (send a small share of users to the new version first) or a gradual migration. Resolvers cache answers, so the split is only approximate.', use: 'Canary releases, moving traffic between data centres step by step.', avoid: 'Don\'t expect instant rollback: resolvers keep giving out the cached answer until its TTL ends.',
       build(m) { dns3(m, 'v1 (weight 90)', 'v2 (weight 10)');
         return [
           { cap: 'Ten users look up the same name', go: async r => { for (let i = 0; i < 3; i++) await m.send(['u', 'dns'], { run: r, ms: 260 }); } },
@@ -44,7 +44,7 @@
         ]; } },
     dnsfailover: { name: 'Failover (health-checked)', tone: 'red', tags: ['DNS routing'],
       rule: 'The DNS provider <b>health-checks</b> the primary. While it passes, DNS answers primary; when it fails, DNS answers the secondary.',
-      takeaway: 'Keep the TTL low (30–60 s): clients keep using the cached dead IP until it expires.', use: 'Active-passive across regions; a static "sorry" site as a last resort.', avoid: 'Expecting instant failover: detection time + TTL is the real outage.',
+      takeaway: 'Keep the TTL low (30–60 s): clients keep using the cached dead IP until it expires.', use: 'Active-passive across regions; a static "sorry" site as a last resort.', avoid: 'Don\'t expect instant failover. The real outage is the time to detect the failure plus the TTL.',
       build(m) { dns3(m, 'Primary', 'Secondary'); m.state('b', 'dim');
         return [
           { cap: 'Health checks pass: DNS answers <b>Primary</b>', go: async r => { m.badge('a', 'healthy', 'teal'); await m.send(['u', 'dns', 'a'], { run: r, tone: 'teal' }); } },
@@ -55,7 +55,7 @@
     /* ---------- H2 · HTTP versions ---------- */
     h11: { name: 'HTTP/1.1 + keep-alive', tone: 'yellow', tags: ['HTTP versions'],
       rule: '<b>Keep-alive</b> reuses one TCP connection for many requests, but one at a time: a slow response blocks the ones behind it. Browsers open about <b>6 connections</b> per host to work around it.',
-      takeaway: 'Reuse saves handshakes; ordering still blocks.', use: 'Everywhere as a fallback; simple internal calls.', avoid: 'Many small requests from a browser: they queue.',
+      takeaway: 'Reusing the connection saves new handshakes. But requests still go one at a time, so a slow one blocks the rest.', use: 'Everywhere as a fallback; simple internal calls.', avoid: 'Many small requests from a browser: they queue.',
       vb: [360, 150],
       build(m) { m.box('c', 50, 75, 'Browser', { icon: 'laptop', w: 84 }); m.box('s', 300, 75, 'Server', { icon: 'server', w: 84 }); m.wire('c', 's', { label: '1 connection' });
         return [
@@ -65,7 +65,7 @@
         ]; } },
     h2: { name: 'HTTP/2 multiplexing', tone: 'cyan', tags: ['HTTP versions'],
       rule: 'Many requests travel <b>at the same time</b> as interleaved streams on one TCP connection, with compressed headers (HPACK).',
-      takeaway: 'One connection, no queueing at the HTTP level. But one lost TCP packet still stalls every stream.', use: 'Browsers and gRPC: the default today.', avoid: 'Lossy mobile networks, where TCP head-of-line blocking hurts.',
+      takeaway: 'One connection, no queueing at the HTTP level. But one lost TCP packet still stalls every stream.', use: 'Browsers and gRPC: the default today.', avoid: 'Mobile networks that lose packets. There, TCP head-of-line blocking hurts: one lost packet makes every stream wait.',
       build(m) { m.box('c', 50, 75, 'Browser', { icon: 'laptop', w: 84 }); m.box('s', 300, 75, 'Server', { icon: 'server', w: 84 }); m.wire('c', 's', { label: '1 TCP connection' });
         return [
           { cap: 'Three requests leave together as streams 1, 3, 5', go: async r => { await Promise.all(['/a', '/b', '/c'].map((p, i) => m.send(['c', 's'], { run: r, label: p, ms: 500 + i * 120 }))); } },
@@ -93,8 +93,8 @@
           { cap: 'LB → app over <b>plain HTTP</b> inside the private network', go: async r => { await m.send(['lb', 's'], { run: r, label: 'http', tone: 'yellow' }); } }
         ]; } },
     tlspass: { name: 'TLS passthrough', tone: 'blue', tags: ['TLS at the edge'],
-      rule: 'The load balancer works at L4 and forwards the <b>encrypted bytes untouched</b>; the app server holds the certificate and decrypts.',
-      takeaway: 'End-to-end encryption, but the LB can\'t see URLs, headers or cookies.', use: 'When only the app may see plaintext, or for non-HTTP protocols.', avoid: 'Path-based routing, WAF rules or header-based stickiness.',
+      rule: 'The load balancer works at L4 (it sees only IP addresses and ports) and forwards the encrypted bytes unchanged. The app server holds the certificate and decrypts.',
+      takeaway: 'End-to-end encryption, but the LB can\'t see URLs, headers or cookies.', use: 'When only the app may see plaintext, or for non-HTTP protocols.', avoid: 'Not possible here: routing by URL path, WAF (web application firewall) rules, or sending a user to the same server based on a header (stickiness).',
       build(m) { m.tile('u', 36, 75, 'Client', 'user'); m.box('lb', 170, 75, 'L4 LB', { icon: 'lb', w: 96 }); m.box('s', 312, 75, 'App', { icon: 'server', w: 76 }); m.wire('u', 'lb'); m.wire('lb', 's');
         return [
           { cap: 'Encrypted bytes reach the LB', go: async r => { await m.send(['u', 'lb'], { run: r, label: 'TLS', tone: 'teal' }); } },
@@ -103,7 +103,7 @@
         ]; } },
     tlsreenc: { name: 'Re-encryption (TLS bridging)', tone: 'violet', tags: ['TLS at the edge'],
       rule: 'The LB decrypts to inspect and route, then opens a <b>new TLS connection</b> to the app server.',
-      takeaway: 'Smart routing and encryption on every hop, at the cost of a second handshake and more certificates.', use: 'Regulated data with L7 routing or a WAF.', avoid: 'Very latency-sensitive internal hops where the network is already trusted.',
+      takeaway: 'Smart routing and encryption on every hop, at the cost of a second handshake and more certificates.', use: 'Regulated data that also needs L7 routing (routing by URL, headers or cookies) or a WAF (web application firewall).', avoid: 'Very latency-sensitive internal hops where the network is already trusted.',
       build(m) { m.tile('u', 36, 75, 'Client', 'user'); m.box('lb', 170, 75, 'Load balancer', { icon: 'lb', w: 116 }); m.box('s', 312, 75, 'App', { icon: 'server', w: 76 }); m.wire('u', 'lb'); m.wire('lb', 's');
         return [
           { cap: 'HTTPS to the LB; it decrypts and inspects', go: async r => { await m.send(['u', 'lb'], { run: r, label: 'TLS', tone: 'teal' }); m.badge('lb', 'inspect + route', 'violet'); } },
@@ -158,7 +158,7 @@
       reset(m) { m.text('d', 'Standby (20%)'); } },
     dractive: { name: 'Active-active (multi-site)', tone: 'blue', tags: ['disaster recovery'],
       rule: 'Two or more regions <b>serve real traffic all the time</b>. If one fails, the others already have the users and the data.',
-      takeaway: 'RPO near zero, RTO near zero, at the highest cost and complexity (data conflicts).', use: 'Payments, global consumer apps, anything that "must never be down".', avoid: 'Apps whose database can\'t handle writes in two regions.',
+      takeaway: 'RPO and RTO are both near zero. This is the most expensive and most complex option, because two regions accept writes and their data can conflict.', use: 'Payments, global consumer apps, anything that "must never be down".', avoid: 'Apps whose database can\'t handle writes in two regions.',
       build(m) { m.tile('u', 180, 22, 'Users', 'users'); m.box('p', 80, 110, 'Region A', { icon: 'cloud', w: 100 }); m.box('d', 280, 110, 'Region B', { icon: 'cloud', w: 100 }); m.wire('u', 'p'); m.wire('u', 'd'); m.wire('p', 'd', { dash: true });
         return [
           { cap: 'Both regions serve users and replicate to each other', go: async r => { await Promise.all([m.send(['u', 'p'], { run: r, tone: 'teal' }), m.send(['u', 'd'], { run: r, tone: 'teal' })]); } },
@@ -178,7 +178,7 @@
         ]; } },
     sessionstore: { name: 'Shared session store', tone: 'red', tags: ['where state lives'],
       rule: 'Servers keep only a <b>session ID</b> in a cookie; the session data lives in a shared store like Redis that every server reads.',
-      takeaway: 'Any server can serve any request; logout and revocation are instant.', use: 'Classic web apps with server-side sessions (ASP.NET Core distributed session).', avoid: 'Forgetting the store is now critical: make Redis highly available.',
+      takeaway: 'Any server can serve any request; logout and revocation are instant.', use: 'Classic web apps with server-side sessions (ASP.NET Core distributed session).', avoid: 'Don\'t forget that the store is now critical: if Redis is down, nobody is logged in. Make Redis highly available.',
       build(m) { m.tile('u', 36, 75, 'Asha', 'user'); m.box('lb', 124, 75, 'LB', { icon: 'lb', w: 62 }); m.box('a', 222, 35, 'Server 1', { icon: 'server', w: 88 }); m.box('b', 222, 118, 'Server 2', { icon: 'server', w: 88 }); m.box('r', 316, 75, 'Redis', { icon: 'ram', w: 70, h: 30 }); m.wire('u', 'lb'); m.wire('lb', 'a'); m.wire('lb', 'b'); m.wire('a', 'r'); m.wire('b', 'r');
         return [
           { cap: 'Login on Server 1 writes the session to Redis', go: async r => { await m.send(['u', 'lb', 'a', 'r'], { run: r, label: 'sid=7f' }); m.badge('r', '7f → Asha', 'teal'); } },
@@ -186,7 +186,7 @@
         ]; } },
     jwt: { name: 'Token on the client (JWT)', tone: 'violet', tags: ['where state lives'],
       rule: 'After login the client holds a <b>signed token</b> with the user\'s claims and sends it on each call (<code>Authorization: Bearer …</code>). Any server checks the signature, no lookup.',
-      takeaway: 'No session store at all; but a token stays valid until it expires, so keep it short and add refresh tokens.', use: 'APIs, mobile apps, service-to-service calls.', avoid: 'Needing instant logout or big claims (the token travels on every request).',
+      takeaway: 'There is no session store at all. But a token stays valid until it expires, so make it short-lived and add refresh tokens (longer-lived tokens used to get a new access token).', use: 'APIs, mobile apps, service-to-service calls.', avoid: 'Not good if you need instant logout, or if the token holds a lot of data, because the token is sent on every request.',
       build(m) { m.tile('u', 36, 75, 'App', 'phone'); m.box('lb', 150, 75, 'LB', { icon: 'lb', w: 70 }); m.box('a', 296, 35, 'Server 1', { icon: 'server', w: 96 }); m.box('b', 296, 118, 'Server 2', { icon: 'server', w: 96 }); m.wire('u', 'lb'); m.wire('lb', 'a'); m.wire('lb', 'b');
         return [
           { cap: 'Login returns a signed token (expires in 15 min)', go: async r => { await m.send(['a', 'lb', 'u'], { run: r, label: 'JWT', tone: 'yellow' }); m.badge('u', 'holds JWT', 'violet'); } },
@@ -212,7 +212,7 @@
         ]; } },
     aggregate: { name: 'Request aggregation', tone: 'cyan', tags: ['gateway'],
       rule: 'The client makes <b>one call</b>; the gateway calls several services <b>in parallel</b> and merges the answers into one response.',
-      takeaway: 'Fewer round trips from slow mobile networks; the gateway pays the fan-out on a fast internal network.', use: 'Dashboards and detail pages that need data from many services.', avoid: 'Long chains: one slow service delays the whole response. Set timeouts and return partial data.',
+      takeaway: 'The phone makes fewer round trips over a slow mobile network. The gateway makes the many calls to services (the fan-out) over the fast internal network instead.', use: 'Dashboards and detail pages that need data from many services.', avoid: 'Long chains: one slow service delays the whole response. Set timeouts and return partial data.',
       build(m) { m.tile('u', 36, 75, 'App', 'phone'); m.box('g', 150, 75, 'Gateway', { icon: 'shield', w: 86 }); ['Orders', 'Profile', 'Offers'].forEach((n, i) => { m.box('s' + i, 300, 28 + i * 47, n, { w: 90, h: 30 }); m.wire('g', 's' + i); }); m.wire('u', 'g');
         return [
           { cap: 'One request: <code>GET /home</code>', go: async r => { await m.send(['u', 'g'], { run: r, label: '/home' }); } },

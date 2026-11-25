@@ -107,11 +107,11 @@
     <p class="crumbs">Week 3 / H20 / Caching &amp; CDN</p>
     <h1>Caching Failure Modes</h1>
     <ul class="lede">
-      <li>A cache hides load from the database, until the moment it <b>stops hiding it</b>.</li>
-      <li><b>Stampede</b>: one hot key expires and every request reloads it at once.</li>
-      <li><b>Avalanche</b>: many keys expire together, or a cache node dies.</li>
-      <li><b>Penetration</b>: lookups for keys that don't exist always reach the database.</li>
-      <li><b>Hot key</b> and <b>stale data</b> round out the set; each has a standard fix.</li>
+      <li>A cache keeps load away from the database. This page shows the moments when it <b>stops doing that</b>.</li>
+      <li><b>Stampede</b>: one popular key expires, and every request loads it from the database at the same time.</li>
+      <li><b>Avalanche</b>: many keys expire at the same time, or a cache server goes down.</li>
+      <li><b>Penetration</b>: requests for data that doesn't exist always go to the database.</li>
+      <li><b>Hot key</b> and <b>stale data</b> are two more problems. Each of the five has a standard fix.</li>
     </ul>
   </header>
 
@@ -120,11 +120,11 @@
 
   <section id="learn" data-nav="Learn">
     <h2 class="sec-h"><span class="sec-n">1</span>Learn it step by step</h2>
-    <p class="sec-sub">A stampede and three ways to stop it. Press <b>Next ▶</b> to go one step at a time, or <b>Play all</b> to watch the whole story.</p>
+    <p class="sec-sub">What a stampede is, and three ways to stop it. Press <b>Next ▶</b> to go one step at a time, or <b>Play all</b> to watch the whole story.</p>
     <div class="story" id="story"></div>
     <div class="sub-block" aria-labelledby="raceH" style="margin-top:22px">
       <h3 class="stage-title sub" id="raceH">Stale data: the cache-aside race</h3>
-      <div class="stage-kind">Even "update the DB, then delete the key" can leave an old value behind · time runs downwards</div>
+      <div class="stage-kind">The safe-looking order "update the database, then delete the key" can still leave an old value in the cache · time runs from top to bottom</div>
       <div class="story" id="raceStory">
         <div class="scroll"><svg class="diagram" id="raceSvg" style="min-width:0" viewBox="0 0 760 380" role="img" aria-label="Sequence of a reader and a writer racing: the reader's slow cache fill lands after the writer's delete and leaves a stale price in the cache"></svg></div>
       </div>
@@ -133,23 +133,23 @@
 
   <section id="compare" data-nav="Compare">
     <h2 class="sec-h"><span class="sec-n">2</span>Compare: 6 patterns side by side</h2>
-    <p class="sec-sub">Read each card top to bottom: rule, diagram, numbered steps, takeaway. Press <b>▶ Play</b> on any diagram to watch it happen.</p>
+    <p class="sec-sub">Each card has the rule, a diagram, numbered steps and the key point. Press <b>▶ Play</b> or <b>Next ▸</b> on a diagram to watch it.</p>
     <div id="atlas"></div>
   </section>
 
   <section id="try" data-nav="Try it">
     <h2 class="sec-h"><span class="sec-n">3</span>Try it: Stampede &amp; avalanche simulator</h2>
-    <p class="sec-sub">Chart database queries per second when keys expire. Turn fixes on and off and watch the peak move against the database's capacity. <span class="mono">(A reload takes 2 s, DB capacity 500 queries/s, numbers are illustrative)</span></p>
-    <ol class="howto"><li><span>Pick a scenario</span></li><li><span>Drag the sliders</span></li><li><span>Tick fixes on and off and watch the red bars</span></li></ol>
+    <p class="sec-sub">The chart shows how many queries per second reach the database when keys expire. Turn the fixes on and off and see whether the bars go above the red line (what the database can handle). <span class="mono">(A reload takes 2 s, DB capacity 500 queries/s, numbers are illustrative)</span></p>
+    <ol class="howto"><li><span>Pick a scenario</span></li><li><span>Drag the sliders</span></li><li><span>Tick the fixes and watch the bars</span></li></ol>
     <div class="cfm-row"><div class="seg" id="scSeg" role="group" aria-label="Scenario"><button type="button" data-v="stampede" aria-pressed="true">One hot key expires</button><button type="button" data-v="avalanche" aria-pressed="false">1,000 keys, same TTL</button></div></div>
     <div class="ranges">
       <div class="range"><label for="rRate"><span>Reads per second <span id="rateLbl">(hot key)</span></span> <output id="oRate"></output></label><input type="range" id="rRate" min="20" max="1500" step="10" value="800"></div>
       <div class="range"><label for="rSrv">App servers <output id="oSrv"></output></label><input type="range" id="rSrv" min="1" max="20" step="1" value="6"></div>
     </div>
     <div class="cfm-fix" id="fixes">
-      <label><input type="checkbox" data-f="sf"> Single-flight (per server)</label>
-      <label><input type="checkbox" data-f="swr"> Stale-while-revalidate</label>
-      <label><input type="checkbox" data-f="jit"> TTL jitter ±10 s</label>
+      <label><input type="checkbox" data-f="sf"> Single-flight: one load per server</label>
+      <label><input type="checkbox" data-f="swr"> Stale-while-revalidate: serve the old value, refresh in the background</label>
+      <label><input type="checkbox" data-f="jit"> TTL jitter: random ±10 s on each key's expiry</label>
     </div>
     <div class="cfm-chart" id="chart"><div class="cfm-cap" id="cap"><span>DB capacity 500/s</span></div></div>
     <div class="cfm-axis"><span>t = 0 s</span><span>key(s) expire at t = 10 s</span><span>t = 30 s</span></div>
@@ -158,41 +158,41 @@
       <div class="kpi accent"><b id="kTot">…</b><span>Extra DB queries</span></div>
       <div class="kpi"><b id="kWait">…</b><span>Requests that waited</span></div>
     </div>
-    <p class="hint" id="labHint">Start with no fixes, then add single-flight, then stale-while-revalidate. For the avalanche, try jitter.</p>
+    <p class="hint" id="labHint">Start with no fixes. Then add single-flight, then stale-while-revalidate. For the avalanche, try jitter.</p>
   </section>
 
   <section id="revise" data-nav="Revise">
     <h2 class="sec-h"><span class="sec-n">4</span>Revise in two minutes</h2>
     <h3 class="sec-h3">Cheat-sheet</h3>
     <ul class="cheat">
-      <li><span class="if">Hot key expires, DB spikes</span><span class="arrow">→</span><span class="then">Stampede: single-flight / lock, stale-while-revalidate</span></li>
-      <li><span class="if">Many servers, still a spike</span><span class="arrow">→</span><span class="then">Distributed lock (SET NX) or refresh-ahead</span></li>
-      <li><span class="if">Spike at the same time every day</span><span class="arrow">→</span><span class="then">Avalanche: TTL jitter, staggered warm-up</span></li>
-      <li><span class="if">Cache node restarted, DB on fire</span><span class="arrow">→</span><span class="then">Avalanche: replicas, persistence, rate-limit the DB path</span></li>
-      <li><span class="if">Misses for IDs that don't exist</span><span class="arrow">→</span><span class="then">Penetration: cache NULL briefly, Bloom filter, validate input</span></li>
-      <li><span class="if">One node hot, others idle</span><span class="arrow">→</span><span class="then">Hot key: L1 copy, replicate or split the key</span></li>
-      <li><span class="if">Users see old values</span><span class="arrow">→</span><span class="then">Stale data: delete on write + TTL (H17)</span></li>
+      <li><span class="if">A popular key expires and the database load jumps</span><span class="arrow">→</span><span class="then">Stampede: let one request load it (single-flight or a lock), or serve the old value while one refresh runs</span></li>
+      <li><span class="if">Many app servers, still a jump</span><span class="arrow">→</span>A lock shared by all servers (Redis SET NX: set the key only if it does not exist yet), or refresh the key before it expires</li>
+      <li><span class="if">A load spike at the same time every day</span><span class="arrow">→</span><span class="then">Avalanche: add random jitter to expiry times; warm the cache in stages</span></li>
+      <li><span class="if">Cache server restarted and the database is overloaded</span><span class="arrow">→</span><span class="then">Avalanche: replicas, persistence, and a limit on queries reaching the database</span></li>
+      <li><span class="if">Misses for IDs that don't exist</span><span class="arrow">→</span><span class="then">Penetration: cache "not found" for a short time, use a Bloom filter, check the input</span></li>
+      <li><span class="if">One cache server is overloaded, the others are idle</span><span class="arrow">→</span><span class="then">Hot key: keep a short local copy on each app server, or copy or split the key</span></li>
+      <li><span class="if">Users see old values</span><span class="arrow">→</span><span class="then">Stale data: delete the key when you write, and always set a TTL (H17)</span></li>
     </ul>
     <h3 class="sec-h3">Reference</h3>
     <div class="card scroll">
       <table>
-        <thead><tr><th>Failure</th><th>Trigger</th><th>Symptom</th><th>Fixes</th></tr></thead>
+        <thead><tr><th>Problem</th><th>What causes it</th><th>What you see</th><th>Fixes</th></tr></thead>
         <tbody>
-          <tr><td>Stampede (thundering herd, dogpile)</td><td>One hot key expires</td><td>Burst of identical queries</td><td>Single-flight, lock, SWR, refresh-ahead, early probabilistic refresh</td></tr>
-          <tr><td>Avalanche</td><td>Many keys expire together / node loss</td><td>Broad DB overload</td><td>TTL jitter, staggered warming, HA cache, DB rate limits</td></tr>
-          <tr><td>Penetration</td><td>Keys that don't exist</td><td>Misses that never become hits</td><td>Negative caching, Bloom filter, input validation, rate limits</td></tr>
-          <tr><td>Hot key</td><td>Skewed traffic</td><td>One cache node saturated</td><td>Local L1, key replication, key splitting</td></tr>
-          <tr><td>Stale data</td><td>Write path skips the cache</td><td>Old values served</td><td>Delete on write, short TTL, change events</td></tr>
+          <tr><td>Stampede (also called thundering herd or dogpile)</td><td>One popular key expires</td><td>A burst of the same query</td><td>Single-flight or a lock, stale-while-revalidate, refresh before expiry</td></tr>
+          <tr><td>Avalanche</td><td>Many keys expire together, or a cache server is lost</td><td>The whole database is overloaded</td><td>Random jitter on expiry, warm up in stages, cache replicas, limits on database queries</td></tr>
+          <tr><td>Penetration</td><td>Requests for keys that don't exist</td><td>Misses that never turn into hits</td><td>Cache "not found", Bloom filter, check the input, rate limits</td></tr>
+          <tr><td>Hot key</td><td>Most traffic goes to one key</td><td>One cache server is overloaded</td><td>Local copy on each app server (L1), copy the key, split the key</td></tr>
+          <tr><td>Stale data</td><td>A write doesn't update or remove the cached copy</td><td>Old values are shown</td><td>Delete on write, short TTL, change events</td></tr>
         </tbody>
       </table>
     </div>
-    <div class="note"><b>Probabilistic early refresh (XFetch):</b> each read refreshes the value early if <code>now − delta × beta × ln(random()) ≥ expiry</code>, where <code>delta</code> is how long a rebuild takes and <code>beta</code> ≈ 1. Far from expiry almost nobody refreshes; close to it, one request does it first. No locks needed.</div>
-    <div class="note"><b>TTL jitter is mainly an avalanche fix.</b> For one hot key it only shifts the moment of expiry; use single-flight, stale-while-revalidate or early refresh for that.</div>
-    <div class="note"><b>Same ideas, other names:</b> some sources say <i>cache breakdown</i> for one hot key expiring (our stampede), keep <i>penetration</i> for keys that never exist, and <i>avalanche</i> for mass expiry or cache loss.</div>
-    <div class="note"><b>Big keys</b> (a multi-MB value, a list with millions of items) block a Redis node while they're read, deleted or migrated. Split them, and delete with <code>UNLINK</code> (async) rather than <code>DEL</code>.</div>
-    <div class="note"><b>When the cache itself is slow or down:</b> short timeouts, a circuit breaker that skips the cache for a while, rate limits in front of the database, and retries with exponential backoff <i>and jitter</i> so clients don't all retry in the same instant.</div>
-    <div class="note">Avalanche, penetration, hot keys and stale-while-revalidate are the usual follow-ups to a stampede question.</div>
-    <div class="note">.NET's <code>HybridCache</code> and ASP.NET Core output caching both collapse concurrent misses for the same key within one process. With many servers you can still get one load per server.</div>
+    <div class="note"><b>Early refresh by chance (XFetch):</b> on each read, make a random choice. The closer the key is to expiry, the more likely the choice is "refresh now". The formula is <code>now − delta × beta × ln(random()) ≥ expiry</code>, where <code>delta</code> is how long a reload takes and <code>beta</code> is about 1. Long before expiry, almost no request refreshes. Close to expiry, one request refreshes first, so the key never actually expires. No lock is needed.</div>
+    <div class="note"><b>Jitter fixes avalanches, not stampedes.</b> For one popular key, jitter only moves the moment it expires. For that key, use single-flight, stale-while-revalidate or early refresh.</div>
+    <div class="note"><b>Other names you may see:</b> some sources call one popular key expiring a <i>cache breakdown</i> (this page calls it a stampede). <i>Penetration</i> and <i>avalanche</i> mean the same as here.</div>
+    <div class="note"><b>Big keys</b> are values of several MB, or lists with millions of items. Redis does one command at a time, so reading, deleting or moving a big key makes every other request wait. Split big keys into smaller ones. Delete them with <code>UNLINK</code>, which frees the memory in the background, instead of <code>DEL</code>.</div>
+    <div class="note"><b>When the cache itself is slow or down:</b> use short timeouts on cache calls. Add a circuit breaker that skips the cache for a while after repeated failures. Limit how many queries can reach the database. Retry with a growing wait <i>plus a random extra delay</i>, so clients don't all retry at the same moment.</div>
+    <div class="note">In interviews, a stampede question is often followed by questions on avalanche, penetration, hot keys and stale-while-revalidate.</div>
+    <div class="note">In .NET, <code>HybridCache</code> and ASP.NET Core output caching both let only one request load a missing key; the others wait for it. This works inside one process. With many servers, each server still loads the key once.</div>
   </section>
 
   <section id="test" data-nav="Test">
@@ -203,25 +203,25 @@
     <p class="sub">Answer before you open each card.</p>
     <div class="quiz">
       <details><summary>Stampede vs avalanche: what's the difference?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>Stampede</b>: many requests for <em>one</em> key at once. <b>Avalanche</b>: <em>many</em> keys missing at once (same TTL or cache loss).</p></div></details>
+        <div class="ans"><p><b>Stampede</b>: many requests for <em>one</em> key at the same moment. <b>Avalanche</b>: <em>many</em> keys missing at the same moment, because they had the same expiry time or the cache was lost.</p></div></details>
       <details><summary>Single-flight solves the stampede on one server. Why can 20 servers still hurt?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>Each server has its own lock</b>, so up to 20 loads run. Use a distributed lock, SWR or refresh-ahead if 20 is too many.</p></div></details>
+        <div class="ans"><p><b>Each server has its own lock</b>, so up to 20 loads run, one per server. If 20 is too many, use a lock shared by all servers, stale-while-revalidate, or refresh the key before it expires.</p></div></details>
       <details><summary>What does stale-while-revalidate trade away?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>Freshness for a short window.</b> Users get the old value instantly while one refresh runs; wrong for balances or stock at checkout.</p></div></details>
+        <div class="ans"><p><b>Freshness, for a short time.</b> Users get the old value straight away while one refresh runs. That's fine for a product list, but wrong for a bank balance or stock at checkout.</p></div></details>
       <details><summary>How does a Bloom filter stop penetration, and what can't it do?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>It says "definitely not present" or "maybe present".</b> Definite misses skip the DB. It can give false positives, never false negatives, and can't easily delete.</p></div></details>
+        <div class="ans"><p>A Bloom filter is a small, fast set of all valid IDs. <b>It answers "definitely not here" or "maybe here".</b> For "definitely not here", the request never reaches the database. It is sometimes wrong when it says "maybe", but never wrong when it says "no". You also can't easily remove an ID from it.</p></div></details>
       <details><summary>Why add jitter instead of just a longer TTL?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>A longer TTL only moves the cliff.</b> Jitter spreads expiries out so they never line up.</p></div></details>
+        <div class="ans"><p><b>A longer TTL only moves the problem later:</b> all the keys still expire together, just at a different time. Jitter gives each key a slightly different expiry, so they never all expire at once.</p></div></details>
       <details><summary>"Update the DB, then delete the key" — how can the cache still end up stale?<span class="go">Show answer</span></summary>
-        <div class="ans"><p>A reader misses, reads the <b>old</b> row, and is slow to write it back. Meanwhile a writer updates the DB and deletes the key. The reader's late <code>SET</code> puts the old value back. Fixes: always set a <b>TTL</b>, a <b>delayed second delete</b>, <b>version checks</b> on write, or invalidation from the DB's change stream (CDC).</p></div></details>
+        <div class="ans"><p>A reader misses, reads the <b>old</b> row, and is slow to put it in the cache. Meanwhile a writer updates the database and deletes the key. Then the reader's late <code>SET</code> puts the old value back. Fixes: always set a <b>TTL</b>. Delete the key <b>a second time</b> a moment after the write. Store a <b>version number</b> and never overwrite newer data with older. Or delete keys from the database's change feed (CDC, change data capture).</p></div></details>
       <details><summary>The cache cluster restarts during peak. What protects the database?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>Replicas and persistence</b> so the cache comes back warm, plus rate limiting / circuit breakers on the DB path so a cold cache can't flood it.</p></div></details>
+        <div class="ans"><p><b>Replicas and persistence</b>, so the cache comes back with its data. Also a limit on queries to the database and a circuit breaker, so an empty cache can't flood the database.</p></div></details>
     </div>
   </section>
 
   <nav id="prevnext"></nav>
 
-  <footer>Sources: Week 3 notes; Microsoft Learn (HybridCache, output caching); RFC 5861 (stale-while-revalidate); common cache failure patterns. The simulator is a simple model with illustrative numbers.</footer>
+  <footer>Sources: study notes "Week 3"; Microsoft Learn (HybridCache, output caching); RFC 5861 (stale-while-revalidate); common cache failure patterns. The simulator is a simple model with illustrative numbers.</footer>
 </div>
 
 <script>
@@ -246,32 +246,32 @@
     reset(m) { note.textContent = ''; m.state('lock', 'hide'); R.forEach(i => m.link('r' + i, 'lock', 'hide')); m.link('lock', 'db', 'hide'); m.link('cache', 'db', 'hide'); },
     steps: [
       { title: 'A hot key, served from cache',
-        text: 'Five requests a moment ask for <b>product:12</b>. All are cache hits; the database is idle.',
+        text: ['Five requests at a time ask for <b>product:12</b>.', 'Every one is found in the cache (a hit).', 'The database has nothing to do.'],
         set(m) { m.badge('cache', 'HIT', 'teal'); m.state('db', 'dim'); R.forEach(i => m.link('r' + i, 'db', 'dim')); },
         async play(m, r) { m.state('db', 'dim'); R.forEach(i => m.link('r' + i, 'db', 'dim')); await fan(m, i => ['r' + i, 'cache'], i => ({ run: r, tone: 'teal', ms: 500 + i * 40 })); m.badge('cache', 'HIT', 'teal'); } },
       { title: 'The key expires',
-        text: 'Its TTL runs out. For the next couple of seconds, until someone reloads it, every request will miss.',
+        text: ['Every cached key has a TTL: a time after which it is deleted.', 'product:12 reaches its TTL and is removed.', 'Until someone loads it again (about 2 seconds), every request misses.'],
         set(m) { m.badge('cache', 'expired', 'muted'); } },
       { title: 'Stampede: everyone reloads at once',
-        text: 'All five miss together and all five run the <b>same expensive query</b>. With 500 requests a second it\'s 500 identical queries. The database slows down, so reloads take longer, so more requests pile in.',
+        text: ['All five miss at the same moment.', 'So all five run the <b>same slow query</b> on the database.', 'At 500 requests a second, that is 500 copies of the same query.', 'The database slows down, so each load takes longer, so even more requests miss and join in.'],
         tip: 'Also called thundering herd or dogpile.',
         set(m) { m.badge('cache', 'MISS ×5', 'red'); m.state('db', 'hot'); m.badge('db', '5 same queries', 'red'); R.forEach(i => m.link('r' + i, 'db', 'hot')); },
         async play(m, r) { m.badge('cache', 'expired', 'muted'); await fan(m, i => ['r' + i, 'cache'], i => ({ run: r, tone: 'muted', ms: 450 })); m.badge('cache', 'MISS ×5', 'red'); await fan(m, i => ['r' + i, 'db'], i => ({ run: r, tone: 'red', ms: 600 + i * 50 })); m.state('db', 'hot'); m.badge('db', '5 same queries', 'red'); R.forEach(i => m.link('r' + i, 'db', 'hot')); } },
       { title: 'Fix 1 · single-flight: one loader, the rest wait',
-        text: 'The first request takes a <b>lock</b> for the key and runs the query. The other four wait for its result instead of querying. One query instead of five.',
+        text: ['The first request takes a <b>lock</b> on the key and runs the query.', 'The other four see the lock and wait for that result instead of querying.', 'The database runs one query instead of five.'],
         tip: '.NET HybridCache.GetOrCreateAsync does this for you, inside one process.',
         set(m) { m.state('lock', ''); R.forEach(i => { m.link('r' + i, 'lock', ''); m.link('r' + i, 'db', 'hide'); }); m.link('lock', 'db', ''); m.badge('lock', 'held by req 1', 'teal'); m.badge('cache', 'filled', 'teal'); m.badge('db', '1 query', 'teal'); note.textContent = '5 requests → 1 query'; },
         async play(m, r) { m.state('lock', ''); R.forEach(i => { m.link('r' + i, 'lock', ''); m.link('r' + i, 'db', 'hide'); }); m.link('lock', 'db', ''); await m.send(['r0', 'lock'], { run: r, label: 'acquire' }); m.badge('lock', 'held by req 1', 'teal'); await fan(m, i => i ? ['r' + i, 'lock'] : ['r0', 'lock'], i => ({ run: r, tone: i ? 'muted' : 'teal', ms: 450, label: i === 2 ? 'wait' : undefined })); await m.send(['lock', 'db'], { run: r, label: 'SELECT' }); m.badge('db', '1 query', 'teal'); await m.send(['db', 'lock'], { run: r, tone: 'yellow' }); m.badge('cache', 'filled', 'teal'); note.textContent = '5 requests → 1 query'; } },
       { title: 'But single-flight is per server',
-        text: 'The lock lives in one process. With <b>20 app servers</b>, each runs its own reload: 20 queries, not 1. Usually fine; if not, use a distributed lock (Redis <code>SET key NX PX</code>) or one of the next two fixes.',
+        text: ['The lock lives inside one app server.', 'With <b>20 app servers</b>, each one loads the key once: 20 queries, not 1.', 'That is usually fine.', 'If not, use a lock all servers share (Redis <code>SET key NX PX</code>) or one of the next two fixes.'],
         set(m) { m.state('lock', ''); m.link('lock', 'db', ''); m.badge('lock', 'per process', 'red'); note.textContent = '20 servers → up to 20 queries'; } },
       { title: 'Fix 2 · stale-while-revalidate',
-        text: 'Keep the expired value a little longer and <b>serve it instantly</b>, while one background refresh fetches the new one. Nobody waits; the database sees one query.',
+        text: ['When the key gets old, keep it a little longer instead of deleting it.', 'Requests get the old value <b>straight away</b>.', 'At the same time, one background job loads the new value.', 'Nobody waits, and the database gets one query.'],
         set(m) { m.link('cache', 'db', ''); R.forEach(i => m.link('r' + i, 'db', 'hide')); m.badge('cache', 'stale → v2', 'teal'); m.badge('db', '1 refresh', 'teal'); note.textContent = '0 requests waited'; },
         async play(m, r) { m.link('cache', 'db', ''); R.forEach(i => m.link('r' + i, 'db', 'hide')); m.badge('cache', 'stale v1', 'muted'); await fan(m, i => ['r' + i, 'cache'], i => ({ run: r, tone: 'yellow', ms: 500 })); await m.send(['cache', 'db'], { run: r, label: 'refresh' }); await m.send(['db', 'cache'], { run: r, tone: 'yellow' }); m.badge('cache', 'stale → v2', 'teal'); m.badge('db', '1 refresh', 'teal'); note.textContent = '0 requests waited'; } },
       { title: 'Fix 3 · jitter and early refresh',
-        text: 'Give keys a TTL of, say, 300 s <b>± 30 s</b> so keys written together don\'t expire together (that stops avalanches). Or refresh a hot key slightly <b>before</b> expiry, with a probability that rises as expiry approaches.',
-        tip: 'In an interview, name the failure first, then the fix and its trade-off.',
+        text: ['Jitter: give each key a TTL of 300 s <b>plus or minus a random 30 s</b>.', 'Keys saved at the same time then expire at different times. This stops avalanches.', 'Early refresh: reload a popular key a little <b>before</b> it expires, so it never runs out.'],
+        tip: 'In an interview, name the problem first, then the fix, then what the fix costs you.',
         set(m) { R.forEach(i => m.link('r' + i, 'db', 'dim')); m.badge('cache', 'TTL 300 ± 30 s', 'teal'); m.state('cache', 'ok'); note.textContent = 'expiries spread out · no cliff'; } }
     ]
   });
@@ -301,10 +301,10 @@
     $('cap').style.bottom = (100 * CAP / top) + '%';
     $('kPeak').textContent = peak.toLocaleString('en-US'); $('kTot').textContent = q.reduce((a, b) => a + b, 0).toLocaleString('en-US'); $('kWait').textContent = waited.toLocaleString('en-US');
     let h;
-    if (fx.swr) h = 'Stale-while-revalidate: each server refreshes once in the background and nobody waits for the database.';
-    else if (fx.sf) h = 'Single-flight: one load per server per key. Requests still wait for that load, but the database sees far fewer queries.';
-    else h = peak > CAP ? '<span class="bad-text">Over capacity.</span> Every miss runs the same query while the reload is in progress.' : 'Under capacity at this rate; raise the reads per second to see the cliff.';
-    if (scen === 'avalanche') h += fx.jit ? ' Jitter spreads the 1,000 expiries over 20 seconds.' : ' All 1,000 keys expire in the same second. Each key gets only a few reads, so single-flight barely helps here: try TTL jitter.';
+    if (fx.swr) h = 'Stale-while-revalidate: each server refreshes once in the background. Nobody waits for the database.';
+    else if (fx.sf) h = 'Single-flight: each server loads the key once. Requests still wait for that load, but the database gets far fewer queries.';
+    else h = peak > CAP ? '<span class="bad-text">Too much for the database.</span> Every miss runs the same query until the reload finishes.' : 'The database can cope at this rate. Raise the reads per second to see it overload.';
+    if (scen === 'avalanche') h += fx.jit ? ' Jitter spreads the 1,000 expiries over 20 seconds.' : ' All 1,000 keys expire in the same second. Each key gets only a few reads, so single-flight hardly helps. Try jitter.';
     $('labHint').innerHTML = h;
   }
   Kit.seg($('scSeg'), v => { scen = v; $('rRate').value = v === 'stampede' ? 800 : 1200; paint(); });
@@ -350,12 +350,12 @@
     FIX.textContent = i === 5 ? 'fix: TTL on every key · delayed second DEL · version check on SET · CDC invalidation' : '';
   }
   K.story({ root: $('raceStory'), show, tipLabel: 'Interview tip', steps: [
-    { title: 'A reader misses', text: 'The reader asks the cache for <span class="mono">price:7</span>. It isn\'t there, so cache-aside says: read the database, then fill the cache.' },
-    { title: 'It reads the old value', text: 'The database still says <b>₹499</b>. Before the reader writes it back, something slows it down: a GC pause, a busy thread pool, a slow network.' },
-    { title: 'A writer updates and deletes', text: 'Meanwhile a writer sets the price to <b>₹449</b> and deletes the cache key. That\'s the textbook-correct write path.' },
-    { title: 'The late SET wins', text: 'Now the reader\'s delayed <span class="mono">SET price:7 = ₹499</span> lands <b>after</b> the delete. The cache holds the old price again, and nobody will delete it.' },
-    { title: 'Everyone reads the stale value', text: 'Every request gets ₹499 until the entry expires. Without a TTL, that\'s forever.' },
-    { title: 'How to close the window', text: 'Always set a <b>TTL</b> (bounds the damage). Add a <b>delayed second delete</b> after the write. Store a <b>version</b> with the value and refuse to overwrite newer with older. Or invalidate from the database\'s <b>change stream</b> (CDC), which also catches writes made outside the app.', tip: 'For money and stock at checkout, read from the database: don\'t cache what must be exact.' }
+    { title: 'A reader misses', text: ['The reader asks the cache for <span class="mono">price:7</span>.', 'It isn\'t there.', 'So the reader will read the database and then save the value in the cache (cache-aside).'] },
+    { title: 'It reads the old value', text: ['The database still says <b>₹499</b>.', 'Before the reader saves it in the cache, something slows the reader down.', 'For example: a garbage-collection pause, a busy thread pool, or a slow network.'] },
+    { title: 'A writer updates and deletes', text: ['Meanwhile, a writer changes the price to <b>₹449</b> in the database.', 'Then it deletes the cache key, which is the recommended way to write.'] },
+    { title: 'The late SET wins', text: ['Now the slow reader finally saves <span class="mono">price:7 = ₹499</span>.', 'This happens <b>after</b> the delete.', 'The cache has the old price again, and nothing will delete it.'] },
+    { title: 'Everyone reads the old value', text: ['Every request now gets ₹499 until the key expires.', 'If the key has no TTL, it never expires.'] },
+    { title: 'How to prevent it', text: ['Always set a <b>TTL</b>, so a wrong value can\'t stay forever.', 'Delete the key <b>a second time</b>, a moment after the write.', 'Save a <b>version number</b> with the value, and never overwrite a newer version with an older one.', 'Or delete keys from the database\'s <b>change feed</b> (CDC), which also catches changes made outside the app.'], tip: 'For money and stock at checkout, read from the database. Don\'t cache what must be exact.' }
   ] });
 })();
 </script>

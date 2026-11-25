@@ -93,7 +93,7 @@
     <ul class="lede">
       <li>Two questions pick the answer: <b>is it shared by many instances?</b> and <b>what kind of workload?</b></li>
       <li>One instance: <b>EBS</b> (persistent) or <b>instance store</b> (fastest, temporary).</li>
-      <li>Shared: <b>EFS</b> (Linux), <b>FSx for Windows</b> (SMB/AD), <b>FSx for Lustre</b> (HPC).</li>
+      <li>Shared: <b>EFS</b> (for Linux), <b>FSx for Windows</b> (SMB file shares with Active Directory), or <b>FSx for Lustre</b> (for HPC, high-performance computing).</li>
       <li>Shared responsibility: AWS runs and replicates the storage; <b>you</b> own backups, encryption and your data.</li>
     </ul>
   </header>
@@ -112,12 +112,12 @@
     <div class="remember"><ol>
       <li><b>EBS</b>: network drive, <b>one instance, one AZ</b>, persistent; snapshots back it up or move it.</li>
       <li><b>Instance store</b>: hardware disk on the host, <b>highest I/O</b>, <b>lost on stop/terminate</b>.</li>
-      <li><b>EFS</b>: managed <b>NFS for Linux</b>, shared by hundreds of instances across AZs, pay per use; EFS-IA/Archive for cold files.</li>
+      <li><b>EFS</b>: a managed NFS (network file system) for Linux. Hundreds of instances across AZs can share it, and you pay per use. EFS-IA (Infrequent Access) and Archive are cheaper classes for cold files (files you rarely open).</li>
       <li><b>FSx for Windows File Server</b>: SMB/NTFS share with Active Directory.</li>
       <li><b>FSx for Lustre</b>: Linux file system for <b>HPC</b>, can be backed by S3.</li>
-      <li><b>AMI</b> is not storage you mount: it's the <b>launch template</b> (built on snapshots); <b>EC2 Image Builder</b> automates it.</li>
+      <li>An <b>AMI</b> is not storage you mount. It is the <b>launch template</b>, built on snapshots. <b>EC2 Image Builder</b> can automate creating AMIs.</li>
       <li><b>S3</b> is object storage used <i>with</i> EC2 (backups, static files), not a disk the OS mounts. Its own section comes later.</li>
-      <li>Shared responsibility: <b>AWS</b> = infrastructure, replication of EBS/EFS data, replacing faulty hardware, keeping its staff out of your data. <b>You</b> = backup/snapshot procedures, encryption, the data itself, and understanding the risk of instance store.</li>
+      <li>Shared responsibility: <b>AWS</b> handles the infrastructure, replicating EBS/EFS data, replacing faulty hardware, and keeping its staff out of your data. <b>You</b> handle backup/snapshot procedures, encryption, the data itself, and understanding the risk of instance store.</li>
     </ol></div>
   </section>
 
@@ -238,7 +238,7 @@
       text: 'Six Linux web servers across 3 AZs must see the same uploaded files. Shared, Linux → <b>EFS</b> (with a lifecycle policy to EFS-IA).',
       play: go(3) },
     { title: 'Windows share for an AD shop',
-      text: 'A .NET app on Windows servers plus office PCs need a common share with AD group permissions. Shared, Windows → <b>FSx for Windows File Server</b>.',
+      text: 'A .NET app on Windows servers, plus the office PCs, need a common file share with Active Directory (AD) group permissions. Shared, Windows → <b>FSx for Windows File Server</b>.',
       play: go(4) },
     { title: 'HPC / machine learning',
       text: 'A training job on dozens of instances reads terabytes from S3 at very high throughput. Shared, HPC → <b>FSx for Lustre</b> linked to the S3 bucket.',

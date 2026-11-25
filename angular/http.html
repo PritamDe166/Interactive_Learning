@@ -86,10 +86,10 @@
     <h1>HTTP, resource &amp; RxJS basics</h1>
     <ul class="lede">
       <li><span class="mono">httpResource(() =&gt; url)</span> fetches data and exposes <b>signals</b>: <span class="mono">isLoading()</span>, <span class="mono">hasValue()</span>, <span class="mono">value()</span>, <span class="mono">error()</span>.</li>
-      <li>The URL function is reactive: when its signals change the request re-runs; returning <span class="mono">undefined</span> means "don't fetch".</li>
-      <li><span class="mono">HttpClient</span> methods return an <b>Observable</b>: nothing is sent until you <span class="mono">subscribe</span>, and each subscription sends again.</li>
+      <li>The URL function is reactive: it re-runs when the signals it reads change. When it re-runs, the request is sent again. If it returns <span class="mono">undefined</span>, nothing is fetched.</li>
+      <li><span class="mono">HttpClient</span> methods return an <b>Observable</b> (an RxJS stream you must <span class="mono">subscribe</span> to). Nothing is sent until you subscribe. Each new subscription sends the request again.</li>
       <li>RxJS operators go in <span class="mono">pipe()</span>: <span class="mono">map</span>, <span class="mono">tap</span>, <span class="mono">catchError</span>…</li>
-      <li>Rule of thumb: <b>reads</b> → <span class="mono">httpResource</span>; <b>writes</b> (POST, PUT, DELETE) → <span class="mono">HttpClient</span>.</li>
+      <li>Simple rule: use <span class="mono">httpResource</span> for <b>reads</b>. Use <span class="mono">HttpClient</span> for <b>writes</b> (POST, PUT, DELETE).</li>
     </ul>
     <div class="cd-trail" data-stage="15"></div>
   </header>
@@ -168,7 +168,7 @@
       <div class="note"><p><b>What this page adds.</b> The modern resource API, plus just enough RxJS to read existing code.</p></div>
       <div class="note"><p><b><span class="mono">value()</span> throws in the error state.</b> CareDesk's first version used <span class="mono">res.value() ?? []</span>. When the server returned 500 the console showed <span class="mono">ResourceValueError: Resource is currently in an error state (see Error.cause for details): Http failure response for …/api/patients.json: 500 Internal Server Error</span>. Guard with <span class="mono">hasValue()</span>.</p></div>
       <div class="note"><p><b>Fetching too early.</b> The first version also requested patients on the login page, without a token, because the header injects the store at start-up. Making the URL depend on <span class="mono">isLoggedIn()</span> removed that request and made the list load by itself right after sign-in.</p></div>
-      <div class="note"><p><b>About the API.</b> CareDesk reads <span class="mono">public/api/patients.json</span>, a static sample file served by <span class="mono">ng serve</span>. The POST to <span class="mono">/api/appointments</span> was answered by the test script with 201; a real backend (an ASP.NET Core minimal API, say) would validate the bearer token there.</p></div>
+      <div class="note"><p><b>About the API.</b> CareDesk reads <span class="mono">public/api/patients.json</span>, a static sample file served by <span class="mono">ng serve</span>. The test script answered the POST to <span class="mono">/api/appointments</span> with 201. A real backend, for example an ASP.NET Core minimal API, would validate the bearer token on that endpoint.</p></div>
     </div>
   </section>
 
@@ -187,7 +187,7 @@
       <details><summary>Why keep a <span class="mono">linkedSignal</span> copy of the server list?<span class="go">Show answer</span></summary>
         <div class="ans"><p>So the UI can change it locally (discharge, admit) while still resetting automatically whenever the resource loads new data.</p></div></details>
       <details><summary>Promise or Observable for HTTP?<span class="go">Show answer</span></summary>
-        <div class="ans"><p>HttpClient uses Observables: lazy, cancellable, composable with operators, and able to emit progress events. For simple reads in new code, <span class="mono">httpResource</span> hides that and gives signals.</p></div></details>
+        <div class="ans"><p>HttpClient uses Observables. They are lazy (they run only when subscribed), cancellable, composable with operators (you can chain map, tap and others), and able to emit progress events. For simple reads in new code, <span class="mono">httpResource</span> hides that and gives signals.</p></div></details>
     </div>
   </section>
 
@@ -308,9 +308,9 @@ this.http.get<Patient[]>('/api/patients.json').pipe(
     { title: 'Local edits without a request', text: 'Discharging Asha changes the <span class="mono">linkedSignal</span> copy only: 3 waiting, no HTTP call. If the resource reloads, the list resets to the server\'s data, which is the behaviour you want from a cache.' },
     { title: 'When the server fails', text: 'With a 500, <span class="mono">error()</span> is set and the list shows the retry message. Careful: <span class="mono">value()</span> <b>throws</b> in this state. The first version (<span class="mono">value() ?? []</span>) logged a ResourceValueError; <span class="mono">hasValue()</span> fixed it.', tip: 'Loading, error and empty states are what interviewers look for in "fetch and show a list". Resources give you all three as signals.' },
     { title: 'Retry = reload()', text: 'The Retry button calls <span class="mono">store.reload()</span>, which re-runs the same request. One GET, four cards back.' },
-    { title: 'Writes use HttpClient', text: 'Booking an appointment is a POST. <span class="mono">http.post()</span> returns an Observable; <span class="mono">tap</span> records the saved booking, and <span class="mono">subscribe</span> in the form actually sends it, with <span class="mono">next</span> and <span class="mono">error</span> handlers. The request carried the bearer token.' },
-    { title: 'RxJS basics', text: 'HttpClient Observables are <b>cold</b>: creating one sent nothing; subscribing twice sent two GETs. <span class="mono">pipe(map(…))</span> transforms the result, here to urgent names. That\'s enough RxJS to read most Angular code.' },
-    { title: 'Signing out clears it', text: 'After sign-out the URL function returns <span class="mono">undefined</span> again, the resource goes idle, its value clears and the header drops to "0 waiting". CareDesk is complete: 15 steps, one app.' }
+    { title: 'Writes use HttpClient', text: 'Booking an appointment is a POST. <span class="mono">http.post()</span> returns an Observable. Inside it, <span class="mono">tap</span> records the saved booking (tap runs code without changing the value). The form calls <span class="mono">subscribe</span>, which actually sends the request, with a <span class="mono">next</span> handler for success and an <span class="mono">error</span> handler for failure. The request carried the bearer token.' },
+    { title: 'RxJS basics', text: 'HttpClient Observables are <b>cold</b>: they do nothing until someone subscribes. Creating one sent nothing. Subscribing twice sent two GETs. <span class="mono">pipe(map(…))</span> transforms the result, here to urgent names. That\'s enough RxJS to read most Angular code.' },
+    { title: 'Signing out clears it', text: 'After sign-out, the URL function returns <span class="mono">undefined</span> again. The resource goes idle and its value clears. The header drops to "0 waiting". CareDesk is complete: 15 steps, one app.' }
   ];
   steps.forEach((st, i) => { if (S[i].play) st.play = PLAYS[S[i].play]; });
   K.story({ root: $('hStory'), show, tipLabel: 'Interview tip', steps });

@@ -114,7 +114,7 @@
     <h1>Single Responsibility Principle</h1>
     <ul class="lede">
       <li>A class should have <b>one reason to change</b>.</li>
-      <li>A "reason to change" is usually a <b>person or team</b> who asks for changes: the DBA, marketing, the academic office.</li>
+      <li>A "reason to change" is usually a <b>person or team</b> who asks for changes: the DBA (database administrator), marketing, the academic office.</li>
       <li>When one class serves several of them, every request edits the <b>same file</b>: more bugs, more merge conflicts, harder tests.</li>
       <li>The fix is to <b>split by reason to change</b>, not to give every method its own class. Closely related responsibilities stay together.</li>
     </ul>
@@ -201,7 +201,7 @@
     </div>
     <div class="notes" style="margin-top:14px">
       <div class="note"><p><b>Defining "reason to change":</b> Robert C. Martin, who named the principle, later phrased it as "a module should be responsible to one, and only one, actor". Asking <i>who</i> requests changes is more practical than counting methods.</p></div>
-      <div class="note"><p><b>The limit:</b> a class doesn't have to do only one thing. Its responsibilities should be closely related so it doesn't bloat, and splitting too far just scatters one idea across many files.</p></div>
+      <div class="note"><p><b>The limit:</b> a class doesn't have to do only one thing. Its responsibilities should be closely related, so the class doesn't grow too big. But if you split too far, one idea ends up spread across many files.</p></div>
       <div class="note"><p><b>Testing is the payoff you'll feel first:</b> once the rule lives in <span class="mono">EnrolmentService</span>, a unit test needs no database or mail server.</p></div>
     </div>
   </div>
@@ -345,14 +345,14 @@ public class EnrolmentService         // changes with rules
   K.story({
     root: $('srpStory'), show, tipLabel: 'Interview tip',
     steps: [
-      { title: 'One class, four jobs', text: '<span class="mono">Student</span> holds the student\'s data, formats a display name, <b>saves itself to SQL</b>, <b>sends an email</b> and <b>enforces enrolment rules</b>. It compiles and works. The trouble starts when things change.' },
+      { title: 'One class, four jobs', text: '<span class="mono">Student</span> holds the student\'s data. On top of that it does four jobs: it formats a display name, <b>saves itself to SQL</b>, <b>sends an email</b> and <b>enforces enrolment rules</b>. It compiles and works. The trouble starts when things change.' },
       { title: 'Change request 1: the database', text: 'The DB team adds a Phone column. Someone edits <span class="mono">Save()</span>, inside <span class="mono">Student.cs</span>.', play: run => hit(0, run) },
       { title: 'Change request 2: the welcome email', text: 'Marketing wants a new email. Another person edits <span class="mono">SendWelcomeEmail()</span>, in the <b>same file</b>.', play: run => hit(1, run) },
       { title: 'Change request 3: an enrolment rule', text: 'The academic office caps students at 5 courses. A third person edits <span class="mono">Enrol()</span>, again in <span class="mono">Student.cs</span>.', play: run => hit(2, run) },
       { title: 'Three reasons to change = trouble', text: 'Three unrelated teams drive changes to one class: three people in one file, merge conflicts, and every change risks breaking the other jobs. Testing one rule needs a database and an SMTP server too.', tip: 'Define SRP by actors: "a class should answer to one team or role". It turns a vague rule into a question you can ask in a code review.' },
       { title: 'Split by reason to change', text: 'Each responsibility moves to its own class: <span class="mono">StudentRepository</span> (database), <span class="mono">WelcomeEmailSender</span> (email), <span class="mono">EnrolmentService</span> (rules). Each <b>uses</b> Student; Student no longer knows about SQL or SMTP.' },
       { title: 'Replay the database change', text: 'Adding the Phone column now touches <span class="mono">StudentRepository</span> only. The email and enrolment code aren\'t even opened, so they can\'t break, and their tests don\'t need re-running.' },
-      { title: 'Not "one method per class"', text: 'Student kept its fields <b>and</b> <span class="mono">GetDisplayName()</span>: it\'s derived from the student\'s own data and changes for the same reason. SRP groups <b>closely related</b> responsibilities; it doesn\'t atomise them.' }
+      { title: 'Not "one method per class"', text: 'Student kept its fields <b>and</b> <span class="mono">GetDisplayName()</span>: it\'s derived from the student\'s own data and changes for the same reason. SRP keeps <b>closely related</b> responsibilities together; it doesn\'t break them into the smallest possible pieces.' }
     ]
   });
 

@@ -107,7 +107,7 @@
   <header>
     <p class="crumbs">Week 1 / H5 / Networking Fundamentals</p>
     <h1>Latency, Percentiles & Queueing</h1>
-    <ul class="lede"><li><b>Latency</b>: how long one request takes.</li><li><b>Throughput</b>: how many requests finish per second.</li><li><b>Percentiles</b> (p50 / p95 / p99) show how latency is spread, especially the slow tail.</li><li>Near capacity, requests <b>queue</b>, and latency rises much faster than load.</li></ul>
+    <ul class="lede"><li><b>Latency</b>: how long one request takes.</li><li><b>Throughput</b>: how many requests finish per second.</li><li><b>Percentiles</b> (p50 / p95 / p99) show how latency is spread. For example, p99 = 200 ms means 99% of requests are faster than 200 ms. The slowest few requests are called the tail.</li><li>Near capacity, requests <b>queue</b>, and latency rises much faster than load.</li></ul>
   </header>
 
   <nav id="series"></nav>
@@ -119,7 +119,7 @@
     <h3 class="sec-h3" id="defH">Four numbers, four questions</h3>
     <div class="cards">
       <div class="card"><h3>Latency · how long?</h3><p>Time for one request, end to end: network + queueing + processing + dependencies. Example: <span class="mono">120 ms</span>.</p></div>
-      <div class="card"><h3>Throughput · how much?</h3><p>Work finished per unit time. Example: <span class="mono">10,000 RPS</span>. High throughput can coexist with high latency.</p></div>
+      <div class="card"><h3>Throughput · how much?</h3><p>Work finished per unit of time. Example: <span class="mono">10,000 RPS</span> (requests per second). High throughput can coexist with high latency.</p></div>
       <div class="card"><h3>Concurrency · how many at once?</h3><p>Requests in flight right now. Linked to the other two by <b>Little's Law</b>: concurrency = throughput × latency.</p></div>
     <div class="card"><h3>Bandwidth · how wide?</h3><p>The most data the link <b>could</b> carry per second, e.g. <span class="mono">1 Gbps</span>. Think of a pipe: bandwidth is its <b>width</b>, latency is its <b>length</b>. A wider pipe doesn't make the first byte arrive sooner.</p></div>
     </div>
@@ -147,7 +147,7 @@
   <section id="compare" data-nav="Compare">
     <h2 class="sec-h"><span class="sec-n">2</span>Compare: latency numbers and terms</h2>
     <h3 class="sec-h3">Latency numbers to know</h3>
-    <p class="sub">Orders of magnitude, not exact values: they tell you what to cache and what to avoid in a hot path.</p>
+    <p class="sub">These are rough sizes (orders of magnitude), not exact values. They tell you what to cache and what to avoid in a hot path (code that runs on almost every request).</p>
     <div class="card scroll">
       <table>
         <thead><tr><th>Operation</th><th>Rough time</th><th>Compared with reading RAM</th></tr></thead>
@@ -165,7 +165,7 @@
         </tbody>
       </table>
     </div>
-    <div class="note"><p><b>How to use it:</b> memory is ~1,000× faster than a network call, and a cross-continent round trip costs as much as a hundred local database queries. That is why we cache, keep chatty calls inside one region and put content on a CDN.</p></div>
+    <div class="note"><p><b>How to use it:</b> memory is ~1,000× faster than a network call, and a cross-continent round trip costs as much as a hundred local database queries. That is why we cache, keep services that call each other many times (chatty calls) inside one region, and put content on a CDN.</p></div>
     <h3 class="sec-h3">Latency vs bandwidth vs throughput</h3>
     <div class="card scroll"><table>
       <thead><tr><th></th><th>Question</th><th>Unit</th><th>Fix when it's the problem</th></tr></thead>
@@ -205,7 +205,7 @@
     </div>
     <div class="notes" style="margin-top:14px">
       <div class="note"><p><b>Why the curve bends:</b> for a simple queue, average time in system ≈ service time ÷ (1 − utilisation). At 50% load that's 2× the service time, at 90% it's 10×, and at 99% it's 100×. Real systems aim to run their bottleneck well below 100%.</p></div>
-      <div class="note"><p><b>Overload feeds itself.</b> Timeouts trigger client retries, retries add load, and more load means more timeouts. This is a retry storm, and Week 15 (backoff, circuit breakers) exists to stop it.</p></div>
+      <div class="note"><p><b>Overload makes itself worse.</b> Timeouts trigger client retries, retries add load, and more load means more timeouts. This is a retry storm, and Week 15 (backoff, circuit breakers) exists to stop it.</p></div>
     </div>
   </div>
     <div class="sub-block" aria-labelledby="calcH">
@@ -229,7 +229,7 @@
         <p class="sub" style="margin:0">That's why big systems care about p99 and p99.9 of every dependency.</p>
       </div>
     </div>
-    <div class="note"><p><b>Percentiles don't average.</b> The p99 of three servers is not the mean of their three p99s. Merge the raw histograms first; monitoring tools do this with histogram metrics.</p></div>
+    <div class="note"><p><b>Percentiles don't average.</b> The p99 of three servers is not the mean of their three p99s. First combine all the raw measurements (as histograms, counts per latency range), then compute the p99. Monitoring tools do this with histogram metrics.</p></div>
   </div>
   </section>
 
@@ -258,11 +258,11 @@
       <details><summary>20,000 RPS at 200 ms average latency. How many requests are in flight?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>4,000.</b> Little's Law: 20,000 × 0.2 s.</p></div></details>
       <details><summary>Under load, p50 went 30 → 40 ms but p99 went 70 → 800 ms. What is likely happening?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>Queueing near saturation</b>, contention or a slow dependency hitting a minority of requests. Find the busiest resource.</p></div></details>
+        <div class="ans"><p>Probably one of three things: requests queue because the server is almost full (saturation), requests fight over a shared resource like a lock (contention), or a slow dependency affects a small share of requests. Find the busiest resource.</p></div></details>
       <details><summary>Your server runs at 90% CPU. Why is it risky even though it isn't "full"?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>Latency is already ~10× service time</b>, and a small traffic bump pushes it far higher. There's no headroom for spikes.</p></div></details>
       <details><summary>Why can p99 matter more than p50 for a page that calls 50 backends?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>Fan-out amplifies the tail:</b> 1 − 0.99⁵⁰ ≈ 40% of page loads wait on at least one p99-slow call.</p></div></details>
+        <div class="ans"><p>When one page calls many backends (fan-out), slow calls add up: 1 − 0.99⁵⁰ ≈ 40% of page loads wait for at least one call that is in the slowest 1%.</p></div></details>
       <details><summary>High throughput, high latency: give a real example.<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>A batch job or a deep queue:</b> millions of items per hour, but each waits minutes. A truck full of hard drives has huge throughput too.</p></div></details>
     </div>
@@ -373,7 +373,7 @@
       const W = S / (1 - rho);
       $('kW').textContent = fmtMs(W * 1000);
       $('kL').textContent = (lam * W).toFixed(1);
-      $('qNote').innerHTML = rho < 0.6 ? 'Plenty of headroom: most requests are served almost immediately. Latency ≈ service time.'
+      $('qNote').innerHTML = rho < 0.6 ? 'There is plenty of spare capacity (headroom): most requests are served almost immediately. Latency ≈ service time.'
         : rho < 0.85 ? 'Getting busy: bursts now form short queues. Average latency is already a few times the service time.'
         : '<span class="accent">Near saturation:</span> small increases in load cause large increases in latency. This is where p99 explodes.';
     }

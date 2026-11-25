@@ -110,7 +110,7 @@
       <li>The classic interview question: "Your app has 1 user today. Grow it to 10 million."</li>
       <li>The answer is a <b>sequence</b>: at each size, find what breaks first and add one thing.</li>
       <li>It uses everything from Weeks 1 to 2: DNS, load balancers, stateless servers, availability.</li>
-      <li>Then it previews what's next: caching (Week 3), replicas and sharding (Phase 2), queues (Phase 4).</li>
+      <li>Then it previews what's next: caching (Week 3), replicas (database copies) and sharding (splitting data across databases) in Phase 2, and queues (Phase 4).</li>
     </ul>
   </header>
 
@@ -135,7 +135,7 @@
           <tr><td>10k to 100k</td><td>One app server is full, and a single point of failure</td><td>Load balancer, 2+ stateless app servers, sessions in Redis</td><td>H8 to H13</td></tr>
           <tr><td>100k to 1M</td><td>Database reads, slow page loads far from the server</td><td>Cache (Redis), CDN for static files and public pages</td><td>H15 to H21</td></tr>
           <tr><td>1M+</td><td>Primary DB still busy with reads; slow work blocks requests</td><td>Read replicas; queue + background workers</td><td>Phase 2, Phase 4</td></tr>
-          <tr><td>5M+</td><td>An outage in one data centre takes everything down; writes outgrow one DB</td><td>Every tier across zones, autoscaling; then multi-region + GeoDNS; sharding</td><td>H1, H6, Phase 2</td></tr>
+          <tr><td>5M+</td><td>An outage in one data centre takes everything down; writes outgrow one DB</td><td>Run every tier in several availability zones, with autoscaling. Then add more regions with GeoDNS. Finally, shard the database.</td><td>H1, H6, Phase 2</td></tr>
         </tbody>
       </table>
     </div>
@@ -163,7 +163,7 @@
     <h3 class="sec-h3">Answer in this order (about 45 minutes)</h3>
     <ol class="tmpl">
       <li><span><b>Requirements (5 min).</b> Functional: what users do. Non-functional: users, latency, availability, consistency. Write them down.</span></li>
-      <li><span><b>Estimates (5 min).</b> Users × requests per day ÷ 86,400 × peak factor; read/write ratio; data size per year.</span></li>
+      <li><span><b>Estimates (5 min).</b> Peak requests per second = users × requests per day ÷ 86,400 (seconds in a day) × peak factor. Also estimate the read/write ratio and the data size per year.</span></li>
       <li><span><b>High-level design (10 min).</b> Client → DNS → CDN → load balancer → stateless app → cache → database. Name each box's job.</span></li>
       <li><span><b>Data model and APIs (5 min).</b> Main tables or documents, and 3 to 4 key endpoints.</span></li>
       <li><span><b>Deep dive (15 min).</b> The part the interviewer cares about: the hot read path, the write path, a tricky feature.</span></li>
@@ -180,7 +180,7 @@
       <li><span class="if">Users worldwide</span><span class="arrow">→</span><span class="then">Multiple regions + GeoDNS / latency routing</span></li>
       <li><span class="if">Writes outgrow one database</span><span class="arrow">→</span><span class="then">Shard / partition (Phase 2)</span></li>
     </ul>
-    <div class="note">The scale-ladder numbers are back-of-envelope rules, the same kind of estimate an interviewer expects you to make out loud.</div>
+    <div class="note">The scale-ladder numbers are rough estimates, the same kind an interviewer expects you to make out loud.</div>
   </section>
 
   <section id="test" data-nav="Test">
@@ -197,7 +197,7 @@
       <details><summary>Estimate peak requests per second for 2 million daily users.<span class="go">Show answer</span></summary>
         <div class="ans"><p>2 M × 50 requests ÷ 86,400 ≈ <b>1,160/s average</b>; × 3 for the peak ≈ <b>3,500/s</b>. With 90% reads that is ~3,150 reads/s, ~350 writes/s.</p></div></details>
       <details><summary>Read replicas are added. A user edits their profile and the page still shows the old value. Why?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>Replication lag.</b> The read went to a replica that hadn't applied the write yet. Read your own writes from the primary for a short time, or use session consistency.</p></div></details>
+        <div class="ans"><p><b>Replication lag.</b> The read went to a replica that hadn't applied the write yet. For a short time after a user writes, read that user's data from the primary. Or use session consistency: the database guarantees a user always sees their own writes.</p></div></details>
       <details><summary>Why does a queue help with traffic spikes?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>It absorbs the burst.</b> Requests are accepted quickly and workers process them at a steady rate, so the database isn't hit with the whole spike at once.</p></div></details>
       <details><summary>What is the single point of failure left after adding two app servers behind one load balancer?<span class="go">Show answer</span></summary>
@@ -277,7 +277,7 @@
         set(m) { L(m, 3); note.textContent = '~1M users · 90% cache hits'; },
         async play(m, r) { L(m, 3); await m.send(['u', 'cdn'], { run: r, label: 'logo.png', tone: 'teal' }); await m.send(['u', 'lb', 'a1', 'cache'], { run: r, label: 'doctors', tone: 'teal' }); note.textContent = '~1M users · 90% cache hits'; } },
       { title: 'Problem: the primary database is still busy with reads → read replicas',
-        text: 'Writes go to the <b>primary</b>; most reads go to <b>replicas</b> that copy it. Replicas lag by a little, so read your own writes from the primary.',
+        text: 'Writes go to the <b>primary</b>; most reads go to <b>replicas</b> that copy it. Replicas get each change a little later than the primary (replication lag). So right after a user saves something, read it from the primary.',
         set(m) { L(m, 4); note.textContent = 'writes → primary · reads → replicas'; },
         async play(m, r) { L(m, 4); await m.send(['a2', 'db', 'rep'], { run: r, label: 'replicate', tone: 'yellow' }); note.textContent = 'writes → primary · reads → replicas'; } },
       { title: 'Problem: slow work inside requests → queue + workers',

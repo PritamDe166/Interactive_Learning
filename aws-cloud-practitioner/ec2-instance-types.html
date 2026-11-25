@@ -112,12 +112,12 @@
     <h2 id="rmH">Points to remember</h2>
     <div class="remember"><ol>
       <li><b>Name</b>: <code>m5.2xlarge</code> = family <b>m</b>, generation <b>5</b>, size <b>2xlarge</b>. Extra letters after the generation are attributes (<code>g</code> Graviton/Arm, <code>i</code> Intel, <code>a</code> AMD, <code>d</code> local NVMe…).</li>
-      <li><b>General purpose (T, M)</b>: balanced; web servers, code repositories, dev/test. <code>t2.micro</code>/<code>t3.micro</code> are the Free Tier examples. T = burstable.</li>
-      <li><b>Compute optimized (C)</b>: high CPU; batch processing, media transcoding, high-performance web servers, HPC, scientific modelling and ML, dedicated game servers.</li>
+      <li><b>General purpose (T, M)</b>: balanced; web servers, code repositories, dev/test. <code>t2.micro</code>/<code>t3.micro</code> are the Free Tier examples. T instances are burstable: they can use extra CPU for short periods by spending CPU credits.</li>
+      <li><b>Compute optimized (C)</b>: high CPU power. Used for batch processing, media transcoding (converting video formats), high-performance web servers, HPC (high-performance computing), scientific modelling and ML (machine learning), and dedicated game servers.</li>
       <li><b>Memory optimized (R, X, z)</b>: large data sets in RAM; high-performance relational/NoSQL databases, in-memory caches, web-scale caches, real-time big data, BI.</li>
-      <li><b>Storage optimized (I, D, H)</b>: very fast local storage; high-frequency OLTP, relational and NoSQL databases, Redis-style caches, data warehouses, distributed file systems.</li>
+      <li><b>Storage optimized (I, D, H)</b>: very fast local storage. Used for high-frequency OLTP (many small database transactions), relational and NoSQL databases, Redis-style caches, data warehouses and distributed file systems.</li>
       <li><b>Accelerated computing (P, G, Inf, Trn)</b>: GPUs or AWS ML chips for training, inference and graphics.</li>
-      <li>Same vCPU count ≠ same use: <code>c5.4xlarge</code> has 16 vCPU and 32 GiB; <code>r5.4xlarge</code> 16 vCPU and 128 GiB.</li>
+      <li>The same vCPU count does not mean the same use: <code>c5.4xlarge</code> has 16 vCPU and 32 GiB of memory, but <code>r5.4xlarge</code> has 16 vCPU and 128 GiB.</li>
       <li>Compare vCPU, memory, network, EBS bandwidth, local storage and <b>price per Region</b> (AWS instance types page; ec2instances.info is a handy comparison site).</li>
     </ol></div>
   </section>
@@ -220,7 +220,7 @@
       text: 'Training a model needs GPUs or AWS\'s ML chips. <b>Accelerated computing</b> (P, G, Inf, Trn) instances provide them.',
       play: async run => { base(5); await net.send(['ml', 'pick', 'ac'], { run }); } },
     { title: 'Then pick the size',
-      text: 'Inside a family, <b>sizes</b> go micro, small, medium, large, xlarge, 2xlarge… each step roughly doubles vCPUs, memory and price. Start small, watch the metrics, resize (stop → change type → start) when needed.',
+      text: 'Inside a family, <b>sizes</b> go micro, small, medium, large, xlarge, 2xlarge… each step roughly doubles vCPUs, memory and price. Start small and watch the metrics. When needed, resize: stop the instance, change its type, then start it again.',
       tip: 'In m5.2xlarge: m = family, 5 = generation, 2xlarge = size.' }
   ];
   K.story({ root: $('story'), steps: STEPS, show: base });

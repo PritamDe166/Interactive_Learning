@@ -6,7 +6,7 @@ SPEC = {
   "A <b>class</b> is a blueprint; calling it (<span class=\"mono\">Patient(\"Asha\", 35)</span>) creates an <b>instance</b>, a new object with its own attributes.",
   "<span class=\"mono\">__init__</span> runs right after the object is created to fill in its attributes. <span class=\"mono\">self</span> is that new object.",
   "<b>Methods</b> are functions defined in the class. <span class=\"mono\">asha.book(\"9:00\")</span> is really <span class=\"mono\">Patient.book(asha, \"9:00\")</span>.",
-  "A <b>subclass</b> inherits everything from its parent, can <b>override</b> methods, and calls the parent's version with <span class=\"mono\">super()</span>.",
+  "A <b>subclass</b> inherits everything from its parent class. It can <b>override</b> a method, which means it replaces it with its own version. It can still call the parent's version with <span class=\\\"mono\\\">super()</span>.",
   "Looking up <span class=\"mono\">obj.x</span> checks the <b>instance</b>, then its <b>class</b>, then the <b>parent classes</b>."
  ],
  "walk": {"title": "patients and VIP patients", "code":
@@ -35,8 +35,8 @@ print(asha.clinic, isinstance(ravi, Patient))''',
  "steps": [
   {"at": 13, "title": "class statements build class objects", "text": "Running a <span class=\"mono\">class</span> block creates a <b>class object</b> holding its attributes: <span class=\"mono\">clinic</span> and the functions <span class=\"mono\">__init__</span> and <span class=\"mono\">book</span>. No patient exists yet."},
   {"at": 14, "title": "Calling the class: __init__ gets a blank object", "text": "<span class=\"mono\">Patient(\"Asha\", 35)</span> makes a new, empty instance and passes it to <span class=\"mono\">__init__</span> as <b>self</b>, followed by your arguments."},
-  {"at": 18, "title": "self.x = … stores on the instance", "text": "Each <span class=\"mono\">self.attr = value</span> puts an attribute on <b>this</b> object. <span class=\"mono\">__init__</span> returns None; the call to <span class=\"mono\">Patient(...)</span> evaluates to the new instance, now bound to <span class=\"mono\">asha</span>."},
-  {"at": 22, "title": "Subclass __init__ calls super()", "text": "<span class=\"mono\">VIPPatient</span> has its own <span class=\"mono\">__init__</span>. Its first line, <span class=\"mono\">super().__init__(name, age)</span>, runs the parent's version on the <b>same</b> self. Two frames for one object."},
+  {"at": 18, "title": "self.x = … stores on the instance", "text": "Each <span class=\"mono\">self.attr = value</span> puts an attribute on <b>this</b> object. <span class=\\\"mono\\\">__init__</span> itself returns None. The call <span class=\\\"mono\\\">Patient(...)</span> gives back the new instance, and the name <span class=\\\"mono\\\">asha</span> now points to it."},
+  {"at": 22, "title": "Subclass __init__ calls super()", "text": "<span class=\"mono\">VIPPatient</span> has its own <span class=\"mono\">__init__</span>. Its first line, <span class=\"mono\">super().__init__(name, age)</span>, runs the parent's version on the <b>same</b> self. So two function calls (two frames) are running now, and both work on the same object."},
   {"at": 29, "title": "The VIP instance", "text": "<span class=\"mono\">ravi</span> got name, age and visits from Patient's <span class=\"mono\">__init__</span>, plus <span class=\"mono\">tier</span> from its own. It is a VIPPatient <b>and</b> a Patient."},
   {"at": 30, "title": "asha.book(\"9:00\")", "text": "Python finds <span class=\"mono\">book</span> on the Patient class and calls it with <span class=\"mono\">self = asha</span>. The method changes asha's own <span class=\"mono\">visits</span> list."},
   {"at": 36, "title": "Override + super()", "text": "For <span class=\"mono\">ravi.book</span>, Python finds VIPPatient's <span class=\"mono\">book</span> first (it <b>overrides</b> the parent's). That method calls <span class=\"mono\">super().book(slot)</span> to reuse the parent logic, then adds the tier."},
@@ -123,7 +123,7 @@ print(asha.clinic, isinstance(ravi, Patient))''',
       </table>
     </div>''',
  "notes": [
-  ["Corrected", "<b>Don't just print on failure.</b> A <span class=\"mono\">withdraw</span> that prints \"Insufficient funds.\" and carries on leaves the caller unable to tell it failed. Raise an exception instead (see the Your turn starter). Store money as <span class=\"mono\">decimal.Decimal</span> or integer paise/cents, not float."],
+  ["Corrected", "<b>Don't just print on failure.</b> If a <span class=\\\"mono\\\">withdraw</span> method only prints \"Insufficient funds.\" and then carries on, the caller has no way to know it failed. Raise an exception instead (see the Your turn starter). Store money as <span class=\"mono\">decimal.Decimal</span> or integer paise/cents, not float."],
   ["Added", "<b>Attribute names:</b> <span class=\"mono\">self.car_make</span>, <span class=\"mono\">self.account_balance</span>, <span class=\"mono\">self.employee_name</span> repeat the class name. Inside a Car, <span class=\"mono\">self.make</span> is clear enough, and callers write <span class=\"mono\">car.make</span>."],
   ["Added", "<b>display_car_info / show_balance</b> print directly. Defining <span class=\"mono\">__str__</span> or <span class=\"mono\">__repr__</span> lets <span class=\"mono\">print(car)</span> and f-strings work, and keeps formatting separate from logic (OOP deeper page)."],
   ["Added", "<b>main() runs on import.</b> The file ends with a bare <span class=\"mono\">main()</span>. Use <span class=\"mono\">if __name__ == \"__main__\": main()</span> so importing the classes from another file doesn't run the demo (Modules page)."]

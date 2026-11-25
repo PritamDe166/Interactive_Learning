@@ -112,7 +112,7 @@
       <li><code>chmod 400 key.pem</code>: SSH refuses keys that other users can read ("unprotected private key file").</li>
       <li>Amazon Linux user name: <b><code>ec2-user</code></b> (Ubuntu uses <code>ubuntu</code>).</li>
       <li>Use the <b>current public IP</b>; it changes after stop/start.</li>
-      <li><b>Timeout</b> → security group doesn't allow 22 from your IP (or wrong IP, instance stopped). <b>Permission denied (publickey)</b> → wrong key or user.</li>
+      <li>If SSH times out, the security group probably doesn't allow port 22 from your IP. Other causes: you used the wrong IP, or the instance is stopped. <b>Permission denied (publickey)</b> → wrong key or user.</li>
       <li>Exit with <code>exit</code>. Commands you run now execute on the instance, not your laptop.</li>
     </ol></div>
   </section>

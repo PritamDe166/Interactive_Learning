@@ -138,7 +138,7 @@
       <li><b>You: security IN the cloud</b>: your data, IAM (users, permissions, MFA), security group and network configuration, guest OS patching on EC2, encryption choices.</li>
       <li>The line <b>moves with the service</b>: on <b>EC2</b> you patch the OS; on <b>RDS</b> AWS patches the OS and database engine; on <b>Lambda</b> there is no OS or runtime for you to patch.</li>
       <li><b>Data and access are always yours</b>, whatever the service. A public bucket or a weak password is the customer's fault.</li>
-      <li><b>Shared controls</b>: patch management, configuration management, awareness and training. <b>Inherited</b> controls: physical and environmental (you rely on AWS's audits via AWS Artifact).</li>
+      <li><b>Shared controls</b>: patch management, configuration management, awareness and training. <b>Inherited</b> controls are ones you get completely from AWS, such as physical and environmental controls. You rely on AWS's audit reports, which you download from AWS Artifact.</li>
       <li>Exam wording (Task 2.1): responsibilities shift depending on the service used.</li>
     </ol></div>
   </section>
@@ -196,7 +196,7 @@
     <div class="cards">
       <div class="card"><h3>Inherited</h3><p>You get them fully from AWS: <b>physical and environmental</b> controls of the data centres. Your auditors can rely on AWS's reports (in AWS Artifact).</p></div>
       <div class="card"><h3>Shared</h3><p>Both sides do their own layer: <b>patch management</b> (AWS patches infrastructure, you patch your guest OS and apps), <b>configuration management</b>, and <b>awareness &amp; training</b>.</p></div>
-      <div class="card"><h3>Customer-specific</h3><p>Only you can do them: for example <b>service and communications protection</b> or zone security, routing data within your own security environments.</p></div>
+      <div class="card"><h3>Customer-specific</h3><p>Only you can do them. Examples: <b>service and communications protection</b>, or zone security, such as controlling how data is routed between your own security environments.</p></div>
     </div>
     <div class="notes" style="margin-top:14px">
       <div class="note"><p><b>Storage specifics:</b> AWS replicates EBS volumes inside their AZ and EFS data across AZs, replaces faulty hardware, and ensures its staff can't read your data. You set up snapshots and backups, choose encryption, and accept that <b>EC2 Instance Store</b> data is lost when the instance stops.</p></div>
@@ -286,17 +286,17 @@
         tip: 'AWS proves it with third-party audits; you download the reports from AWS Artifact.',
         play: async run => { show(1); await net.send(['user', 'net', 'dc', 'hw', 'hyp'], { run, onHop: n => net.badge(n, 'AWS', 'info') }); } },
       { title: 'You: security IN the cloud',
-        text: 'On EC2, everything from the <b>security group</b> up is yours: firewall rules, patching the <b>guest OS</b>, your <b>app</b>, and your <b>data</b>: who can access it (IAM) and whether it is encrypted.',
+        text: 'On EC2, everything from the <b>security group</b> up is yours: firewall rules, patching the <b>guest OS</b> (the operating system on your instance), and your <b>app</b>. Your <b>data</b> is yours too: who can access it (IAM) and whether it is encrypted.',
         tip: 'Data, identities and access are ALWAYS the customer\'s, whatever the service.',
         play: async run => { show(2); await net.send(['hyp', 'sg', 'os', 'app', 'data'], { run, onHop: n => net.badge(n, 'you', '') }); } },
       { title: 'Your rule stops an attacker',
         text: 'An attacker scans for SSH on port 22. Your <b>security group</b> only allows HTTPS from the internet, so the probe is dropped. That rule was your job, and you did it.',
         play: async run => { show(2); net.focus(null); await net.send(['user', 'net', 'dc', 'hw', 'hyp', 'sg'], { run, tone: 'red', label: 'port 22?' }); net.badge('sg', 'port 22 closed', 'ok'); } },
       { title: 'A breach that is your fault',
-        text: 'Now the security group allows everything from anywhere and the OS hasn\'t been patched for a year. The attacker walks in and reads patient data. AWS\'s layers all worked; the gaps were <b>in the cloud</b>, so this one is on the customer.',
+        text: 'Now the security group allows everything from anywhere and the OS hasn\'t been patched for a year. The attacker walks in and reads patient data. AWS\'s layers all worked. The gaps were in the customer\'s part (security <b>in the cloud</b>), so the customer is responsible.',
         play: async run => { show(3); net.badge('sg', '0.0.0.0/0 open', 'bad'); net.badge('os', 'unpatched', 'bad'); await net.send(ROUTE, { run, tone: 'red', label: 'exploit' }); net.state('data', 'down'); net.badge('data', 'leaked', 'bad'); } },
       { title: 'RDS: AWS takes the OS and engine',
-        text: 'Move the database to <b>Amazon RDS</b> and AWS also patches the <b>operating system and database engine</b> and runs backups. You still own the <b>security group</b> rules, the <b>database users</b>, the data and whether it is encrypted. The split is no longer one straight line.',
+        text: 'Move the database to <b>Amazon RDS</b> and AWS also patches the <b>operating system and database engine</b> and runs backups. You still own the <b>security group</b> rules, the <b>database users</b>, the data and whether it is encrypted. The boundary between AWS\'s duties and yours is no longer one straight line across the layers.',
         tip: 'Classic exam contrast: EC2 = you patch the OS; RDS = AWS patches the OS and engine.' },
       { title: 'Lambda: even further',
         text: 'With <b>AWS Lambda</b> there is no server or runtime for you to patch. You own your <b>code</b>, its <b>IAM permissions</b> and the <b>data</b> it touches. The more managed the service, the further the line moves, but data and access stay yours.' },

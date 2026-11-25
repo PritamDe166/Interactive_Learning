@@ -106,7 +106,7 @@
     <h1>Interface Segregation Principle</h1>
     <ul class="lede">
       <li>No client should be forced to <b>depend on methods it doesn't use</b>.</li>
-      <li>A <b>fat interface</b> hurts both sides: implementers write stub methods that throw, and clients get coupled to methods they never call.</li>
+      <li>A <b>fat interface</b> (one with too many methods) hurts both sides. Implementers must write stub methods (empty methods that just throw an exception). And clients depend on methods they never call.</li>
       <li>Split it into small <b>role interfaces</b> shaped around what each client needs, e.g. read, write, import.</li>
       <li>When something needs all of them, a combined interface can <b>inherit</b> the small ones. Don't go as far as one method per interface.</li>
     </ul>
@@ -167,7 +167,7 @@
       <li><span class="if">Implementers throw NotSupportedException / NotImplementedException for some members</span><span class="arrow">→</span><span class="then">the interface is too fat; split it</span></li>
       <li><span class="if">Test fakes need many empty methods</span><span class="arrow">→</span><span class="then">the class under test depends on more than it uses</span></li>
       <li><span class="if">A method only loops over a collection</span><span class="arrow">→</span><span class="then">take <span class="mono">IEnumerable&lt;T&gt;</span>, not <span class="mono">List&lt;T&gt;</span></span></li>
-      <li><span class="if">Some clients read, others write</span><span class="arrow">→</span><span class="then">separate read and write interfaces (the same idea as CQRS)</span></li>
+      <li><span class="if">Some clients read, others write</span><span class="arrow">→</span>Separate read and write interfaces (the same idea as CQRS, Command Query Responsibility Segregation)</li>
       <li><span class="if">One class legitimately does everything</span><span class="arrow">→</span><span class="then">implement several role interfaces, or a combined one that inherits them</span></li>
       <li><span class="if">Ending up with one method per interface</span><span class="arrow">→</span><span class="then">too far: group by how clients use them</span></li>
     </ul>
@@ -189,7 +189,7 @@
     <div class="notes" style="margin-top:14px">
       <div class="note"><p><b>Origin:</b> Robert C. Martin formulated ISP while consulting for Xerox, whose printer software had one large job class that every task depended on. Small changes forced long rebuilds across the system; splitting the class's interface by client fixed it.</p></div>
       <div class="note"><p><b>.NET learned this too:</b> <span class="mono">IReadOnlyList&lt;T&gt;</span> and <span class="mono">IReadOnlyCollection&lt;T&gt;</span> arrived in .NET 4.5 so read-only callers no longer depend on <span class="mono">Add</span>/<span class="mono">Remove</span>, and arrays and read-only collections stopped needing throwing implementations (see the Liskov page).</p></div>
-      <div class="note"><p><b>In practice:</b> split a bulky generic repository into read, write and delete interfaces, recombine with a main interface that inherits them when needed, and avoid the over-applied version with one method per interface.</p></div>
+      <div class="note"><p><b>In practice:</b> split a large generic repository into read, write and delete interfaces. When something needs all of them, combine them in a main interface that inherits them. Don't go so far that each interface has only one method.</p></div>
     </div>
   </div>
   </section>
@@ -203,7 +203,7 @@
       <details><summary>State ISP in one sentence.<span class="go">Show answer</span></summary>
         <div class="ans"><p>Clients should not be forced to depend on methods they do not use.</p></div></details>
       <details><summary>Name two costs of a fat interface.<span class="go">Show answer</span></summary>
-        <div class="ans"><p>Implementers write <b>stubs that throw</b> (also an LSP risk), and clients are <b>coupled to unrelated methods</b>: changes to those ripple to them, and their test fakes grow.</p></div></details>
+        <div class="ans"><p>Implementers write <b>stubs that throw</b>, which is also an LSP risk. And clients depend on unrelated methods: when those methods change, the clients are affected, and their test fakes get bigger.</p></div></details>
       <details><summary>How is ISP different from SRP?<span class="go">Show answer</span></summary>
         <div class="ans"><p>SRP looks at a <b>class</b> from the side of who changes it. ISP looks at an <b>interface</b> from the side of who uses it. One class can implement several small interfaces and still have one responsibility.</p></div></details>
       <details><summary>A <span class="mono">PrintSummary(List&lt;Patient&gt; patients)</span> only loops. What should the parameter be?<span class="go">Show answer</span></summary>
@@ -309,7 +309,7 @@ public class ReportService(IReadRepository<Patient> patients) { ... }`, 'cs');
       { title: 'Implementers forced to write stubs', text: '<span class="mono">AuditLogReader</span> is read-only by design, yet it must implement Add, Update, Delete and BulkImport. They throw <span class="mono">NotSupportedException</span>, a trap for anyone holding it as an <span class="mono">IRepository</span>.' },
       { title: 'Clients coupled to methods they never call', text: 'Change <span class="mono">BulkImport</span>\'s signature and <span class="mono">ReportService</span>, which only calls <span class="mono">GetAll</span>, is affected anyway: rebuild, redeploy, and its test fake must implement all six.' },
       { title: 'Split into role interfaces', text: 'Cut along how clients use it: <span class="mono">IReadRepository</span>, <span class="mono">IWriteRepository</span>, <span class="mono">IImportRepository</span>. Each client asks for exactly its role.' },
-      { title: 'No more stubs or stray coupling', text: '<span class="mono">AuditLogReader</span> implements the read role only: two real methods. ReportService\'s fake needs two methods, and import changes no longer touch it.', tip: 'Mention test fakes: "the smaller the interface a class depends on, the smaller the mock". It shows you\'ve felt the pain.' },
+      { title: 'No more stubs or stray coupling', text: '<span class="mono">AuditLogReader</span> implements the read role only: two real methods. ReportService\'s fake needs two methods, and import changes no longer touch it.', tip: 'Mention test fakes: "the smaller the interface a class depends on, the smaller the mock". It shows you have real experience with the problem.' },
       { title: 'Recombine when something needs it all', text: '<span class="mono">IRepository&lt;T&gt;</span> can still exist, <b>inheriting</b> read and write. The SQL repository implements it plus import, so code needing everything has one convenient type.' },
       { title: '.NET did the same', text: '<span class="mono">IList&lt;T&gt;</span> includes Add and Remove. Since .NET 4.5, read-only callers can ask for <span class="mono">IReadOnlyList&lt;T&gt;</span> or <span class="mono">IReadOnlyCollection&lt;T&gt;</span> instead, and accept far more kinds of collection.' },
       { title: 'Don\'t split to dust', text: 'One method per interface means dozens of tiny types to find and wire up. Group methods by the role a client plays, then stop.' }

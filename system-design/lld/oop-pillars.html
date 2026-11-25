@@ -121,8 +121,8 @@
     <ul class="lede">
       <li><b>Encapsulation</b>: state stays private; the only way in is a method that enforces the rules.</li>
       <li><b>Abstraction</b>: callers see <i>what</i> an object does, not <i>how</i> (interfaces, abstract classes).</li>
-      <li><b>Inheritance</b>: one base class, many interfaces; <b>constructors run base first</b>.</li>
-      <li><b>Polymorphism</b>: with <span class="mono">override</span> the <b>object</b> decides at runtime; with <span class="mono">new</span> the <b>variable's type</b> decides; overloads are picked by the <b>compiler</b>.</li>
+      <li><b>Inheritance</b>: a class can have only one base class but can implement many interfaces. When you create an object, the base class constructor runs first.</li>
+      <li><b>Polymorphism</b>: with <span class="mono">override</span>, the real <b>object</b> decides which method runs, at runtime. With <span class="mono">new</span> (hiding), the variable's declared type decides. With overloads, the <b>compiler</b> picks the method from the arguments.</li>
       <li>Interview favourites: interface vs abstract class, <span class="mono">protected internal</span> vs <span class="mono">private protected</span>, class vs struct.</li>
     </ul>
   </header>
@@ -176,7 +176,7 @@
     <ul class="cheat">
       <li><span class="if">Public setter with no rule</span><span class="arrow">→</span><span class="then">not encapsulation: make it a method that validates</span></li>
       <li><span class="if">Callers shouldn't know how it works</span><span class="arrow">→</span><span class="then">abstraction: an interface or abstract class in front</span></li>
-      <li><span class="if">Related classes share code and state, a few steps differ</span><span class="arrow">→</span><span class="then">abstract base class (template method)</span></li>
+      <li><span class="if">Related classes share code and state, a few steps differ</span><span class="arrow">→</span>Abstract base class (the template method pattern: the base class runs the steps and subclasses fill in the ones that differ)</li>
       <li><span class="if">Unrelated classes share a capability, or you need to swap / fake it</span><span class="arrow">→</span><span class="then">interface</span></li>
       <li><span class="if">Behaviour must follow the real object</span><span class="arrow">→</span><span class="then"><span class="mono">virtual</span> in the base + <span class="mono">override</span></span></li>
       <li><span class="if">You see <span class="mono">new</span> on a method, or warning CS0108</span><span class="arrow">→</span><span class="then">hiding: the variable's type decides; usually a bug</span></li>
@@ -222,7 +222,7 @@
       </table>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><p><b>Defaults:</b> members are <span class="mono">private</span> unless stated; top-level types are <span class="mono">internal</span>. A <span class="mono">static class</span> can't be instantiated or inherited; a <span class="mono">sealed class</span> can't be inherited, and <span class="mono">sealed override</span> stops one method being overridden further.</p></div>
+      <div class="note"><p><b>Defaults:</b> members are <span class="mono">private</span> unless stated; top-level types are <span class="mono">internal</span>. A <span class="mono">static class</span> can't be instantiated or inherited. A <span class="mono">sealed class</span> can't be inherited. A <span class="mono">sealed override</span> stops that one method from being overridden again in further subclasses.</p></div>
       <div class="note"><p><b>Encapsulation vs abstraction:</b> encapsulation protects <i>data</i> (private state, guarded changes); abstraction hides <i>complexity</i> (a small contract in front of the details). They work together.</p></div>
       <div class="note"><p><b>Covariant returns</b> (C# 9): an override may return a more derived type than the base method declared.</p></div>
     </div>
@@ -409,10 +409,10 @@ public class BillingService : ILoggable, IAuditable
   ];
   function show(i) { clear(); SCENES[i](); const c = CODE[i]; K.codeCard($('opCode'), { file: c.f, lang: 'cs', code: c.c, marks: c.m }); }
   K.story({ root: $('opStory'), show, tipLabel: 'Interview tip', steps: [
-    { title: 'Encapsulation: a wall with one door', text: 'The balance is <b>private</b>. The only way to change it is <span class="mono">Pay()</span>, which rejects bad amounts. Touching the field from outside doesn\'t even compile (<b>CS0122</b>).', tip: 'A public setter with no rule is not encapsulation, it\'s a field with extra steps.' },
+    { title: 'Encapsulation: a wall with one door', text: 'The balance is <b>private</b>. The only way to change it is <span class="mono">Pay()</span>, which rejects bad amounts. Touching the field from outside doesn\'t even compile (<b>CS0122</b>).', tip: 'A public setter with no rule is not encapsulation. It is just a public field written in a longer way.' },
     { title: 'Abstraction: a small public face', text: 'The caller sees <span class="mono">Send(text)</span> and nothing else. Validation, delivery and the SMS provider sit behind it and can change without touching callers. An abstract class can\'t be created directly (<b>CS0144</b>).' },
-    { title: 'Inheritance: is-a, and base runs first', text: 'UrgentSmsNotifier <b>is a</b> SmsNotifier, which <b>is a</b> Notifier. Creating one runs constructors <b>base first</b>. <span class="mono">: base(phone)</span> passes arguments up; <span class="mono">base.Deliver()</span> reuses the parent\'s code. <span class="mono">sealed</span> ends the chain.' },
-    { title: 'Polymorphism: override, the object decides', text: 'The variable is typed <span class="mono">Report</span>, but the object is a <span class="mono">LabReport</span>. For a <span class="mono">virtual</span> method the runtime follows the reference to the object and uses <b>its</b> method table: <span class="mono">"Lab report"</span>.' },
+    { title: 'Inheritance: is-a, and base runs first', text: 'UrgentSmsNotifier <b>is a</b> SmsNotifier, which <b>is a</b> Notifier. Creating one runs constructors <b>base first</b>. <span class="mono">: base(phone)</span> passes arguments to the base constructor. <span class="mono">base.Deliver()</span> reuses the parent\'s code. <span class="mono">sealed</span> stops any further class from inheriting.' },
+    { title: 'Polymorphism: override, the object decides', text: 'The variable is typed <span class="mono">Report</span>, but the object is a <span class="mono">LabReport</span>. For a <span class="mono">virtual</span> method, the runtime looks at the real object and uses that object\'s version of the method (from <b>its</b> method table, a per-class list of methods). Result: <span class="mono">"Lab report"</span>.' },
     { title: 'Hiding with new: the variable decides', text: '<span class="mono">Footer()</span> isn\'t virtual; LabReport declares a <b>new</b> one. The compiler binds the call to the variable\'s type, so you get <span class="mono">"generic footer"</span>. Leave out <span class="mono">new</span> and you get warning <b>CS0108</b>.', tip: 'Classic interview trap. Hiding is almost always a bug in a design: make the base method virtual and override it.' },
     { title: 'Overloading: the compiler picks', text: 'Same name, different parameter lists. The <b>compiler</b> chooses from the arguments before the program runs: <span class="mono">Fee(500)</span> → 500, <span class="mono">Fee(500, true)</span> → 400.0.' },
     { title: 'class vs struct: share or copy', text: 'Assigning a <b>class</b> copies the reference, so both variables see one object. Assigning a <b>struct</b> copies the value. Use structs for small immutable values (Money, Point), classes for entities with identity.' },

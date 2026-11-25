@@ -94,8 +94,8 @@
     <ul class="lede">
       <li><b>Infrastructure as Code</b>: describe resources in a file, and let AWS create, change and delete them in order. <b>CloudFormation</b> (templates) or <b>CDK</b> (real code that becomes templates).</li>
       <li><b>Elastic Beanstalk</b>: PaaS. Upload code; it builds the EC2, load balancer and Auto Scaling for you.</li>
-      <li><b>CodePipeline</b> orchestrates <b>CodeCommit → CodeBuild → CodeDeploy</b>. <b>CodeArtifact</b> stores packages.</li>
-      <li><b>Systems Manager</b> runs fleets (patching, commands, <b>Session Manager</b> shells, <b>Parameter Store</b>), on AWS and on-premises.</li>
+      <li><b>CodePipeline</b> runs the stages in order: CodeCommit holds the code, CodeBuild builds and tests it, and CodeDeploy deploys it. <b>CodeArtifact</b> stores packages.</li>
+      <li><b>Systems Manager</b> manages fleets (groups of many servers) on AWS and on-premises. It handles patching, running commands, <b>Session Manager</b> shells and <b>Parameter Store</b>.</li>
     </ul>
   </header>
 
@@ -104,7 +104,7 @@
     <p class="sub">These tools do jobs you already do around .NET builds and servers.</p>
     <div class="card analogy">
       <div class="row head"><span>AWS</span><span>Closest idea you already know</span><span>The difference</span></div>
-      <div class="row"><span class="aws">CloudFormation</span><span class="like">A SQL deployment script, but for infrastructure: run it again and you get the same result</span><span>Declarative template → a stack of resources.</span></div>
+      <div class="row"><span class="aws">CloudFormation</span><span class="like">A SQL deployment script, but for infrastructure: run it again and you get the same result</span><span>A declarative template (you describe what you want, not the steps to build it) creates a stack (a group of resources managed together).</span></div>
       <div class="row"><span class="aws">CDK</span><span class="like">Writing that script in C# instead of JSON/YAML</span><span>C#, TypeScript… that compiles to CloudFormation.</span></div>
       <div class="row"><span class="aws">Elastic Beanstalk</span><span class="like">Publishing to IIS, with AWS running the servers</span><span>PaaS: upload code, AWS runs the servers.</span></div>
       <div class="row"><span class="aws">CodePipeline + CodeBuild + CodeDeploy</span><span class="like">Your build server: build, test, deploy (Jenkins, TeamCity, GitHub Actions)</span><span>Orchestrate build, test and deploy.</span></div>
@@ -191,7 +191,7 @@
         <thead><tr><th>Service</th><th>Job</th><th>Exam trigger</th></tr></thead>
         <tbody>
           <tr><td><b>CloudFormation</b></td><td>Declarative templates (YAML/JSON) → stacks; drift detection</td><td>"infrastructure as code", "repeatable across Regions/accounts"</td></tr>
-          <tr><td><b>CDK</b></td><td>Infrastructure in TypeScript, Python, Java, .NET…; synthesizes CloudFormation</td><td>"use a programming language"</td></tr>
+          <tr><td><b>CDK</b></td><td>Infrastructure written in TypeScript, Python, Java, .NET…; CDK turns it into (synthesizes) a CloudFormation template</td><td>"use a programming language"</td></tr>
           <tr><td><b>Elastic Beanstalk</b></td><td>PaaS: upload code, it runs EC2 + ELB + ASG + monitoring (no extra charge)</td><td>"developer just uploads code", "least effort web app"</td></tr>
           <tr><td><b>CodeCommit</b></td><td>Private Git repositories</td><td>"store code in AWS"</td></tr>
           <tr><td><b>CodeBuild</b></td><td>Serverless build and test, pay per build minute</td><td>"compile and run tests"</td></tr>
@@ -205,7 +205,7 @@
     </div>
     <div class="notes" style="margin-top:14px">
       <div class="note"><p><b>CodeCommit is open to new customers again.</b> AWS stopped onboarding new customers in July 2024, then returned CodeCommit to general availability in November 2025. Older courses may say it's closed.</p></div>
-      <div class="note"><p><b>CodeBuild doesn't watch your repository on its own.</b> It runs when something triggers it: a webhook, a CodePipeline stage, or a manual start. And CloudFormation uploads a template to S3 only in some cases (for example large templates), not always.</p></div>
+      <div class="note"><p><b>CodeBuild doesn't watch your repository on its own.</b> It runs when something triggers it: a webhook, a CodePipeline stage, or a manual start. Separately: CloudFormation uploads a template to S3 only in some cases (for example large templates), not always.</p></div>
       <div class="note"><p><b>Secrets Manager vs Parameter Store:</b> both hold secrets; <b>Secrets Manager</b> adds automatic <b>rotation</b> (for example RDS passwords) and costs per secret. Parameter Store is cheaper and good for configuration. Exam: "rotate database credentials automatically" → Secrets Manager.</p></div>
       <div class="note"><p><b>Drift isn't auto-repaired.</b> Drift detection only reports differences. You fix it by updating the template or reverting the change. Beanstalk itself uses CloudFormation behind the scenes.</p></div>
     </div>
@@ -290,10 +290,10 @@
         tip: '"Developer just wants to deploy code, least effort" → Elastic Beanstalk.',
         play: async run => { show(4); await build(run); } },
       { title: 'CI/CD: from commit to production',
-        text: '<b>CodePipeline</b> orchestrates the stages (like your build server): code in <b>CodeCommit</b> (or GitHub) → <b>CodeBuild</b> compiles and runs tests → <b>CodeDeploy</b> updates EC2 and even on-prem servers. <b>CodeArtifact</b> hosts NuGet/npm packages.',
+        text: '<b>CodePipeline</b> orchestrates the stages, like your build server. The code is in <b>CodeCommit</b> (or GitHub). <b>CodeBuild</b> compiles it and runs tests. <b>CodeDeploy</b> then updates EC2 and even on-prem servers. <b>CodeArtifact</b> hosts NuGet/npm packages.',
         play: async run => { show(5); const p = K.pill(P, 'commit', 'alt'); for (let j = 0; j < 3; j++) await K.move(p, [98 + j * 168, 335], [98 + (j + 1) * 168, 335], 450, run); p.remove(); } },
       { title: 'Systems Manager: run the whole fleet',
-        text: '<b>Systems Manager</b> manages EC2 and on-prem servers through an agent: run a command or patch everything at once, open a shell with <b>Session Manager</b> (no SSH keys, no port 22), and store config and secrets in <b>Parameter Store</b>.',
+        text: '<b>Systems Manager</b> manages EC2 and on-prem servers through an agent (a small program on each server). You can run a command or patch every server at once. You can open a shell with <b>Session Manager</b>, with no SSH keys and no port 22. You can store config and secrets in <b>Parameter Store</b>.',
         tip: '"Patch a fleet" or "shell without opening port 22" → Systems Manager.' }
     ];
     K.story({ root: $('depStory'), steps: STEPS, show });

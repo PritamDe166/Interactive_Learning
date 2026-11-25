@@ -140,7 +140,7 @@
 
   <section id="compare" data-nav="Compare">
     <h2 class="sec-h"><span class="sec-n">2</span>Compare: 4 places to keep state</h2>
-    <p class="sub">Keep the app servers forgettable: session data, identity and files each have a better home. Press <b>▶ Play</b> on a card.</p>
+    <p class="sub">Keep nothing important on the app servers, so losing one doesn't matter. Session data, identity and files each have a better place to live. Press <b>▶ Play</b> on a card.</p>
     <div id="atlas"></div>
     <div class="sub-block" aria-labelledby="whereH">
     <h3 class="sec-h3" id="whereH">Where state can live instead</h3>
@@ -163,7 +163,7 @@
         <tr><td>How it is sent</td><td>Browser sends it automatically</td><td>App adds <code>Authorization: Bearer …</code> (or puts it in a cookie)</td></tr>
         <tr><td>Server work per request</td><td>Look up the session (Redis)</td><td>Check the signature, no lookup</td></tr>
         <tr><td>Logout / revoke</td><td>Instant: delete the session</td><td>Hard: valid until expiry → keep it short, use refresh tokens</td></tr>
-        <tr><td>Main risk</td><td>CSRF → <code>SameSite</code> cookies, anti-forgery tokens</td><td>Theft via XSS if kept in localStorage</td></tr>
+        <tr><td>Main risk</td><td>CSRF (another site makes the browser send your cookie) → fix with <code>SameSite</code> cookies and anti-forgery tokens</td><td>Can be stolen via XSS (an attacker's script running in your page) if kept in localStorage</td></tr>
         <tr><td>Fits</td><td>Browser web apps</td><td>APIs, mobile apps, service-to-service</td></tr>
       </tbody></table></div>
     <div class="note"><p>Use <code>HttpOnly</code> + <code>Secure</code> + <code>SameSite</code> on any cookie that carries a session ID or token, so page scripts can't read it and other sites can't send it.</p></div>
@@ -195,7 +195,7 @@
       <details><summary>"Our API is stateless, so it doesn't use a database." What's wrong?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>Stateless refers to the app instances.</b> A stateless API with a stateful database is the normal design.</p></div></details>
       <details><summary>Why do sticky sessions make autoscaling awkward?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>Users are pinned</b>, so new servers get only new users and scaling in kills sessions. Load drifts uneven.</p></div></details>
+        <div class="ans"><p>Each user is tied to one server, so new servers get only new users. Removing servers (scaling in) ends the sessions on them. Over time, load becomes uneven.</p></div></details>
       <details><summary>A server is replaced during a deploy. What happens to carts in the stateless design?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>Nothing.</b> They live in Redis; the new server reads them on the next request.</p></div></details>
       <details><summary>Name one new risk the stateless design introduces.<span class="go">Show answer</span></summary>
@@ -203,7 +203,7 @@
       <details><summary>How does a server validate a JWT without asking anyone?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>It verifies the signature</b> with the issuer's key and checks expiry and claims. No session lookup is needed.</p></div></details>
       <details><summary>When are sticky sessions still reasonable?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>Legacy apps</b> that keep session state in memory and can't be changed yet, or for cache locality. Treat them as a stopgap.</p></div></details>
+        <div class="ans"><p><b>Legacy apps</b> that keep session state in memory and can't be changed yet, or when you want each user's cached data to stay on one server (cache locality). Treat them as a temporary fix.</p></div></details>
     </div>
   </div>
   </section>

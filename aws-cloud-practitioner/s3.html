@@ -110,8 +110,8 @@
     <ul class="lede">
       <li><b>Object storage</b>: files (objects) in <b>buckets</b>, reached by API or URL. Virtually unlimited; objects up to ~48.8 TiB.</li>
       <li>A bucket lives in <b>one Region</b>; its name is globally unique. "Folders" are just key prefixes.</li>
-      <li><b>Private by default</b>, encrypted by default (SSE-S3). Access comes from IAM policies and bucket policies.</li>
-      <li><b>11 nines durability</b> in every storage class; classes trade price against retrieval speed and availability.</li>
+      <li>Buckets are private by default, and objects are encrypted by default (SSE-S3: server-side encryption with keys that S3 manages). Access comes from IAM policies and bucket policies.</li>
+      <li>Every storage class has 11 nines of durability (99.999999999%: data is almost never lost). The classes differ in price, retrieval speed and availability: cheaper classes are slower to read from.</li>
     </ul>
   </header>
 
@@ -209,16 +209,16 @@
   <section aria-labelledby="moreH">
     <h2 id="moreH">More S3 you'll be asked about</h2>
     <div class="cards" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr))">
-      <div class="card"><h3>Replication</h3><p><b>CRR</b> (cross-Region): compliance, lower latency, other accounts. <b>SRR</b> (same Region): aggregate logs, prod → test copies. Needs <b>versioning on both buckets</b>; asynchronous; only new objects (existing ones need <b>S3 Batch Replication</b>).</p></div>
-      <div class="card"><h3>Encryption</h3><p><b>SSE-S3</b>: default on every new object since January 2023, free. <b>SSE-KMS</b>: keys in KMS, usage audited in CloudTrail. <b>Client-side</b>: you encrypt before upload. In transit: HTTPS.</p></div>
-      <div class="card"><h3>Static website</h3><p>Turn on website hosting, add <span class="mono">index.html</span>, make it public (BPA off + policy). The website endpoint is <b>HTTP only</b>: put <b>CloudFront</b> in front for HTTPS and a custom domain.</p></div>
+      <div class="card"><h3>Replication</h3><p><b>CRR</b> (Cross-Region Replication) copies objects to another Region, for compliance, lower latency, or copying to other accounts. <b>SRR</b> (Same-Region Replication) copies within one Region, for example to collect logs in one place or copy prod data to test. Both need <b>versioning on both buckets</b>. Replication is asynchronous (it happens a little later, not instantly) and copies only new objects; existing objects need <b>S3 Batch Replication</b>.</p></div>
+      <div class="card"><h3>Encryption</h3><p><b>SSE-S3</b>: default on every new object since January 2023, free. <b>SSE-KMS</b>: the keys are kept in KMS (AWS Key Management Service), and every use of a key is recorded in CloudTrail. <b>Client-side</b>: you encrypt before upload. In transit: HTTPS.</p></div>
+      <div class="card"><h3>Static website</h3><p>Turn on website hosting, add <span class="mono">index.html</span>, and make it public (turn Block Public Access off and add a bucket policy). The website endpoint is <b>HTTP only</b>: put <b>CloudFront</b> in front for HTTPS and a custom domain.</p></div>
       <div class="card"><h3>Storage Gateway</h3><p>Hybrid bridge from on-premises to S3: <b>S3 File Gateway</b> (NFS/SMB), <b>Volume Gateway</b> (iSCSI, EBS snapshots), <b>Tape Gateway</b> (virtual tapes → S3 Glacier).</p></div>
       <div class="card"><h3>Access checks</h3><p><b>IAM Access Analyzer for S3</b> lists buckets that are public or shared with other accounts. <b>Pre-signed URLs</b> give time-limited access to a private object.</p></div>
       <div class="card"><h3>Lock it down</h3><p><b>MFA Delete</b>: MFA for permanent deletes (root only). <b>Object Lock</b> / <b>Glacier Vault Lock</b>: write-once-read-many (WORM) for compliance.</p></div>
     </div>
     <div class="notes" style="margin-top:14px">
       <div class="note"><p><b>Maximum object size is 48.8 TiB</b> (multipart, 10,000 parts of up to 5 GiB), not 50 TB; older material says 5 TB. A single PUT is limited to 5 GB, and multipart is recommended from about 100 MB.</p></div>
-      <div class="note"><p><b>Existing objects are replicated with S3 Batch Replication</b>, not "S3 Batch Operations" in general. Replication has no time guarantee unless you pay for <b>Replication Time Control</b> (15-minute SLA).</p></div>
+      <div class="note"><p><b>Existing objects are replicated with S3 Batch Replication</b>, not "S3 Batch Operations" in general. Replication has no time guarantee unless you pay for <b>Replication Time Control</b> (an SLA, a service-level agreement, of 15 minutes).</p></div>
       <div class="note"><p><b>Snowball devices reach end of support on 31 December 2026</b> in commercial Regions, and the Snow Family isn't on the CLF-C02 in-scope list. Know it only as "ship a physical device to move huge data".</p></div>
       <div class="note"><p><b>S3 Express One Zone</b>: single-digit-millisecond latency, up to 10× faster than Standard, request costs up to 80% lower, one AZ, "directory buckets". Bucket names can also live in an <b>account regional namespace</b> that only your account can claim.</p></div>
       <div class="note"><p><b>Pricing levers:</b> you pay for GB-months stored, requests, retrievals (IA and Glacier) and data transfer <i>out</i>. Data in is free. Every version of an object is billed as a full object, so pair versioning with lifecycle expiration.</p></div>

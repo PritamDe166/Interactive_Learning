@@ -23,8 +23,8 @@ SPEC = {
  "lede": [
   "Functions are objects: you can pass them to other functions. <b>lambda</b> writes a small one inline: <span class=\"mono\">lambda p: p[1]</span>.",
   "<span class=\"mono\">sorted(items, key=f)</span> sorts by <b>f(item)</b>, not by the item itself. Same <span class=\"mono\">key=</span> works for min, max and groupby.",
-  "<span class=\"mono\">map(f, xs)</span> transforms, <span class=\"mono\">filter(f, xs)</span> keeps items where f is true, <span class=\"mono\">reduce(f, xs, start)</span> folds them into one value. A comprehension is often clearer for the first two.",
-  "<b>itertools</b> has lazy building blocks: <span class=\"mono\">chain</span>, <span class=\"mono\">islice</span>, <span class=\"mono\">groupby</span>, <span class=\"mono\">count</span>…"
+  "<span class=\\\"mono\\\">map(f, xs)</span> calls f on every item and gives the results. <span class=\\\"mono\\\">filter(f, xs)</span> keeps only the items where f returns true. <span class=\\\"mono\\\">reduce(f, xs, start)</span> combines (folds) all items into one value. A comprehension is often clearer for the first two.",
+  "The <b>itertools</b> module has lazy tools (they make items one at a time, only when asked): <span class=\\\"mono\\\">chain</span>, <span class=\\\"mono\\\">islice</span>, <span class=\\\"mono\\\">groupby</span>, <span class=\\\"mono\\\">count</span>…"
  ],
  "walk": {"title": "sorting and summarising patients", "code":
 '''from functools import reduce
@@ -47,9 +47,9 @@ print(list(chain(["9:00"], ["9:30", "10:00"])), list(islice(names, 2)))''',
   {"at": 29, "title": "Two-level sort with a tuple key", "text": "Key <span class=\"mono\">(-fee, name)</span>: highest fee first (negating flips the order), ties broken alphabetically. Tuples compare item by item."},
   {"at": 42, "title": "map: transform each item", "text": "<span class=\"mono\">map</span> applies the lambda to every patient and returns a lazy iterator; <span class=\"mono\">list()</span> collects the uppercased names. Equivalent: <span class=\"mono\">[p[0].upper() for p in patients]</span>."},
   {"at": 55, "title": "filter: keep what passes", "text": "Only patients with fee &lt; 500 survive: Asha and John. Equivalent: <span class=\"mono\">[p for p in patients if p[2] &lt; 500]</span>."},
-  {"at": 68, "title": "reduce: fold into one value", "text": "<span class=\"mono\">reduce</span> carries an accumulator: start 0, then 0+800, +450, +1200, +450 = 2900. For sums, <span class=\"mono\">sum(p[2] for p in patients)</span> is simpler; reduce shines for custom combining.", "tip": "reduce lives in functools because Python prefers explicit loops or sum/any/all for common cases."},
+  {"at": 68, "title": "reduce: fold into one value", "text": "<span class=\\\"mono\\\">reduce</span> keeps a running result (the accumulator). It starts at 0, then adds each fee: 0+800, +450, +1200, +450 = 2900. For sums, <span class=\\\"mono\\\">sum(p[2] for p in patients)</span> is simpler. reduce is most useful when you need your own way of combining items.", "tip": "reduce lives in functools because Python prefers explicit loops or sum/any/all for common cases."},
   {"at": 78, "title": "groupby groups neighbours", "text": "<span class=\"mono\">groupby</span> walks the <b>sorted</b> list and bundles consecutive items with the same key. It only groups neighbours, which is why we sorted by age first."},
-  {"at": "end", "title": "chain and islice", "text": "<span class=\"mono\">chain</span> joins iterables end to end without copying; <span class=\"mono\">islice</span> slices any iterator (even an infinite one) lazily."}
+  {"at": "end", "title": "chain and islice", "text": "<span class=\\\"mono\\\">chain</span> joins iterables end to end without copying them. <span class=\\\"mono\\\">islice</span> takes a slice of any iterator, even an infinite one. It works lazily, making items only when they are needed."}
  ]},
  "walk_out": "Meera Meera ['RAVI', 'ASHA', 'MEERA', 'JOHN'] 2 2900 / 29 ['Meera'] / 35 ['Asha'] / 41 ['Ravi', 'John'] / ['9:00', '9:30', '10:00'] ['RAVI', 'ASHA']",
  "puzzles": [
@@ -78,7 +78,7 @@ print(list(chain(["9:00"], ["9:30", "10:00"])), list(islice(names, 2)))''',
     function show(i) {
       const s = S[i];
       rows.forEach((r, k) => { r.style.transform = `translateY(${s.order.indexOf(k) * H + 34}px)`; r.querySelector('.sk-k').textContent = s.keys[k]; });
-      $('skStatus').innerHTML = `<span class="mono">sorted(patients${i ? ', ' + s.label : ''})</span> · ` + (i === 0 ? 'no key: whole tuples compare, name first (uppercase before lowercase).' : 'rows are ordered by the key column; equal keys keep their original order (stable sort).');
+      $('skStatus').innerHTML = `<span class="mono">sorted(patients${i ? ', ' + s.label : ''})</span> · ` + (i === 0 ? 'no key: whole tuples are compared, starting with the name (uppercase letters come before lowercase).' : 'rows are ordered by the key column; equal keys keep their original order (stable sort).');
     }
     $('skBtns').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { $('skBtns').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); show(+b.dataset.i); }));
     show(0);'''.replace('__P__', json.dumps(P)).replace('__S__', json.dumps(SORTS))}

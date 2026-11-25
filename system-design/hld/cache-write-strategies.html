@@ -107,10 +107,10 @@
     <h1>Cache Write Strategies &amp; Invalidation</h1>
     <ul class="lede">
       <li>Once data is cached there are <b>two copies</b>; every write must decide how the cache copy gets fixed.</li>
-      <li><b>Write-through</b>: update cache and DB together before acknowledging. Fresh, but slower writes.</li>
-      <li><b>Write-behind</b>: acknowledge after the cache, flush to the DB later. Fast, but can lose data.</li>
+      <li><b>Write-through</b>: update cache and DB together before telling the client the write succeeded (acknowledging). Data stays fresh, but writes are slower.</li>
+      <li><b>Write-behind</b>: confirm the write once it is in the cache, and copy (flush) it to the DB later. Fast, but data can be lost.</li>
       <li><b>Write-around</b>: write only to the DB; the cache fills on the next read.</li>
-      <li>With cache-aside, <b>delete the key</b> on write; overwriting it can put an old value back.</li>
+      <li>With cache-aside, <b>delete the key</b> when you write. If you overwrite the key instead, a slower request can put an old value back.</li>
     </ul>
   </header>
 
@@ -153,7 +153,7 @@
       <li><span class="if">Written a lot, read rarely</span><span class="arrow">→</span><span class="then">Write-around</span></li>
       <li><span class="if">Using cache-aside and data changes</span><span class="arrow">→</span><span class="then">Update DB, then DEL the key</span></li>
       <li><span class="if">"Can the cache still go stale?"</span><span class="arrow">→</span><span class="then">Yes, rarely: keep a TTL as a safety net</span></li>
-      <li><span class="if">Strict freshness across services</span><span class="arrow">→</span><span class="then">Publish change events (outbox/CDC) that invalidate</span></li>
+      <li><span class="if">Strict freshness across services</span><span class="arrow">→</span>Publish change events (outbox pattern or CDC, change data capture) that tell each service to delete its cached key</li>
     </ul>
     <h3 class="sec-h3">Reference</h3>
     <div class="card scroll">
@@ -168,7 +168,7 @@
       </table>
     </div>
     <div class="note">Interviewers often ask "how do you keep cache and DB consistent?" right after "add a cache"; write-around and the invalidation race are the usual follow-ups.</div>
-    <div class="note">Deleting the key does not make cache-aside perfectly consistent: a slow reader can still put an old value back (see the lab). A TTL bounds how long that lasts; a delayed second delete closes most of the gap.</div>
+    <div class="note">Deleting the key does not make cache-aside perfectly consistent: a slow reader can still put an old value back (see the lab). A TTL limits how long the old value can stay. Deleting the key a second time, a little later, fixes most of these cases.</div>
   </section>
 
   <section id="test" data-nav="Test">
@@ -187,7 +187,7 @@
       <details><summary>What does write-through cost you on reads?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>Nothing extra; it costs on writes</b> (two hops) and memory (it caches data that may never be read).</p></div></details>
       <details><summary>Ten services cache the same patient record. How do they all learn it changed?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>Publish an event</b> (outbox or CDC) that each service consumes to delete its key, plus a TTL as a backstop.</p></div></details>
+        <div class="ans"><p><b>Publish an event</b> (using the outbox pattern or CDC, change data capture). Each service reads the event and deletes its key. Keep a TTL as a safety net.</p></div></details>
       <details><summary>What is a "delayed double delete"?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>Delete, then delete again after a short delay</b> (longer than a typical read). It removes a stale value a slow reader may have written in between.</p></div></details>
     </div>

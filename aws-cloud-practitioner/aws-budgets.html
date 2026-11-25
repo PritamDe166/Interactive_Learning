@@ -113,11 +113,11 @@
   <section aria-labelledby="rmH">
     <h2 id="rmH">Points to remember</h2>
     <div class="remember"><ol>
-      <li><b>AWS Budgets</b> tracks <b>cost or usage</b> and sends <b>alerts by email</b> (or SNS) when <b>actual</b> or <b>forecasted</b> spend crosses a threshold.</li>
-      <li><b>Zero-spend budget</b>: alerts as soon as you spend anything. <b>Monthly cost budget</b>: e.g. $10 with alerts at 85% and 100% actual, and 100% forecasted.</li>
+      <li><b>AWS Budgets</b> tracks <b>cost or usage</b>. It sends <b>alerts by email</b> (or by Amazon SNS, AWS's notification service) when <b>actual</b> or <b>forecasted</b> spend crosses a threshold.</li>
+      <li><b>Zero-spend budget</b>: alerts as soon as you spend anything. <b>Monthly cost budget</b>: for example $10, with alerts when actual spend reaches 85% and 100%, and when forecasted spend reaches 100%.</li>
       <li>IAM users see <b>Access denied</b> in Billing until the <b>root user</b> enables <b>"IAM user and role access to Billing information"</b> (Account page). They still need IAM permissions.</li>
       <li><b>Bills → Charges by service</b> tells you what caused a charge. <b>Free Tier</b> shows current and forecasted usage against free limits.</li>
-      <li>"Free Tier" doesn't mean everything is free. Common EC2-related surprises: <b>NAT Gateway</b>, <b>public IPv4 / Elastic IP</b>, <b>EBS volumes and snapshots</b>, <b>load balancers</b>.</li>
+      <li>"Free Tier" doesn't mean everything is free. Common EC2-related surprises: a <b>NAT Gateway</b> (lets private servers reach the internet), a public IPv4 address or Elastic IP (a fixed public address), <b>EBS volumes and snapshots</b>, and <b>load balancers</b>.</li>
       <li>Stopping an instance stops compute charges, but <b>EBS keeps billing</b>. Terminate and delete when done.</li>
       <li>Resources are <b>regional</b>: check every Region you used when hunting a charge.</li>
       <li>Budgets <b>alert</b>; they don't stop resources by themselves (unless you configure budget actions).</li>
@@ -233,7 +233,7 @@
       text: 'When spend crosses a threshold, Budgets <b>emails you</b>. It doesn\'t stop anything on its own; it makes sure you notice in days, not at the end of the month.',
       play: async run => { base(5); await net.send(['bud', 'you'], { run, label: 'budget alert', tone: 'red' }); } },
     { title: 'Find it and delete it',
-      text: 'Open <b>Bills → Charges by service</b>, find the culprit (the NAT Gateway), and delete it. Also look for unattached EBS volumes, idle Elastic IPs and old snapshots, <b>in every Region</b> you used.',
+      text: 'Open <b>Bills → Charges by service</b>, find the resource that caused the cost (the NAT Gateway), and delete it. Also look for unattached EBS volumes, idle Elastic IPs and old snapshots, <b>in every Region</b> you used.',
       play: async run => { base(6); await net.send(['you', 'bill'], { run, label: 'charges by service' }); } }
   ];
   K.story({ root: $('story'), steps: STEPS, show: base });

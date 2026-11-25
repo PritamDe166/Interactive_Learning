@@ -31,7 +31,7 @@ SPEC = {
   "Type hints describe what a value <b>should</b> be: <span class=\"mono\">def with_tax(amount: float) -&gt; float:</span>.",
   "Python <b>does not check them at run time</b>. They're read by your editor and by type checkers such as <b>mypy</b> or <b>pyright</b> before the code runs.",
   "Modern syntax: <span class=\"mono\">list[int]</span>, <span class=\"mono\">dict[str, float]</span>, <span class=\"mono\">str | None</span> (3.10+). No <span class=\"mono\">typing</span> import needed for these.",
-  "Hints document intent, power autocomplete, and catch whole classes of bugs (None, wrong types, typos) early: the closest Python gets to C#'s compiler checks."
+  "Hints show what you intended and help editor autocomplete. They also catch whole groups of bugs early (None, wrong types, typos). This is the closest Python gets to C#'s compiler checks."
  ],
  "walk": {"title": "annotations are stored, not enforced", "code":
 '''def with_tax(amount: float, rate: float = 0.18) -> float:
@@ -118,8 +118,8 @@ print(with_tax.__annotations__)''',
     </div>''',
  "notes": [
   ["Corrected", "<b>Modern hint syntax.</b> Since Python 3.10 write <span class=\"mono\">str | None</span> instead of <span class=\"mono\">Union[str, None]</span>. A function annotated <span class=\"mono\">-&gt; int</span> that returns a tuple is exactly the kind of mistake mypy reports."],
-  ["Added", "<b>Why hints matter beyond readability:</b> tool-calling libraries for AI agents and FastAPI/Pydantic build JSON schemas from them."],
-  ["Updated", "<b>Python 3.14</b> evaluates annotations lazily (PEP 649/749), so a class can refer to itself or to classes defined later without quotes or <span class=\"mono\">from __future__ import annotations</span>."]
+  ["Added", "<b>Why hints matter beyond readability:</b> tool-calling libraries for AI agents and FastAPI/Pydantic build JSON schemas (descriptions of the expected data) from them."],
+  ["Updated", "<b>Python 3.14</b> evaluates annotations lazily (only when something reads them) (PEP 649/749). So a class can refer to itself, or to classes defined later, without quotes or <span class=\\\"mono\\\">from __future__ import annotations</span>."]
  ],
  "quiz": [
   {"q": "Does Python raise an error for <span class=\"mono\">x: int = \"hello\"</span>?", "code": "x: int = \"hello\"\nprint(x)", "expect": "hello", "a": "<b>No</b>, it prints <span class=\"mono\">hello</span>. Only a type checker would complain."},

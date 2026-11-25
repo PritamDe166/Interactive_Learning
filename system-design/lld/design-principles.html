@@ -113,10 +113,10 @@
     <h1>Design Principles: DRY, KISS, YAGNI and More</h1>
     <ul class="lede">
       <li>Every principle answers one question: <b>when a requirement changes, how many classes do I have to edit?</b></li>
-      <li><b>DRY</b>: one place per piece of knowledge. <b>Law of Demeter</b>: talk to your friends, not their friends. <b>Program to an interface</b>: depend on what, not who.</li>
+      <li><b>DRY</b> (Don't Repeat Yourself): each piece of knowledge lives in one place. <b>Law of Demeter</b>: call methods only on objects you hold directly, not on objects they return. <b>Program to an interface</b>: depend on what an object can do, not on its concrete class.</li>
       <li><b>Composition over inheritance</b>: combine small parts instead of multiplying subclasses.</li>
-      <li><b>High cohesion, low coupling</b> are the measures; the other principles are ways to improve them.</li>
-      <li><b>KISS</b> and <b>YAGNI</b> are the brakes: don't add abstractions or features until they earn their place.</li>
+      <li>High cohesion (the parts of a class belong together) and low coupling (classes depend little on each other) are the measures. The other principles are ways to improve them.</li>
+      <li><b>KISS</b> (Keep It Simple) and <b>YAGNI</b> (You Aren't Gonna Need It) slow you down on purpose: don't add abstractions or features until a real need appears.</li>
     </ul>
   </header>
 
@@ -202,7 +202,7 @@
       </table>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><p><b>Rule of three:</b> duplicate once if you must; extract a shared abstraction when the same knowledge appears a third time. Extracting after two look-alikes often produces a helper full of flags.</p></div>
+      <div class="note"><p><b>Rule of three:</b> duplicate once if you must; extract a shared abstraction when the same knowledge appears a third time. If you extract shared code after only two similar copies, you often get a helper method full of boolean flags to handle their differences.</p></div>
       <div class="note"><p><b>LINQ and fluent builders aren't Demeter violations:</b> each call returns the same kind of thing you already had. The law is about reaching through <i>other objects' internals</i>; plain DTOs (<span class="mono">dto.Address.City</span>) are usually fine too.</p></div>
       <div class="note"><p><b>YAGNI isn't "no design":</b> tests, clear names and small classes make future change cheaper and still apply. Think ahead for decisions that are expensive to reverse: public API contracts, database schema, security.</p></div>
       <div class="note"><p><b>The principles pull against each other.</b> DRY and SOLID encourage abstractions; KISS and YAGNI resist them. Good design is choosing on purpose and being able to say why.</p></div>
@@ -224,7 +224,7 @@
       <details><summary>Rewrite <span class="mono">appointment.Patient.Insurance.Policy.Plan.Copay</span>.<span class="go">Show answer</span></summary>
         <div class="ans"><p><span class="mono">appointment.Patient.CopayFor(service)</span>, or <span class="mono">appointment.Copay()</span>. The object that owns the data computes it, so callers don't depend on how insurance is stored.</p></div></details>
       <details><summary>Give two reasons to prefer composition over inheritance.<span class="go">Show answer</span></summary>
-        <div class="ans"><p>Subclasses <b>multiply</b> with every combination of variations, and a change in a base class <b>ripples</b> into every subclass (fragile base class). Composition combines small parts and can change them at runtime.</p></div></details>
+        <div class="ans"><p>Subclasses <b>multiply</b> with every combination of variations. Also, a change in a base class affects every subclass (the fragile base class problem). Composition combines small parts and can change them at runtime.</p></div></details>
       <details><summary>What do cohesion and coupling measure, and which way should each go?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>Cohesion</b>: how well the parts inside a module belong together: aim <b>high</b>. <b>Coupling</b>: how much modules depend on each other: aim <b>low</b>. Together they keep a change local and contained.</p></div></details>
       <details><summary>When does YAGNI <i>not</i> stop you adding an interface?<span class="go">Show answer</span></summary>
@@ -347,12 +347,12 @@
       { title: 'DRY, before: one rule, three copies', text: 'The senior-discount rule is typed into three classes. The policy changes to 65+ and 25%: <b>three edits</b>, three test runs, and a real chance one copy is missed.', play: play(1) },
       { title: 'DRY, after: one home for the knowledge', text: '<span class="mono">SeniorDiscount</span> owns the rule; the others call it. The same change touches <b>one class</b>. DRY is about duplicated <b>knowledge</b>, not similar-looking lines.', tip: 'Mention the rule of three: extract on the third copy, so you don\'t merge code that only looks alike.', play: play(2) },
       { title: 'Law of Demeter, before: reaching through objects', text: 'Billing and the portal navigate <span class="mono">Patient → Insurance → Policy</span> to read the copay. They now depend on the <b>internal structure</b> of three classes. Policy changes how it stores copay, and <b>every caller breaks</b>.', play: play(3) },
-      { title: 'Law of Demeter, after: talk to your friends', text: 'Callers ask <span class="mono">patient.CopayFor(service)</span>; Patient asks its field Insurance; only Insurance knows Policy. The change stays with <b>Policy and its one friend</b>. This is "tell, don\'t ask".', play: play(4) },
+      { title: 'Law of Demeter, after: talk to your friends', text: 'Callers ask <span class="mono">patient.CopayFor(service)</span>; Patient asks its field Insurance; only Insurance knows Policy. The change affects only Policy and Insurance, the one class that uses it directly. This is "tell, don\'t ask".', play: play(4) },
       { title: 'Program to an interface, before', text: '<span class="mono">ReminderService</span> does <span class="mono">new TwilioSmsSender()</span>. Moving to WhatsApp means <b>editing the service</b>, and its tests need a real SMS account.', play: play(5) },
       { title: 'Program to an interface, after', text: 'The service depends on <span class="mono">INotifier</span>, injected through its constructor. WhatsApp is a <b>new class plus one DI line</b>; the service and its tests (with a fake) are untouched. This is dependency inversion in practice.', play: play(6) },
       { title: 'Composition over inheritance', text: 'Channel × style as subclasses gives one class per <b>combination</b>; adding WhatsApp adds three. Composition holds an <span class="mono">IChannel</span> and an <span class="mono">IStyle</span>: adding WhatsApp adds <b>one</b>, and parts can be swapped at runtime.', play: play(7) },
       { title: 'KISS and YAGNI: the brakes', text: 'A rules engine with contexts, sets and factories answers "is the clinic open?". Two more classes exist "in case". <b>Simple</b> means few concepts, and <b>YAGNI</b> says build the flexibility when a real change asks for it.', tip: 'When asked "isn\'t that over-engineering?", name the change you expect and add the abstraction only for that.' },
-      { title: 'Cohesion and coupling: the two measures', text: 'A <b>low-cohesion</b> class does unrelated jobs, so every team edits it. Split by reason to change and keep arrows between classes <b>few and stable</b>. High cohesion keeps a change <b>local</b>; low coupling keeps it <b>contained</b>.' }
+      { title: 'Cohesion and coupling: the two measures', text: 'A <b>low-cohesion</b> class does unrelated jobs, so every team edits it. Split by reason to change and keep arrows between classes <b>few and stable</b>. High cohesion means a change touches only one class. Low coupling means the change does not spread to the classes that use it.' }
     ]
   });
 

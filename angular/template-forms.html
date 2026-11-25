@@ -84,7 +84,7 @@
     <p class="crumbs">Angular 22 / Part 4 / Forms &amp; data</p>
     <h1>Template-driven forms</h1>
     <ul class="lede">
-      <li>In a <b>template-driven</b> form the template is the source of truth: <span class="mono">ngModel</span> on each field, <span class="mono">#f="ngForm"</span> on the form.</li>
+      <li>In a <b>template-driven</b> form, the template defines the form. You put <span class="mono">ngModel</span> on each field and <span class="mono">#f="ngForm"</span> on the form.</li>
       <li>Angular builds a <b>form model</b> behind it: one control per field (keyed by <span class="mono">name</span>), grouped under the form.</li>
       <li>Each control tracks three pairs: <b>valid/invalid</b>, <b>pristine/dirty</b> (changed?), <b>untouched/touched</b> (visited?).</li>
       <li>Validators are HTML attributes (<span class="mono">required</span>, <span class="mono">minlength</span>), and the states appear as CSS classes (<span class="mono">ng-invalid</span>, <span class="mono">ng-touched</span>).</li>
@@ -158,8 +158,8 @@
       <div id="refHtml"></div>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><p><b>Submit with <span class="mono">(ngSubmit)</span>.</b> Calling the handler from <span class="mono">(click)</span> on the button misses keyboard submits. <span class="mono">(ngSubmit)</span> on the form also fires on Enter in a field (in the real run, pressing Enter in the date field booked the appointment), and marks the form as submitted.</p></div>
-      <div class="note"><p><b>Validity vs visited.</b> Validity is valid/invalid from validators; "visited" is touched/untouched, set on blur. In the real run, tabbing through the doctor field without choosing made it touched (and showed "Pick a doctor") while it stayed pristine.</p></div>
+      <div class="note"><p><b>Submit with <span class="mono">(ngSubmit)</span>.</b> Calling the handler from <span class="mono">(click)</span> on the button misses keyboard submits. <span class="mono">(ngSubmit)</span> on the form also fires when the user presses Enter in a field, and it marks the form as submitted. In the real run, pressing Enter in the date field booked the appointment.</p></div>
+      <div class="note"><p><b>Validity vs visited.</b> Validity is valid/invalid, set by validators. "Visited" is touched/untouched, set on blur (when the user leaves the field). In the real run, tabbing through the doctor field without choosing made it touched (and showed "Pick a doctor") while it stayed pristine.</p></div>
       <div class="note"><p><b>Missing <span class="mono">name</span> inside a form</b> threw at runtime: <span class="mono">NG01352: If ngModel is used within a form tag, either the name attribute must be set or the form control must be defined as 'standalone' in ngModelOptions.</span> The opt-out is <span class="mono">[ngModelOptions]="{ standalone: true }"</span>, with square brackets.</p></div>
       <div class="note"><p><b>FormModel is the same idea in both styles.</b> Template-driven and reactive forms share the same model (FormGroup / FormControl). The difference is who creates it: the template here, the class on the next page.</p></div>
     </div>
@@ -172,7 +172,7 @@
       <details><summary>Touched vs dirty?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>Dirty</b>: the user changed the value. <b>Touched</b>: the user focused and left the field. You can be touched but pristine (visited, didn't change), as the doctor field was after tabbing through.</p></div></details>
       <details><summary>Why show errors only when <span class="mono">touched</span>?<span class="go">Show answer</span></summary>
-        <div class="ans"><p>Every required field starts invalid. Showing red on page load scolds the user before they did anything.</p></div></details>
+        <div class="ans"><p>Every required field starts invalid. Showing red on page load tells the user they made a mistake before they did anything.</p></div></details>
       <details><summary>What does <span class="mono">#doctor="ngModel"</span> give you?<span class="go">Show answer</span></summary>
         <div class="ans"><p>A template variable pointing at that field's <span class="mono">NgModel</span> directive, so you can read <span class="mono">doctor.invalid</span>, <span class="mono">doctor.touched</span>, <span class="mono">doctor.errors</span>.</p></div></details>
       <details><summary>What's in <span class="mono">f.value</span> at submit?<span class="go">Show answer</span></summary>
@@ -287,8 +287,8 @@ export class AppointmentStore {
       { title: 'Visited but not changed', text: 'Tabbing into the doctor list and out again, without choosing, made it <b>touched</b> but still <b>pristine</b>. Touched + invalid is the moment to show "Pick a doctor". The form is touched because one of its controls is.' },
       { title: 'A real change makes it dirty', text: 'Choosing Dr Arjun made the control <b>dirty</b> and <b>valid</b>; its classes became <span class="mono">ng-touched ng-dirty ng-valid</span>. The form is dirty too, but still invalid: two fields to go.' },
       { title: 'Validators: required, minlength', text: 'A date, then "ECG" as the reason. <span class="mono">minlength="5"</span> puts <span class="mono">{ minlength: … }</span> in <span class="mono">reason.errors</span>, so the template shows "At least 5 characters". The red border comes from <span class="mono">.ng-invalid.ng-touched</span> in the CSS.' },
-      { title: 'All valid, button on', text: '"ECG review" passes. Every control is valid, so the form is valid and <span class="mono">[disabled]="f.invalid"</span> releases the button.' },
-      { title: 'Submit and reset', text: '<span class="mono">book(f)</span> received <span class="mono">f.value</span> keyed by the field names, saved it in the new <span class="mono">AppointmentStore</span>, and <span class="mono">resetForm()</span> returned everything to pristine and untouched, so no stale errors appear. Step 13 of CareDesk is done.' },
+      { title: 'All valid, button on', text: '"ECG review" passes. Every control is valid, so the form is valid. <span class="mono">[disabled]="f.invalid"</span> is now false, so the button is enabled.' },
+      { title: 'Submit and reset', text: '<span class="mono">book(f)</span> received <span class="mono">f.value</span>, keyed by the field names. It saved the value in the new <span class="mono">AppointmentStore</span>. Then <span class="mono">resetForm()</span> returned everything to pristine and untouched, so no old errors appear. Step 13 of CareDesk is done.' },
       { title: 'ngSubmit, not click', text: 'Because the handler is on <span class="mono">(ngSubmit)</span>, pressing Enter in a field submits too, as it did in the real run. A <span class="mono">(click)</span> on the button would miss keyboard users.', tip: 'Form states are a favourite: be ready to explain pristine/dirty vs untouched/touched with an example.' },
       { title: 'The name rule', text: 'Inside a <span class="mono">&lt;form&gt;</span>, a field without <span class="mono">name</span> can\'t be registered (the name is its key in the model), and Angular throws NG01352. Outside a form, as with step 4\'s search box, no name is needed.' }
     ]

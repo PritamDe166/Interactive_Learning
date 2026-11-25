@@ -92,7 +92,7 @@
       <li>Three ways in: the <b>Management Console</b> (browser), the <b>AWS CLI</b> (terminal) and the <b>AWS SDKs</b> (your code). All three call the same <b>AWS APIs</b>.</li>
       <li>The console uses a <b>password + MFA</b>. The CLI and SDK use <b>access keys</b>: an access key ID (like a username) and a <b>secret access key</b> (like a password).</li>
       <li>Every route passes the <b>same IAM check</b>. The CLI and SDK don't bypass anything.</li>
-      <li>Long-term keys never expire on their own; <b>temporary credentials</b> (roles, IAM Identity Center) do, so prefer them.</li>
+      <li>Long-term keys never expire on their own. Temporary credentials (from roles or IAM Identity Center) do expire, so prefer <b>temporary credentials</b>.</li>
     </ul>
   </header>
   <div class="aws-trail"></div>
@@ -122,7 +122,7 @@
       <li><b>Console</b> = browser, for people; protected by <b>password + MFA</b>. <b>CLI</b> = terminal commands and scripts. <b>SDK</b> = libraries for application code (.NET, Python, Java, JavaScript, Go…).</li>
       <li>All three call the same <b>AWS APIs</b>, and IAM evaluates every call the same way. <b>AccessDenied</b> in the CLI means a missing permission.</li>
       <li>An <b>access key</b> = <b>access key ID</b> (starts with <code>AKIA</code>) + <b>secret access key</b>. Temporary credentials add a <b>session token</b>.</li>
-      <li>A user can have <b>console access, access keys, both or neither</b>. Up to <b>two</b> access keys per user (to rotate without downtime).</li>
+      <li>A user can have <b>console access, access keys, both or neither</b>. Each user can have up to <b>two</b> access keys, so you can rotate them (replace the old key with a new one) without downtime.</li>
       <li><b>Never</b> share keys, commit them to Git, paste them in tickets or chat, or hard-code them in code. <b>Never create root access keys.</b></li>
       <li><b>Long-term keys</b> work until you delete them. <b>Temporary credentials</b> (IAM roles, IAM Identity Center, <code>aws configure sso</code>) expire automatically: prefer them.</li>
       <li>Code running on AWS (EC2, Lambda, ECS) should use an <b>IAM role</b>, not stored keys. The SDK finds role credentials automatically.</li>
@@ -168,7 +168,7 @@
         <li>Better for real work: <code>aws configure sso</code> (IAM Identity Center) or <code>aws login</code> (CLI 2.32+), both give <b>temporary</b> credentials.</li>
         <li>Delete course access keys when you're done.</li>
       </ol>
-      <p class="res">Troubleshooting: "Unable to locate credentials" → configure or pick a profile. "AccessDenied" → check identity, then policies. Resource "missing" → wrong Region (<code>--region</code>).</p>
+      <p class="res">Troubleshooting: "Unable to locate credentials" → configure or pick a profile. "AccessDenied" → check identity, then policies. If a resource seems to be missing, you are probably looking in the wrong Region: use <code>--region</code>.</p>
     </details>
   </section>
 
@@ -239,7 +239,7 @@
       text: 'The CLI can\'t type a password, so it signs requests with an <b>access key</b>: an <b>access key ID</b> (like a user name, starts with AKIA) and a <b>secret access key</b> (like a password, shown once). <code>aws iam list-users</code> calls the same API the console used.',
       play: async run => { base(2); await net.send(['cli', 'api', 'iam', 'iams'], { run, label: 'aws iam list-users' }); } },
     { title: 'SDK: the same calls from code',
-      text: 'An SDK, such as the AWS SDK for .NET, is a library your code uses: <span class="mono">s3.PutObjectAsync(...)</span>. It finds credentials through a <b>provider chain</b> (environment variables, profile files, or a role on EC2/Lambda) so you never hard-code them.',
+      text: 'An SDK, such as the AWS SDK for .NET, is a library your code uses: <span class="mono">s3.PutObjectAsync(...)</span>. It finds credentials by checking several places in order (the <b>provider chain</b>): environment variables, profile files, or a role on EC2/Lambda. So you never hard-code them.',
       play: async run => { base(3); await net.send(['sdk', 'api', 'iam', 's3'], { run, label: 'PutObject' }); } },
     { title: 'One gate: IAM decides for all three',
       text: 'Remove a permission and all three doors fail together: the console shows an authorization error, the CLI prints <b>AccessDenied</b>, the SDK throws an exception. No route bypasses IAM.',

@@ -27,7 +27,7 @@ SPEC = {
   "A web API is a URL that returns <b>data</b> (usually JSON) instead of a page. You send an HTTP <b>request</b> (method, URL, headers, body) and get a <b>response</b> (status code, headers, body).",
   "The <b>requests</b> library: <span class=\"mono\">requests.get(url, params=…, headers=…, timeout=…)</span>, <span class=\"mono\">requests.post(url, json=…)</span>.",
   "Check the outcome with <span class=\"mono\">r.status_code</span> or <span class=\"mono\">r.raise_for_status()</span>, then decode with <span class=\"mono\">r.json()</span>, which gives plain dicts and lists.",
-  "Always set a <b>timeout</b>, keep secrets out of code, and expect lists to come in <b>pages</b>."
+  "Always set a <b>timeout</b>. Keep secrets (keys, tokens) out of your code. Expect long lists to come in <b>pages</b>: the API sends one part of the list per request."
  ],
  "walk": {"title": "paging through an API (simulated)", "code":
 '''import json
@@ -53,13 +53,13 @@ print(everyone)
 status, body = fake_get("/doctors")
 print(status, json.loads(body)["error"])''',
  "steps": [
-  {"at": {"after": 4}, "title": "A stand-in for the network", "text": "The page runs in your browser, which can't call real APIs freely, so <span class=\"mono\">fake_get</span> plays the server: it returns a <b>status code</b> and a JSON <b>text body</b>, exactly what <span class=\"mono\">requests.get</span> gives you as <span class=\"mono\">r.status_code</span> and <span class=\"mono\">r.text</span>."},
-  {"at": {"after": 13, "n": 1}, "title": "Build the query string safely", "text": "<span class=\"mono\">urlencode</span> turns a dict into <span class=\"mono\">city=Pune&amp;page=1</span>, escaping spaces and symbols. With requests you'd pass <span class=\"mono\">params={\"city\": \"Pune\", \"page\": 1}</span> and it does this for you."},
+  {"at": {"after": 4}, "title": "A stand-in for the network", "text": "The page runs in your browser, which can't call real APIs freely. So <span class=\\\"mono\\\">fake_get</span> plays the server. It returns a <b>status code</b> and a JSON <b>text body</b>, exactly what <span class=\\\"mono\\\">requests.get</span> gives you as <span class=\\\"mono\\\">r.status_code</span> and <span class=\\\"mono\\\">r.text</span>."},
+  {"at": {"after": 13, "n": 1}, "title": "Build the query string safely", "text": "<span class=\\\"mono\\\">urlencode</span> turns a dict into <span class=\\\"mono\\\">city=Pune&amp;page=1</span>. It also escapes spaces and symbols (rewrites them in a form that is safe inside a URL). With requests you'd pass <span class=\"mono\">params={\"city\": \"Pune\", \"page\": 1}</span> and it does this for you."},
   {"at": 13, "title": "Send the request, get status + body", "text": "The response body is still <b>text</b>. Nothing is a dict yet."},
   {"at": 14, "title": "Check the status first", "text": "2xx means success. Anything else should stop or retry rather than be parsed as data. <span class=\"mono\">r.raise_for_status()</span> does this check in one call."},
   {"at": 15, "title": "JSON text → Python objects", "text": "<span class=\"mono\">json.loads(body)</span> (or <span class=\"mono\">r.json()</span>) gives dicts and lists; JSON <span class=\"mono\">null</span> becomes <span class=\"mono\">None</span>."},
   {"at": {"after": 19, "n": 1}, "title": "Follow the next page", "text": "APIs return big lists in <b>pages</b>. This one says <span class=\"mono\">\"next\": 2</span>, so the loop asks again with page=2."},
-  {"at": {"after": 19, "n": 2}, "title": "No next page: done", "text": "Page 2's <span class=\"mono\">next</span> is null → None, which is falsy, so <span class=\"mono\">while page</span> ends. We collected both patients."},
+  {"at": {"after": 19, "n": 2}, "title": "No next page: done", "text": "On page 2, <span class=\\\"mono\\\">next</span> is null, which becomes None in Python. None is falsy, so the <span class=\\\"mono\\\">while page</span> loop ends. We collected both patients."},
   {"at": "end", "title": "Errors come back as data too", "text": "An unknown path returns <b>404</b> with an error message in the body. Read the body: good APIs explain what went wrong."}
  ]},
  "walk_out": "['Asha', 'Meera'] / 404 not found",
@@ -131,16 +131,16 @@ print(status, json.loads(body)["error"])''',
       <tr><td class="mono">401 / 403</td><td>not authenticated / not allowed</td><td>check the token or permissions</td></tr>
       <tr><td class="mono">404</td><td>no such resource</td><td>handle \"not found\"</td></tr>
       <tr><td class="mono">429</td><td>too many requests</td><td>wait (Retry-After header) and retry</td></tr>
-      <tr><td class="mono">500 / 502 / 503</td><td>server-side problem</td><td>retry later with backoff</td></tr>
+      <tr><td class="mono">500 / 502 / 503</td><td>server-side problem</td><td>retry later with backoff (wait a little longer after each failed try)</td></tr>
     </tbody></table></div>''',
  "notes": [
-  ["Added", "<b>The step before AI agents:</b> agents are mostly API calls with JSON in and JSON out."],
-  ["Added", "<b>Why it's simulated here:</b> the edit-and-run box uses Pyodide in the browser, where <span class=\"mono\">requests</span> can't open network connections and browsers block most cross-site calls (CORS). Run the reference script in your own venv against a real or test API."],
+  ["Added", "Why this matters for AI agents: agents are mostly API calls with JSON in and JSON out."],
+  ["Added", "<b>Why it's simulated here:</b> the edit-and-run box uses Pyodide in the browser. There, <span class=\\\"mono\\\">requests</span> can't open network connections, and browsers block most calls to other sites (a security rule called CORS). Run the reference script in your own venv against a real or test API."],
   ["Added", "<b>Timeouts:</b> requests has <b>no default timeout</b>, so a hung server can freeze your script forever. Always pass <span class=\"mono\">timeout=</span>."],
   ["Updated", "<b>Alternatives:</b> <span class=\"mono\">httpx</span> offers the same style plus async support (<span class=\"mono\">async with httpx.AsyncClient()</span>), common in FastAPI and agent code. requests remains the most widely used synchronous client."]
  ],
  "quiz": [
-  {"q": "What's the difference between <span class=\"mono\">params=</span> and <span class=\"mono\">json=</span> in requests?", "a": "<span class=\"mono\">params</span> go into the <b>URL query string</b> (<span class=\"mono\">?city=Pune</span>); <span class=\"mono\">json</span> is serialised into the <b>request body</b> with a <span class=\"mono\">Content-Type: application/json</span> header (typical for POST/PUT)."},
+  {"q": "What's the difference between <span class=\"mono\">params=</span> and <span class=\"mono\">json=</span> in requests?", "a": "<span class=\\\"mono\\\">params</span> go into the <b>URL query string</b> (<span class=\\\"mono\\\">?city=Pune</span>). <span class=\\\"mono\\\">json</span> is serialised (turned into JSON text) and put in the <b>request body</b>, with a <span class=\\\"mono\\\">Content-Type: application/json</span> header (typical for POST/PUT)."},
   {"q": "<span class=\"mono\">import json\\nprint(json.loads('{\"next\": null}')[\"next\"] is None)</span>", "code": "import json\nprint(json.loads('{\"next\": null}')[\"next\"] is None)", "expect": "True", "a": "<b class=\"mono\">True</b>. JSON null → None."},
   {"q": "Does <span class=\"mono\">requests.get()</span> raise an exception for a 404?", "a": "<b>No.</b> It returns a response with <span class=\"mono\">status_code</span> 404. Only network problems (timeouts, DNS, refused connections) raise. Call <span class=\"mono\">r.raise_for_status()</span> to turn 4xx/5xx into an <span class=\"mono\">HTTPError</span>."}
  ],

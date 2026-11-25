@@ -91,7 +91,7 @@
       <li><b>Amazon EC2</b> (Elastic Compute Cloud) rents you virtual servers called <b>instances</b>. It is <b>IaaS</b>: AWS runs the hardware, you run the OS and up.</li>
       <li>Every launch makes the same choices: <b>AMI</b> (OS image), <b>instance type</b> (CPU, RAM), <b>storage</b> (EBS), <b>key pair</b>, <b>security group</b> (firewall) and optional <b>user data</b>.</li>
       <li>A visitor's request reaches the instance's <b>public IP</b>, passes the <b>security group</b>, and is answered by the software on the instance.</li>
-      <li>EC2 comes with friends: <b>EBS</b> volumes, <b>Elastic Load Balancers</b> and <b>Auto Scaling groups</b> (later sections).</li>
+      <li>EC2 is often used with other services: <b>EBS</b> volumes, <b>Elastic Load Balancers</b> and <b>Auto Scaling groups</b> (covered in later sections).</li>
     </ul>
   </header>
   <div class="aws-trail"></div>
@@ -119,12 +119,12 @@
     <h2 id="rmH">Points to remember</h2>
     <div class="remember"><ol>
       <li><b>EC2 = Elastic Compute Cloud</b>, virtual servers on demand: <b>IaaS</b>.</li>
-      <li>Launch choices: <b>AMI</b> (OS: Linux, Windows, macOS), <b>instance type</b> (vCPU, RAM, network), <b>storage</b> (EBS/EFS network drives or instance store), <b>networking</b> (public/private IP), <b>security group</b>, <b>key pair</b>, <b>user data</b>.</li>
+      <li>Launch choices: the <b>AMI</b> (the OS: Linux, Windows or macOS) and the <b>instance type</b> (vCPU, RAM, network). Then <b>storage</b> (EBS/EFS network drives or instance store) and <b>networking</b> (public/private IP). Then the <b>security group</b>, <b>key pair</b> and <b>user data</b>.</li>
       <li><b>Security group</b> = the instance's firewall. Inbound blocked by default; open <b>22</b> for SSH, <b>80/443</b> for web, <b>3389</b> for RDP.</li>
-      <li><b>User data</b> = bootstrap script that runs <b>once</b>, at <b>first launch</b>, as <b>root</b>.</li>
+      <li><b>User data</b> is a bootstrap script (a setup script) that runs <b>once</b>, at <b>first launch</b>, as <b>root</b>.</li>
       <li><b>Public IPv4</b> reaches the instance from the internet and <b>changes after stop/start</b>; the <b>private IP</b> is for inside AWS and stays.</li>
       <li><b>Stop</b> = no compute charge, EBS kept. <b>Terminate</b> = gone for good (root volume deleted by default).</li>
-      <li><b>Shared responsibility for EC2</b>: AWS secures the infrastructure, host isolation and hardware; <b>you</b> handle security group rules, OS patches, installed software, IAM roles and data.</li>
+      <li><b>Shared responsibility for EC2</b>: AWS secures the infrastructure, host isolation and hardware. You handle security group rules, OS patches, installed software, IAM roles and data.</li>
       <li>EC2 is <b>regional</b>; an instance lives in one Availability Zone.</li>
     </ol></div>
   </section>

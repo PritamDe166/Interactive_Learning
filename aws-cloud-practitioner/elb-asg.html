@@ -207,7 +207,7 @@
           <tr><td><b>Fixed</b> (no policy)</td><td>Holds desired capacity; still replaces unhealthy instances</td><td>"maintain N instances"</td></tr>
           <tr><td><b>Manual</b></td><td>You change desired capacity</td><td>"administrator changes"</td></tr>
           <tr><td><b>Target tracking</b></td><td>Keep a metric near a target, like a thermostat (AWS's recommended default)</td><td>"keep average CPU at 40%"</td></tr>
-          <tr><td><b>Step / Simple</b></td><td>CloudWatch alarm → add/remove a set amount (step: size depends on the breach; simple: one adjustment, then cooldown)</td><td>"if CPU &gt; 70% add 2"</td></tr>
+          <tr><td><b>Step / Simple</b></td><td>A CloudWatch alarm adds or removes a set number of instances. With step scaling, the number depends on how far the metric is past the limit (the breach). With simple scaling, there is one adjustment, then a cooldown (a waiting period).</td><td>"if CPU &gt; 70% add 2"</td></tr>
           <tr><td><b>Scheduled</b></td><td>Change capacity at known dates and times</td><td>"every Friday at 5 pm"</td></tr>
           <tr><td><b>Predictive</b></td><td>Machine learning forecasts recurring load from history and scales ahead</td><td>"forecast", "ML", "daily pattern"</td></tr>
         </tbody>
@@ -215,14 +215,14 @@
     </div>
     <div class="cards" style="margin-top:14px">
       <div class="card"><h3>How ELB and ASG connect</h3><p>The ALB sends traffic to a <b>target group</b>. The ASG registers new instances in that group and deregisters ones it removes. ELB health checks can tell the ASG to <b>replace</b> an instance that the ALB found unhealthy.</p></div>
-      <div class="card"><h3>What ELB adds</h3><p>One DNS name, health checks, TLS termination with <b>ACM</b> certificates, <b>AWS WAF</b> on ALB, Route 53 alias records, and it scales itself. AWS runs it; you configure listeners, target groups and security groups.</p></div>
-      <div class="card"><h3>What it costs</h3><p><b>ELB</b>: per hour plus capacity units (LCU / NLCU / GLCU). <b>EC2 Auto Scaling</b>: no extra charge; you pay for the instances, EBS and CloudWatch it uses. Mix Spot and On-Demand in one group.</p></div>
+      <div class="card"><h3>What ELB adds</h3><p>ELB gives you one DNS name and health checks. It can do TLS termination (it decrypts HTTPS so your servers don't have to) using certificates from <b>ACM</b> (AWS Certificate Manager). On an ALB you can add <b>AWS WAF</b> (a web application firewall). Route 53 alias records can point your domain at it. It also scales itself. AWS runs it; you configure listeners, target groups and security groups.</p></div>
+      <div class="card"><h3>What it costs</h3><p><b>ELB</b>: you pay per hour plus capacity units (LCU for ALB, NLCU for NLB, GLCU for GWLB), which measure how much traffic and how many connections it handles. <b>EC2 Auto Scaling</b>: no extra charge; you pay for the instances, EBS and CloudWatch it uses. Mix Spot and On-Demand in one group.</p></div>
     </div>
     <div class="notes" style="margin-top:14px">
       <div class="note"><p><b>The Classic Load Balancer isn't retired.</b> It's the <b>previous generation</b>, still documented and billed; AWS recommends migrating to ALB or NLB.</p></div>
       <div class="note"><p><b>ELB + ASG don't deliver "agility".</b> They deliver high availability and elasticity. Agility is the general cloud benefit of getting resources in minutes instead of weeks.</p></div>
       <div class="note"><p><b>Use launch templates.</b> Launch configurations are deprecated; accounts created since 1 October 2024 can't create them. The hands-on's Amazon Linux 2 reached end of support on 30 June 2026 (use AL2023).</p></div>
-      <div class="note"><p><b>HA vs DR:</b> multi-<b>AZ</b> (ASG + ELB) survives a data-centre failure; multi-<b>Region</b> is disaster recovery and lower latency for distant users, covered in Global Infrastructure. A single-AZ ASG is not highly available.</p></div>
+      <div class="note"><p>HA (high availability) vs DR (disaster recovery): a multi-<b>AZ</b> setup (ASG + ELB) survives a data-centre failure. A multi-<b>Region</b> setup gives disaster recovery and lower latency for distant users; this is covered in Global Infrastructure. A single-AZ ASG is not highly available.</p></div>
     </div>
   </section>
 
@@ -324,7 +324,7 @@
         text: 'When traffic drops, the ASG removes instances (never below min). You pay only for what runs. Growing and shrinking automatically with demand is <b>elasticity</b>.',
         tip: 'EC2 Auto Scaling itself is free; you pay for the instances.' },
       { title: 'Which load balancer?',
-        text: '<b>ALB</b> (layer 7): HTTP/HTTPS, routes by path or host, e.g. <span class="mono">/api</span> vs <span class="mono">/images</span>. <b>NLB</b> (layer 4): TCP/UDP, extreme performance, <b>static IP</b>. <b>GWLB</b> (layer 3): sends traffic through firewall appliances. <b>Classic</b>: previous generation.' }
+        text: '<b>ALB</b> works at layer 7 (the application level, where it can read HTTP requests). It handles HTTP/HTTPS and routes by path or host, e.g. <span class="mono">/api</span> vs <span class="mono">/images</span>. <b>NLB</b> (layer 4): TCP/UDP, extreme performance, <b>static IP</b>. <b>GWLB</b> (layer 3): sends traffic through firewall appliances. <b>Classic</b>: previous generation.' }
     ];
     K.story({ root: $('elbStory'), steps: STEPS, show });
   })();

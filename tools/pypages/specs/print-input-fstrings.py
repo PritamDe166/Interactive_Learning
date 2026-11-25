@@ -18,7 +18,7 @@ SPEC = {
  "title": "print, input &amp; f-strings", "title_plain": "print, input & f-strings",
  "desc": "Python fundamentals: how print() assembles output with sep and end, why input() always returns text, and how f-strings and format specs build strings.",
  "lede": [
-  "<b>print()</b> turns each argument into text, joins them with <b>sep</b> (a space) and finishes with <b>end</b> (a newline).",
+  "<b>print()</b> turns each argument into text, joins them with <b>sep</b> (by default a space) and finishes with <b>end</b> (by default a newline).",
   "<b>input()</b> shows a prompt and always returns a <b>str</b>, even when the user types a number.",
   "<b>f-strings</b> (<span class=\"mono\">f\"Hi {name}\"</span>) evaluate the code inside <span class=\"mono\">{}</span> and drop the result into the text.",
   "After a colon, a <b>format spec</b> controls the look: <span class=\"mono\">{fee:,.2f}</span> → <span class=\"mono\">1,234.50</span>."

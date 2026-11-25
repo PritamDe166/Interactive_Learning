@@ -85,7 +85,7 @@
       <li>An <b>AWS account</b> is the container: a 12-digit ID, its own resources and <b>one bill</b>.</li>
       <li>Every account has <b>exactly one root user</b>, created with it, with full and unrestricted access.</li>
       <li><b>IAM users</b> are identities inside one account, with only the permissions you grant. An account can have many; a user never spans accounts.</li>
-      <li>A handful of tasks <b>only the root user</b> can do. Everything else should be done by IAM identities.</li>
+      <li>Only the root user can do a small number of tasks. Everything else should be done by IAM identities.</li>
     </ul>
   </header>
   <div class="aws-trail"></div>
@@ -114,10 +114,18 @@
       <li>An <b>AWS account</b> = billing and resource container with a <b>12-digit account ID</b>.</li>
       <li><b>Exactly one root user</b> per account, created automatically (it signs in with the account email). It has full access that policies can't restrict.</li>
       <li>Use root <b>only for root-only tasks</b>. Protect it with <b>MFA</b> (AWS now enforces MFA for root sign-in) and <b>don't create root access keys</b>.</li>
-      <li><b>Root-only tasks</b> to know: change the account email, root password or root access keys; <b>close the account</b>; <b>restore permissions</b> when the only IAM admin locked themselves out; activate IAM access to the <b>Billing</b> console; register as a seller in the <b>Reserved Instance Marketplace</b>; configure <b>S3 MFA Delete</b>; edit a bucket policy that denies everyone; sign up for GovCloud.</li>
-      <li><b>Not</b> root-only: launching EC2, creating IAM users, changing contact info or the account name. These are distractors in exam questions.</li>
+      <li><b>Root-only tasks</b> to know:
+- change the account email, root password or root access keys
+- <b>close the account</b>
+- <b>restore permissions</b> when the only IAM admin locked themselves out
+- activate IAM access to the <b>Billing</b> console
+- register as a seller in the <b>Reserved Instance Marketplace</b>
+- configure <b>S3 MFA Delete</b>
+- edit a bucket policy that denies everyone
+- sign up for GovCloud.</li>
+      <li><b>Not</b> root-only: launching EC2, creating IAM users, changing contact info or the account name. These appear in exam questions as wrong answers meant to distract you.</li>
       <li><b>IAM users</b>: many per account, each with only the permissions granted. A user belongs to <b>one account only</b>.</li>
-      <li>Separate identities <b>contain damage</b>: revoke one leaked user and the account, root and other users are untouched.</li>
+      <li>Separate identities limit the damage: if one user's credentials leak, you revoke only that user. The account, the root user and the other users are not affected.</li>
       <li>Root sign-in shows only the account ID in the console menu; an IAM user shows <b>user @ account</b>.</li>
       <li>Companies use <b>several accounts</b> (dev, test, prod) for full isolation of resources and billing (AWS Organizations, later).</li>
     </ol></div>
@@ -261,7 +269,7 @@
       text: 'CI-Bot\'s access key is committed to a public Git repository by mistake. An attacker finds it within minutes and starts calling AWS with it, here reading S3.',
       play: async run => { base(4); await net.send(['bot', 'repo'], { run, tone: 'red', label: 'AKIA…' }); await net.send(['repo', 'atk'], { run, tone: 'red' }); await net.send(['atk', 'iam', 's3'], { run, tone: 'red', label: 'as CI-Bot' }); net.badge('s3', 'data read!', 'bad'); } },
     { title: 'Revoke one user, nothing else breaks',
-      text: 'Deactivate and delete <b>CI-Bot\'s key</b>. The attacker is locked out. Pritam, the root user and the account keep working. That containment is the reason for separate identities. If it had been the <b>root key</b>, the attacker would have owned the whole account.',
+      text: 'Deactivate and delete <b>CI-Bot\'s key</b>. The attacker is locked out. Pritam, the root user and the account keep working. That containment is the reason for separate identities. If it had been the <b>root key</b>, the attacker would have had full control of the whole account.',
       play: async run => { base(5); await net.send(['atk', 'iam'], { run, tone: 'red', label: 'as CI-Bot' }); net.badge('iam', 'key invalid', 'bad'); } },
     { title: 'What only root can do',
       text: 'A few tasks need the root user: <b>closing the account</b>, changing the <b>account email or root password</b>, <b>restoring an IAM admin</b> who locked themselves out, enabling IAM access to <b>billing</b>, <b>S3 MFA Delete</b>. For these, sign in as root with MFA, do the task, sign out.',

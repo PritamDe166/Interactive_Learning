@@ -119,9 +119,9 @@
     <h1>Cache Eviction Policies</h1>
     <ul class="lede">
       <li>Memory is finite: when the cache is full, an <b>eviction policy</b> picks which key leaves.</li>
-      <li><b>LRU</b> evicts the least recently used key; <b>LFU</b> the least frequently used; <b>FIFO</b> the oldest inserted.</li>
+      <li><b>LRU</b> (least recently used) removes the key that was used longest ago. <b>LFU</b> (least frequently used) removes the key used the fewest times. <b>FIFO</b> (first in, first out) removes the key that was added first.</li>
       <li><b>TTL expiry</b> is different: it removes keys for being old, not because memory is full.</li>
-      <li>An LRU cache is a <b>hash map + doubly linked list</b>, so every get and put is O(1).</li>
+      <li>An LRU cache is a <b>hash map + doubly linked list</b>, so every get and put is O(1): it takes the same short time however big the cache is.</li>
     </ul>
   </header>
 
@@ -166,7 +166,7 @@
       <li><span class="if">Only some keys may be evicted</span><span class="arrow">→</span><span class="then"><code>volatile-*</code> policies (keys with a TTL)</span></li>
       <li><span class="if">Cache must never drop data</span><span class="arrow">→</span><span class="then"><code>noeviction</code>: writes fail when full</span></li>
       <li><span class="if">"Implement an LRU cache"</span><span class="arrow">→</span><span class="then">Dictionary + doubly linked list, O(1) get/put</span></li>
-      <li><span class="if">Stale-but-once-popular keys squat in LFU</span><span class="arrow">→</span><span class="then">Counter decay / ageing</span></li>
+      <li>In LFU, keys that were popular once never leave<span class="arrow">→</span>Fix: counters that decay (shrink) over time</li>
     </ul>
     <h3 class="sec-h3">Reference</h3>
     <div class="card scroll">
@@ -255,7 +255,7 @@
         text: 'LFU keeps a count per key and evicts the lowest count (oldest on ties). Efficient versions group keys into frequency buckets, each one a small LRU list.',
         set(m) { showList(m, ['D×1', 'B×4', 'C×2']); m.state('l0', 'hot'); op.textContent = 'LFU would evict D (count 1)'; } },
       { title: 'What Redis really does',
-        text: 'Redis doesn\'t keep a full list per key. On eviction it <b>samples</b> a few keys (default 5) and drops the best candidate. Its LFU counter decays over time so old popularity fades.',
+        text: 'Redis doesn\'t keep a full list per key. On eviction it picks a few random keys (default 5) and drops the one that best fits the policy, for example the least recently used of them. Its LFU counter decays over time so old popularity fades.',
         tip: 'Mention "approximate LRU" if asked how Redis scales eviction.',
         set(m) { op.textContent = 'sample 5 keys → evict the oldest of them'; } }
     ]

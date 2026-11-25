@@ -106,9 +106,9 @@
     <h1>Open-Closed Principle</h1>
     <ul class="lede">
       <li>Code should be <b>open for extension</b> but <b>closed for modification</b>: add new behaviour by adding new code, not by editing classes that already work and are tested.</li>
-      <li>The usual smell is a <b>switch or if-chain over types</b> that grows with every new case.</li>
+      <li>The usual warning sign (a 'code smell') is a <b>switch or if-chain over types</b> that grows with every new case.</li>
       <li>Common tools in C#: <b>strategy</b> (one class per variant behind an interface), <b>decorator</b> (wrap a class to add behaviour), <b>extension methods</b>, inheritance.</li>
-      <li>No design is closed against <i>every</i> change. Close it against the changes you actually expect.</li>
+      <li>No design can avoid edits for <i>every</i> possible change. Design it so the changes you actually expect need no edits.</li>
     </ul>
   </header>
 
@@ -192,7 +192,7 @@
         <tbody>
           <tr><td>Strategy</td><td>interface + one class per variant; caller gets one injected or picks by key</td><td>yes</td><td>only worth it when variants really multiply</td></tr>
           <tr><td>Decorator</td><td>new class implements the same interface and wraps the original</td><td>yes (via DI)</td><td>only covers public members of the interface</td></tr>
-          <tr><td>Extension methods</td><td>static method with <span class="mono">this T</span> in a separate file</td><td>no</td><td>can't see private state; easy to scatter</td></tr>
+          <tr><td>Extension methods</td><td>static method with <span class="mono">this T</span> in a separate file</td><td>no</td><td>can't see private state; they can easily end up spread across many files</td></tr>
           <tr><td>Inheritance</td><td>subclass overrides virtual members</td><td>yes</td><td>tight coupling to the base class; must respect Liskov</td></tr>
           <tr><td>Events / pipelines</td><td>new handlers or middleware subscribe without changing the publisher</td><td>yes</td><td>harder to follow the flow</td></tr>
         </tbody>
@@ -201,7 +201,7 @@
     <div class="notes" style="margin-top:14px">
       <div class="note"><p><b>Origin:</b> Bertrand Meyer stated the principle in 1988 (<i>Object-Oriented Software Construction</i>), meaning extension by inheritance. Robert C. Martin's later version relies on interfaces and polymorphism, which is how it's taught today. Martin calls plugin systems such as IDE extensions the principle in its purest form: the core doesn't know its plugins.</p></div>
       <div class="note"><p><b>Real examples people use:</b> discounts by customer type, notification channels, payment methods, report formats, tax rules. Each is a family of variants that grows over time, which is exactly where OCP pays off.</p></div>
-      <div class="note"><p><b>Strategic closure:</b> you can't predict every change. Close the design along the axes that are already varying (here: plans and cross-cutting concerns), and leave the rest simple until a real second case appears.</p></div>
+      <div class="note"><p><b>Strategic closure:</b> you can't predict every change. Make the design extensible only in the areas that already change (here: plans, and cross-cutting concerns such as logging and caching that affect many classes). Keep the rest simple until a real second case appears.</p></div>
     </div>
   </div>
   </section>
@@ -334,13 +334,13 @@ if (slot.IsClinicHoliday()) { ... }`, 'cs');
     root: $('ocpStory'), show, tipLabel: 'Interview tip',
     steps: [
       { title: 'A switch that works', text: '<span class="mono">FeeCalculator</span> picks a discount with a <span class="mono">switch</span> on the patient\'s plan. Three cases, three passing tests, shipped to production.' },
-      { title: 'A new plan means editing it', text: 'Marketing adds a <b>Senior</b> plan. The only way in is to <b>modify</b> the tested method. Everything that calls it must be re-tested, and a slip in the edit broke the Gold case.', play: async run => { const p = K.pill(FX, 'edit', 'bad'); await K.move(p, [380, 0], [380, 150], 700, run); p.remove(); } },
+      { title: 'A new plan means editing it', text: 'Marketing adds a <b>Senior</b> plan. The only way in is to <b>modify</b> the tested method. Everything that calls the method must be re-tested, and a small mistake in the edit broke the Gold case.', play: async run => { const p = K.pill(FX, 'edit', 'bad'); await K.move(p, [380, 0], [380, 150], 700, run); p.remove(); } },
       { title: 'Strategy: one class per plan', text: 'Each plan becomes a class implementing <span class="mono">IDiscountPolicy</span>. <span class="mono">FeeCalculator</span> only knows the interface and receives all policies through its constructor.' },
       { title: 'Add Senior without touching anything', text: 'A new plan is now a <b>new file</b>: <span class="mono">SeniorPolicy</span>. FeeCalculator and the other policies aren\'t edited, so their tests can\'t break. Open for extension, closed for modification.', tip: 'Say it this way: "the code that changes is new code, not old code". Then name the pattern you used.' },
       { title: 'A different change: add caching', text: 'Patient look-ups are slow. Instead of editing <span class="mono">SqlPatientRepository</span>, look at what depends on it: <span class="mono">BookingService</span> only uses <span class="mono">IPatientRepository</span>.' },
       { title: 'Decorator: wrap, don\'t edit', text: '<span class="mono">CachingPatientRepository</span> implements the same interface and <b>wraps</b> the SQL one: it answers from cache, or asks the inner repository and remembers. Neither the service nor the SQL class changed.' },
       { title: 'DI decides which one runs', text: 'Program.cs registers the cached version around the SQL one. Turning caching off is a one-line registration change, and you can do it per environment. This is the "switch at runtime" advantage.' },
-      { title: 'Know where to stop', text: 'You can\'t be closed against every possible change. Plans and cross-cutting concerns were <b>already varying</b>, so they earned an interface. Add the next abstraction when the next real variant shows up.' }
+      { title: 'Know where to stop', text: 'You can\'t be closed against every possible change. Plans and cross-cutting concerns (like caching and logging) were already changing, so it was worth giving them an interface. Add the next abstraction when the next real variant shows up.' }
     ]
   });
 

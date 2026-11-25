@@ -40,9 +40,9 @@ SPEC = {
  "desc": "Python fundamentals: functions as objects, wrapper functions, the @ syntax, functools.wraps, decorators with arguments, and stacking decorators.",
  "lede": [
   "A <b>decorator</b> is a function that takes a function and returns a <b>replacement</b>, usually a wrapper that adds behaviour before and after the original.",
-  "<span class=\"mono\">@log_calls</span> above <span class=\"mono\">def f</span> is shorthand for <span class=\"mono\">f = log_calls(f)</span>, run <b>once</b>, when the def runs.",
-  "The wrapper uses <span class=\"mono\">*args, **kwargs</span> to accept any arguments and a <b>closure</b> to remember the original function.",
-  "Always add <span class=\"mono\">@functools.wraps(func)</span> so the wrapper keeps the original's name and docstring. Used everywhere: logging, timing, caching, permissions, web routes."
+  "Writing <span class=\\\"mono\\\">@log_calls</span> above <span class=\\\"mono\\\">def f</span> is shorthand for <span class=\\\"mono\\\">f = log_calls(f)</span>. Python runs it <b>once</b>, at the moment the def runs.",
+  "The wrapper uses <span class=\\\"mono\\\">*args, **kwargs</span> to accept any arguments. It is a <b>closure</b>: an inner function that remembers the original function from the outer one.",
+  "Always add <span class=\"mono\">@functools.wraps(func)</span> so the wrapper keeps the original's name and docstring. Decorators are used everywhere: logging, timing, caching, permissions, web routes."
  ],
  "walk": {"title": "logging every call", "code":
 '''import functools
@@ -145,7 +145,7 @@ print(total, with_tax.__name__)''',
           <tr><td class="mono">@property</td><td>built-in</td><td>method read like an attribute (OOP deeper)</td></tr>
           <tr><td class="mono">@classmethod / @staticmethod</td><td>built-in</td><td>method gets the class / nothing instead of self</td></tr>
           <tr><td class="mono">@dataclass</td><td>dataclasses</td><td>writes __init__, __repr__, __eq__ for you</td></tr>
-          <tr><td class="mono">@functools.cache / lru_cache</td><td>functools</td><td>memoise results</td></tr>
+          <tr><td class="mono">@functools.cache / lru_cache</td><td>functools</td><td>memoise results (remember each result, so a repeat call with the same arguments returns it at once)</td></tr>
           <tr><td class="mono">@contextlib.contextmanager</td><td>contextlib</td><td>turns a generator into a with-block helper</td></tr>
           <tr><td class="mono">@app.get("/patients")</td><td>FastAPI / Flask</td><td>registers a function as a web route</td></tr>
           <tr><td class="mono">@pytest.fixture</td><td>pytest</td><td>marks reusable test setup</td></tr>
@@ -155,7 +155,7 @@ print(total, with_tax.__name__)''',
  "notes": [
   ["Added", "<b>Builds on closures.</b> Decorators build directly on closures from the Scope page."],
   ["Added", "<b>Coming from .NET:</b> the effect resembles an ASP.NET action filter or middleware, but a Python decorator is just a function call at definition time. There is no attribute metadata involved."],
-  ["Added", "<b>Keep wrappers thin:</b> they run on every call. Put heavy setup outside the wrapper, in the decorator body, which runs only once."]
+  ["Added", "Keep wrappers small and fast: they run on every call. Put heavy setup outside the wrapper, in the decorator body, which runs only once."]
  ],
  "quiz": [
   {"q": "<span class=\"mono\">def d(f): return lambda: f() * 2\\n@d\\ndef five(): return 5\\nprint(five())</span>", "code": "def d(f): return lambda: f() * 2\n@d\ndef five(): return 5\nprint(five())", "expect": "10", "a": "<b class=\"mono\">10</b>. Any callable can be the replacement, even a lambda."},

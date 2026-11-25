@@ -15,7 +15,7 @@ SPEC = {
  "title": "Iterators &amp; generators", "title_plain": "Iterators & generators",
  "desc": "Python fundamentals: the iterator protocol (iter and next), StopIteration, generator functions with yield, generator expressions, and why lazy evaluation saves memory.",
  "lede": [
-  "A <b>for</b> loop calls <span class=\"mono\">iter()</span> on the object to get an <b>iterator</b>, then <span class=\"mono\">next()</span> until it raises <b>StopIteration</b>.",
+  "A <b>for</b> loop first calls <span class=\\\"mono\\\">iter()</span> on the object to get an <b>iterator</b>: an object that hands out items one by one. Then it calls <span class=\\\"mono\\\">next()</span> again and again, until next() raises <b>StopIteration</b>.",
   "A function containing <span class=\"mono\">yield</span> is a <b>generator function</b>: calling it runs <b>nothing</b> yet and returns a generator object.",
   "Each <span class=\"mono\">next()</span> runs the body up to the next <span class=\"mono\">yield</span>, hands out that value and <b>pauses</b>, keeping its local variables.",
   "Generators are <b>lazy</b>: values are made one at a time, so a stream of a million rows needs memory for one. They can be used <b>once</b>."
@@ -42,7 +42,7 @@ print(sum(squares), list(squares))''',
   {"at": {"event": "return", "n": 1}, "title": "yield hands out a value and pauses", "text": "At <span class=\"mono\">yield t</span> the generator gives 540 to the caller and <b>freezes</b> right there. Its frame leaves the stack, but the generator object keeps <span class=\"mono\">t</span>, <span class=\"mono\">start</span>, <span class=\"mono\">end</span>…"},
   {"at": {"event": "call", "n": 2}, "title": "The next next() resumes after yield", "text": "Execution continues from the line <b>after</b> <span class=\"mono\">yield</span>: <span class=\"mono\">t += step</span>, then the loop test, then the next yield (570)."},
   {"at": {"after": 11, "n": 1}, "title": "for calls next() for you", "text": "The <span class=\"mono\">for</span> loop picks up where we left off: 600. It doesn't restart the generator, which only goes forward."},
-  {"at": {"after": 12}, "title": "StopIteration ends the loop", "text": "After 600, <span class=\"mono\">t</span> becomes 630, the while test fails and the function returns. A finished generator raises <b>StopIteration</b> on the next <span class=\"mono\">next()</span>, which <span class=\"mono\">for</span> treats as \"done\". Its state is now <i>finished</i>."},
+  {"at": {"after": 12}, "title": "StopIteration ends the loop", "text": "After 600, <span class=\"mono\">t</span> becomes 630, the while test fails and the function returns. When you call <span class=\\\"mono\\\">next()</span> on a finished generator, it raises <b>StopIteration</b>. The <span class=\\\"mono\\\">for</span> loop treats this as \"done\". Its state is now <i>finished</i>."},
   {"at": {"after": 13}, "title": "Every for loop works this way", "text": "<span class=\"mono\">iter([10, 20])</span> gives a list iterator. Two <span class=\"mono\">next()</span> calls return the items; the third would raise StopIteration, but <span class=\"mono\">next(it, default)</span> returns the default instead.", "tip": "Lists, strings, dicts and files are <b>iterables</b> (you can call iter() on them as often as you like). Iterators are one-pass cursors over them."},
   {"at": "end", "title": "Generator expressions are one-pass too", "text": "<span class=\"mono\">sum(squares)</span> consumed every value (0+1+4+9 = 14). Asking again gives nothing: <span class=\"mono\">list(squares)</span> is empty."}
  ]},
@@ -104,7 +104,7 @@ print(sum(squares), list(squares))''',
       $('mmL').style.width = Math.max(1, Math.log10(m.list) / Math.log10(mx) * 100) + '%';
       $('mmG').style.width = Math.max(1, Math.log10(m.gen) / Math.log10(mx) * 100) + '%';
       $('mmLv').textContent = fmt(m.list); $('mmGv').textContent = fmt(m.gen);
-      $('mmStatus').innerHTML = `The list holds all ${m.n.toLocaleString('en')} results at once; the generator stays at ${m.gen} bytes whatever n is. (Log scale; the list figure counts only its slots, not the int objects themselves.)`;
+      $('mmStatus').innerHTML = `The list holds all ${m.n.toLocaleString('en')} results at once; the generator stays at ${m.gen} bytes whatever n is. (The chart uses a log scale. The list size counts only the list's slots, the references it holds, not the int objects themselves.)`;
     }
     $('mmN').addEventListener('input', draw); draw();'''.replace('__MEM__', json.dumps(MEM))}
  ],
@@ -139,7 +139,7 @@ print(sum(squares), list(squares))''',
  "quiz": [
   {"q": "<span class=\"mono\">def g():\\n    yield 1\\n    yield 2\\nprint(sum(g()), len(list(g())))</span>", "code": "def g():\n    yield 1\n    yield 2\nprint(sum(g()), len(list(g())))", "expect": "3 2", "a": "<b class=\"mono\">3 2</b>. Each call to g() makes a new generator."},
   {"q": "<span class=\"mono\">r = range(3)\\nprint(list(r), list(r), r[1])</span>", "code": "r = range(3)\nprint(list(r), list(r), r[1])", "expect": "[0, 1, 2] [0, 1, 2] 1", "a": "<b class=\"mono\">[0, 1, 2] [0, 1, 2] 1</b>. range is reusable and indexable."},
-  {"q": "<span class=\"mono\">it = iter([1, 2, 3])\\nfor x in it:\\n    print(x, next(it))</span>", "code": "it = iter([1, 2, 3])\nfor x in it:\n    print(x, next(it))", "expect": "1 2", "a": "<b class=\"mono\">1 2</b> then <b>StopIteration</b>. The loop and your next() share one iterator: x=1, next→2, x=3, next→nothing left."}
+  {"q": "<span class=\"mono\">it = iter([1, 2, 3])\\nfor x in it:\\n    print(x, next(it))</span>", "code": "it = iter([1, 2, 3])\nfor x in it:\n    print(x, next(it))", "expect": "1 2", "a": "<b class=\\\"mono\\\">1 2</b> then <b>StopIteration</b>. The loop and your next() share one iterator: the loop takes x=1, next() takes 2, the loop takes x=3, then next() finds nothing left."}
  ],
  "sources": "From the Notion plan (Planning for python learning, Week 2: iterators &amp; generators). Python docs: Iterators, Generators, itertools."
 }

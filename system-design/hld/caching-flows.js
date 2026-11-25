@@ -32,7 +32,7 @@
     aside: { name: 'Cache-aside', tone: 'cyan', tags: ['read path'],
       rule: 'The app checks the cache; on a miss it reads the DB and fills the cache itself. Also called lazy loading.',
       takeaway: 'Only data someone asked for gets cached.',
-      use: 'Read-heavy data; the default with Redis and <code>IMemoryCache</code>.', avoid: 'First read is slow; data stale until TTL or delete.',
+      use: 'Read-heavy data; the default with Redis and <code>IMemoryCache</code>.', avoid: 'The first read is slow. The cached data can be out of date (stale) until the TTL runs out or the key is deleted.',
       build(m) { trio(m); return [
         { cap: 'GET <b>product:12</b> from the cache → <b class="bad-text">miss</b>', go: async r => { await m.send(['app', 'cache'], { run: r, label: 'GET' }); m.badge('cache', 'MISS', 'red'); await m.send(['cache', 'app'], { run: r, tone: 'muted' }); } },
         { cap: 'The app reads the row from the database', go: async r => { m.state('db', 'on'); await m.send(['app', 'db'], { run: r, label: 'SELECT' }); await m.send(['db', 'app'], { run: r, tone: 'yellow' }); } },
@@ -53,7 +53,7 @@
 
     refresh: { name: 'Refresh-ahead', tone: 'teal', tags: ['read path'],
       rule: 'Before a popular entry expires, the cache reloads it in the background, so no reader waits on a miss.',
-      takeaway: 'Hot keys never expire in front of a user.',
+      takeaway: 'Popular (hot) keys are never missing when a user reads them.',
       use: 'Expensive, predictable, hot data (home page, config, price lists).', avoid: 'Refreshes keys nobody reads again; needs a good guess of what\'s hot.',
       build(m) { line3(m); const bar = ttlBar(m, 120, 118, 120, ''); m._bar = bar; return [
         { cap: 'Reads hit while the entry is fresh', go: async r => { m.badge('cache', 'v1', 'teal'); await m.send(['app', 'cache'], { run: r, label: 'GET' }); await bar.to(m, r, 1, 0.45, 1300, '', k => `TTL left ${Math.round(k * 100)}%`); } },
@@ -64,8 +64,8 @@
 
     /* ---- write path ---- */
     wthrough: { name: 'Write-through', tone: 'blue', tags: ['write path'],
-      rule: 'Every write goes to the cache and on to the database in the same request; the client gets its ack only after both.',
-      takeaway: 'Cache is never behind the DB; every write pays two hops.',
+      rule: 'Every write goes to the cache and then to the database in the same request. The client gets its confirmation (ack) only after both.',
+      takeaway: 'The cache is never behind the DB. But every write must make two trips (hops): one to the cache and one to the database.',
       use: 'Data read right after it is written (profiles, carts, settings).', avoid: 'Slower writes; fills the cache with data nobody may read.',
       build(m) { line3(m); return [
         { cap: 'App writes <b>cart:7</b> to the cache', go: async r => { await m.send(['app', 'cache'], { run: r, label: 'SET' }); m.badge('cache', 'v2', 'teal'); } },
@@ -74,7 +74,7 @@
       ]; } },
 
     wbehind: { name: 'Write-behind (write-back)', tone: 'orange', tags: ['write path'],
-      rule: 'Writes land in the cache and are acknowledged at once; the cache flushes them to the DB later, in batches.',
+      rule: 'Writes go into the cache and the client is told \'saved\' at once. Later, the cache copies (flushes) them to the DB in batches.',
       takeaway: 'Fastest writes, but the buffer can be lost.',
       use: 'Very high write rates where small loss is acceptable (counters, metrics, likes).', avoid: 'Money, orders, anything you must not lose.',
       vb: [360, 160],
@@ -122,7 +122,7 @@
     lru: { name: 'LRU eviction', tone: 'yellow', tags: ['eviction'],
       rule: 'When the cache is full, evict the key used <b>least recently</b>.',
       takeaway: 'Same reads as the LFU card: LRU throws out A, the popular key.',
-      use: 'Recent data is likely to be read again (most workloads, Redis allkeys-lru).', avoid: 'One-off scans push hot keys out.',
+      use: 'Recent data is likely to be read again (most workloads, Redis allkeys-lru).', avoid: 'A job that reads many keys only once (a scan) pushes the often-used (hot) keys out.',
       build(m) { const s = m.slots('c', 180, 72, 3, { w: 34, label: '3 slots · least recent ← → most recent' }); const seq = m.label(180, 128, '', 'at-small'); m._seq = seq;
         const show = arr => s.set(arr.map(k => ({ t: k, tone: k === 'D' ? 'yellow' : '' })));
         return [
@@ -134,8 +134,8 @@
 
     lfu: { name: 'LFU eviction', tone: 'violet', tags: ['eviction'],
       rule: 'When the cache is full, evict the key used <b>least often</b> (ties: the older one).',
-      takeaway: 'LFU keeps A; but a once-popular key can squat forever without ageing.',
-      use: 'A stable set of hot keys mixed with one-off reads (Redis allkeys-lfu).', avoid: 'Popularity that shifts; needs counter decay.',
+      takeaway: 'LFU keeps A. But a key that was popular once can stay in the cache forever, unless its count is reduced over time (ageing).',
+      use: 'A stable set of hot keys mixed with one-off reads (Redis allkeys-lfu).', avoid: 'Popularity that changes over time. LFU needs its counts to shrink over time (counter decay).',
       build(m) { const s = m.slots('c', 180, 72, 3, { w: 34, label: '3 slots · read count under each key' }); const seq = m.label(180, 128, '', 'at-small'); const cnt = [0, 1, 2].map(i => m.label(180 - 38 + i * 38, 104, '', 'at-small')); m._seq = seq; m._cnt = cnt;
         const show = arr => { s.set(arr.map(([k, c, tone]) => ({ t: k, tone }))); cnt.forEach((t, i) => t.textContent = arr[i] ? '×' + arr[i][1] : ''); };
         return [
@@ -159,7 +159,7 @@
 
     ttl: { name: 'TTL expiry', tone: 'teal', tags: ['eviction'],
       rule: 'Every key gets a time-to-live; when it runs out the key disappears and the next read reloads it.',
-      takeaway: 'TTL caps how stale data can get. Add jitter so keys don\'t all expire together.',
+      takeaway: 'TTL limits how old (stale) cached data can get. Add jitter (a small random extra time) to each TTL so keys don\'t all expire at the same moment.',
       use: 'Any cached copy of data that changes; a safety net even with invalidation.', avoid: 'Too short: few hits. Too long: stale data.',
       build(m) { trio(m); const bar = ttlBar(m, 150, 128, 110, ''); m._bar = bar; return [
         { cap: 'SET <b>doctor:42</b> with TTL 60 s', go: async r => { await m.send(['app', 'cache'], { run: r, label: 'SET ttl=60s' }); bar.set(1, '', '60 s left'); } },
@@ -171,65 +171,65 @@
 
     /* ---- failure modes ---- */
     stampede: { name: 'Cache stampede', tone: 'red', tags: ['failure'],
-      rule: 'A hot key expires and many requests miss at once; every one of them runs the same expensive DB query.',
-      takeaway: 'Fix: single-flight (one loader, others wait), stale-while-revalidate, early refresh.',
-      use: '(failure mode) Expect it on any hot key with a TTL.', avoid: 'HybridCache single-flight is per server, not cluster-wide.',
+      rule: 'A popular key expires. Many requests miss at the same moment, and each one runs the same slow database query.',
+      takeaway: 'There are three fixes. Let one request load it while the others wait (single-flight). Or serve the old value while one refresh runs. Or refresh the key before it expires.',
+      use: '(a problem, not a pattern) It can happen to any popular key that has a TTL.', avoid: 'HybridCache single-flight works per server, not across all servers.',
       vb: [360, 160],
       build(m) { const ys = [24, 58, 92, 126]; ys.forEach((y, i) => m.box('r' + i, 36, y, 'req ' + (i + 1), { w: 50, h: 22 })); m.box('cache', 190, 30, 'Cache', { icon: 'ram', w: 84 }); m.db('db', 305, 104, 'Database');
         ys.forEach((y, i) => { m.wire('r' + i, 'cache', { dash: true }); m.wire('r' + i, 'db'); });
         return [
           { cap: 'Hot key <b>product:12</b> expires', go: async r => { m.badge('cache', 'expired', 'muted'); await m.sleep(500, r); } },
           { cap: '4 requests miss at the same moment…', go: async r => { await all(ys, (_, i) => m.send(['r' + i, 'cache'], { run: r, tone: 'muted', ms: 600 })); } },
-          { cap: '…and all 4 run the same query → <b class="bad-text">DB overloaded</b>', go: async r => { await all(ys, (_, i) => m.send(['r' + i, 'db'], { run: r, tone: 'red', ms: 750 })); m.state('db', 'hot'); m.badge('db', 'CPU 100%', 'red'); await m.sleep(600, r); } },
-          { cap: 'Fix · single-flight: req 1 loads, req 2–4 <b>wait</b> for its result', go: async r => { m.state('db', ''); m.badge('db'); ['r1', 'r2', 'r3'].forEach(id => m.state(id, 'dim')); await m.send(['r0', 'db'], { run: r, tone: 'teal' }); await m.send(['db', 'r0'], { run: r, tone: 'yellow' }); m.badge('cache', 'filled', 'teal'); ['r0', 'r1', 'r2', 'r3'].forEach(id => m.state(id, 'ok')); } }
+          { cap: '…and all 4 run the same query → <b class="bad-text">database overloaded</b>', go: async r => { await all(ys, (_, i) => m.send(['r' + i, 'db'], { run: r, tone: 'red', ms: 750 })); m.state('db', 'hot'); m.badge('db', 'CPU 100%', 'red'); await m.sleep(600, r); } },
+          { cap: 'Fix · single-flight: request 1 loads it, requests 2–4 <b>wait</b> for its result', go: async r => { m.state('db', ''); m.badge('db'); ['r1', 'r2', 'r3'].forEach(id => m.state(id, 'dim')); await m.send(['r0', 'db'], { run: r, tone: 'teal' }); await m.send(['db', 'r0'], { run: r, tone: 'yellow' }); m.badge('cache', 'filled', 'teal'); ['r0', 'r1', 'r2', 'r3'].forEach(id => m.state(id, 'ok')); } }
         ]; } },
 
     swr: { name: 'Stale-while-revalidate', tone: 'teal', tags: ['failure'],
-      rule: 'When an entry goes stale, keep serving the old copy instantly while <b>one</b> background refresh fetches the new one.',
-      takeaway: 'Nobody waits and only one query reaches the DB.',
-      use: 'Data where a few seconds of staleness is fine (catalogues, feeds, dashboards).', avoid: 'Balances, stock at checkout: anything that must be exact.',
+      rule: 'When a value gets old, keep giving out the old copy straight away, while <b>one</b> background job loads the new one.',
+      takeaway: 'Nobody waits, and only one query reaches the database.',
+      use: 'Data that can be a few seconds old (product lists, feeds, dashboards).', avoid: 'Bank balances, stock at checkout: anything that must be exact.',
       build(m) { trio(m); const bar = ttlBar(m, 150, 128, 110, ''); m._bar = bar; return [
-        { cap: 'Entry is fresh for 60 s, then usable-but-stale for 30 s more', go: async r => { m.badge('cache', 'v1', 'teal'); await bar.to(m, r, 1, 0, 1200, '', k => k > 0 ? `fresh ${Math.round(k * 60)} s` : 'stale'); bar.set(1, 'warn', 'stale window'); } },
+        { cap: 'The value is fresh for 60 s, then old but still usable for 30 s more', go: async r => { m.badge('cache', 'v1', 'teal'); await bar.to(m, r, 1, 0, 1200, '', k => k > 0 ? `fresh ${Math.round(k * 60)} s` : 'stale'); bar.set(1, 'warn', 'stale window'); } },
         { cap: 'A read in the stale window gets <b>v1 instantly</b>…', go: async r => { await m.send(['app', 'cache'], { run: r, label: 'GET' }); await m.send(['cache', 'app'], { run: r, tone: 'yellow', label: 'v1 (stale)' }); } },
         { cap: '…and triggers <b>one</b> background refresh', go: async r => { m.state('db', 'on'); await m.send(['app', 'db'], { run: r, label: 'refresh' }); await m.send(['db', 'app'], { run: r, tone: 'yellow' }); await m.send(['app', 'cache'], { run: r, label: 'SET v2' }); m.state('db', ''); m.badge('cache', 'v2', 'teal'); bar.set(1, '', 'fresh 60 s'); } }
       ]; },
       reset(m) { m._bar && m._bar.set(1, '', ''); } },
 
     penetration: { name: 'Cache penetration', tone: 'orange', tags: ['failure'],
-      rule: 'Requests for keys that don\'t exist anywhere always miss, so every one reaches the database.',
-      takeaway: 'Fix: cache the "not found" (short TTL) or check a Bloom filter first.',
-      use: '(failure mode) Bots, scrapers, bad client IDs.', avoid: 'Negative entries must expire, or new records stay "missing".',
+      rule: 'Requests for data that doesn\'t exist never find anything in the cache, so every one goes to the database.',
+      takeaway: 'Fix: cache the answer "not found" for a short time, or check a Bloom filter (a fast list of valid IDs) first.',
+      use: '(a problem, not a pattern) Bots, scrapers, wrong IDs sent by a client.', avoid: 'The cached "not found" must expire, or a record added later will still look missing.',
       build(m) { m.box('app', 58, 78, 'Bot', { icon: 'bug', w: 80 }); m.box('cache', 195, 34, 'Cache', { icon: 'ram', w: 84 }); m.db('db', 305, 92, 'Database'); m.wire('app', 'cache'); m.wire('app', 'db');
         return [
           { cap: 'GET <b>patient:999999</b> → miss', go: async r => { await m.send(['app', 'cache'], { run: r, label: 'GET' }); m.badge('cache', 'MISS', 'red'); } },
           { cap: 'Not in the DB either: nothing to cache', go: async r => { await m.send(['app', 'db'], { run: r, label: 'SELECT' }); m.badge('db', 'no row', 'muted'); await m.send(['db', 'app'], { run: r, tone: 'muted' }); } },
           { cap: 'So every repeat hits the database again', go: async r => { m.badge('db'); for (let k = 0; k < 3; k++) await m.send(['app', 'db'], { run: r, tone: 'red', ms: 380 }); m.state('db', 'hot'); } },
-          { cap: 'Fix: store <b>NULL</b> with a short TTL; repeats stop at the cache', go: async r => { m.state('db', 'dim'); m.badge('cache', 'NULL ttl=30s', 'teal'); for (let k = 0; k < 2; k++) await m.send(['app', 'cache'], { run: r, tone: 'teal', ms: 380 }); } }
+          { cap: 'Fix: save <b>"not found"</b> (NULL) for 30 s; repeats now stop at the cache', go: async r => { m.state('db', 'dim'); m.badge('cache', 'NULL ttl=30s', 'teal'); for (let k = 0; k < 2; k++) await m.send(['app', 'cache'], { run: r, tone: 'teal', ms: 380 }); } }
         ]; } },
 
     avalanche: { name: 'Cache avalanche', tone: 'red', tags: ['failure'],
-      rule: 'Many keys expire at the same moment (or a cache node dies), so a flood of misses hits the DB together.',
-      takeaway: 'Fix: add random jitter to TTLs, warm the cache gradually, protect the DB with limits.',
-      use: '(failure mode) Bulk loads with one TTL, cache restarts.', avoid: 'Jitter spreads load; it doesn\'t remove it.',
+      rule: 'Many keys expire at the same moment, or a cache server goes down. A flood of misses reaches the database at once.',
+      takeaway: 'Fix: add a random extra time (jitter) to each TTL, fill the cache in stages, and limit queries to the database.',
+      use: '(a problem, not a pattern) Loading many keys at once with the same TTL; restarting the cache.', avoid: 'Jitter spreads the load out over time; the total load stays the same.',
       vb: [360, 160],
       build(m) { m.box('app', 50, 80, 'App', { icon: 'server', w: 78 }); const s = m.slots('keys', 190, 38, 6, { w: 20, label: 'keys loaded at 09:00, TTL 1 h' }); m.db('db', 305, 112, 'Database'); m.wire('app', 'keys', { dash: true }); m.wire('app', 'db'); m._s = s;
         const full = (tone) => s.set(Array.from({ length: 6 }, (_, i) => ({ t: 'k' + (i + 1), tone })));
         return [
           { cap: '6 popular keys all cached at 09:00 with the <b>same</b> TTL', go: async r => { full(''); await m.sleep(700, r); } },
           { cap: 'At 10:00 they all expire together', go: async r => { full('muted'); await m.sleep(400, r); s.set([]); } },
-          { cap: 'Every one misses at once → <b class="bad-text">DB flooded</b>', go: async r => { await all([0, 1, 2, 3, 4, 5], i => m.send(['app', 'db'], { run: r, tone: 'red', ms: 500 + i * 60 })); m.state('db', 'hot'); m.badge('db', '6× load', 'red'); } },
-          { cap: 'Fix: TTL = 1 h ± random jitter, so expiries spread out', go: async r => { m.state('db', ''); m.badge('db'); for (let i = 0; i < 6; i++) { s.set(Array.from({ length: 6 }, (_, j) => ({ t: 'k' + (j + 1), tone: j === i ? 'muted' : '' }))); await m.send(['app', 'db'], { run: r, tone: 'teal', ms: 300 }); } full(''); } }
+          { cap: 'All of them miss at once → <b class="bad-text">database flooded</b>', go: async r => { await all([0, 1, 2, 3, 4, 5], i => m.send(['app', 'db'], { run: r, tone: 'red', ms: 500 + i * 60 })); m.state('db', 'hot'); m.badge('db', '6× load', 'red'); } },
+          { cap: 'Fix: TTL = 1 h plus or minus a random few minutes, so they expire at different times', go: async r => { m.state('db', ''); m.badge('db'); for (let i = 0; i < 6; i++) { s.set(Array.from({ length: 6 }, (_, j) => ({ t: 'k' + (j + 1), tone: j === i ? 'muted' : '' }))); await m.send(['app', 'db'], { run: r, tone: 'teal', ms: 300 }); } full(''); } }
         ]; } },
 
     hotkey: { name: 'Hot key', tone: 'orange', tags: ['failure'],
-      rule: 'One key gets most of the traffic, so the one cache node that owns it melts while the others idle.',
-      takeaway: 'Fix: a short-lived local (L1) copy in each app server, or replicate that key.',
-      use: '(failure mode) Flash sales, viral posts, a celebrity\'s profile.', avoid: 'L1 copies add a staleness window per server.',
+      rule: 'One key gets most of the traffic. The one cache server that holds it is overloaded, while the others have little to do.',
+      takeaway: 'Fix: keep a short-lived copy of that key on each app server (L1), or store copies of it on several cache servers.',
+      use: '(a problem, not a pattern) Flash sales, viral posts, a celebrity\'s profile.', avoid: 'Each local copy can be a few seconds out of date.',
       build(m) { m.box('app', 48, 70, 'App ×N', { icon: 'server', w: 80 }); m.box('l1', 48, 128, 'L1 copy', { w: 70, h: 22 }); ['s1', 's2', 's3'].forEach((id, i) => m.box(id, 270, 26 + i * 46, 'node ' + (i + 1), { icon: 'ram', w: 84 })); ['s1', 's2', 's3'].forEach(id => m.wire('app', id)); m.wire('app', 'l1', { dash: true });
         return [
-          { cap: 'Keys spread across 3 cache nodes; <b>product:12</b> lives on node 2', go: async r => { m.state('l1', 'dim'); await m.send(['app', 's1'], { run: r, ms: 450 }); await m.send(['app', 's3'], { run: r, ms: 450 }); await m.send(['app', 's2'], { run: r, ms: 450, label: 'product:12' }); } },
+          { cap: 'Keys are spread over 3 cache servers; <b>product:12</b> is on node 2', go: async r => { m.state('l1', 'dim'); await m.send(['app', 's1'], { run: r, ms: 450 }); await m.send(['app', 's3'], { run: r, ms: 450 }); await m.send(['app', 's2'], { run: r, ms: 450, label: 'product:12' }); } },
           { cap: 'A flash sale: almost every read is for that one key', go: async r => { m.state('l1', 'dim'); for (let k = 0; k < 4; k++) await m.send(['app', 's2'], { run: r, ms: 300, tone: 'red' }); m.state('s2', 'hot'); m.badge('s2', '95% load', 'red'); m.state('s1', 'dim'); m.state('s3', 'dim'); } },
-          { cap: 'Fix: each app keeps a 5-second <b>L1 copy</b>; node 2 sees one read per server', go: async r => { m.state('s2', ''); m.badge('s2'); m.state('s1', ''); m.state('s3', ''); m.state('l1', 'ok'); for (let k = 0; k < 3; k++) await m.send(['app', 'l1'], { run: r, ms: 300, tone: 'teal' }); } }
+          { cap: 'Fix: each app server keeps its own copy for 5 s (<b>L1</b>); node 2 gets one read per server', go: async r => { m.state('s2', ''); m.badge('s2'); m.state('s1', ''); m.state('s3', ''); m.state('l1', 'ok'); for (let k = 0; k < 3; k++) await m.send(['app', 'l1'], { run: r, ms: 300, tone: 'teal' }); } }
         ]; },
       reset(m) { m.state('l1', 'dim'); } },
 
@@ -272,7 +272,7 @@
     cluster: { name: 'Sharded cache cluster', tone: 'blue', tags: ['where it lives'],
       rule: 'Spread keys over several cache nodes. Redis Cluster maps each key to one of <b>16,384 hash slots</b>; each node owns a range of slots.',
       takeaway: 'More memory and throughput; adding a node moves only some slots.',
-      use: 'Data or traffic bigger than one node can hold.', avoid: 'Multi-key operations must live in one slot (use {hash tags}).',
+      use: 'Data or traffic bigger than one node can hold.', avoid: 'A command that uses several keys only works if all keys are in one slot. Use hash tags: put the shared part of the key in {braces}, and only that part is hashed.',
       vb: [360, 160],
       build(m) { m.box('app', 50, 80, 'App', { icon: 'server', w: 78 }); m.box('hk', 165, 80, 'hash the key', { w: 100, h: 26 }); ['n1', 'n2', 'n3'].forEach((id, i) => m.box(id, 300, 30 + i * 50, ['0–5460', '5461–10922', '10923–16383'][i], { icon: 'ram', w: 96, sub: i === 2 ? 'slot ranges' : '' })); m.wire('app', 'hk'); ['n1', 'n2', 'n3'].forEach(id => m.wire('hk', id));
         return [
@@ -284,7 +284,7 @@
     replication: { name: 'Replication & failover', tone: 'teal', tags: ['where it lives'],
       rule: 'A primary takes writes and copies them <b>asynchronously</b> to replicas. If the primary dies, a replica is promoted (Sentinel or Cluster).',
       takeaway: 'Survives a node loss, but the last writes before a crash can be lost.',
-      use: 'Any cache you can\'t afford to lose in one go (sessions, rate-limit counters).', avoid: 'Async copy = possible loss of recent writes on failover.',
+      use: 'Any cache you can\'t afford to lose in one go (sessions, rate-limit counters).', avoid: 'The copy to replicas is asynchronous (done a moment later), so the most recent writes can be lost on failover.',
       build(m) { m.box('app', 50, 75, 'App', { icon: 'server', w: 78 }); m.box('p', 190, 40, 'Primary', { icon: 'ram', w: 90 }); m.box('rp', 190, 115, 'Replica', { icon: 'ram', w: 90 }); m.box('sent', 315, 75, 'Sentinel', { icon: 'eye', w: 80 }); m.wire('app', 'p'); m.wire('p', 'rp'); m.wire('app', 'rp', { dash: true }); m.wire('sent', 'p', { dash: true }); m.wire('sent', 'rp', { dash: true });
         return [
           { cap: 'Writes go to the primary, which copies them to the replica', go: async r => { await m.send(['app', 'p'], { run: r, label: 'SET' }); await m.send(['p', 'rp'], { run: r, tone: 'teal', label: 'async copy' }); } },
@@ -293,7 +293,7 @@
         ]; } },
 
     persistence: { name: 'Redis persistence: RDB vs AOF', tone: 'orange', tags: ['where it lives'],
-      rule: '<b>RDB</b> saves a point-in-time snapshot every few minutes. <b>AOF</b> appends every write to a log (fsync every second by default).',
+      rule: '<b>RDB</b> saves a point-in-time snapshot every few minutes. <b>AOF</b> appends every write to a log file. By default it forces the log onto disk (fsync) every second.',
       takeaway: 'RDB: compact, may lose minutes. AOF: loses about a second, bigger files. Many run both.',
       use: 'When a restart must not mean a fully cold cache.', avoid: 'A cache is still not your source of truth.',
       vb: [360, 160],
@@ -308,7 +308,7 @@
     cdn: { name: 'CDN: pull vs push', tone: 'blue', tags: ['edge'],
       rule: 'An edge server near the user keeps copies of files. <b>Pull</b>: it fetches from the origin on the first miss. <b>Push</b>: you upload ahead of time.',
       takeaway: 'Pull is the default; push (or pre-warming) for big, predictable launches.',
-      use: 'Static assets, images, video, versioned JS/CSS bundles.', avoid: 'Purging after a bad deploy; use versioned file names.',
+      use: 'Static assets, images, video, versioned JS/CSS bundles.', avoid: 'After a bad deploy you must purge (delete) old copies from every edge. Use versioned file names so a new version never needs a purge.',
       vb: [360, 160],
       build(m) { m.tile('user', 34, 62, 'User · Pune', 'users'); m.box('edge', 168, 62, 'Edge · Mumbai', { icon: 'edge', w: 106 }); m.box('origin', 310, 62, 'Origin', { icon: 'server', w: 78 }); m.box('ci', 310, 132, 'CI deploy', { icon: 'branch', w: 82, h: 26 }); m.wire('user', 'edge'); m.wire('edge', 'origin'); m.wire('ci', 'edge', { dash: true });
         return [
@@ -321,7 +321,7 @@
 
     cdnpull: { name: 'Pull CDN', tone: 'blue', tags: ['edge'],
       rule: 'The edge starts empty. On the first request it <b>pulls</b> the file from your origin, keeps it, and serves everyone nearby.',
-      takeaway: 'Zero setup per file; the first user in each region pays the trip to the origin.',
+      takeaway: 'No setup is needed per file. But the first user in each region must wait while the edge fetches the file from the origin (your own server).',
       use: 'The default for websites, images and API responses you mark cacheable.', avoid: 'A huge launch: every region misses at the same moment.',
       vb: [360, 150],
       build(m) { m.tile('u1', 34, 40, 'User 1', 'user'); m.tile('u2', 34, 110, 'User 2', 'user'); m.box('edge', 175, 75, 'Edge · Mumbai', { icon: 'edge', w: 110 }); m.box('origin', 312, 75, 'Origin', { icon: 'server', w: 78 }); m.wire('u1', 'edge'); m.wire('u2', 'edge'); m.wire('edge', 'origin');
@@ -358,7 +358,7 @@
     etag: { name: 'ETag & 304 Not Modified', tone: 'teal', tags: ['http'],
       rule: 'The response carries a version tag (<code>ETag: "v7"</code>). Later the browser asks <code>If-None-Match: "v7"</code>; if unchanged the server answers <b>304</b> with no body.',
       takeaway: 'Revalidation costs a round trip but not the download.',
-      use: 'HTML, API responses, anything with <code>no-cache</code> or an expired max-age.', avoid: 'Still a request per use; versioned files with long max-age avoid even that.',
+      use: 'HTML, API responses, anything with <code>no-cache</code> or an expired max-age.', avoid: 'It still sends one request each time the file is used. Versioned files with a long max-age avoid even this request.',
       build(m) { m.tile('br', 40, 70, 'Browser', 'laptop'); m.box('origin', 290, 70, 'API / origin', { icon: 'server', w: 96 }); m.wire('br', 'origin'); const h = m.label(165, 128, '', 'at-small'); m._h = h;
         return [
           { cap: 'First request: <b>200</b> with the body and <code>ETag: "v7"</code>', go: async r => { await m.send(['br', 'origin'], { run: r, label: 'GET /doctors' }); h.textContent = '200 OK · 48 KB · ETag: "v7"'; await m.send(['origin', 'br'], { run: r, tone: 'yellow', label: '48 KB' }); m.badge('br', 'v7', 'teal'); } },
@@ -381,8 +381,8 @@
 
     purge: { name: 'Purge / invalidation', tone: 'red', tags: ['http'],
       rule: 'Tell the CDN to drop a URL (or a tag) from every edge now, so the next request goes back to the origin.',
-      takeaway: 'Your emergency brake for things that can\'t be versioned (HTML, an API response).',
-      use: 'A wrong price on a cached page; content taken down.', avoid: 'Purges take time to spread and can stampede the origin.',
+      takeaway: 'Use it in emergencies, for things that can\'t be given versioned names (HTML, an API response).',
+      use: 'A wrong price on a cached page; content taken down.', avoid: 'Purges take time to reach every edge. They can also send a sudden flood of requests to the origin, because every edge misses at once.',
       vb: [360, 150],
       build(m) { m.box('ci', 60, 40, 'You / CI', { icon: 'terminal', w: 90 }); m.tile('u', 50, 112, 'User', 'user'); m.box('edge', 200, 75, 'CDN edges', { icon: 'edge', w: 100 }); m.box('origin', 318, 75, 'Origin', { icon: 'server', w: 70 }); m.wire('ci', 'edge'); m.wire('u', 'edge'); m.wire('edge', 'origin');
         return [
@@ -395,7 +395,7 @@
     pubsub: { name: 'Clear L1 on every server (pub/sub)', tone: 'violet', tags: ['in practice'],
       rule: 'When one server changes data, it deletes the Redis key and <b>publishes</b> "invalidate product:12". Every server is subscribed and drops its own L1 copy.',
       takeaway: 'L1 stays fast, and servers agree within milliseconds instead of waiting for the L1 TTL.',
-      use: 'Any L1 + Redis setup where stale prices or permissions matter.', avoid: 'Redis pub/sub is fire-and-forget: a restarting server misses messages, so keep the L1 TTL short too.',
+      use: 'Any L1 + Redis setup where stale prices or permissions matter.', avoid: 'Redis pub/sub does not store messages: it sends them once and does not check they arrived. A server that is restarting misses them, so also keep the L1 (in-server) cache TTL short.',
       vb: [360, 160],
       build(m) { m.box('redis', 290, 80, 'Redis', { icon: 'ram', w: 86 }); [0, 1, 2].forEach(i => { m.box('a' + i, 58, 30 + i * 50, 'App ' + (i + 1), { icon: 'server', w: 80 }); m.box('c' + i, 150, 30 + i * 50, 'L1', { w: 40, h: 24 }); m.wire('a' + i, 'c' + i); m.wire('c' + i, 'redis'); });
         return [
@@ -406,9 +406,9 @@
         ]; } },
 
     events: { name: 'Invalidate across services (change events)', tone: 'blue', tags: ['in practice'],
-      rule: 'The service that owns the data writes the change and an <b>outbox</b> row in one transaction; a relay publishes "ProductChanged"; every service that cached it deletes its copy.',
+      rule: 'The service that owns the data writes the change and an <b>outbox</b> row (a \'message to send\' record) in one transaction. A relay (a small background process) reads that row and publishes "ProductChanged". Every service that cached the product deletes its copy.',
       takeaway: 'Each service owns its cache; events tell it when to drop entries.',
-      use: 'Microservices that cache another service\'s data (search, pricing, recommendations).', avoid: 'Events can be late or duplicated: keep TTLs and make the delete idempotent.',
+      use: 'Microservices that cache another service\'s data (search, pricing, recommendations).', avoid: 'Events can be late or arrive twice. Keep TTLs, and make the delete idempotent: running it twice has the same result as running it once.',
       vb: [360, 160],
       build(m) { m.box('a', 60, 40, 'Catalog svc', { icon: 'server', w: 94 }); m.db('db', 60, 118, 'DB + outbox'); m.box('bk', 185, 80, 'Broker', { icon: 'pipe', w: 80 }); m.box('s1', 305, 40, 'Search svc', { icon: 'server', w: 92 }); m.box('s2', 305, 120, 'Pricing svc', { icon: 'server', w: 92 }); m.wire('a', 'db'); m.wire('db', 'bk'); m.wire('bk', 's1'); m.wire('bk', 's2');
         return [
@@ -446,7 +446,7 @@
 
     leak: { name: 'Cache leaks & poisoning', tone: 'red', tags: ['in practice'],
       rule: 'If a personalised response is cacheable, the edge serves <b>Asha\'s page to Ravi</b>. Poisoning is the same idea on purpose: an attacker gets a harmful variant cached for everyone.',
-      takeaway: 'Per-user responses: <code>Cache-Control: private</code> or <code>no-store</code>. Cache only on keyed inputs.',
+      takeaway: 'For per-user responses, send <code>Cache-Control: private</code> or <code>no-store</code>. Only cache a response if everything it depends on is part of the cache key.',
       use: '(failure mode) Logged-in pages, anything with Set-Cookie.', avoid: 'Responses that change with headers you didn\'t put in the key (e.g. <code>X-Forwarded-Host</code>).',
       vb: [360, 160],
       build(m) { m.tile('a', 34, 40, 'Asha', 'user'); m.tile('b', 34, 118, 'Ravi', 'user'); m.box('edge', 180, 80, 'CDN edge', { icon: 'edge', w: 96 }); m.box('origin', 315, 80, 'Origin', { icon: 'server', w: 74 }); m.wire('a', 'edge'); m.wire('b', 'edge'); m.wire('edge', 'origin');
@@ -507,7 +507,7 @@
         ]; } },
 
     monitor: { name: 'Read the cache dashboard', tone: 'teal', tags: ['in practice'],
-      rule: 'Five numbers tell you if a cache is healthy: <b>hit ratio</b>, <b>evictions/s</b>, <b>memory used</b>, <b>p99 latency</b> and the <b>DB load</b> behind it.',
+      rule: 'Five numbers tell you if a cache is healthy: <b>hit ratio</b>, evictions per second, <b>memory used</b>, <b>p99 latency</b> (99% of requests finish faster than this) and the <b>DB load</b> behind it.',
       takeaway: 'They move together: memory full → evictions → hit ratio falls → DB load and p99 rise.',
       use: 'Every cache in production; alert on hit ratio and memory.', avoid: 'Watching averages only: a stampede hides inside a good average.',
       vb: [360, 160],
@@ -544,11 +544,11 @@
     { q: 'A small cache serves a stable set of hot keys, but a nightly job reads every record once.', a: 'lfu', why: 'The scan reads each key once; LFU evicts those first and keeps the hot set.' },
     { q: 'Recently viewed items are likely to be viewed again soon; popularity changes through the day.', a: 'lru', why: 'LRU follows recency and adapts as popularity shifts.' },
     { q: 'Doctor availability changes every few minutes; a little staleness is OK but never more than a minute.', a: 'ttl', why: 'A 60-second TTL caps staleness even if an invalidation is missed.' },
-    { q: 'At 00:00 a sale starts, the product key expires, and the database CPU jumps to 100% for a few seconds.', a: 'stampede', why: 'Many concurrent misses on one key: single-flight, stale-while-revalidate or early refresh.' },
-    { q: 'A dashboard can show numbers a few seconds old, but must never block a user while it refreshes.', a: 'swr', why: 'Serve the stale copy instantly and refresh once in the background.' },
-    { q: 'A scraper requests random patient IDs; none exist, and every request reaches SQL Server.', a: 'penetration', why: 'Cache the "not found" briefly or keep a Bloom filter of valid IDs; also rate-limit the client.' },
-    { q: 'A nightly import caches 2 million rows with a 24-hour TTL; the next night the database falls over at the same minute.', a: 'avalanche', why: 'Everything expires together. Add random jitter to the TTL and warm gradually.' },
-    { q: 'A viral post sends 95% of reads to one Redis node in a cluster of six.', a: 'hotkey', why: 'One key, one node: add a short local L1 copy or replicate the key.' },
+    { q: 'At 00:00 a sale starts, the product key expires, and the database CPU jumps to 100% for a few seconds.', a: 'stampede', why: 'Many misses on one key at the same moment. Fix with single-flight, stale-while-revalidate or early refresh.' },
+    { q: 'A dashboard can show numbers a few seconds old, but must never block a user while it refreshes.', a: 'swr', why: 'Give out the old copy straight away and refresh it once in the background.' },
+    { q: 'A scraper requests random patient IDs; none exist, and every request reaches SQL Server.', a: 'penetration', why: 'Cache "not found" for a short time, or keep a Bloom filter of valid IDs. Also limit how fast that client can call.' },
+    { q: 'A nightly import caches 2 million rows with a 24-hour TTL; the next night the database falls over at the same minute.', a: 'avalanche', why: 'Everything expires at once. Add a random extra time to each TTL and fill the cache in stages.' },
+    { q: 'A viral post sends 95% of reads to one Redis node in a cluster of six.', a: 'hotkey', why: 'One key lives on one server. Keep a short local copy on each app server, or store copies of the key on several servers.' },
     { q: 'Country and currency lists change twice a year and are read on every request.', a: 'l1', why: 'Tiny, near-static data: keep it in each server\'s memory, no network hop.' },
     { q: 'User sessions must be visible to whichever of 8 app servers gets the next request.', a: 'redis', why: 'A shared distributed cache gives every server the same copy.' },
     { q: 'Your Redis cluster is at 85% memory and still growing.', a: 'cluster', why: 'Shard keys across more nodes (hash slots); adding a node moves only some slots.' },

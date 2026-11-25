@@ -128,8 +128,8 @@
       <li><b>Move a volume to another AZ</b>: snapshot → <b>Create volume from snapshot</b> in the target AZ. The new volume is a copy, not kept in sync.</li>
       <li><b>Copy a snapshot to another Region</b> for disaster recovery or to launch there.</li>
       <li><b>EBS Snapshot Archive</b>: up to <b>75% cheaper</b> storage, but restoring takes <b>24 to 72 hours</b>. Use for backups kept 90+ days and rarely needed.</li>
-      <li><b>Recycle Bin</b>: with a <b>retention rule</b>, deleted snapshots (and AMIs, volumes) are kept for a period you choose (snapshots: 1 day to 1 year) and can be <b>recovered</b>. Without a rule, delete is permanent.</li>
-      <li>A <b>locked</b> retention rule can't be edited or deleted until it is unlocked and a delay of 7 to 30 days passes: protection against someone deleting your safety net.</li>
+      <li><b>Recycle Bin</b>: if you have a <b>retention rule</b>, deleted snapshots, AMIs and volumes are kept for a period you choose, and you can recover them. For snapshots the period is 1 day to 1 year. Without a rule, delete is permanent.</li>
+      <li>A <b>locked</b> retention rule can't be edited or deleted until it is unlocked and a delay of 7 to 30 days passes. This protects you: nobody can quickly delete the rule that keeps your deleted snapshots recoverable.</li>
       <li>When restoring you can change the volume <b>type, size</b> (bigger), and turn on <b>encryption</b>.</li>
     </ol></div>
   </section>
@@ -202,7 +202,7 @@
     </div>
     <div class="notes" style="margin-top:14px">
       <div class="note"><p><b>Recycle Bin now also protects EBS volumes</b> (retention 1 to 7 days), not only snapshots and AMIs (AWS Recycle Bin documentation).</p></div>
-      <div class="note"><p>Archive converts the snapshot into a <b>full</b> copy (not incremental), and is billed for a minimum of <b>90 days</b>. Retention ranges and the 7 to 30 day open delay for locked rules come from the AWS docs.</p></div>
+      <div class="note"><p>Archive converts the snapshot into a <b>full</b> copy (not incremental), and is billed for a minimum of <b>90 days</b>. Retention ranges and the 7 to 30 day unlock delay for locked rules (the wait before a locked rule can be changed) come from the AWS docs.</p></div>
     </div>
   </section>
 
@@ -262,7 +262,7 @@
       play: async run => { base(1); await net.send(['vol', 'snap'], { run, label: 'changed blocks' }); } },
     { title: 'Restore into another AZ',
       text: 'The snapshot is not tied to an AZ. <b>Create volume from snapshot</b> in AZ b: you get an independent copy there, attachable to instances in AZ b. This is <b>how an EBS volume "moves" across AZs</b>.',
-      tip: 'Exam: EBS is AZ-bound; snapshots are how you get the data to another AZ.',
+      tip: 'An EBS volume is tied to one AZ. Snapshots are how you get its data to another AZ.',
       play: async run => { base(2); await net.send(['snap', 'volb'], { run, tone: 'green', label: 'create volume' }); } },
     { title: 'Copy to another Region',
       text: '<b>Copy snapshot</b> to eu-west-1. If ap-south-1 has a disaster, you create volumes (or launch from AMIs) in eu-west-1 from the copy.',
@@ -271,7 +271,7 @@
       text: 'Moving a snapshot to the <b>Archive tier</b> stores it up to <b>75% cheaper</b>. The catch: restoring it takes <b>24 to 72 hours</b>. Good for monthly or yearly compliance backups you rarely touch.',
       play: async run => { base(4); await net.send(['snap', 'arch'], { run, tone: 'yellow', label: 'archive' }); } },
     { title: 'Recycle Bin for accidents',
-      text: 'Create a <b>retention rule</b> first (e.g. keep deleted snapshots 7 days). Then a deleted snapshot goes to the <b>Recycle Bin</b> instead of vanishing, and you can <b>Recover</b> it until the period ends. No rule, no rescue.',
+      text: 'Create a <b>retention rule</b> first (e.g. keep deleted snapshots 7 days). Then a deleted snapshot goes to the <b>Recycle Bin</b> instead of vanishing, and you can <b>Recover</b> it until the period ends. If no rule existed before the delete, the snapshot cannot be recovered.',
       play: async run => { base(5); await net.send(['snap', 'bin'], { run, tone: 'red', label: 'delete' }); await net.send(['bin', 'snap'], { run, tone: 'green', label: 'recover' }); } },
     { title: 'The whole picture',
       text: 'Snapshot = <b>backup of one volume</b>, <b>incremental</b>, <b>Region-level</b>. From it you <b>restore in any AZ</b>, <b>copy to another Region</b>, <b>archive</b> cheaply, and with a rule, <b>recover</b> after deletion. AMIs (next) are built from snapshots.' }

@@ -95,7 +95,7 @@
     <p class="crumbs">AWS CLF-C02 / Cloud &amp; AWS overview / Section review</p>
     <h1>Cloud &amp; AWS overview: review</h1>
     <ul class="lede">
-      <li>Traditional IT means owning every box on the request path; <b>cloud computing</b> rents it on demand.</li>
+      <li>With traditional IT you own every piece of hardware the request passes through. With <b>cloud computing</b> you rent that hardware when you need it.</li>
       <li>The service model decides <b>how much of the stack you manage</b>: IaaS, PaaS, SaaS.</li>
       <li>AWS runs in <b>Regions</b> made of <b>Availability Zones</b>, plus <b>edge locations</b> near users.</li>
       <li>Security is split: <b>AWS secures the cloud, you secure what you put in it</b>.</li>
@@ -117,28 +117,28 @@
     <div class="sum-grid">
       <div class="card"><h3>Traditional IT</h3><ul>
         <li>A server = CPU, RAM, storage (+ database, network).</li>
-        <li>Browser asks <b>DNS</b> for the IP, then internet → router → switch → server.</li>
+        <li>The browser asks <b>DNS</b> for the server's IP address. Then the request travels over the internet, through a router and a switch, to the server.</li>
         <li>Owning it means rent, power, cooling, staff 24/7, slow growth, and one site that can fail.</li></ul></div>
       <div class="card"><h3>Cloud computing</h3><ul>
         <li>On-demand IT over the internet, <b>pay as you go</b>.</li>
         <li>5 characteristics: on-demand self-service, broad network access, resource pooling, rapid elasticity, measured service.</li>
-        <li>6 advantages: CAPEX→OPEX, economies of scale, stop guessing capacity, speed &amp; agility, no data centres to run, global in minutes.</li>
+        <li>6 advantages: trade CAPEX for OPEX (capital expense: buying hardware up front, becomes operating expense: paying monthly for what you use); economies of scale; stop guessing capacity; speed and agility; no data centres to run; go global in minutes.</li>
         <li>Deployment: private, public, hybrid.</li></ul></div>
       <div class="card"><h3>IaaS, PaaS, SaaS &amp; pricing</h3><ul>
-        <li><b>IaaS</b> (EC2): you manage OS and up. <b>PaaS</b> (Elastic Beanstalk): code and data. <b>SaaS</b>: use the app.</li>
+        <li><b>IaaS</b> (EC2): you manage the operating system and every layer above it. <b>PaaS</b> (Elastic Beanstalk): code and data. <b>SaaS</b>: use the app.</li>
         <li>Data, users and access settings are always yours.</li>
         <li>You pay for compute, storage and <b>data transfer out</b>; data in is generally free.</li></ul></div>
       <div class="card"><h3>Regions, AZs &amp; edge</h3><ul>
         <li><b>Region</b> = geographic area; most services are regional.</li>
-        <li>Each Region has <b>≥ 3 AZs</b>; an AZ = one or more isolated data centres.</li>
+        <li>Each Region has 3 or more AZs. An AZ is one or more isolated data centres.</li>
         <li>Multi-AZ = high availability. Edge locations cache content near users (CloudFront).</li>
         <li>Pick a Region by compliance, latency, service availability, price.</li>
         <li>Global services: IAM, Route 53, CloudFront, WAF.</li></ul></div>
       <div class="card"><h3>Shared responsibility</h3><ul>
         <li>AWS: security <b>of</b> the cloud (facilities, hardware, network, hypervisor).</li>
         <li>You: security <b>in</b> the cloud (data, IAM, security groups, guest OS on EC2, encryption).</li>
-        <li>The split shifts by service: on RDS and Lambda AWS also patches the OS/runtime.</li>
-        <li>Shared controls: patching, configuration management, awareness &amp; training.</li></ul></div>
+        <li>Who does what depends on the service: on RDS and Lambda, AWS also patches the OS and runtime.</li>
+        <li>Shared controls (areas where AWS and you each have a part): patching, configuration management, and awareness and training.</li></ul></div>
     </div>
   </section>
 

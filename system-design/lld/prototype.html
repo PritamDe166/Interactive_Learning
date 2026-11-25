@@ -96,7 +96,7 @@
     <ul class="lede">
       <li>Create a new object by <b>copying an existing, already configured one</b> (the prototype) instead of building it from scratch.</li>
       <li>Worth it when setting an object up is expensive (loaded from a database, many steps) and you need many slightly different copies.</li>
-      <li>The whole pattern hinges on one question: <b>shallow or deep copy?</b> Get it wrong and editing the copy silently changes the original.</li>
+      <li>The whole pattern depends on one question: shallow copy (the copy shares the original's inner objects) or deep copy (the inner objects are copied too)? Choose wrong and editing the copy quietly changes the original.</li>
       <li>In C#: <span class="mono">MemberwiseClone()</span> and record <span class="mono">with</span> expressions are both <b>shallow</b>.</li>
     </ul>
   </header>
@@ -166,13 +166,13 @@
     <h2 class="sec-h"><span class="sec-n">4</span>Revise in two minutes</h2>
     <h3 class="sec-h3">Cheat-sheet</h3>
     <ul class="cheat">
-      <li><span class="if">Building an object is expensive and you need many variants</span><span class="arrow">→</span><span class="then">configure one prototype, then clone and tweak</span></li>
+      <li><span class="if">Building an object is expensive and you need many variants</span><span class="arrow">→</span>Configure one prototype, then clone it and change what differs</li>
       <li><span class="if">Object has only value types and strings</span><span class="arrow">→</span><span class="then">shallow copy (<span class="mono">MemberwiseClone</span>, record <span class="mono">with</span>) is enough</span></li>
       <li><span class="if">Object holds lists or mutable objects the copy may change</span><span class="arrow">→</span><span class="then">deep-copy those fields explicitly (copy constructor or <span class="mono">Clone()</span>)</span></li>
       <li><span class="if">Field is a shared entity (doctor, tenant)</span><span class="arrow">→</span><span class="then">keep the reference; don't clone it</span></li>
       <li><span class="if">Need templates by name</span><span class="arrow">→</span><span class="then">prototype registry: <span class="mono">Dictionary&lt;string, Template&gt;</span> + <span class="mono">Clone()</span></span></li>
       <li><span class="if">Tempted by <span class="mono">ICloneable</span></span><span class="arrow">→</span><span class="then">avoid it: it doesn't say shallow or deep; write your own typed <span class="mono">Clone()</span></span></li>
-      <li><span class="if">Deep copy via JSON serialise / deserialise</span><span class="arrow">→</span><span class="then">quick, but slow and drops non-serialisable state; fine for tests</span></li>
+      <li><span class="if">Deep copy via JSON serialise / deserialise</span><span class="arrow">→</span>Quick to write, but slow to run, and it loses anything that can't be serialised. Fine for tests</li>
     </ul>
   </section>
 

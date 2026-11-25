@@ -3,9 +3,9 @@ SPEC = {
  "title": "Modules, packages, pip &amp; venv", "title_plain": "Modules, packages, pip & venv",
  "desc": "Python fundamentals: what import does, module caching, from-imports and aliases, if __name__ == '__main__', packages, pip and virtual environments.",
  "lede": [
-  "Every <b>.py file is a module</b>. <span class=\"mono\">import billing</span> runs billing.py <b>once</b>, caches it in <span class=\"mono\">sys.modules</span>, and binds the name <span class=\"mono\">billing</span>.",
-  "<span class=\"mono\">from billing import tax</span> copies just that name into your file; <span class=\"mono\">import numpy as np</span> picks a shorter alias.",
-  "<span class=\"mono\">__name__</span> is <span class=\"mono\">\"__main__\"</span> when a file is run directly and the module's name when it's imported, hence <span class=\"mono\">if __name__ == \"__main__\":</span>.",
+  "Every <b>.py file is a module</b>. <span class=\\\"mono\\\">import <span class=\\\"mono\\\">billing</span></span> runs billing.py <b>once</b>. Python saves (caches) the result in <span class=\\\"mono\\\">sys.modules</span>, and creates the name billing that points to it.",
+  "<span class=\\\"mono\\\">from billing import tax</span> copies just that name into your file. <span class=\\\"mono\\\">import numpy as np</span> gives the module a shorter name (an alias).",
+  "<span class=\\\"mono\\\">__name__</span> is <span class=\\\"mono\\\">\"__main__\"</span> when a file is run directly, and the module's name when it's imported. That is why we write <span class=\\\"mono\\\">if __name__ == \"__main__\":</span> to run code only when the file is started directly.",
   "A <b>package</b> is a folder of modules. <b>pip</b> installs third-party packages; a <b>virtual environment</b> (venv) keeps each project's packages separate."
  ],
  "walk": {"title": "writing and importing our own module", "code":
@@ -32,7 +32,7 @@ print(billing.__name__, __name__)''',
   {"at": {"after": 12}, "title": "from … import copies names", "text": "<span class=\"mono\">tax</span> and <span class=\"mono\">RATE</span> now exist directly in this file, pointing at the same objects as <span class=\"mono\">billing.tax</span> and <span class=\"mono\">billing.RATE</span>. Handy, but you lose the reminder of where they came from."},
   {"at": {"after": 13}, "title": "Standard library + alias", "text": "<span class=\"mono\">statistics</span> ships with Python (the \"batteries included\" standard library). <span class=\"mono\">as st</span> binds a shorter name."},
   {"at": {"after": 15}, "title": "Using what you imported", "text": "<span class=\"mono\">billing.tax(1000)</span> and the copied <span class=\"mono\">tax(500)</span> call the same function. <span class=\"mono\">st.mean</span> averages the fees."},
-  {"at": "end", "title": "__name__ tells you how you were started", "text": "The imported module's <span class=\"mono\">__name__</span> is <span class=\"mono\">'billing'</span>; this file, run directly, is <span class=\"mono\">'__main__'</span>. Put demo or start-up code under <span class=\"mono\">if __name__ == \"__main__\":</span> so importing the file stays side-effect free."}
+  {"at": "end", "title": "__name__ tells you how you were started", "text": "The imported module's <span class=\"mono\">__name__</span> is <span class=\"mono\">'billing'</span>; this file, run directly, is <span class=\"mono\">'__main__'</span>. Put demo or start-up code under <span class=\\\"mono\\\">if __name__ == \"__main__\":</span>. Then importing the file runs no extra code (it stays side-effect free)."}
  ]},
  "walk_out": "loading billing / 180.0 90.0 0.18 / 816.6666666666666 / billing __main__",
  "puzzles": [
@@ -100,8 +100,8 @@ print(billing.__name__, __name__)''',
       <div class="card"><div class="label">Terminal</div><pre class="codeblock" style="min-height:0;margin:6px 0 0"><span class="ln">python3 -m venv .venv          <span class="c"># create</span></span><span class="ln">source .venv/bin/activate      <span class="c"># activate (Windows: .venv\\Scripts\\activate)</span></span><span class="ln">python -m pip install requests <span class="c"># install into this venv</span></span><span class="ln">pip list                       <span class="c"># what's installed</span></span><span class="ln">pip freeze &gt; requirements.txt  <span class="c"># pin versions</span></span><span class="ln">deactivate                     <span class="c"># leave the venv</span></span></pre></div>
     </div>''',
  "notes": [
-  ["Added", "<b>Why a venv:</b> without one, <span class=\"mono\">pip install</span> puts packages into the system or user Python shared by every project, and versions clash. A venv is a folder with its own interpreter link and site-packages, like a per-project <span class=\"mono\">node_modules</span> or NuGet packages folder."],
-  ["Added", "<b>Running a package module:</b> <span class=\"mono\">python -m clinic.billing</span> runs it with the right import paths; running <span class=\"mono\">python clinic/billing.py</span> directly often breaks its imports of sibling modules."],
+  ["Added", "<b>Why a venv:</b> without one, <span class=\"mono\">pip install</span> puts packages into the system or user Python shared by every project, and versions clash. A venv is a folder with its own interpreter link and its own site-packages (the folder where installed packages go), like a per-project <span class=\\\"mono\\\">node_modules</span> or NuGet packages folder."],
+  ["Added", "<b>Running a package module:</b> <span class=\\\"mono\\\">python -m clinic.billing</span> runs it with the right import paths. Running <span class=\\\"mono\\\">python clinic/billing.py</span> directly often breaks its imports of sibling modules (other modules in the same package)."],
   ["Updated", "<b>Newer tools:</b> <span class=\"mono\">uv</span> (Astral) creates venvs and installs packages much faster and is widely used now (<span class=\"mono\">uv venv</span>, <span class=\"mono\">uv pip install</span>, <span class=\"mono\">uv add</span>). Project metadata lives in <span class=\"mono\">pyproject.toml</span>. Plain venv + pip still works everywhere and is what the docs teach."]
  ],
  "quiz": [

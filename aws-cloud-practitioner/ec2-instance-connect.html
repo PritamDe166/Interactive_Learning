@@ -90,7 +90,7 @@
       <li><b>EC2 Instance Connect</b> opens an SSH terminal <b>in your browser</b> from the EC2 console: no local terminal, no PuTTY, no <span class="mono">.pem</span> to manage.</li>
       <li>Behind the scenes AWS <b>pushes a one-time public key</b> to the instance (valid for about 60 seconds) and connects over <b>SSH, port 22</b>.</li>
       <li>So the <b>security group must still allow SSH 22</b>, from the Instance Connect service's addresses (in the lab: anywhere).</li>
-      <li>Works on supported AMIs like <b>Amazon Linux</b> and Ubuntu; user <span class="mono">ec2-user</span>.</li>
+      <li>It works on supported AMIs such as <b>Amazon Linux</b> and Ubuntu. You log in as the user <span class="mono">ec2-user</span>.</li>
     </ul>
   </header>
   <div class="aws-trail"></div>
@@ -201,7 +201,7 @@
       tip: 'A security group allowing only "My IP" blocks browser Instance Connect.',
       play: async run => { base(3); await net.send(['eic', 'sg', 'ec2'], { run, label: 'SSH :22' }); } },
     { title: 'A terminal in your browser',
-      text: 'A new tab shows a shell: <code>whoami</code> → <b>ec2-user</b>. Same as SSH, minus the key management.',
+      text: 'A new tab shows a shell: <code>whoami</code> → <b>ec2-user</b>. It is the same as SSH, but you don\'t have to manage any keys.',
       play: async run => { base(4); await net.send(['ec2', 'sg', 'eic', 'me'], { run, tone: 'green', label: 'shell' }); } },
     { title: 'Three ways to get a shell',
       text: '<b>SSH / PuTTY</b> with your own key, <b>EC2 Instance Connect</b> in the browser (still port 22), and later <b>Session Manager</b> (no port 22 at all). One working method is enough.' }

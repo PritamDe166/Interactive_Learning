@@ -6,7 +6,7 @@ window.SEARCH_INDEX = [
 "k": "HLD",
 "h": "system-design/hld/availability-slos.html",
 "d": "Day 6: what each extra nine costs in downtime, an error budget you can burn with incidents, and how series and redundant components combine into overall availability.",
-"w": "SLI = measure : what actually happened (e.g. % of requests that succeeded). SLO = target : what the team aims for (e.g. 99.9% over 30 days). SLA = promise : what customers are contractually owed if you miss it. Error budget = 100% − SLO: the failure you can afford to spend on shipping changes. 1 Learn: nines, SLOs and error budgets What each nine costs Spend the error budget 2 Compare: recovering from a disaster (RPO, RTO) RPO and RTO RPO, how much data can we lose? RTO, how long can we be down?"
+"w": "SLI = measure : what actually happened (e.g. % of requests that succeeded). SLO = target : what the team aims for (e.g. 99.9% over 30 days). SLA = promise : what customers are contractually owed if you miss it. Error budget = 100% − SLO: the amount of failure you are allowed. The team can 'spend' it on the risk of shipping changes. 1 Learn: nines, SLOs and error budgets What each nine costs Spend the error budget 2 Compare: recovering from a disaster (RPO, RTO) RPO and RTO RPO, how much data can"
 },
 {
 "t": "Cache Eviction Policies",
@@ -14,7 +14,7 @@ window.SEARCH_INDEX = [
 "k": "HLD",
 "h": "system-design/hld/cache-eviction.html",
 "d": "H18: LRU, LFU, FIFO and TTL, animated; how an LRU cache is built from a hash map and a doubly linked list; and a three-way eviction race.",
-"w": "Memory is finite: when the cache is full, an eviction policy picks which key leaves. LRU evicts the least recently used key; LFU the least frequently used; FIFO the oldest inserted. TTL expiry is different: it removes keys for being old, not because memory is full. An LRU cache is a hash map + doubly linked list , so every get and put is O(1). 2 Compare: 4 patterns side by side 3 Try it: LRU vs LFU vs FIFO"
+"w": "Memory is finite: when the cache is full, an eviction policy picks which key leaves. LRU (least recently used) removes the key that was used longest ago. LFU (least frequently used) removes the key used the fewest times. FIFO (first in, first out) removes the key that was added first. TTL expiry is different: it removes keys for being old, not because memory is full. An LRU cache is a hash map + doubly linked list , so every get and put is O(1): it takes the same short time however big the cache"
 },
 {
 "t": "Caching Failure Modes",
@@ -22,7 +22,7 @@ window.SEARCH_INDEX = [
 "k": "HLD",
 "h": "system-design/hld/cache-failure-modes.html",
 "d": "H20: cache stampede, avalanche, penetration, hot keys and stale data, animated with their fixes; plus a simulator that charts database load when a hot key or many keys expire.",
-"w": "A cache hides load from the database, until the moment it stops hiding it . Stampede : one hot key expires and every request reloads it at once. Avalanche : many keys expire together, or a cache node dies. Penetration : lookups for keys that don't exist always reach the database. Hot key and stale data round out the set; each has a standard fix. Stale data: the cache-aside race 2 Compare: 6 patterns side by side 3 Try it: Stampede & avalanche simulator"
+"w": "A cache keeps load away from the database. This page shows the moments when it stops doing that . Stampede : one popular key expires, and every request loads it from the database at the same time. Avalanche : many keys expire at the same time, or a cache server goes down. Penetration : requests for data that doesn't exist always go to the database. Hot key and stale data are two more problems. Each of the five has a standard fix. Stale data: the cache-aside race 2 Compare: 6 patterns side by sid"
 },
 {
 "t": "Cache Read Strategies",
@@ -30,7 +30,7 @@ window.SEARCH_INDEX = [
 "k": "HLD",
 "h": "system-design/hld/cache-read-strategies.html",
 "d": "H16: cache-aside, read-through and refresh-ahead, animated step by step, with a request lab where you change the TTL and watch the hit ratio.",
-"w": "A read strategy answers one question: who loads the data when the cache misses? Cache-aside : your code checks the cache, reads the DB on a miss and fills the cache. Read-through : same flow, but the cache layer does the loading for you. Refresh-ahead : hot keys are reloaded before they expire, so nobody waits on a miss. The TTL and the cache key decide how fresh and how reusable each entry is. 2 Compare: 4 patterns side by side 3 Try it: Request lab In .NET terms"
+"w": "A read strategy answers one question: who loads the data when the cache misses? Cache-aside : your code checks the cache, reads the DB on a miss and fills the cache. Read-through : same flow, but the cache layer does the loading for you. Refresh-ahead : hot keys are reloaded before they expire, so nobody waits on a miss. The TTL (time-to-live: how long an entry may stay in the cache) and the cache key decide how fresh and how reusable each entry is. 2 Compare: 4 patterns side by side 3 Try it: R"
 },
 {
 "t": "Cache Write Strategies & Invalidation",
@@ -38,7 +38,7 @@ window.SEARCH_INDEX = [
 "k": "HLD",
 "h": "system-design/hld/cache-write-strategies.html",
 "d": "H17: write-through, write-behind, write-around and invalidate-on-write, animated, plus a race replayer that shows why you delete the cache key instead of overwriting it.",
-"w": "Once data is cached there are two copies ; every write must decide how the cache copy gets fixed. Write-through : update cache and DB together before acknowledging. Fresh, but slower writes. Write-behind : acknowledge after the cache, flush to the DB later. Fast, but can lose data. Write-around : write only to the DB; the cache fills on the next read. With cache-aside, delete the key on write; overwriting it can put an old value back. 2 Compare: 5 patterns side by side 3 Try it: Race replayer"
+"w": "Once data is cached there are two copies ; every write must decide how the cache copy gets fixed. Write-through : update cache and DB together before telling the client the write succeeded (acknowledging). Data stays fresh, but writes are slower. Write-behind : confirm the write once it is in the cache, and copy (flush) it to the DB later. Fast, but data can be lost. Write-around : write only to the DB; the cache fills on the next read. With cache-aside, delete the key when you write. If you ove"
 },
 {
 "t": "Caching in Practice: the Interview Playbook",
@@ -54,7 +54,7 @@ window.SEARCH_INDEX = [
 "k": "HLD",
 "h": "system-design/hld/caching-overview.html",
 "d": "Day 15: why caches exist, how hits and misses work, the hit ratio, where caches live from browser to database, and why we don't cache everything. With a live hit-ratio simulator.",
-"w": "A cache keeps a temporary copy of data or a computed result in a faster, closer place so it can be reused . A hit is served from the copy; a miss goes to the source and fills the cache. Hit ratio = hits ÷ requests. It cuts latency , database load and cost (paid APIs, LLM calls), and raises throughput . Caches live at every layer: browser, CDN, proxy, distributed cache, in-process . You can't cache everything: memory is limited, the cache isn't the source of truth , and copies go stale . 1 Learn:"
+"w": "A cache keeps a temporary copy of data or a computed result in a faster, closer place so it can be reused . A hit is served from the copy; a miss goes to the source and fills the cache. Hit ratio = hits ÷ requests. A cache cuts latency (waiting time), database load and cost (paid APIs, LLM calls). It also raises throughput (requests handled per second). Caches live at every layer: browser, CDN, proxy, distributed cache, in-process . You can't cache everything: memory is limited, the cache isn't "
 },
 {
 "t": "Cache Patterns at a Glance",
@@ -62,7 +62,7 @@ window.SEARCH_INDEX = [
 "k": "HLD",
 "h": "system-design/hld/caching-patterns-atlas.html",
 "d": "Week 3 at a glance: all 14 caching patterns as infographic cards with animated diagrams, a cheat-sheet and a 'which one fits?' drill.",
-"w": "Every cache design answers four questions: who loads on a miss , when writes reach the database , what gets evicted , and what happens when it goes wrong . Read path : cache-aside, read-through, refresh-ahead. Write path : write-through, write-behind, write-around, invalidate. Eviction : LRU, LFU and TTL decide what leaves a full or ageing cache. Failure modes (stampede, penetration, hot key) are what interviewers probe after you say \"add Redis\". 1 All 14 caching patterns 2 Revise in two minutes"
+"w": "Every cache design answers four questions: who loads on a miss , when writes reach the database , what gets evicted , and what happens when it goes wrong . Read path : cache-aside, read-through, refresh-ahead. Write path : write-through, write-behind, write-around, invalidate. Eviction : LRU (least recently used), LFU (least frequently used) and TTL (time-to-live) decide what leaves a full or ageing cache. Failure modes (stampede, penetration, hot key) are what interviewers ask about after you s"
 },
 {
 "t": "CDN & HTTP Caching",
@@ -70,7 +70,7 @@ window.SEARCH_INDEX = [
 "k": "HLD",
 "h": "system-design/hld/cdn-http-caching.html",
 "d": "H21: pull vs push CDNs, Cache-Control, ETag and 304, versioned file names and purges, animated; plus a header lab that shows which cache answers your next request.",
-"w": "A CDN keeps copies of your responses on edge servers close to users. Pull CDNs fetch from your origin on the first miss; push CDNs get files uploaded ahead of time. The Cache-Control header decides who may store a response (browser, CDN) and for how long. ETag + 304 lets a stale copy be re-validated without downloading it again. Static files get a hash in the name and a one-year cache; HTML stays short-lived. Purge is the emergency brake. 2 Compare: 6 patterns side by side 3 Try it: Header lab I"
+"w": "A CDN keeps copies of your responses on edge servers close to users. Pull CDNs fetch from your origin on the first miss; push CDNs get files uploaded ahead of time. The Cache-Control header decides who may store a response (browser, CDN) and for how long. An ETag is a version tag on a response. The browser can ask \"is version X still current?\", and the server answers 304 (Not Modified) if it is, so the old copy is reused without downloading it again. Static files get a hash in the name and a one"
 },
 {
 "t": "Client-Server & DNS",
@@ -78,7 +78,7 @@ window.SEARCH_INDEX = [
 "k": "HLD",
 "h": "system-design/hld/client-server-dns.html",
 "d": "Day 1: how a client finds a server. Watch a live DNS lookup walk resolver, root, TLD and authoritative servers, with caching, TTL and outages.",
-"w": "The client asks; the server processes and answers. Before asking, the client needs the server's IP address . DNS turns a name like www.example.com into that IP. Caching at every level means most lookups never travel the whole chain. 1 Learn: how a client finds a server Client and server Client Server Why it matters Live DNS lookup 2 Compare: 5 ways DNS can answer, and the record types DNS routing policies Common record types Worth knowing When DNS fails Healthy app, dead site Caches buy time How"
+"w": "The client asks; the server processes and answers. Before asking, the client needs the server's IP address . DNS turns a name like www.example.com into that IP. Each step (browser, operating system, resolver) caches answers, so most lookups never need to ask every DNS server in the chain. 1 Learn: how a client finds a server Client and server Client Server Why it matters Live DNS lookup 2 Compare: 5 ways DNS can answer, and the record types DNS routing policies Common record types Worth knowing "
 },
 {
 "t": "Distributed Caching",
@@ -86,7 +86,7 @@ window.SEARCH_INDEX = [
 "k": "HLD",
 "h": "system-design/hld/distributed-caching.html",
 "d": "H19: in-process vs distributed caches, L1 + L2, Redis cluster hash slots, replication and persistence, animated; plus a lab showing how many keys move when you add a cache node.",
-"w": "An in-process cache lives inside each server: fastest, but every server has its own copy. A distributed cache (Redis) is shared by all servers: one copy, one network hop away. L1 + L2 combines both: a tiny local cache in front of Redis. Redis grows with sharding (16,384 hash slots), survives failures with replicas , and restarts warm with persistence . How keys find their node: the hash ring 2 Compare: 6 patterns side by side 3 Try it: Add a cache node In .NET terms Redis data types you'll actua"
+"w": "An in-process cache lives inside each server: fastest, but every server has its own copy. A distributed cache (Redis) is shared by all servers: one copy, one network hop away. L1 + L2 combines both: a tiny local cache in front of Redis. Redis grows by sharding : splitting keys across nodes using 16,384 hash slots. It survives failures with replicas (copies). With persistence (saving to disk) it restarts with its data instead of empty. How keys find their node: the hash ring 2 Compare: 6 patterns"
 },
 {
 "t": "HTTP Requests & Status Codes",
@@ -94,7 +94,7 @@ window.SEARCH_INDEX = [
 "k": "HLD",
 "h": "system-design/hld/http.html",
 "d": "Day 2: HTTP request and response anatomy, methods and idempotency you can test by sending twice, and which component returns each status code.",
-"w": "A request says what to do (method) to which resource (path). It carries metadata ( headers ) and optional data ( body ). The response answers with a status code , headers and an optional body. It all travels over the connection that DNS, TCP and TLS set up first. 1 Learn: what a request and response look like Anatomy 2 Compare: methods and HTTP versions Methods at a glance HTTP/1.1 vs 2 vs 3 3 Try it: retries and status codes Send it twice Who sends which status code?"
+"w": "A request says what to do (method) to which resource (path). It carries metadata ( headers ) and optional data ( body ). The response answers with a status code , headers and an optional body. The request and response travel over a connection. First DNS finds the server's IP, then TCP and TLS set up the connection. 1 Learn: what a request and response look like Anatomy 2 Compare: methods and HTTP versions Methods at a glance HTTP/1.1 vs 2 vs 3 3 Try it: retries and status codes Send it twice Who"
 },
 {
 "t": "HTTPS & the TLS Handshake",
@@ -102,7 +102,7 @@ window.SEARCH_INDEX = [
 "k": "HLD",
 "h": "system-design/hld/https-tls.html",
 "d": "Day 4: TLS 1.2 vs TLS 1.3 handshakes on a timeline showing where encryption starts, and a certificate validator you can break.",
-"w": "HTTPS = HTTP over TLS. Job 1: prove the server's identity with a certificate. Job 2: agree on shared keys during the handshake. After that, everything is encrypted with fast symmetric crypto. 1 Learn: what TLS gives you and how the handshake works What TLS gives you Confidentiality Integrity Authentication The handshake, on a timeline 2 Compare: where TLS ends, mTLS and HSTS 3 Try it: will the browser trust this certificate? Can I trust this certificate? Around the handshake Asymmetric, then sym"
+"w": "HTTPS = HTTP over TLS. Job 1: prove the server's identity with a certificate. Job 2: agree on shared keys during the handshake. After that, everything is encrypted with fast symmetric crypto: both sides use the same shared key. 1 Learn: what TLS gives you and how the handshake works What TLS gives you Confidentiality Integrity Authentication The handshake, on a timeline 2 Compare: where TLS ends, mTLS and HSTS 3 Try it: will the browser trust this certificate? Can I trust this certificate? Aroun"
 },
 {
 "t": "System Design: HLD",
@@ -118,7 +118,7 @@ window.SEARCH_INDEX = [
 "k": "HLD",
 "h": "system-design/hld/latency-throughput.html",
 "d": "Day 5: latency vs throughput, why p95/p99 beat averages, and a live queue that shows latency exploding as a server nears saturation, with Little's Law.",
-"w": "Latency : how long one request takes. Throughput : how many requests finish per second. Percentiles (p50 / p95 / p99) show how latency is spread, especially the slow tail. Near capacity, requests queue , and latency rises much faster than load. 1 Learn: the numbers that describe speed Four numbers, four questions Latency · how long? Throughput · how much? Concurrency · how many at once? Bandwidth · how wide? Why the average lies 2 Compare: latency numbers and terms Latency numbers to know Latenc"
+"w": "Latency : how long one request takes. Throughput : how many requests finish per second. Percentiles (p50 / p95 / p99) show how latency is spread. For example, p99 = 200 ms means 99% of requests are faster than 200 ms. The slowest few requests are called the tail. Near capacity, requests queue , and latency rises much faster than load. 1 Learn: the numbers that describe speed Four numbers, four questions Latency · how long? Throughput · how much? Concurrency · how many at once? Bandwidth · how wi"
 },
 {
 "t": "Load Balancing Algorithms",
@@ -150,7 +150,7 @@ window.SEARCH_INDEX = [
 "k": "HLD",
 "h": "system-design/hld/redis-hash-slots.html",
 "d": "How Redis Cluster turns a key into one of 16,384 hash slots: the key's bytes, the CRC16 checksum, keeping the low 14 bits, hash tags, and why .NET GetHashCode() can't be used. Step-by-step animation and a hash lab, with numbers from real Redis.",
-"w": "Redis Cluster puts every key in one of 16,384 hash slots with CRC16(key) mod 16384 . CRC16 reads the key's bytes and folds them into one 16-bit number (0 to 65,535). mod 16384 keeps the lowest 14 bits : that number is the slot. Every client in every language gets the same slot, which is why Redis uses a fixed formula and not .NET's GetHashCode() . Watch patient:42 become slot 13565 2 In terms you already know 3 Try it: the hash lab Hash lab: watch a key become a slot Reference: real outputs In c"
+"w": "Redis Cluster puts every key in one of 16,384 hash slots with CRC16(key) mod 16384 . CRC16 reads the key's bytes and combines them into one 16-bit number (0 to 65,535). mod 16384 (divide by 16384 and keep the remainder) keeps the lowest 14 bits : that number is the slot. Every client in every language gets the same slot, which is why Redis uses a fixed formula and not .NET's GetHashCode() . Watch patient:42 become slot 13565 2 In terms you already know 3 Try it: the hash lab Hash lab: watch a ke"
 },
 {
 "t": "Design: Scale a Web App to Millions",
@@ -158,7 +158,7 @@ window.SEARCH_INDEX = [
 "k": "HLD",
 "h": "system-design/hld/scale-web-app.html",
 "d": "H14 design: grow one web app from a single server to millions of users, one layer at a time: separate database, load balancer and stateless servers, cache and CDN, read replicas, queues, redundancy and multiple regions. With a scale-ladder calculator and an answer template.",
-"w": "The classic interview question: \"Your app has 1 user today. Grow it to 10 million.\" The answer is a sequence : at each size, find what breaks first and add one thing. It uses everything from Weeks 1 to 2: DNS, load balancers, stateless servers, availability. Then it previews what's next: caching (Week 3), replicas and sharding (Phase 2), queues (Phase 4). 1 Learn: one app, one layer at a time 2 Compare: what breaks at each size 3 Try it: the scale ladder 4 Revise: how to answer a design question"
+"w": "The classic interview question: \"Your app has 1 user today. Grow it to 10 million.\" The answer is a sequence : at each size, find what breaks first and add one thing. It uses everything from Weeks 1 to 2: DNS, load balancers, stateless servers, availability. Then it previews what's next: caching (Week 3), replicas (database copies) and sharding (splitting data across databases) in Phase 2, and queues (Phase 4). 1 Learn: one app, one layer at a time 2 Compare: what breaks at each size 3 Try it: t"
 },
 {
 "t": "Vertical vs Horizontal Scaling",
@@ -166,7 +166,7 @@ window.SEARCH_INDEX = [
 "k": "HLD",
 "h": "system-design/hld/scaling.html",
 "d": "Day 8: scale up a single server or scale out to many, push traffic until something saturates, find the bottleneck, and kill a server to see single points of failure.",
-"w": "Scale up (vertical): make one machine bigger. Scale out (horizontal): add more machines behind a load balancer. Neither helps unless you scale the bottleneck : the component that saturates first. 1 Learn: push traffic until something breaks Push traffic until something breaks 2 Compare: scale up vs scale out Side by side"
+"w": "Scale up (vertical): make one machine bigger. Scale out (horizontal): add more machines behind a load balancer. Neither helps unless you scale the bottleneck : the component that reaches its full capacity first. 1 Learn: push traffic until something breaks Push traffic until something breaks 2 Compare: scale up vs scale out Side by side"
 },
 {
 "t": "Stateless Applications",
@@ -190,7 +190,7 @@ window.SEARCH_INDEX = [
 "k": "HLD",
 "h": "system-design/hld/week-1-review.html",
 "d": "Day 7: the whole of Week 1 in two views — a timeline of DNS, TCP, TLS and HTTP costs you can tune, and the protocol stack showing how a request is wrapped layer by layer.",
-"w": "Everything from Week 1 in two pictures. The timeline : what happens and how long it takes. DNS finds, TCP connects, TLS secures, HTTP asks. The stack : what carries it. Each layer wraps the one above. Journey of a Request 1 Learn: one request, start to finish Timeline: what does the first byte cost? Stack: how the request is wrapped 2 Compare: what can fail at each step What can fail at each step 3 Try it: whiteboard drill Whiteboard drill 4 Revise: Week 1 in one table"
+"w": "Everything from Week 1 in two pictures. The timeline : what happens and how long it takes. DNS finds, TCP connects, TLS secures, HTTP asks. The stack : what carries the request. Each layer puts the data from the layer above inside its own envelope (wraps it). Journey of a Request 1 Learn: one request, start to finish Timeline: what does the first byte cost? Stack: how the request is wrapped 2 Compare: what can fail at each step What can fail at each step 3 Try it: whiteboard drill Whiteboard dri"
 },
 {
 "t": "Abstract Factory",
@@ -198,7 +198,7 @@ window.SEARCH_INDEX = [
 "k": "LLD",
 "h": "system-design/lld/abstract-factory.html",
 "d": "Creational pattern L14: create families of related objects that must match. File storage, message queue and secrets for Azure, AWS or local development come from one factory, so you can't mix them by accident.",
-"w": "An interface for creating a family of related objects without naming their concrete classes. Use it when the objects must match : Azure storage with an Azure queue, not Azure storage with an AWS queue. Swapping the whole family is one line: the factory you pick at startup (cloud in production, local fakes in development). The trade-off: adding a new kind of product means editing every factory. 1 Learn: one factory per family Walkthrough: storage, queue and secrets that belong together 2 Compare:"
+"w": "An interface for creating a family of related objects without naming their concrete classes. Use it when the objects must match : Azure storage with an Azure queue, not Azure storage with an AWS queue. To swap the whole family, you change one line: the factory you choose at startup. For example, the cloud factory in production and a factory of local fakes in development. The trade-off: adding a new kind of product means editing every factory. 1 Learn: one factory per family Walkthrough: storage,"
 },
 {
 "t": "Builder",
@@ -206,7 +206,7 @@ window.SEARCH_INDEX = [
 "k": "LLD",
 "h": "system-design/lld/builder.html",
 "d": "Creational pattern L15: build a complex object step by step. An appointment with many optional parts moves from telescoping constructors to a fluent builder that validates in Build(), plus a director for presets and when C# object initializers are enough.",
-"w": "Build a complex object step by step through readable method calls, then get the finished object from Build() . It replaces telescoping constructors : new Appointment(p, d, t, 30, true, null, \"R12\", 2, false) . Which true is which? Build() is the one place to validate the combination , so the object you get back is always valid and can be immutable. You use builders daily: StringBuilder , WebApplication.CreateBuilder() , DbContextOptionsBuilder , UriBuilder . 1 Learn: from a constructor puzzle to"
+"w": "Build a complex object step by step through readable method calls, then get the finished object from Build() . It replaces telescoping constructors (many constructor overloads, each with one more parameter), such as new Appointment(p, d, t, 30, true , null, \"R12\", 2, false) . Which true is which? Build() is the one place to check that the combination of values is valid. So the object you get back is always valid, and it can be immutable (it never changes after creation). You use builders daily: "
 },
 {
 "t": "Design Principles",
@@ -214,7 +214,7 @@ window.SEARCH_INDEX = [
 "k": "LLD",
 "h": "system-design/lld/design-principles.html",
 "d": "DRY, KISS, YAGNI, Law of Demeter, cohesion and coupling, program to an interface and composition over inheritance, shown as how far one change request spreads through the code.",
-"w": "Every principle answers one question: when a requirement changes, how many classes do I have to edit? DRY : one place per piece of knowledge. Law of Demeter : talk to your friends, not their friends. Program to an interface : depend on what, not who. Composition over inheritance : combine small parts instead of multiplying subclasses. High cohesion, low coupling are the measures; the other principles are ways to improve them. KISS and YAGNI are the brakes: don't add abstractions or features unti"
+"w": "Every principle answers one question: when a requirement changes, how many classes do I have to edit? DRY (Don't Repeat Yourself): each piece of knowledge lives in one place. Law of Demeter : call methods only on objects you hold directly, not on objects they return. Program to an interface : depend on what an object can do, not on its concrete class. Composition over inheritance : combine small parts instead of multiplying subclasses. High cohesion (the parts of a class belong together) and low"
 },
 {
 "t": "Simple Factory & Factory Method",
@@ -222,7 +222,7 @@ window.SEARCH_INDEX = [
 "k": "LLD",
 "h": "system-design/lld/factory-method.html",
 "d": "Creational pattern L13: stop scattering new. Appointment reminders move from new-in-every-caller to a simple factory, then to the factory method pattern, then to keyed DI services in .NET.",
-"w": "Both answer one question: who decides which class to new ? Callers shouldn't; they should ask for \"a notifier\" and get the right one. Simple factory : one class with a Create(type) method and a switch. Not a GoF pattern, but the most common. Factory method (GoF): a base class calls an abstract CreateX() ; each subclass decides what to create. In ASP.NET Core the DI container is usually your factory: inject INotifier , or pick by key with keyed services. 1 Learn: three ways to stop scattering new"
+"w": "Both answer one question: who decides which class to create with new? Callers shouldn't; they should ask for \"a notifier\" and get the right one. Simple factory : one class with a Create(type) method and a switch. It is not one of the GoF (Gang of Four book) patterns, but it is the most common. Factory method (GoF): a base class calls an abstract CreateX() ; each subclass decides what to create. In ASP.NET Core the DI container is usually your factory: inject INotifier , or pick by key with keyed"
 },
 {
 "t": "System Design: LLD",
@@ -238,7 +238,7 @@ window.SEARCH_INDEX = [
 "k": "LLD",
 "h": "system-design/lld/oop-pillars.html",
 "d": "Encapsulation, abstraction, inheritance and polymorphism in C#, shown as what the runtime actually does: guarded state, constructor order, virtual dispatch vs method hiding, overloading, class vs struct and interfaces.",
-"w": "Encapsulation : state stays private; the only way in is a method that enforces the rules. Abstraction : callers see what an object does, not how (interfaces, abstract classes). Inheritance : one base class, many interfaces; constructors run base first . Polymorphism : with override the object decides at runtime; with new the variable's type decides; overloads are picked by the compiler . Interview favourites: interface vs abstract class, protected internal vs private protected , class vs struct."
+"w": "Encapsulation : state stays private; the only way in is a method that enforces the rules. Abstraction : callers see what an object does, not how (interfaces, abstract classes). Inheritance : a class can have only one base class but can implement many interfaces. When you create an object, the base class constructor runs first. Polymorphism : with override , the real object decides which method runs, at runtime. With new (hiding), the variable's declared type decides. With overloads, the compiler"
 },
 {
 "t": "Prototype",
@@ -246,7 +246,7 @@ window.SEARCH_INDEX = [
 "k": "LLD",
 "h": "system-design/lld/prototype.html",
 "d": "Creational pattern L16: create new objects by copying a configured one. See in a memory diagram why assignment isn't a copy, how MemberwiseClone and record with-expressions share lists, and what a deep copy changes.",
-"w": "Create a new object by copying an existing, already configured one (the prototype) instead of building it from scratch. Worth it when setting an object up is expensive (loaded from a database, many steps) and you need many slightly different copies. The whole pattern hinges on one question: shallow or deep copy? Get it wrong and editing the copy silently changes the original. In C#: MemberwiseClone() and record with expressions are both shallow . 1 Learn: what a copy really copies Walkthrough: c"
+"w": "Create a new object by copying an existing, already configured one (the prototype) instead of building it from scratch. Worth it when setting an object up is expensive (loaded from a database, many steps) and you need many slightly different copies. The whole pattern depends on one question: shallow copy (the copy shares the original's inner objects) or deep copy (the inner objects are copied too)? Choose wrong and editing the copy quietly changes the original. In C#: MemberwiseClone() and recor"
 },
 {
 "t": "Class Relationships",
@@ -254,7 +254,7 @@ window.SEARCH_INDEX = [
 "k": "LLD",
 "h": "system-design/lld/relationships.html",
 "d": "Dependency, association, aggregation, composition and inheritance in C#, shown as objects, references and garbage collection: who creates a part, who else holds it, and whether it outlives the whole. Plus composition over inheritance.",
-"w": "Five relationships, loosest to tightest: dependency (uses briefly), association (keeps a reference), aggregation (has parts that live on), composition (owns parts that go with it), inheritance (is a kind of). Decide by lifetime and ownership : who creates the part, who else holds it, does it outlive the whole? In .NET, \"dies with the whole\" means nothing else references it , so the garbage collector reclaims it. is-a → inheritance; has-a → composition. Favour composition : combine parts instead "
+"w": "There are five relationships, from loosest to tightest. Dependency: uses another object briefly. Association: keeps a reference to it. Aggregation: has parts that keep living after the whole is gone. Composition: owns parts that are deleted with the whole. Inheritance: is a kind of another class. Decide by lifetime and ownership : who creates the part, who else holds it, does it outlive the whole? In .NET, \"dies with the whole\" means nothing else references it , so the garbage collector reclaims"
 },
 {
 "t": "Singleton",
@@ -262,7 +262,7 @@ window.SEARCH_INDEX = [
 "k": "LLD",
 "h": "system-design/lld/singleton.html",
 "d": "Creational pattern L12: one instance shared by everyone. Watch two threads race through a naive singleton, fix it with lock, double-checked locking and Lazy<T>, then see why a DI singleton is usually better and how a captive dependency bites.",
-"w": "A class that has exactly one instance and a single global way to reach it: a private constructor plus a static Instance . Fits things that really are one-per-app: configuration, a cache, a connection pool, a logger. The hard part is thread safety : two requests arriving together can create two instances. In ASP.NET Core you rarely hand-write one: services.AddSingleton<…>() gives one instance without the global, untestable static. 1 Learn: the idea, the race, the fixes Walkthrough: one AppConfig "
+"w": "A class that has exactly one instance and a single global way to reach it: a private constructor plus a static Instance . Fits things that really are one-per-app: configuration, a cache, a connection pool, a logger. The hard part is thread safety : two requests arriving together can create two instances. In ASP.NET Core you rarely write one yourself. services.AddSingleton<…>() gives you one instance, without a global static property that makes testing hard. 1 Learn: the idea, the race, the fixes"
 },
 {
 "t": "Dependency Inversion Principle",
@@ -270,7 +270,7 @@ window.SEARCH_INDEX = [
 "k": "LLD",
 "h": "system-design/lld/solid-dip.html",
 "d": "SOLID, D: high-level policy and low-level details both depend on an abstraction the high-level side owns. Watch the dependency arrow flip, then wire implementations with constructor injection.",
-"w": "High-level modules (business rules) shouldn't depend on low-level modules (SQL, SMTP, HTTP). Both should depend on an abstraction . The abstraction belongs to the high-level side : the domain defines IBookingRepository , the SQL project implements it. That's the \"inversion\": the arrow now points from detail to policy. Dependency injection (passing the implementation in through the constructor) is how you wire it up. DI is the mechanism; DIP is the direction. Biggest everyday payoff: you can test"
+"w": "High-level modules (business rules) shouldn't depend on low-level modules (SQL, SMTP, HTTP). Both should depend on an abstraction . The abstraction belongs to the high-level side : the domain defines IBookingRepository , the SQL project implements it. That's the \"inversion\": the code dependency (the arrow in a diagram) now points from the detail (SQL code) to the policy (business rules). Dependency injection (passing the implementation in through the constructor) is how you wire it up. DI is the"
 },
 {
 "t": "Interface Segregation Principle",
@@ -278,7 +278,7 @@ window.SEARCH_INDEX = [
 "k": "LLD",
 "h": "system-design/lld/solid-isp.html",
 "d": "SOLID, I: no client should depend on methods it doesn't use. A fat repository interface is split into role interfaces; .NET's read-only collection interfaces show the same idea.",
-"w": "No client should be forced to depend on methods it doesn't use . A fat interface hurts both sides: implementers write stub methods that throw, and clients get coupled to methods they never call. Split it into small role interfaces shaped around what each client needs, e.g. read, write, import. When something needs all of them, a combined interface can inherit the small ones. Don't go as far as one method per interface. Walkthrough: the do-everything repository . How finely should you split? . As"
+"w": "No client should be forced to depend on methods it doesn't use . A fat interface (one with too many methods) hurts both sides. Implementers must write stub methods (empty methods that just throw an exception). And clients depend on methods they never call. Split it into small role interfaces shaped around what each client needs, e.g. read, write, import. When something needs all of them, a combined interface can inherit the small ones. Don't go as far as one method per interface. Walkthrough: th"
 },
 {
 "t": "Liskov Substitution Principle",
@@ -286,7 +286,7 @@ window.SEARCH_INDEX = [
 "k": "LLD",
 "h": "system-design/lld/solid-lsp.html",
 "d": "SOLID, L: a subtype must work anywhere its base type is expected. Parent and Child, Rectangle and Square, contract rules and a substitution tester.",
-"w": "Anywhere the code expects a base type, you must be able to pass any subtype and still get correct behaviour. \"Is-a\" in plain English isn't enough. A Square is a rectangle in maths, yet a Square subclass breaks code written for Rectangle . Red flags: an override that throws NotImplementedException / NotSupportedException , does nothing, or quietly changes what the method promises. Rule of thumb: a subtype may accept more and promise more , never demand more or deliver less . Walkthrough: when a c"
+"w": "Anywhere the code expects a base type, you must be able to pass any subtype and still get correct behaviour. \"Is-a\" in plain English isn't enough. A Square is a rectangle in maths, yet a Square subclass breaks code written for Rectangle . Red flags: an override that throws NotImplementedException / NotSupportedException , does nothing, or quietly changes what the method promises. Rule of thumb: a subtype may accept more kinds of input and give stronger results. It must never require more from it"
 },
 {
 "t": "Open-Closed Principle",
@@ -294,7 +294,7 @@ window.SEARCH_INDEX = [
 "k": "LLD",
 "h": "system-design/lld/solid-ocp.html",
 "d": "SOLID, O: add behaviour without editing tested code. A fee calculator moves from a switch to strategies, a repository gains caching through a decorator.",
-"w": "Code should be open for extension but closed for modification : add new behaviour by adding new code, not by editing classes that already work and are tested. The usual smell is a switch or if-chain over types that grows with every new case. Common tools in C#: strategy (one class per variant behind an interface), decorator (wrap a class to add behaviour), extension methods , inheritance. No design is closed against every change. Close it against the changes you actually expect. Walkthrough: fee"
+"w": "Code should be open for extension but closed for modification : add new behaviour by adding new code, not by editing classes that already work and are tested. The usual warning sign (a 'code smell') is a switch or if-chain over types that grows with every new case. Common tools in C#: strategy (one class per variant behind an interface), decorator (wrap a class to add behaviour), extension methods , inheritance. No design can avoid edits for every possible change. Design it so the changes you ac"
 },
 {
 "t": "Single Responsibility Principle",
@@ -302,7 +302,7 @@ window.SEARCH_INDEX = [
 "k": "LLD",
 "h": "system-design/lld/solid-srp.html",
 "d": "SOLID, S: a class should have one reason to change. A god class splits into focused classes; change requests show why.",
-"w": "A class should have one reason to change . A \"reason to change\" is usually a person or team who asks for changes: the DBA, marketing, the academic office. When one class serves several of them, every request edits the same file : more bugs, more merge conflicts, harder tests. The fix is to split by reason to change , not to give every method its own class. Closely related responsibilities stay together. Walkthrough: one Student class, three teams . Change-request simulator . Sort an AppointmentS"
+"w": "A class should have one reason to change . A \"reason to change\" is usually a person or team who asks for changes: the DBA (database administrator), marketing, the academic office. When one class serves several of them, every request edits the same file : more bugs, more merge conflicts, harder tests. The fix is to split by reason to change , not to give every method its own class. Closely related responsibilities stay together. Walkthrough: one Student class, three teams . Change-request simulat"
 },
 {
 "t": "SOLID Principles",
@@ -310,7 +310,7 @@ window.SEARCH_INDEX = [
 "k": "LLD",
 "h": "system-design/lld/solid.html",
 "d": "SOLID overview: five object-oriented design guidelines shown in one appointment-booking class diagram, with a spot-the-violation game.",
-"w": "Five guidelines for object-oriented code that is easy to change, test and extend . S ingle responsibility, O pen-closed, L iskov substitution, I nterface segregation, D ependency inversion. They work together: small focused classes, talking through interfaces , with implementations plugged in from outside. They are guidelines, not rules . Applied mechanically they produce over-engineered code; the goal is simple code that is safe to change. The five, one page each Walkthrough: all five in one de"
+"w": "Five guidelines for object-oriented code that is easy to change, test and extend . S ingle responsibility, O pen-closed, L iskov substitution, I nterface segregation, D ependency inversion. They work together: small focused classes, talking through interfaces , with implementations plugged in from outside. They are guidelines, not rules . If you apply them everywhere without thinking, you get code with too many classes and interfaces (over-engineered). The goal is simple code that is safe to cha"
 },
 {
 "t": "UML: Class and Sequence Diagrams",
@@ -318,7 +318,7 @@ window.SEARCH_INDEX = [
 "k": "LLD",
 "h": "system-design/lld/uml.html",
 "d": "UML for low-level design: class boxes, the six relationships (dependency, association, aggregation, composition, generalization, realization), multiplicity and sequence diagrams, built step by step.",
-"w": "UML is the standard picture language for designs. LLD mostly needs two diagrams: class diagrams (structure) and sequence diagrams (who calls whom, in order). A class box has three parts: name , attributes , operations , with + − # ~ for visibility. Six relationships, weakest to strongest: dependency , association , aggregation , composition , generalization (inheritance) and realization (implements). Arrowheads point at what is depended on ; diamonds sit on the whole . Filled diamond = the parts"
+"w": "UML is the standard picture language for designs. LLD mostly needs two diagrams: class diagrams (structure) and sequence diagrams (who calls whom, in order). A class box has three parts: name , attributes and operations . Symbols show visibility: + public, − private, # protected, ~ package. Six relationships, weakest to strongest: dependency , association , aggregation , composition , generalization (inheritance) and realization (implements). Arrowheads point at what is depended on ; diamonds si"
 },
 {
 "t": "System Design",
@@ -342,7 +342,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/ami.html",
 "d": "AWS Cloud Practitioner: an Amazon Machine Image is a template for launching EC2 instances, built on EBS snapshots, usable across AZs and copyable to other Regions.",
-"w": "An AMI is the template an EC2 instance is launched from: OS, installed software, configuration. Sources: public (e.g. Amazon Linux from AWS), your own custom AMIs, or AWS Marketplace (vendors, sometimes paid). A custom AMI = EBS snapshots of the instance's volumes + launch metadata. Software baked in means faster boots . An AMI belongs to one Region : use it in any AZ there; copy it to use in another Region. AMIs: Amazon Machine Images Walkthrough: bake once, launch many Boot race: public AMI vs"
+"w": "An AMI is the template an EC2 instance is launched from: OS, installed software, configuration. Sources: public (e.g. Amazon Linux from AWS), your own custom AMIs, or AWS Marketplace (vendors, sometimes paid). A custom AMI = EBS snapshots of the instance's volumes + launch metadata. When the software is already installed in the AMI, new instances start up faster. An AMI belongs to one Region : use it in any AZ there; copy it to use in another Region. AMIs: Amazon Machine Images Walkthrough: bake"
 },
 {
 "t": "AWS Budgets and billing alerts",
@@ -374,7 +374,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/containers-serverless.html",
 "d": "AWS Cloud Practitioner: who manages what on EC2, ECS, Fargate and Lambda; how Lambda scales with events and what it costs; and how to pick a compute service.",
-"w": "Containers package an app with its dependencies. ECR stores the images; ECS (AWS's own) or EKS (Kubernetes) runs them. Fargate runs those containers with no servers to manage . Lambda runs short functions on events, scales automatically, and costs nothing when idle. API Gateway turns Lambda into an HTTP API. Batch runs long jobs; Lightsail is the simple fixed-price option. Walkthrough: from a VM to containers to functions Who manages what? Lambda: events in, functions out Pick the compute servic"
+"w": "Containers package an app with its dependencies. Amazon ECR (Elastic Container Registry) stores the container images. Amazon ECS (Elastic Container Service, AWS's own container service) or Amazon EKS (Elastic Kubernetes Service) runs them. Fargate runs those containers with no servers to manage . Lambda runs short functions on events, scales automatically, and costs nothing when idle. API Gateway turns Lambda into an HTTP API. AWS Batch runs long jobs. Amazon Lightsail is the simple option with "
 },
 {
 "t": "Databases & Analytics",
@@ -382,7 +382,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/databases-analytics.html",
 "d": "AWS Cloud Practitioner: RDS Multi-AZ vs read replicas under failure, choosing the right AWS database, and how data flows through Kinesis, Glue, Athena, Redshift, EMR and QuickSight.",
-"w": "Managed databases : AWS runs the hardware, OS, patching, backups and failover; you own the data, schema and access. Relational (SQL, joins): RDS and Aurora. NoSQL (flexible schema, scales out): DynamoDB, DocumentDB, Neptune. Multi-AZ = availability . Read replicas = read scaling . Don't swap them. Analytics : Kinesis streams in, Glue prepares, Athena / Redshift / EMR query, QuickSight shows. Walkthrough: from a self-managed database to the right AWS service RDS: Multi-AZ vs read replica Which da"
+"w": "Managed databases : AWS runs the hardware, OS, patching, backups and failover; you own the data, schema and access. Relational (SQL, joins): RDS and Aurora. NoSQL (flexible schema, scales out): DynamoDB, DocumentDB, Neptune. Multi-AZ gives high availability: a standby copy takes over if the main database fails. Read replicas give read scaling: extra copies answer read queries. Don't confuse the two. Analytics : Kinesis streams data in, Glue prepares it, Athena, Redshift or EMR query it, and Quic"
 },
 {
 "t": "Deployment & Infrastructure as Code",
@@ -390,7 +390,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/deployment-iac.html",
 "d": "AWS Cloud Practitioner: CloudFormation stacks and drift, a CodePipeline from commit to deploy, and reaching EC2 with SSH, Instance Connect or Session Manager.",
-"w": "Infrastructure as Code : describe resources in a file, and let AWS create, change and delete them in order. CloudFormation (templates) or CDK (real code that becomes templates). Elastic Beanstalk : PaaS. Upload code; it builds the EC2, load balancer and Auto Scaling for you. CodePipeline orchestrates CodeCommit → CodeBuild → CodeDeploy . CodeArtifact stores packages. Systems Manager runs fleets (patching, commands, Session Manager shells, Parameter Store ), on AWS and on-premises. Walkthrough: f"
+"w": "Infrastructure as Code : describe resources in a file, and let AWS create, change and delete them in order. CloudFormation (templates) or CDK (real code that becomes templates). Elastic Beanstalk : PaaS. Upload code; it builds the EC2, load balancer and Auto Scaling for you. CodePipeline runs the stages in order: CodeCommit holds the code, CodeBuild builds and tests it, and CodeDeploy deploys it. CodeArtifact stores packages. Systems Manager manages fleets (groups of many servers) on AWS and on-"
 },
 {
 "t": "EBS snapshots",
@@ -406,7 +406,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/ebs.html",
 "d": "AWS Cloud Practitioner: Amazon EBS volumes are network drives for EC2, locked to one Availability Zone, persistent, detachable, with Delete on termination rules.",
-"w": "Amazon EBS (Elastic Block Store) is the disk of an EC2 instance, but it is a network drive , not a disk inside the server. It is persistent : data stays when the instance stops, and can stay after it is terminated. A volume lives in one Availability Zone and attaches only to instances in that AZ. You provision size (GiB) and performance (IOPS) up front and pay for what you provision. Walkthrough: a volume's life next to an instance Volume lab Kept or deleted?"
+"w": "Amazon EBS (Elastic Block Store) is the disk of an EC2 instance, but it is a network drive , not a disk inside the server. It is persistent : data stays when the instance stops, and can stay after it is terminated. A volume lives in one Availability Zone and attaches only to instances in that AZ. You choose ( provision ) the size (GiB) and performance (IOPS: input/output operations per second) up front, and you pay for what you choose. Walkthrough: a volume's life next to an instance Volume lab "
 },
 {
 "t": "EC2 basics",
@@ -414,7 +414,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/ec2-basics.html",
 "d": "AWS Cloud Practitioner: what Amazon EC2 is and the choices behind every instance (AMI, instance type, storage, key pair, security group, user data), shown as a request reaching a web server.",
-"w": "Amazon EC2 (Elastic Compute Cloud) rents you virtual servers called instances . It is IaaS : AWS runs the hardware, you run the OS and up. Every launch makes the same choices: AMI (OS image), instance type (CPU, RAM), storage (EBS), key pair , security group (firewall) and optional user data . A visitor's request reaches the instance's public IP , passes the security group , and is answered by the software on the instance. EC2 comes with friends: EBS volumes, Elastic Load Balancers and Auto Scal"
+"w": "Amazon EC2 (Elastic Compute Cloud) rents you virtual servers called instances . It is IaaS : AWS runs the hardware, you run the OS and up. Every launch makes the same choices: AMI (OS image), instance type (CPU, RAM), storage (EBS), key pair , security group (firewall) and optional user data . A visitor's request reaches the instance's public IP , passes the security group , and is answered by the software on the instance. EC2 is often used with other services: EBS volumes, Elastic Load Balancer"
 },
 {
 "t": "IAM roles for EC2",
@@ -422,7 +422,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/ec2-iam-roles.html",
 "d": "AWS Cloud Practitioner: give an EC2 instance AWS permissions by attaching an IAM role (instance profile). The CLI picks up temporary credentials automatically; never run aws configure with personal keys on an instance.",
-"w": "Software on an instance that calls AWS (CLI, SDK) needs credentials. The right way: attach an IAM role to the instance. The role reaches the instance through an instance profile ; the CLI and SDK fetch its temporary credentials automatically, so no aws configure . Never type your personal access keys into an instance: anyone who gets onto the box can copy them. The role can do only what its permissions policy allows. Remove the policy and the same command gets AccessDenied . Walkthrough: from \"U"
+"w": "Software on an instance that calls AWS (CLI, SDK) needs credentials. The right way: attach an IAM role to the instance. The role reaches the instance through an instance profile (a container that holds the role). The CLI and SDK fetch the role's temporary credentials automatically, so you do not need to run aws configure. Never type your personal access keys into an instance: anyone who gets onto the server can copy them. The role can do only what its permissions policy allows. Remove the policy"
 },
 {
 "t": "EC2 Image Builder",
@@ -430,7 +430,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/ec2-image-builder.html",
 "d": "AWS Cloud Practitioner: EC2 Image Builder automates building, testing and distributing AMIs on a schedule; the service is free, you pay for the instances and storage it uses.",
-"w": "EC2 Image Builder automates making AMIs: build → test → distribute , on a schedule or when packages update. It launches a temporary builder instance , installs your components , and creates the AMI. It can launch a test instance from the new AMI and run your tests, then copy the AMI to several Regions . The service is free ; you pay for the EC2 instances it runs and the AMI storage. Walkthrough: a weekly golden-image pipeline Run the pipeline Which tool?"
+"w": "EC2 Image Builder makes AMIs for you in three steps: build, test and distribute. It runs on a schedule or when packages are updated. It launches a temporary builder instance , installs your components , and creates the AMI. It can launch a test instance from the new AMI and run your tests, then copy the AMI to several Regions . The service is free ; you pay for the EC2 instances it runs and the AMI storage. Walkthrough: a weekly golden-image pipeline Run the pipeline Which tool?"
 },
 {
 "t": "EC2 Instance Connect",
@@ -438,7 +438,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/ec2-instance-connect.html",
 "d": "AWS Cloud Practitioner: EC2 Instance Connect opens an SSH session in the browser by pushing a one-time key; it still needs port 22 open to AWS's Instance Connect addresses.",
-"w": "EC2 Instance Connect opens an SSH terminal in your browser from the EC2 console: no local terminal, no PuTTY, no .pem to manage. Behind the scenes AWS pushes a one-time public key to the instance (valid for about 60 seconds) and connects over SSH, port 22 . So the security group must still allow SSH 22 , from the Instance Connect service's addresses (in the lab: anywhere). Works on supported AMIs like Amazon Linux and Ubuntu; user ec2-user . Walkthrough: SSH without a key file Will Instance Conn"
+"w": "EC2 Instance Connect opens an SSH terminal in your browser from the EC2 console: no local terminal, no PuTTY, no .pem to manage. Behind the scenes AWS pushes a one-time public key to the instance (valid for about 60 seconds) and connects over SSH, port 22 . So the security group must still allow SSH 22 , from the Instance Connect service's addresses (in the lab: anywhere). It works on supported AMIs such as Amazon Linux and Ubuntu. You log in as the user ec2-user . Walkthrough: SSH without a key"
 },
 {
 "t": "EC2 instance types",
@@ -454,7 +454,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/ec2-review.html",
 "d": "AWS Cloud Practitioner: EC2 section review with a one-path recap, section summary, commonly confused pairs, a mixed drill and 20 exam-style questions.",
-"w": "EC2 rents virtual servers (IaaS): AMI + instance type + storage + security group + key pair + user data. Requests reach the public IP , pass the security group (stateful, allow-only), and hit the software on the instance. Get in with SSH 22 , Instance Connect or RDP 3389 ; give the instance AWS access with an IAM role . Pay with On-Demand, Reserved, Savings Plans, Spot, Dedicated or Capacity Reservations , and set a budget first. EC2: review The whole section on one path Section summary Budgets "
+"w": "EC2 rents virtual servers (IaaS): AMI + instance type + storage + security group + key pair + user data. Requests reach the public IP , pass the security group , and arrive at the software on the instance. The security group is stateful (replies to allowed traffic are allowed back out) and has allow rules only. Get in with SSH 22 , Instance Connect or RDP 3389 ; give the instance AWS access with an IAM role . Pay with On-Demand, Reserved, Savings Plans, Spot, Dedicated or Capacity Reservations ,"
 },
 {
 "t": "Choosing EC2 storage",
@@ -462,7 +462,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/ec2-storage-choices.html",
 "d": "AWS Cloud Practitioner: choose between EBS, instance store, EFS, FSx for Windows and FSx for Lustre with a decision walker, and see who is responsible for what in EC2 storage.",
-"w": "Two questions pick the answer: is it shared by many instances? and what kind of workload? One instance: EBS (persistent) or instance store (fastest, temporary). Shared: EFS (Linux), FSx for Windows (SMB/AD), FSx for Lustre (HPC). Shared responsibility: AWS runs and replicates the storage; you own backups, encryption and your data. Walkthrough: five workloads through one decision tree Storage decision walker AWS or you? Scenario drill Shared responsibility for storage AWS You"
+"w": "Two questions pick the answer: is it shared by many instances? and what kind of workload? One instance: EBS (persistent) or instance store (fastest, temporary). Shared: EFS (for Linux), FSx for Windows (SMB file shares with Active Directory), or FSx for Lustre (for HPC, high-performance computing). Shared responsibility: AWS runs and replicates the storage; you own backups, encryption and your data. Walkthrough: five workloads through one decision tree Storage decision walker AWS or you? Scenari"
 },
 {
 "t": "EC2 Instance Storage",
@@ -486,7 +486,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/efs.html",
 "d": "AWS Cloud Practitioner: Amazon EFS is a managed NFS file system shared by many Linux instances across AZs, pay per use, with Infrequent Access and Archive storage classes.",
-"w": "Amazon EFS (Elastic File System) is a managed NFS network file system : one shared folder for many instances. Hundreds of Linux instances in different AZs mount it at once and see the same files. No capacity planning : it grows and shrinks, and you pay per GB actually stored (pricier per GB than EBS). A lifecycle policy moves cold files to EFS-IA (up to 95% cheaper) and Archive , invisibly to apps. Walkthrough: one folder, three AZs Lifecycle policy calculator EFS or EBS?"
+"w": "Amazon EFS (Elastic File System) is a managed NFS network file system : one shared folder for many instances. Hundreds of Linux instances in different AZs mount it at once and see the same files. No capacity planning : it grows and shrinks, and you pay per GB actually stored (pricier per GB than EBS). A lifecycle policy moves cold files (files nobody has opened for a while) to EFS-IA (Infrequent Access, up to 95% cheaper) and to Archive . Apps do not notice the move. Walkthrough: one folder, thr"
 },
 {
 "t": "Elastic Load Balancing & Auto Scaling",
@@ -502,7 +502,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/fsx.html",
 "d": "AWS Cloud Practitioner: Amazon FSx runs managed third-party file systems: FSx for Windows File Server (SMB, NTFS, Active Directory) and FSx for Lustre (high performance computing), plus NetApp ONTAP and OpenZFS.",
-"w": "Amazon FSx runs well-known third-party file systems as a managed service, for when EFS or S3 don't fit. FSx for Windows File Server : a Windows share ( SMB , NTFS) joined to Active Directory , reachable from AWS and on-premises. FSx for Lustre (Linux + cluster): file storage for high performance computing , ML and analytics, often backed by S3 . Also FSx for NetApp ONTAP and FSx for OpenZFS for teams moving those systems to AWS. Walkthrough: two very different file systems Which file system?"
+"w": "Amazon FSx runs well-known third-party file systems as a managed service, for when EFS or S3 don't fit. FSx for Windows File Server : a Windows share ( SMB , NTFS) joined to Active Directory , reachable from AWS and on-premises. FSx for Lustre (the name comes from Linux + cluster): file storage for high performance computing , ML (machine learning) and analytics. It is often linked to an S3 bucket that holds the source data. Also FSx for NetApp ONTAP and FSx for OpenZFS for teams moving those sy"
 },
 {
 "t": "Global Infrastructure",
@@ -510,7 +510,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/global-infrastructure.html",
 "d": "AWS Cloud Practitioner: Route 53 routing policies with users around the world, CloudFront vs Global Accelerator vs S3 Transfer Acceleration, and picking the right global service.",
-"w": "Going global gives lower latency , disaster recovery and resilience against attacks. Route 53 (DNS) decides which Region a user is sent to. CloudFront caches content at edge locations. Global Accelerator carries traffic over AWS's network, no caching, two static IPs. S3 Transfer Acceleration speeds up long-distance uploads to one bucket via the nearest edge. Regions, AZs and edge locations themselves are on Regions, AZs & edge locations ; DNS basics on Client-Server & DNS . Walkthrough: serving "
+"w": "Going global gives lower latency , disaster recovery and resilience against attacks. Route 53 (DNS) decides which Region a user is sent to. CloudFront caches content at edge locations. Global Accelerator carries traffic over AWS's own network. It does not cache anything, and it gives you two static IP addresses. S3 Transfer Acceleration speeds up long-distance uploads to one bucket via the nearest edge. Regions, AZs and edge locations themselves are on Regions, AZs & edge locations ; DNS basics "
 },
 {
 "t": "Console, CLI, SDK and access keys",
@@ -518,7 +518,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/iam-access-methods.html",
 "d": "AWS Cloud Practitioner: the three ways to reach AWS (Management Console, CLI, SDKs), access keys, long-term versus temporary credentials, and why every route goes through the same IAM check.",
-"w": "Three ways in: the Management Console (browser), the AWS CLI (terminal) and the AWS SDKs (your code). All three call the same AWS APIs . The console uses a password + MFA . The CLI and SDK use access keys : an access key ID (like a username) and a secret access key (like a password). Every route passes the same IAM check . The CLI and SDK don't bypass anything. Long-term keys never expire on their own; temporary credentials (roles, IAM Identity Center) do, so prefer them. Console, CLI, SDK & acc"
+"w": "Three ways in: the Management Console (browser), the AWS CLI (terminal) and the AWS SDKs (your code). All three call the same AWS APIs . The console uses a password + MFA . The CLI and SDK use access keys : an access key ID (like a username) and a secret access key (like a password). Every route passes the same IAM check . The CLI and SDK don't bypass anything. Long-term keys never expire on their own. Temporary credentials (from roles or IAM Identity Center) do expire, so prefer temporary crede"
 },
 {
 "t": "IAM best practices",
@@ -526,7 +526,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/iam-best-practices.html",
 "d": "AWS Cloud Practitioner: IAM guidelines and best practices (root protection, MFA, password policy, groups, roles, key hygiene, audits) and the shared responsibility model for IAM.",
-"w": "Lock the root user away (MFA, no access keys). Give each person their own identity ; never share. Manage permissions through groups with least privilege ; use roles for AWS services. Enforce a password policy and MFA ; keep access keys secret and rotated, or avoid them. Audit with the credential report and Access Advisor. AWS runs IAM; configuring it well is your responsibility . IAM best practices & shared responsibility Walkthrough: each practice stops an attack Harden the account, then attack"
+"w": "Protect the root user and don't use it day to day: turn on MFA and create no access keys for it. Give each person their own identity ; never share. Manage permissions through groups with least privilege ; use roles for AWS services. Enforce a password policy and MFA ; keep access keys secret and rotated, or avoid them. Audit with the credential report and Access Advisor. AWS runs IAM; configuring it well is your responsibility . IAM best practices & shared responsibility Walkthrough: each practi"
 },
 {
 "t": "AWS CloudShell",
@@ -542,7 +542,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/iam-policies.html",
 "d": "AWS Cloud Practitioner: the parts of an IAM policy (Version, Statement, Effect, Action, Resource, Principal, Condition) and how AWS evaluates a request: default deny, explicit deny, allow.",
-"w": "A policy is a JSON document: Effect (Allow / Deny) + Action (API calls) + Resource (which things), optionally a Condition . For every request AWS gathers all policies that apply and decides: explicit Deny wins , otherwise an Allow lets it through, otherwise it's denied by default . Policies on users, groups and roles are identity-based (no Principal). Policies on resources, like S3 bucket policies, are resource-based and name a Principal . AWS managed policies (AdministratorAccess, IAMReadOnlyAc"
+"w": "A policy is a JSON document: Effect (Allow / Deny) + Action (API calls) + Resource (which things), optionally a Condition . For every request, AWS collects all the policies that apply. If any policy says Deny for the action (an explicit Deny), the request is denied. If not, and a policy says Allow , the request is allowed. If no policy mentions it, it is denied by default . Policies on users, groups and roles are identity-based (no Principal). Policies on resources, like S3 bucket policies, are "
 },
 {
 "t": "IAM review",
@@ -550,7 +550,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/iam-review.html",
 "d": "AWS Cloud Practitioner: IAM section review with a one-path recap, section summary, commonly confused pairs, a mixed drill and 20 exam-style questions.",
-"w": "IAM decides who gets in and what they can do, for every console click, CLI command and SDK call. Identities: root user (one, locked away), IAM users (people), groups (sets of users), roles (assumed, temporary). Permissions come from JSON policies : default deny, explicit Deny wins, Allow grants. Keep it safe: MFA , password policy, least privilege, roles instead of keys, regular audits . That configuration is your responsibility. IAM: review The whole section on one path Section summary Users & "
+"w": "IAM decides who gets in and what they can do, for every console click, CLI command and SDK call. Identities: the root user (only one, kept safe and rarely used), IAM users (people), groups (sets of users), and roles (taken on for a while to get temporary credentials). Permissions come from JSON policies : default deny, explicit Deny wins, Allow grants. Keep it safe: MFA , password policy, least privilege, roles instead of keys, regular audits . That configuration is your responsibility. IAM: rev"
 },
 {
 "t": "IAM roles",
@@ -558,7 +558,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/iam-roles.html",
 "d": "AWS Cloud Practitioner: IAM roles. An EC2 instance or Lambda function assumes a role, gets temporary credentials from STS, and calls AWS without stored keys. Trust policy, permissions policy, cross-account and federation.",
-"w": "An IAM role is an identity with permissions but no password and no long-term keys . Something assumes it and gets temporary credentials . AWS services use roles to act on your behalf: an EC2 instance reading S3, a Lambda function writing to DynamoDB, CloudFormation creating resources. A role has two policies: a trust policy (who may assume it) and permissions policies (what it may do). Roles also give another AWS account or federated users (company directory, IAM Identity Center) access without "
+"w": "An IAM role is an identity with permissions but no password and no long-term keys . A user, application or AWS service can assume the role (take it on for a while) and gets temporary credentials . AWS services use roles to act on your behalf: an EC2 instance reading S3, a Lambda function writing to DynamoDB, CloudFormation creating resources. A role has two policies: a trust policy (who may assume it) and permissions policies (what it may do). Roles also give access to another AWS account , or t"
 },
 {
 "t": "Root account vs IAM user",
@@ -566,7 +566,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/iam-root-vs-user.html",
 "d": "AWS Cloud Practitioner: what an AWS account is, the root user versus IAM users, tasks only the root user can perform, and why separate identities contain a leak.",
-"w": "An AWS account is the container: a 12-digit ID, its own resources and one bill . Every account has exactly one root user , created with it, with full and unrestricted access. IAM users are identities inside one account, with only the permissions you grant. An account can have many; a user never spans accounts. A handful of tasks only the root user can do. Everything else should be done by IAM identities. In everyday terms: the house and its keys Walkthrough: one account, many identities Contain "
+"w": "An AWS account is the container: a 12-digit ID, its own resources and one bill . Every account has exactly one root user , created with it, with full and unrestricted access. IAM users are identities inside one account, with only the permissions you grant. An account can have many; a user never spans accounts. Only the root user can do a small number of tasks. Everything else should be done by IAM identities. In everyday terms: the house and its keys Walkthrough: one account, many identities Con"
 },
 {
 "t": "IAM security tools",
@@ -614,7 +614,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/overview-review.html",
 "d": "AWS Cloud Practitioner: review of the cloud and AWS overview section, with a mixed scenario drill, cheat-sheet and quiz.",
-"w": "Traditional IT means owning every box on the request path; cloud computing rents it on demand. The service model decides how much of the stack you manage : IaaS, PaaS, SaaS. AWS runs in Regions made of Availability Zones , plus edge locations near users. Security is split: AWS secures the cloud, you secure what you put in it . Cloud & AWS overview: review The whole section on one path Section summary Traditional IT Cloud computing IaaS, PaaS, SaaS & pricing Regions, AZs & edge Shared responsibil"
+"w": "With traditional IT you own every piece of hardware the request passes through. With cloud computing you rent that hardware when you need it. The service model decides how much of the stack you manage : IaaS, PaaS, SaaS. AWS runs in Regions made of Availability Zones , plus edge locations near users. Security is split: AWS secures the cloud, you secure what you put in it . Cloud & AWS overview: review The whole section on one path Section summary Traditional IT Cloud computing IaaS, PaaS, SaaS &"
 },
 {
 "t": "EC2 Purchasing Options",
@@ -638,7 +638,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/s3.html",
 "d": "AWS Cloud Practitioner: who can read an S3 object, how versioning and delete markers work, and which storage class fits each access pattern.",
-"w": "Object storage : files (objects) in buckets , reached by API or URL. Virtually unlimited; objects up to ~48.8 TiB. A bucket lives in one Region ; its name is globally unique. \"Folders\" are just key prefixes. Private by default , encrypted by default (SSE-S3). Access comes from IAM policies and bucket policies. 11 nines durability in every storage class; classes trade price against retrieval speed and availability. Walkthrough: storing a clinic's scans Who can read scans/xray-0042.png ? Versionin"
+"w": "Object storage : files (objects) in buckets , reached by API or URL. Virtually unlimited; objects up to ~48.8 TiB. A bucket lives in one Region ; its name is globally unique. \"Folders\" are just key prefixes. Buckets are private by default, and objects are encrypted by default (SSE-S3: server-side encryption with keys that S3 manages). Access comes from IAM policies and bucket policies. Every storage class has 11 nines of durability (99.999999999%: data is almost never lost). The classes differ i"
 },
 {
 "t": "Security groups and classic ports",
@@ -646,7 +646,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/security-groups.html",
 "d": "AWS Cloud Practitioner: EC2 security groups as a stateful, allow-only firewall in front of instances; inbound vs outbound, CIDR and security-group sources, timeout vs connection refused, and the classic ports 21, 22, 80, 443, 3389.",
-"w": "A security group is a virtual firewall around EC2 instances, with inbound and outbound rules. It has allow rules only . Inbound is blocked by default ; outbound is allowed by default . Replies to allowed traffic flow back automatically ( stateful ). A rule = protocol + port + source : an IP range ( 0.0.0.0/0 , 203.0.113.10/32 ) or another security group . Timeout = blocked by the security group. Connection refused = it got through, but nothing is listening. Security groups & classic ports Walkth"
+"w": "A security group is a virtual firewall around EC2 instances, with inbound and outbound rules. It has allow rules only . Inbound is blocked by default ; outbound is allowed by default . Replies to allowed traffic flow back automatically ( stateful ). A rule has a protocol, a port and a source . The source is an IP range ( 0.0.0.0/0 is every IPv4 address; 203.0.113.10/32 is one address) or another security group . Timeout = blocked by the security group. Connection refused means the traffic got th"
 },
 {
 "t": "Shared Responsibility Model",
@@ -678,7 +678,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/traditional-it.html",
 "d": "AWS Cloud Practitioner: how a website is served from your own data centre (DNS, router, switch, server, database) and why running it yourself is hard.",
-"w": "A server is a computer with CPU (compute), RAM (memory) and storage , usually backed by a database . To open a website, the browser asks DNS for the server's IP address , then the request travels the internet → router → switch → server . In traditional IT you buy, rack, power, cool and staff every one of those boxes yourself. Its limits (big upfront cost, slow to grow, one failure takes you down) are why cloud computing exists . Traditional IT: how a website is served Walkthrough: follow one req"
+"w": "A server is a computer with CPU (compute), RAM (memory) and storage , usually backed by a database . To open a website, the browser asks DNS for the server's IP address . Then the request travels over the internet to a router, then a switch, then the server. In traditional IT you buy every one of those machines yourself, mount them in racks, and pay for their power, cooling and the staff to run them. Its limits (big upfront cost, slow to grow, one failure takes you down) are why cloud computing "
 },
 {
 "t": "What is cloud computing",
@@ -694,7 +694,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "python-fundamentals/builtins.html",
 "d": "Python fundamentals: len, sum, min, max, sorted, reversed, enumerate, zip, any, all, round, abs, pow, divmod, help and dir, with real outputs.",
-"w": "Built-ins are always available, no import needed. Most take any iterable : list, tuple, string, set, dict, range, generator. Some return a value straight away ( len , sum , sorted ); others return a lazy iterator ( reversed , enumerate , zip , map ) you loop over or wrap in list() . sorted() returns a new list; list.sort() changes the list and returns None. round() rounds halves to the even neighbour: round(2.5) is 2. Walkthrough: summarising a day's fees Function machines Where does round() go?"
+"w": "Built-ins are always available, no import needed. Most take any iterable : list, tuple, string, set, dict, range, generator. Some give you the result straight away ( len , sum , sorted ). Others ( reversed , enumerate , zip , map ) return a lazy iterator : an object that makes its items only when you ask for them. Loop over it, or wrap it in list() to see the items. sorted() returns a new list; list.sort() changes the list and returns None. round() rounds halves to the even neighbour: round(2.5)"
 },
 {
 "t": "Classes & objects",
@@ -702,7 +702,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "python-fundamentals/classes-objects.html",
 "d": "Python fundamentals: classes as blueprints, __init__ and self, instance vs class attributes, methods, inheritance with super(), and how attribute lookup works.",
-"w": "A class is a blueprint; calling it ( Patient(\"Asha\", 35) ) creates an instance , a new object with its own attributes. __init__ runs right after the object is created to fill in its attributes. self is that new object. Methods are functions defined in the class. asha.book(\"9:00\") is really Patient.book(asha, \"9:00\") . A subclass inherits everything from its parent, can override methods, and calls the parent's version with super() . Looking up obj.x checks the instance , then its class , then the"
+"w": "A class is a blueprint; calling it ( Patient(\"Asha\", 35) ) creates an instance , a new object with its own attributes. __init__ runs right after the object is created to fill in its attributes. self is that new object. Methods are functions defined in the class. asha.book(\"9:00\") is really Patient.book(asha, \"9:00\") . A subclass inherits everything from its parent class. It can override a method, which means it replaces it with its own version. It can still call the parent's version with super()"
 },
 {
 "t": "Collections: list, tuple, set, dict",
@@ -710,7 +710,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "python-fundamentals/collections.html",
 "d": "Python fundamentals: lists, tuples, sets and dictionaries drawn as objects in memory, with indexing, unpacking, set operations and dict lookups.",
-"w": "list [ ] : ordered, changeable, duplicates allowed. The everyday container. tuple ( ) : ordered but fixed . Good for records like (lat, lon) and for unpacking. set { } : no order, no duplicates , very fast in checks, maths like union and intersection. dict {key: value} : look things up by key. Keys are unique; insertion order is kept. Walkthrough: four containers for one clinic List operations bench Set operations Reference: the four at a glance"
+"w": "list [ ] : ordered, changeable, duplicates allowed. The everyday container. tuple ( ) : ordered but fixed . Good for records like (lat, lon) and for unpacking. set { } : no order and no duplicates . Check in g \"is x in the set?\" is very fast. Sets also support maths like union and intersection. dict {key: value} : look things up by key. Keys are unique; insertion order is kept. Walkthrough: four containers for one clinic List operations bench Set operations Reference: the four at a glance"
 },
 {
 "t": "Comprehensions",
@@ -718,7 +718,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "python-fundamentals/comprehensions.html",
 "d": "Python fundamentals: list, dict and set comprehensions and generator expressions, shown side by side with the loop they replace.",
-"w": "A comprehension builds a new list from an existing sequence in one expression: [f * 2 for f in fees] . Read it as what to keep , for each item , optional filter : [expr for x in items if cond] . Same idea for dicts {k: v for ...} and sets {x for ...} ; with round brackets it becomes a lazy generator expression . Use one when the loop only builds a collection. If it needs several statements, keep the normal loop. Walkthrough: the same list, two ways Comprehension pipeline Reference: the four shap"
+"w": "A comprehension builds a new list from an existing sequence in one expression: [f * 2 for f in fees] . Read it in three parts: what to keep (expr), for each item (for x in items), and an optional filter (if cond): [expr for x in items if cond] . The same idea works for dicts {k: v for ...} and sets {x for ...} . With round brackets it becomes a generator expression . It is lazy: it makes one value at a time instead of building the whole list. Use one when the loop only builds a collection. If it"
 },
 {
 "t": "Conditionals & loops",
@@ -726,7 +726,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "python-fundamentals/conditionals-loops.html",
 "d": "Python fundamentals: if/elif/else, for loops over sequences and range(), while loops, break, continue and the loop else clause, stepped line by line.",
-"w": "if / elif / else checks conditions top to bottom and runs only the first branch that is true. A for loop takes items one at a time from any sequence (list, string, range() ); a while loop repeats as long as a condition stays true. continue skips to the next item; break leaves the loop completely. Indentation is the syntax: the indented lines under a colon are the block. Walkthrough: grading a list of scores range() on a number line break vs continue vs neither Reference: truthiness and match"
+"w": "if / elif / else checks conditions top to bottom and runs only the first branch that is true. A for loop takes items one at a time from any sequence (list, string, range() ). A while loop repeats as long as a condition stays true. continue skips to the next item; break leaves the loop completely. Indentation is the syntax: the indented lines under a colon are the block. Walkthrough: grading a list of scores range() on a number line break vs continue vs neither Reference: truthiness and match"
 },
 {
 "t": "Context managers",
@@ -734,7 +734,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "python-fundamentals/context-managers.html",
 "d": "Python fundamentals: the with statement, __enter__ and __exit__, guaranteed cleanup when errors happen, and writing your own with contextlib.contextmanager.",
-"w": "with X as v: calls X.__enter__() before the block (its return value becomes v ) and X.__exit__() after it, no matter how the block ends. That makes with the standard way to acquire and release : files, locks, database transactions, network connections, temporary settings. __exit__ receives the exception (if any). Returning a true value swallows it; usually you return False and let it propagate. @contextmanager lets you write one as a generator: code before yield is enter, code after (in finally "
+"w": "with X as v : first calls X.__enter__() , and its return value becomes v. Then the block runs. Then Python calls X.__exit__() , no matter how the block ends. So with is the standard way to get a resource and then give it back ( acquire and release ). Examples: files, locks, database transactions, network connections, temporary settings. __exit__ receives the exception (if any). If __exit__ returns a true value, the exception is swallowed (stopped and hidden). Usually you return False, so the exc"
 },
 {
 "t": "Decorators",
@@ -742,7 +742,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "python-fundamentals/decorators.html",
 "d": "Python fundamentals: functions as objects, wrapper functions, the @ syntax, functools.wraps, decorators with arguments, and stacking decorators.",
-"w": "A decorator is a function that takes a function and returns a replacement , usually a wrapper that adds behaviour before and after the original. @log_calls above def f is shorthand for f = log_calls(f) , run once , when the def runs. The wrapper uses *args, **kwargs to accept any arguments and a closure to remember the original function. Always add @functools.wraps(func) so the wrapper keeps the original's name and docstring. Used everywhere: logging, timing, caching, permissions, web routes. Wa"
+"w": "A decorator is a function that takes a function and returns a replacement , usually a wrapper that adds behaviour before and after the original. Writing @log_calls above def f is shorthand for f = log_calls(f) . Python runs it once , at the moment the def runs. The wrapper uses *args, **kwargs to accept any arguments. It is a closure : an inner function that remembers the original function from the outer one. Always add @functools.wraps(func) so the wrapper keeps the original's name and docstrin"
 },
 {
 "t": "Errors & exceptions",
@@ -750,7 +750,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "python-fundamentals/errors-exceptions.html",
 "d": "Python fundamentals: reading a traceback, try/except/else/finally, catching specific exceptions, raising your own, and how an exception travels up the call stack.",
-"w": "An exception is an object Python raises when something goes wrong. It stops the current line and travels up the call stack until something catches it. try runs risky code; except SomeError handles that error; else runs only if nothing went wrong; finally always runs. Catch specific exceptions ( ValueError , KeyError ), not everything, so real bugs still show up. Use raise to signal a problem yourself. Read a traceback from the bottom: the last line says what went wrong. Walkthrough: validating a"
+"w": "An exception is an object Python raises when something goes wrong. It stops the current line and moves up through the functions that called it (the call stack) until some code catches it. try runs risky code. except SomeError handles that error. else runs only if nothing went wrong. finally always runs. Catch specific exceptions ( ValueError , KeyError ), not everything, so real bugs still show up. Use raise to signal a problem yourself. Read a traceback from the bottom: the last line says what "
 },
 {
 "t": "Files, CSV & JSON",
@@ -758,7 +758,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "python-fundamentals/files-csv-json.html",
 "d": "Python fundamentals: open() modes, the with statement, reading line by line, csv.reader and DictReader, csv.writer, and converting between Python objects and JSON.",
-"w": "open(path, mode) returns a file object . Mode \"r\" reads, \"w\" erases then writes, \"a\" appends to the end. Always use with open(...) as f: . The file is closed automatically when the block ends, even after an error. Pass encoding=\"utf-8\" , and newline=\"\" for CSV files. csv.DictReader turns each row into a dict keyed by the header. Values are always strings . json : dump/load work with files, dumps/loads with strings (the s is for string). Walkthrough: a day's appointments on disk The file and its "
+"w": "open(path, mode) returns a file object . Mode \"r\" reads, \"w\" erases then writes, \"a\" appends to the end. Always use with open(...) as f: . The file is closed automatically when the block ends, even after an error. Always pass encoding=\"utf-8\" . For CSV files, also pass newline=\"\" . csv.DictReader turns each row into a dict keyed by the header. Values are always strings . json : dump/load work with files, dumps/loads with strings (the s is for string). Walkthrough: a day's appointments on disk Th"
 },
 {
 "t": "Functional tools & itertools",
@@ -766,7 +766,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "python-fundamentals/functional-tools.html",
 "d": "Python fundamentals: lambda, sorted with key=, map, filter, functools.reduce, and itertools helpers like chain, groupby and islice.",
-"w": "Functions are objects: you can pass them to other functions. lambda writes a small one inline: lambda p: p[1] . sorted(items, key=f) sorts by f(item) , not by the item itself. Same key= works for min, max and groupby. map(f, xs) transforms, filter(f, xs) keeps items where f is true, reduce(f, xs, start) folds them into one value. A comprehension is often clearer for the first two. itertools has lazy building blocks: chain , islice , groupby , count … Walkthrough: sorting and summarising patients"
+"w": "Functions are objects: you can pass them to other functions. lambda writes a small one inline: lambda p: p[1] . sorted(items, key=f) sorts by f(item) , not by the item itself. Same key= works for min, max and groupby. map(f, xs) calls f on every item and gives the results. filter(f, xs) keeps only the items where f returns true. reduce(f, xs, start) combines (folds) all items into one value. A comprehension is often clearer for the first two. The itertools module has lazy tools (they make items "
 },
 {
 "t": "Functions & arguments",
@@ -774,7 +774,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "python-fundamentals/functions-arguments.html",
 "d": "Python fundamentals: def and return, the call stack, positional and keyword arguments, defaults, *args and **kwargs, returning several values, and the mutable default trap.",
-"w": "def creates a function object and a name for it. Calling it creates a fresh frame holding the parameters and local variables. Arguments bind to parameters by position , then by keyword ; anything not given falls back to its default . *args collects extra positional values into a tuple ; **kwargs collects extra keywords into a dict . return a, b returns one tuple . No return means the function returns None . Defaults are created once , when def runs. A mutable default like [] is shared between ca"
+"w": "def creates a function object and a name for it. Calling it creates a fresh frame holding the parameters and local variables. Python matches arguments to parameters first by position , then by keyword . Any parameter you don't give uses its default value. *args collects extra positional values into a tuple ; **kwargs collects extra keywords into a dict . return a, b returns one tuple . No return means the function returns None . Defaults are created once , when def runs. A mutable default like ["
 },
 {
 "t": "Python Fundamentals Explainers",
@@ -790,7 +790,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "python-fundamentals/iterators-generators.html",
 "d": "Python fundamentals: the iterator protocol (iter and next), StopIteration, generator functions with yield, generator expressions, and why lazy evaluation saves memory.",
-"w": "A for loop calls iter() on the object to get an iterator , then next() until it raises StopIteration . A function containing yield is a generator function : calling it runs nothing yet and returns a generator object. Each next() runs the body up to the next yield , hands out that value and pauses , keeping its local variables. Generators are lazy : values are made one at a time, so a stream of a million rows needs memory for one. They can be used once . Walkthrough: generating appointment slots "
+"w": "A for loop first calls iter() on the object to get an iterator : an object that hands out items one by one. Then it calls next() again and again, until next() raises StopIteration . A function containing yield is a generator function : calling it runs nothing yet and returns a generator object. Each next() runs the body up to the next yield , hands out that value and pauses , keeping its local variables. Generators are lazy : values are made one at a time, so a stream of a million rows needs mem"
 },
 {
 "t": "Modules, packages, pip & venv",
@@ -798,7 +798,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "python-fundamentals/modules-packages.html",
 "d": "Python fundamentals: what import does, module caching, from-imports and aliases, if __name__ == '__main__', packages, pip and virtual environments.",
-"w": "Every .py file is a module . import billing runs billing.py once , caches it in sys.modules , and binds the name billing . from billing import tax copies just that name into your file; import numpy as np picks a shorter alias. __name__ is \"__main__\" when a file is run directly and the module's name when it's imported, hence if __name__ == \"__main__\": . A package is a folder of modules. pip installs third-party packages; a virtual environment (venv) keeps each project's packages separate. Walkthr"
+"w": "Every .py file is a module . import billing runs billing.py once . Python saves (caches) the result in sys.modules , and creates the name billing that points to it. from billing import tax copies just that name into your file. import numpy as np gives the module a shorter name (an alias). __name__ is \"__main__\" when a file is run directly, and the module's name when it's imported. That is why we write if __name__ == \"__main__\": to run code only when the file is started directly. A package is a f"
 },
 {
 "t": "OOP deeper: dunders, properties, dataclasses",
@@ -806,7 +806,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "python-fundamentals/oop-deeper.html",
 "d": "Python fundamentals: special (dunder) methods like __repr__, __str__, __eq__ and __add__, @property, @classmethod and @staticmethod, polymorphism, and @dataclass.",
-"w": "Python's operators and built-ins call dunder methods (double underscore): a + b → a.__add__(b) , len(x) → x.__len__() , print(x) → x.__str__() . Define __repr__ (for developers) and optionally __str__ (for users) so objects print usefully. @property makes a method read like an attribute; @classmethod gets the class (alternative constructors); @staticmethod gets neither. @dataclass writes __init__ , __repr__ and __eq__ from type-annotated fields: the quickest way to a clean data class. Walkthroug"
+"w": "Python's operators and built-ins call dunder methods (double underscore): a + b → a.__add__(b) , len(x) → x.__len__() , print(x) → x.__str__() . Define __repr__ (for developers) and optionally __str__ (for users) so objects print usefully. @property lets you read a method like an attribute (no brackets). @classmethod gives the method the class instead of self; it is often used for alternative constructors (other ways to create an object). @staticmethod gets neither the object nor the class. @dat"
 },
 {
 "t": "print, input & f-strings",
@@ -814,7 +814,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "python-fundamentals/print-input-fstrings.html",
 "d": "Python fundamentals: how print() assembles output with sep and end, why input() always returns text, and how f-strings and format specs build strings.",
-"w": "print() turns each argument into text, joins them with sep (a space) and finishes with end (a newline). input() shows a prompt and always returns a str , even when the user types a number. f-strings ( f\"Hi {name}\" ) evaluate the code inside {} and drop the result into the text. After a colon, a format spec controls the look: {fee:,.2f} → 1,234.50 . Walkthrough: printing a clinic receipt The print() assembly line Format spec explorer Reference: format specs and escapes"
+"w": "print() turns each argument into text, joins them with sep (by default a space) and finishes with end (by default a newline). input() shows a prompt and always returns a str , even when the user types a number. f-strings ( f\"Hi {name}\" ) evaluate the code inside {} and drop the result into the text. After a colon, a format spec controls the look: {fee:,.2f} → 1,234.50 . Walkthrough: printing a clinic receipt The print() assembly line Format spec explorer Reference: format specs and escapes"
 },
 {
 "t": "Scope (LEGB)",
@@ -830,7 +830,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "python-fundamentals/strings.html",
 "d": "Python fundamentals: string indexing with positive and negative positions, slicing with start:stop:step, common methods, and why strings are immutable.",
-"w": "A str is an ordered sequence of characters. Each one has a position: 0 from the left, -1 from the right. Slicing s[start:stop:step] copies a part; stop is excluded and missing values mean \"from the start\" / \"to the end\". Strings are immutable : methods like upper() , strip() and replace() return a new string and leave the original alone. split() turns text into a list; \"sep\".join(list) turns a list back into text. Walkthrough: cleaning a department name Slice ruler Method bench Reference: everyd"
+"w": "A str is an ordered sequence of characters. Each one has a position: 0 from the left, -1 from the right. Slicing s[start:stop:step] copies a part of the string. The stop position is not included. If you leave out start, it means \"from the start\"; if you leave out stop, it means \"to the end\". Strings are immutable : methods like upper() , strip() and replace() return a new string and leave the original alone. split() turns text into a list; \"sep\".join(list) turns a list back into text. Walkthroug"
 },
 {
 "t": "Type hints",
@@ -838,7 +838,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "python-fundamentals/type-hints.html",
 "d": "Python fundamentals: annotating variables, parameters and return values, built-in generics like list[int], X | None, and what a type checker such as mypy catches that Python itself doesn't.",
-"w": "Type hints describe what a value should be: def with_tax(amount: float) -> float: . Python does not check them at run time . They're read by your editor and by type checkers such as mypy or pyright before the code runs. Modern syntax: list[int] , dict[str, float] , str | None (3.10+). No typing import needed for these. Hints document intent, power autocomplete, and catch whole classes of bugs (None, wrong types, typos) early: the closest Python gets to C#'s compiler checks. Walkthrough: annotati"
+"w": "Type hints describe what a value should be: def with_tax(amount: float) -> float: . Python does not check them at run time . They're read by your editor and by type checkers such as mypy or pyright before the code runs. Modern syntax: list[int] , dict[str, float] , str | None (3.10+). No typing import needed for these. Hints show what you intended and help editor autocomplete. They also catch whole groups of bugs early (None, wrong types, typos). This is the closest Python gets to C#'s compiler "
 },
 {
 "t": "Variables, Objects & Types",
@@ -854,7 +854,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "python-fundamentals/working-with-apis.html",
 "d": "Python fundamentals: calling HTTP APIs with requests, query parameters, JSON bodies, status codes, raise_for_status, timeouts, and paging through results.",
-"w": "A web API is a URL that returns data (usually JSON) instead of a page. You send an HTTP request (method, URL, headers, body) and get a response (status code, headers, body). The requests library: requests.get(url, params=…, headers=…, timeout=…) , requests.post(url, json=…) . Check the outcome with r.status_code or r.raise_for_status() , then decode with r.json() , which gives plain dicts and lists. Always set a timeout , keep secrets out of code, and expect lists to come in pages . Walkthrough:"
+"w": "A web API is a URL that returns data (usually JSON) instead of a page. You send an HTTP request (method, URL, headers, body) and get a response (status code, headers, body). The requests library: requests.get(url, params=…, headers=…, timeout=…) , requests.post(url, json=…) . Check the outcome with r.status_code or r.raise_for_status() , then decode with r.json() , which gives plain dicts and lists. Always set a timeout . Keep secrets (keys, tokens) out of your code. Expect long lists to come in"
 },
 {
 "t": "How an Angular app boots",
@@ -862,7 +862,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "angular/app-boot.html",
 "d": "Angular 22: from ng new to pixels. Follow CareDesk from the CLI through index.html, main.ts and bootstrapApplication until the App component fills app-root.",
-"w": "Node.js and the Angular CLI are build tools on your machine. The app itself runs in the browser . ng new creates the workspace; ng serve compiles TypeScript and templates into JavaScript and serves it. The browser first gets an almost empty index.html : just <app-root></app-root> and a script tag. main.ts calls bootstrapApplication(App, appConfig) . appConfig lists app-wide providers. There's no NgModule. Angular finds <app-root> , creates App and renders its template inside it. Walkthrough: fro"
+"w": "Node.js and the Angular CLI are build tools on your machine. The app itself runs in the browser . ng new creates the workspace. ng serve compiles TypeScript and templates into JavaScript, then serves the result to the browser. The browser first gets an almost empty index.html : just <app-root></app-root> and a script tag. main.ts calls bootstrapApplication(App, appConfig) . appConfig lists app-wide providers: the services and features (such as the router) that every part of the app can use. Ther"
 },
 {
 "t": "Change detection",
@@ -870,7 +870,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "angular/change-detection.html",
 "d": "Angular 22 change detection, recorded from CareDesk: zoneless and OnPush by default. See which components refresh after a click, a keystroke, a new input or a signal change, and why a plain field set in a timer never shows.",
-"w": "Change detection = Angular re-evaluating templates and patching the DOM where values changed. Angular 22 apps are zoneless : a refresh is scheduled by a signal change , a template event , an input change or markForCheck() , not by every timer or HTTP callback. Components are OnPush by default : a component is skipped unless something it depends on changed. An event marks its component and its ancestors ; a signal refreshes only the views that read it . A plain field changed in a setInterval neve"
+"w": "Change detection = Angular re-evaluating templates and patching the DOM where values changed. Angular 22 apps are zoneless : they don't use zone.js. A screen refresh is scheduled only by a signal change , a template event , an input change or markForCheck() . Timers and HTTP callbacks don't trigger it by themselves. Components are OnPush by default : a component is skipped unless something it depends on changed. An event marks its component and its ancestors (its parent, grandparent and so on up"
 },
 {
 "t": "Components & templates",
@@ -886,7 +886,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "angular/control-flow.html",
 "d": "Angular 22 built-in control flow on CareDesk: @for with track, @empty, @if, @switch and @let. See why track $index moved a nurse's note onto the wrong patient in a real run.",
-"w": "Templates decide what exists with blocks: @if , @for , @switch , plus @let for local values. @for needs a track expression: how Angular matches items to the DOM it already built. Track by a stable id ( track p.id ). Tracking by $index can move state to the wrong item. @empty renders when the list is empty; @else pairs with @if . These replace *ngIf , *ngFor and [ngSwitch] , deprecated since v20. Walkthrough: one card per patient Track lab Reference: old directives vs blocks {{ heading() }}"
+"w": "Templates decide what exists with blocks: @if , @for , @switch , plus @let for local values. @for needs a track expression. Angular uses it to match each item to the DOM it already built for that item. Track by a stable id ( track p.id ). Tracking by $index can move state to the wrong item. @empty renders when the list is empty; @else pairs with @if . These replace *ngIf , *ngFor and [ngSwitch] , deprecated since v20. Walkthrough: one card per patient Track lab Reference: old directives vs block"
 },
 {
 "t": "Data binding",
@@ -894,7 +894,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "angular/data-binding.html",
 "d": "Angular 22 data binding on CareDesk's PatientCard: interpolation, property, class, style and attribute bindings flow from class to DOM; events flow back; ngModel does both.",
-"w": "Bindings connect a component's class to its template . Angular keeps the DOM in step for you. Class → DOM (cyan): {{ value }} , [property] , [class.x] , [style.x] , [attr.x] . DOM → class (orange): (event)=\"handler()\" . Both ways (violet): [(ngModel)] = [ngModel] + (ngModelChange) . Needs FormsModule . The right-hand side is a template expression , type-checked against the class. Walkthrough: wiring up PatientCard and the search box . Binding lab . What happens here? Reference: binding syntax {{"
+"w": "Bindings connect a component's class to its template . Angular keeps the DOM in step for you. Class → DOM (cyan): {{ value }} , [property] , [class.x] , [style.x] , [attr.x] . DOM → class (orange): (event)=\"handler()\" . Both ways (violet): [(ngModel)] . It is short for [ngModel] plus (ngModelChange) . It needs FormsModule in the component's imports. The text inside the quotes (the right-hand side) is a template expression . The compiler type-checks it against the class. Walkthrough: wiring up Pa"
 },
 {
 "t": "Route guards & login flow",
@@ -902,7 +902,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "angular/guards-login.html",
 "d": "Angular 22 route guards on CareDesk: a functional authGuard that redirects to a login page with a returnUrl, an AuthStore holding a demo token, and an HTTP interceptor that attaches it, with results from a real run.",
-"w": "A guard is a function the router runs before entering a route: return true to continue, or a UrlTree to redirect. CareDesk's authGuard sends signed-out users to /login?returnUrl=… and brings them back after sign-in. An interceptor sees every HttpClient request; CareDesk's adds Authorization: Bearer … . Guards are user experience, not security . Anyone can edit the browser; the server must check the token. Functional guards ( CanActivateFn ) replaced class-based guards, which are deprecated. Walk"
+"w": "A guard is a function the router runs before entering a route. It returns true to continue, or a UrlTree (a URL object built by the router) to redirect. CareDesk's authGuard sends signed-out users to /login?returnUrl=… and brings them back after sign-in. An interceptor is a function that sees every HttpClient request before it is sent. CareDesk's interceptor adds the header Authorization: Bearer … . Guards are user experience, not security . Anyone can edit the browser; the server must check the"
 },
 {
 "t": "HTTP, resource & RxJS basics",
@@ -910,7 +910,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "angular/http.html",
 "d": "Angular 22 HTTP on CareDesk: load patients with httpResource (loading, error, retry as signals), keep a local copy with linkedSignal, post bookings with HttpClient, and the RxJS basics: cold Observables, subscribe and pipe.",
-"w": "httpResource(() => url) fetches data and exposes signals : isLoading() , hasValue() , value() , error() . The URL function is reactive: when its signals change the request re-runs; returning undefined means \"don't fetch\". HttpClient methods return an Observable : nothing is sent until you subscribe , and each subscription sends again. RxJS operators go in pipe() : map , tap , catchError … Rule of thumb: reads → httpResource ; writes (POST, PUT, DELETE) → HttpClient . Walkthrough: CareDesk talks "
+"w": "httpResource(() => url) fetches data and exposes signals : isLoading() , hasValue() , value() , error() . The URL function is reactive: it re-runs when the signals it reads change. When it re-runs, the request is sent again. If it returns undefined , nothing is fetched. HttpClient methods return an Observable (an RxJS stream you must subscribe to). Nothing is sent until you subscribe. Each new subscription sends the request again. RxJS operators go in pipe() : map , tap , catchError … Simple rul"
 },
 {
 "t": "Angular",
@@ -926,7 +926,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "angular/lifecycle.html",
 "d": "Angular 22 lifecycle hooks, recorded from CareDesk's PatientCard: which hooks run when a card is created, checked, given a new input and destroyed, and why a forgotten clearInterval leaks.",
-"w": "Angular calls hook methods on a component at fixed moments: created, inputs changed, checked, destroyed. ngOnInit = inputs are ready, start work. ngOnDestroy = clean up (timers, subscriptions). The …Checked hooks and ngDoCheck run on every check, so keep them cheap. ngOnChanges runs only for bound inputs , before ngOnInit and again on each new value. The constructor isn't a hook: it runs before inputs exist. Reading a required input there fails the build. Walkthrough: the life of a PatientCard H"
+"w": "Lifecycle hooks are methods that Angular calls on a component at fixed moments: when it is created, when its inputs change, when it is checked, and when it is destroyed. ngOnInit = inputs are ready, start work. ngOnDestroy = clean up (timers, subscriptions). ngDoCheck and the hooks whose names end in Checked (ngAfterContentChecked, ngAfterViewChecked) run on every change-detection check. So keep the code in them small and fast. ngOnChanges runs only for bound inputs , before ngOnInit and again o"
 },
 {
 "t": "Parent ↔ child data flow",
@@ -942,7 +942,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "angular/reactive-forms.html",
 "d": "Angular 22 reactive forms on CareDesk's patient registration: a typed FormGroup built in the class, bound with formControlName, validated, previewed with valueChanges. Then the same form with the new Signal Forms API.",
-"w": "In a reactive form you build the form model in the class ( FormGroup , FormControl ), then bind the template to it. Validators are functions ( Validators.required ), so rules live in TypeScript where you can test them. Forms are typed : getRawValue() returns { name: string; … } . valueChanges is an Observable; toSignal() turns it into a signal for the template. New: Signal Forms ( form() + [formField] ) wrap a signal you own; every state is a signal. Walkthrough: registering a new patient Same f"
+"w": "In a reactive form you build the form model in the class ( FormGroup , FormControl ), then bind the template to it. Validators are functions ( Validators.required ), so rules live in TypeScript where you can test them. Forms are typed : getRawValue() returns { name: string; … } . valueChanges is an Observable (a stream of every new form value). toSignal() turns it into a signal that the template can read. New: Signal Forms use form() and [formField] . They wrap a signal that you own, and every f"
 },
 {
 "t": "Routing",
@@ -950,7 +950,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "angular/routing.html",
 "d": "Angular 22 routing on CareDesk: a route table, router-outlet, routerLink, route parameters as inputs, lazy loading, redirects, wildcards and routerLinkActive, with every result from a real run.",
-"w": "The router maps the URL to a component and renders it in <router-outlet /> , without reloading the page. Routes are checked top to bottom; the first match wins . Put '**' last. routerLink navigates inside the app; href reloads everything. URL parameters such as :id can arrive as a component input ( withComponentInputBinding ). loadComponent lazy-loads a page: its code downloads on first visit. Walkthrough: CareDesk gets pages Router simulator Reference: CareDesk's routes {{ heading() }} {{ p.nam"
+"w": "The router maps the URL to a component and renders it in <router-outlet /> , without reloading the page. Routes are checked top to bottom; the first match wins . Put '**' last. routerLink navigates inside the app without a reload. A normal href reloads the whole app. URL parameters such as :id can arrive as a component input ( withComponentInputBinding ). loadComponent lazy-loads a page: its code downloads on first visit. Walkthrough: CareDesk gets pages Router simulator Reference: CareDesk's ro"
 },
 {
 "t": "Services & dependency injection",
@@ -958,7 +958,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "angular/services-di.html",
 "d": "Angular 22 services and dependency injection on CareDesk: a PatientStore shared by the header and the list with @Service and inject(). Watch lookups walk the injector tree, and see a component-level provider split the state.",
-"w": "A service is a class for state or logic that several components share, such as CareDesk's PatientStore . Components ask for it with inject(PatientStore) ; Angular's injector creates it and hands out the same instance. New in v22: @Service() , a shorthand for @Injectable({ providedIn: 'root' }) : one app-wide instance. Lookups walk up the injector tree ; the first provider found wins. A component's own providers make a separate instance. Walkthrough: one store, two readers Injector resolver Refer"
+"w": "A service is a class for state or logic that several components share, such as CareDesk's PatientStore . Components ask for the service with inject(PatientStore) . Angular's injector (the part of Angular that creates and stores services) creates it and gives every component the same instance. New in v22: @Service() , a shorthand for @Injectable({ providedIn: 'root' }) : one app-wide instance. Angular looks for a provider starting at the component, then its parent, and so on up to the root. It us"
 },
 {
 "t": "Signals",
@@ -966,7 +966,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "angular/signals.html",
 "d": "Angular 22 signals on CareDesk's patient list: signal, computed, linkedSignal and effect as a dependency graph. Watch a search keystroke mark dependants dirty and pull fresh values, with logs from a real run.",
-"w": "A signal is a value that tells its readers when it changes. Read it by calling it: search() . computed derives a value from other signals. It's lazy (runs only when read) and cached (re-runs only when a dependency changed). linkedSignal is a writable value that resets when its source changes. effect runs side effects (save, log, call a library), not derivations. Change = new value. Setting an equal value (same object, same number) stops propagation. Walkthrough: the waiting room as a signal grap"
+"w": "A signal is a value that tells its readers when it changes. Read it by calling it: search() . computed derives a value from other signals. It's lazy (runs only when read) and cached (re-runs only when a dependency changed). linkedSignal is a writable value that resets when its source changes. effect runs side effects (save, log, call a library). Don't use it to calculate values from other signals; use computed for that. Change = new value. Setting an equal value (same object, same number) does n"
 },
 {
 "t": "Template-driven forms",
@@ -974,7 +974,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "angular/template-forms.html",
 "d": "Angular 22 template-driven forms on CareDesk's booking form: ngForm, ngModel, name, validators, and the valid/invalid, pristine/dirty, untouched/touched states, recorded from a real run.",
-"w": "In a template-driven form the template is the source of truth: ngModel on each field, #f=\"ngForm\" on the form. Angular builds a form model behind it: one control per field (keyed by name ), grouped under the form. Each control tracks three pairs: valid/invalid , pristine/dirty (changed?), untouched/touched (visited?). Validators are HTML attributes ( required , minlength ), and the states appear as CSS classes ( ng-invalid , ng-touched ). Submit with (ngSubmit) on the form, not (click) on the bu"
+"w": "In a template-driven form, the template defines the form. You put ngModel on each field and #f=\"ngForm\" on the form. Angular builds a form model behind it: one control per field (keyed by name ), grouped under the form. Each control tracks three pairs: valid/invalid , pristine/dirty (changed?), untouched/touched (visited?). Validators are HTML attributes ( required , minlength ), and the states appear as CSS classes ( ng-invalid , ng-touched ). Submit with (ngSubmit) on the form, not (click) on "
 },
 {
 "t": "TypeScript for Angular",
@@ -982,6 +982,6 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "angular/typescript.html",
 "d": "The TypeScript you need for Angular 22, built around CareDesk's Patient type: interfaces, union types, optional fields, generics, classes, decorators, and what disappears at run time.",
-"w": "TypeScript is JavaScript plus types . Types are checked when you build, then erased : the browser runs plain JavaScript. An interface describes the shape of data, like a C# DTO without behaviour. Union types ( 'routine' | 'urgent' ) and optional fields ( phone? ) catch whole classes of bugs. Generics appear everywhere in Angular: signal<Patient[]> , input<Patient> , output<string> . Angular checks templates with the same types, so a typo in HTML fails the build. Walkthrough: typing CareDesk's pa"
+"w": "TypeScript is JavaScript plus types . Types are checked when you build, then erased : the browser runs plain JavaScript. An interface describes the shape of data, like a C# DTO without behaviour. Union types ( 'routine' | 'urgent' ) and optional fields ( phone? ) catch entire kinds of bugs at build time. Generics appear everywhere in Angular: signal<Patient[]> , input<Patient> , output<string> . Angular checks templates with the same types, so a typo in HTML fails the build. Walkthrough: typing "
 }
 ];

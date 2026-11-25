@@ -81,9 +81,9 @@
     <h1>Change detection</h1>
     <ul class="lede">
       <li><b>Change detection</b> = Angular re-evaluating templates and patching the DOM where values changed.</li>
-      <li>Angular 22 apps are <b>zoneless</b>: a refresh is scheduled by a <b>signal change</b>, a <b>template event</b>, an input change or <span class="mono">markForCheck()</span>, not by every timer or HTTP callback.</li>
+      <li>Angular 22 apps are <b>zoneless</b>: they don't use zone.js. A screen refresh is scheduled only by a <b>signal change</b>, a <b>template event</b>, an input change or <span class="mono">markForCheck()</span>. Timers and HTTP callbacks don't trigger it by themselves.</li>
       <li>Components are <b>OnPush by default</b>: a component is skipped unless something it depends on changed.</li>
-      <li>An event marks its component <b>and its ancestors</b>; a signal refreshes <b>only the views that read it</b>.</li>
+      <li>An event marks its component <b>and its ancestors</b> (its parent, grandparent and so on up to App) for refresh. A signal change refreshes only the views that read that signal.</li>
       <li>A plain field changed in a <span class="mono">setInterval</span> never shows. Use a signal.</li>
     </ul>
     <div class="cd-trail" data-stage="7"></div>
@@ -123,7 +123,7 @@
   <section aria-labelledby="cheatH">
     <h2 id="cheatH">Cheat-sheet</h2>
     <ul class="cheat">
-      <li><span class="if">Value changes but the screen doesn't</span><span class="arrow">→</span><span class="then">it's a plain field changed outside a template event: make it a <span class="mono">signal</span></span></li>
+      <li><span class="if">Value changes but the screen doesn't</span><span class="arrow">→</span>You probably changed a plain field outside a template event. Make that field a signal.</li>
       <li><span class="if">Data from a timer, WebSocket or third-party callback</span><span class="arrow">→</span><span class="then"><span class="mono">signal.set()</span> (or <span class="mono">toSignal()</span> for observables)</span></li>
       <li><span class="if">Mutated an object or array inside a signal</span><span class="arrow">→</span><span class="then">no refresh; replace it (<span class="mono">update(list =&gt; [...list, p])</span>)</span></li>
       <li><span class="if">Click handler in a deep child</span><span class="arrow">→</span><span class="then">that child and its ancestors are refreshed; siblings aren't</span></li>
@@ -152,10 +152,10 @@
       <div><div class="label ok-text">CareDesk's header clock</div><div id="goodClock"></div></div>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><p><b>Why it matters.</b> Features like ngOnChanges and ngModel depend on change detection, it's a frequent interview topic, and the rules changed a lot between Angular 16 and 22.</p></div>
-      <div class="note"><p><b>zone.js is gone by default.</b> Older apps loaded zone.js, which patched timers, promises and events to trigger a check of the whole tree after any async work. New apps are zoneless: smaller, faster, and explicit about what changed. That's why CareDesk's header clock needed a signal.</p></div>
+      <div class="note"><p><b>Why it matters.</b> Features like ngOnChanges and ngModel depend on change detection. It is a frequent interview topic. And the rules changed a lot between Angular 16 and 22.</p></div>
+      <div class="note"><p><b>zone.js is gone by default.</b> Older apps loaded zone.js. It patched (wrapped) timers, promises and events. After any async work, it triggered a check of the whole component tree. New apps are zoneless: smaller, faster, and explicit about what changed. That's why CareDesk's header clock needed a signal.</p></div>
       <div class="note"><p><b>OnPush by default (v22).</b> <span class="mono">ChangeDetectionStrategy.OnPush</span> is now the default and the old <span class="mono">Default</span> strategy is named <span class="mono">Eager</span>. Existing code you see in interviews may still set <span class="mono">OnPush</span> explicitly; it means the same thing.</p></div>
-      <div class="note"><p><b>First render ran a second pass.</b> In the real logs, App and PatientList were checked again right after the first render (caused by the search box's <span class="mono">ngModel</span>: with the box removed, the second pass disappeared). Extra passes are normal; never rely on how many times a template is evaluated.</p></div>
+      <div class="note"><p><b>First render ran a second pass.</b> In the real logs, App and PatientList were checked again right after the first render. The search box's <span class="mono">ngModel</span> caused this: when we removed the box, the second pass disappeared. Extra passes are normal; never rely on how many times a template is evaluated.</p></div>
     </div>
   </section>
 
@@ -302,8 +302,8 @@ protected trace() {
       { title: 'An event: the path to the root', text: 'Clicking Select inside the card (orange dot) marked the card <b>and its ancestors</b> for refresh: App → PatientList → PatientCard. The Header, a sibling branch, was skipped.', play: P('click'), tip: 'OnPush in one sentence: "re-check me only when my inputs change, an event happens inside me, or a signal I read changes".' },
       { title: 'A parent event skips the child', text: 'Typing in PatientList\'s search refreshed App and PatientList. The card was skipped: its <span class="mono">patient</span> input is the same object and it reads no signal that changed.', play: P('type') },
       { title: 'A new input refreshes the child', text: '"Admit next" passed a <b>new</b> patient object down. A changed input reference marks the child, so the card refreshed too.', play: P('input') },
-      { title: 'A signal: only its readers', text: 'The card\'s <span class="mono">waited</span> signal ticked with no click anywhere. Only PatientCard was refreshed: signals tell Angular exactly which views read them, so it doesn\'t touch the rest of the tree.', play: P('sig') },
-      { title: 'The zoneless trap', text: 'First attempt at this step\'s feature, a clock in the header: a plain field updated by <span class="mono">setInterval</span>. Nothing was checked, and the time on screen froze. Without zone.js, Angular has no idea a timer changed a field.', play: P('plain') },
+      { title: 'A signal: only its readers', text: 'The card\'s <span class="mono">waited</span> signal (its waiting-time clock) changed every second, with no click anywhere. Only PatientCard was refreshed: signals tell Angular exactly which views read them, so it doesn\'t touch the rest of the tree.', play: P('sig') },
+      { title: 'The zoneless trap', text: 'Our first attempt at this step\'s feature was a clock in the header. It used a plain field that <span class="mono">setInterval</span> updated every second. Nothing was checked, and the time on screen froze. Without zone.js, Angular has no idea a timer changed a field.', play: P('plain') },
       { title: 'Fix: make it a signal', text: '<span class="mono">now = signal(new Date())</span> and <span class="mono">now.set(new Date())</span> in the timer. Each write refreshed just the Header and the clock ticked. That\'s step 7 of CareDesk: a live clock, and you now know who refreshes when.', play: P('plainSig') },
       { title: 'Eager: the old default', text: 'Setting the Header to <span class="mono">ChangeDetectionStrategy.Eager</span> (called <span class="mono">Default</span> before v22) made it refresh on <b>every</b> pass, here after a click deep in the card, even though nothing in the Header changed.', play: P('eagerClick') }
     ]

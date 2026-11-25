@@ -112,8 +112,8 @@
     <h1>Builder</h1>
     <ul class="lede">
       <li>Build a complex object <b>step by step</b> through readable method calls, then get the finished object from <span class="mono">Build()</span>.</li>
-      <li>It replaces <b>telescoping constructors</b>: <span class="mono">new Appointment(p, d, t, 30, true, null, "R12", 2, false)</span>. Which <span class="mono">true</span> is which?</li>
-      <li><span class="mono">Build()</span> is the one place to <b>validate the combination</b>, so the object you get back is always valid and can be immutable.</li>
+      <li>It replaces <b>telescoping constructors</b> (many constructor overloads, each with one more parameter), such as <span class="mono">new Appointment(p, d, t, 30, <span class="mono">true</span>, null, "R12", 2, false)</span>. Which true is which?</li>
+      <li><span class="mono">Build()</span> is the one place to check that the combination of values is valid. So the object you get back is always valid, and it can be immutable (it never changes after creation).</li>
       <li>You use builders daily: <span class="mono">StringBuilder</span>, <span class="mono">WebApplication.CreateBuilder()</span>, <span class="mono">DbContextOptionsBuilder</span>, <span class="mono">UriBuilder</span>.</li>
     </ul>
   </header>
@@ -194,7 +194,7 @@
     </ul>
     <div class="notes" style="margin-top:14px">
       <div class="note"><p><b>Builders you already use:</b> <span class="mono">WebApplication.CreateBuilder(args)</span> → configure services → <span class="mono">Build()</span>; <span class="mono">DbContextOptionsBuilder.UseSqlServer(…)</span>; EF Core's <span class="mono">modelBuilder.Entity&lt;T&gt;().HasKey(…)</span>; <span class="mono">StringBuilder.Append(…).ToString()</span>; <span class="mono">UriBuilder</span>; <span class="mono">ConfigurationBuilder</span>.</p></div>
-      <div class="note"><p><b>GoF vs fluent builder:</b> the original GoF Builder separates a director (the steps) from builders (how each step is done, e.g. HTML vs PDF report). Today "builder" usually means the fluent style; the director is optional.</p></div>
+      <div class="note"><p>GoF (Gang of Four, the 1994 Design Patterns book) vs fluent builder: the original GoF Builder separates a director, which decides the steps, from builders, which decide how each step is done (for example an HTML or a PDF report). Today "builder" usually means the fluent style; the director is optional.</p></div>
     </div>
   </section>
 
@@ -206,7 +206,7 @@
     <p class="sub">Answer before you open each card.</p>
     <div class="quiz">
       <details><summary>What is the telescoping constructor problem?<span class="go">Show answer</span></summary>
-        <div class="ans"><p>A chain of constructors, each adding one more optional parameter. Callers pass long positional lists (<span class="mono">true, null, 2</span>) that are hard to read and easy to swap by mistake, and combinations explode.</p></div></details>
+        <div class="ans"><p>A chain of constructors, each adding one more optional parameter. Callers pass long lists of values by position (<span class="mono">true, null, 2</span>). They are hard to read and easy to swap by mistake. And the number of combinations grows very fast.</p></div></details>
       <details><summary>Why validate in Build() instead of in each setter method?<span class="go">Show answer</span></summary>
         <div class="ans"><p>Many rules involve several fields and the order of calls is free. Only at <span class="mono">Build()</span> is the whole picture known, so it's the one place that can guarantee the object is valid.</p></div></details>
       <details><summary>What does a director add?<span class="go">Show answer</span></summary>

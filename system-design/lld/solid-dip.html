@@ -104,7 +104,7 @@
     <h1>Dependency Inversion Principle</h1>
     <ul class="lede">
       <li><b>High-level modules</b> (business rules) shouldn't depend on <b>low-level modules</b> (SQL, SMTP, HTTP). Both should depend on an <b>abstraction</b>.</li>
-      <li>The abstraction belongs to the <b>high-level side</b>: the domain defines <span class="mono">IBookingRepository</span>, the SQL project implements it. That's the "inversion": the arrow now points from detail to policy.</li>
+      <li>The abstraction belongs to the <b>high-level side</b>: the domain defines <span class="mono">IBookingRepository</span>, the SQL project implements it. That's the "inversion": the code dependency (the arrow in a diagram) now points from the detail (SQL code) to the policy (business rules).</li>
       <li><b>Dependency injection</b> (passing the implementation in through the constructor) is how you wire it up. DI is the mechanism; DIP is the direction.</li>
       <li>Biggest everyday payoff: you can test business rules with a <b>fake</b> instead of a real database.</li>
     </ul>
@@ -171,7 +171,7 @@
       <li><span class="if">Where does the interface go?</span><span class="arrow">→</span><span class="then">next to the code that <b>uses</b> it (domain), named in domain terms</span></li>
       <li><span class="if">Who creates the concrete classes?</span><span class="arrow">→</span><span class="then">the composition root (Program.cs / DI container), nowhere else</span></li>
       <li><span class="if">"We use DI, so we follow DIP"</span><span class="arrow">→</span><span class="then">only if what's injected is an abstraction the high-level code owns</span></li>
-      <li><span class="if">Stable, side-effect-free code (string, Math, your own value objects)</span><span class="arrow">→</span><span class="then">depend on it directly; no interface needed</span></li>
+      <li>Stable code that doesn't touch the outside world (string, Math, your own value objects)<span class="arrow">→</span>Depend on it directly; no interface needed</li>
     </ul>
   </div>
     <div class="sub-block" aria-labelledby="refH">
@@ -190,7 +190,7 @@
     <div class="notes" style="margin-top:14px">
       <div class="note"><p><b>The two statements</b> (Robert C. Martin, 1996): high-level modules should not depend on low-level modules, both should depend on abstractions; and abstractions should not depend on details, details should depend on abstractions.</p></div>
       <div class="note"><p><b>Ownership matters:</b> if <span class="mono">IBookingRepository</span> lives in the Infrastructure project, the domain still references infrastructure and nothing was inverted. Put it in the domain, name it in domain language, and use domain types in its signatures. This is the heart of Clean Architecture and Ports &amp; Adapters.</p></div>
-      <div class="note"><p><b>In practice:</b> a Service that creates its Repository depends on a concrete low-level class. Introduce an interface, inject it through the constructor, and the service no longer knows which repository it uses or how it works. Most projects have one implementation per interface, so the main practical win is mocking in tests.</p></div>
+      <div class="note"><p><b>In practice:</b> a Service that creates its Repository depends on a concrete low-level class. Introduce an interface, inject it through the constructor, and the service no longer knows which repository it uses or how it works. Most projects have one implementation per interface, so the main practical benefit is mocking in tests: replacing the real class with a fake.</p></div>
     </div>
   </div>
   </section>
@@ -212,7 +212,7 @@
       <details><summary>Why is <span class="mono">DateTime.Now</span> inside a booking rule a DIP smell?<span class="go">Show answer</span></summary>
         <div class="ans"><p>It's a hidden dependency on a low-level detail (the system clock), so tests can't control "now". Inject a clock abstraction, such as .NET 8's <span class="mono">TimeProvider</span>.</p></div></details>
       <details><summary>Should every class get an interface?<span class="go">Show answer</span></summary>
-        <div class="ans"><p>No. Invert dependencies on <b>volatile details</b> (I/O, external services, time). Depending directly on stable, pure code is fine.</p></div></details>
+        <div class="ans"><p>No. Invert dependencies on details that change or are hard to control (I/O, external services, time). Depending directly on stable, pure code is fine.</p></div></details>
     </div>
   </div>
   </section>
@@ -304,7 +304,7 @@ public void Booking_a_taken_slot_throws()
     root: $('dipStory'), show, tipLabel: 'Interview tip',
     steps: [
       { title: 'Policy depends on a detail', text: '<span class="mono">BookingService</span> holds the clinic\'s booking rules: the <b>high-level</b> part. It creates <span class="mono">SqlBookingRepository</span> itself, so the Domain project must reference Infrastructure. The arrow points from policy down to detail.' },
-      { title: 'Why that hurts', text: 'Testing "a taken slot is rejected" now needs a real database. Moving to another store, or adding caching, means editing the booking rules. Detail changes leak upward.' },
+      { title: 'Why that hurts', text: 'Testing "a taken slot is rejected" now needs a real database. Moving to another store, or adding caching, means editing the booking rules. A change in a low-level detail forces changes in the high-level business rules.' },
       { title: 'Introduce an abstraction the domain owns', text: 'The domain declares what it needs: <span class="mono">IBookingRepository</span>, in <b>its own</b> project and in its own words (IsTaken, Save). BookingService depends only on that.' },
       { title: 'The arrow flips', text: '<span class="mono">SqlBookingRepository</span> implements the domain\'s interface, so now <b>Infrastructure references Domain</b>. The source-code dependency points from detail to policy. That reversal is the "inversion".', tip: 'Draw the project references before and after. Interviewers want to hear that the interface lives with the high-level code; otherwise nothing was inverted.' },
       { title: 'Constructor injection wires it', text: 'BookingService receives an <span class="mono">IBookingRepository</span> through its constructor. Only <span class="mono">Program.cs</span>, the composition root, knows the concrete class and registers it with the DI container.' },
@@ -352,7 +352,7 @@ public void Booking_a_taken_slot_throws()
     dom.g.classList.add(v === 'domain' ? 'ok' : 'bad');
     $('owStatus').innerHTML = v === 'domain'
       ? '<b class="ok-text">Inverted.</b> Domain references nothing below it; Infrastructure depends on Domain to implement its interface. Domain can be built and tested alone.'
-      : '<b class="bad-text">Not inverted.</b> There\'s an interface, but Domain must still reference Infrastructure to see it, and it drags SQL packages along. Move the interface to Domain.';
+      : '<b class="bad-text">Not inverted.</b> There\'s an interface, but Domain must still reference Infrastructure to see it, and that reference brings in the SQL packages too. Move the interface to Domain.';
   }
   K.seg($('owSeg'), own); own('infra');
 })();

@@ -95,8 +95,8 @@
     <ul class="lede">
       <li>A <b>security group</b> is a virtual firewall around EC2 instances, with <b>inbound</b> and <b>outbound</b> rules.</li>
       <li>It has <b>allow rules only</b>. Inbound is <b>blocked by default</b>; outbound is <b>allowed by default</b>. Replies to allowed traffic flow back automatically (<b>stateful</b>).</li>
-      <li>A rule = protocol + <b>port</b> + <b>source</b>: an IP range (<span class="mono">0.0.0.0/0</span>, <span class="mono">203.0.113.10/32</span>) or <b>another security group</b>.</li>
-      <li><b>Timeout</b> = blocked by the security group. <b>Connection refused</b> = it got through, but nothing is listening.</li>
+      <li>A rule has a protocol, a <b>port</b> and a <b>source</b>. The source is an IP range (<span class="mono">0.0.0.0/0</span> is every IPv4 address; <span class="mono">203.0.113.10/32</span> is one address) or <b>another security group</b>.</li>
+      <li><b>Timeout</b> = blocked by the security group. <b>Connection refused</b> means the traffic got through the security group, but no application is listening on that port.</li>
     </ul>
   </header>
   <div class="aws-trail"></div>
@@ -116,9 +116,9 @@
       <li>Rules are <b>allow-only</b>: there is no "deny" rule. Anything not allowed is dropped.</li>
       <li><b>Default</b>: all <b>inbound blocked</b>, all <b>outbound allowed</b>.</li>
       <li><b>Stateful</b>: if a request is allowed in, its reply goes out automatically (and vice versa).</li>
-      <li>Rule = type/protocol, <b>port</b> (or range), <b>source</b>: CIDR (<code>0.0.0.0/0</code> = all IPv4, <code>x.x.x.x/32</code> = one IP), IPv6 range, or <b>another security group</b>.</li>
-      <li>Referencing a security group keeps working when instances' IPs change, which suits app tiers and load balancers.</li>
-      <li>Many-to-many: one group on many instances; one instance with several groups (rules combine). Groups are tied to a <b>Region and VPC</b>.</li>
+      <li>A rule has a type/protocol, a <b>port</b> (or port range) and a <b>source</b>. The source can be a CIDR (an IP address range: <code>0.0.0.0/0</code> means all IPv4 addresses, <code>x.x.x.x/32</code> means one IP), an IPv6 range, or <b>another security group</b>.</li>
+      <li>A rule that names another security group keeps working when instances' IPs change. This suits app tiers (layers such as web servers and app servers) and load balancers.</li>
+      <li>One security group can be attached to many instances, and one instance can have several security groups (their rules are combined). Groups are tied to a <b>Region and VPC</b>.</li>
       <li>Keep <b>SSH in its own group</b>, open only to your IP. Opening 443 isn't enough for HTTPS; the server also needs a certificate.</li>
       <li><b>Ports</b>: <b>21</b> FTP, <b>22</b> SSH and SFTP, <b>80</b> HTTP, <b>443</b> HTTPS, <b>3389</b> RDP (Windows).</li>
     </ol></div>
@@ -248,7 +248,7 @@
       text: 'Add an inbound rule: <b>HTTP, TCP 80, source 0.0.0.0/0</b> (every IPv4 address). Now visitors reach the web server and its reply flows back.',
       play: async run => { base(2); await atk(run, 'vis', true, 'HTTP :80'); await net.send(['ec2', 'gate', 'vis'], { run, tone: 'green', label: '200 OK' }); } },
     { title: 'SSH only from your IP',
-      text: 'Add <b>SSH, TCP 22, source 203.0.113.10/32</b>: your IP and nothing else. You get in; an unknown laptop scanning port 22 is dropped. Keep admin ports narrow.',
+      text: 'Add <b>SSH, TCP 22, source 203.0.113.10/32</b>: your IP and nothing else. You get in; an unknown laptop scanning port 22 is dropped. Open admin ports (like SSH 22) only to the few IP addresses that need them.',
       tip: '/32 = exactly one IPv4 address.',
       play: async run => { base(3); await atk(run, 'you', true, 'SSH :22'); await atk(run, 'oth', false, 'SSH :22'); } },
     { title: 'Outbound open, replies automatic',

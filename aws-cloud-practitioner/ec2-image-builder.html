@@ -90,7 +90,7 @@
     <p class="crumbs">AWS CLF-C02 / EC2 instance storage / 4</p>
     <h1>EC2 Image Builder</h1>
     <ul class="lede">
-      <li><b>EC2 Image Builder</b> automates making AMIs: <b>build → test → distribute</b>, on a <b>schedule</b> or when packages update.</li>
+      <li><b>EC2 Image Builder</b> makes AMIs for you in three steps: build, test and distribute. It runs on a <b>schedule</b> or when packages are updated.</li>
       <li>It launches a temporary <b>builder instance</b>, installs your <b>components</b>, and creates the AMI.</li>
       <li>It can launch a <b>test instance</b> from the new AMI and run your tests, then copy the AMI to <b>several Regions</b>.</li>
       <li>The service is <b>free</b>; you pay for the EC2 instances it runs and the AMI storage.</li>
@@ -241,7 +241,7 @@
   }
   const STEPS = [
     { title: 'Why automate AMIs?',
-      text: 'A custom AMI goes stale: every week there are OS patches and new versions. Rebuilding it by hand (launch, install, create image, copy to Regions) is slow and error-prone. <b>EC2 Image Builder</b> runs that whole routine as a <b>pipeline</b>.' },
+      text: 'A custom AMI soon becomes out of date: every week there are new OS patches and new software versions. Rebuilding it by hand (launch, install, create image, copy to Regions) is slow and error-prone. <b>EC2 Image Builder</b> runs that whole routine as a <b>pipeline</b>.' },
     { title: 'Trigger',
       text: 'The pipeline starts on a <b>schedule</b> (e.g. weekly), automatically <b>when updated packages</b> are available, or <b>manually</b>.',
       play: async run => { base(1); await net.send(['trig', 'build'], { run, tone: 'cyan', label: 'start' }); } },
@@ -252,10 +252,10 @@
       text: 'When the components finish, an <b>AMI is created</b> from the builder instance, and the builder is terminated. Same as "Create image", but automatic.',
       play: async run => { base(3); await net.send(['build', 'ami'], { run, label: 'create AMI' }); } },
     { title: 'Test it (optional)',
-      text: 'A <b>test instance</b> is launched <b>from the new AMI</b> and your tests run: does it boot, does the app start, are ports closed. A failure stops the pipeline, so a broken image is never shipped.',
+      text: 'A <b>test instance</b> is launched <b>from the new AMI</b> and your tests run: does it boot, does the app start, are ports closed. If a test fails, the pipeline stops, so a broken image is never sent out to be used.',
       play: async run => { base(4); await net.send(['ami', 'test'], { run, tone: 'cyan', label: 'launch' }); net.badge('test', 'tests pass', 'ok'); } },
     { title: 'Distribute to Regions',
-      text: 'The tested AMI is <b>copied to every Region</b> in the distribution settings, so Auto Scaling groups around the world launch the same golden image.',
+      text: 'The tested AMI is <b>copied to every Region</b> in the distribution settings. So Auto Scaling groups around the world launch the same golden image (the approved standard image).',
       play: async run => { base(5); await Promise.all(['e', 'p', 'u'].map(r => net.send(['ami', r], { run, tone: 'green' }))); } },
     { title: 'Who pays for what',
       text: 'Image Builder itself is <b>free</b>. You pay for the <b>builder and test instances</b> while they run, and for the <b>AMI storage</b> in every Region it is distributed to.' }

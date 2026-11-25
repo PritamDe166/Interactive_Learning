@@ -41,7 +41,7 @@ SPEC = {
  "lede": [
   "Python's operators and built-ins call <b>dunder methods</b> (double underscore): <span class=\"mono\">a + b</span> → <span class=\"mono\">a.__add__(b)</span>, <span class=\"mono\">len(x)</span> → <span class=\"mono\">x.__len__()</span>, <span class=\"mono\">print(x)</span> → <span class=\"mono\">x.__str__()</span>.",
   "Define <span class=\"mono\">__repr__</span> (for developers) and optionally <span class=\"mono\">__str__</span> (for users) so objects print usefully.",
-  "<b>@property</b> makes a method read like an attribute; <b>@classmethod</b> gets the class (alternative constructors); <b>@staticmethod</b> gets neither.",
+  "<b>@property</b> lets you read a method like an attribute (no brackets). <b>@classmethod</b> gives the method the class instead of self; it is often used for alternative constructors (other ways to create an object). <b>@staticmethod</b> gets neither the object nor the class.",
   "<b>@dataclass</b> writes <span class=\"mono\">__init__</span>, <span class=\"mono\">__repr__</span> and <span class=\"mono\">__eq__</span> from type-annotated fields: the quickest way to a clean data class."
  ],
  "walk": {"title": "money and patients done properly", "code":
@@ -80,7 +80,7 @@ print(ravi, ravi.is_senior, ravi == Patient("Ravi", 64))''',
   {"at": 36, "title": "print uses __str__, repr uses __repr__", "text": "<span class=\"mono\">print(fee)</span> called <span class=\"mono\">__str__</span>: <span class=\"mono\">Rs 1,450.50</span> for people. <span class=\"mono\">repr(fee)</span> called <span class=\"mono\">__repr__</span>: <span class=\"mono\">Money(145050)</span>, unambiguous, for logs and debugging. Storing paise as an int avoids float rounding errors."},
   {"at": 50, "title": "@dataclass writes the boilerplate", "text": "From the annotated fields <span class=\"mono\">name: str</span>, <span class=\"mono\">age: int</span>, <span class=\"mono\">visits: list</span>, the decorator generated <span class=\"mono\">__init__</span>, <span class=\"mono\">__repr__</span> and <span class=\"mono\">__eq__</span>.", "tip": "<span class=\"mono\">field(default_factory=list)</span> gives each patient its own new list: the dataclass way around the mutable-default trap."},
   {"at": 51, "title": "The generated __init__", "text": "<span class=\"mono\">Patient(\"Ravi\", 64)</span> set name, age and a fresh empty visits list. We didn't write a single <span class=\"mono\">self.x = x</span>."},
-  {"at": 52, "title": "@property: a computed attribute", "text": "<span class=\"mono\">ravi.is_senior</span> has no brackets, yet it runs the method. Callers read it like data; you can later change how it's computed without breaking them."},
+  {"at": 52, "title": "@property: a computed attribute", "text": "<span class=\"mono\">ravi.is_senior</span> has no brackets, yet it runs the method. Callers read it like data. Later you can change how it is computed without breaking the code that uses it."},
   {"at": "end", "title": "Free repr and equality", "text": "<span class=\"mono\">print(ravi)</span> shows <span class=\"mono\">Patient(name='Ravi', age=64, visits=[])</span>, and two patients with equal fields compare equal. A plain class would print an address and compare by identity."}
  ]},
  "walk_out": "Rs 1,450.50 Money(145050) / Patient(name='Ravi', age=64, visits=[]) True True",
@@ -148,7 +148,7 @@ print(ravi, ravi.is_senior, ravi == Patient("Ravi", 64))''',
     </div>''',
  "notes": [
   ["Added", "<b>Fixing the repo's classes:</b> <span class=\"mono\">Car</span> and <span class=\"mono\">Employee</span> are mostly data, so <span class=\"mono\">@dataclass</span> would remove their __init__ boilerplate and give printable objects; <span class=\"mono\">display_car_info()</span> becomes <span class=\"mono\">__str__</span>."],
-  ["Added", "<b>Coming from C#:</b> @property ≈ a C# property with get/set; dunders ≈ operator overloads and ToString()/Equals()/GetHashCode() overrides; @dataclass ≈ a <span class=\"mono\">record</span>. Python has no interfaces by default: duck typing, or <span class=\"mono\">typing.Protocol</span> / <span class=\"mono\">abc.ABC</span> when you want them."]
+  ["Added", "<b>Coming from C#:</b> @property ≈ a C# property with get/set; dunders ≈ operator overloads and ToString()/Equals()/GetHashCode() overrides; @dataclass ≈ a <span class=\"mono\">record</span>. Python has no interfaces by default. It uses duck typing: if an object has the method you need, you can use it. When you want interfaces, use <span class=\\\"mono\\\">typing.Protocol</span> or <span class=\\\"mono\\\">abc.ABC</span>."]
  ],
  "quiz": [
   {"q": "<span class=\"mono\">from dataclasses import dataclass\\n@dataclass(frozen=True)\\nclass P:\\n    x: int\\np = P(1); p.x = 2</span>", "code": "from dataclasses import dataclass\n@dataclass(frozen=True)\nclass P:\n    x: int\np = P(1); p.x = 2", "expect": "FrozenInstanceError", "a": "<b class=\"mono\">FrozenInstanceError</b>. Frozen dataclasses are immutable (and hashable)."},

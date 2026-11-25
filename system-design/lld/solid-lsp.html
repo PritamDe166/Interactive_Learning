@@ -112,7 +112,7 @@
       <li>Anywhere the code expects a base type, you must be able to pass <b>any subtype</b> and still get correct behaviour.</li>
       <li>"Is-a" in plain English isn't enough. A Square <i>is a</i> rectangle in maths, yet a <span class="mono">Square</span> subclass breaks code written for <span class="mono">Rectangle</span>.</li>
       <li>Red flags: an override that <b>throws NotImplementedException / NotSupportedException</b>, does nothing, or quietly changes what the method promises.</li>
-      <li>Rule of thumb: a subtype may <b>accept more and promise more</b>, never <b>demand more or deliver less</b>.</li>
+      <li>Rule of thumb: a subtype may accept more kinds of input and give stronger results. It must never require more from its inputs or give weaker results than the base type.</li>
     </ul>
   </header>
 
@@ -191,9 +191,9 @@
       </table>
     </div>
     <div class="notes" style="margin-top:14px">
-      <div class="note"><p><b>Origin:</b> Barbara Liskov introduced the idea in a 1987 keynote on data abstraction; Liskov and Jeannette Wing formalised it in 1994 as "behavioural subtyping", with the pre/postcondition, invariant and history rules above.</p></div>
+      <div class="note"><p><b>Origin:</b> Barbara Liskov introduced the idea in a 1987 keynote on data abstraction. Liskov and Jeannette Wing formalised it in 1994 as "behavioural subtyping", with rules for preconditions, postconditions, invariants and history (the history rule: a subtype must not change state in ways the base type never allows).</p></div>
       <div class="note"><p><b>Real .NET example:</b> arrays and <span class="mono">ReadOnlyCollection&lt;T&gt;</span> implement <span class="mono">ICollection&lt;T&gt;</span> but throw <span class="mono">NotSupportedException</span> from <span class="mono">Add</span>. Code that takes <span class="mono">ICollection&lt;T&gt;</span> and adds will crash at run time. It's both an LSP and an interface-segregation problem, which is why the read-only interfaces were introduced.</p></div>
-      <div class="note"><p><b>In practice:</b> a "not implemented" override breaks LSP because the child can't stand in for the parent; the fix in the Parent/Child example is a shared <span class="mono">Human</span> base with <span class="mono">Adult</span> and <span class="mono">Child</span> subclasses.</p></div>
+      <div class="note"><p><b>In practice:</b> a "not implemented" override breaks LSP because the child can't be used in place of the parent. In the Parent/<span class="mono">Child</span> example, the fix is a shared <span class="mono">Human</span> base with <span class="mono">Adult</span> and Child subclasses.</p></div>
     </div>
   </div>
   </section>
@@ -213,7 +213,7 @@
       <details><summary>A subclass of <span class="mono">PaymentGateway</span> adds "amount must be under ₹10,000". Problem?<span class="go">Show answer</span></summary>
         <div class="ans"><p>Yes: a <b>strengthened precondition</b>. Code that worked with the base (any amount) fails with the subtype. Put the limit in the base contract, or handle large amounts differently.</p></div></details>
       <details><summary>May a subtype return a <i>more specific</i> type or accept <i>more</i> inputs?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>Yes.</b> Promising more (covariant returns, stronger guarantees) and accepting more (weaker preconditions) is safe. Demanding more or delivering less is not.</p></div></details>
+        <div class="ans"><p><b>Yes.</b> Promising more (covariant returns, meaning a more specific return type, or stronger guarantees) and accepting more (weaker preconditions) is safe. Demanding more or delivering less is not.</p></div></details>
       <details><summary>How can you catch LSP violations automatically?<span class="go">Show answer</span></summary>
         <div class="ans"><p>Write <b>contract tests</b> against the base type or interface (an abstract test class) and run the same suite for every implementation.</p></div></details>
     </div>
@@ -321,7 +321,7 @@ void StartWeekday(List<Adult> adults)    // only types that can work
     steps: [
       { title: 'A Parent class', text: '<span class="mono">Parent</span> can eat, sleep, go to work and make dinner. <span class="mono">Child</span> inherits from it to reuse eating and sleeping. Sounds reasonable.' },
       { title: 'Child can\'t keep the promises', text: 'A child can\'t go to work or make dinner, so those overrides <b>throw NotImplementedException</b>. The compiler is happy; the promise Parent made is broken.' },
-      { title: 'Code written for Parent crashes', text: '<span class="mono">StartWeekday</span> takes a list of Parents and calls <span class="mono">GoToWork()</span> on each. It works for Dad and Mum, then blows up on the Child that was passed in as a Parent.',
+      { title: 'Code written for Parent crashes', text: '<span class="mono">StartWeekday</span> takes a list of Parents and calls <span class="mono">GoToWork()</span> on each. It works for Dad and Mum, then crashes with an exception on the Child that was passed in as a Parent.',
         play: async run => { for (let k = 0; k < 3; k++) { const f = fam[k]; f.g.classList.remove('dim'); f.g.classList.add(k < 2 ? 'ok' : 'bad'); await K.sleep(500, run); } } },
       { title: 'Fix the hierarchy, not the caller', text: 'Move what everyone shares into <span class="mono">Human</span>. <span class="mono">Adult</span> adds work and cooking, <span class="mono">Child</span> adds school. No type promises something it can\'t do, and StartWeekday asks for exactly what it needs: Adults.', tip: 'Don\'t "fix" LSP with <span class="mono">if (p is Child) continue;</span> in the caller. Type checks in callers are the symptom, not the cure.' },
       { title: 'The classic: Square is a Rectangle?', text: 'In maths a square is a rectangle, so <span class="mono">Square : Rectangle</span> looks natural. To stay square, it overrides both setters to change <b>both sides</b>. Here\'s some code written for Rectangle.' },

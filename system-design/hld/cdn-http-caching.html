@@ -106,8 +106,8 @@
       <li>A <b>CDN</b> keeps copies of your responses on edge servers close to users.</li>
       <li><b>Pull</b> CDNs fetch from your origin on the first miss; <b>push</b> CDNs get files uploaded ahead of time.</li>
       <li>The <b>Cache-Control</b> header decides who may store a response (browser, CDN) and for how long.</li>
-      <li><b>ETag + 304</b> lets a stale copy be re-validated without downloading it again.</li>
-      <li>Static files get a <b>hash in the name</b> and a one-year cache; HTML stays short-lived. Purge is the emergency brake.</li>
+      <li>An ETag is a version tag on a response. The browser can ask "is version X still current?", and the server answers 304 (Not Modified) if it is, so the old copy is reused without downloading it again.</li>
+      <li>Static files get a <b>hash in the name</b> and a one-year cache; HTML stays short-lived. Purge (telling the CDN to delete a copy now) is for emergencies only.</li>
     </ul>
   </header>
 
@@ -247,7 +247,7 @@
         set(m) { m.badge('bc', 'HIT', 'teal'); m.state('bc', 'ok'); m.state('edge', 'dim'); m.state('origin', 'dim'); },
         async play(m, r) { m.state('edge', 'dim'); m.state('origin', 'dim'); await m.send(['br', 'bc'], { run: r, label: 'fresh?' }); m.badge('bc', 'HIT', 'teal'); m.state('bc', 'ok'); } },
       { title: 'After 5 minutes: revalidate with If-None-Match',
-        text: 'The browser copy is now stale but probably unchanged. It asks the edge "still <b>\"a1\"</b>?". The edge\'s copy is still fresh, so it answers <b>304 Not Modified</b> with no body.',
+        text: 'The browser copy is now stale but probably unchanged. It asks the edge: "Is the version with ETag <b>"a1"</b> still current?" (If-None-Match: "a1"). The edge\'s copy is still fresh, so it answers <b>304 Not Modified</b> with no body.',
         set(m) { h1.textContent = 'If-None-Match: "a1"'; h2.textContent = '304 Not Modified · 0 KB'; m.badge('edge', '304', 'teal'); m.badge('bc', 'reused', 'teal'); m.state('origin', 'dim'); },
         async play(m, r) { m.state('origin', 'dim'); h1.textContent = 'If-None-Match: "a1"'; m.badge('bc', 'stale', 'muted'); await m.send(['br', 'edge'], { run: r, label: '"a1"?' }); m.badge('edge', '304', 'teal'); h2.textContent = '304 Not Modified · 0 KB'; await m.send(['edge', 'br'], { run: r, tone: 'teal', label: '304' }); m.badge('bc', 'reused', 'teal'); } },
       { title: 'A new deploy: a new file name',

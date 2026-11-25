@@ -158,7 +158,7 @@
     <div class="notes" style="margin-top:14px">
       <div class="note"><p><b>Triple-quoted text isn't a comment.</b> <span class="mono">'''…'''</span> is a string literal that Python creates and throws away (at the top of a function it becomes the docstring). Real comments start with <span class="mono">#</span>.</p></div>
       <div class="note"><p><b>It's <span class="mono">isinstance</span>, not <span class="mono">isInstance</span>.</b> Python names are case-sensitive. And <span class="mono">int(4.5)</span> doesn't round: it truncates toward zero, so <span class="mono">int(-4.5)</span> is -4.</p></div>
-      <div class="note"><p><b>Your <span class="mono">id(list1) == id(list2)</span> example is aliasing.</b> In <span class="mono">UtilityBuiltInFunctions.py</span> both ids print the same number because <span class="mono">list2 = list1</span> creates a second name, not a second list. <span class="mono">id()</span> is an object's identity while it lives (its memory address in CPython).</p></div>
+      <div class="note"><p><b>The <span class="mono">id(list1) == id(list2)</span> example shows aliasing: two names for one list.</b> In <span class="mono">UtilityBuiltInFunctions.py</span> both ids print the same number because <span class="mono">list2 = list1</span> creates a second name, not a second list. <span class="mono">id()</span> is an object's identity while it lives. In CPython (the standard Python you download) it is the memory address.</p></div>
       <div class="note"><p><b>Never use <span class="mono">is</span> to compare numbers or strings.</b> CPython reuses some small ints and short strings, so <span class="mono">is</span> may look like it works and then fail with other values. Use <span class="mono">==</span> for values; <span class="mono">is</span> for <span class="mono">None</span> (<span class="mono">if x is None</span>).</p></div>
       <div class="note"><p><b>Python has no constants.</b> By convention, UPPER_CASE names (<span class="mono">MAX_VISITS = 5</span>) mean "don't reassign". Type hints (<span class="mono">age: int = 34</span>) are documentation for tools like mypy; Python doesn't enforce them at runtime.</p></div>
     </div>
@@ -196,7 +196,7 @@
   const MAP = [0, 1, 4, 5, 6, 7, 8, 9, 10];
   const STEPS = [
     { title: 'Before anything runs',
-      text: 'Python hasn\'t run line 1 yet. On the left, the <b>next line to run</b> is highlighted. On the right, two lists start empty: <b>names</b> (grouped by frame; at the top level it\'s the "Global frame") and <b>objects</b>.' },
+      text: 'Python hasn\'t run line 1 yet. On the left, the <b>next line to run</b> is highlighted. On the right, two lists start empty: <b>names</b> and <b>objects</b>. Names are grouped by frame, a set of names for one part of the program. At the top level it\'s the "Global frame".' },
     { title: 'A name points to an object',
       text: '<span class="mono">patient = "Asha"</span> does two things: Python <b>creates a str object</b> holding <span class="mono">\'Asha\'</span>, then <b>binds the name</b> <span class="mono">patient</span> to it. The arrow is the binding. The name itself stores no text.' },
     { title: 'Every object has a type; names don\'t',

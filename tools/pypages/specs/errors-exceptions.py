@@ -36,8 +36,8 @@ SPEC = {
  "title": "Errors &amp; exceptions", "title_plain": "Errors & exceptions",
  "desc": "Python fundamentals: reading a traceback, try/except/else/finally, catching specific exceptions, raising your own, and how an exception travels up the call stack.",
  "lede": [
-  "An <b>exception</b> is an object Python raises when something goes wrong. It stops the current line and travels <b>up the call stack</b> until something catches it.",
-  "<span class=\"mono\">try</span> runs risky code; <span class=\"mono\">except SomeError</span> handles that error; <span class=\"mono\">else</span> runs only if nothing went wrong; <span class=\"mono\">finally</span> <b>always</b> runs.",
+  "An <b>exception</b> is an object Python raises when something goes wrong. It stops the current line and moves up through the functions that called it (the call stack) until some code catches it.",
+  "<span class=\\\"mono\\\">try</span> runs risky code. <span class=\\\"mono\\\">except SomeError</span> handles that error. <span class=\\\"mono\\\">else</span> runs only if nothing went wrong. <span class=\\\"mono\\\">finally</span> <b>always</b> runs.",
   "Catch <b>specific</b> exceptions (<span class=\"mono\">ValueError</span>, <span class=\"mono\">KeyError</span>), not everything, so real bugs still show up.",
   "Use <span class=\"mono\">raise</span> to signal a problem yourself. Read a <b>traceback</b> from the bottom: the last line says what went wrong."
  ],
@@ -68,7 +68,7 @@ except ValueError as e:
   {"at": {"after": 5}, "title": "A matching except handles it", "text": "Python checks the except clauses in order. <span class=\"mono\">except ValueError</span> matches, so its block runs. The error is <b>handled</b>: the program carries on normally."},
   {"at": {"event": "return", "n": 2}, "title": "finally runs here too", "text": "The except block returns None, and on the way out <span class=\"mono\">finally</span> still prints. That's what finally is for: closing files, releasing locks, logging."},
   {"at": {"after": 9}, "title": "raise your own exception", "text": "For \"-5\" the conversion works, so <span class=\"mono\">else</span> runs and finds a negative age. <span class=\"mono\">raise ValueError(...)</span> signals a problem the caller must deal with.", "tip": "Raise when the function can't do its job. Returning a special value like -1 is easy for callers to ignore."},
-  {"at": {"event": "return", "n": 3}, "title": "The exception leaves the function", "text": "Nothing inside <span class=\"mono\">parse_age</span> catches this one (the <span class=\"mono\">except</span> only covers the <span class=\"mono\">try</span> block), so after finally runs the frame ends <b>without a return value</b> and the exception moves up to the caller."},
+  {"at": {"event": "return", "n": 3}, "title": "The exception leaves the function", "text": "Nothing inside <span class=\\\"mono\\\">parse_age</span> catches this one, because the <span class=\\\"mono\\\">except</span> only covers the <span class=\\\"mono\\\">try</span> block. So finally runs, and then the function's frame ends <b>without a return value</b>. The exception moves up to the caller."},
   {"at": "end", "title": "Caught by the caller", "text": "The caller's <span class=\"mono\">try/except ValueError as e</span> catches it. <span class=\"mono\">e</span> is the exception object; printing it shows the message. If no one had caught it, Python would print a traceback and stop."}
  ]},
  "walk_out": "checked 42 / 42 / not a number: abc / checked abc / None / checked -5 / caught: negative age -5",
@@ -155,8 +155,8 @@ except ValueError as e:
  "notes": [
   ["Added", "<b>The first real use of try/except:</b> <span class=\"mono\">int(input(...))</span> crashes on any typo. Wrapping it lets you handle a non-number and ask again."],
   ["Added", "<b>Custom exceptions:</b> <span class=\"mono\">class SlotTakenError(Exception): pass</span> then <span class=\"mono\">raise SlotTakenError(\"9:00\")</span>. Callers can catch exactly that."],
-  ["Added", "<b>Re-raising:</b> inside except, a bare <span class=\"mono\">raise</span> re-raises the same error after logging it; <span class=\"mono\">raise NewError(...) from e</span> wraps it while keeping the original cause."],
-  ["Updated", "<b>Recent versions:</b> Python 3.11 added <span class=\"mono\">except*</span> and ExceptionGroup for errors from several tasks at once, plus <span class=\"mono\">e.add_note()</span>. Python 3.14 lets you drop the brackets when catching several types: <span class=\"mono\">except ValueError, TypeError:</span> (PEP 758)."]
+  ["Added", "<b>Re-raising:</b> inside except, a bare <span class=\\\"mono\\\">raise</span> (raise with nothing after it) raises the same error again, for example after you log it. <span class=\\\"mono\\\">raise NewError(...) from e</span> raises a new error and keeps the original one as its cause."],
+  ["Updated", "<b>Recent versions:</b> Python 3.11 added <span class=\\\"mono\\\">except*</span> and ExceptionGroup, for handling errors from several tasks that run at the same time. It also added <span class=\\\"mono\\\">e.add_note()</span> to attach extra text to an error. Python 3.14 lets you drop the brackets when catching several types: <span class=\"mono\">except ValueError, TypeError:</span> (PEP 758)."]
  ],
  "quiz": [
   {"q": "<span class=\"mono\">try:\\n    print(\"a\")\\nexcept Exception:\\n    print(\"b\")\\nfinally:\\n    print(\"c\")</span>", "code": "try:\n    print(\"a\")\nexcept Exception:\n    print(\"b\")\nfinally:\n    print(\"c\")", "expect": "a / c", "a": "<b class=\"mono\">a</b> then <b class=\"mono\">c</b>. No error, so no except."},

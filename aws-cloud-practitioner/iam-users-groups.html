@@ -128,7 +128,7 @@
       <li>The <b>root user</b> is created automatically with the account and has full access. Use it only for root-only tasks; protect it with MFA.</li>
       <li><b>One IAM user = one person</b> (or one workload). Never share users or credentials.</li>
       <li><b>Groups contain users only</b>, never other groups. A user can be in <b>several groups</b>, or in none.</li>
-      <li>Permissions come from <b>policies</b>, JSON documents attached to users, groups or roles. A user gets the <b>union</b> of everything attached to them and their groups.</li>
+      <li>Permissions come from <b>policies</b>, JSON documents attached to users, groups or roles. A user gets the <b>union</b> (all permissions combined) of everything attached to them and to their groups.</li>
       <li><b>Default is deny</b>: with no policy allowing an action, the request fails.</li>
       <li><b>Least privilege</b>: grant only what each job needs. "Give everyone AdministratorAccess" is the wrong answer.</li>
       <li>Prefer attaching policies to <b>groups</b> over attaching them to individual users.</li>
@@ -282,7 +282,7 @@
       play: async run => { base(7); net.badge('iam', ''); net.badge('Fred', ''); await net.send(['Fred', 'iam'], { run, label: 'ec2:DescribeInstances', tone: 'red' }); net.badge('iam', 'implicit deny', 'bad'); net.badge('Fred', 'AccessDenied', 'bad'); } },
     { title: 'Least privilege',
       text: 'Give each group <b>only what that job needs</b>. If Developers only read EC2, don\'t give them EC2 full access, and certainly not AdministratorAccess. Less access means less damage when a password leaks or someone makes a mistake, and fewer surprise costs.',
-      tip: '"Least privilege" answers narrow permissions; broad admin access is almost never the right option.' }
+      tip: 'When a question is about "least privilege", the answer gives narrow permissions. Broad admin access is almost never the right option.' }
   ];
   K.story({ root: $('story'), steps: STEPS, show: base });
 

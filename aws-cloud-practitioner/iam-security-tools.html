@@ -119,10 +119,10 @@
   <section aria-labelledby="rmH">
     <h2 id="rmH">Points to remember</h2>
     <div class="remember"><ol>
-      <li><b>IAM credential report</b> = <b>account-level</b>, downloaded as <b>CSV</b>. Lists all IAM users <b>and the root user</b> with: password enabled / last used / last changed, <b>MFA active</b>, access keys active / <b>last rotated</b> / last used, certificates.</li>
-      <li>Use it to find: users <b>without MFA</b>, <b>old or unused access keys</b>, old passwords, stale users.</li>
+      <li><b>IAM credential report</b> = <b>account-level</b>, downloaded as <b>CSV</b>. It lists all IAM users <b>and the root user</b>. For each one it shows: whether a password is enabled and when it was last used and last changed; whether MFA is active; whether access keys are active and when they were <b>last rotated</b> and last used; and certificates.</li>
+      <li>Use it to find users <b>without MFA</b>, <b>old or unused access keys</b>, old passwords, and users who no longer sign in.</li>
       <li>It can be generated <b>once every 4 hours</b>; AWS keeps one report.</li>
-      <li><b>IAM Access Advisor</b> = <b>last accessed information</b> for a <b>user, group, role or policy</b>: which services it is allowed to use, which <b>policy</b> grants them, and <b>when</b> each was last accessed (tracked for at least 400 days).</li>
+      <li><b>IAM Access Advisor</b> shows <b>last accessed information</b> for a <b>user, group, role or <b>policy</b></b>. It lists which services it is allowed to use and which policy grants them. It also shows <b>when</b> each service was last accessed (tracked for at least 400 days).</li>
       <li>Use it to <b>remove unused permissions</b>: if a user with AdministratorAccess only ever touches EC2 and S3, narrow their policy.</li>
       <li>Exam trigger words: "which users have no MFA / old keys" → <b>credential report</b>; "which services has this user used" → <b>Access Advisor</b>.</li>
       <li>Related (later topics): <b>IAM Access Analyzer</b> finds resources shared publicly or with other accounts; <b>AWS Trusted Advisor</b> flags root without MFA; <b>CloudTrail</b> is the full log of API calls.</li>
@@ -137,7 +137,7 @@
     <div class="card">
       <div class="scroll"><table class="rep" id="au"></table></div>
       <div class="controls" style="justify-content:flex-start;margin-top:10px"><button class="btn primary" id="auCheck" type="button">Check my audit</button><button class="btn" id="auReset" type="button">Reset</button></div>
-      <p class="nf-cap" id="auCap">Today is 1 Nov 2026. Rule of thumb: everyone with console access needs MFA; keys older than 90 days get rotated; users idle for 90+ days get reviewed.</p>
+      <p class="nf-cap" id="auCap">Today is 1 Nov 2026. Simple rules: everyone with console access needs MFA. Keys older than 90 days should be rotated. Users not active for 90+ days should be reviewed.</p>
     </div>
   </section>
 
@@ -239,7 +239,7 @@
     { title: 'Read it row by row',
       text: 'Each row shows the password (enabled, last used), <b>MFA active</b>, and each access key (active, <b>last rotated</b>, last used). The root row should say MFA <b>true</b> and no keys.' },
     { title: 'Spot the problems',
-      text: '<b>Pritam</b> has no MFA. <b>CI-Bot</b>\'s key hasn\'t been rotated for over a year. <b>old-intern</b> hasn\'t signed in for months and has no MFA: probably a leaver to remove. Fix these and rerun the report.',
+      text: '<b>Pritam</b> has no MFA. <b>CI-Bot</b>\'s key hasn\'t been rotated for over a year. <b>old-intern</b> hasn\'t signed in for months and has no MFA: probably someone who has left the company, so remove the user. Fix these and rerun the report.',
       tip: '"Find users without MFA or with old keys" → credential report.' },
     { title: 'Access Advisor: what Charles really uses',
       text: 'Open <b>Users → Charles → Last accessed</b>. Access Advisor lists every service his policies allow (all 400+, thanks to AdministratorAccess), which policy grants it, and <b>when he last used it</b>. It also works for groups, roles and policies.',

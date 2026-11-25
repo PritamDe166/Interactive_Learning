@@ -94,8 +94,8 @@
     <p class="crumbs">System Design / LLD / Creational / L13</p>
     <h1>Simple Factory &amp; Factory Method</h1>
     <ul class="lede">
-      <li>Both answer one question: <b>who decides which class to <span class="mono">new</span>?</b> Callers shouldn't; they should ask for "a notifier" and get the right one.</li>
-      <li><b>Simple factory</b>: one class with a <span class="mono">Create(type)</span> method and a switch. Not a GoF pattern, but the most common.</li>
+      <li>Both answer one question: who decides which class to create with new? Callers shouldn't; they should ask for "a notifier" and get the right one.</li>
+      <li><b>Simple factory</b>: one class with a <span class="mono">Create(type)</span> method and a switch. It is not one of the GoF (Gang of Four book) patterns, but it is the most common.</li>
       <li><b>Factory method</b> (GoF): a base class calls an abstract <span class="mono">CreateX()</span>; each subclass decides what to create.</li>
       <li>In ASP.NET Core the DI container is usually your factory: inject <span class="mono">INotifier</span>, or pick by key with keyed services.</li>
     </ul>
@@ -105,7 +105,7 @@
   <nav id="pageNav"></nav>
 
   <section id="learn" data-nav="Learn">
-    <h2 class="sec-h"><span class="sec-n">1</span>Learn: three ways to stop scattering <span class="mono">new</span></h2>
+    <h2 class="sec-h"><span class="sec-n">1</span>Learn: three ways to stop writing <span class="mono">new</span> in many different places</h2>
     <p class="sec-sub">Appointment reminders go out by email or SMS, and WhatsApp is coming. Step through with <b>Next ▶</b>.</p>
     <div class="sub-block">
       <h3 class="stage-title sub">Walkthrough: who creates the notifier?</h3>
@@ -187,7 +187,7 @@
     </ul>
     <div class="notes" style="margin-top:14px">
       <div class="note"><p><b>Why "factory method" confuses people:</b> any static method that returns a new object (<span class="mono">Guid.NewGuid()</span>, <span class="mono">TimeSpan.FromMinutes()</span>) is casually called a factory method. The GoF pattern is narrower: an <b>overridable</b> creation step inside a class, so subclasses choose the product.</p></div>
-      <div class="note"><p><b>Link to SOLID:</b> a simple factory still breaks open-closed (edit the switch for each new type) but contains the damage to one file. Factory method and keyed DI keep the code closed: new types are new classes. And callers depend on <span class="mono">INotifier</span>, not concrete classes (dependency inversion).</p></div>
+      <div class="note"><p><b>Link to SOLID:</b> a simple factory still breaks the open-closed principle (you must edit the switch for each new type). But the edit is limited to one file. Factory method and keyed DI keep existing code closed to edits: a new type is just a new class. And callers depend on <span class="mono">INotifier</span>, not concrete classes (dependency inversion).</p></div>
     </div>
   </section>
 
@@ -329,9 +329,9 @@ public class ReminderJob(IServiceProvider sp)
       { title: 'WhatsApp arrives: three edits', text: 'The new channel means finding and <b>editing every caller</b>. Miss one and that flow silently never sends WhatsApp.', play: async run => { for (const c of aCall) { c.g.classList.add('bad'); await K.sleep(400, run); } } },
       { title: 'Simple factory: one place decides', text: 'Move the decision into <span class="mono">NotifierFactory.Create(channel)</span>. Callers now depend on the factory and <span class="mono">INotifier</span>, nothing else.' },
       { title: 'WhatsApp arrives: one edit', text: 'Add one line to the switch and one new class. Callers are untouched. Still an edit to tested code, but in exactly one place.', tip: 'Say: "a simple factory isn\'t a GoF pattern, but it\'s the one I\'d write first". It shows you know both.' },
-      { title: 'Factory method: subclasses decide', text: '<span class="mono">ReminderSender</span> owns the algorithm (build text, send). The one step that varies, <b>which notifier</b>, is an abstract <span class="mono">CreateNotifier()</span> each subclass overrides.' },
+      { title: 'Factory method: subclasses decide', text: '<span class="mono">ReminderSender</span> owns the algorithm (build text, send). Only one step varies: <b>which notifier</b> to use. That step is an abstract <span class="mono">CreateNotifier()</span> method, and each subclass overrides it.' },
       { title: 'WhatsApp arrives: no edits', text: 'Add <span class="mono">WhatsAppReminderSender</span>; it overrides one method. No switch exists, so nothing existing changes: open-closed.', play: async run => { subs[2].g.classList.remove('gone'); subs[2].g.classList.add('on'); await K.sleep(500, run); } },
-      { title: 'In .NET the container is your factory', text: 'Register each notifier with a key; resolve by the patient\'s channel. Constructor arguments (API keys, HttpClient) are wired by DI too, so no class calls <span class="mono">new</span> on a dependency.', tip: 'Mention IHttpClientFactory and ILoggerFactory as factories you already use daily.' }
+      { title: 'In .NET the container is your factory', text: 'Register each notifier with a key; resolve by the patient\'s channel. DI also supplies the constructor arguments (API keys, HttpClient), so no class has to call <span class="mono">new</span> on a dependency.', tip: 'Mention IHttpClientFactory and ILoggerFactory as factories you already use daily.' }
     ]
   });
 

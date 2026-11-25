@@ -108,7 +108,7 @@
       <li><b>Cache-aside</b>: your code checks the cache, reads the DB on a miss and fills the cache.</li>
       <li><b>Read-through</b>: same flow, but the cache layer does the loading for you.</li>
       <li><b>Refresh-ahead</b>: hot keys are reloaded before they expire, so nobody waits on a miss.</li>
-      <li>The <b>TTL</b> and the <b>cache key</b> decide how fresh and how reusable each entry is.</li>
+      <li>The <b>TTL</b> (time-to-live: how long an entry may stay in the cache) and the <b>cache key</b> decide how fresh and how reusable each entry is.</li>
     </ul>
   </header>
 
@@ -187,8 +187,8 @@
         </tbody>
       </table>
     </div>
-    <div class="note">Caching at the query level (key = hash of the SQL) vs the object level (key = <code>product:12</code>): object-level keys are easier to invalidate when one row changes, which is why the System Design Primer recommends them.</div>
-    <div class="note"><code>HybridCache</code> (generally available since March 2025) wraps the read-through style around an in-process L1 and an optional distributed L2. Its stampede protection covers one process.</div>
+    <div class="note">You can cache at the query level (key = hash of the SQL) or the object level (key = <code>product:12</code>). Object-level keys are easier to invalidate (delete) when one row changes. That is why the System Design Primer recommends them.</div>
+    <div class="note"><code>HybridCache</code> (generally available since March 2025) uses the read-through style with two levels: L1, a cache in the app's own memory (in-process), and an optional L2, a shared distributed cache such as Redis. Its stampede protection covers one process.</div>
   </section>
 
   <section id="test" data-nav="Test">
@@ -201,7 +201,7 @@
       <details><summary>Cache-aside and read-through make the same trips. So what's actually different?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>Who owns the loading code.</b> In cache-aside every caller checks, loads and stores. In read-through the cache layer has the loader, so callers just ask the cache.</p></div></details>
       <details><summary>Why is the first request after a deploy slower even with a cache?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>The cache is cold.</b> Lazy strategies only fill on a miss. Pre-warm the hottest keys, or use refresh-ahead for them.</p></div></details>
+        <div class="ans"><p>The cache is cold (empty). Lazy strategies, like cache-aside, only fill the cache on a miss. Pre-warm the hottest keys, or use refresh-ahead for them.</p></div></details>
       <details><summary>Your TTL is 10 minutes and data changes every minute. What do users see?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>Up to 10-minute-old data.</b> Shorten the TTL or delete the key when the data changes.</p></div></details>
       <details><summary>Two tenants share a Redis. What must the key include?<span class="go">Show answer</span></summary>

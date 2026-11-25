@@ -141,7 +141,7 @@
     <div class="scroll">
       <svg class="diagram narrow" id="fwd" viewBox="0 0 1000 220" aria-label="Forward proxy acts for clients; reverse proxy acts for servers"></svg>
     </div>
-    <p class="sub">Same mechanism, different side. A forward proxy hides the <b>clients</b> (company egress proxy, VPN). A reverse proxy hides the <b>servers</b>.</p>
+    <p class="sub">Same mechanism, different side. A forward proxy hides the <b>clients</b>, for example a company proxy for all outgoing (egress) traffic, or a VPN. A reverse proxy hides the <b>servers</b>.</p>
   </div>
     <span id="h12"></span>
     <div class="sub-block" aria-labelledby="l4Title">
@@ -172,7 +172,7 @@
     </div>
   </div>
     <h3 class="sec-h3" id="h11">Gateway patterns and keeping the front door up</h3>
-    <p class="sub">BFF and aggregation are what a gateway does beyond routing; DNS balancing and active-passive / active-active are how the balancers themselves stay available. Press <b>▶ Play</b> on a card.</p>
+    <p class="sub">BFF (backend for frontend) and request aggregation are jobs a gateway does beyond routing. DNS balancing, active-passive and active-active are ways to keep the balancers themselves running. Press <b>▶ Play</b> on a card.</p>
     <div id="atlas"></div>
   </section>
 
@@ -213,11 +213,11 @@
     <h3 class="sec-h3" id="fixH">Corrections and additions</h3>
     <div class="notes">
       <div class="note"><p><b>A server with no proxy in front doesn't return 502.</b> 502 Bad Gateway is produced by a proxy or gateway when its upstream misbehaves. An overloaded bare server shows up as timeouts, refused connections or 503s.</p></div>
-      <div class="note"><p><b>The server doesn't validate certificates in normal TLS</b>; the client does. The server's TLS cost is the key exchange and signing. Offloading that is what TLS termination saves (validation happens on the server only with mutual TLS).</p></div>
+      <div class="note"><p><b>The server doesn't validate certificates in normal TLS</b>; the client does. The server's TLS cost is the key exchange and signing. TLS termination saves the app server this work by doing it at the proxy. (The server validates certificates only with mutual TLS.)</p></div>
       <div class="note"><p><b>"A load balancer is a reverse proxy" is true for Layer 7.</b> Layer 4 balancers often forward TCP connections without terminating them, so they never see HTTP.</p></div>
       <div class="note"><p><b>A CDN terminating TLS doesn't remove TLS from your origin.</b> The edge usually opens its own HTTPS connection to the origin. The saving is that it reuses a few long-lived connections instead of one handshake per user.</p></div>
       <div class="note"><p><b>Health checks come in two kinds:</b> active (the balancer polls <span class="mono">/health</span> every few seconds) and passive (it notices real requests failing). <b>Connection draining</b> lets in-flight requests finish before an instance is removed for a deploy.</p></div>
-      <div class="note"><p><b>Every layer is itself a dependency.</b> Gateways and load balancers run as redundant pairs or managed services; otherwise you've moved the single point of failure, not removed it.</p></div>
+      <div class="note"><p><b>Every layer is itself a dependency.</b> Gateways and load balancers run as redundant pairs or as managed services. If they don't, the gateway itself becomes the single point of failure: you have only moved the problem.</p></div>
     </div>
   </div>
   </section>
@@ -406,7 +406,7 @@
     K.el('line', { x1: 160, y1: 230, x2: 305, y2: 175, class: 'msg solid' }, l4);
     l4._pools = pools;
     l4._p = K.el('g', {}, l4);
-    $('lStatus').textContent = lt === '4' ? 'L4 picks a backend once per connection; every request on it follows.' : 'L7 terminates TLS, reads each request, and routes by path.';
+    $('lStatus').textContent = lt === '4' ? 'An L4 balancer picks a backend once per connection. Every request sent on that connection goes to the same backend.' : 'L7 terminates TLS, reads each request, and routes by path.';
   }
   async function playL() {
     drawL();

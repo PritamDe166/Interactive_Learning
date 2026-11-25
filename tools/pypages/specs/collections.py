@@ -9,7 +9,7 @@ SPEC = {
  "lede": [
   "<b>list</b> <span class=\"mono\">[ ]</span>: ordered, changeable, duplicates allowed. The everyday container.",
   "<b>tuple</b> <span class=\"mono\">( )</span>: ordered but <b>fixed</b>. Good for records like (lat, lon) and for unpacking.",
-  "<b>set</b> <span class=\"mono\">{ }</span>: no order, <b>no duplicates</b>, very fast <span class=\"mono\">in</span> checks, maths like union and intersection.",
+  "<b>set</b> <span class=\\\"mono\\\">{ }</span>: no order and <b>no duplicates</b>. Check<span class=\\\"mono\\\">in</span>g \"is x in the set?\" is very fast. Sets also support maths like union and intersection.",
   "<b>dict</b> <span class=\"mono\">{key: value}</span>: look things up by key. Keys are unique; insertion order is kept."
  ],
  "walk": {"title": "four containers for one clinic", "code":
@@ -29,12 +29,12 @@ for key, value in patient.items():
  "steps": [
   {"at": {"after": 1}, "title": "A list holds references", "text": "Each cell of the list points to a str object. The boxes underneath are <b>indexes</b> 0, 1, 2. \"Asha\" appears twice: lists allow duplicates."},
   {"at": {"after": 2}, "title": "append() changes the list in place", "text": "No new list is made: the same object grows by one cell. That's what <b>mutable</b> means. append() returns <span class=\"mono\">None</span>, so never write <span class=\"mono\">visits = visits.append(...)</span>."},
-  {"at": {"after": 3}, "title": "pop(0) removes and returns", "text": "<span class=\"mono\">pop(0)</span> takes out the first item and hands it back, so <span class=\"mono\">first</span> now points to \"Asha\". The others shift left: indexes are renumbered.", "tip": "<span class=\"mono\">pop()</span> from the end is fast; <span class=\"mono\">pop(0)</span> has to shift everything. For a real queue use <span class=\"mono\">collections.deque</span>."},
+  {"at": {"after": 3}, "title": "pop(0) removes and returns", "text": "<span class=\"mono\">pop(0)</span> takes out the first item and hands it back, so <span class=\"mono\">first</span> now points to \"Asha\". The others shift left: indexes are renumbered.", "tip": "<span class=\\\"mono\\\">pop()</span> from the end is fast. <span class=\\\"mono\\\">pop(0)</span> is slower because every other item has to move one place left. For a real queue use <span class=\"mono\">collections.deque</span>."},
   {"at": {"after": 5}, "title": "A tuple, then unpacking", "text": "<span class=\"mono\">point</span> is a tuple: it can't grow or change. <span class=\"mono\">lat, lon = point</span> <b>unpacks</b> it, one name per item. The count must match, or you get a ValueError."},
   {"at": {"after": 6}, "title": "set() drops duplicates", "text": "Building a set from the list keeps only one \"Asha\". Sets have <b>no index</b>: the order you see is not guaranteed, and <span class=\"mono\">unique[0]</span> is an error."},
   {"at": {"after": 7}, "title": "Sets are mutable too", "text": "<span class=\"mono\">add()</span> puts John in. Adding \"Ravi\" again would change nothing. Checking <span class=\"mono\">\"Ravi\" in unique</span> is very fast, even for millions of items."},
   {"at": {"after": 8}, "title": "A dict maps keys to values", "text": "Each row is a <b>key → value</b> pair. You look values up by key, not by position: <span class=\"mono\">patient[\"name\"]</span>."},
-  {"at": {"after": 10}, "title": "Assign to update or add", "text": "<span class=\"mono\">patient[\"age\"] = 42</span> replaces an existing value; <span class=\"mono\">patient[\"city\"] = \"Pune\"</span> adds a new pair. Same syntax, Python checks whether the key exists."},
+  {"at": {"after": 10}, "title": "Assign to update or add", "text": "<span class=\"mono\">patient[\"age\"] = 42</span> replaces an existing value; <span class=\"mono\">patient[\"city\"] = \"Pune\"</span> adds a new pair. The syntax is the same for both: Python checks whether the key already exists, then replaces the value or adds a new pair."},
   {"at": {"after": 11}, "title": "get() for keys that may be missing", "text": "<span class=\"mono\">patient[\"phone\"]</span> would raise <b>KeyError</b>. <span class=\"mono\">get(\"phone\", \"n/a\")</span> returns the default instead."},
   {"at": "end", "title": "Looping over items()", "text": "<span class=\"mono\">items()</span> gives (key, value) pairs, unpacked straight into two names. Order is the order keys were added (guaranteed since Python 3.7)."}
  ]},
@@ -150,7 +150,7 @@ for key, value in patient.items():
   ["Corrected", "<b><span class=\"mono\">remove(x)</span> removes by value, not position.</b> It deletes the <b>first</b> item equal to x, which may not be the one you just added. Use <span class=\"mono\">pop()</span> to remove the last item."],
   ["Corrected", "<b><span class=\"mono\">(10.4)</span> without a comma is just a float</b>, not a tuple: parentheses don't change the type, they just group. A one-item tuple needs the comma: <span class=\"mono\">(10.4,)</span>."],
   ["Corrected", "<b>Finding an item's position.</b> Use <span class=\"mono\">fruits.index(\"orange\")</span>, or <span class=\"mono\">enumerate()</span> while looping; there's no need to import <span class=\"mono\">indexOf</span> from <span class=\"mono\">operator</span>."],
-  ["Added", "<b>Keys must be hashable:</b> str, int, tuple work as dict keys and set items; lists and dicts don't (<span class=\"mono\">TypeError: unhashable type: 'list'</span>)."]
+  ["Added", "<b>Keys must be hashable:</b> Python must be able to compute a fixed hash number for them, which in practice means immutable types. str, int and tuple work as dict keys and set items. Lists and dicts don't (<span class=\\\"mono\\\">TypeError: unhashable type: 'list'</span>)."]
  ],
  "quiz": [
   {"q": "<span class=\"mono\">nums = [3, 1, 2]; print(sorted(nums), nums)</span>", "code": "nums = [3, 1, 2]; print(sorted(nums), nums)", "expect": "[1, 2, 3] [3, 1, 2]", "a": "<b class=\"mono\">[1, 2, 3] [3, 1, 2]</b>. sorted() returns a new list; nums is unchanged."},

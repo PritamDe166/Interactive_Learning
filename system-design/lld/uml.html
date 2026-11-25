@@ -130,7 +130,7 @@
     <h1>UML: Class and Sequence Diagrams</h1>
     <ul class="lede">
       <li>UML is the standard picture language for designs. LLD mostly needs two diagrams: <b>class diagrams</b> (structure) and <b>sequence diagrams</b> (who calls whom, in order).</li>
-      <li>A class box has three parts: <b>name</b>, <b>attributes</b>, <b>operations</b>, with <b>+ − # ~</b> for visibility.</li>
+      <li>A class box has three parts: <b>name</b>, <b>attributes</b> and <b>operations</b>. Symbols show visibility: + public, − private, # protected, ~ package.</li>
       <li>Six relationships, weakest to strongest: <b>dependency</b>, <b>association</b>, <b>aggregation</b>, <b>composition</b>, <b>generalization</b> (inheritance) and <b>realization</b> (implements).</li>
       <li><b>Arrowheads point at what is depended on</b>; <b>diamonds sit on the whole</b>. Filled diamond = the parts die with the whole.</li>
       <li><b>Multiplicity</b> (<span class="mono">1</span>, <span class="mono">0..1</span>, <span class="mono">*</span>, <span class="mono">1..*</span>) says how many objects take part at each end.</li>
@@ -207,7 +207,7 @@
       <li><span class="if">Not sure if it's aggregation</span><span class="arrow">→</span><span class="then">draw a plain association and say the lifetime out loud</span></li>
       <li><span class="if">Sequence: caller waits for the result</span><span class="arrow">→</span><span class="then">solid line, filled arrowhead; reply is a dashed line</span></li>
       <li><span class="if">Sequence: publish an event, don't wait</span><span class="arrow">→</span><span class="then">solid line, open arrowhead (async)</span></li>
-      <li><span class="if">Sequence: if / else, optional step, loop</span><span class="arrow">→</span><span class="then"><span class="mono">alt</span> / <span class="mono">opt</span> / <span class="mono">loop</span> frames with a <span class="mono">[guard]</span></span></li>
+      <li><span class="if">Sequence: if / else, optional step, loop</span><span class="arrow">→</span>Draw an alt / opt / loop frame (a labelled box around the messages) with a [guard], the condition in square brackets</li>
     </ul>
     </div>
     <div class="sub-block" aria-labelledby="refH">
@@ -217,9 +217,9 @@
         <thead><tr><th>Relationship</th><th>Line and end</th><th>Means</th><th>Typical C#</th><th>Mermaid</th></tr></thead>
         <tbody>
           <tr><td>Dependency</td><td>dashed, open arrow at the used class</td><td>uses temporarily</td><td>parameter, local, static call</td><td class="mono">A ..&gt; B</td></tr>
-          <tr><td>Association</td><td>solid, optional open arrow (navigability)</td><td>knows / holds a reference</td><td>field or property</td><td class="mono">A --&gt; B</td></tr>
+          <tr><td>Association</td><td>solid line, with an optional open arrow showing navigability (which class can reach the other)</td><td>knows / holds a reference</td><td>field or property</td><td class="mono">A --&gt; B</td></tr>
           <tr><td>Aggregation</td><td>solid, hollow diamond at the whole</td><td>has parts that can live on, may be shared</td><td>collection of objects passed in</td><td class="mono">A o-- B</td></tr>
-          <tr><td>Composition</td><td>solid, filled diamond at the whole</td><td>owns parts exclusively, same lifetime</td><td>whole creates parts, never hands them out to own</td><td class="mono">A *-- B</td></tr>
+          <tr><td>Composition</td><td>solid, filled diamond at the whole</td><td>owns parts exclusively, same lifetime</td><td>the whole creates its parts and never gives them to another object to own</td><td class="mono">A *-- B</td></tr>
           <tr><td>Generalization</td><td>solid, hollow triangle at the parent</td><td>is-a, inherits</td><td class="mono">class B : A</td><td class="mono">A &lt;|-- B</td></tr>
           <tr><td>Realization</td><td>dashed, hollow triangle at the interface</td><td>implements a contract</td><td class="mono">class B : IA</td><td class="mono">IA &lt;|.. B</td></tr>
         </tbody>
@@ -233,7 +233,7 @@
           <tr><td class="mono">+ − # ~</td><td>public, private, protected, package (closest C#: <span class="mono">internal</span>)</td></tr>
           <tr><td><u>underlined</u> member</td><td>static</td></tr>
           <tr><td><i>italic</i> name, or <span class="mono">{abstract}</span></td><td>abstract class or operation</td></tr>
-          <tr><td class="mono">«interface»</td><td>interface (stereotype above the name)</td></tr>
+          <tr><td class="mono">«interface»</td><td>interface (written as a stereotype, a label in « » above the name)</td></tr>
           <tr><td class="mono">1 · 0..1 · * · 1..* · 2..5</td><td>exactly one · optional · zero or more · at least one · range</td></tr>
           <tr><td>lifeline (dashed vertical line)</td><td>a participant over time</td></tr>
           <tr><td>activation bar (thin rectangle)</td><td>the participant is executing</td></tr>
@@ -412,13 +412,13 @@ public class BookingService(INotifier notifier)   // kept as a field: associatio
     root: $('classStory'), show: showClass, tipLabel: 'Interview tip',
     steps: [
       { title: 'One class, three compartments', text: 'A class box has a <b>name</b>, then <b>attributes</b>, then <b>operations</b>. <span class="mono">-</span> is private, <span class="mono">+</span> public, <span class="mono">#</span> protected, <span class="mono">~</span> package (≈ <span class="mono">internal</span>). Only the name is required: show just the members that matter.' },
-      { title: 'Dependency: "uses for a moment"', text: '<span class="mono">BookingService.Book()</span> creates and returns an Appointment but keeps <b>no field</b> of that type. That\'s a <b>dependency</b>: a <b>dashed line with an open arrow</b> pointing at the class being used. The weakest link.' },
+      { title: 'Dependency: "uses for a moment"', text: '<span class="mono">BookingService.Book()</span> creates and returns an Appointment but keeps <b>no field</b> of that type. That\'s a <b>dependency</b>: a <b>dashed line with an open arrow</b> pointing at the class being used. It is the weakest relationship.' },
       { title: 'Association: "holds a reference"', text: 'An Appointment keeps its Patient in a property, so the link is <b>structural</b>: a <b>solid line</b>. The arrow says Appointment knows Patient, not the other way round. <span class="mono">*</span> and <span class="mono">1</span> are the <b>multiplicities</b>: many appointments, one patient each.' },
       { title: 'Aggregation: parts that live on', text: 'A Department has Doctors, but doctors are hired independently and can work in two departments. That\'s <b>aggregation</b>: a <b>hollow diamond on the whole</b>. Delete a department and the doctors are still there.', play: run => deleteWhole('dept', run) },
       { title: 'Composition: parts that die with the whole', text: 'A Clinic <b>creates</b> its Departments and nobody else owns them. That\'s <b>composition</b>: a <b>filled diamond on the whole</b>. Delete the clinic and its departments go too, while the doctors, linked by aggregation, survive.', tip: 'The test question: "if I delete the whole, do the parts go too, and can a part belong to two wholes?"', play: run => deleteWhole('clinic', run) },
       { title: 'Generalization: is-a', text: '<span class="mono">Patient : Person</span>. A <b>solid line with a hollow triangle</b> pointing at the <b>parent</b>. A Patient can be used anywhere a Person is expected.' },
       { title: 'Realization: implements an interface', text: '<span class="mono">SmsNotifier : INotifier</span>. A <b>dashed line with a hollow triangle</b> at the <b>interface</b>. BookingService holds an <span class="mono">INotifier</span> field: an association to the abstraction, not to SMS.' },
-      { title: 'Read the whole diagram', text: 'Seven links, six kinds. Two rules read every one of them: <b>arrowheads point at what is depended on</b>, and <b>diamonds sit on the whole</b>. Solid lines are structural; dashed lines are weaker (dependency) or contractual (realization).', tip: 'Choose each relationship out loud: "composition, because a department doesn\'t exist without its clinic". The reasoning scores more than the notation.' }
+      { title: 'Read the whole diagram', text: 'Seven links, six kinds. Two rules read every one of them: <b>arrowheads point at what is depended on</b>, and <b>diamonds sit on the whole</b>. Solid lines mean a lasting link held in a field. Dashed lines mean a weaker link (dependency) or a promise to implement an interface (realization).', tip: 'Choose each relationship out loud: "composition, because a department doesn\'t exist without its clinic". The reasoning scores more than the notation.' }
     ]
   });
 
@@ -520,7 +520,7 @@ public async Task<BookingResult> Book(int patientId, int slotId)
       { title: 'Lifelines: who takes part', text: 'Each participant gets a box and a dashed <b>lifeline</b>. <b>Time runs downwards</b>: vertical position shows order, not duration.' },
       { title: 'Synchronous calls', text: 'The patient posts a booking; the controller calls <span class="mono">Book()</span>. A <b>solid line with a filled arrowhead</b> is a call where the caller <b>waits</b>. The thin <b>activation bars</b> show who is busy.', play: run => draw([0, 1], run) },
       { title: 'A call and its reply', text: 'BookingService asks the repository for the slot. The answer comes back as a <b>dashed reply</b> arrow. Replies are optional when the return value is obvious.', play: run => draw([2, 3], run) },
-      { title: 'alt: the if-branch', text: 'The <span class="mono">if (slot.IsFree)</span> becomes an <b>alt</b> frame with a <b>[guard]</b>. In the first operand the slot is reserved and <span class="mono">201 Created</span> goes back to the patient.', play: run => draw([4, 6, 7], run) },
+      { title: 'alt: the if-branch', text: 'The <span class="mono">if (slot.IsFree)</span> becomes an <b>alt</b> frame with a <b>[guard]</b>. In the first part of the alt frame (its first operand), the slot is reserved and <span class="mono">201 Created</span> goes back to the patient.', play: run => draw([4, 6, 7], run) },
       { title: 'An asynchronous message', text: 'Publishing <span class="mono">BookingConfirmed</span> doesn\'t wait for anyone to send the SMS. That\'s an <b>asynchronous</b> message: <b>open arrowhead</b>, and the sender carries on immediately.', play: run => draw([5], run) },
       { title: '[else]: the other operand', text: 'If the slot is taken, the service returns <span class="mono">SlotUnavailable</span> and the controller answers <span class="mono">409 Conflict</span>. For any one request, <b>only one operand of an alt runs</b>.', play: run => draw([8, 9], run) },
       { title: 'Other frames you\'ll use', text: '<b>opt</b> = an if without else, <b>loop</b> = repeat while a guard holds, <b>par</b> = operands in parallel, <b>break</b> = leave early, <b>ref</b> = "see another diagram". Same box, different label.', tip: 'Draw the sequence for one core flow only (book, park, pay). It shows you know which object owns each step.' }

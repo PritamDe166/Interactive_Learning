@@ -102,14 +102,14 @@
   <section aria-labelledby="rmH">
     <h2 id="rmH">Points to remember</h2>
     <div class="remember"><ol>
-      <li><b>User data</b> = bootstrap script in "Advanced details" at launch. Runs <b>only once</b>, at <b>first start</b>, with <b>root</b> privileges.</li>
+      <li><b>User data</b> is a bootstrap (first-boot setup) script that you enter in "Advanced details" at launch. Runs <b>only once</b>, at <b>first start</b>, with <b>root</b> privileges.</li>
       <li>Typical uses: install updates, install software (<code>httpd</code>), download files, write config. The more it does, the longer first boot takes.</li>
       <li>"Running" in the console doesn't mean user data has finished: give it a minute before testing the website.</li>
-      <li><b>Stop</b> → no instance (compute) charge; <b>EBS still billed</b>; RAM is lost; <b>public IPv4 released</b>; <b>private IP kept</b>.</li>
+      <li>When you stop an instance: there is no instance (compute) charge, but EBS is still billed. The RAM is lost. The public IPv4 address is released, and the private IP is kept.</li>
       <li><b>Start</b> after stop → usually a <b>new public IPv4</b>; user data does <b>not</b> run again.</li>
       <li>Want a public IP that never changes? Attach an <b>Elastic IP</b> (billed hourly, like all public IPv4).</li>
       <li><b>Terminate</b> = permanent. Root volume deleted when "delete on termination" is on (default for the root volume); extra volumes and Elastic IPs remain and keep billing.</li>
-      <li>Website troubleshooting: instance running? user data finished? <b>HTTP 80</b> allowed? using <b>http://</b> not https? current public IP?</li>
+      <li>If the website does not load, check: Is the instance running? Has user data finished? Is HTTP port 80 allowed? Are you using <b>http://</b> and not https://? Are you using the current public IP?</li>
     </ol></div>
   </section>
 
@@ -203,7 +203,7 @@
       tip: 'The console says "running" before user data has finished. Be patient before declaring it broken.',
       play: async run => { base(2); await net.send(['web', 'run'], { run, label: 'GET /' }); await net.send(['run', 'web'], { run, tone: 'green', label: 'Hello' }); } },
     { title: 'Stop: compute off, disk kept',
-      text: '<b>Stop</b> shuts the OS down. Compute billing ends, the <b>EBS volume and its data stay</b> (and keep billing), memory is lost, and the <b>public IPv4 is released</b>. The private IP stays.',
+      text: '<b>Stop</b> shuts the OS down. Compute billing ends. The <b>EBS volume and its data stay</b> (and keep billing). Memory is lost, and the public IPv4 address is released. The private IP stays.',
       play: async run => { base(3); await net.send(['run', 'stopping', 'stopped'], { run, label: 'StopInstances' }); } },
     { title: 'Start: new public IP, no user data',
       text: '<b>Start</b> brings it back through pending to running, often on different hardware, with a <b>new public IPv4</b>. Old links break. User data <b>does not run again</b>; the software is already on the disk.',
@@ -213,7 +213,7 @@
       text: '<b>Terminate</b> deletes the instance. Its root EBS volume goes too when <b>delete on termination</b> is on (the default for root volumes). There is no undo. Extra volumes and Elastic IPs stay behind and keep billing.',
       play: async run => { base(5); await net.send(['run', 'shut', 'term'], { run, label: 'TerminateInstances', tone: 'red' }); } },
     { title: 'The whole map',
-      text: 'pending → running ⇄ stopping → stopped → (start) pending… and running/stopped → shutting-down → terminated. Billing for compute only happens in <b>running</b>; storage bills until it is deleted.' }
+      text: 'A new instance goes from pending to running. When you stop it, it goes from running to stopping to stopped. When you start it again, it goes back to pending and then running. When you terminate it (from running or stopped), it goes to shutting-down and then terminated. Billing for compute only happens in <b>running</b>; storage bills until it is deleted.' }
   ];
   K.story({ root: $('story'), steps: STEPS, show: base });
 

@@ -97,7 +97,7 @@
       <li><b>Amazon EBS</b> (Elastic Block Store) is the disk of an EC2 instance, but it is a <b>network drive</b>, not a disk inside the server.</li>
       <li>It is <b>persistent</b>: data stays when the instance stops, and can stay after it is terminated.</li>
       <li>A volume lives in <b>one Availability Zone</b> and attaches only to instances in that AZ.</li>
-      <li>You <b>provision</b> size (GiB) and performance (IOPS) up front and pay for what you provision.</li>
+      <li>You choose (<b>provision</b>) the size (GiB) and performance (IOPS: input/output operations per second) up front, and you pay for what you choose.</li>
     </ul>
   </header>
   <div class="aws-trail"></div>
@@ -277,7 +277,7 @@
       tip: 'Need the root disk after termination? Set Delete on termination to No at launch.',
       play: async run => { base(4); await K.sleep(500, run); base(5); } },
     { title: 'The whole picture',
-      text: 'EBS: <b>network block storage</b>, <b>one AZ</b>, <b>one instance at a time</b>, <b>persistent</b>, <b>provisioned and billed by size/IOPS</b>, root deleted on terminate by default. Snapshots (next) back it up and move it.' }
+      text: 'EBS is <b>network block storage</b>. A volume lives in <b>one AZ</b> and attaches to <b>one instance at a time</b>. It is <b>persistent</b>. You provision it and are billed by size and IOPS. By default, the root volume is deleted when the instance is terminated. Snapshots (next) back it up and move it.' }
   ];
   K.story({ root: $('story'), steps: STEPS, show: base });
 

@@ -117,11 +117,11 @@
     <h2 id="rmH">Points to remember</h2>
     <div class="remember"><ol>
       <li><b>Cloud computing</b> = on-demand delivery of compute, storage, databases and other IT over the internet, with <b>pay-as-you-go</b> pricing.</li>
-      <li>The provider owns and runs the hardware; you provision through a <b>web console or API</b> in minutes.</li>
+      <li>The provider owns and runs the hardware. You provision (request and set up) resources through a <b>web console or API</b> in minutes.</li>
       <li><b>Five characteristics</b>: on-demand self-service, broad network access, resource pooling (multi-tenancy), rapid elasticity and scalability, measured service.</li>
-      <li><b>Six advantages</b> (quoted on the exam): trade CAPEX for OPEX, economies of scale, stop guessing capacity, speed and agility, stop spending money running data centres, go global in minutes.</li>
+      <li><b>Six advantages</b> (quoted on the exam): trade CAPEX for OPEX (buying hardware up front becomes paying monthly for what you use), economies of scale, stop guessing capacity, speed and agility, stop spending money running data centres, and go global in minutes.</li>
       <li><b>Deployment models</b>: private (one organisation), public (AWS, shared over the internet), hybrid (some on-premises, some cloud, connected).</li>
-      <li><b>Elasticity</b> = scale up <i>and down</i> automatically with demand; <b>scalability</b> = able to handle more load.</li>
+      <li><b>Elasticity</b> means scaling up <i>and down</i> automatically with demand. Scalability means being able to handle more load.</li>
       <li>Cloud also makes <b>high availability</b> and <b>fault tolerance</b> easier by spreading across data centres.</li>
     </ol></div>
   </section>
@@ -301,7 +301,7 @@
       play: async run => { base(2); await Promise.all([safe(net.send(['phone', 'inet', 'front', 's1'], { run })), (async () => { await K.sleep(250, run); await safe(net.send(['laptop', 'inet', 'front', 's2'], { run })); })()]); } },
     { title: 'Rapid elasticity',
       text: 'A health-camp announcement doubles the traffic. Two more servers are added in minutes, and in the evening they are removed again. Capacity <b>follows demand</b> both ways, so you stop guessing.',
-      tip: 'Characteristic 4: rapid elasticity and scalability.',
+      tip: 'This is characteristic 4 in the list: rapid elasticity and scalability. (Characteristic 3, resource pooling, comes next.)',
       play: async run => { base(2); const ps = []; for (let k = 0; k < 4; k++) { ps.push(safe(net.send(['laptop', 'inet', 'front', k % 2 ? 's2' : 's1'], { run }))); await K.sleep(150, run); } servers(['s1', 's2', 's3', 's4']); net.focus(['phone', 'laptop', 'inet', 'front', 's1', 's2', 's3', 's4', 'bill']); net.badge('s3', 'added', 'ok'); net.badge('s4', 'added', 'ok'); for (let k = 0; k < 4; k++) { ps.push(safe(net.send(['phone', 'inet', 'front', ['s1', 's2', 's3', 's4'][k]], { run }))); await K.sleep(150, run); } await Promise.all(ps); } },
     { title: 'Resource pooling (multi-tenancy)',
       text: 'Your server is a <b>virtual machine</b>. The physical host underneath may also run other companies\' virtual machines, fully isolated from yours. Sharing hardware across many customers is what makes AWS cheap at scale.',

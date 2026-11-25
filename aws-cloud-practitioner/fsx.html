@@ -84,7 +84,7 @@
     <ul class="lede">
       <li><b>Amazon FSx</b> runs well-known <b>third-party file systems</b> as a managed service, for when EFS or S3 don't fit.</li>
       <li><b>FSx for Windows File Server</b>: a Windows share (<b>SMB</b>, NTFS) joined to <b>Active Directory</b>, reachable from AWS and on-premises.</li>
-      <li><b>FSx for Lustre</b> (Linux + cluster): file storage for <b>high performance computing</b>, ML and analytics, often backed by <b>S3</b>.</li>
+      <li><b>FSx for Lustre</b> (the name comes from Linux + cluster): file storage for <b>high performance computing</b>, ML (machine learning) and analytics. It is often linked to an <b>S3</b> bucket that holds the source data.</li>
       <li>Also <b>FSx for NetApp ONTAP</b> and <b>FSx for OpenZFS</b> for teams moving those systems to AWS.</li>
     </ul>
   </header>
@@ -94,7 +94,7 @@
     <h2 id="anH">In terms you know</h2>
     <div class="card analogy">
       <div class="row head"><span>FSx</span><span>Closest thing you know</span><span>The difference</span></div>
-      <div class="row"><span class="aws">FSx for Windows File Server</span><span class="like">Your Windows file server with DFS shares and NTFS ACLs for AD groups</span><span>Same SMB share and AD permissions; AWS patches, backs up and fails it over.</span></div>
+      <div class="row"><span class="aws">FSx for Windows File Server</span><span class="like">Your Windows file server with DFS shares and NTFS ACLs for AD groups</span><span>Same SMB share and AD permissions. AWS patches it, backs it up, and switches to a standby (failover) if it breaks.</span></div>
       <div class="row"><span class="aws">FSx for Lustre</span><span class="like">A cluster's parallel scratch file system</span><span>Created in minutes, can load data straight from an S3 bucket and write results back.</span></div>
     </div>
   </section>
@@ -110,7 +110,7 @@
   <section aria-labelledby="rmH">
     <h2 id="rmH">Points to remember</h2>
     <div class="remember"><ol>
-      <li><b>FSx = managed third-party, high-performance file systems</b>. Four flavours; the exam focuses on <b>Windows File Server</b> and <b>Lustre</b>.</li>
+      <li>FSx gives you managed third-party, high-performance file systems. Four flavours; the exam focuses on <b>Windows File Server</b> and <b>Lustre</b>.</li>
       <li><b>FSx for Windows File Server</b>: Windows-native shared file system, <b>SMB protocol</b> and <b>NTFS</b>, integrated with <b>Microsoft Active Directory</b> for user security.</li>
       <li>It can be deployed across <b>two AZs</b> (Multi-AZ) for high availability.</li>
       <li>Reachable from <b>Windows EC2 instances</b> and from <b>on-premises</b> machines (over VPN or Direct Connect).</li>

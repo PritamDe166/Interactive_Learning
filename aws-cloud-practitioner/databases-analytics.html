@@ -103,8 +103,8 @@
     <ul class="lede">
       <li><b>Managed databases</b>: AWS runs the hardware, OS, patching, backups and failover; you own the data, schema and access.</li>
       <li><b>Relational</b> (SQL, joins): RDS and Aurora. <b>NoSQL</b> (flexible schema, scales out): DynamoDB, DocumentDB, Neptune.</li>
-      <li><b>Multi-AZ = availability</b>. <b>Read replicas = read scaling</b>. Don't swap them.</li>
-      <li><b>Analytics</b>: Kinesis streams in, Glue prepares, Athena / Redshift / EMR query, QuickSight shows.</li>
+      <li>Multi-AZ gives high availability: a standby copy takes over if the main database fails. Read replicas give read scaling: extra copies answer read queries. Don't confuse the two.</li>
+      <li><b>Analytics</b>: Kinesis streams data in, Glue prepares it, Athena, Redshift or EMR query it, and QuickSight shows it in dashboards.</li>
     </ul>
   </header>
 
@@ -115,10 +115,10 @@
       <div class="row head"><span>AWS</span><span>Closest idea you already know</span><span>The difference</span></div>
       <div class="row"><span class="aws">RDS</span><span class="like">SQL Server you install and patch yourself, minus the installing and patching</span><span>Managed MySQL, PostgreSQL, SQL Server, Oracle…; no OS access.</span></div>
       <div class="row"><span class="aws">Multi-AZ</span><span class="like">SQL Server Always On (sync replica)</span><span>Automatic failover to a standby in another AZ.</span></div>
-      <div class="row"><span class="aws">Read replica</span><span class="like">Readable secondary</span><span>Async copy for reporting; manual promotion.</span></div>
+      <div class="row"><span class="aws">Read replica</span><span class="like">Readable secondary</span><span>An asynchronous copy (a little behind the primary) used for reports. If needed, you promote it to be the primary by hand.</span></div>
       <div class="row"><span class="aws">DynamoDB</span><span class="like">A huge Dictionary&lt;key, item&gt; you reach over HTTPS</span><span>Serverless NoSQL key-value, ms latency at any scale.</span></div>
       <div class="row"><span class="aws">ElastiCache</span><span class="like">Redis, or IMemoryCache shared by every server</span><span>In-memory cache in front of a database.</span></div>
-      <div class="row"><span class="aws">Redshift</span><span class="like">A SQL Server reporting warehouse (OLAP cubes, star schema)</span><span>Columnar data warehouse for analytics (OLAP).</span></div>
+      <div class="row"><span class="aws">Redshift</span><span class="like">A SQL Server reporting warehouse (OLAP cubes, star schema)</span><span>Columnar data warehouse for analytics (OLAP: online analytical processing, meaning large reporting queries).</span></div>
     </div>
   </section>
 
@@ -199,7 +199,7 @@
     </div>
     <div class="cards" style="margin-top:14px">
       <div class="card"><h3>Aurora</h3><p>AWS's own MySQL/PostgreSQL-compatible engine. Storage auto-grows (up to 256 TiB) with 6 copies across 3 AZs, up to 15 low-lag replicas. <b>Aurora Serverless</b> scales capacity per second for spiky or intermittent load.</p></div>
-      <div class="card"><h3>DynamoDB</h3><p>Serverless key-value/document NoSQL, single-digit ms at any scale, no joins. <b>On-demand</b> or <b>provisioned</b> capacity. <b>DAX</b>: microsecond cache, DynamoDB only. <b>Global Tables</b>: active-active across Regions.</p></div>
+      <div class="card"><h3>DynamoDB</h3><p>DynamoDB is a serverless NoSQL database that stores key-value items and documents. It answers in single-digit milliseconds at any scale and has no joins. You choose on-demand or <b>provisioned</b> capacity. <b>DAX</b> (DynamoDB Accelerator) is a cache that answers in microseconds and works only with DynamoDB. <b>Global Tables</b> copy a table to several Regions, and every Region can accept writes (active-active).</p></div>
       <div class="card"><h3>Snapshots and backups</h3><p>Automated backups with point-in-time restore. Restoring always creates a <b>new</b> database. Copy snapshots to another Region for DR, share them with other accounts. You can't SSH into RDS.</p></div>
       <div class="card"><h3>Kinesis</h3><p>Real-time streaming. <b>Data Streams</b>: ingest and process events in real time. <b>Data Firehose</b>: deliver streams into S3, Redshift or OpenSearch with no code.</p></div>
       <div class="card"><h3>OpenSearch Service</h3><p>Managed search and log analytics (Elasticsearch fork): full-text search, log dashboards. Trigger: "search", "log analytics".</p></div>
@@ -207,7 +207,7 @@
     </div>
     <div class="notes" style="margin-top:14px">
       <div class="note"><p><b>Multi-AZ now has two forms.</b> A Multi-AZ <b>DB instance</b> has one standby that can't serve reads (the classic exam answer). A Multi-AZ <b>DB cluster</b> has two standbys in three AZs that <b>can</b> serve reads. For the exam: Multi-AZ = HA.</p></div>
-      <div class="note"><p><b>Aurora's marketing number</b>: AWS now quotes up to <b>6×</b> the throughput of MySQL and PostgreSQL; older material says 5× / 3×. If only one is offered in an exam question, go with that. Aurora Serverless v2 scales in 0.5 ACU steps and can scale to zero.</p></div>
+      <div class="note"><p><b>Aurora's marketing number</b>: AWS now quotes up to <b>6×</b> the throughput of MySQL and PostgreSQL; older material says 5× / 3×. If only one is offered in an exam question, go with that. Aurora Serverless v2 scales in steps of 0.5 ACU (Aurora Capacity Unit, a unit of memory and CPU) and can scale to zero.</p></div>
       <div class="note"><p><b>Timestream for LiveAnalytics has an end-of-support notice</b>; AWS points to Timestream for InfluxDB. ElastiCache now offers <b>Valkey</b> as well as Redis OSS and Memcached. Managed Blockchain supports Ethereum, Hyperledger Fabric and more.</p></div>
       <div class="note"><p><b>Also in the exam scope:</b> Kinesis, OpenSearch Service and SCT (cards above). Out of scope: Keyspaces, MemoryDB, MSK. Timestream and Managed Blockchain are on neither list: know only the trigger word.</p></div>
     </div>
@@ -226,7 +226,7 @@
       <details><summary>MongoDB workload, managed on AWS?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>DocumentDB.</b></p></div></details>
       <details><summary>OLAP, columnar, petabyte data warehouse?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>Redshift.</b> (RDS/Aurora are OLTP.)</p></div></details>
+        <div class="ans"><p><b>Redshift.</b> (RDS and Aurora are OLTP: online transaction processing, meaning many small reads and writes.)</p></div></details>
       <details><summary>Migrate Oracle on-prem to Aurora with minimal downtime: which two services?<span class="go">Show answer</span></summary>
         <div class="ans"><p><b>SCT</b> converts the schema, <b>DMS</b> moves the data and keeps it in sync until cut-over.</p></div></details>
     </div>
@@ -319,7 +319,7 @@
         text: 'Don\'t run big analytics on the booking database. Land data in <b>S3</b>, query files in place with <b>Athena</b> (pay per TB scanned), load a <b>Redshift</b> data warehouse for heavy BI, and show dashboards in <b>QuickSight</b>. <b>Glue</b> prepares the data; <b>Kinesis</b> streams it in real time.',
         play: async run => { const p = K.pill(P, 'data', 'alt'); for (const [a, b] of [[260, 380], [380, 500], [500, 620]]) await K.move(p, [a, 325], [b, 325], 420, run); p.remove(); } },
       { title: 'Pick by the keyword',
-        text: '<b>SQL + managed</b> → RDS. <b>Best performance, MySQL/PG</b> → Aurora. <b>Serverless key-value</b> → DynamoDB. <b>Cache</b> → ElastiCache. <b>MongoDB</b> → DocumentDB. <b>Graph</b> → Neptune. <b>Warehouse / OLAP</b> → Redshift. <b>SQL on S3</b> → Athena. <b>Move a database</b> → DMS.' }
+        text: '<b>SQL + managed</b> → RDS. Best performance with MySQL or PostgreSQL → Aurora. <b>Serverless key-value</b> → DynamoDB. <b>Cache</b> → ElastiCache. <b>MongoDB</b> → DocumentDB. <b>Graph</b> → Neptune. <b>Warehouse / OLAP</b> → Redshift. <b>SQL on S3</b> → Athena. <b>Move a database</b> → DMS.' }
     ];
     K.story({ root: $('dbStory'), steps: STEPS, show });
   })();
