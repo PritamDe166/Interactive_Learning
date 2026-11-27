@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>RDS Read Replicas, Multi-AZ &amp; Multi-Region</title>
+<meta name="description" content="RDS Multi-AZ for automatic failover, read replicas for read scaling and cross-Region replicas for disaster recovery, with a lab to write, read and lose an AZ.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+  .svc rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s, opacity .2s; }
+  .svc text { fill: var(--fg); font-size: 13px; font-weight: 700; text-anchor: middle; }
+  .svc .sm { fill: var(--muted); font-family: var(--mono); font-size: 12px; font-weight: 400; }
+  .svc.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .svc.path rect { stroke: var(--cyan); fill: var(--teal-wash); }
+  .svc.fade text { opacity: .45; }
+  .svc.fade rect { stroke: var(--line); }
+  .cat { fill: var(--muted); font-family: var(--display); font-size: 13px; }
+  .link { stroke: var(--line); stroke-width: 2; fill: none; transition: stroke .2s; }
+  .link.on { stroke: var(--cyan); stroke-width: 3; }
+  .chore rect { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; transition: fill .3s, stroke .3s; }
+  .chore.you rect { stroke: var(--accent-text); }
+  .chore.aws rect { stroke: var(--teal); fill: var(--teal-wash); }
+  .chore.you text:last-child { fill: var(--accent-text); font-weight: 700; }
+  .chore.aws text:last-child { fill: var(--good-text); font-weight: 700; }
+  .zone.down { stroke: var(--red); }
+  .ptoggles { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html" aria-current="page"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Databases &amp; analytics / 3 · Domain 3 Technology</p>
+    <h1>Read Replicas, Multi-AZ &amp; Multi-Region</h1>
+    <ul class="lede">
+      <li><b>Multi-AZ</b>: a synchronous standby in another AZ for <b>high availability</b> and automatic failover.</li>
+      <li><b>Read replicas</b>: asynchronous, read-only copies to <b>scale reads</b>; you promote one by hand.</li>
+      <li><b>Cross-Region replicas</b>: faster reads far away and <b>disaster recovery</b>.</li>
+      <li>They solve different problems and are often combined.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Multi-AZ</span><span class="like">A SQL Server Always On availability group with a synchronous secondary and automatic failover</span><span>One checkbox; the secondary isn't readable in the classic form.</span></div>
+      <div class="row"><span class="aws">Read replica</span><span class="like">A readable asynchronous secondary (or log-shipped reporting copy)</span><span>Has its own endpoint; you send reports to it.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: keeping bookings fast and available</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="A primary RDS database with a synchronous Multi-AZ standby, an asynchronous read replica for reports and a cross-Region replica in Frankfurt"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li><b>Multi-AZ</b>: standby in another AZ, <b>synchronous</b> replication, <b>automatic failover</b> to the same endpoint. For HA, not for reads (classic form).</li>
+      <li><b>Read replica</b>: <b>asynchronous</b>, read-only, own endpoint; same or another Region; can be <b>promoted</b> manually.</li>
+      <li><b>Cross-Region replica</b>: DR plus lower latency reads for distant users; cross-Region transfer is billed.</li>
+      <li>Writes always go to the primary.</li>
+      <li>Multi-AZ DB cluster (newer): two readable standbys across 3 AZs.</li>
+      <li>Aurora supports up to 15 replicas sharing one storage volume.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="rdsH">
+    <h2 class="stage-title" id="rdsH">Write, report, lose an AZ</h2>
+    <div class="stage-kind">Turn features on, then write, read, or fail AZ a</div>
+    <div class="card">
+      <div class="controls">
+        <div class="ptoggles">
+          <label class="toggle" for="maz"><input type="checkbox" id="maz" checked> Multi-AZ standby</label>
+          <label class="toggle" for="rr"><input type="checkbox" id="rr" checked> Read replica</label>
+        </div>
+        <button class="btn" type="button" id="wB">Write an appointment</button>
+        <button class="btn" type="button" id="rB">Run a heavy report</button>
+        <button class="btn" type="button" id="fB">AZ a fails</button>
+        <button class="btn" type="button" id="resetB">Reset</button>
+      </div>
+      <div class="scroll"><svg class="diagram" id="rds" viewBox="0 0 1000 330" aria-label="App, a primary database in AZ a, a standby in AZ b and a read replica in AZ c"></svg></div>
+      <p class="status-line" id="rdsStatus">The app connects to one DNS endpoint, not to a specific server.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">High availability, automatic failover</span><span class="arrow">→</span><span class="then">Multi-AZ</span></li>
+      <li><span class="if">Read-heavy workload, offload reports</span><span class="arrow">→</span><span class="then">Read replica</span></li>
+      <li><span class="if">DR or low-latency reads in another Region</span><span class="arrow">→</span><span class="then">Cross-Region read replica</span></li>
+      <li><span class="if">Synchronous replication</span><span class="arrow">→</span><span class="then">Multi-AZ</span></li>
+      <li><span class="if">Asynchronous replication</span><span class="arrow">→</span><span class="then">Read replica</span></li>
+      <li><span class="if">Turn a replica into its own database</span><span class="arrow">→</span><span class="then">Promote it</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>Read replica</th><th>Multi-AZ (instance)</th><th>Cross-Region replica</th></tr></thead>
+        <tbody>
+          <tr><td><b>Goal</b></td><td>Scale reads</td><td>High availability</td><td>DR and global reads</td></tr>
+          <tr><td><b>Replication</b></td><td>Asynchronous</td><td>Synchronous</td><td>Asynchronous</td></tr>
+          <tr><td><b>Serves traffic</b></td><td>Reads</td><td>No (standby)</td><td>Reads</td></tr>
+          <tr><td><b>Failover</b></td><td>Manual promotion</td><td>Automatic, same endpoint</td><td>Manual promotion</td></tr>
+          <tr><td><b>Transfer cost</b></td><td>Free within a Region</td><td>Included</td><td>Cross-Region charged</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><p><b>Read replica limits</b> depend on the engine; Aurora allows up to 15. Check the engine's page before quoting a number for RDS.</p></div>
+      <div class="note"><p><b>Snapshot copy</b> to another Region is the cheaper DR option when you can accept a longer recovery than a cross-Region replica.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Which RDS feature gives automatic failover to another AZ?<span class="go">Show answer</span></summary><div class="ans"><p><b>Multi-AZ</b>.</p></div></details>
+      <details><summary>A nightly report slows down bookings. What helps?<span class="go">Show answer</span></summary><div class="ans"><p>A <b>read replica</b> for the report.</p></div></details>
+      <details><summary>Can the Multi-AZ standby serve reads?<span class="go">Show answer</span></summary><div class="ans"><p>Not in a Multi-AZ <b>instance</b> deployment. (A Multi-AZ DB <b>cluster</b> has readable standbys.)</p></div></details>
+      <details><summary>Is read-replica replication synchronous?<span class="go">Show answer</span></summary><div class="ans"><p><b>No</b>, asynchronous.</p></div></details>
+      <details><summary>The primary Region goes down. What can you do with a cross-Region replica?<span class="go">Show answer</span></summary><div class="ans"><p><b>Promote</b> it to a standalone primary.</p></div></details>
+      <details><summary>Does failover change the endpoint the app uses?<span class="go">Show answer</span></summary><div class="ans"><p><b>No</b>, Multi-AZ failover keeps the same DNS endpoint.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Failover time and replica lag are typical values, not guarantees. Sources: databases notes "RDS Deployment Options: Read Replicas, Multi-AZ, and Multi-Region" and "Databases and Analytics: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.html">Multi-AZ deployments</a>; <a href="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html">Read replicas</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 20, y: 20, w: 700, h: 385, kind: 'region', label: 'ap-south-1' }, { id: 'a', x: 40, y: 200, w: 210, h: 190, kind: 'az', label: 'AZ a' }, { id: 'b', x: 265, y: 200, w: 210, h: 190, kind: 'az', label: 'AZ b' }, { id: 'c', x: 490, y: 200, w: 210, h: 190, kind: 'az', label: 'AZ c' },
+      { id: 'f', x: 750, y: 20, w: 230, h: 385, kind: 'region', label: 'eu-central-1' }],
+    nodes: {
+      app: { x: 145, y: 95, icon: 'server', kind: 'compute', label: 'Booking app' },
+      bi: { x: 595, y: 95, icon: 'chart', kind: 'user', label: 'Reports team' },
+      p: { x: 145, y: 300, icon: 'db', kind: 'db', label: 'Primary', sub: 'reads + writes' },
+      s: { x: 370, y: 300, icon: 'db', kind: 'db', label: 'Standby', sub: 'Multi-AZ' },
+      r: { x: 595, y: 300, icon: 'db', kind: 'db', label: 'Read replica', sub: 'reads only' },
+      x: { x: 865, y: 300, icon: 'db', kind: 'db', label: 'Cross-Region replica', sub: 'DR + EU reads' },
+      eu: { x: 865, y: 95, icon: 'users', kind: 'user', label: 'EU staff' }
+    },
+    links: [{ a: 'app', b: 'p' }, { a: 'p', b: 's', kind: 'priv', label: 'synchronous', at: [258, 290] }, { a: 'p', b: 'r', kind: 'dash', via: [[145, 396], [595, 396]], label: 'asynchronous', at: [370, 391] }, { a: 'bi', b: 'r' }, { a: 'r', b: 'x', kind: 'dash', label: 'async, cross-Region', at: [735, 290] }, { a: 'eu', b: 'x' }, { a: 'app', b: 's', kind: 'pub' }]
+  });
+  function base(i) {
+    net.reset(); net.zones.a.classList.remove('down'); net.node('s').label('Standby'); net.node('s').sub('Multi-AZ');
+    net.link('app', 's', 'hide');
+    const F = [['app', 'p'], ['app', 'p', 's'], ['app', 'p', 's'], ['app', 'p', 'r', 'bi'], ['p', 'r', 'bi'], ['p', 'r', 'x', 'eu'], ['app', 'p', 's', 'r', 'bi', 'x', 'eu'], null];
+    net.focus(F[i]);
+    if (i === 1) net.badge('s', 'not readable', 'info');
+    if (i === 2) { net.zones.a.classList.add('down'); net.state('p', 'down'); net.link('app', 'p', 'cut'); net.link('app', 's', ''); net.node('s').label('New primary'); net.node('s').sub('same endpoint'); net.badge('s', 'automatic failover', 'ok'); }
+    if (i === 3) net.badge('r', 'own endpoint', 'info');
+    if (i === 4) net.badge('r', 'lag ~1 s', 'info');
+    if (i === 5) net.badge('x', 'promote if Region fails', 'info');
+  }
+  const STEPS = [
+    { title: "One database instance",
+      text: ["The booking app writes to and reads from a single RDS instance in AZ a.", "If that AZ fails, or a big report hogs the CPU, bookings suffer."],
+      play: async run => { base(0); await net.send(['app', 'p'], { run, label: 'INSERT' }); } },
+    { title: "Multi-AZ: a standby in another AZ",
+      text: ["Tick <b>Multi-AZ</b> and RDS keeps a <b>standby</b> in another AZ, updated <b>synchronously</b>: a write commits only when both have it.", "The standby doesn't serve traffic. Its only job is to take over."],
+      play: async run => { base(1); await net.send(['app', 'p'], { run, label: 'INSERT' }); await net.send(['p', 's'], { run, tone: 'cyan', label: 'sync' }); } },
+    { title: "Automatic failover",
+      text: ["AZ a fails. RDS <b>fails over automatically</b>: the standby becomes the primary and the <b>same DNS endpoint</b> now points to it.", "Usually one to two minutes, no data lost, no app change."],
+      tip: "High availability, automatic failover = Multi-AZ.",
+      play: async run => { base(2); await net.send(['app', 's'], { run, label: 'INSERT', tone: 'green' }); } },
+    { title: "Read replicas: scale reads",
+      text: ["A <b>read replica</b> is a read-only copy with its own endpoint. Reports and dashboards query it, so the primary keeps serving bookings.", "Replication is <b>asynchronous</b>, so a replica can be slightly behind. Writes always go to the primary."],
+      tip: "Read-heavy, offload reporting = read replica.",
+      play: async run => { base(3); await net.send(['bi', 'r'], { run, label: 'SELECT … GROUP BY' }); } },
+    { title: "Replicas are not automatic HA",
+      text: ["If the primary fails, a read replica does <b>not</b> take over by itself. You can <b>promote</b> it to a standalone database, with its own endpoint.", "Writes not yet copied when the primary failed are lost."] },
+    { title: "Cross-Region read replica",
+      text: ["A replica in <b>another Region</b> gives users there fast reads and a <b>disaster-recovery</b> copy you can promote if the whole Region fails.", "Replication within a Region is free; cross-Region transfer is charged."],
+      play: async run => { base(5); await net.send(['p', 'r', 'x'], { run, tone: 'cyan', label: 'async' }); await net.send(['eu', 'x'], { run, label: 'SELECT' }); } },
+    { title: "Combine them",
+      text: ["Production often uses all three: Multi-AZ for availability, read replicas for read scale, a cross-Region replica for DR.", "They solve different problems."] },
+    { title: "A newer Multi-AZ form",
+      text: ["A <b>Multi-AZ DB cluster</b> (MySQL and PostgreSQL) keeps <b>two</b> readable standbys in three AZs and fails over faster.", "For the exam, \"Multi-AZ\" still means high availability, not read scaling."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+  /* ========== 1. RDS ========== */
+  const rs = $('rds');
+  const azs = [['AZ ap-south-1a', 40], ['AZ ap-south-1b', 360], ['AZ ap-south-1c', 680]];
+  const zoneEls = azs.map(([n, x]) => { const z = K.el('rect', { x, y: 130, width: 290, height: 170, rx: 14, class: 'zone' }, rs); K.text(rs, x + 12, 150, n, 'zone-label'); return z; });
+  const app = K.node(rs, 185, 50, 200, 52, 'Booking app', 'mydb.xxxx.rds…');
+  app.g.classList.add('solid');
+  const N = {
+    p: K.node(rs, 185, 225, 220, 64, 'Primary', 'reads + writes'),
+    s: K.node(rs, 505, 225, 220, 64, 'Standby', 'sync copy · not readable'),
+    r: K.node(rs, 825, 225, 220, 64, 'Read replica', 'async copy · reads only')
+  };
+  const ep = K.el('line', { x1: 185, y1: 76, x2: 185, y2: 193, class: 'msg solid' }, rs);
+  const epT = K.text(rs, 195, 140, 'writer endpoint', 'mlabel muted');
+  const lag = K.text(rs, 825, 280, '', 'mlabel muted'); lag.style.textAnchor = 'middle';
+  const rP = K.el('g', {}, rs);
+  let S;
+  function rReset() {
+    K.cancel('rds'); rP.textContent = '';
+    S = { primary: 'p', failed: false, rows: 0, rrRows: 0 };
+    N.p.g.setAttribute('class', 'node teal'); N.p.title.textContent = 'Primary'; N.p.sub.textContent = 'reads + writes';
+    N.s.g.setAttribute('class', 'node' + ($('maz').checked ? '' : ' dim')); N.s.title.textContent = 'Standby'; N.s.sub.textContent = 'sync copy · not readable';
+    N.r.g.setAttribute('class', 'node' + ($('rr').checked ? '' : ' dim')); N.r.title.textContent = 'Read replica'; N.r.sub.textContent = 'async copy · reads only';
+    zoneEls[0].classList.remove('down');
+    ep.setAttribute('x2', 185); epT.setAttribute('x', 195); epT.setAttribute('y', 140); lag.textContent = '';
+    $('rdsStatus').textContent = 'The app connects to one DNS endpoint, not to a specific server.';
+  }
+  const X = { p: 185, s: 505, r: 825 };
+  async function write() {
+    const run = K.newRun('rds');
+    if (S.failed && S.primary === 'p') { $('rdsStatus').innerHTML = '<span class="bad-text">Write failed.</span> The primary is down and there\'s no standby to fail over to.'; return; }
+    const px = X[S.primary];
+    try {
+      const w = K.pill(rP, 'INSERT appt');
+      await K.move(w, [185, 80], [px, 190], 500, run); w.remove();
+      if ($('maz').checked && S.primary === 'p') {
+        const c = K.pill(rP, 'sync copy', 'alt');
+        await K.move(c, [295, 225], [395, 225], 450, run); c.remove();
+      }
+      S.rows++;
+      const ok = K.pill(rP, 'COMMIT ✓', 'ok');
+      await K.move(ok, [px, 190], [185, 80], 450, run); ok.remove();
+      $('rdsStatus').innerHTML = $('maz').checked && S.primary === 'p' ? 'Committed only after the standby confirmed: <b>synchronous</b>, so no data is lost on failover.' : 'Committed on the primary.';
+      if ($('rr').checked && S.primary === 'p') {
+        lag.textContent = 'replica lag: ~1 s';
+        await K.sleep(700, run);
+        const a = K.pill(rP, 'async copy', 'alt');
+        await K.move(a, [295, 300], [715, 300], 700, run); a.remove();
+        S.rrRows = S.rows; lag.textContent = 'replica up to date';
+      }
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  async function report() {
+    const run = K.newRun('rds');
+    try {
+      if ($('rr').checked) {
+        const q = K.pill(rP, 'SELECT … GROUP BY');
+        await K.move(q, [185, 80], [825, 190], 700, run); q.remove();
+        N.r.g.classList.add('ok');
+        const ok = K.pill(rP, 'report rows', 'ok'); await K.move(ok, [825, 190], [185, 80], 600, run); ok.remove();
+        N.r.g.classList.remove('ok');
+        $('rdsStatus').innerHTML = 'The report ran on the <b>read replica</b> (its own reader endpoint), so the primary keeps serving bookings at full speed.' + (S.rrRows < S.rows ? ' It may be a second behind.' : '');
+      } else {
+        if (S.failed && S.primary === 'p') { $('rdsStatus').innerHTML = '<span class="bad-text">No database to query.</span>'; return; }
+        const q = K.pill(rP, 'SELECT … GROUP BY');
+        await K.move(q, [185, 80], [X[S.primary], 190], 600, run); q.remove();
+        N[S.primary].g.classList.add('bad'); N[S.primary].sub.textContent = 'CPU 98% · bookings slow';
+        await K.sleep(900, run);
+        N[S.primary].g.classList.remove('bad'); N[S.primary].sub.textContent = 'reads + writes';
+        $('rdsStatus').innerHTML = '<span class="bad-text">The report hit the primary</span> and slowed every booking. ' + ($('maz').checked ? 'The Multi-AZ standby can\'t help: it doesn\'t serve reads.' : 'Add a read replica.');
+      }
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  async function fail() {
+    const run = K.newRun('rds');
+    S.failed = true; zoneEls[0].classList.add('down');
+    N.p.g.setAttribute('class', 'node bad'); N.p.sub.textContent = 'AZ outage';
+    try {
+      await K.sleep(700, run);
+      if ($('maz').checked) {
+        const d = K.pill(rP, 'DNS → standby', 'alt');
+        await K.move(d, [185, 120], [505, 160], 700, run); d.remove();
+        S.primary = 's';
+        N.s.g.setAttribute('class', 'node teal'); N.s.title.textContent = 'New primary'; N.s.sub.textContent = 'reads + writes';
+        ep.setAttribute('x2', 505); epT.setAttribute('x', 390); epT.setAttribute('y', 112);
+        $('rdsStatus').innerHTML = '<span class="ok-text">Automatic failover</span> in about a minute or two: same endpoint, no data lost, no app change. RDS then rebuilds a new standby.';
+      } else if ($('rr').checked) {
+        $('rdsStatus').innerHTML = '<span class="bad-text">Outage.</span> No standby. You can <b>promote the read replica</b> by hand, but it\'s a separate database with a new endpoint, and writes not yet replicated are lost.';
+      } else {
+        $('rdsStatus').innerHTML = '<span class="bad-text">Outage</span> until you restore from a snapshot or backup (a new database). That\'s why production uses Multi-AZ.';
+      }
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('wB').addEventListener('click', write); $('rB').addEventListener('click', report); $('fB').addEventListener('click', fail);
+  $('resetB').addEventListener('click', rReset);
+  $('maz').addEventListener('change', rReset); $('rr').addEventListener('change', rReset);
+  rReset();
+
+})();
+</script>
+</body>
+</html>

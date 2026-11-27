@@ -150,13 +150,13 @@
    After adding or renaming pages, run: python3 tools/build_search_index.py
    and python3 tools/build_shell.py (refreshes the sidebar on every explainer page). */
 const SUBJECTS = [
-  {name:"System Design", path:"system-design/index.html", note:"HLD and LLD", pages:38,
+  {name:"System Design", path:"system-design/index.html", note:"HLD and LLD", pages:37,
    tracks:[
-     {label:"HLD", title:"Design the whole system.", blurb:"Networking, scaling, caching, then distributed systems.", n:22, unit:"explainers, 147 sessions planned", href:"system-design/hld/index.html", cta:"Explore HLD"},
+     {label:"HLD", title:"Design the whole system.", blurb:"Networking, scaling, caching, then distributed systems.", n:21, unit:"explainers, 147 sessions planned", href:"system-design/hld/index.html", cta:"Explore HLD"},
      {label:"LLD", title:"Make the details work.", blurb:"OOP and SOLID, design patterns, concurrency, then classic problems.", n:13, unit:"explainers, 67 topics planned", href:"system-design/lld/index.html", cta:"Explore LLD"}]},
-  {name:"AWS", path:"aws-cloud-practitioner/index.html", note:"CLF-C02", pages:34,
+  {name:"AWS", path:"aws-cloud-practitioner/index.html", note:"CLF-C02", pages:100,
    tracks:[
-     {label:"Cloud Practitioner", title:"Follow every request through AWS.", blurb:"Regions, AZs and edge locations, then IAM, EC2, storage, S3 and databases.", n:34, unit:"explainers, 85 topics planned", href:"aws-cloud-practitioner/index.html", cta:"Explore AWS"}]},
+     {label:"Cloud Practitioner", title:"Follow every request through AWS.", blurb:"From Regions and IAM through EC2, storage, scaling, S3, databases, containers and serverless, deployment and global apps.", n:100, unit:"explainers, every course section", href:"aws-cloud-practitioner/index.html", cta:"Explore AWS"}]},
   {name:"Python", path:"python-fundamentals/index.html", note:"Fundamentals", pages:20,
    tracks:[
      {label:"Fundamentals", title:"Watch each line run.", blurb:"Stepped line by line with edit-and-run boxes, from objects to type hints and APIs.", n:20, unit:"explainers, every topic built", href:"python-fundamentals/index.html", cta:"Explore Python"}]},
@@ -167,7 +167,18 @@ const SUBJECTS = [
    tracks:[]}
 ];
 const RECENT = [
-  {subject:"System Design", title:"How a key becomes a hash slot: CRC16, 14 bits and a hash lab", note:"H19 deep dive", href:"system-design/hld/redis-hash-slots.html", fig:["CRC16 29949|mark","slot 13565"]},
+  {subject:"AWS", title:"Sync vs async: a spike lab for queues, SQS, SNS and Kinesis", note:"Cloud integrations", href:"aws-cloud-practitioner/sync-vs-async.html", fig:["Booking","Queue|mark","Workers"]},
+  {subject:"AWS", title:"Global architectures: one AZ to active-active, plus Outposts, Wavelength, Local Zones", note:"Global 6 to 9", href:"aws-cloud-practitioner/global-architectures.html"},
+  {subject:"AWS", title:"Route 53, CloudFront, Transfer Acceleration, Global Accelerator: one request around the world", note:"Global 1 to 5", href:"aws-cloud-practitioner/route53.html"},
+  {subject:"AWS", title:"Deployment at scale: CloudFormation stack lab, CI/CD pipeline, Session Manager", note:"Deployment 1 to 13", href:"aws-cloud-practitioner/cloudformation.html"},
+  {subject:"AWS", title:"Containers and serverless: ECS, Fargate, EKS, Lambda events and cost, API Gateway", note:"Other compute 1 to 8", href:"aws-cloud-practitioner/lambda.html"},
+  {subject:"AWS", title:"Databases and analytics: 16 pages from RDS to DMS", note:"Databases 1 to 16", href:"aws-cloud-practitioner/databases-intro.html"},
+  {subject:"AWS", title:"Amazon S3: access lab, versioning, replication, storage-class cost calculator", note:"S3 1 to 9", href:"aws-cloud-practitioner/s3-basics.html"},
+  {subject:"AWS", title:"Elastic Load Balancing: health-check lab, ALB routing rules, which load balancer?", note:"ELB & ASG 2", href:"aws-cloud-practitioner/load-balancers.html", fig:["ALB|mark","EC2 ×4"]},
+  {subject:"AWS", title:"ELB & Auto Scaling review: recap, drill & 20 exam-style questions", note:"ELB & ASG review", href:"aws-cloud-practitioner/elb-review.html"},
+  {subject:"AWS", title:"Auto Scaling strategies: one day, seven policies, plus a day simulator", note:"ELB & ASG 4", href:"aws-cloud-practitioner/scaling-strategies.html"},
+  {subject:"AWS", title:"Auto Scaling groups: be the ASG, min/desired/max and AZ failure lab", note:"ELB & ASG 3", href:"aws-cloud-practitioner/auto-scaling.html"},
+  {subject:"AWS", title:"High availability, scalability & elasticity: survive-the-outage lab", note:"ELB & ASG 1", href:"aws-cloud-practitioner/ha-scalability.html"},
   {subject:"System Design", title:"Redis from zero: keys, nodes, hash slots, replicas and a pocket cluster", note:"H19 deep dive", href:"system-design/hld/redis-cluster-explained.html", fig:["slot 13565|mark","node C"]},
   {subject:"System Design", title:"Class relationships: objects, references and a GC reachability lab", note:"LLD L2", href:"system-design/lld/relationships.html", fig:["Clinic|mark","Dept"]},
   {subject:"System Design", title:"OOP pillars in C#: override vs new, constructor order, access modifier map", note:"LLD L1", href:"system-design/lld/oop-pillars.html", fig:["Report r","LabReport|on"], dark:true},

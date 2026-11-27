@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>AWS CodeBuild</title>
+<meta name="description" content="AWS CodeBuild serverless builds: buildspec, fresh build environments, artifacts and logs, pay per build minute, with a cost lab.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html" aria-current="page"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Deployment &amp; infrastructure / 7 · Domain 3 Technology</p>
+    <h1>AWS CodeBuild</h1>
+    <ul class="lede">
+      <li><b>CodeBuild</b> compiles code, runs tests and produces packages: a fully managed, <b>serverless</b> build service.</li>
+      <li>Steps are defined in a <code>buildspec.yml</code> file.</li>
+      <li>You pay only for <b>build minutes</b>; no build servers to run.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">CodeBuild</span><span class="like">An Azure DevOps hosted agent or a Jenkins build agent</span><span>Nothing to install or keep running.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: the clinic API's path from commit to servers</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="A commit flows from CodeCommit through CodeBuild (with packages from CodeArtifact) and CodeDeploy to EC2 and on-premises servers, orchestrated by CodePipeline"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>CodeBuild = fully managed, <b>serverless</b> build service: compile, test, package.</li>
+      <li>Instructions in <code>buildspec.yml</code>.</li>
+      <li>Pay per <b>build minute</b>; scales automatically.</li>
+      <li>Outputs artifacts to S3/ECR, logs to CloudWatch.</li>
+      <li>Usually started by CodePipeline or a webhook.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="bH">
+    <h2 class="stage-title" id="bH">What does a month of builds cost?</h2>
+    <div class="stage-kind">Illustrative price of $0.005 per build minute (small Linux machine) after the free minutes</div>
+    <div class="card">
+      <div class="lab-form">
+        <div class="range"><label for="bN">Builds per day <output id="bNO"></output></label><input type="range" id="bN" min="1" max="200" value="30"></div>
+        <div class="range"><label for="bM">Minutes per build <output id="bMO"></output></label><input type="range" id="bM" min="1" max="60" value="6"></div>
+      </div>
+      <div class="kpis" id="bK"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Build and test code, serverless</span><span class="arrow">→</span><span class="then">CodeBuild</span></li>
+      <li><span class="if">CodeBuild pricing</span><span class="arrow">→</span><span class="then">Per build minute</span></li>
+      <li><span class="if">Build instructions file</span><span class="arrow">→</span><span class="then">buildspec.yml</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Stage</th><th>Service</th></tr></thead>
+        <tbody>
+          <tr><td><b>Source</b></td><td>CodeCommit / GitHub</td></tr>
+          <tr><td><b>Build + test</b></td><td>CodeBuild</td></tr>
+          <tr><td><b>Deploy</b></td><td>CodeDeploy / Beanstalk / CloudFormation</td></tr>
+          <tr><td><b>Orchestrate</b></td><td>CodePipeline</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>How is CodeBuild billed?<span class="go">Show answer</span></summary><div class="ans"><p>By <b>build minutes</b>.</p></div></details>
+      <details><summary>Do you manage build servers?<span class="go">Show answer</span></summary><div class="ans"><p><b>No</b>, it is serverless.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Prices in the lab are illustrative. Sources: deployment note "AWS CodeBuild: Building and Testing Code in the Cloud" and the section exam summary; <a href="https://aws.amazon.com/codebuild/pricing/">CodeBuild pricing</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'pl', x: 180, y: 30, w: 600, h: 170, kind: 'aws', label: 'CodePipeline' }, { id: 'dc', x: 800, y: 230, w: 180, h: 175, kind: 'onprem', label: 'On-premises' }],
+    nodes: {
+      dev: { x: 80, y: 115, icon: 'code', kind: 'user', label: 'Developer', sub: 'git push' },
+      cc: { x: 280, y: 115, icon: 'branch', kind: 'storage', label: 'CodeCommit', sub: 'Git repo' },
+      cb: { x: 480, y: 115, icon: 'gear', kind: 'compute', label: 'CodeBuild', sub: 'build + test' },
+      cd: { x: 680, y: 115, icon: 'router', kind: 'mgmt', label: 'CodeDeploy' },
+      ca: { x: 480, y: 320, icon: 'box', kind: 'storage', label: 'CodeArtifact', sub: 'NuGet / npm' },
+      up: { x: 250, y: 320, icon: 'globe', kind: 'plain', label: 'nuget.org / npmjs' },
+      ec2: { x: 890, y: 90, icon: 'server', kind: 'compute', label: 'EC2 fleet' },
+      onp: { x: 890, y: 320, icon: 'server', kind: 'compute', label: 'On-prem servers' }
+    },
+    links: [{ a: 'dev', b: 'cc' }, { a: 'cc', b: 'cb' }, { a: 'cb', b: 'cd' }, { a: 'ca', b: 'cb', kind: 'dash' }, { a: 'up', b: 'ca', kind: 'dash' }, { a: 'cd', b: 'ec2' }, { a: 'cd', b: 'onp' }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['cc', 'cb'], ['cb', 'ca', 'up'], ['cb'], ['cb'], null];
+    net.focus(F[i]);
+    if (i === 2) net.badge('cb', 'billed per build minute', 'info');
+    if (i === 3) net.badge('cb', '1 test failed', 'bad');
+  }
+  const STEPS = [
+    { title: "Code needs building",
+      text: ["A new commit must be compiled (<code>dotnet build</code>), tested (<code>dotnet test</code>) and packaged before it can be deployed."],
+      play: async run => { base(0); await net.send(['cc', 'cb'], { run, label: 'source' }); } },
+    { title: "A fresh build environment each time",
+      text: ["<b>CodeBuild</b> starts a clean container with the right tools, pulls dependencies (from CodeArtifact or the internet) and runs the commands in <code>buildspec.yml</code>."],
+      tip: "Compile, test and package code, serverless = CodeBuild.",
+      play: async run => { base(1); await net.send(['up', 'ca', 'cb'], { run, label: 'packages', tone: 'cyan' }); } },
+    { title: "Pay per minute",
+      text: ["No Jenkins or TeamCity servers to keep running. Builds scale out in parallel and you pay only for the minutes they take."] },
+    { title: "Results",
+      text: ["Artifacts (a zip, a container image) go to S3 or ECR; logs to CloudWatch. A failed test stops the build.", "CodeBuild needs a trigger (a pipeline, a webhook or a manual start); it doesn't watch the repository on its own."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+  function cost() {
+    const n = +$('bN').value, m = +$('bM').value; $('bNO').textContent = n; $('bMO').textContent = m;
+    const mins = n * m * 30, paid = Math.max(0, mins - 100), c = paid * 0.005;
+    $('bK').innerHTML = [['Build minutes / month', mins.toLocaleString(), ''], ['Cost', '$' + c.toFixed(2), 'good'], ['Build servers to run', '0', 'good']].map(([l, v, k]) => `<div class="${k}"><b>${v}</b><span>${l}</span></div>`).join('');
+  }
+  ['bN', 'bM'].forEach(id => $(id).addEventListener('input', cost)); cost();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>Databases &amp; analytics: review</title>
+<meta name="description" content="AWS Cloud Practitioner: databases and analytics section review with a one-path recap, section summary, commonly confused pairs, a mixed drill and 20 exam-style questions.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-xs); }
+  .topic-links a { display: block; padding: var(--space-sm) var(--space-sm); border-radius: 0; background: var(--panel); color: var(--fg); text-decoration: none; }
+  .topic-links a:hover { border-color: var(--orange); }
+  .topic-links a span { display: block; font-size: 13px; color: var(--muted); margin-top: var(--space-3xs); }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html" aria-current="page"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Databases &amp; analytics / Section review</p>
+    <h1>Databases &amp; analytics: review</h1>
+    <ul class="lede">
+      <li><b>Relational</b>: RDS (six engines) and Aurora (cloud-native, Serverless). <b>Multi-AZ</b> for HA, <b>read replicas</b> for reads.</li>
+      <li><b>NoSQL</b>: DynamoDB (serverless key-value, DAX, global tables), DocumentDB (MongoDB), Neptune (graph).</li>
+      <li><b>In-memory</b>: ElastiCache. <b>Other</b>: Timestream (time series), Managed Blockchain.</li>
+      <li><b>Analytics</b>: Redshift (warehouse), Athena (SQL on S3), EMR (Spark/Hadoop), Glue (ETL), QuickSight (dashboards). <b>Migration</b>: DMS (+ SCT).</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="recapH">
+    <h2 class="stage-title" id="recapH">The whole section on one path</h2>
+    <div class="stage-kind">Press play · each hop is one topic</div>
+    <div class="controls"><button class="btn primary" id="recapPlay" type="button">Play a booking</button></div>
+    <div class="scroll"><svg class="diagram nf-canvas" id="recapSvg" viewBox="0 0 1000 420" aria-label="A booking app writes to Aurora, reads from ElastiCache and stores sessions in DynamoDB; Glue moves data to S3 and Redshift; Athena and Redshift feed QuickSight"></svg></div>
+    <p class="nf-cap" id="recapCap">Press <b>Play a booking</b>.</p>
+  </section>
+
+  <section aria-labelledby="sumH">
+    <h2 id="sumH">Section summary</h2>
+    <div class="sum-grid">
+      <div class="card"><h3>Relational</h3><ul><li>RDS: managed MySQL, PostgreSQL, MariaDB, Oracle, SQL Server, Db2; no SSH; backups with point-in-time restore.</li><li>Aurora: MySQL/PostgreSQL-compatible, 6 copies in 3 AZs, auto-growing storage, Serverless option.</li><li>Multi-AZ = sync standby, automatic failover. Read replica = async, reads, manual promotion.</li></ul></div>
+      <div class="card"><h3>NoSQL &amp; in-memory</h3><ul><li>DynamoDB: serverless key-value, single-digit ms, partition/sort key, no JOINs; on-demand or provisioned.</li><li>DAX: microsecond cache for DynamoDB only. Global tables: multi-Region active-active.</li><li>ElastiCache: Valkey / Redis OSS / Memcached cache for any DB.</li><li>DocumentDB = MongoDB; Neptune = graph; Timestream = time series.</li></ul></div>
+      <div class="card"><h3>Analytics</h3><ul><li>Redshift: columnar MPP data warehouse (OLAP); Serverless option.</li><li>Athena: serverless SQL on S3, $5 per TB scanned; Parquet + partitions cut cost.</li><li>EMR: managed Spark/Hadoop clusters, Spot task nodes.</li><li>Glue: serverless ETL + Data Catalog. QuickSight: BI dashboards.</li></ul></div>
+      <div class="card"><h3>Migration &amp; responsibility</h3><ul><li>DMS: migrate with the source online, ongoing change replication.</li><li>SCT converts schemas between different engines.</li><li>Managed DB: AWS patches OS and engine; you own data, schema, access and settings.</li></ul></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="topH">
+    <h2 id="topH">Topics in this section</h2>
+    <div class="topic-links">
+      <a href="databases-intro.html">Databases on AWS<span>Managed vs self-managed</span></a>
+      <a href="rds-aurora.html">RDS &amp; Aurora<span>Engines, snapshots, Serverless</span></a>
+      <a href="rds-deployments.html">Multi-AZ &amp; read replicas<span>HA vs read scaling</span></a>
+      <a href="elasticache.html">ElastiCache<span>Cache in front of a DB</span></a>
+      <a href="dynamodb.html">DynamoDB &amp; DAX<span>Query vs scan</span></a>
+      <a href="dynamodb-global-tables.html">Global tables<span>Active-active</span></a>
+      <a href="redshift.html">Redshift<span>Warehouse, columnar</span></a>
+      <a href="emr.html">EMR<span>Spark and Hadoop</span></a>
+      <a href="athena.html">Athena<span>SQL on S3</span></a>
+      <a href="quicksight.html">QuickSight<span>Dashboards</span></a>
+      <a href="documentdb.html">DocumentDB<span>MongoDB</span></a>
+      <a href="neptune.html">Neptune<span>Graph</span></a>
+      <a href="timestream.html">Timestream<span>Time series</span></a>
+      <a href="managed-blockchain.html">Managed Blockchain<span>Ledger</span></a>
+      <a href="glue.html">Glue<span>ETL + catalog</span></a>
+      <a href="dms.html">DMS<span>Database migration</span></a>
+    </div>
+  </section>
+
+  <section aria-labelledby="pairH">
+    <h2 id="pairH">Commonly confused pairs</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Pair</th><th>The difference</th></tr></thead>
+        <tbody>
+          <tr><td>RDS vs Aurora</td><td>Standard engines vs AWS's cloud-native MySQL/PostgreSQL-compatible engine</td></tr>
+          <tr><td>RDS vs DynamoDB</td><td>Relational, SQL, JOINs vs serverless key-value, flexible schema</td></tr>
+          <tr><td>Multi-AZ vs read replica</td><td>Automatic failover (HA) vs read scaling</td></tr>
+          <tr><td>ElastiCache vs DAX</td><td>Cache for any database vs cache for DynamoDB only</td></tr>
+          <tr><td>Redshift vs Athena</td><td>Warehouse with loaded data vs ad hoc SQL on files in S3</td></tr>
+          <tr><td>Athena vs QuickSight</td><td>Query engine vs visualisation</td></tr>
+          <tr><td>Glue vs DMS</td><td>Prepare data for analytics vs migrate a database</td></tr>
+          <tr><td>EMR vs Redshift</td><td>Big-data frameworks (Spark, Hadoop) vs SQL data warehouse</td></tr>
+          <tr><td>DynamoDB vs DocumentDB</td><td>Serverless key-value vs MongoDB-compatible document DB</td></tr>
+          <tr><td>DMS vs SCT</td><td>Moves the data vs converts the schema between engines</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="drillH">
+    <h2 class="stage-title" id="drillH">Mixed drill: name it</h2>
+    <div class="card" id="drill"></div>
+  </section>
+
+  <section aria-labelledby="exH">
+    <h2 id="exH">Exam-style questions</h2>
+    <p class="sub">Twenty original questions in the style of CLF-C02 and common practice sets. Pick an answer (two for "Select TWO") to see why.</p>
+    <div id="mcq"></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Section cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Managed relational, SQL, backups</span><span class="arrow">→</span><span class="then">RDS</span></li>
+      <li><span class="if">Cloud-native MySQL/PostgreSQL</span><span class="arrow">→</span><span class="then">Aurora</span></li>
+      <li><span class="if">Relational, spiky load</span><span class="arrow">→</span><span class="then">Aurora Serverless</span></li>
+      <li><span class="if">HA, automatic failover</span><span class="arrow">→</span><span class="then">Multi-AZ</span></li>
+      <li><span class="if">Read-heavy, offload reads</span><span class="arrow">→</span><span class="then">Read replica</span></li>
+      <li><span class="if">In-memory cache</span><span class="arrow">→</span><span class="then">ElastiCache</span></li>
+      <li><span class="if">Serverless NoSQL</span><span class="arrow">→</span><span class="then">DynamoDB</span></li>
+      <li><span class="if">DynamoDB cache</span><span class="arrow">→</span><span class="then">DAX</span></li>
+      <li><span class="if">Multi-Region active-active NoSQL</span><span class="arrow">→</span><span class="then">Global tables</span></li>
+      <li><span class="if">MongoDB</span><span class="arrow">→</span><span class="then">DocumentDB</span></li>
+      <li><span class="if">Graph</span><span class="arrow">→</span><span class="then">Neptune</span></li>
+      <li><span class="if">Time series</span><span class="arrow">→</span><span class="then">Timestream</span></li>
+      <li><span class="if">Data warehouse</span><span class="arrow">→</span><span class="then">Redshift</span></li>
+      <li><span class="if">Hadoop / Spark</span><span class="arrow">→</span><span class="then">EMR</span></li>
+      <li><span class="if">SQL on S3</span><span class="arrow">→</span><span class="then">Athena</span></li>
+      <li><span class="if">Dashboards</span><span class="arrow">→</span><span class="then">QuickSight</span></li>
+      <li><span class="if">ETL, data catalog</span><span class="arrow">→</span><span class="then">Glue</span></li>
+      <li><span class="if">Streaming data</span><span class="arrow">→</span><span class="then">Kinesis</span></li>
+      <li><span class="if">Migrate a database</span><span class="arrow">→</span><span class="then">DMS (+ SCT)</span></li>
+    </ul>
+  </section>
+
+  <footer>Questions are original, written to the official exam guide (Domain 3 Tasks 3.4 databases and 3.7 analytics): <a href="https://docs.aws.amazon.com/aws-certification/latest/examguides/cloud-practitioner-02.html">AWS CLF-C02 exam guide</a>, <a href="https://aws.amazon.com/products/databases/">AWS databases</a>, <a href="https://aws.amazon.com/big-data/datalakes-and-analytics/">AWS analytics</a>. Section notes: Databases and Analytics notes 1 to 17.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('recapSvg'), {
+    zones: [{ id: 'reg', x: 160, y: 20, w: 820, h: 385, kind: 'region', label: 'ap-south-1' }],
+    nodes: {
+      app: { x: 80, y: 120, icon: 'server', kind: 'compute', label: 'Booking app' },
+      ec: { x: 290, y: 60, icon: 'bolt', kind: 'db', label: 'ElastiCache' },
+      rds: { x: 290, y: 200, icon: 'db', kind: 'db', label: 'Aurora', sub: 'Multi-AZ + replica' },
+      ddb: { x: 290, y: 340, icon: 'box', kind: 'db', label: 'DynamoDB', sub: 'sessions' },
+      glue: { x: 510, y: 200, icon: 'gear', kind: 'compute', label: 'Glue ETL' },
+      s3: { x: 510, y: 340, icon: 'bucket', kind: 'storage', label: 'S3 data lake' },
+      rs: { x: 720, y: 120, icon: 'chart', kind: 'db', label: 'Redshift' },
+      at: { x: 720, y: 300, icon: 'code', kind: 'compute', label: 'Athena' },
+      qs: { x: 900, y: 210, icon: 'chart', kind: 'user', label: 'QuickSight' }
+    },
+    links: [{ a: 'app', b: 'ec' }, { a: 'app', b: 'rds' }, { a: 'app', b: 'ddb' }, { a: 'rds', b: 'glue' }, { a: 'glue', b: 's3' }, { a: 'glue', b: 'rs' }, { a: 's3', b: 'at' }, { a: 'rs', b: 'qs' }, { a: 'at', b: 'qs' }]
+  });
+  $('recapPlay').addEventListener('click', async () => {
+    const run = K.newRun('r'); net.reset(); const say = h => $('recapCap').innerHTML = h;
+    try {
+      say('A booking is written to <b>Aurora</b> (managed relational, Multi-AZ). Popular reads come from <b>ElastiCache</b>; sessions live in <b>DynamoDB</b>.');
+      await net.send(['app', 'rds'], { run, label: 'INSERT' }); await net.send(['app', 'ec'], { run, tone: 'green', label: 'hit' }); await net.send(['app', 'ddb'], { run, label: 'session' });
+      say('Nightly, <b>Glue</b> extracts and transforms the data into the <b>S3</b> data lake and <b>Redshift</b>.');
+      await net.send(['rds', 'glue', 'rs'], { run, tone: 'cyan', label: 'ETL' }); await net.send(['glue', 's3'], { run, tone: 'cyan' });
+      say('<b>Athena</b> queries the files in S3; <b>Redshift</b> runs warehouse SQL; <b>QuickSight</b> shows dashboards.');
+      await Promise.all([net.send(['s3', 'at', 'qs'], { run, tone: 'yellow' }), net.send(['rs', 'qs'], { run, tone: 'yellow' })]);
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  });
+
+  K.pick($('drill'), [{"q": "Managed relational, automatic backups, SQL Server engine.", "a": "RDS", "why": "RDS supports SQL Server."}, {"q": "MySQL-compatible, cloud-native, highest performance.", "a": "Aurora", "why": "AWS's own engine."}, {"q": "Automatic failover to another AZ.", "a": "Multi-AZ", "why": "Synchronous standby."}, {"q": "Serverless NoSQL, single-digit ms.", "a": "DynamoDB", "why": "Key-value at scale."}, {"q": "Reduce load from repeated queries on RDS.", "a": "ElastiCache", "why": "In-memory cache."}, {"q": "MongoDB workload.", "a": "DocumentDB", "why": "MongoDB-compatible."}, {"q": "Graph of connected entities.", "a": "Neptune", "why": "Graph database."}, {"q": "Data warehouse, columnar.", "a": "Redshift", "why": "OLAP."}, {"q": "SQL on S3, no servers.", "a": "Athena", "why": "Pay per TB scanned."}, {"q": "Migrate a database with minimal downtime.", "a": "DMS", "why": "Source stays online."}], ["RDS", "Aurora", "Multi-AZ", "DynamoDB", "ElastiCache", "DocumentDB", "Neptune", "Redshift", "Athena", "DMS"]);
+  K.mcq($('mcq'), [{"q": "A company needs a managed relational database with automated backups and no OS administration. Which service fits?", "o": ["Amazon DynamoDB", "Amazon RDS", "Amazon ElastiCache", "Amazon Neptune"], "a": [1], "why": "RDS is the managed relational service."}, {"q": "A web app is slow because thousands of users read the same product data from RDS. Which service reduces the load on the database?", "o": ["Amazon Redshift", "Amazon Athena", "Amazon ElastiCache", "AWS Glue"], "a": [2], "why": "An in-memory cache absorbs repeated reads."}, {"q": "Which RDS feature provides automatic failover to another Availability Zone?", "o": ["Read replica", "Multi-AZ", "Snapshot copy", "Storage autoscaling"], "a": [1], "why": "Multi-AZ keeps a synchronous standby and fails over automatically."}, {"q": "An application needs single-digit millisecond latency, no servers to manage, and items with varying attributes. Which service?", "o": ["Amazon RDS for MySQL", "Amazon Redshift", "Amazon DynamoDB", "Amazon EMR"], "a": [2], "why": "Serverless key-value NoSQL."}, {"q": "A company runs a MongoDB workload and wants a managed AWS equivalent. Which service?", "o": ["DynamoDB", "DocumentDB", "Neptune", "Aurora"], "a": [1], "why": "DocumentDB is MongoDB-compatible."}, {"q": "Which service lets analysts run SQL directly on CSV and Parquet files in Amazon S3 without loading data or managing servers?", "o": ["Redshift", "EMR", "Athena", "RDS"], "a": [2], "why": "Athena is serverless SQL on S3."}, {"q": "A team wants to reduce Athena query charges. Which actions help?", "o": ["Convert the data to Parquet", "Move the data to EBS", "Compress the data", "Enable Multi-AZ", "Use a larger instance size"], "a": [0, 2], "why": "Columnar formats and compression reduce data scanned."}, {"q": "Which service is designed for OLAP workloads and stores data in columns?", "o": ["RDS", "DynamoDB", "Redshift", "ElastiCache"], "a": [2], "why": "Redshift is a columnar data warehouse."}, {"q": "A company wants dashboards from Redshift and Athena data for business users. Which service?", "o": ["AWS Glue", "Amazon QuickSight", "Amazon EMR", "AWS DMS"], "a": [1], "why": "QuickSight is the BI service."}, {"q": "A company must migrate an on-premises Oracle database to Amazon Aurora with minimal downtime. Which service moves the data?", "o": ["AWS DMS", "AWS Glue", "Amazon Athena", "Amazon Kinesis"], "a": [0], "why": "DMS migrates while the source stays online (SCT converts the schema)."}, {"q": "Which service is the best fit for a highly connected social-graph dataset?", "o": ["Neptune", "DynamoDB", "Redshift", "QuickSight"], "a": [0], "why": "Neptune is the graph database."}, {"q": "A workload needs a Hadoop and Spark cluster for large-scale data processing. Which service?", "o": ["Amazon EMR", "Amazon Athena", "Amazon RDS", "Amazon Timestream"], "a": [0], "why": "EMR runs managed big-data frameworks."}, {"q": "Which service performs serverless ETL and keeps a data catalog used by Athena?", "o": ["AWS Glue", "AWS DMS", "Amazon QuickSight", "Amazon Neptune"], "a": [0], "why": "Glue ETL and the Glue Data Catalog."}, {"q": "A caching layer is needed specifically for a DynamoDB table, with microsecond read latency. Which service?", "o": ["ElastiCache", "DAX", "CloudFront", "RDS read replica"], "a": [1], "why": "DAX is DynamoDB-specific."}, {"q": "Which statements about Amazon RDS are true?", "o": ["Customers can SSH into the underlying instance", "AWS handles OS patching", "Automated backups support point-in-time restore", "RDS supports only MySQL", "RDS cannot run in multiple AZs"], "a": [1, 2], "why": "AWS manages the OS; point-in-time restore is built in."}, {"q": "A startup has an unpredictable, intermittent relational workload and wants no capacity planning. Which is most suitable?", "o": ["RDS for Oracle with a Reserved Instance", "Aurora Serverless", "A provisioned Redshift cluster", "Self-managed MySQL on EC2"], "a": [1], "why": "Aurora Serverless scales with load and bills per second."}, {"q": "A global app needs a NoSQL table with low-latency reads and writes in several Regions. Which feature?", "o": ["RDS cross-Region read replica", "DynamoDB global tables", "Multi-AZ", "Athena federated query"], "a": [1], "why": "Global tables are multi-Region and multi-active."}, {"q": "Under the shared responsibility model for RDS, which is the customer's responsibility?", "o": ["Patching the host OS", "Physical data centre security", "Managing database users, data and network access rules", "Replacing failed hardware"], "a": [2], "why": "You own data, users and access; AWS owns the infrastructure."}, {"q": "A company needs to ingest and process streaming data in real time. Which service fits?", "o": ["Amazon Kinesis", "Amazon Redshift", "AWS Glue", "Amazon Neptune"], "a": [0], "why": "Kinesis handles real-time streams."}, {"q": "Which statement about RDS read replicas is correct?", "o": ["They replicate synchronously", "They provide automatic failover", "They scale read traffic and can be promoted manually", "They accept writes"], "a": [2], "why": "Asynchronous, read-only, promotable."}]);
+})();
+</script>
+</body>
+</html>

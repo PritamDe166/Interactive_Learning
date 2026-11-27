@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>Amazon API Gateway</title>
+<meta name="description" content="Amazon API Gateway publishes serverless REST, HTTP and WebSocket APIs in front of Lambda, with authentication, API keys, throttling and monitoring, with a throttling lab.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html" aria-current="page"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Other compute / 6 · Domain 3 Technology</p>
+    <h1>Amazon API Gateway</h1>
+    <ul class="lede">
+      <li><b>API Gateway</b> creates, publishes, secures and monitors <b>APIs</b>, fully managed and serverless.</li>
+      <li>It gives Lambda functions an HTTPS endpoint: <b>API Gateway + Lambda</b> = a serverless API.</li>
+      <li>Adds <b>authentication</b>, <b>API keys</b>, <b>throttling</b> and monitoring.</li>
+      <li>Supports <b>REST/HTTP</b> and <b>WebSocket</b> APIs.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">API Gateway</span><span class="like">Azure API Management, or an IIS reverse proxy with auth and rate limiting in front of your Web API</span><span>Serverless; you never run the proxy.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: a serverless bookings API</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="A mobile app calls API Gateway, which authenticates, throttles a flooding script, invokes Lambda and records metrics in CloudWatch"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>API Gateway = fully managed, serverless service to <b>create, publish, maintain, monitor and secure APIs</b>.</li>
+      <li>Lambda isn't an HTTP API by default; API Gateway proxies requests to it.</li>
+      <li>Features: authentication (IAM, Cognito, authorizers), <b>API keys</b>, <b>throttling</b>, caching, stages, CloudWatch monitoring.</li>
+      <li>API types: <b>REST</b>, HTTP and <b>WebSocket</b> (real-time).</li>
+      <li>Classic serverless stack: API Gateway + Lambda + DynamoDB.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="tH">
+    <h2 class="stage-title" id="tH">Throttling and API keys</h2>
+    <div class="stage-kind">Set a limit, send traffic</div>
+    <div class="card">
+      <div class="lab-form">
+        <div class="range"><label for="tLim">Throttle limit <output id="tLimO"></output></label><input type="range" id="tLim" min="10" max="1000" step="10" value="100"></div>
+        <div class="range"><label for="tRps">Incoming traffic <output id="tRpsO"></output></label><input type="range" id="tRps" min="0" max="2000" step="10" value="300"></div>
+      </div>
+      <label class="toggle" for="tKey"><input type="checkbox" id="tKey" checked> Caller sends a valid API key</label>
+      <div class="kpis" id="tK"></div>
+      <p class="status-line" id="tSt"></p>
+    </div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Serverless REST API</span><span class="arrow">→</span><span class="then">API Gateway + Lambda</span></li>
+      <li><span class="if">Expose Lambda over HTTPS</span><span class="arrow">→</span><span class="then">API Gateway</span></li>
+      <li><span class="if">Limit requests per client</span><span class="arrow">→</span><span class="then">Throttling / usage plans</span></li>
+      <li><span class="if">Real-time two-way API</span><span class="arrow">→</span><span class="then">WebSocket API</span></li>
+      <li><span class="if">Partners need keys</span><span class="arrow">→</span><span class="then">API keys</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Feature</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><b>Integration</b></td><td>Forwards requests to Lambda, HTTP backends or AWS services</td></tr>
+          <tr><td><b>Authorisation</b></td><td>IAM, Amazon Cognito, Lambda authorizers</td></tr>
+          <tr><td><b>Throttling</b></td><td>Caps requests per second; extra get 429</td></tr>
+          <tr><td><b>API keys + usage plans</b></td><td>Identify and limit partners</td></tr>
+          <tr><td><b>Stages</b></td><td>dev, test, prod versions of the API</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>How do you expose a Lambda function as a REST API?<span class="go">Show answer</span></summary><div class="ans"><p>Put <b>API Gateway</b> in front of it.</p></div></details>
+      <details><summary>Which API type suits a real-time chat?<span class="go">Show answer</span></summary><div class="ans"><p>A <b>WebSocket</b> API.</p></div></details>
+      <details><summary>What does a throttled client receive?<span class="go">Show answer</span></summary><div class="ans"><p><b>429 Too Many Requests.</b></p></div></details>
+    </div>
+  </section>
+
+  <footer>Lab limits are illustrative. Sources: compute notes "Amazon API Gateway" and "Other Compute Services: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html">What is Amazon API Gateway?</a>; <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-request-throttling.html">Throttling</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 220, y: 20, w: 760, h: 385, kind: 'region', label: 'ap-south-1' }],
+    nodes: {
+      app: { x: 100, y: 120, icon: 'phone', kind: 'user', label: 'Mobile app' },
+      bad: { x: 100, y: 320, icon: 'bug', kind: 'user', label: 'Script flooding', sub: 'no API key' },
+      gw: { x: 400, y: 210, icon: 'router', kind: 'net', label: 'API Gateway', sub: 'api.clinic.test' },
+      fn: { x: 650, y: 120, icon: 'lambda', kind: 'compute', label: 'Lambda', sub: 'bookings' },
+      ddb: { x: 870, y: 120, icon: 'box', kind: 'db', label: 'DynamoDB' },
+      cw: { x: 650, y: 320, icon: 'chart', kind: 'mgmt', label: 'CloudWatch', sub: 'metrics + logs' }
+    },
+    links: [{ a: 'app', b: 'gw', label: 'HTTPS', at: [250, 150] }, { a: 'bad', b: 'gw' }, { a: 'gw', b: 'fn' }, { a: 'fn', b: 'ddb' }, { a: 'gw', b: 'cw', kind: 'dash' }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['fn', 'ddb'], ['app', 'gw', 'fn', 'ddb'], ['app', 'gw'], ['bad', 'gw'], ['gw', 'cw'], null];
+    net.focus(F[i]);
+    if (i === 0) net.badge('fn', 'no URL of its own', 'info');
+    if (i === 2) net.badge('gw', 'auth: Cognito / IAM', 'info');
+    if (i === 3) { net.badge('bad', '429 Too Many Requests', 'bad'); net.link('bad', 'gw', 'cut'); }
+  }
+  const STEPS = [
+    { title: "A function isn't an API yet",
+      text: ["The bookings logic is a Lambda function, but the mobile app needs an <b>HTTPS endpoint</b> like <code>POST /bookings</code>.", "Lambda functions aren't exposed as REST APIs on their own."] },
+    { title: "API Gateway in front",
+      text: ["<b>Amazon API Gateway</b> publishes the API, receives each HTTP request and passes it to Lambda (or to other backends), then returns the response.", "It is <b>serverless</b> and scales automatically."],
+      tip: "Serverless API = API Gateway + Lambda (+ DynamoDB).",
+      play: async run => { base(1); await net.send(['app', 'gw', 'fn', 'ddb'], { run, label: 'POST /bookings' }); } },
+    { title: "Security built in",
+      text: ["Check who is calling with IAM, Amazon Cognito or custom authorizers, and require <b>API keys</b> for partners."] },
+    { title: "Throttling",
+      text: ["Limit requests per second, per API or per client. Extra requests get <b>429 Too Many Requests</b> and never reach your backend."],
+      play: async run => { base(3); for (let j = 0; j < 3; j++) await net.send(['bad', 'gw'], { run, label: 'GET', tone: 'red' }); } },
+    { title: "Monitor and version",
+      text: ["Metrics and logs go to CloudWatch. Stages (dev, prod) and versions let you change the API safely.", "<b>REST</b> and HTTP APIs, plus <b>WebSocket</b> APIs for real-time two-way messages."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  function thr() {
+    const lim = +$('tLim').value, rps = +$('tRps').value, keyed = $('tKey').checked;
+    $('tLimO').textContent = lim + ' req/s'; $('tRpsO').textContent = rps + ' req/s';
+    const ok = keyed ? Math.min(lim, rps) : 0, rej = rps - ok;
+    $('tK').innerHTML = [['Reach Lambda', ok + '/s', 'good'], ['Rejected (403 / 429)', rej + '/s', rej ? 'bad' : ''], ['Lambda load protected', rps > lim || !keyed ? 'yes' : 'no need', '']]
+      .map(([l, v, c]) => `<div class="${c}"><b>${v}</b><span>${l}</span></div>`).join('');
+    $('tSt').innerHTML = !keyed ? 'No valid API key: API Gateway answers <b>403 Forbidden</b> without calling the backend.' : rps > lim ? `Above the limit, API Gateway returns <b>429</b> for ${rej} requests a second.` : 'Within the limit: every request passes through.';
+  }
+  ['tLim', 'tRps', 'tKey'].forEach(id => $(id).addEventListener('input', thr)); thr();
+
+})();
+</script>
+</body>
+</html>

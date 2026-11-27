@@ -4,31 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
-<title>Databases &amp; Analytics</title>
-<meta name="description" content="AWS Cloud Practitioner: RDS Multi-AZ vs read replicas under failure, choosing the right AWS database, and how data flows through Kinesis, Glue, Athena, Redshift, EMR and QuickSight.">
+<title>Databases &amp; analytics</title>
+<meta name="description" content="This page has been split into one explainer per topic.">
 <link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
 <link rel="stylesheet" href="../assets/css/base.css?v=20261122">
 <link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
 <script src="../assets/js/theme.js?v=20261122"></script>
-<script src="../assets/js/explainer-kit.js?v=20261122"></script>
 <style>
-  .svc rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s, opacity .2s; }
-  .svc text { fill: var(--fg); font-size: 13px; font-weight: 700; text-anchor: middle; }
-  .svc .sm { fill: var(--muted); font-family: var(--mono); font-size: 12px; font-weight: 400; }
-  .svc.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
-  .svc.path rect { stroke: var(--cyan); fill: var(--teal-wash); }
-  .svc.fade text { opacity: .45; }
-  .svc.fade rect { stroke: var(--line); }
-  .cat { fill: var(--muted); font-family: var(--display); font-size: 13px; }
-  .link { stroke: var(--line); stroke-width: 2; fill: none; transition: stroke .2s; }
-  .link.on { stroke: var(--cyan); stroke-width: 3; }
-  .chore rect { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; transition: fill .3s, stroke .3s; }
-  .chore.you rect { stroke: var(--accent-text); }
-  .chore.aws rect { stroke: var(--teal); fill: var(--teal-wash); }
-  .chore.you text:last-child { fill: var(--accent-text); font-weight: 700; }
-  .chore.aws text:last-child { fill: var(--good-text); font-weight: 700; }
-  .zone.down { stroke: var(--red); }
-  .ptoggles { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+  .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: var(--space-xs); margin-top: var(--space-md); }
+  .topic-links a { display: block; padding: var(--space-sm) var(--space-md); border-radius: 0; background: var(--panel); color: var(--fg); text-decoration: none; font-weight: 600; }
+  .topic-links a:hover { border-color: var(--orange); }
+  .topic-links a span { display: block; font-size: 13px; font-weight: 400; color: var(--muted); margin-top: var(--space-3xs); }
 </style>
 </head>
 <body class="wb">
@@ -81,10 +67,90 @@
 <li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
 <li><a href="storage-review.html"><span class="t">Section review</span></a></li>
 </ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
 </nav></details>
 <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
 <li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
-<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
 <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
 <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
 <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
@@ -96,437 +162,30 @@
 <a class="back" href="index.html">AWS Cloud Practitioner</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
-
   <header>
-    <p class="crumbs">AWS CLF-C02 / Section 9 / Domain 3 Technology &amp; Services (Tasks 3.4, 3.6)</p>
-    <h1>Databases &amp; Analytics</h1>
-    <ul class="lede">
-      <li><b>Managed databases</b>: AWS runs the hardware, OS, patching, backups and failover; you own the data, schema and access.</li>
-      <li><b>Relational</b> (SQL, joins): RDS and Aurora. <b>NoSQL</b> (flexible schema, scales out): DynamoDB, DocumentDB, Neptune.</li>
-      <li>Multi-AZ gives high availability: a standby copy takes over if the main database fails. Read replicas give read scaling: extra copies answer read queries. Don't confuse the two.</li>
-      <li><b>Analytics</b>: Kinesis streams data in, Glue prepares it, Athena, Redshift or EMR query it, and QuickSight shows it in dashboards.</li>
-    </ul>
+    <p class="crumbs">AWS CLF-C02 / Databases &amp; analytics</p>
+    <h1>This page has moved</h1>
+    <ul class="lede"><li>"Databases &amp; analytics" is now <b>one page per topic</b>, each with its own walkthrough and labs.</li><li>Pick a topic below.</li></ul>
   </header>
-
-  <section aria-labelledby="whatH">
-    <h2 id="whatH">In terms you already know</h2>
-    <p class="sub">Mostly the same databases you know from SQL Server, with AWS doing the operations.</p>
-    <div class="card analogy">
-      <div class="row head"><span>AWS</span><span>Closest idea you already know</span><span>The difference</span></div>
-      <div class="row"><span class="aws">RDS</span><span class="like">SQL Server you install and patch yourself, minus the installing and patching</span><span>Managed MySQL, PostgreSQL, SQL Server, Oracle…; no OS access.</span></div>
-      <div class="row"><span class="aws">Multi-AZ</span><span class="like">SQL Server Always On (sync replica)</span><span>Automatic failover to a standby in another AZ.</span></div>
-      <div class="row"><span class="aws">Read replica</span><span class="like">Readable secondary</span><span>An asynchronous copy (a little behind the primary) used for reports. If needed, you promote it to be the primary by hand.</span></div>
-      <div class="row"><span class="aws">DynamoDB</span><span class="like">A huge Dictionary&lt;key, item&gt; you reach over HTTPS</span><span>Serverless NoSQL key-value, ms latency at any scale.</span></div>
-      <div class="row"><span class="aws">ElastiCache</span><span class="like">Redis, or IMemoryCache shared by every server</span><span>In-memory cache in front of a database.</span></div>
-      <div class="row"><span class="aws">Redshift</span><span class="like">A SQL Server reporting warehouse (OLAP cubes, star schema)</span><span>Columnar data warehouse for analytics (OLAP: online analytical processing, meaning large reporting queries).</span></div>
-    </div>
-  </section>
-
-  <section aria-labelledby="dbStoryH">
-    <h2 class="stage-title" id="dbStoryH">Walkthrough: from a self-managed database to the right AWS service</h2>
-    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
-    <div class="story" id="dbStory">
-      <div class="scroll"><svg class="diagram" id="dbStorySvg" style="min-width:0" viewBox="0 0 700 440" aria-label="A database in AZ a with a standby and read replica in AZ b, plus panels for Aurora, DynamoDB, caching and analytics"></svg></div>
-    </div>
-  </section>
-
-  <h2 class="part-title">Try it yourself</h2>
-  <p class="sub">Now break things and watch what changes.</p>
-
-  <section aria-labelledby="rdsH">
-    <h2 class="stage-title" id="rdsH">RDS: Multi-AZ vs read replica</h2>
-    <div class="stage-kind">Turn features on, then write, read, or lose an AZ</div>
-    <div class="controls">
-      <div class="ptoggles">
-        <label class="toggle" for="maz"><input type="checkbox" id="maz" checked> Multi-AZ standby</label>
-        <label class="toggle" for="rr"><input type="checkbox" id="rr" checked> Read replica</label>
-      </div>
-      <button class="btn" type="button" id="wB">Write an appointment</button>
-      <button class="btn" type="button" id="rB">Run a heavy report</button>
-      <button class="btn" type="button" id="fB">AZ a fails</button>
-      <button class="btn" type="button" id="resetB">Reset</button>
-    </div>
-    <div class="scroll">
-      <svg class="diagram" id="rds" viewBox="0 0 1000 330" aria-label="App, a primary database in AZ a, a standby in AZ b and a read replica in AZ c"></svg>
-    </div>
-    <p class="status-line" id="rdsStatus">The app connects to one DNS endpoint, not to a specific server.</p>
-  </section>
-
-  <section aria-labelledby="pickH">
-    <h2 class="stage-title" id="pickH">Which database?</h2>
-    <div class="stage-kind">Pick a need · it lands on the service</div>
-    <div class="chips" id="dbChips"></div>
-    <div class="scroll">
-      <svg class="diagram" id="db" viewBox="0 0 1000 330" aria-label="AWS database services grouped by type"></svg>
-    </div>
-    <p class="status-line" id="dbStatus">Pick a need.</p>
-  </section>
-
-  <section aria-labelledby="anaH">
-    <h2 class="stage-title" id="anaH">The analytics pipeline</h2>
-    <div class="stage-kind">Pick a job · the data takes its path</div>
-    <div class="chips" id="anChips"></div>
-    <div class="scroll">
-      <svg class="diagram" id="an" viewBox="0 0 1000 330" aria-label="Sources, ingestion, S3 data lake, Glue, query engines and QuickSight"></svg>
-    </div>
-    <p class="status-line" id="anStatus">Pick a job.</p>
-  </section>
-
-  <section aria-labelledby="cheatH">
-    <h2 id="cheatH">Exam cheat-sheet</h2>
-    <ul class="cheat">
-      <li><span class="if">Managed relational, automated backups</span><span class="arrow">→</span><span class="then">RDS</span></li>
-      <li><span class="if">Automatic failover to another AZ</span><span class="arrow">→</span><span class="then">RDS Multi-AZ</span></li>
-      <li><span class="if">Offload heavy reads / reports</span><span class="arrow">→</span><span class="then">Read replica</span></li>
-      <li><span class="if">Serverless NoSQL, single-digit ms</span><span class="arrow">→</span><span class="then">DynamoDB</span></li>
-      <li><span class="if">Reduce load from repeated queries</span><span class="arrow">→</span><span class="then">ElastiCache</span></li>
-      <li><span class="if">Data warehouse, OLAP</span><span class="arrow">→</span><span class="then">Redshift</span></li>
-    </ul>
-  </section>
-
-  <section aria-labelledby="refH">
-    <h2 id="refH">Reference</h2>
-    <div class="scroll card table-card">
-      <table>
-        <thead><tr><th></th><th>Read replica</th><th>Multi-AZ (DB instance)</th><th>Cross-Region replica</th></tr></thead>
-        <tbody>
-          <tr><td>Goal</td><td>Scale reads</td><td>High availability</td><td>DR + reads near distant users</td></tr>
-          <tr><td>Replication</td><td>Asynchronous (lag)</td><td>Synchronous</td><td>Asynchronous, transfer billed</td></tr>
-          <tr><td>Serves reads?</td><td>Yes</td><td>No (standby only)</td><td>Yes</td></tr>
-          <tr><td>Failover</td><td>Manual promotion</td><td><b>Automatic</b>, same endpoint</td><td>Manual promotion</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="cards" style="margin-top:14px">
-      <div class="card"><h3>Aurora</h3><p>AWS's own MySQL/PostgreSQL-compatible engine. Storage auto-grows (up to 256 TiB) with 6 copies across 3 AZs, up to 15 low-lag replicas. <b>Aurora Serverless</b> scales capacity per second for spiky or intermittent load.</p></div>
-      <div class="card"><h3>DynamoDB</h3><p>DynamoDB is a serverless NoSQL database that stores key-value items and documents. It answers in single-digit milliseconds at any scale and has no joins. You choose on-demand or <b>provisioned</b> capacity. <b>DAX</b> (DynamoDB Accelerator) is a cache that answers in microseconds and works only with DynamoDB. <b>Global Tables</b> copy a table to several Regions, and every Region can accept writes (active-active).</p></div>
-      <div class="card"><h3>Snapshots and backups</h3><p>Automated backups with point-in-time restore. Restoring always creates a <b>new</b> database. Copy snapshots to another Region for DR, share them with other accounts. You can't SSH into RDS.</p></div>
-      <div class="card"><h3>Kinesis</h3><p>Real-time streaming. <b>Data Streams</b>: ingest and process events in real time. <b>Data Firehose</b>: deliver streams into S3, Redshift or OpenSearch with no code.</p></div>
-      <div class="card"><h3>OpenSearch Service</h3><p>Managed search and log analytics (Elasticsearch fork): full-text search, log dashboards. Trigger: "search", "log analytics".</p></div>
-      <div class="card"><h3>Migrating databases</h3><p><b>DMS</b> moves data while the source stays online (and keeps replicating). <b>SCT</b> converts the schema when engines differ (Oracle → Aurora PostgreSQL).</p></div>
-    </div>
-    <div class="notes" style="margin-top:14px">
-      <div class="note"><p><b>Multi-AZ now has two forms.</b> A Multi-AZ <b>DB instance</b> has one standby that can't serve reads (the classic exam answer). A Multi-AZ <b>DB cluster</b> has two standbys in three AZs that <b>can</b> serve reads. For the exam: Multi-AZ = HA.</p></div>
-      <div class="note"><p><b>Aurora's marketing number</b>: AWS now quotes up to <b>6×</b> the throughput of MySQL and PostgreSQL; older material says 5× / 3×. If only one is offered in an exam question, go with that. Aurora Serverless v2 scales in steps of 0.5 ACU (Aurora Capacity Unit, a unit of memory and CPU) and can scale to zero.</p></div>
-      <div class="note"><p><b>Timestream for LiveAnalytics has an end-of-support notice</b>; AWS points to Timestream for InfluxDB. ElastiCache now offers <b>Valkey</b> as well as Redis OSS and Memcached. Managed Blockchain supports Ethereum, Hyperledger Fabric and more.</p></div>
-      <div class="note"><p><b>Also in the exam scope:</b> Kinesis, OpenSearch Service and SCT (cards above). Out of scope: Keyspaces, MemoryDB, MSK. Timestream and Managed Blockchain are on neither list: know only the trigger word.</p></div>
-    </div>
-  </section>
-
-  <section aria-labelledby="quizH">
-    <h2 id="quizH">Check yourself</h2>
-    <p class="sub">Answer out loud before you open each card.</p>
-    <div class="quiz">
-      <details><summary>Which RDS feature gives automatic failover to another AZ?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>Multi-AZ.</b> Read replicas need manual promotion and may lose recent writes.</p></div></details>
-      <details><summary>Reports are slowing down the production database. What do you add?<span class="go">Show answer</span></summary>
-        <div class="ans"><p>A <b>read replica</b> and point the reports at it (or a cache like ElastiCache for repeated reads).</p></div></details>
-      <details><summary>SQL on CSV/Parquet files in S3 without loading data or servers?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>Athena</b>, billed per TB scanned; Parquet and compression cut the bill.</p></div></details>
-      <details><summary>MongoDB workload, managed on AWS?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>DocumentDB.</b></p></div></details>
-      <details><summary>OLAP, columnar, petabyte data warehouse?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>Redshift.</b> (RDS and Aurora are OLTP: online transaction processing, meaning many small reads and writes.)</p></div></details>
-      <details><summary>Migrate Oracle on-prem to Aurora with minimal downtime: which two services?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>SCT</b> converts the schema, <b>DMS</b> moves the data and keeps it in sync until cut-over.</p></div></details>
-    </div>
-  </section>
-
-  <footer>Replication timings are illustrative. Sources: Databases and Analytics notes (Introduction; RDS and Aurora; RDS Hands-On; RDS Deployment Options; ElastiCache; DynamoDB and DAX; Global Tables; Redshift; EMR; Athena; QuickSight; DocumentDB; Neptune; Timestream; Managed Blockchain; Glue; DMS; Full Section Recap) and "Databases and Analytics: CLF-C02 Exam Summary".</footer>
+  <div class="topic-links">
+    <a href="databases-intro.html">Databases on AWS<span>Managed vs self-managed</span></a>
+    <a href="rds-aurora.html">RDS &amp; Aurora<span>Engines, snapshots, Serverless</span></a>
+    <a href="rds-deployments.html">Multi-AZ &amp; read replicas<span>HA vs read scaling</span></a>
+    <a href="elasticache.html">ElastiCache<span>Cache in front of a DB</span></a>
+    <a href="dynamodb.html">DynamoDB &amp; DAX<span>Query vs scan</span></a>
+    <a href="dynamodb-global-tables.html">Global tables<span>Active-active</span></a>
+    <a href="redshift.html">Redshift<span>Warehouse, columnar</span></a>
+    <a href="emr.html">EMR<span>Spark and Hadoop</span></a>
+    <a href="athena.html">Athena<span>SQL on S3</span></a>
+    <a href="quicksight.html">QuickSight<span>Dashboards</span></a>
+    <a href="documentdb.html">DocumentDB<span>MongoDB</span></a>
+    <a href="neptune.html">Neptune<span>Graph</span></a>
+    <a href="timestream.html">Timestream<span>Time series</span></a>
+    <a href="managed-blockchain.html">Managed Blockchain<span>Ledger</span></a>
+    <a href="glue.html">Glue<span>ETL + catalog</span></a>
+    <a href="dms.html">DMS<span>Database migration</span></a>
+    <a href="db-review.html">Section review<span>Recap, drill and 20 exam-style questions</span></a>
+  </div>
 </div>
-
-<script>
-(function () {
-  const K = Kit, $ = K.$;
-
-  /* ========== 0. Guided walkthrough ========== */
-  (function () {
-    const sv = $('dbStorySvg');
-    const E = {}, N = {};
-    const sx = (k, el) => { el.classList.add('sx'); E[k] = el; return el; };
-    const grp = k => sx(k, K.el('g', {}, sv));
-    const node = (k, x, y, w, h, t, sub, parent) => { const n = K.node(parent || sv, x, y, w, h, t, sub); if (!parent) sx(k, n.g); N[k] = n; return n; };
-    // chores column
-    grp('chores');
-    K.text(E.chores, 20, 26, 'WHO DOES THE CHORES?', 'zone-label');
-    const CH = ['Patching', 'Backups', 'Failover', 'Scaling', 'Monitoring'];
-    const chT = CH.map((c, j) => { const g = K.el('g', { class: 'chore' }, E.chores); K.el('rect', { x: 18, y: 40 + j * 40, width: 170, height: 32, rx: 8 }, g); const t = K.text(g, 30, 61 + j * 40, c, 'mlabel'); t.style.textAnchor = 'start'; const o = K.text(g, 178, 61 + j * 40, '', 'mlabel'); o.style.textAnchor = 'end'; return { g, o }; });
-    const zA = grp('azA'); K.el('rect', { x: 206, y: 8, width: 236, height: 232, rx: 12, class: 'zone' }, zA); K.text(zA, 218, 28, 'AZ a', 'zone-label');
-    const zB = grp('azB'); K.el('rect', { x: 456, y: 8, width: 236, height: 232, rx: 12, class: 'zone' }, zB); K.text(zB, 468, 28, 'AZ b', 'zone-label');
-    sx('lSync', K.el('line', { x1: 404, y1: 80, x2: 500, y2: 80, class: 'msg solid' }, sv));
-    sx('lAsync', K.el('path', { d: 'M324 108 C 324 190, 420 190, 500 180', class: 'msg dash', fill: 'none' }, sv));
-    node('app', 324, 190, 150, 44, 'Booking app', 'writes + reads');
-    node('pri', 324, 80, 160, 56, 'EC2 + MySQL', 'you manage it');
-    node('stb', 574, 80, 160, 56, 'Standby', 'sync copy');
-    node('rr', 574, 180, 160, 50, 'Read replica', 'async copy');
-    // bottom panels
-    const BOT = (k, label) => { const g = grp(k); K.el('rect', { x: 206, y: 262, width: 486, height: 170, rx: 12, class: 'zone' }, g); K.text(g, 218, 282, label, 'zone-label'); return g; };
-    const au = BOT('aur', 'AURORA STORAGE · 6 COPIES ACROSS 3 AZs · GROWS AUTOMATICALLY');
-    for (let j = 0; j < 6; j++) K.node(au, 250 + j * 76, 350, 64, 44, 'copy', ['AZ a', 'AZ a', 'AZ b', 'AZ b', 'AZ c', 'AZ c'][j]);
-    const dd = BOT('ddb', 'DYNAMODB TABLE · Appointments · key-value, no joins');
-    [['patientId (key)', 'date', 'doctor', 'notes?'], ['P-1001', '2026-11-02', 'Dr Rao', ''], ['P-1002', '2026-11-02', 'Dr Iyer', 'follow-up'], ['P-1003', '2026-11-03', 'Dr Rao', '']].forEach((r, ri) => r.forEach((c, ci) => { const t = K.text(dd, 230 + ci * 118, 312 + ri * 30, c, ri ? 'mlabel' : 'mlabel muted'); t.style.textAnchor = 'start'; }));
-    const ca = BOT('cache', 'CACHE IN FRONT OF THE DATABASE');
-    N.ec = K.node(ca, 330, 360, 170, 50, 'ElastiCache', 'in memory · <1 ms');
-    N.dbb = K.node(ca, 570, 360, 170, 50, 'RDS', 'only on a cache miss');
-    K.el('line', { x1: 415, y1: 360, x2: 485, y2: 360, class: 'msg dash' }, ca);
-    const an = BOT('ana', 'ANALYTICS · separate from the transactional DB');
-    [['S3 data lake', 260], ['Athena', 380], ['Redshift', 500], ['QuickSight', 620]].forEach(([t, x], j) => K.node(an, x, 360, 108, 46, t, ['files', 'SQL on S3', 'warehouse', 'dashboards'][j]));
-    const P = K.el('g', {}, sv);
-    const VIS = { chores: 0, azA: 0, app: 0, pri: 0, azB: 2, stb: 2, lSync: 2, rr: 3, lAsync: 3, aur: 4, ddb: 5, cache: 6, ana: 7 };
-    const FOC = [['chores', 'pri', 'azA', 'app'], ['chores', 'pri', 'app'], ['pri', 'stb', 'lSync', 'azB', 'azA'], ['pri', 'rr', 'lAsync', 'app', 'azB'], ['aur', 'pri'], ['ddb'], ['cache', 'app'], ['ana'], null];
-    const BOTS = ['aur', 'ddb', 'cache', 'ana'];
-    function show(i) {
-      P.textContent = '';
-      for (const k in VIS) {
-        let gone = i < VIS[k];
-        if (BOTS.includes(k)) gone = VIS[k] !== i;
-        E[k].classList.toggle('gone', gone);
-        E[k].classList.toggle('fade-out', !!FOC[i] && !FOC[i].includes(k));
-      }
-      const aws = i >= 1;
-      chT.forEach(c => { c.o.textContent = aws ? 'AWS' : 'YOU'; c.g.setAttribute('class', 'chore ' + (aws ? 'aws' : 'you')); });
-      N.pri.title.textContent = i === 0 ? 'EC2 + MySQL' : i === 4 ? 'Aurora' : 'RDS primary';
-      N.pri.sub.textContent = i === 0 ? 'you manage it' : i === 2 ? 'sync to standby' : 'managed by AWS';
-      ['pri', 'stb', 'rr', 'app'].forEach(k => N[k].g.classList.remove('ok', 'bad', 'on'));
-      if (i === 2) N.stb.g.classList.add('on');
-      if (i === 3) N.rr.g.classList.add('ok');
-    }
-    const reveal = async (keys, run) => { for (const k of keys) { E[k].classList.remove('gone', 'fade-out'); await K.sleep(220, run); } };
-    const STEPS = [
-      { title: 'Running a database yourself is a lot of work',
-        text: 'You could install MySQL on an EC2 instance. Then <b>you</b> patch the OS and engine, take backups, build failover, scale it and monitor it. That\'s the same chore list as an on-prem SQL Server (AWS still owns the physical hardware).' },
-      { title: 'RDS: AWS does the chores',
-        text: '<b>Amazon RDS</b> is a managed relational database (MySQL, PostgreSQL, MariaDB, Oracle, SQL Server, Db2, Aurora). AWS patches, backs up (with point-in-time restore), monitors and replaces hardware. You still own the <b>schema, data, users and network access</b>. You can\'t SSH into it.',
-        tip: '"Least operational overhead" for a relational DB → RDS (not a DB on EC2).',
-        play: async run => { for (const c of chT) { c.o.textContent = 'AWS'; c.g.setAttribute('class', 'chore aws'); await K.sleep(200, run); } } },
-      { title: 'Multi-AZ: a standby for when things break',
-        text: 'Turn on <b>Multi-AZ</b> and RDS keeps a <b>standby</b> in another AZ, copied <b>synchronously</b> (every write lands on both). If the primary or its AZ fails, RDS <b>fails over automatically</b> to the same endpoint. The standby doesn\'t serve reads.',
-        tip: 'Multi-AZ = high availability.',
-        play: async run => { await reveal(['azB', 'stb', 'lSync'], run); const p = K.pill(P, 'write', 'alt'); await K.move(p, [404, 62], [494, 62], 500, run); p.remove(); } },
-      { title: 'Read replica: more capacity for reads',
-        text: 'Monthly reports were slowing bookings down. A <b>read replica</b> gets an <b>asynchronous</b> copy (a second or so behind) and serves read-only queries, so heavy reports run there instead of on the primary. Replicas can also live in another Region.',
-        tip: 'Read replica = read scaling, not automatic failover.',
-        play: async run => { await reveal(['rr', 'lAsync'], run); const p = K.pill(P, 'SELECT report'); await K.move(p, [324, 170], [574, 158], 650, run); p.remove(); } },
-      { title: 'Aurora: AWS\'s cloud-native engine',
-        text: '<b>Aurora</b> speaks MySQL or PostgreSQL but was rebuilt for the cloud: storage keeps <b>6 copies across 3 AZs</b>, grows automatically, and up to 15 fast replicas can read from it. <b>Aurora Serverless</b> scales capacity up and down for spiky or occasional use.' },
-      { title: 'Not everything is relational: DynamoDB',
-        text: '<b>DynamoDB</b> is a <b>serverless NoSQL</b> key-value store: no servers or patching, single-digit millisecond reads at any scale, pay per request or capacity. Each item is found by its key; items can have different attributes; there are no joins. <b>Global Tables</b> replicate it across Regions.',
-        tip: 'Other NoSQL: DocumentDB = MongoDB, Neptune = graph, ElastiCache = in-memory.' },
-      { title: 'Caches make repeated reads instant',
-        text: '<b>ElastiCache</b> (Valkey, Redis or Memcached) keeps hot data in memory in front of any database: repeated queries are answered in under a millisecond and RDS only sees cache misses. <b>DAX</b> does the same, but only for DynamoDB.',
-        play: async run => { const p = K.pill(P, 'GET product:42', 'ok'); await K.move(p, [324, 214], [330, 330], 550, run); p.remove(); } },
-      { title: 'Analytics lives in different services',
-        text: 'Don\'t run big analytics on the booking database. Land data in <b>S3</b>, query files in place with <b>Athena</b> (pay per TB scanned), load a <b>Redshift</b> data warehouse for heavy BI, and show dashboards in <b>QuickSight</b>. <b>Glue</b> prepares the data; <b>Kinesis</b> streams it in real time.',
-        play: async run => { const p = K.pill(P, 'data', 'alt'); for (const [a, b] of [[260, 380], [380, 500], [500, 620]]) await K.move(p, [a, 325], [b, 325], 420, run); p.remove(); } },
-      { title: 'Pick by the keyword',
-        text: '<b>SQL + managed</b> → RDS. Best performance with MySQL or PostgreSQL → Aurora. <b>Serverless key-value</b> → DynamoDB. <b>Cache</b> → ElastiCache. <b>MongoDB</b> → DocumentDB. <b>Graph</b> → Neptune. <b>Warehouse / OLAP</b> → Redshift. <b>SQL on S3</b> → Athena. <b>Move a database</b> → DMS.' }
-    ];
-    K.story({ root: $('dbStory'), steps: STEPS, show });
-  })();
-
-  /* ========== 1. RDS ========== */
-  const rs = $('rds');
-  const azs = [['AZ ap-south-1a', 40], ['AZ ap-south-1b', 360], ['AZ ap-south-1c', 680]];
-  const zoneEls = azs.map(([n, x]) => { const z = K.el('rect', { x, y: 130, width: 290, height: 170, rx: 14, class: 'zone' }, rs); K.text(rs, x + 12, 150, n, 'zone-label'); return z; });
-  const app = K.node(rs, 185, 50, 200, 52, 'Booking app', 'mydb.xxxx.rds…');
-  app.g.classList.add('solid');
-  const N = {
-    p: K.node(rs, 185, 225, 220, 64, 'Primary', 'reads + writes'),
-    s: K.node(rs, 505, 225, 220, 64, 'Standby', 'sync copy · not readable'),
-    r: K.node(rs, 825, 225, 220, 64, 'Read replica', 'async copy · reads only')
-  };
-  const ep = K.el('line', { x1: 185, y1: 76, x2: 185, y2: 193, class: 'msg solid' }, rs);
-  const epT = K.text(rs, 195, 140, 'writer endpoint', 'mlabel muted');
-  const lag = K.text(rs, 825, 280, '', 'mlabel muted'); lag.style.textAnchor = 'middle';
-  const rP = K.el('g', {}, rs);
-  let S;
-  function rReset() {
-    K.cancel('rds'); rP.textContent = '';
-    S = { primary: 'p', failed: false, rows: 0, rrRows: 0 };
-    N.p.g.setAttribute('class', 'node teal'); N.p.title.textContent = 'Primary'; N.p.sub.textContent = 'reads + writes';
-    N.s.g.setAttribute('class', 'node' + ($('maz').checked ? '' : ' dim')); N.s.title.textContent = 'Standby'; N.s.sub.textContent = 'sync copy · not readable';
-    N.r.g.setAttribute('class', 'node' + ($('rr').checked ? '' : ' dim')); N.r.title.textContent = 'Read replica'; N.r.sub.textContent = 'async copy · reads only';
-    zoneEls[0].classList.remove('down');
-    ep.setAttribute('x2', 185); epT.setAttribute('x', 195); epT.setAttribute('y', 140); lag.textContent = '';
-    $('rdsStatus').textContent = 'The app connects to one DNS endpoint, not to a specific server.';
-  }
-  const X = { p: 185, s: 505, r: 825 };
-  async function write() {
-    const run = K.newRun('rds');
-    if (S.failed && S.primary === 'p') { $('rdsStatus').innerHTML = '<span class="bad-text">Write failed.</span> The primary is down and there\'s no standby to fail over to.'; return; }
-    const px = X[S.primary];
-    try {
-      const w = K.pill(rP, 'INSERT appt');
-      await K.move(w, [185, 80], [px, 190], 500, run); w.remove();
-      if ($('maz').checked && S.primary === 'p') {
-        const c = K.pill(rP, 'sync copy', 'alt');
-        await K.move(c, [295, 225], [395, 225], 450, run); c.remove();
-      }
-      S.rows++;
-      const ok = K.pill(rP, 'COMMIT ✓', 'ok');
-      await K.move(ok, [px, 190], [185, 80], 450, run); ok.remove();
-      $('rdsStatus').innerHTML = $('maz').checked && S.primary === 'p' ? 'Committed only after the standby confirmed: <b>synchronous</b>, so no data is lost on failover.' : 'Committed on the primary.';
-      if ($('rr').checked && S.primary === 'p') {
-        lag.textContent = 'replica lag: ~1 s';
-        await K.sleep(700, run);
-        const a = K.pill(rP, 'async copy', 'alt');
-        await K.move(a, [295, 300], [715, 300], 700, run); a.remove();
-        S.rrRows = S.rows; lag.textContent = 'replica up to date';
-      }
-    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
-  }
-  async function report() {
-    const run = K.newRun('rds');
-    try {
-      if ($('rr').checked) {
-        const q = K.pill(rP, 'SELECT … GROUP BY');
-        await K.move(q, [185, 80], [825, 190], 700, run); q.remove();
-        N.r.g.classList.add('ok');
-        const ok = K.pill(rP, 'report rows', 'ok'); await K.move(ok, [825, 190], [185, 80], 600, run); ok.remove();
-        N.r.g.classList.remove('ok');
-        $('rdsStatus').innerHTML = 'The report ran on the <b>read replica</b> (its own reader endpoint), so the primary keeps serving bookings at full speed.' + (S.rrRows < S.rows ? ' It may be a second behind.' : '');
-      } else {
-        if (S.failed && S.primary === 'p') { $('rdsStatus').innerHTML = '<span class="bad-text">No database to query.</span>'; return; }
-        const q = K.pill(rP, 'SELECT … GROUP BY');
-        await K.move(q, [185, 80], [X[S.primary], 190], 600, run); q.remove();
-        N[S.primary].g.classList.add('bad'); N[S.primary].sub.textContent = 'CPU 98% · bookings slow';
-        await K.sleep(900, run);
-        N[S.primary].g.classList.remove('bad'); N[S.primary].sub.textContent = 'reads + writes';
-        $('rdsStatus').innerHTML = '<span class="bad-text">The report hit the primary</span> and slowed every booking. ' + ($('maz').checked ? 'The Multi-AZ standby can\'t help: it doesn\'t serve reads.' : 'Add a read replica.');
-      }
-    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
-  }
-  async function fail() {
-    const run = K.newRun('rds');
-    S.failed = true; zoneEls[0].classList.add('down');
-    N.p.g.setAttribute('class', 'node bad'); N.p.sub.textContent = 'AZ outage';
-    try {
-      await K.sleep(700, run);
-      if ($('maz').checked) {
-        const d = K.pill(rP, 'DNS → standby', 'alt');
-        await K.move(d, [185, 120], [505, 160], 700, run); d.remove();
-        S.primary = 's';
-        N.s.g.setAttribute('class', 'node teal'); N.s.title.textContent = 'New primary'; N.s.sub.textContent = 'reads + writes';
-        ep.setAttribute('x2', 505); epT.setAttribute('x', 390); epT.setAttribute('y', 112);
-        $('rdsStatus').innerHTML = '<span class="ok-text">Automatic failover</span> in about a minute or two: same endpoint, no data lost, no app change. RDS then rebuilds a new standby.';
-      } else if ($('rr').checked) {
-        $('rdsStatus').innerHTML = '<span class="bad-text">Outage.</span> No standby. You can <b>promote the read replica</b> by hand, but it\'s a separate database with a new endpoint, and writes not yet replicated are lost.';
-      } else {
-        $('rdsStatus').innerHTML = '<span class="bad-text">Outage</span> until you restore from a snapshot or backup (a new database). That\'s why production uses Multi-AZ.';
-      }
-    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
-  }
-  $('wB').addEventListener('click', write); $('rB').addEventListener('click', report); $('fB').addEventListener('click', fail);
-  $('resetB').addEventListener('click', rReset);
-  $('maz').addEventListener('change', rReset); $('rr').addEventListener('change', rReset);
-  rReset();
-
-  /* ========== 2. Database chooser ========== */
-  const db = $('db');
-  const CATS = [['RELATIONAL', 40], ['NOSQL', 290], ['IN-MEMORY', 540], ['ANALYTICS / OTHER', 770]];
-  CATS.forEach(([n, x]) => K.text(db, x, 28, n, 'cat'));
-  const SV = {
-    rds: { t: 'RDS', s: 'MySQL · PG · Oracle · SQL Server…', x: 140, y: 75 },
-    aur: { t: 'Aurora', s: 'cloud-native MySQL/PG', x: 140, y: 150 },
-    aus: { t: 'Aurora Serverless', s: 'spiky, no capacity planning', x: 140, y: 225 },
-    ddb: { t: 'DynamoDB', s: 'serverless key-value', x: 390, y: 75 },
-    gt: { t: 'DynamoDB Global Tables', s: 'active-active Regions', x: 390, y: 150 },
-    doc: { t: 'DocumentDB', s: 'MongoDB-compatible', x: 390, y: 225 },
-    nep: { t: 'Neptune', s: 'graph', x: 390, y: 300 },
-    ec: { t: 'ElastiCache', s: 'Valkey · Redis · Memcached', x: 640, y: 75 },
-    dax: { t: 'DAX', s: 'DynamoDB-only cache', x: 640, y: 150 },
-    rsf: { t: 'Redshift', s: 'data warehouse · OLAP', x: 870, y: 75 },
-    ts: { t: 'Timestream', s: 'time series', x: 870, y: 150 },
-    mb: { t: 'Managed Blockchain', s: 'ledger', x: 870, y: 225 }
-  };
-  const svE = {};
-  for (const k in SV) {
-    const o = SV[k], g = K.el('g', { class: 'svc' }, db);
-    K.el('rect', { x: o.x - 110, y: o.y - 28, width: 220, height: 56, rx: 12 }, g);
-    K.text(g, o.x, o.y - 3, o.t, ''); K.text(g, o.x, o.y + 15, o.s, 'sm'); svE[k] = g;
-  }
-  const dbP = K.el('g', {}, db);
-  const NEEDS = [
-    ['Patient records with joins and transactions', 'rds', 'Managed relational database with standard engines and automated backups.'],
-    ['Best relational performance, MySQL-compatible', 'aur', 'AWS\'s cloud-native engine; storage grows by itself across 3 AZs.'],
-    ['Relational app used a few hours a week', 'aus', 'Scales capacity with load, billed per second; no capacity planning.'],
-    ['Millions of IoT readings by device ID, serverless', 'ddb', 'Key-value at any scale with single-digit ms latency; no servers.'],
-    ['Users in Mumbai and Frankfurt both write locally', 'gt', 'Multi-Region, multi-active NoSQL replication.'],
-    ['Existing MongoDB app', 'doc', 'MongoDB-compatible managed document database.'],
-    ['Fraud ring detection via relationships', 'nep', 'Graph database for highly connected data.'],
-    ['Same product query hammers RDS', 'ec', 'In-memory cache in front of any database: sub-ms reads, less DB load.'],
-    ['Microsecond reads for a DynamoDB table', 'dax', 'Purpose-built cache for DynamoDB only.'],
-    ['Years of billing data for BI queries', 'rsf', 'Columnar, massively parallel data warehouse for OLAP.']
-  ];
-  $('dbChips').innerHTML = NEEDS.map((n, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${n[0]}</button>`).join('');
-  $('dbChips').querySelectorAll('button').forEach(b => b.addEventListener('click', async () => {
-    $('dbChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-    const [n, k, why] = NEEDS[+b.dataset.i];
-    const run = K.newRun('db');
-    dbP.textContent = ''; Object.values(svE).forEach(g => g.setAttribute('class', 'svc'));
-    const p = K.pill(dbP, n.length > 28 ? n.slice(0, 27) + '…' : n);
-    try {
-      await K.move(p, [500, 330], [SV[k].x, SV[k].y - 38], 700, run); p.remove();
-      for (const o in svE) svE[o].classList.add(o === k ? 'hit' : 'fade');
-      $('dbStatus').innerHTML = `<b>${SV[k].t}</b>. ${why}`;
-    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
-  }));
-
-  /* ========== 3. Analytics pipeline ========== */
-  const an = $('an');
-  const A = {
-    app: { t: 'Clickstream / IoT', s: 'events', x: 100, y: 60 },
-    odb: { t: 'On-prem Oracle', s: 'source DB', x: 100, y: 270 },
-    kin: { t: 'Kinesis', s: 'Data Streams / Firehose', x: 300, y: 60 },
-    s3: { t: 'S3 data lake', s: 'raw + curated', x: 300, y: 165 },
-    dms: { t: 'DMS + SCT', s: 'migrate, convert schema', x: 300, y: 270 },
-    glue: { t: 'Glue', s: 'ETL + Data Catalog', x: 500, y: 165 },
-    aur: { t: 'Aurora', s: 'target DB', x: 500, y: 270 },
-    ath: { t: 'Athena', s: 'SQL on S3, per TB', x: 700, y: 60 },
-    red: { t: 'Redshift', s: 'warehouse', x: 700, y: 165 },
-    emr: { t: 'EMR', s: 'Spark / Hadoop', x: 700, y: 270 },
-    qs: { t: 'QuickSight', s: 'dashboards', x: 900, y: 165 }
-  };
-  const LINKS = [['app', 'kin'], ['kin', 's3'], ['s3', 'glue'], ['glue', 'ath'], ['glue', 'red'], ['s3', 'emr'], ['ath', 'qs'], ['red', 'qs'], ['odb', 'dms'], ['dms', 'aur'], ['s3', 'ath']];
-  const lE = {};
-  LINKS.forEach(([a, b]) => { lE[a + b] = K.el('line', { x1: A[a].x, y1: A[a].y, x2: A[b].x, y2: A[b].y, class: 'link' }, an); });
-  const aE = {};
-  for (const k in A) {
-    const o = A[k], g = K.el('g', { class: 'svc' }, an);
-    K.el('rect', { x: o.x - 88, y: o.y - 28, width: 176, height: 56, rx: 12 }, g);
-    K.text(g, o.x, o.y - 3, o.t, ''); K.text(g, o.x, o.y + 15, o.s, 'sm'); aE[k] = g;
-  }
-  const anP = K.el('g', {}, an);
-  const JOBS = [
-    ['Ad hoc SQL on load-balancer logs', ['s3', 'glue', 'ath', 'qs'], 'Glue crawls the files into the Data Catalog, Athena queries them in place (pay per TB scanned), QuickSight charts the result.'],
-    ['Real-time app clickstream', ['app', 'kin', 's3', 'glue', 'ath'], 'Kinesis ingests events in real time; Firehose lands them in S3 for later analysis.'],
-    ['Nightly BI on billing history', ['s3', 'glue', 'red', 'qs'], 'Glue transforms and loads into Redshift; analysts run heavy SQL and QuickSight dashboards on it.'],
-    ['Spark job over 50 TB of scans metadata', ['s3', 'emr'], 'EMR spins up a Spark/Hadoop cluster (Spot friendly) over data in S3.'],
-    ['Move Oracle on-prem to Aurora', ['odb', 'dms', 'aur'], 'SCT converts the schema; DMS copies the data and keeps replicating while the source stays live.']
-  ];
-  $('anChips').innerHTML = JOBS.map((j, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${j[0]}</button>`).join('');
-  $('anChips').querySelectorAll('button').forEach(b => b.addEventListener('click', async () => {
-    $('anChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-    const [, path, why] = JOBS[+b.dataset.i];
-    const run = K.newRun('an');
-    anP.textContent = '';
-    Object.values(aE).forEach(g => g.setAttribute('class', 'svc fade'));
-    Object.values(lE).forEach(l => l.setAttribute('class', 'link'));
-    $('anStatus').textContent = 'Data flowing…';
-    const p = K.pill(anP, 'data', 'alt');
-    try {
-      aE[path[0]].setAttribute('class', 'svc path');
-      for (let i = 1; i < path.length; i++) {
-        const a = A[path[i - 1]], c = A[path[i]];
-        (lE[path[i - 1] + path[i]] || lE[path[i] + path[i - 1]]).setAttribute('class', 'link on');
-        await K.move(p, [a.x, a.y - 40], [c.x, c.y - 40], 550, run);
-        aE[path[i]].setAttribute('class', 'svc path');
-      }
-      p.remove();
-      $('anStatus').innerHTML = why;
-    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
-  }));
-})();
-</script>
 </body>
 </html>

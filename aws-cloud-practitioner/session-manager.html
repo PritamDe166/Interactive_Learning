@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>Systems Manager Session Manager</title>
+<meta name="description" content="Session Manager gives a secure shell to EC2 and on-premises servers with no SSH keys, no bastion and no open port 22, with a three-ways-to-connect lab.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+  .stage rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .stage text { fill: var(--fg); font-size: 13.5px; font-weight: 700; text-anchor: middle; }
+  .stage .sm { fill: var(--muted); font-family: var(--mono); font-size: 12px; font-weight: 400; }
+  .stage.on rect { stroke: var(--cyan); fill: var(--teal-wash); }
+  .stage.ok rect { stroke: var(--teal); }
+  .stage.bad rect { stroke: var(--red); }
+  .stage.dim { opacity: .45; }
+  .wall { fill: var(--teal-wash); stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 6 5; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html" aria-current="page"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Deployment &amp; infrastructure / 12 · Domain 2 Security</p>
+    <h1>Session Manager</h1>
+    <ul class="lede">
+      <li><b>Session Manager</b> opens a shell on EC2 or on-premises servers with <b>no SSH keys</b>, <b>no bastion</b> and <b>port 22 closed</b>.</li>
+      <li>Needs the <b>SSM agent</b> and an IAM role (<code>AmazonSSMManagedInstanceCore</code>).</li>
+      <li><b>IAM</b> controls access; sessions can be <b>logged</b> to S3 or CloudWatch.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Session Manager</span><span class="like">Remote PowerShell through a central gateway, with no RDP/SSH ports open</span><span>Access controlled by IAM and fully logged.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: a shell without opening port 22</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="An admin reaches an EC2 instance through Session Manager; the instance&#x27;s SSM agent connects outbound, the security group has no inbound rules, and sessions are logged"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>Session Manager = secure shell to EC2 and on-premises servers.</li>
+      <li>No SSH access, no bastion hosts, no SSH keys; <b>port 22 can stay closed</b>.</li>
+      <li>Needs the <b>SSM agent</b> and an IAM role with <code>AmazonSSMManagedInstanceCore</code>.</li>
+      <li>Linux, macOS and Windows.</li>
+      <li>Session logs to <b>S3</b> or <b>CloudWatch Logs</b>.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="sshH">
+    <h2 class="stage-title" id="sshH">Three ways to get a shell</h2>
+    <div class="stage-kind">Close port 22, then try each method</div>
+    <div class="card">
+    <div class="controls">
+      <label class="toggle" for="p22"><input type="checkbox" id="p22" checked> Security group allows inbound port 22</label>
+      <label class="toggle" for="ssmRole"><input type="checkbox" id="ssmRole" checked> Instance role has AmazonSSMManagedInstanceCore</label>
+    </div>
+    <div class="chips" id="shChips"></div>
+    <div class="scroll">
+      <svg class="diagram narrow" id="sh" viewBox="0 0 1000 230" aria-label="Admin laptop, security group, EC2 instance with SSM agent, and the Systems Manager service"></svg>
+    </div>
+    <p class="status-line" id="shStatus">Pick a method.</p>
+
+    </div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Shell without SSH / port 22</span><span class="arrow">→</span><span class="then">Session Manager</span></li>
+      <li><span class="if">Requirement on the instance</span><span class="arrow">→</span><span class="then">SSM agent + IAM role</span></li>
+      <li><span class="if">Log every session</span><span class="arrow">→</span><span class="then">S3 or CloudWatch Logs</span></li>
+      <li><span class="if">Browser SSH with temporary keys (port 22 open)</span><span class="arrow">→</span><span class="then">EC2 Instance Connect</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Method</th><th>Port 22 open?</th><th>SSH keys?</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><b>Classic SSH</b></td><td>Yes</td><td>Yes</td><td>You manage key files</td></tr>
+          <tr><td><b>EC2 Instance Connect</b></td><td>Yes</td><td>No (temporary)</td><td>Browser-based SSH</td></tr>
+          <tr><td><b>Session Manager</b></td><td>No</td><td>No</td><td>SSM agent + IAM role; logged</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>How can admins get a shell with port 22 closed?<span class="go">Show answer</span></summary><div class="ans"><p><b>Session Manager</b>.</p></div></details>
+      <details><summary>What role permission does the instance need?<span class="go">Show answer</span></summary><div class="ans"><p><code>AmazonSSMManagedInstanceCore</code>.</p></div></details>
+      <details><summary>Does EC2 Instance Connect need port 22?<span class="go">Show answer</span></summary><div class="ans"><p><b>Yes.</b></p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: deployment note "AWS Systems Manager Session Manager: Secure Shell Access Without SSH" and the section exam summary; <a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager.html">Session Manager</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 300, y: 20, w: 680, h: 385, kind: 'region', label: 'ap-south-1' }],
+    nodes: {
+      adm: { x: 110, y: 210, icon: 'laptop', kind: 'user', label: 'Admin', sub: 'console or CLI' },
+      sg: { x: 430, y: 300, icon: 'shield', kind: 'sec', label: 'Security group', sub: 'no inbound rules' },
+      ssm: { x: 600, y: 100, icon: 'gear', kind: 'mgmt', label: 'Session Manager' },
+      ec2: { x: 820, y: 300, icon: 'server', kind: 'compute', label: 'EC2 instance', sub: 'SSM agent + role' },
+      log: { x: 860, y: 100, icon: 'bucket', kind: 'storage', label: 'S3 / CloudWatch', sub: 'session logs' }
+    },
+    links: [{ a: 'adm', b: 'ssm', label: 'HTTPS + IAM', at: [330, 140] }, { a: 'ec2', b: 'ssm', label: 'agent: outbound', at: [745, 200] }, { a: 'adm', b: 'sg', kind: 'dash' }, { a: 'ssm', b: 'log', kind: 'dash' }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['adm', 'sg', 'ec2'], ['ec2', 'ssm'], ['adm', 'ssm', 'ec2'], ['ssm', 'log'], null];
+    net.focus(F[i]);
+    if (i === 0) { net.badge('sg', 'port 22 closed', 'ok'); net.link('adm', 'sg', 'cut'); }
+    if (i === 1) net.badge('ec2', 'AmazonSSMManagedInstanceCore', 'info');
+    if (i === 2) net.badge('adm', 'IAM decides who', 'info');
+  }
+  const STEPS = [
+    { title: "No port 22, no keys",
+      text: ["Security wants <b>no inbound ports</b> on the instance and <b>no SSH keys</b> to look after, and no bastion host.", "Classic SSH and EC2 Instance Connect both need port 22 open."] },
+    { title: "The agent calls out",
+      text: ["The instance runs the <b>SSM agent</b> and has an IAM role with <code>AmazonSSMManagedInstanceCore</code>.", "The agent makes an <b>outbound</b> HTTPS connection to Systems Manager, so nothing has to be open inbound."],
+      play: async run => { base(1); await net.send(['ec2', 'ssm'], { run, label: 'register', tone: 'cyan' }); } },
+    { title: "Start a session",
+      text: ["The admin starts a session from the console or CLI. <b>IAM</b> decides who may open sessions to which instances.", "Works for Linux, Windows, macOS and on-premises servers."],
+      tip: "Shell access without SSH or open port 22 = Session Manager.",
+      play: async run => { base(2); await net.send(['adm', 'ssm'], { run, label: 'start-session' }); await net.send(['ssm', 'ec2'], { run, label: 'shell', tone: 'green' }); } },
+    { title: "Every session recorded",
+      text: ["Session activity can be logged to <b>S3</b> or <b>CloudWatch Logs</b>, and session starts appear in CloudTrail."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+  /* ========== 3. Shell access ========== */
+  const sh = $('sh');
+  const admin = K.node(sh, 110, 100, 170, 56, 'Admin laptop', '203.0.113.10');
+  K.el('rect', { x: 400, y: 30, width: 36, height: 150, rx: 8, class: 'wall' }, sh);
+  const wl = K.text(sh, 418, 22, 'SG', 'mlabel accent'); wl.style.textAnchor = 'middle';
+  const inst = K.node(sh, 640, 100, 200, 70, 'EC2 instance', 'sshd · SSM agent');
+  inst.g.classList.add('solid');
+  const ssm = K.node(sh, 880, 190, 190, 52, 'Systems Manager', 'Session Manager');
+  const consoleN = K.node(sh, 880, 45, 190, 52, 'AWS console', 'Instance Connect');
+  K.el('line', { x1: 740, y1: 120, x2: 785, y2: 180, class: 'msg dash' }, sh);
+  const shP = K.el('g', {}, sh);
+  const M = [{ k: 'ssh', n: 'SSH with a .pem key' }, { k: 'ic', n: 'EC2 Instance Connect' }, { k: 'sm', n: 'Session Manager' }];
+  $('shChips').innerHTML = M.map(m => `<button class="chip-btn" type="button" data-k="${m.k}" aria-pressed="false">${m.n}</button>`).join('');
+  async function shell(k) {
+    const run = K.newRun('sh'); shP.textContent = '';
+    inst.g.setAttribute('class', 'node solid'); ssm.g.setAttribute('class', 'node'); consoleN.g.setAttribute('class', 'node');
+    const s = $('shStatus'); const open = $('p22').checked;
+    try {
+      if (k === 'ssh' || k === 'ic') {
+        const from = k === 'ssh' ? [195, 100] : [785, 45];
+        if (k === 'ic') { consoleN.g.classList.add('ok'); const t = K.pill(shP, 'push temp key', 'alt'); await K.move(t, [880, 75], [700, 70], 500, run); t.remove(); }
+        const p = K.pill(shP, 'TCP 22');
+        const target = k === 'ssh' ? [395, 100] : [440, 60];
+        await K.move(p, k === 'ssh' ? from : [785, 45], k === 'ssh' ? target : [460, 60], 550, run);
+        if (!open) { p.remove(); K.text(shP, 418, (k === 'ssh' ? 106 : 66), '✕', 'xmark'); s.innerHTML = `<span class="bad-text">Timeout.</span> ${k === 'ic' ? 'Instance Connect is still SSH, so it' : 'SSH'} needs port 22 open in the security group.`; return; }
+        await K.move(p, k === 'ssh' ? [440, 100] : [460, 60], [540, 100], 400, run); p.remove();
+        inst.g.setAttribute('class', 'node ok');
+        s.innerHTML = k === 'ssh' ? '<span class="ok-text">Connected.</span> Works, but you manage key files and keep port 22 open (ideally to your IP only).' : '<span class="ok-text">Connected in the browser</span> with a temporary key pushed by AWS: no key file to manage, but port 22 must still be open.';
+      } else {
+        if (!$('ssmRole').checked) { s.innerHTML = '<span class="bad-text">Instance not listed in Session Manager.</span> The SSM agent needs an IAM role (AmazonSSMManagedInstanceCore) to register with the service.'; return; }
+        const r = K.pill(shP, 'agent → HTTPS out', 'alt');
+        await K.move(r, [700, 135], [800, 190], 500, run); r.remove();
+        ssm.g.classList.add('ok');
+        const p = K.pill(shP, 'start-session');
+        await K.move(p, [195, 130], [785, 205], 800, run); p.remove();
+        const q = K.pill(shP, 'shell', 'ok');
+        await K.move(q, [800, 190], [700, 135], 450, run); q.remove();
+        inst.g.setAttribute('class', 'node ok');
+        s.innerHTML = `<span class="ok-text">Connected${open ? '' : ' with port 22 closed'}.</span> No inbound port, no SSH keys, no bastion: the agent connects <b>outbound</b>, IAM controls who may start sessions, and sessions can be logged to S3 or CloudWatch.`;
+      }
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('shChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('shChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    shell(b.dataset.k);
+  }));
+
+})();
+</script>
+</body>
+</html>

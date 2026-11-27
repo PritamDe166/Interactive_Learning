@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>EC2 Auto Scaling Groups</title>
+<meta name="description" content="How an Auto Scaling group launches, registers, replaces and removes EC2 instances across AZs, with a min/desired/max lab.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); }
+  .kpis b { display: block; font-size: 22px; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .as-ctl { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .as-ctl .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .as-ctl input[type=range] { width: 100%; }
+  .as-azs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-sm); margin-top: var(--space-sm); }
+  .as-az { border: 1.6px dashed var(--teal); padding: var(--space-xs) var(--space-sm) var(--space-sm); min-height: 110px; }
+  .as-az.down { border-color: var(--red); background: color-mix(in srgb, var(--red) 8%, transparent); }
+  .as-azh { font: 600 12px/1.4 var(--mono); color: var(--teal-text); margin-bottom: var(--space-xs); }
+  .as-az.down .as-azh { color: var(--bad-text); } .as-az.down .as-azh::after { content: ' · down'; }
+  .as-insts { display: flex; flex-wrap: wrap; gap: var(--space-2xs); }
+  .as-i { display: grid; gap: 2px; font: 11px/1.2 var(--mono); padding: 6px 9px; background: var(--orange); color: var(--on-accent); }
+  .as-i b { font-size: 12px; }
+  .as-i.pend { background: var(--yellow); color: var(--ink); }
+  .as-i.drain { background: var(--panel-2); color: var(--muted); outline: 1.5px dashed var(--muted); }
+  .as-i.bad { background: var(--red); }
+  .as-none { font-size: 13px; color: var(--muted); }
+  .as-log { margin: var(--space-sm) 0 0; padding-left: 1.3em; font-size: 14px; display: grid; gap: 4px; min-height: 7.5em; }
+  .as-log li:first-child { font-weight: 600; }
+  .as-log li:not(:first-child) { color: var(--muted); }
+</style>
+
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html" aria-current="page"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / ELB &amp; Auto Scaling / 3 · Domain 3 Technology</p>
+    <h1>EC2 Auto Scaling Groups</h1>
+    <ul class="lede">
+      <li>An <b>Auto Scaling group (ASG)</b> keeps the right number of EC2 instances running: it <b>adds</b> them when load rises and <b>removes</b> them when it falls.</li>
+      <li>You set a <b>minimum</b>, a <b>desired</b> and a <b>maximum</b> count; a <b>launch template</b> says what each new instance looks like.</li>
+      <li>It <b>replaces unhealthy instances</b> and spreads them across <b>Availability Zones</b>.</li>
+      <li>New instances are <b>registered with the load balancer</b> automatically. The ASG itself is free; you pay for the instances.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Launch template</span><span class="like">The server build sheet: base image, size, firewall rules, setup script</span><span>The ASG follows it to build each new instance in minutes, with no one involved.</span></div>
+      <div class="row"><span class="aws">Min / desired / max</span><span class="like">"Never fewer than 2 IIS servers, normally 2, never more than 6"</span><span>The ASG enforces it all the time and changes "desired" itself when a scaling policy fires.</span></div>
+      <div class="row"><span class="aws">Replacing unhealthy instances</span><span class="like">Monitoring pages someone at night, who rebuilds the server</span><span>The ASG terminates the instance and launches a fresh one by itself.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: an Auto Scaling group through a busy day</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="An Auto Scaling group launches EC2 instances from a launch template in two Availability Zones behind a load balancer; a CloudWatch alarm tells it when to scale"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>An ASG <b>scales out</b> (adds instances) when load rises and <b>scales in</b> (removes them) when it falls.</li>
+      <li>It keeps the count between a <b>minimum</b> and a <b>maximum</b>; <b>desired capacity</b> is how many should run right now.</li>
+      <li>A <b>launch template</b> holds the AMI, instance type, key pair, security groups and user data for new instances. Launch configurations are the older, deprecated form.</li>
+      <li>New instances are <b>registered</b> with the load balancer's target group; removed ones are <b>deregistered</b> first, so current requests can finish.</li>
+      <li>It <b>replaces unhealthy instances</b>. By default it uses EC2 status checks; turn on <b>ELB health checks</b> so an instance whose app has failed is replaced too.</li>
+      <li>Spread the ASG across <b>several AZs</b>: if an AZ fails, it launches replacements in the others.</li>
+      <li>The ASG is <b>free</b>; you pay for the EC2 instances it launches. It can mix On-Demand and Spot instances.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the numbers, break things, and read what the ASG does.</p>
+
+  <section aria-labelledby="labH">
+    <h2 class="stage-title" id="labH">Be the Auto Scaling group</h2>
+    <div class="stage-kind">Set min, desired and max · then fail an instance or a whole AZ</div>
+    <div class="card">
+      <div class="as-ctl">
+        <div class="range"><label for="mn">Minimum <output id="mnO"></output></label><input type="range" id="mn" min="0" max="8" value="2"></div>
+        <div class="range"><label for="ds">Desired <output id="dsO"></output></label><input type="range" id="ds" min="0" max="8" value="2"></div>
+        <div class="range"><label for="mx">Maximum <output id="mxO"></output></label><input type="range" id="mx" min="1" max="8" value="6"></div>
+      </div>
+      <div class="controls">
+        <button class="btn" type="button" id="asFail">An instance fails</button>
+        <button class="btn" type="button" id="asAz">AZ b fails</button>
+        <button class="btn" type="button" id="asAzBack">AZ b is back</button>
+        <button class="btn primary" type="button" id="asReset">Reset</button>
+      </div>
+      <div class="as-azs">
+        <div class="as-az" id="zA"><div class="as-azh">AZ a</div><div class="as-insts" id="lA"></div></div>
+        <div class="as-az" id="zB"><div class="as-azh">AZ b</div><div class="as-insts" id="lB"></div></div>
+      </div>
+      <div class="kpis" id="asK"></div>
+      <ol class="as-log" id="asLog" aria-live="polite"></ol>
+    </div>
+  </section>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">Load balancer or Auto Scaling group?</h2>
+    <div class="stage-kind">Who does this job?</div>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Create an Auto Scaling group behind a load balancer (outline)</summary>
+      <ol>
+        <li>EC2 → <b>Launch templates</b> → Create: Amazon Linux 2023 AMI, <code>t3.micro</code>, a security group, and user data that installs a small web server.</li>
+        <li>EC2 → <b>Auto Scaling groups</b> → Create: choose the launch template, the VPC and <b>subnets in at least two AZs</b>.</li>
+        <li><b>Attach to an existing load balancer</b>: pick the target group from the ALB topic. Turn on <b>Elastic Load Balancing health checks</b>.</li>
+        <li>Group size: <b>desired 2, minimum 1, maximum 4</b>. Optionally add a target tracking policy (for example average CPU 50%).</li>
+        <li>Watch the <b>Activity</b> tab launch two instances; they appear as healthy targets behind the load balancer.</li>
+        <li>Terminate one instance yourself: the ASG notices and launches a replacement. Set desired to 0 or delete the group to clean up.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Add instances when load rises, remove them when it falls</span><span class="arrow">→</span><span class="then">Auto Scaling group</span></li>
+      <li><span class="if">Always keep at least N instances running</span><span class="arrow">→</span><span class="then">ASG minimum capacity</span></li>
+      <li><span class="if">Replace a crashed instance automatically</span><span class="arrow">→</span><span class="then">ASG (with ELB health checks)</span></li>
+      <li><span class="if">Spread instances across data centres</span><span class="arrow">→</span><span class="then">Multi-AZ ASG</span></li>
+      <li><span class="if">What each new instance looks like</span><span class="arrow">→</span><span class="then">Launch template</span></li>
+      <li><span class="if">Spread requests across the instances</span><span class="arrow">→</span><span class="then">Load balancer, not the ASG</span></li>
+      <li><span class="if">How much does the ASG cost?</span><span class="arrow">→</span><span class="then">Nothing; you pay for the instances</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Setting</th><th>What it does</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td><b>Minimum capacity</b></td><td>The ASG never goes below this</td><td>2 (one per AZ)</td></tr>
+          <tr><td><b>Desired capacity</b></td><td>How many should run now; scaling policies change it</td><td>2 at night, 5 at the morning rush</td></tr>
+          <tr><td><b>Maximum capacity</b></td><td>The ASG never goes above this, which also caps cost</td><td>6</td></tr>
+          <tr><td><b>Launch template</b></td><td>AMI, instance type, key pair, security groups, user data, IAM role</td><td>AL2023, <code>t3.micro</code>, web-sg</td></tr>
+          <tr><td><b>Health check type</b></td><td>EC2 status checks (default), plus ELB health checks if turned on</td><td>EC2 + ELB</td></tr>
+          <tr><td><b>Health check grace period</b></td><td>How long a new instance has to start before checks count</td><td>300 s in the console</td></tr>
+          <tr><td><b>Subnets / AZs</b></td><td>Where instances are launched; the ASG keeps them balanced</td><td>ap-south-1a and ap-south-1b</td></tr>
+          <tr><td><b>Scaling policies</b></td><td>When to change desired capacity</td><td>See <a href="scaling-strategies.html">scaling strategies</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><p><b>Launch configurations are deprecated.</b> Accounts created on or after 1 October 2024 can't create new ones. Use launch templates, which also support versions, Spot and mixed instance types.</p></div>
+      <div class="note"><p><b>Scaling in picks carefully.</b> By default the ASG first balances AZs (it removes from the AZ with the most instances), then prefers instances from the oldest launch template. You can protect particular instances from scale-in.</p></div>
+      <div class="note"><p><b>Instance refresh</b> replaces running instances in batches after you change the launch template, for example to roll out a new AMI.</p></div>
+      <div class="note"><p><b>Amazon EC2 Auto Scaling vs AWS Auto Scaling.</b> EC2 Auto Scaling manages ASGs of instances. AWS Auto Scaling is a separate console for scaling plans across several services (EC2, ECS, DynamoDB, Aurora). For the exam, "scale EC2 instances" means an ASG.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Min 2, desired 3, max 6. One instance is terminated. What happens?<span class="go">Show answer</span></summary><div class="ans"><p>Only 2 are running but desired is 3, so the ASG <b>launches a replacement</b>.</p></div></details>
+      <details><summary>The web app on an instance hangs, but the instance itself is fine. Will the ASG replace it?<span class="go">Show answer</span></summary><div class="ans"><p><b>Only if ELB health checks are turned on</b> for the ASG. EC2 status checks only see the instance and its hardware, not your app.</p></div></details>
+      <details><summary>Where does the ASG get the AMI and instance type for new instances?<span class="go">Show answer</span></summary><div class="ans"><p>From the <b>launch template</b>.</p></div></details>
+      <details><summary>An AZ fails. What does a multi-AZ ASG do?<span class="go">Show answer</span></summary><div class="ans"><p>It <b>launches replacement instances in the remaining AZs</b> to get back to desired capacity, and rebalances when the AZ returns.</p></div></details>
+      <details><summary>How much does an Auto Scaling group cost?<span class="go">Show answer</span></summary><div class="ans"><p><b>Nothing.</b> You pay only for the instances (and other resources) it launches.</p></div></details>
+      <details><summary>Does the ASG spread requests across the instances?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> The load balancer spreads requests. The ASG decides how many instances exist and registers them with the load balancer.</p></div></details>
+    </div>
+  </section>
+
+  <footer>The lab is a simplified model: launch and drain times are sped up, and it shows one ASG with one instance type. Sources: ELB and ASG notes "Auto Scaling Groups (ASG) Overview", "Auto Scaling Group Hands-On" and "ELB and ASG: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html">What is Amazon EC2 Auto Scaling?</a>; <a href="https://docs.aws.amazon.com/autoscaling/ec2/userguide/launch-configurations.html">Launch configurations</a>; <a href="https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-termination-policies.html">Termination policies</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  /* ---------- walkthrough ---------- */
+  const A = ['a1', 'a2', 'a3'], B = ['b1', 'b2', 'b3'], ALL = [...A, ...B];
+  const pos = { a1: [455, 175], a2: [585, 175], a3: [520, 310], b1: [745, 175], b2: [875, 175], b3: [810, 310] };
+  const nodes = {
+    users: { x: 80, y: 130, icon: 'users', kind: 'user', label: 'Patients' },
+    alb: { x: 245, y: 130, icon: 'lb', kind: 'net', label: 'Load balancer', sub: 'target group' },
+    cw: { x: 80, y: 330, icon: 'chart', kind: 'mgmt', label: 'CloudWatch', sub: 'CPU alarm' },
+    lt: { x: 245, y: 330, icon: 'doc', kind: 'mgmt', label: 'Launch template', sub: 'AL2023 · t3.micro' }
+  };
+  ALL.forEach(k => nodes[k] = { x: pos[k][0], y: pos[k][1], icon: 'server', kind: 'compute', label: 'EC2' });
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 345, y: 15, w: 640, h: 395, kind: 'region', label: 'ap-south-1 (Mumbai)' },
+      { id: 'asg', x: 365, y: 48, w: 600, h: 350, kind: 'aws', label: 'Auto Scaling group' },
+      { id: 'a', x: 385, y: 80, w: 275, h: 305, kind: 'az', label: 'AZ a' }, { id: 'b', x: 675, y: 80, w: 275, h: 305, kind: 'az', label: 'AZ b' }],
+    nodes,
+    links: [{ a: 'users', b: 'alb', kind: 'pub' }, { a: 'cw', b: 'lt', kind: 'dash', label: 'alarm', at: [162, 320] },
+      ...ALL.map(k => ({ a: 'alb', b: k, kind: 'priv' })), ...ALL.map(k => ({ a: 'lt', b: k, kind: 'dash' }))]
+  });
+  const zl = net.zones.asg.querySelector('text');
+  function show(run, extra) {
+    ALL.forEach(k => { const on = run.includes(k); net.link('alb', k, on ? '' : 'hide'); net.link('lt', k, 'hide'); });
+    net.focus(['users', 'alb', 'cw', 'lt', ...run, ...(extra || [])]);
+  }
+  function base(i) {
+    net.reset(); net.zones.b.classList.remove('down');
+    const cap = [[2, 2, 6], [2, 2, 6], [2, 2, 6], [2, 4, 6], [2, 2, 6], [2, 2, 6], [2, 2, 6], [2, 4, 6], [2, 2, 6]][i];
+    zl.textContent = `Auto Scaling group · min ${cap[0]} · desired ${cap[1]} · max ${cap[2]}`;
+    if (i === 0) { show([]); net.focus(['lt']); net.badge('lt', 'what to launch', 'info'); }
+    if (i === 1) { show(['a1', 'b1']); net.link('lt', 'a1', ''); net.link('lt', 'b1', ''); net.badge('a1', 'launching', 'info'); net.badge('b1', 'launching', 'info'); }
+    if (i === 2) { show(['a1', 'b1']); net.badge('alb', '2 targets', 'ok'); }
+    if (i === 3) { show(['a1', 'b1', 'a2', 'b2']); net.badge('cw', 'CPU 80%', 'bad'); net.link('lt', 'a2', ''); net.link('lt', 'b2', ''); ['a2', 'b2'].forEach(k => net.badge(k, 'new', 'ok')); }
+    if (i === 4) { show(['a1', 'b1'], ['a2', 'b2']); ['a2', 'b2'].forEach(k => { net.state(k, 'dim'); net.badge(k, 'draining', 'info'); }); net.badge('cw', 'CPU 25%', 'ok'); }
+    if (i === 5) { show(['a1', 'b1', 'a2']); net.state('b1', 'down'); net.badge('b1', 'unhealthy', 'bad'); net.link('alb', 'b1', 'cut'); net.focus(['users', 'alb', 'cw', 'lt', 'a1', 'b1', 'b2']); net.link('lt', 'b2', ''); net.badge('b2', 'replacement', 'ok'); }
+    if (i === 6) { show(['a1', 'a2'], ['b1', 'b2']); net.zones.b.classList.add('down'); ['b1', 'b2'].forEach(k => net.state(k, 'down')); net.link('lt', 'a2', ''); net.badge('a2', 'launched in AZ a', 'ok'); }
+    if (i === 7) { show(['a1', 'b1', 'a2', 'b2']); net.badge('a2', 'On-Demand', 'info'); net.badge('b2', 'Spot', 'info'); }
+    if (i === 8) show(['a1', 'b1']);
+  }
+  const STEPS = [
+    { title: 'A recipe for new instances',
+      text: ['A <b>launch template</b> describes each new instance: the AMI, instance type, security group and user data script.', 'The Auto Scaling group will follow it every time it needs another instance.', 'Nothing is running yet.'] },
+    { title: 'Min, desired, max',
+      text: ['The group is set to <b>min 2, desired 2, max 6</b>, with subnets in two AZs.', 'It launches 2 instances, one in each AZ, so the count matches <b>desired</b>.', 'It will never go below 2 or above 6.'],
+      play: async run => { base(1); await Promise.all([net.send(['lt', 'a1'], { run, tone: 'cyan', label: 'launch' }), net.send(['lt', 'b1'], { run, tone: 'cyan', label: 'launch' })]); } },
+    { title: 'Registered with the load balancer',
+      text: ['When an instance is ready, the ASG <b>registers it in the target group</b>.', 'The load balancer starts health-checking it and sending it requests.', 'Nobody edits the load balancer by hand.'],
+      play: async run => { base(2); for (const k of ['a1', 'b1', 'a1', 'b1']) await net.send(['users', 'alb', k], { run, label: 'GET' }); } },
+    { title: 'Scale out at the morning rush',
+      text: ['Average CPU reaches 80%. A <b>CloudWatch alarm</b> (or a target tracking policy) tells the ASG to raise <b>desired to 4</b>.', 'Two new instances launch from the template, one per AZ, and join the target group.', 'The load is shared by 4 instances.'],
+      tip: 'Scale out = add instances. Scale up = bigger instance.',
+      play: async run => { base(3); await Promise.all([net.send(['cw', 'lt', 'a2'], { run, tone: 'red', label: 'scale out' }), net.send(['cw', 'lt', 'b2'], { run, tone: 'red', label: 'scale out' })]); } },
+    { title: 'Scale in when it is quiet',
+      text: ['In the evening CPU drops to 25%, so <b>desired goes back to 2</b>.', 'The ASG first <b>deregisters</b> two instances: the load balancer stops sending them new requests and lets current ones finish.', 'Then it terminates them, and you stop paying for them.'] },
+    { title: 'Self-healing',
+      text: ['The instance in AZ b fails its <b>health check</b>.', 'The ASG <b>terminates</b> it and <b>launches a replacement</b> in the same AZ, so the count stays at desired.', 'Use <b>ELB health checks</b> on the ASG so a failed app counts, not just failed hardware.'],
+      play: async run => { base(5); await net.send(['lt', 'b2'], { run, tone: 'cyan', label: 'replace' }); } },
+    { title: 'An AZ goes down',
+      text: ['AZ b fails. Its instance is gone, so only 1 instance is running against a desired 2.', 'The ASG <b>launches the replacement in AZ a</b>, which is still healthy.', 'When AZ b returns, the ASG <b>rebalances</b> to one instance per AZ again.'],
+      tip: 'Multi-AZ ASG + load balancer = high availability.',
+      play: async run => { base(6); await net.send(['lt', 'a2'], { run, tone: 'cyan', label: 'launch' }); } },
+    { title: 'What it costs',
+      text: ['The Auto Scaling group itself is <b>free</b>. You pay for the instances it runs, and only while they run.', 'A <b>mixed instances</b> group can run some capacity as On-Demand and the rest as cheaper <b>Spot</b> instances.', 'The maximum capacity also caps how much it can spend.'] },
+    { title: 'The whole picture',
+      text: ['Launch template = <b>what</b> to launch. Min / desired / max = <b>how many</b>. Subnets = <b>where</b>.', 'The ASG adds, removes and replaces instances and registers them with the load balancer.', '<a href="scaling-strategies.html">Scaling strategies</a> decide <b>when</b> desired changes.'] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ---------- ASG lab ---------- */
+  const S = { list: [], id: 0, bDown: false, log: [], timer: null };
+  const say = t => { S.log.unshift(t); S.log = S.log.slice(0, 6); };
+  const live = () => S.list.filter(x => x.st !== 'term');
+  function launch(az, why) { const x = { id: 'i-' + String(++S.id).padStart(2, '0'), az, st: 'pend', age: 0 }; S.list.push(x); say(`Launching <b>${x.id}</b> in AZ ${az}: ${why}.`); }
+  function pickAZ() {
+    if (S.bDown) return 'a';
+    const a = live().filter(x => x.az === 'a').length, b = live().filter(x => x.az === 'b').length;
+    return b < a ? 'b' : 'a';
+  }
+  function tick() {
+    const mn = +$('mn').value, mx = +$('mx').value, ds = +$('ds').value;
+    S.list.forEach(x => { x.age++; if (x.st === 'pend' && x.age >= 2) { x.st = 'ok'; say(`<b>${x.id}</b> passed its checks and is now InService.`); }
+      if (x.st === 'drain' && x.age >= 2) { x.st = 'term'; say(`<b>${x.id}</b> terminated.`); }
+      if (x.st === 'bad') { x.st = 'term'; say(`<b>${x.id}</b> is unhealthy, so it was terminated.`); } });
+    S.list = S.list.filter(x => x.st !== 'term');
+    const act = S.list.filter(x => x.st === 'ok' || x.st === 'pend');
+    if (act.length < ds) launch(pickAZ(), `${act.length} running, desired is ${ds}`);
+    else if (act.length > ds) {
+      const a = act.filter(x => x.az === 'a').length, b = act.length - a;
+      const az = a >= b ? 'a' : 'b';
+      const v = act.filter(x => x.az === az).pop(); v.st = 'drain'; v.age = 0;
+      say(`Scaling in: deregistering <b>${v.id}</b> from AZ ${az} (the AZ with more instances); current requests can finish.`);
+    } else if (!S.bDown) {
+      const a = act.filter(x => x.az === 'a' && x.st === 'ok').length, b = act.filter(x => x.az === 'b' && x.st === 'ok').length;
+      if (a - b >= 2 && !act.some(x => x.st === 'pend')) { launch('b', 'rebalancing across AZs'); const v = act.filter(x => x.az === 'a').pop(); v.st = 'drain'; v.age = 0; say(`Rebalancing: then removing <b>${v.id}</b> from AZ a.`); }
+    }
+    draw();
+  }
+  function clamp(src) {
+    let mn = +$('mn').value, ds = +$('ds').value, mx = +$('mx').value;
+    if (src === 'mn') { if (mn > mx) mx = mn; if (ds < mn) ds = mn; }
+    if (src === 'mx') { if (mx < mn) mn = mx; if (ds > mx) ds = mx; }
+    if (src === 'ds') { if (ds < mn) { ds = mn; say(`Desired can't go below the minimum (${mn}).`); } if (ds > mx) { ds = mx; say(`Desired can't go above the maximum (${mx}).`); } }
+    $('mn').value = mn; $('ds').value = ds; $('mx').value = mx; draw();
+  }
+  function draw() {
+    ['mn', 'ds', 'mx'].forEach(k => $(k + 'O').textContent = $(k).value);
+    const lab = { pend: 'starting', ok: 'InService', drain: 'draining', bad: 'unhealthy' };
+    ['a', 'b'].forEach(az => {
+      const xs = S.list.filter(x => x.az === az);
+      $('l' + az.toUpperCase()).innerHTML = xs.map(x => `<span class="as-i ${x.st}"><b>${x.id}</b>${lab[x.st]}</span>`).join('') || '<span class="as-none">none</span>';
+    });
+    $('zB').classList.toggle('down', S.bDown);
+    const ok = S.list.filter(x => x.st === 'ok').length, ds = +$('ds').value;
+    $('asK').innerHTML = [['InService', ok, ok >= ds ? 'good' : 'accent'], ['Desired', ds, ''], ['Range', $('mn').value + ' to ' + $('mx').value, ''], ['Billed instances', S.list.length, '']]
+      .map(([l, v, c]) => `<div class="${c}"><b>${v}</b><span>${l}</span></div>`).join('');
+    $('asLog').innerHTML = S.log.map(t => `<li>${t}</li>`).join('') || '<li>The group is steady.</li>';
+  }
+  ['mn', 'ds', 'mx'].forEach(k => $(k).addEventListener('input', () => clamp(k)));
+  $('asFail').addEventListener('click', () => { const v = S.list.filter(x => x.st === 'ok'); if (!v.length) { say('No InService instance to fail.'); return draw(); } const x = v[Math.floor(Math.random() * v.length)]; x.st = 'bad'; say(`<b>${x.id}</b> failed its health check.`); draw(); });
+  $('asAz').addEventListener('click', () => { if (S.bDown) return; S.bDown = true; S.list.filter(x => x.az === 'b').forEach(x => { x.st = 'bad'; }); say('AZ b is down. Its instances fail their health checks.'); draw(); });
+  $('asAzBack').addEventListener('click', () => { if (!S.bDown) return; S.bDown = false; say('AZ b is back. The ASG will rebalance.'); draw(); });
+  function reset() { S.list = []; S.id = 0; S.bDown = false; S.log = []; $('mn').value = 2; $('ds').value = 2; $('mx').value = 6;
+    ['a', 'b'].forEach(az => { const x = { id: 'i-' + String(++S.id).padStart(2, '0'), az, st: 'ok', age: 9 }; S.list.push(x); }); draw(); }
+  $('asReset').addEventListener('click', reset);
+  reset();
+  S.timer = setInterval(tick, 900);
+
+  K.pick($('pick'), [
+    { q: 'Spread incoming requests across the healthy instances.', a: 'Load balancer', why: 'The load balancer routes each request.' },
+    { q: 'Launch two more instances when CPU is high.', a: 'Auto Scaling group', why: 'The ASG changes how many instances exist.' },
+    { q: 'Stop sending requests to an instance whose app is down.', a: 'Load balancer', why: 'Its health check takes the instance out of rotation.' },
+    { q: 'Terminate the broken instance and launch a fresh one.', a: 'Auto Scaling group', why: 'Replacing instances is the ASG\'s job (using EC2 or ELB health checks).' },
+    { q: 'Give the app one DNS name.', a: 'Load balancer', why: 'Users call the load balancer\'s DNS name.' },
+    { q: 'Keep the site running when an AZ fails.', a: 'Both', why: 'The load balancer sends traffic to the healthy AZ; the ASG launches replacement capacity there.' },
+    { q: 'End HTTPS so instances don\'t need certificates.', a: 'Load balancer', why: 'TLS termination with an ACM certificate.' },
+    { q: 'Never run more than 6 instances.', a: 'Auto Scaling group', why: 'Maximum capacity.' }
+  ], ['Load balancer', 'Auto Scaling group', 'Both']);
+})();
+</script>
+</body>
+</html>

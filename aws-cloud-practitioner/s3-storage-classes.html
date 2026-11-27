@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>S3 Storage Classes &amp; Lifecycle</title>
+<meta name="description" content="The eight S3 storage classes compared by price, availability, retrieval and minimum duration, lifecycle rules and Intelligent-Tiering, with a class picker and cost calculator.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+
+  .cls rect.bg { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; transition: stroke .2s, fill .2s, opacity .2s; }
+  .cls.on rect.bg { stroke: var(--accent-text); fill: var(--panel-2); }
+  .cls.dimc { opacity: .4; }
+  .cls rect.cost { fill: var(--cyan); opacity: .75; }
+  .cls text { fill: var(--fg); font-size: 13px; font-weight: 600; }
+  .cls .sm { fill: var(--muted); font-family: var(--mono); font-size: 12px; font-weight: 400; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html" aria-current="page"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Amazon S3 / 6 · Domain 3 Technology</p>
+    <h1>S3 Storage Classes &amp; Lifecycle</h1>
+    <ul class="lede">
+      <li>Every class has <b>11 nines of durability</b>; they differ in <b>price</b>, <b>availability</b>, <b>retrieval</b> time and fees, and <b>minimum duration</b>.</li>
+      <li><b>Standard</b> for frequent access, <b>Standard-IA / One Zone-IA</b> for infrequent, three <b>Glacier</b> classes for archives.</li>
+      <li><b>Intelligent-Tiering</b> moves objects automatically when the access pattern is unknown.</li>
+      <li><b>Lifecycle rules</b> move objects to cheaper classes as they age and delete them at the end.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Storage classes</span><span class="like">Fast SAN for live data, cheaper NAS for old files, tape in an offsite vault</span><span>All in one service, same API, switch per object.</span></div>
+      <div class="row"><span class="aws">Glacier Deep Archive</span><span class="like">Backup tapes at an offsite vault</span><span>No tapes to handle; a restore takes hours instead of days.</span></div>
+      <div class="row"><span class="aws">Lifecycle rule</span><span class="like">A scheduled job that moves old files to the archive share</span><span>Built in; set once per bucket or prefix.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: an X-ray's life across the storage classes</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram" id="stSvg" viewBox="0 0 1000 420" aria-label="Eight S3 storage classes as bars of relative storage price; the walkthrough highlights each one and moves an object down them by lifecycle rule"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>Durability is <b>11 nines for every class</b>; <b>availability</b> differs (Standard 99.99%, IA 99.9%, One Zone-IA 99.5%).</li>
+      <li><b>Standard</b>: frequent access, default. <b>Standard-IA</b>: infrequent, instant, retrieval fee, 30-day minimum.</li>
+      <li><b>One Zone-IA</b>: one AZ, cheaper, for re-creatable data.</li>
+      <li><b>Glacier Instant Retrieval</b> (ms, 90 days), <b>Glacier Flexible Retrieval</b> (minutes to hours, 90 days), <b>Glacier Deep Archive</b> (cheapest, within 12 hours, 180 days).</li>
+      <li><b>Intelligent-Tiering</b>: automatic tiering by access, small monitoring fee, no retrieval fees.</li>
+      <li><b>Express One Zone</b>: single-digit ms, one AZ, directory bucket.</li>
+      <li><b>Lifecycle rules</b>: <b>transition</b> actions (move to another class after N days) and <b>expiration</b> actions (delete after N days, including old versions).</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="clsH">
+    <h2 class="stage-title" id="clsH">Match the data to a class</h2>
+    <div class="stage-kind">Pick an access pattern</div>
+    <div class="card">
+      <div class="chips" id="clsChips"></div>
+      <div class="scroll"><svg class="diagram" id="cls" viewBox="0 0 1000 420" aria-label="Eight S3 storage classes from most to least expensive storage"></svg></div>
+      <p class="status-line" id="clsStatus">Bar = relative storage price per GB-month (log scale).</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="calcH">
+    <h2 class="stage-title" id="calcH">What would it cost?</h2>
+    <div class="stage-kind">Total cost for the whole period · illustrative US prices, storage plus retrieval only</div>
+    <div class="card">
+      <div class="lab-form">
+        <div class="range"><label for="cGb">Data stored <output id="cGbO"></output></label><input type="range" id="cGb" min="100" max="20000" step="100" value="1000"></div>
+        <div class="range"><label for="cRd">Read back each month <output id="cRdO"></output></label><input type="range" id="cRd" min="0" max="100" value="5"></div>
+        <div class="range"><label for="cMo">Kept for <output id="cMoO"></output></label><input type="range" id="cMo" min="1" max="36" value="12"></div>
+      </div>
+      <div class="kpis" id="cOut"></div>
+      <p class="sub" style="margin:8px 0 0">Try reading 100% a month: retrieval fees pile up and Glacier Instant Retrieval ends up dearer than Standard. Try 1 month: minimum durations kick in. Intelligent-Tiering is shown at its frequent-access price; objects nobody reads would drop to cheaper tiers.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Change a storage class and add a lifecycle rule (outline)</summary>
+      <ol>
+        <li>Upload an object and choose its storage class under <b>Properties</b> (for example Standard-IA).</li>
+        <li>Select an existing object → <b>Actions</b> → <b>Edit storage class</b> to move it to Glacier Instant Retrieval.</li>
+        <li>Bucket → <b>Management</b> → <b>Create lifecycle rule</b>: transition current versions to Standard-IA after 30 days and Glacier Flexible Retrieval after 90; expire after 2,555 days.</li>
+        <li>Review the timeline the console draws, then save.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Frequent access, default</span><span class="arrow">→</span><span class="then">S3 Standard</span></li>
+      <li><span class="if">Unknown or changing access pattern</span><span class="arrow">→</span><span class="then">Intelligent-Tiering</span></li>
+      <li><span class="if">Infrequent, instant, multi-AZ</span><span class="arrow">→</span><span class="then">Standard-IA</span></li>
+      <li><span class="if">Infrequent, re-creatable, cheaper</span><span class="arrow">→</span><span class="then">One Zone-IA</span></li>
+      <li><span class="if">Archive, needs milliseconds</span><span class="arrow">→</span><span class="then">Glacier Instant Retrieval</span></li>
+      <li><span class="if">Archive, minutes to hours is fine</span><span class="arrow">→</span><span class="then">Glacier Flexible Retrieval</span></li>
+      <li><span class="if">Cheapest, 12 hours is fine</span><span class="arrow">→</span><span class="then">Glacier Deep Archive</span></li>
+      <li><span class="if">Lowest latency, next to compute</span><span class="arrow">→</span><span class="then">Express One Zone</span></li>
+      <li><span class="if">Move objects by age automatically</span><span class="arrow">→</span><span class="then">Lifecycle rules</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Class</th><th>Availability</th><th>AZs</th><th>Minimum duration</th><th>Retrieval</th></tr></thead>
+        <tbody>
+          <tr><td><b>Standard</b></td><td>99.99%</td><td>≥3</td><td>none</td><td>ms, no fee</td></tr>
+          <tr><td><b>Intelligent-Tiering</b></td><td>99.9%</td><td>≥3</td><td>none</td><td>ms, no fee</td></tr>
+          <tr><td><b>Standard-IA</b></td><td>99.9%</td><td>≥3</td><td>30 days</td><td>ms, per-GB fee</td></tr>
+          <tr><td><b>One Zone-IA</b></td><td>99.5%</td><td>1</td><td>30 days</td><td>ms, per-GB fee</td></tr>
+          <tr><td><b>Glacier Instant Retrieval</b></td><td>99.9%</td><td>≥3</td><td>90 days</td><td>ms, per-GB fee</td></tr>
+          <tr><td><b>Glacier Flexible Retrieval</b></td><td>99.99%</td><td>≥3</td><td>90 days</td><td>minutes to 12 hours</td></tr>
+          <tr><td><b>Glacier Deep Archive</b></td><td>99.99%</td><td>≥3</td><td>180 days</td><td>within 12 hours (bulk 48)</td></tr>
+          <tr><td><b>Express One Zone</b></td><td>99.95%</td><td>1</td><td>1 hour</td><td>single-digit ms</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><p><b>Minimum duration.</b> Delete or move an object before its minimum and you still pay for the full minimum (for example 90 days in Glacier Flexible Retrieval).</p></div>
+      <div class="note"><p><b>Lifecycle vs Intelligent-Tiering.</b> Lifecycle rules move data by <b>age</b> on a schedule you set; Intelligent-Tiering moves it by actual <b>access</b>, object by object.</p></div>
+      <div class="note"><p><b>Glacier retrieval options.</b> Flexible Retrieval offers expedited (minutes), standard (hours) and free bulk retrievals (up to about 12 hours).</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Images are accessed unpredictably; you want no retrieval fees and no tiering work. Which class?<span class="go">Show answer</span></summary><div class="ans"><p><b>S3 Intelligent-Tiering</b>.</p></div></details>
+      <details><summary>Compliance records kept 10 years, retrieval within 12 hours is fine, lowest cost.<span class="go">Show answer</span></summary><div class="ans"><p><b>Glacier Deep Archive</b>.</p></div></details>
+      <details><summary>Is durability lower in One Zone-IA?<span class="go">Show answer</span></summary><div class="ans"><p>Durability is still designed for 11 nines, but data is in <b>one AZ</b>, so losing that AZ loses the data; availability is 99.5%.</p></div></details>
+      <details><summary>What happens if you delete a Standard-IA object after 10 days?<span class="go">Show answer</span></summary><div class="ans"><p>You are billed for the <b>30-day minimum</b>.</p></div></details>
+      <details><summary>Which feature moves objects to Glacier after 90 days automatically?<span class="go">Show answer</span></summary><div class="ans"><p>A <b>lifecycle rule</b> (transition action).</p></div></details>
+      <details><summary>Archive data that must open in milliseconds when needed?<span class="go">Show answer</span></summary><div class="ans"><p><b>Glacier Instant Retrieval</b>.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Prices are illustrative US list prices per GB-month and per GB retrieved; real bills add request charges and vary by Region. Sources: S3 notes "Amazon S3 Storage Classes: Overview and Hands-On" and "Amazon S3: CLF-C02 Exam Summary"; <a href="https://aws.amazon.com/s3/storage-classes/">Amazon S3 storage classes</a>; <a href="https://aws.amazon.com/s3/pricing/">S3 pricing</a>; <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html">Managing the lifecycle of objects</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const CL = [
+    { k: 'exp', n: 'Express One Zone', p: 0.11, r: 0, ret: 'single-digit ms', min: 1 / 720, minT: '1 hour', az: '1 AZ · 99.95%' },
+    { k: 'std', n: 'Standard', p: 0.023, r: 0, ret: 'milliseconds', min: 0, minT: 'none', az: '≥3 AZ · 99.99%' },
+    { k: 'it', n: 'Intelligent-Tiering', p: 0.023, r: 0, ret: 'milliseconds', min: 0, minT: 'none', az: '≥3 AZ · 99.9% · no retrieval fee' },
+    { k: 'ia', n: 'Standard-IA', p: 0.0125, r: 0.01, ret: 'ms + retrieval fee', min: 1, minT: '30 days', az: '≥3 AZ · 99.9%' },
+    { k: 'oz', n: 'One Zone-IA', p: 0.01, r: 0.01, ret: 'ms + retrieval fee', min: 1, minT: '30 days', az: '1 AZ · 99.5%' },
+    { k: 'gir', n: 'Glacier Instant Retrieval', p: 0.004, r: 0.03, ret: 'milliseconds', min: 3, minT: '90 days', az: '≥3 AZ · 99.9%' },
+    { k: 'gfr', n: 'Glacier Flexible Retrieval', p: 0.0036, r: 0.01, ret: 'minutes to 12 h', min: 3, minT: '90 days', az: '≥3 AZ · 99.99%' },
+    { k: 'gda', n: 'Glacier Deep Archive', p: 0.00099, r: 0.02, ret: 'within 12 h (bulk 48 h)', min: 6, minT: '180 days', az: '≥3 AZ · 99.99%' }
+  ];
+  function classChart(svg) {
+    const E = {}, maxLog = Math.log10(0.11 / 0.00099);
+    CL.forEach((c, i) => {
+      const y = 20 + i * 49, g = K.el('g', { class: 'cls' }, svg);
+      K.el('rect', { x: 20, y, width: 960, height: 42, rx: 10, class: 'bg' }, g);
+      K.text(g, 36, y + 18, c.n, '');
+      K.text(g, 36, y + 34, c.az, 'sm');
+      const w = 20 + 170 * (Math.log10(c.p / 0.00099) / maxLog);
+      K.el('rect', { x: 300, y: y + 13, width: w, height: 16, rx: 4, class: 'cost' }, g);
+      K.text(g, 500, y + 26, 'retrieval: ' + c.ret, 'sm');
+      K.text(g, 810, y + 26, 'min ' + c.minT, 'sm');
+      E[c.k] = { g, y };
+    });
+    return E;
+  }
+
+  const sv = $('stSvg');
+  const cE = classChart(sv), P = K.el('g', {}, sv);
+  const light = ks => { for (const c in cE) cE[c].g.classList.toggle('on', ks.includes(c)); for (const c in cE) cE[c].g.classList.toggle('dimc', ks.length > 0 && !ks.includes(c)); };
+  function base(i) {
+    P.textContent = '';
+    light([[], ['std'], ['ia'], ['oz'], ['gir', 'gfr', 'gda'], ['it'], ['exp'], ['std', 'ia', 'gfr', 'gda'], []][i]);
+  }
+  const STEPS = [
+    { title: "Eight classes, one durability",
+      text: ["Every object is stored in a <b>storage class</b>. All classes are designed for <b>11 nines of durability</b>.", "They differ in <b>storage price</b> (the bar, cheapest at the bottom), <b>availability</b>, how fast and how expensive <b>retrieval</b> is, and the <b>minimum storage duration</b>.", "You pick a class per object at upload, change it later, or let rules do it."] },
+    { title: "S3 Standard",
+      text: ["The default, for data used often: websites, app content, analytics.", "Stored across at least 3 AZs, 99.99% availability, millisecond access, no retrieval fee and no minimum duration."] },
+    { title: "Standard-IA (Infrequent Access)",
+      text: ["Cheaper storage for data read rarely but needed instantly: monthly reports, backups, DR copies.", "You pay a <b>retrieval fee per GB</b> and for at least <b>30 days</b> of storage. Multi-AZ, 99.9% availability."] },
+    { title: "One Zone-IA",
+      text: ["Like Standard-IA, but in <b>one AZ</b> only, so about 20% cheaper with 99.5% availability.", "If that AZ is destroyed the data is lost: use it for data you can <b>re-create</b>, such as thumbnails or secondary backup copies."],
+      tip: "One AZ + recreatable data = One Zone-IA." },
+    { title: "Three Glacier classes for archives",
+      text: ["<b>Glacier Instant Retrieval</b>: archive price, milliseconds to read, 90-day minimum. For data read about once a quarter.", "<b>Glacier Flexible Retrieval</b>: minutes (expedited) to hours (bulk is free), 90-day minimum.", "<b>Glacier Deep Archive</b>: the cheapest storage of all, retrieval within 12 hours (bulk up to 48), 180-day minimum."] },
+    { title: "Intelligent-Tiering",
+      text: ["For data whose access pattern is <b>unknown or changing</b>.", "S3 moves each object between access tiers by itself: Frequent, Infrequent after 30 days without access, Archive Instant after 90 days, and optional deeper archive tiers.", "A small monthly monitoring fee per object, but <b>no retrieval fees</b>."],
+      tip: "Unknown access pattern = Intelligent-Tiering." },
+    { title: "Express One Zone",
+      text: ["The fastest class: <b>single-digit millisecond</b> latency in one AZ, using a special <b>directory bucket</b> next to your compute.", "For latency-sensitive work such as ML training and analytics. The most expensive per GB, but cheaper requests."] },
+    { title: "Lifecycle rules move data for you",
+      text: ["A <b>lifecycle rule</b> moves objects as they age and can delete them.", "Example: Standard \u2192 Standard-IA after 30 days \u2192 Glacier Flexible after 90 \u2192 Deep Archive after 180 \u2192 expire after 7 years."],
+      play: async run => { base(7); const o = K.pill(P, 'xray-0042.png', 'alt'); let at = [895, cE.std.y + 21]; for (const k of ['ia', 'gfr', 'gda']) { await K.sleep(500, run); const to = [895, cE[k].y + 21]; await K.move(o, at, to, 700, run); at = to; } await K.sleep(600, run); o.remove(); } },
+    { title: "How to choose",
+      text: ["How often is it read? How fast must it come back? Can it be re-created? How long is it kept?", "Cheaper storage always means slower or more expensive retrieval, and a minimum duration."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ---------- pattern picker ---------- */
+  const lab = $('cls');
+  const lE = classChart(lab);
+  const PAT = [
+    { n: 'Thumbnails viewed all day', k: 'std', why: 'Frequent access: Standard, the default.' },
+    { n: 'Access pattern unknown', k: 'it', why: 'Intelligent-Tiering moves objects between tiers by access, with no retrieval fees.' },
+    { n: 'Monthly reports, open instantly', k: 'ia', why: 'Infrequent but instant, multi-AZ: Standard-IA.' },
+    { n: 'Re-creatable copy of thumbnails', k: 'oz', why: 'One Zone-IA is cheaper; if the AZ is lost you regenerate the data.' },
+    { n: 'Old X-rays, rare, must open instantly', k: 'gir', why: 'Archive price with millisecond retrieval: Glacier Instant Retrieval.' },
+    { n: 'Backups, hours to restore is fine', k: 'gfr', why: 'Glacier Flexible Retrieval: minutes to hours; bulk retrieval is free.' },
+    { n: '7-year compliance archive', k: 'gda', why: 'Cheapest storage; retrieval within 12 hours.' },
+    { n: 'ML training data, latency-critical', k: 'exp', why: 'Express One Zone: single-digit ms, in one AZ next to the compute.' }
+  ];
+  $('clsChips').innerHTML = PAT.map((p, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${p.n}</button>`).join('');
+  $('clsChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('clsChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    const p = PAT[+b.dataset.i]; for (const c in lE) lE[c].g.classList.toggle('on', c === p.k);
+    $('clsStatus').innerHTML = `<b>${CL.find(c => c.k === p.k).n}</b>. ${p.why}`;
+  }));
+
+  /* ---------- cost calculator ---------- */
+  function calc() {
+    const gb = +$('cGb').value, rd = +$('cRd').value / 100, mo = +$('cMo').value;
+    $('cGbO').textContent = gb.toLocaleString() + ' GB'; $('cRdO').textContent = Math.round(rd * 100) + '% a month'; $('cMoO').textContent = mo + (mo === 1 ? ' month' : ' months');
+    const rows = CL.filter(c => c.k !== 'exp').map(c => {
+      const billed = Math.max(mo, c.min);
+      const cost = gb * c.p * billed + gb * rd * c.r * mo;
+      return { c, cost, pen: billed > mo };
+    }).sort((a, b) => a.cost - b.cost);
+    const best = rows[0].cost;
+    $('cOut').innerHTML = rows.map(r => `<div class="${r.cost === best ? 'good' : ''}"><b>$${r.cost.toFixed(0)}</b><span>${r.c.n}${r.pen ? ' · billed for the minimum duration' : ''}</span></div>`).join('');
+  }
+  ['cGb', 'cRd', 'cMo'].forEach(id => $(id).addEventListener('input', calc));
+  calc();
+
+})();
+</script>
+</body>
+</html>

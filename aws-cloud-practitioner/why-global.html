@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>Why Go Global</title>
+<meta name="description" content="Why build a global application on AWS: lower latency for distant users, disaster recovery across Regions and attack resilience, using Regions and edge locations, with a latency lab.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html" aria-current="page"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Global infrastructure / 1 · Domain 3 Technology</p>
+    <h1>Why Go Global</h1>
+    <ul class="lede">
+      <li>Distance adds <b>latency</b>: users far from your Region wait longer for every request.</li>
+      <li>Deploying in several <b>Regions</b> cuts latency and gives <b>disaster recovery</b>.</li>
+      <li><b>Edge locations</b> speed things up without full deployments.</li>
+      <li>Building blocks: Regions, AZs, edge locations, Local Zones, Wavelength, Outposts.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: serving patients on four continents</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="Users in Chennai, London, New York and Sydney reach copies of an app in Mumbai, Frankfurt and North Virginia, and an edge location in Sydney"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>A global application is deployed in <b>several geographies</b> (Regions, edge locations).</li>
+      <li>Benefits: <b>lower latency</b>, <b>disaster recovery</b>, attack resilience.</li>
+      <li>Regions and AZs: full deployments. Edge locations: caching (CloudFront) and fast entry to the AWS network.</li>
+      <li>Services: Route 53, CloudFront, S3 Transfer Acceleration, Global Accelerator, Local Zones, Wavelength, Outposts.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="wH">
+    <h2 class="stage-title" id="wH">Where should the app run?</h2>
+    <div class="stage-kind">Tick the Regions you deploy to · round-trip times are illustrative</div>
+    <div class="card">
+      <div class="ptoggles">
+        <label class="toggle" for="wm"><input type="checkbox" id="wm" checked> Mumbai (ap-south-1)</label>
+        <label class="toggle" for="wf"><input type="checkbox" id="wf"> Frankfurt (eu-central-1)</label>
+        <label class="toggle" for="wv"><input type="checkbox" id="wv"> N. Virginia (us-east-1)</label>
+        <label class="toggle" for="wDown"><input type="checkbox" id="wDown"> Mumbai Region has an outage</label>
+      </div>
+      <div class="kpis" id="wOut"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Lower latency for distant users</span><span class="arrow">→</span><span class="then">Deploy in more Regions / use the edge</span></li>
+      <li><span class="if">Survive a Region failure</span><span class="arrow">→</span><span class="then">Multi-Region (DR)</span></li>
+      <li><span class="if">Cache content near users</span><span class="arrow">→</span><span class="then">CloudFront at edge locations</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Building block</th><th>What it is</th></tr></thead>
+        <tbody>
+          <tr><td><b>Region</b></td><td>Cluster of data centres (AZs) in a geography</td></tr>
+          <tr><td><b>Availability Zone</b></td><td>One or more data centres in a Region</td></tr>
+          <tr><td><b>Edge location</b></td><td>Point of presence for caching and network entry</td></tr>
+          <tr><td><b>Local Zone</b></td><td>Extension of a Region in a city</td></tr>
+          <tr><td><b>Wavelength Zone</b></td><td>AWS compute inside a 5G network</td></tr>
+          <tr><td><b>Outposts</b></td><td>AWS racks in your data centre</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Name two benefits of a global application.<span class="go">Show answer</span></summary><div class="ans"><p>Lower latency, disaster recovery, attack resilience.</p></div></details>
+      <details><summary>Does a bigger instance fix latency for users far away?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> Distance is the cause; deploy closer or use the edge.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Latency figures are illustrative. Sources: global infrastructure notes "Why Build a Global Application on AWS" and "AWS Global Infrastructure: Summary"; <a href="https://aws.amazon.com/about-aws/global-infrastructure/">AWS Global Infrastructure</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'm', x: 600, y: 170, w: 170, h: 150, kind: 'region', label: 'Mumbai' }, { id: 'f', x: 380, y: 40, w: 170, h: 150, kind: 'region', label: 'Frankfurt' }, { id: 'v', x: 60, y: 60, w: 170, h: 150, kind: 'region', label: 'N. Virginia' }],
+    nodes: {
+      am: { x: 685, y: 260, icon: 'server', kind: 'compute', label: 'App' },
+      af: { x: 465, y: 130, icon: 'server', kind: 'compute', label: 'App' },
+      av: { x: 145, y: 150, icon: 'server', kind: 'compute', label: 'App' },
+      ch: { x: 800, y: 370, icon: 'users', kind: 'user', label: 'Chennai' },
+      lo: { x: 330, y: 300, icon: 'users', kind: 'user', label: 'London' },
+      ny: { x: 90, y: 330, icon: 'users', kind: 'user', label: 'New York' },
+      sy: { x: 930, y: 230, icon: 'users', kind: 'user', label: 'Sydney' },
+      ed: { x: 900, y: 90, icon: 'edge', kind: 'net', label: 'Edge location', sub: 'Sydney' }
+    },
+    links: [{ a: 'ch', b: 'am' }, { a: 'lo', b: 'am', kind: 'pub' }, { a: 'ny', b: 'am', kind: 'pub', via: [[400, 395]] }, { a: 'lo', b: 'af' }, { a: 'ny', b: 'av' }, { a: 'sy', b: 'am', kind: 'pub' }, { a: 'sy', b: 'ed' }, { a: 'ed', b: 'am', kind: 'priv' }]
+  });
+
+  function base(i) {
+    net.reset(); net.zones.m.classList.remove('down');
+    if (i === 0) { net.focus(['am', 'ch', 'lo', 'ny', 'sy']); net.link('lo', 'af', 'hide'); net.link('ny', 'av', 'hide'); net.link('sy', 'ed', 'hide'); net.link('ed', 'am', 'hide'); net.badge('ny', '~250 ms', 'bad'); net.badge('ch', '~20 ms', 'ok'); }
+    if (i === 1) { net.focus(['am', 'af', 'av', 'lo', 'ny', 'ch']); net.link('lo', 'am', 'hide'); net.link('ny', 'am', 'hide'); net.link('sy', 'ed', 'hide'); net.badge('ny', '~10 ms', 'ok'); net.badge('lo', '~15 ms', 'ok'); }
+    if (i === 2) { net.focus(['am', 'af', 'av', 'ch']); net.zones.m.classList.add('down'); net.state('am', 'down'); net.badge('af', 'takes over', 'ok'); }
+    if (i === 3) { net.focus(['sy', 'ed', 'am']); net.link('sy', 'am', 'hide'); net.badge('ed', 'cache + AWS network', 'ok'); }
+    if (i === 4) net.focus(null);
+  }
+  const STEPS = [
+    { title: "One Region, users everywhere",
+      text: ["The booking app runs only in Mumbai. Chennai users get answers in about 20 ms; New York users wait about 250 ms for every request, because the signal has to cross the world.", "Distance adds <b>latency</b> that no server upgrade can remove."],
+      play: async run => { base(0); await Promise.all([net.send(['ch', 'am'], { run, tone: 'green' }), net.send(['ny', 'am'], { run, tone: 'red' })]); } },
+    { title: "Deploy closer to users",
+      text: ["Running copies of the app in more <b>Regions</b> (Frankfurt, N. Virginia) puts it near each group of users. Route 53 sends each user to the nearest one."],
+      play: async run => { base(1); await Promise.all([net.send(['lo', 'af'], { run, tone: 'green' }), net.send(['ny', 'av'], { run, tone: 'green' })]); } },
+    { title: "Survive a Region failure",
+      text: ["If a whole Region has a problem, another Region can take over: <b>disaster recovery</b>.", "A spread-out application is also harder to take down with an attack."] },
+    { title: "Use the edge too",
+      text: ["Not everything needs a full Region. <b>Edge locations</b> (hundreds of them) cache content with CloudFront and carry traffic onto the AWS network with Global Accelerator and S3 Transfer Acceleration."],
+      play: async run => { base(3); await net.send(['sy', 'ed', 'am'], { run, label: 'GET', tone: 'cyan' }); } },
+    { title: "The building blocks",
+      text: ["<b>Regions</b> (each with several AZs) for full deployments; <b>edge locations</b> for caching and fast entry; <b>Local Zones</b>, <b>Wavelength</b> and <b>Outposts</b> to bring AWS even closer.", "The rest of this section covers each service."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+  const LAT = { ch: { m: 20, f: 130, v: 210 }, lo: { m: 120, f: 15, v: 75 }, ny: { m: 250, f: 85, v: 10 }, sy: { m: 150, f: 280, v: 200 } };
+  function lat() {
+    const on = ['m', 'f', 'v'].filter(r => $('w' + r).checked && !(r === 'm' && $('wDown').checked));
+    const N = { m: 'Mumbai', f: 'Frankfurt', v: 'N. Virginia' };
+    $('wOut').innerHTML = ['ch', 'lo', 'ny', 'sy'].map(u => {
+      if (!on.length) return `<div class="bad"><b>no Region</b><span>${({ ch: 'Chennai', lo: 'London', ny: 'New York', sy: 'Sydney' })[u]}</span></div>`;
+      const best = on.reduce((a, b) => LAT[u][a] <= LAT[u][b] ? a : b);
+      const ms = LAT[u][best];
+      return `<div class="${ms < 60 ? 'good' : ms > 150 ? 'bad' : 'accent'}"><b>${ms} ms</b><span>${({ ch: 'Chennai', lo: 'London', ny: 'New York', sy: 'Sydney' })[u]} → ${N[best]}</span></div>`;
+    }).join('');
+  }
+  ['wm', 'wf', 'wv', 'wDown'].forEach(id => $(id).addEventListener('change', lat)); lat();
+
+})();
+</script>
+</body>
+</html>

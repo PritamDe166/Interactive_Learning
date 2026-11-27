@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>S3 Buckets &amp; Objects</title>
+<meta name="description" content="What Amazon S3 is: buckets in a Region, globally unique names, objects, keys and prefixes, durability and pre-signed URLs, with a naming lab.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html" aria-current="page"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Amazon S3 / 1 · Domain 3 Technology</p>
+    <h1>S3 Buckets &amp; Objects</h1>
+    <ul class="lede">
+      <li><b>Amazon S3</b> is <b>object storage</b>: you store whole files (objects) in <b>buckets</b> and reach them over HTTPS.</li>
+      <li>Storage is virtually unlimited; one object can be up to about <b>48.8 TiB</b>. You pay for what you store and use.</li>
+      <li>A bucket lives in <b>one Region</b>, but its <b>name is unique across all AWS accounts</b>.</li>
+      <li>An object's <b>key</b> is its full name; "folders" are only <b>prefixes</b> in the key.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Bucket</span><span class="like">A top-level file share on a file server</span><span>Reached over HTTPS with an API, not mapped as a drive; the name must be unique worldwide.</span></div>
+      <div class="row"><span class="aws">Object</span><span class="like">A file</span><span>Always written whole; you can't edit part of it in place. It carries metadata and tags.</span></div>
+      <div class="row"><span class="aws">Key prefix</span><span class="like">A folder path</span><span>Only part of the name: there are no real directories.</span></div>
+      <div class="row"><span class="aws">Pre-signed URL</span><span class="like">A SharePoint "anyone with the link" share that expires</span><span>Signed with the creator's AWS permissions; works only until it expires.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: storing a clinic's X-ray scans</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="A clinic app uploads scans to an S3 bucket in Mumbai that keeps copies in three Availability Zones; a doctor downloads one with a pre-signed URL"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>S3 is <b>object storage</b>: virtually unlimited, pay per GB-month, per request and for data transferred out. Data transferred in is free.</li>
+      <li>A <b>bucket</b> is created in one <b>Region</b>. Its name must be <b>globally unique</b>: 3 to 63 characters, lowercase letters, numbers, dots and hyphens, starting and ending with a letter or number.</li>
+      <li>An <b>object</b> = key + value (the data) + metadata + tags (+ version ID when versioning is on).</li>
+      <li>The <b>key</b> is the full path, e.g. <code>scans/2026/xray-0042.png</code> = prefix <code>scans/2026/</code> + object name. There are no real folders.</li>
+      <li>Maximum object size is about <b>48.8 TiB</b>. Use <b>multipart upload</b> for big files (required above 5 GB, recommended from about 100 MB).</li>
+      <li>S3 Standard stores data across <b>at least 3 AZs</b>; durability is <b>11 nines</b> for every storage class.</li>
+      <li>Buckets are <b>private by default</b>; a <b>pre-signed URL</b> gives temporary access to one object.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="labH">
+    <h2 class="stage-title" id="labH">Name a bucket, build a key</h2>
+    <div class="stage-kind">Type a bucket name and a key · the rules are checked as you type</div>
+    <div class="card">
+      <div class="lab-form">
+        <label>Bucket name <input id="bIn" value="clinic-imaging-ap-1042" spellcheck="false"></label>
+        <label>Object key <input id="kIn" value="scans/2026/xray-0042.png" spellcheck="false"></label>
+      </div>
+      <div class="chips" id="bChips"><button class="chip-btn" type="button" data-v="Clinic_Imaging">Clinic_Imaging</button><button class="chip-btn" type="button" data-v="clinic-imaging">clinic-imaging</button><button class="chip-btn" type="button" data-v="192.168.10.5">192.168.10.5</button><button class="chip-btn" type="button" data-v="xn--clinic">xn--clinic</button><button class="chip-btn" type="button" data-v="ab">ab</button></div>
+      <ul class="checks" id="bOut"></ul>
+      <p class="status-line" id="bSt"></p>
+      <div class="kpis" id="kOut"></div>
+      <p class="codebox" id="kUrl" style="margin-top:12px"></p>
+    </div>
+  </section>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">S3, EBS or EFS?</h2>
+    <div class="stage-kind">Pick the storage type</div>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Create a bucket and upload a file (outline)</summary>
+      <ol>
+        <li>S3 → <b>Create bucket</b>: pick the Region and a unique name. Leave <b>Block all public access</b> on and default encryption (SSE-S3) as it is.</li>
+        <li><b>Upload</b> a file, then open it: the <b>Open</b> button works (it uses a pre-signed URL), but the plain <b>Object URL</b> returns AccessDenied because the bucket is private.</li>
+        <li><b>Create folder</b> and upload into it, then look at the object's key: the "folder" is just a prefix.</li>
+        <li>Clean up: empty the bucket, then delete it.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Object storage, virtually unlimited</span><span class="arrow">→</span><span class="then">Amazon S3</span></li>
+      <li><span class="if">Backups, archives, media, data lake</span><span class="arrow">→</span><span class="then">S3</span></li>
+      <li><span class="if">Must a bucket name be unique?</span><span class="arrow">→</span><span class="then">Yes, across all accounts</span></li>
+      <li><span class="if">Where does a bucket live?</span><span class="arrow">→</span><span class="then">One Region</span></li>
+      <li><span class="if">Folder in S3</span><span class="arrow">→</span><span class="then">Key prefix</span></li>
+      <li><span class="if">Upload a 20 GB file</span><span class="arrow">→</span><span class="then">Multipart upload</span></li>
+      <li><span class="if">Temporary link to a private object</span><span class="arrow">→</span><span class="then">Pre-signed URL</span></li>
+      <li><span class="if">How durable?</span><span class="arrow">→</span><span class="then">11 nines</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>S3</th><th>EBS</th><th>EFS</th></tr></thead>
+        <tbody>
+          <tr><td><b>Type</b></td><td>Object</td><td>Block</td><td>File (NFS)</td></tr>
+          <tr><td><b>Accessed by</b></td><td>HTTPS API / URL</td><td>One EC2 instance (mostly)</td><td>Many Linux instances</td></tr>
+          <tr><td><b>Scope</b></td><td>Region (3+ AZs)</td><td>One AZ</td><td>Region</td></tr>
+          <tr><td><b>Size</b></td><td>Virtually unlimited</td><td>You provision it</td><td>Grows automatically</td></tr>
+          <tr><td><b>Pay for</b></td><td>GB stored, requests, transfer out</td><td>Provisioned GB</td><td>GB stored</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><p><b>What you pay for.</b> Storage (per GB-month, by storage class), requests (PUT, GET…), retrievals from IA and Glacier classes, and data transferred out to the internet or another Region. Uploads (data in) and transfers to other AWS services in the same Region are free.</p></div>
+      <div class="note"><p><b>Account regional namespace.</b> As an alternative to the shared global namespace, a bucket can be created with a name of the form <code>prefix-&lt;accountId&gt;-&lt;region&gt;-an</code>, which only your account can use.</p></div>
+      <div class="note"><p><b>Express One Zone</b> uses a different kind of bucket (a directory bucket) in a single AZ for very low latency; see storage classes.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Is an S3 bucket global or Regional?<span class="go">Show answer</span></summary><div class="ans"><p>The bucket and its data are in <b>one Region</b>. Only the <b>name</b> is unique globally.</p></div></details>
+      <details><summary>What is the "folder" in <code>reports/2026/june.pdf</code>?<span class="go">Show answer</span></summary><div class="ans"><p>The <b>prefix</b> <code>reports/2026/</code>, part of the key. S3 has no real folders.</p></div></details>
+      <details><summary>Can one object be 100 TB?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> The maximum object size is about 48.8 TiB. You can store unlimited objects, though.</p></div></details>
+      <details><summary>A doctor without an AWS account must download one private scan. What do you give them?<span class="go">Show answer</span></summary><div class="ans"><p>A <b>pre-signed URL</b> that expires after a set time.</p></div></details>
+      <details><summary>S3, EBS or EFS for a data lake?<span class="go">Show answer</span></summary><div class="ans"><p><b>S3.</b></p></div></details>
+      <details><summary>Does durability differ between storage classes?<span class="go">Show answer</span></summary><div class="ans"><p><b>No</b>, all are designed for 11 nines. <b>Availability</b> differs.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Prices and the "taken" bucket names in the lab are illustrative. Sources: S3 notes "Amazon S3 Overview", "Creating an S3 Bucket and Uploading Objects" and "Amazon S3: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html">Bucket naming rules</a>; <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/qfacts.html">Multipart upload limits</a>; <a href="https://aws.amazon.com/s3/pricing/">S3 pricing</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 300, y: 20, w: 680, h: 385, kind: 'region', label: 'ap-south-1 (Mumbai)' },
+      { id: 'a', x: 560, y: 255, w: 130, h: 135, kind: 'az', label: 'AZ a' }, { id: 'b', x: 705, y: 255, w: 130, h: 135, kind: 'az', label: 'AZ b' }, { id: 'c', x: 850, y: 255, w: 120, h: 135, kind: 'az', label: 'AZ c' }],
+    nodes: {
+      app: { x: 90, y: 110, icon: 'server', kind: 'compute', label: 'Clinic app', sub: 'EC2 + IAM role' },
+      user: { x: 90, y: 310, icon: 'laptop', kind: 'user', label: 'Doctor', sub: 'browser' },
+      b: { x: 430, y: 200, icon: 'bucket', kind: 'storage', label: 'clinic-imaging', sub: 'bucket' },
+      o: { x: 760, y: 120, icon: 'doc', kind: 'plain', label: 'scans/2026/xray-0042.png', sub: 'key' },
+      da: { x: 625, y: 330, icon: 'disk', kind: 'storage', label: 'copy' },
+      db: { x: 770, y: 330, icon: 'disk', kind: 'storage', label: 'copy' },
+      dc: { x: 910, y: 330, icon: 'disk', kind: 'storage', label: 'copy' }
+    },
+    links: [{ a: 'app', b: 'b', label: 'HTTPS PUT', at: [250, 140] }, { a: 'user', b: 'b', label: 'GET (pre-signed URL)', at: [250, 290] }, { a: 'b', b: 'o', kind: 'dash' },
+      { a: 'b', b: 'da', kind: 'priv' }, { a: 'b', b: 'db', kind: 'priv' }, { a: 'b', b: 'dc', kind: 'priv' }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['app', 'b'], ['app', 'b'], ['b', 'o'], ['b', 'o'], ['b', 'da', 'db', 'dc'], ['app', 'b', 'o'], ['user', 'b', 'o', 'app'], null];
+    net.focus(F[i]);
+    if (i === 0) net.badge('b', 'object storage', 'info');
+    if (i === 1) net.badge('b', 'name unique worldwide', 'info');
+    if (i === 2) net.badge('o', 'key + value + metadata', 'info');
+    if (i === 3) { net.node('o').label('scans/2026/ + xray-0042.png'); net.badge('o', 'prefix + name', 'info'); }
+    if (i === 4) ['da', 'db', 'dc'].forEach(k => net.badge(k, '11 nines', 'ok'));
+    if (i === 5) net.badge('o', 'up to ~48.8 TiB', 'info');
+    if (i === 6) net.badge('user', 'link expires in 15 min', 'ok');
+    if (i !== 3) net.node('o').label('scans/2026/xray-0042.png');
+  }
+  const STEPS = [
+    { title: "Object storage, not a disk",
+      text: ["Amazon S3 stores <b>objects</b>: whole files reached over HTTPS with an API call, not a disk you mount.", "There is no size to choose: storage is virtually unlimited and you pay per GB stored, per request and for data sent out.", "EBS is a disk for one instance and EFS is a shared file system; S3 is neither."],
+      play: async run => { base(0); await net.send(['app', 'b'], { run, label: 'PUT scan' }); } },
+    { title: "A bucket lives in one Region",
+      text: ["Objects go into a <b>bucket</b>, which you create in one Region (here Mumbai).", "The console lists all your buckets together, which makes S3 look global, but each bucket and its data stay in its Region.", "The bucket <b>name</b> must be unique across all AWS accounts: 3 to 63 characters, lowercase letters, numbers, dots and hyphens."],
+      tip: "Buckets are Regional; bucket names are globally unique." },
+    { title: "What an object is",
+      text: ["An object has a <b>key</b> (its full name), a <b>value</b> (the bytes), <b>metadata</b> (content type, your own key-value pairs) and optional <b>tags</b>.", "With versioning on, each object also has a <b>version ID</b>."] },
+    { title: "Folders are just prefixes",
+      text: ["The key <code>scans/2026/xray-0042.png</code> is one flat name: the <b>prefix</b> <code>scans/2026/</code> plus the object name.", "The console draws prefixes as folders, but S3 has no real directories.", "Deleting a \"folder\" deletes every object whose key starts with that prefix."] },
+    { title: "Stored across several AZs",
+      text: ["S3 Standard keeps copies across <b>at least three Availability Zones</b> in the Region.", "Durability is <b>99.999999999%</b> (11 nines): if you store 10 million objects, you can expect to lose one about every 10,000 years.", "You don't manage any of this."],
+      tip: "Durability (11 nines) is the same for every storage class; availability differs." },
+    { title: "How big can an object be?",
+      text: ["One object can be up to about <b>48.8 TiB</b> (roughly 50 TB).", "A single PUT uploads up to 5 GB; larger files use <b>multipart upload</b>, which AWS recommends from about 100 MB.", "\"Unlimited storage\" means unlimited objects, not unlimited object size."],
+      play: async run => { base(5); for (let j = 0; j < 3; j++) await net.send(['app', 'b'], { run, label: 'part ' + (j + 1) }); } },
+    { title: "Sharing a private object",
+      text: ["Buckets are <b>private by default</b>. The doctor has no AWS account.", "The app creates a <b>pre-signed URL</b>: a link signed with the app's own permissions that works until it expires.", "The doctor's browser downloads the scan directly from S3."],
+      play: async run => { base(6); await net.send(['user', 'b'], { run, label: 'GET', tone: 'green' }); } },
+    { title: "What people use S3 for",
+      text: ["Backups and archives, disaster recovery copies, media and static website files, application uploads, logs, and data lakes for analytics.", "Many AWS services store their data in S3 or read from it (Athena, Glue, CloudFront, EBS snapshots)."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ---------- key + bucket name lab ---------- */
+  const h = v => String(v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  function keyParse() {
+    const k = $('kIn').value;
+    const i = k.lastIndexOf('/');
+    const pre = i >= 0 ? k.slice(0, i + 1) : '', nm = k.slice(i + 1);
+    $('kOut').innerHTML = `<div><b>${h(pre) || '(none)'}</b><span>prefix (what the console shows as folders)</span></div><div><b>${h(nm) || '(empty)'}</b><span>object name</span></div><div><b>${(pre.match(/\//g) || []).length}</b><span>"folder" levels</span></div>`;
+    $('kUrl').textContent = `https://${$('bIn').value || 'bucket'}.s3.ap-south-1.amazonaws.com/${k}`;
+  }
+  const RULES = [
+    [n => n.length >= 3 && n.length <= 63, '3 to 63 characters'],
+    [n => /^[a-z0-9.-]*$/.test(n), 'only lowercase letters, numbers, dots (.) and hyphens (-)'],
+    [n => /^[a-z0-9]/.test(n) && /[a-z0-9]$/.test(n), 'starts and ends with a letter or number'],
+    [n => !/\.\./.test(n), 'no two dots in a row'],
+    [n => !/^\d{1,3}(\.\d{1,3}){3}$/.test(n), 'not formatted like an IP address'],
+    [n => !/^(xn--|sthree-|amzn-s3-demo-)/.test(n) && !/(-s3alias|--ol-s3|--x-s3)$/.test(n), 'no reserved prefix or suffix (xn--, sthree-, -s3alias…)'],
+    [n => !['clinic-imaging', 'images', 'backup', 'test'].includes(n), 'not already taken by another account (simulated)']
+  ];
+  function nameCheck() {
+    const n = $('bIn').value;
+    const res = RULES.map(([f, t]) => [f(n), t]);
+    $('bOut').innerHTML = res.map(([ok, t]) => `<li class="${ok ? '' : 'no'}">${t}</li>`).join('');
+    $('bSt').innerHTML = res.every(r => r[0]) ? '<span class="ok-text">Valid name.</span> The bucket would be created in the Region you choose.' : '<span class="bad-text">Not allowed.</span>';
+    keyParse();
+  }
+  $('kIn').addEventListener('input', keyParse); $('bIn').addEventListener('input', nameCheck);
+  document.querySelectorAll('#bChips button').forEach(b => b.addEventListener('click', () => { $('bIn').value = b.dataset.v; nameCheck(); }));
+  nameCheck();
+
+  K.pick($('pick'), [
+    { q: 'Store millions of patient scans, read over HTTPS by an app.', a: 'S3', why: 'Object storage, virtually unlimited.' },
+    { q: 'The C: drive of one Windows EC2 instance.', a: 'EBS', why: 'Block storage attached to one instance.' },
+    { q: 'A shared folder mounted by 20 Linux web servers.', a: 'EFS', why: 'Shared NFS file system.' },
+    { q: 'Nightly database backups kept for a year.', a: 'S3', why: 'Backup and archive is a classic S3 use.' },
+    { q: 'A database that needs a fast disk with low latency.', a: 'EBS', why: 'Databases run on block storage.' },
+    { q: 'Files for a static website (HTML, CSS, images).', a: 'S3', why: 'S3 can serve static websites.' },
+    { q: 'A data lake queried with Athena.', a: 'S3', why: 'Athena queries data in S3.' }
+  ], ['S3', 'EBS', 'EFS']);
+
+})();
+</script>
+</body>
+</html>

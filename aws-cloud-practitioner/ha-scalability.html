@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>High Availability, Scalability and Elasticity</title>
+<meta name="description" content="Vertical vs horizontal scaling, elasticity, high availability across AZs, and agility, with an outage lab.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .ha-ctl { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .ha-ctl .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .ha-ctl input[type=range] { width: 100%; }
+  .ha-azs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-sm); margin-top: var(--space-sm); }
+  .ha-az { border: 1.6px dashed var(--teal); padding: var(--space-xs) var(--space-sm) var(--space-sm); min-height: 96px; }
+  .ha-az.down { border-color: var(--red); background: color-mix(in srgb, var(--red) 8%, transparent); }
+  .ha-azh { font: 600 12px/1.4 var(--mono); color: var(--teal-text); margin-bottom: var(--space-xs); }
+  .ha-az.down .ha-azh { color: var(--bad-text); }
+  .ha-az.down .ha-azh::after { content: ' · down'; }
+  .ha-insts { display: flex; flex-wrap: wrap; gap: var(--space-2xs); }
+  .ha-i { font: 600 11px/1 var(--mono); padding: 8px 10px; background: var(--orange); color: var(--on-accent); }
+  .ha-i.dead { background: var(--panel-2); color: var(--muted); text-decoration: line-through; }
+  .ha-none { font-size: 13px; color: var(--muted); }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); }
+  .kpis b { display: block; font-size: 22px; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+</style>
+
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html" aria-current="page"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / ELB &amp; Auto Scaling / 1 · Domain 1 Cloud Concepts &amp; Domain 3 Technology</p>
+    <h1>High Availability, Scalability and Elasticity</h1>
+    <ul class="lede">
+      <li><b>Scalability</b> means the app can handle more load. <b>Vertical</b> scaling uses a bigger instance (scale up). <b>Horizontal</b> scaling adds more instances (scale out).</li>
+      <li><b>Elasticity</b> means scaling happens <b>automatically</b> as demand changes, so you pay only for what runs.</li>
+      <li><b>High availability</b> means running in <b>at least two Availability Zones</b>, so losing one data centre doesn't stop the app.</li>
+      <li><b>Agility</b> is a different benefit: new resources in minutes instead of weeks. The exam uses it as a distractor.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>Cloud term</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Vertical scaling</span><span class="like">Adding RAM and CPUs to your one SQL Server box</span><span>On EC2 you pick a bigger instance type; it needs a stop and start, and there is always a biggest size.</span></div>
+      <div class="row"><span class="aws">Horizontal scaling</span><span class="like">Adding IIS servers to a web farm</span><span>Instances are ready in minutes, not weeks of procurement.</span></div>
+      <div class="row"><span class="aws">Elasticity</span><span class="like">A web farm that adds and removes servers by itself</span><span>An Auto Scaling group does it from a metric or a schedule; you stop paying for removed servers.</span></div>
+      <div class="row"><span class="aws">High availability</span><span class="like">A second data centre for the same app</span><span>Availability Zones are separate data centres in one Region, a few milliseconds apart.</span></div>
+      <div class="row"><span class="aws">Agility</span><span class="like">Getting a test server the same day instead of after a purchase order</span><span>About speed of getting resources, not about handling load.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: one booking site, five ideas</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="Patients reach EC2 instances in two Availability Zones; the walkthrough grows one instance, adds instances, scales them automatically and survives an AZ failure"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li><b>Scalability</b>: the system can handle a larger load by adapting.</li>
+      <li><b>Vertical scaling</b> (scale up or down) changes the <b>size</b> of one instance, for example <code>t3.micro</code> → <code>t3.large</code>. It suits systems that don't split well, like a single database. There is a hardware limit, and resizing an EC2 instance means stopping it.</li>
+      <li><b>Horizontal scaling</b> (scale out or in) changes the <b>number</b> of instances. The app must be <b>distributed</b>: each instance works on its own, so the app keeps no state on one server (stateless). On AWS this is done by an <b>Auto Scaling group</b>.</li>
+      <li><b>Elasticity</b> is horizontal scaling that happens <b>automatically</b> with demand. You don't size for the peak all year, so you pay only for what you use.</li>
+      <li><b>High availability (HA)</b>: run the app in <b>at least 2 Availability Zones</b> to survive the loss of a data centre (power cut, fire, flood).</li>
+      <li>On AWS, HA and elasticity come from a <b>multi-AZ Auto Scaling group</b> plus a <b>multi-AZ load balancer</b>, the next two topics.</li>
+      <li><b>Agility</b>: new IT resources are "a click away", so getting them takes minutes instead of weeks. It is not the same as scalability or elasticity.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Now break things and watch what changes.</p>
+
+  <section aria-labelledby="azH">
+    <h2 class="stage-title" id="azH">Survive the outage</h2>
+    <div class="stage-kind">The site needs 4 healthy instances at peak · place them, then take an AZ down</div>
+    <div class="card">
+      <div class="ha-ctl">
+        <div class="range"><label for="nA">Instances in AZ a <output id="nAo"></output></label><input type="range" id="nA" min="0" max="6" value="4"></div>
+        <div class="range"><label for="nB">Instances in AZ b <output id="nBo"></output></label><input type="range" id="nB" min="0" max="6" value="0"></div>
+      </div>
+      <div class="controls">
+        <button class="btn" type="button" id="downA">AZ a fails</button>
+        <button class="btn" type="button" id="downB">AZ b fails</button>
+        <button class="btn" type="button" id="downOne">One instance fails</button>
+        <button class="btn primary" type="button" id="haReset">Everything back up</button>
+      </div>
+      <div class="ha-azs">
+        <div class="ha-az" id="azA"><div class="ha-azh">AZ a</div><div class="ha-insts" id="iA"></div></div>
+        <div class="ha-az" id="azB"><div class="ha-azh">AZ b</div><div class="ha-insts" id="iB"></div></div>
+      </div>
+      <div class="kpis" id="haK"></div>
+      <p class="nf-cap" id="haCap"></p>
+    </div>
+  </section>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">Name the idea</h2>
+    <div class="stage-kind">The exam mixes these words up · pick the right one</div>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Survive the failure of one AZ</span><span class="arrow">→</span><span class="then">High availability: run in at least 2 AZs</span></li>
+      <li><span class="if">Change to a bigger instance type</span><span class="arrow">→</span><span class="then">Vertical scaling (scale up)</span></li>
+      <li><span class="if">Add more instances</span><span class="arrow">→</span><span class="then">Horizontal scaling (scale out)</span></li>
+      <li><span class="if">Add and remove capacity automatically with demand</span><span class="arrow">→</span><span class="then">Elasticity (Auto Scaling)</span></li>
+      <li><span class="if">Resources in minutes instead of weeks</span><span class="arrow">→</span><span class="then">Agility</span></li>
+      <li><span class="if">Don't pay for peak capacity all year</span><span class="arrow">→</span><span class="then">Elasticity</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Term</th><th>What it means</th><th>AWS example</th><th>Exam trigger words</th></tr></thead>
+        <tbody>
+          <tr><td><b>Vertical scaling</b></td><td>Make one instance bigger or smaller</td><td><code>t3.micro</code> → <code>t3.large</code></td><td>"bigger instance", "scale up"</td></tr>
+          <tr><td><b>Horizontal scaling</b></td><td>Change the number of instances</td><td>Auto Scaling group from 2 to 6 instances</td><td>"more instances", "scale out"</td></tr>
+          <tr><td><b>Elasticity</b></td><td>Scale out and in automatically with demand</td><td>Auto Scaling group with a scaling policy</td><td>"automatically", "pay only for what you use"</td></tr>
+          <tr><td><b>High availability</b></td><td>Keep running when a data centre fails</td><td>Instances in 2+ AZs behind a load balancer</td><td>"survive an AZ failure", "multi-AZ"</td></tr>
+          <tr><td><b>Agility</b></td><td>Get resources fast and experiment</td><td>A test environment created in minutes</td><td>"minutes instead of weeks"</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><p><b>Horizontal does not mean elastic.</b> If a person has to add the instances by hand, the system scales horizontally but is not elastic. Elasticity is the <i>automatic</i> part.</p></div>
+      <div class="note"><p><b>High availability vs disaster recovery.</b> Two or more AZs survive a data-centre failure inside one Region. Running in a second <b>Region</b> is about disaster recovery and lower latency for distant users; that is covered in Global Infrastructure.</p></div>
+      <div class="note"><p><b>How big can vertical go?</b> EC2 sizes range from instances with under 1 GB of memory to high-memory instances with many terabytes. The largest types change as AWS releases new ones, so the exam asks about the idea, not the numbers.</p></div>
+      <div class="note"><p><b>Fault tolerance</b> is a close cousin of high availability: the system keeps working while a part fails, often with no visible effect. In questions, "survive the loss of an AZ" points to multi-AZ.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>You move the app from <code>t3.micro</code> to <code>t3.xlarge</code>. Which kind of scaling is that?<span class="go">Show answer</span></summary><div class="ans"><p><b>Vertical scaling</b> (scale up): the same instance gets bigger.</p></div></details>
+      <details><summary>An administrator adds two instances every Monday by hand. Is that elastic?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> It is horizontal scaling, but elasticity means it happens automatically with demand.</p></div></details>
+      <details><summary>What is the minimum number of AZs for high availability?<span class="go">Show answer</span></summary><div class="ans"><p><b>Two.</b> With one AZ, a single data-centre failure stops the app.</p></div></details>
+      <details><summary>"We can create a test environment in ten minutes." Which benefit is that?<span class="go">Show answer</span></summary><div class="ans"><p><b>Agility</b>: fast access to resources. It is not elasticity.</p></div></details>
+      <details><summary>Why does horizontal scaling need a distributed (stateless) app?<span class="go">Show answer</span></summary><div class="ans"><p>Each request may land on any instance. If one server kept a user's session in memory, the next request on another server would not find it.</p></div></details>
+      <details><summary>Which two AWS services together give high availability and elasticity?<span class="go">Show answer</span></summary><div class="ans"><p>An <b>Elastic Load Balancer</b> and an <b>Auto Scaling group</b>, both spread across several AZs.</p></div></details>
+    </div>
+  </section>
+
+  <footer>The outage lab is illustrative: each instance serves one unit of peak load and the site needs four. Sources: ELB and ASG notes "High Availability, Scalability, and Elasticity" and "ELB and ASG: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/aws-certification/latest/cloud-practitioner-02/cloud-practitioner-02-domain1.html">CLF-C02 exam guide, Domain 1</a>; <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-resize.html">Change the instance type</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  /* ---------- walkthrough ---------- */
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 230, y: 20, w: 750, h: 385, kind: 'region', label: 'ap-south-1 (Mumbai)' },
+      { id: 'a', x: 255, y: 60, w: 340, h: 330, kind: 'az', label: 'AZ a' }, { id: 'b', x: 615, y: 60, w: 340, h: 330, kind: 'az', label: 'AZ b' }],
+    nodes: {
+      users: { x: 90, y: 210, icon: 'users', kind: 'user', label: 'Patients', sub: 'booking site' },
+      a1: { x: 340, y: 150, icon: 'server', kind: 'compute', label: 'EC2', sub: 't3.micro' },
+      a2: { x: 510, y: 150, icon: 'server', kind: 'compute', label: 'EC2', sub: 't3.micro' },
+      a3: { x: 340, y: 300, icon: 'server', kind: 'compute', label: 'EC2', sub: 't3.micro' },
+      a4: { x: 510, y: 300, icon: 'server', kind: 'compute', label: 'EC2', sub: 't3.micro' },
+      b1: { x: 700, y: 150, icon: 'server', kind: 'compute', label: 'EC2', sub: 't3.micro' },
+      b2: { x: 870, y: 150, icon: 'server', kind: 'compute', label: 'EC2', sub: 't3.micro' },
+      b3: { x: 700, y: 300, icon: 'server', kind: 'compute', label: 'EC2', sub: 't3.micro' },
+      b4: { x: 870, y: 300, icon: 'server', kind: 'compute', label: 'EC2', sub: 't3.micro' }
+    },
+    links: ['a1', 'a2', 'a3', 'a4', 'b1', 'b2', 'b3', 'b4'].map(k => ({ a: 'users', b: k, kind: 'pub' }))
+  });
+  const AZA = ['a1', 'a2', 'a3', 'a4'], AZB = ['b1', 'b2', 'b3', 'b4'];
+  function on(ids) {
+    const keep = new Set(ids);
+    [...AZA, ...AZB].forEach(k => { net.link('users', k, keep.has(k) ? '' : 'hide'); });
+    net.focus(['users', ...ids]);
+  }
+  function zoneDown(id, down) { net.zones[id].classList.toggle('down', down); }
+  function base(i) {
+    net.reset(); zoneDown('a', false);
+    [...AZA, ...AZB].forEach(k => net.node(k).sub('t3.micro'));
+    if (i === 0) { on(['a1']); net.badge('a1', 'CPU 98%', 'bad'); }
+    if (i === 1) { on(['a1']); net.node('a1').sub('t3.2xlarge'); net.badge('a1', 'CPU 25%', 'ok'); }
+    if (i === 2) { on(['a1', 'a2', 'a3', 'a4']); AZA.forEach(k => net.badge(k, 'CPU 40%', 'ok')); }
+    if (i === 3) { on(['a1', 'a2']); net.badge('a1', 'night: 2 running', 'info'); }
+    if (i === 4) { on(['a1', 'a2', 'a3', 'a4']); zoneDown('a', true); AZA.forEach(k => { net.state(k, 'down'); net.link('users', k, 'cut'); }); net.badge('users', 'site down', 'bad'); }
+    if (i === 5) { on(['a1', 'a2', 'b1', 'b2']); zoneDown('a', true); ['a1', 'a2'].forEach(k => { net.state(k, 'down'); net.link('users', k, 'cut'); }); ['b1', 'b2'].forEach(k => net.badge(k, 'still serving', 'ok')); }
+    if (i === 6) { on(['a1', 'a2', 'b1', 'b2']); net.badge('users', 'minutes, not weeks', 'info'); }
+    if (i === 7) { on(['a1', 'a2', 'b1', 'b2']); ['a1', 'a2', 'b1', 'b2'].forEach(k => net.state(k, 'ok')); }
+  }
+  const req = (run, k, label) => net.send(['users', k], { run, label });
+  const STEPS = [
+    { title: 'One server hits its limit',
+      text: ['The clinic\'s booking site runs on one small EC2 instance in AZ a.', 'At 9 am patients rush in and its CPU reaches <b>98%</b>.', 'Pages slow down and some requests fail. The app needs to <b>scale</b>.'],
+      play: async run => { base(0); await Promise.all([0, 1, 2].map(async j => { await K.sleep(j * 250, run); await req(run, 'a1', 'GET'); })); } },
+    { title: 'Scale up: a bigger instance',
+      text: ['<b>Vertical scaling</b> swaps the instance for a bigger type: <code>t3.micro</code> → <code>t3.2xlarge</code>.', 'It is simple, and it suits a database that runs on one server.', 'But resizing needs a stop and start, and there is always a biggest size.'],
+      tip: 'Bigger instance = vertical = scale up.' },
+    { title: 'Scale out: more instances',
+      text: ['<b>Horizontal scaling</b> adds more instances of the same size.', 'Each one handles part of the traffic, so there is no fixed ceiling.', 'The app must be <b>stateless</b>: any instance can serve any request. Something must spread the traffic: the <a href="load-balancers.html">load balancer</a>.'],
+      tip: 'More instances = horizontal = scale out.',
+      play: async run => { base(2); await Promise.all(AZA.map(async (k, j) => { await K.sleep(j * 180, run); await req(run, k, 'GET'); })); } },
+    { title: 'Elasticity: scale on its own',
+      text: ['At night only a few patients book, so four instances sit idle and cost money.', '<b>Elasticity</b> means the number of instances follows demand <b>automatically</b>: 4 in the morning rush, 2 at night.', 'You pay only for what runs. On AWS an <a href="auto-scaling.html">Auto Scaling group</a> does this.'],
+      tip: 'Automatic scale out and in = elasticity.' },
+    { title: 'All in one AZ: one failure stops everything',
+      text: ['A power failure takes out <b>AZ a</b>.', 'Every instance was in that one data centre, so the whole site goes down, however many instances there were.', 'More instances in the same place don\'t protect you from losing the place.'] },
+    { title: 'High availability: two AZs',
+      text: ['Put the instances in <b>at least two Availability Zones</b>.', 'When AZ a fails, the instances in AZ b keep serving patients.', 'That is <b>high availability</b>: surviving the loss of a data centre.'],
+      tip: 'Survive an AZ failure = run in 2+ AZs (multi-AZ).',
+      play: async run => { base(5); await Promise.all(['b1', 'b2'].map(async (k, j) => { await K.sleep(j * 200, run); await req(run, k, 'GET'); })); } },
+    { title: 'Agility is something else',
+      text: ['The team builds a test copy of the whole setup in ten minutes instead of waiting weeks for hardware.', 'That is <b>agility</b>: getting resources fast.', 'It doesn\'t add capacity or survive failures, so don\'t confuse it with elasticity.'],
+      tip: 'Minutes instead of weeks = agility (a common distractor).' },
+    { title: 'The whole picture',
+      text: ['<b>Vertical</b> = bigger. <b>Horizontal</b> = more. <b>Elasticity</b> = more or fewer, automatically. <b>High availability</b> = 2+ AZs.', 'On AWS a multi-AZ <b>load balancer</b> plus a multi-AZ <b>Auto Scaling group</b> give you high availability and elasticity together.'] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ---------- outage lab ---------- */
+  const NEED = 4; let downAZ = null, broken = 0;
+  function draw() {
+    const a = +$('nA').value, b = +$('nB').value;
+    $('nAo').textContent = a; $('nBo').textContent = b;
+    const mk = (n, dead, failOne) => Array.from({ length: n }, (_, i) => `<span class="ha-i ${dead || (failOne && i === 0) ? 'dead' : ''}">${dead ? 'down' : failOne && i === 0 ? 'failed' : 'EC2'}</span>`).join('') || '<span class="ha-none">no instances</span>';
+    const failA = broken && a > 0, failB = broken && !failA && b > 0;
+    $('iA').innerHTML = mk(a, downAZ === 'a', failA); $('iB').innerHTML = mk(b, downAZ === 'b', failB);
+    $('azA').classList.toggle('down', downAZ === 'a'); $('azB').classList.toggle('down', downAZ === 'b');
+    let up = (downAZ === 'a' ? 0 : a) + (downAZ === 'b' ? 0 : b) - (broken && (a + b) ? 1 : 0);
+    up = Math.max(0, up);
+    const served = Math.min(100, Math.round(up / NEED * 100));
+    const azs = (a > 0) + (b > 0);
+    $('haK').innerHTML = [['Healthy instances', `${up} of ${a + b}`], ['Peak demand served', served + '%'], ['AZs used', azs], ['Cost (instance count)', a + b]]
+      .map(([l, v], i) => `<div class="kpi ${i === 1 ? (served >= 100 ? 'good' : served === 0 ? 'bad' : 'accent') : ''}"><b>${v}</b><span>${l}</span></div>`).join('');
+    let cap;
+    if (a + b === 0) cap = 'No instances at all: nothing to serve patients.';
+    else if (downAZ && azs === 1 && ((downAZ === 'a' && a) || (downAZ === 'b' && b))) cap = '<span class="bad-text">Site down.</span> All instances were in the failed AZ. One AZ is never highly available.';
+    else if (downAZ && up < NEED) cap = `The site stays up, but only ${served}% of peak demand is served. Keep enough capacity in each AZ (or let an Auto Scaling group relaunch it) to cover the loss of one AZ.`;
+    else if (downAZ) cap = '<span class="ok-text">Still fully served.</span> Enough instances in the other AZ to carry the peak on their own.';
+    else if (broken) cap = up >= NEED ? 'One instance failed and the rest still cover the peak.' : 'One instance failed and the rest can\'t cover the peak. An Auto Scaling group would replace it.';
+    else if (azs === 1) cap = 'Everything is in one AZ. Now press the button for that AZ.';
+    else cap = 'Instances in two AZs. Try failing one AZ: is what is left enough for the peak?';
+    $('haCap').innerHTML = cap;
+  }
+  ['nA', 'nB'].forEach(id => $(id).addEventListener('input', draw));
+  $('downA').addEventListener('click', () => { downAZ = 'a'; draw(); });
+  $('downB').addEventListener('click', () => { downAZ = 'b'; draw(); });
+  $('downOne').addEventListener('click', () => { broken = 1; draw(); });
+  $('haReset').addEventListener('click', () => { downAZ = null; broken = 0; draw(); });
+  draw();
+
+  K.pick($('pick'), [
+    { q: 'Resize the database server from r6i.large to r6i.4xlarge.', a: 'Vertical scaling', why: 'The same instance gets bigger (scale up).' },
+    { q: 'Run 6 web servers instead of 2 behind the load balancer.', a: 'Horizontal scaling', why: 'More instances (scale out).' },
+    { q: 'Servers are added at 9 am and removed at night without anyone touching them.', a: 'Elasticity', why: 'Automatic scale out and in with demand.' },
+    { q: 'The site keeps working when one data centre loses power.', a: 'High availability', why: 'Running in at least two AZs.' },
+    { q: 'A new test environment is ready in ten minutes.', a: 'Agility', why: 'Fast access to resources, not more capacity.' },
+    { q: 'You stop paying for idle servers at night.', a: 'Elasticity', why: 'Capacity shrinks with demand, so the bill does too.' },
+    { q: 'Instances are spread across AZ a and AZ b.', a: 'High availability', why: 'Multi-AZ is the exam\'s answer for surviving an AZ failure.' }
+  ], ['Vertical scaling', 'Horizontal scaling', 'Elasticity', 'High availability', 'Agility']);
+})();
+</script>
+</body>
+</html>

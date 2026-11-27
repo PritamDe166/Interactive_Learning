@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>S3 Replication (CRR &amp; SRR)</title>
+<meta name="description" content="How S3 replication copies objects between buckets: Cross-Region and Same-Region Replication, prerequisites, timing, Batch Replication and deletes, with a will-it-replicate lab.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html" aria-current="page"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Amazon S3 / 5 · Domain 3 Technology</p>
+    <h1>S3 Replication: CRR &amp; SRR</h1>
+    <ul class="lede">
+      <li><b>Replication</b> copies new objects to another bucket automatically and <b>asynchronously</b>.</li>
+      <li><b>CRR</b> (Cross-Region) copies to another Region; <b>SRR</b> (Same-Region) to another bucket in the same Region. Both can cross accounts.</li>
+      <li>It needs <b>versioning on both buckets</b> and an <b>IAM role</b> for S3.</li>
+      <li>It is <b>not retroactive</b>: existing objects need <b>S3 Batch Replication</b>.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">S3 Replication</span><span class="like">SQL Server transactional replication, or DFS Replication between file servers</span><span>Managed by S3, one direction per rule, applied per object as it is written.</span></div>
+      <div class="row"><span class="aws">CRR</span><span class="like">Log shipping to a DR site in another city</span><span>The "other site" is another AWS Region.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: copying the clinic's scans to Frankfurt</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="A source bucket in Mumbai replicates new objects to a bucket in Frankfurt (CRR) and to a logs bucket in Mumbai (SRR)"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>Replication = automatic, <b>asynchronous</b> copying of objects between buckets, in the same or different accounts.</li>
+      <li><b>CRR</b> (different Regions): compliance, disaster recovery, lower-latency access, cross-account copies.</li>
+      <li><b>SRR</b> (same Region): log aggregation, live copies between production and test accounts, data residency.</li>
+      <li>Requirements: <b>versioning on source and destination</b>, and an <b>IAM role</b> for S3.</li>
+      <li>Only <b>new</b> objects replicate after the rule is set up. Use <b>S3 Batch Replication</b> for existing objects.</li>
+      <li>No time guarantee by default; <b>Replication Time Control</b> gives a 15-minute SLA.</li>
+      <li>Delete markers replicate only if you enable it; version deletes never replicate.</li>
+      <li>You pay for the copy's storage, the requests and (for CRR) the data transfer.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="labH">
+    <h2 class="stage-title" id="labH">Will it replicate?</h2>
+    <div class="stage-kind">Set up the buckets and the rule · then do something to an object</div>
+    <div class="card">
+      <div class="ptoggles">
+        <label class="toggle" for="rVs"><input type="checkbox" id="rVs" checked> Versioning on the source bucket</label>
+        <label class="toggle" for="rVd"><input type="checkbox" id="rVd" checked> Versioning on the destination bucket</label>
+        <label class="toggle" for="rRole"><input type="checkbox" id="rRole" checked> IAM role for S3 replication</label>
+        <label class="toggle" for="rDm"><input type="checkbox" id="rDm"> Delete marker replication turned on</label>
+      </div>
+      <div class="lab-form">
+        <label>The object was uploaded <select id="rWhen"><option value="after">after the rule was created</option><option value="before">before the rule was created</option></select></label>
+        <label>Action <select id="rAct"><option value="put">Upload (PUT)</option><option value="del">Delete without a version ID</option><option value="vdel">Delete a specific version</option></select></label>
+      </div>
+      <p class="status-line" id="rOut"></p>
+    </div>
+  </section>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">CRR, SRR or versioning?</h2>
+    <div class="stage-kind">Pick the feature</div>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Set up Cross-Region Replication (outline)</summary>
+      <ol>
+        <li>Create a source bucket in one Region and a destination bucket in another, both with <b>versioning enabled</b>.</li>
+        <li>Source bucket → <b>Management</b> → Replication rules → <b>Create replication rule</b>: apply to all objects, choose the destination bucket, let S3 <b>create a new IAM role</b>.</li>
+        <li>When asked whether to replicate existing objects, say no (or run a Batch Replication job).</li>
+        <li>Upload a file to the source; a few seconds later it appears in the destination with the same version ID.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Copy objects to another Region automatically</span><span class="arrow">→</span><span class="then">CRR</span></li>
+      <li><span class="if">Aggregate logs in the same Region</span><span class="arrow">→</span><span class="then">SRR</span></li>
+      <li><span class="if">Prerequisite for replication</span><span class="arrow">→</span><span class="then">Versioning on both buckets</span></li>
+      <li><span class="if">Replicate objects that already exist</span><span class="arrow">→</span><span class="then">S3 Batch Replication</span></li>
+      <li><span class="if">Guaranteed replication time</span><span class="arrow">→</span><span class="then">Replication Time Control (15 min)</span></li>
+      <li><span class="if">Replication: synchronous or asynchronous?</span><span class="arrow">→</span><span class="then">Asynchronous</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>CRR</th><th>SRR</th></tr></thead>
+        <tbody>
+          <tr><td><b>Destination</b></td><td>Bucket in another Region</td><td>Bucket in the same Region</td></tr>
+          <tr><td><b>Typical use</b></td><td>Compliance, DR, latency</td><td>Log aggregation, prod → test, data residency</td></tr>
+          <tr><td><b>Cross-account</b></td><td>Yes</td><td>Yes</td></tr>
+          <tr><td><b>Transfer charge</b></td><td>Yes (between Regions)</td><td>No inter-Region charge</td></tr>
+          <tr><td><b>Needs versioning</b></td><td>Both buckets</td><td>Both buckets</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><p><b>Versioning vs replication.</b> Versioning keeps older copies of an object inside one bucket; replication keeps copies in another bucket. Replication builds on versioning.</p></div>
+      <div class="note"><p><b>Different storage class at the destination.</b> A rule can write the copies straight into a cheaper class (for example Glacier) for a backup copy.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>What must be enabled before you configure replication?<span class="go">Show answer</span></summary><div class="ans"><p><b>Versioning</b> on both the source and the destination bucket.</p></div></details>
+      <details><summary>You create a CRR rule today. Are last year's objects copied?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> Replication is not retroactive; use S3 Batch Replication.</p></div></details>
+      <details><summary>Logs from several buckets must end up in one bucket in the same Region. Which feature?<span class="go">Show answer</span></summary><div class="ans"><p><b>Same-Region Replication</b>.</p></div></details>
+      <details><summary>Is replication synchronous?<span class="go">Show answer</span></summary><div class="ans"><p><b>No</b>, asynchronous. Use Replication Time Control for a 15-minute SLA.</p></div></details>
+      <details><summary>Can the destination bucket be in another AWS account?<span class="go">Show answer</span></summary><div class="ans"><p><b>Yes</b>, for both CRR and SRR.</p></div></details>
+      <details><summary>Someone permanently deletes a version in the source. Is it deleted in the destination?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> Version deletes are never replicated.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Bucket names and timings are examples. Sources: S3 notes "Amazon S3 Replication: Overview and Hands-On" and "Amazon S3: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html">Replicating objects</a>; <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/s3-batch-replication-batch.html">S3 Batch Replication</a>; <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication-time-control.html">Replication Time Control</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'm', x: 20, y: 20, w: 470, h: 385, kind: 'region', label: 'ap-south-1 (Mumbai)' }, { id: 'f', x: 530, y: 20, w: 450, h: 385, kind: 'region', label: 'eu-central-1 (Frankfurt)' }],
+    nodes: {
+      app: { x: 100, y: 110, icon: 'server', kind: 'compute', label: 'Clinic app' },
+      src: { x: 300, y: 110, icon: 'bucket', kind: 'storage', label: 'clinic-imaging', sub: 'source' },
+      role: { x: 300, y: 300, icon: 'idcard', kind: 'sec', label: 'IAM role', sub: 'for S3' },
+      logs: { x: 100, y: 300, icon: 'bucket', kind: 'storage', label: 'clinic-logs', sub: 'SRR target' },
+      dst: { x: 760, y: 110, icon: 'bucket', kind: 'storage', label: 'clinic-imaging-dr', sub: 'CRR target' },
+      eu: { x: 760, y: 300, icon: 'users', kind: 'user', label: 'EU doctors' }
+    },
+    links: [{ a: 'app', b: 'src' }, { a: 'src', b: 'dst', kind: 'priv', label: 'Cross-Region Replication', at: [530, 98] }, { a: 'src', b: 'logs', kind: 'priv', label: 'SRR', at: [190, 195] }, { a: 'role', b: 'src', kind: 'dash' }, { a: 'eu', b: 'dst' }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['app', 'src', 'dst'], ['src', 'dst', 'role'], ['app', 'src', 'dst', 'eu'], ['app', 'src', 'logs'], ['src', 'dst'], ['src', 'dst'], ['src', 'dst'], null];
+    net.focus(F[i]);
+    if (i === 1) { net.badge('src', 'versioning on', 'ok'); net.badge('dst', 'versioning on', 'ok'); net.badge('role', 'replicate permission', 'info'); }
+    if (i === 2) net.badge('eu', 'low latency reads', 'ok');
+    if (i === 3) net.badge('logs', 'same Region', 'info');
+    if (i === 4) net.badge('dst', 'seconds to minutes', 'info');
+    if (i === 5) { net.badge('src', '10,000 old objects', 'info'); net.badge('dst', 'empty', 'bad'); }
+    if (i === 6) net.badge('dst', 'delete marker? optional', 'info');
+  }
+  const STEPS = [
+    { title: "Automatic copies to another bucket",
+      text: ["<b>S3 Replication</b> copies new objects from a source bucket to a destination bucket automatically.", "Copying is <b>asynchronous</b>: the upload finishes first, then S3 copies the object in the background.", "The destination can be in another Region and even in another AWS account."],
+      play: async run => { base(0); await net.send(['app', 'src'], { run, label: 'PUT scan' }); await net.send(['src', 'dst'], { run, label: 'copy', tone: 'cyan' }); } },
+    { title: "What it needs",
+      text: ["<b>Versioning</b> must be enabled on <b>both</b> buckets.", "S3 needs an <b>IAM role</b> that lets it read the source and write to the destination.", "Replicas keep the same version IDs and metadata."],
+      tip: "Replication requires versioning on source and destination." },
+    { title: "Cross-Region Replication (CRR)",
+      text: ["The copy goes to a bucket in <b>another Region</b>, here Frankfurt.", "Reasons: <b>compliance</b> (keep a copy far away), <b>disaster recovery</b>, and <b>lower latency</b> for users near that Region.", "Cross-Region transfer is charged."],
+      play: async run => { base(2); await net.send(['src', 'dst'], { run, label: 'copy', tone: 'cyan' }); await net.send(['eu', 'dst'], { run, label: 'GET' }); } },
+    { title: "Same-Region Replication (SRR)",
+      text: ["The copy goes to another bucket in the <b>same Region</b>.", "Reasons: <b>aggregate logs</b> from several buckets into one, keep a live copy of production data for a <b>test account</b>, or meet rules that data stays in one country."],
+      play: async run => { base(3); await net.send(['src', 'logs'], { run, label: 'copy', tone: 'cyan' }); } },
+    { title: "How fast?",
+      text: ["Most objects replicate within seconds to minutes, but there is no guarantee.", "<b>S3 Replication Time Control (RTC)</b> adds a 15-minute target backed by an SLA, at extra cost."] },
+    { title: "Not retroactive",
+      text: ["A new replication rule copies only objects uploaded <b>after</b> it was created.", "To copy objects that were already in the bucket, run <b>S3 Batch Replication</b>."],
+      tip: "Existing objects = Batch Replication." },
+    { title: "Deletes",
+      text: ["Delete markers are <b>not</b> replicated unless you turn on delete marker replication.", "Permanent deletes of a specific version are <b>never</b> replicated, which protects the copy from malicious deletes.", "Replication doesn't chain: objects copied from A to B are not copied on from B to C."] },
+    { title: "The whole picture",
+      text: ["Versioning on both + IAM role + a rule = automatic, asynchronous copies.", "CRR for compliance, DR and latency; SRR for logs, test copies and data residency. You pay for the extra storage, the requests and, for CRR, the transfer."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ---------- will it replicate? ---------- */
+  function check() {
+    const on = id => $(id).checked;
+    const when = $('rWhen').value, act = $('rAct').value;
+    let ok, why;
+    if (!on('rVs') || !on('rVd')) { ok = false; why = 'You can\'t even create the rule: versioning must be enabled on <b>both</b> buckets.'; }
+    else if (!on('rRole')) { ok = false; why = 'S3 has no IAM role allowing it to read the source and write the destination, so replication fails.'; }
+    else if (act === 'put' && when === 'before') { ok = false; why = 'The object existed before the rule. Replication is <b>not retroactive</b>: use S3 Batch Replication.'; }
+    else if (act === 'put') { ok = true; why = 'New object: copied asynchronously, usually within seconds to minutes (15-minute SLA with RTC).'; }
+    else if (act === 'del') { ok = on('rDm'); why = ok ? 'Delete marker replication is on, so the marker is copied and the object looks deleted in both buckets.' : 'Delete markers are <b>not</b> replicated by default. The copy still shows the object.'; }
+    else { ok = false; why = 'Deleting a specific version is <b>never</b> replicated. The destination keeps that version, protecting it from malicious deletes.'; }
+    $('rOut').innerHTML = `<span class="${ok ? 'ok-text' : 'bad-text'}">${ok ? 'Replicated.' : 'Not replicated.'}</span> ${why}`;
+  }
+  ['rVs', 'rVd', 'rRole', 'rDm', 'rWhen', 'rAct'].forEach(id => $(id).addEventListener('change', check));
+  check();
+
+  K.pick($('pick'), [
+    { q: 'Keep a copy of patient data in another Region for compliance.', a: 'CRR', why: 'Different Region.' },
+    { q: 'Collect logs from five buckets into one bucket in the same Region.', a: 'SRR', why: 'Same Region aggregation.' },
+    { q: 'Give users in Europe faster reads of the same objects.', a: 'CRR', why: 'A copy in a Region near them.' },
+    { q: 'Live copy of production data for a test account in the same Region.', a: 'SRR', why: 'Same Region, cross-account is allowed.' },
+    { q: 'Recover a file someone overwrote yesterday.', a: 'Versioning', why: 'Versions of one object in one bucket.' },
+    { q: 'Data must never leave the country, but you want a second copy.', a: 'SRR', why: 'Stays in the same Region.' }
+  ], ['CRR', 'SRR', 'Versioning']);
+
+})();
+</script>
+</body>
+</html>

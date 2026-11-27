@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>Deployment &amp; infrastructure: review</title>
+<meta name="description" content="AWS Cloud Practitioner: deployment and infrastructure-at-scale section review with a one-path recap, summary, confused pairs, a drill and 20 exam-style questions.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-xs); }
+  .topic-links a { display: block; padding: var(--space-sm) var(--space-sm); border-radius: 0; background: var(--panel); color: var(--fg); text-decoration: none; }
+  .topic-links a:hover { border-color: var(--orange); }
+  .topic-links a span { display: block; font-size: 13px; color: var(--muted); margin-top: var(--space-3xs); }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html" aria-current="page"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Deployment &amp; infrastructure / Section review</p>
+    <h1>Deployment &amp; infrastructure: review</h1>
+    <ul class="lede">
+      <li><b>IaC</b>: CloudFormation templates; the CDK generates them from code. <b>PaaS</b>: Elastic Beanstalk.</li>
+      <li><b>CI/CD</b>: CodeCommit (Git), CodeBuild (build), CodeDeploy (deploy, hybrid), CodePipeline (orchestrate), CodeArtifact (packages).</li>
+      <li><b>Operations</b>: Systems Manager (hybrid, SSM agent), Session Manager (no SSH), Parameter Store (config and secrets).</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="recapH">
+    <h2 class="stage-title" id="recapH">The whole section on one path</h2>
+    <div class="stage-kind">Press play · each hop is one topic</div>
+    <div class="controls"><button class="btn primary" id="recapPlay" type="button">Play a release</button></div>
+    <div class="scroll"><svg class="diagram nf-canvas" id="recapSvg" viewBox="0 0 1000 420" aria-label="CloudFormation creates servers; a commit flows through CodeCommit, CodeBuild and CodeDeploy to the fleet; Systems Manager patches and manages it"></svg></div>
+    <p class="nf-cap" id="recapCap">Press <b>Play a release</b>.</p>
+  </section>
+
+  <section aria-labelledby="sumH">
+    <h2 id="sumH">Section summary</h2>
+    <div class="sum-grid">
+      <div class="card"><h3>Infrastructure as code</h3><ul><li>CloudFormation: YAML/JSON templates, stacks, repeatable across Regions and accounts, drift detection.</li><li>CDK: TypeScript, Python, C#… → CloudFormation.</li><li>Terraform: third-party, multi-cloud.</li></ul></div>
+      <div class="card"><h3>Platform</h3><ul><li>Elastic Beanstalk: PaaS, upload code; EC2 + ELB + ASG built for you; free, pay for resources.</li><li>Pick CloudFormation for control, CDK for developer productivity, Beanstalk for least effort.</li></ul></div>
+      <div class="card"><h3>Developer tools</h3><ul><li>CodeCommit: private Git (back to GA Nov 2025).</li><li>CodeBuild: serverless build, pay per minute.</li><li>CodeDeploy: EC2 + on-premises, agent.</li><li>CodePipeline: orchestrates. CodeArtifact: NuGet/npm/pip/Maven packages.</li></ul></div>
+      <div class="card"><h3>Operations</h3><ul><li>Systems Manager: hybrid fleet; Run Command, Patch Manager, Inventory…</li><li>Session Manager: no port 22, no keys, IAM + logs.</li><li>Parameter Store: String / SecureString (KMS), IAM, versions.</li></ul></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="topH">
+    <h2 id="topH">Topics in this section</h2>
+    <div class="topic-links">
+      <a href="cloudformation.html">CloudFormation<span>Templates and stacks</span></a>
+      <a href="cdk.html">CDK<span>Code → CloudFormation</span></a>
+      <a href="cdk-vs-terraform.html">CDK vs Terraform<span>AWS-only vs multi-cloud</span></a>
+      <a href="elastic-beanstalk.html">Elastic Beanstalk<span>PaaS</span></a>
+      <a href="iac-choices.html">CloudFormation vs CDK vs Beanstalk<span>Which to pick</span></a>
+      <a href="codecommit.html">CodeCommit<span>Git</span></a>
+      <a href="codebuild.html">CodeBuild<span>Build and test</span></a>
+      <a href="codedeploy.html">CodeDeploy<span>Hybrid deploys</span></a>
+      <a href="codepipeline.html">CodePipeline<span>Orchestration</span></a>
+      <a href="codeartifact.html">CodeArtifact<span>Packages</span></a>
+      <a href="systems-manager.html">Systems Manager<span>Fleet management</span></a>
+      <a href="session-manager.html">Session Manager<span>No SSH</span></a>
+      <a href="parameter-store.html">Parameter Store<span>Config and secrets</span></a>
+    </div>
+  </section>
+
+  <section aria-labelledby="pairH">
+    <h2 id="pairH">Commonly confused pairs</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Pair</th><th>The difference</th></tr></thead>
+        <tbody>
+          <tr><td>CloudFormation vs CDK</td><td>YAML/JSON templates vs code that generates those templates</td></tr>
+          <tr><td>CloudFormation vs Beanstalk</td><td>Full control of any resources vs upload code for a standard web stack</td></tr>
+          <tr><td>CDK vs Terraform</td><td>AWS-only via CloudFormation vs third-party multi-cloud</td></tr>
+          <tr><td>CodeBuild vs CodeDeploy</td><td>Compile and test vs install on servers</td></tr>
+          <tr><td>CodeDeploy vs CodePipeline</td><td>One deployment step vs the whole orchestrated flow</td></tr>
+          <tr><td>CodeCommit vs CodeArtifact</td><td>Source code (Git) vs packages and dependencies</td></tr>
+          <tr><td>Session Manager vs Instance Connect</td><td>No port 22 vs browser SSH that still needs port 22</td></tr>
+          <tr><td>Parameter Store String vs SecureString</td><td>Plain vs KMS-encrypted</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="drillH">
+    <h2 class="stage-title" id="drillH">Mixed drill: name it</h2>
+    <div class="card" id="drill"></div>
+  </section>
+
+  <section aria-labelledby="exH">
+    <h2 id="exH">Exam-style questions</h2>
+    <p class="sub">Twenty original questions in the style of CLF-C02 and common practice sets. Pick an answer (two for "Select TWO") to see why.</p>
+    <div id="mcq"></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Section cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Infrastructure as code</span><span class="arrow">→</span><span class="then">CloudFormation</span></li>
+      <li><span class="if">IaC in a programming language</span><span class="arrow">→</span><span class="then">CDK</span></li>
+      <li><span class="if">Least effort web app deployment</span><span class="arrow">→</span><span class="then">Elastic Beanstalk</span></li>
+      <li><span class="if">Private Git</span><span class="arrow">→</span><span class="then">CodeCommit</span></li>
+      <li><span class="if">Build and test</span><span class="arrow">→</span><span class="then">CodeBuild</span></li>
+      <li><span class="if">Deploy to EC2 + on-prem</span><span class="arrow">→</span><span class="then">CodeDeploy</span></li>
+      <li><span class="if">Orchestrate CI/CD</span><span class="arrow">→</span><span class="then">CodePipeline</span></li>
+      <li><span class="if">Packages and dependencies</span><span class="arrow">→</span><span class="then">CodeArtifact</span></li>
+      <li><span class="if">Patch / run commands on a fleet</span><span class="arrow">→</span><span class="then">Systems Manager</span></li>
+      <li><span class="if">Shell without SSH</span><span class="arrow">→</span><span class="then">Session Manager</span></li>
+      <li><span class="if">Config and secrets</span><span class="arrow">→</span><span class="then">Parameter Store</span></li>
+    </ul>
+  </section>
+
+  <footer>Questions are original, written to the official exam guide (Domain 3 Task 3.1 deployment and operations): <a href="https://docs.aws.amazon.com/aws-certification/latest/examguides/cloud-practitioner-02.html">AWS CLF-C02 exam guide</a>, <a href="https://aws.amazon.com/devops/">DevOps on AWS</a>, <a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/what-is-systems-manager.html">Systems Manager</a>. Section notes: deployment notes 1 to 15.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('recapSvg'), {
+    zones: [{ id: 'reg', x: 180, y: 20, w: 800, h: 385, kind: 'region', label: 'ap-south-1' }],
+    nodes: {
+      dev: { x: 80, y: 110, icon: 'code', kind: 'user', label: 'Developer' },
+      cc: { x: 290, y: 110, icon: 'branch', kind: 'storage', label: 'CodeCommit' },
+      cb: { x: 470, y: 110, icon: 'gear', kind: 'compute', label: 'CodeBuild' },
+      cd: { x: 650, y: 110, icon: 'router', kind: 'mgmt', label: 'CodeDeploy' },
+      ec2: { x: 860, y: 110, icon: 'server', kind: 'compute', label: 'EC2 fleet' },
+      cfn: { x: 290, y: 310, icon: 'layers', kind: 'mgmt', label: 'CloudFormation', sub: 'stack' },
+      ssm: { x: 650, y: 310, icon: 'gear', kind: 'mgmt', label: 'Systems Manager', sub: 'patch, session, params' },
+      ops: { x: 80, y: 310, icon: 'user', kind: 'user', label: 'Ops' }
+    },
+    links: [{ a: 'dev', b: 'cc' }, { a: 'cc', b: 'cb' }, { a: 'cb', b: 'cd' }, { a: 'cd', b: 'ec2' }, { a: 'cfn', b: 'ec2', via: [[860, 310]] }, { a: 'ops', b: 'cfn' }, { a: 'ssm', b: 'ec2', kind: 'dash' }]
+  });
+  $('recapPlay').addEventListener('click', async () => {
+    const run = K.newRun('r'); net.reset(); const say = h => $('recapCap').innerHTML = h;
+    try {
+      say('<b>CloudFormation</b> builds the servers from a template (or the CDK generates it, or Beanstalk does it all).');
+      await net.send(['ops', 'cfn', 'ec2'], { run, tone: 'cyan', label: 'stack' });
+      say('A commit flows through <b>CodePipeline</b>: CodeCommit → <b>CodeBuild</b> → <b>CodeDeploy</b> → the fleet.');
+      await net.send(['dev', 'cc', 'cb', 'cd', 'ec2'], { run, label: 'v42' });
+      say('<b>Systems Manager</b> patches the fleet, opens shells with Session Manager and serves Parameter Store values.');
+      await net.send(['ssm', 'ec2'], { run, tone: 'yellow', label: 'patch' });
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  });
+
+  K.pick($('drill'), [{"q": "Infrastructure as code in YAML.", "a": "CloudFormation", "why": "Templates."}, {"q": "Infrastructure in TypeScript, generates templates.", "a": "CDK", "why": "Code → CloudFormation."}, {"q": "Upload code, AWS builds the web stack.", "a": "Elastic Beanstalk", "why": "PaaS."}, {"q": "Compile and run tests, serverless.", "a": "CodeBuild", "why": "Pay per build minute."}, {"q": "Upgrade apps on EC2 and on-prem servers.", "a": "CodeDeploy", "why": "Agent on each server."}, {"q": "Orchestrate source → build → deploy.", "a": "CodePipeline", "why": "CI/CD."}, {"q": "Private NuGet and npm packages.", "a": "CodeArtifact", "why": "Package repository."}, {"q": "Patch 200 hybrid servers.", "a": "Systems Manager", "why": "Patch Manager."}, {"q": "Shell with port 22 closed.", "a": "Session Manager", "why": "Outbound agent."}, {"q": "Encrypted DB password for the app.", "a": "Parameter Store", "why": "SecureString."}], ["CloudFormation", "CDK", "Elastic Beanstalk", "CodeBuild", "CodeDeploy", "CodePipeline", "CodeArtifact", "Systems Manager", "Session Manager", "Parameter Store"]);
+  K.mcq($('mcq'), [{"q": "Which service provisions AWS resources from YAML or JSON templates?", "o": ["AWS CloudFormation", "AWS CodeBuild", "AWS Systems Manager", "Amazon Lightsail"], "a": [0], "why": "CloudFormation is AWS's IaC service."}, {"q": "A company must create identical environments in several Regions and accounts. What should it use?", "o": ["Manual console steps", "CloudFormation templates", "EC2 user data only", "AWS Budgets"], "a": [1], "why": "Templates are repeatable (StackSets for many accounts)."}, {"q": "Which statement about the AWS CDK is correct?", "o": ["It replaces CloudFormation", "It generates CloudFormation templates from programming languages", "It only supports YAML", "It is a monitoring tool"], "a": [1], "why": "cdk synth produces CloudFormation."}, {"q": "A developer wants to deploy a standard web application with the least infrastructure management. Which service?", "o": ["AWS CloudFormation", "Amazon EC2", "AWS Elastic Beanstalk", "AWS Systems Manager"], "a": [2], "why": "Beanstalk is PaaS."}, {"q": "What is the charge for AWS Elastic Beanstalk itself?", "o": ["A per-application fee", "No charge; you pay for the underlying resources", "A per-deployment fee", "Included only in Enterprise Support"], "a": [1], "why": "Pay only for EC2, ELB, etc."}, {"q": "Which tool is multi-cloud?", "o": ["AWS CDK", "AWS CloudFormation", "Terraform", "Elastic Beanstalk"], "a": [2], "why": "Terraform has providers for many clouds."}, {"q": "Which service compiles source code, runs tests and produces packages, billed per build minute?", "o": ["AWS CodeDeploy", "AWS CodeBuild", "AWS CodePipeline", "AWS CodeCommit"], "a": [1], "why": "CodeBuild."}, {"q": "Which service deploys application updates to both EC2 instances and on-premises servers?", "o": ["AWS CodeDeploy", "AWS Elastic Beanstalk", "AWS CloudFormation", "Amazon ECR"], "a": [0], "why": "CodeDeploy is hybrid."}, {"q": "What must be installed on servers for CodeDeploy to work?", "o": ["The CloudWatch agent only", "The CodeDeploy agent", "Docker", "Nothing"], "a": [1], "why": "The agent pulls and installs revisions."}, {"q": "Which service orchestrates the steps from code commit to deployment?", "o": ["AWS CodePipeline", "AWS CodeArtifact", "AWS CodeCommit", "AWS Config"], "a": [0], "why": "CodePipeline orchestrates CI/CD."}, {"q": "Which service stores private Git repositories?", "o": ["AWS CodeCommit", "AWS CodeArtifact", "Amazon ECR", "AWS CodeBuild"], "a": [0], "why": "CodeCommit."}, {"q": "A team needs a managed repository for NuGet and npm dependencies. Which service?", "o": ["AWS CodeCommit", "AWS CodeArtifact", "Amazon S3 Glacier", "Amazon ECR"], "a": [1], "why": "CodeArtifact stores packages."}, {"q": "Which service can patch and run commands on a fleet of EC2 and on-premises servers?", "o": ["AWS Systems Manager", "AWS CloudFormation", "Amazon Inspector", "AWS Batch"], "a": [0], "why": "SSM is hybrid fleet management."}, {"q": "What is required on each server managed by Systems Manager?", "o": ["The SSM agent and permissions to use Systems Manager", "An open port 22", "A public IP address", "A Beanstalk environment"], "a": [0], "why": "Agent plus IAM role."}, {"q": "Security requires shell access to EC2 with no inbound ports and no SSH keys. Which service?", "o": ["EC2 Instance Connect", "Session Manager", "A bastion host", "AWS Direct Connect"], "a": [1], "why": "The agent connects outbound."}, {"q": "Where can Session Manager write session logs?", "o": ["Amazon S3 or CloudWatch Logs", "Only on the instance", "Amazon ECR", "Nowhere"], "a": [0], "why": "S3 or CloudWatch Logs."}, {"q": "Which Parameter Store type is encrypted with KMS?", "o": ["String", "StringList", "SecureString", "PlainText"], "a": [2], "why": "SecureString."}, {"q": "How does an application on EC2 get permission to read a Parameter Store value?", "o": ["Hard-coded access keys", "An IAM role allowing ssm:GetParameter", "A security group rule", "A public bucket policy"], "a": [1], "why": "IAM role permissions."}, {"q": "Someone changed a resource created by CloudFormation by hand. Which feature shows this?", "o": ["Change sets", "Drift detection", "StackSets", "Rollback triggers"], "a": [1], "why": "Drift detection."}, {"q": "Which services are hybrid (work with on-premises servers)?", "o": ["AWS CodeDeploy", "AWS Elastic Beanstalk", "AWS Systems Manager", "AWS CloudFormation", "Amazon Lightsail"], "a": [0, 2], "why": "Both use agents on any server."}]);
+})();
+</script>
+</body>
+</html>

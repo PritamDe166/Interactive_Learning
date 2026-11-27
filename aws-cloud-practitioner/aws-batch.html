@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>AWS Batch</title>
+<meta name="description" content="AWS Batch runs batch jobs at any scale: Docker jobs in a queue, EC2 Spot or Fargate capacity provisioned for you, and how it differs from Lambda.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html" aria-current="page"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Other compute / 7 · Domain 3 Technology</p>
+    <h1>AWS Batch</h1>
+    <ul class="lede">
+      <li><b>Batch</b> runs <b>batch jobs</b> (a start and an end) at any scale.</li>
+      <li>Jobs are <b>Docker images</b> submitted to a <b>job queue</b>.</li>
+      <li>Batch launches <b>EC2 / Spot</b> or Fargate capacity to match the queue, then shrinks it.</li>
+      <li>No time limit (unlike Lambda); Batch itself is free.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">AWS Batch</span><span class="like">A job scheduler (SQL Agent jobs or an HPC queue) that also buys and returns the servers</span><span>Capacity appears for the queue and disappears afterwards.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: 10,000 three-hour research jobs</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="Researchers submit Docker jobs to a queue; AWS Batch launches EC2 Spot instances to run them and writes results to S3"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>Batch = fully managed <b>batch processing</b> at any scale.</li>
+      <li>Jobs are <b>Docker images</b> in a <b>job queue</b>.</li>
+      <li>Provisions <b>EC2 / Spot</b> (or Fargate) automatically; runs on ECS/EKS underneath.</li>
+      <li><b>No 15-minute limit</b>; good for long jobs.</li>
+      <li>No charge for Batch; pay for the compute. Spot cuts cost.</li>
+      <li>Managed, <b>not serverless</b> on EC2.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="bH">
+    <h2 class="stage-title" id="bH">Lambda or Batch?</h2>
+    <div class="stage-kind">Set the job length</div>
+    <div class="card">
+      <div class="lab-form">
+        <div class="range"><label for="bDur">Each job runs <output id="bDurO"></output></label><input type="range" id="bDur" min="1" max="600" value="180"></div>
+      </div>
+      <label class="toggle" for="bImg"><input type="checkbox" id="bImg"> Packaged as a general Docker image</label>
+      <p class="status-line" id="bOut"></p>
+    </div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Batch jobs, start and end, any scale</span><span class="arrow">→</span><span class="then">AWS Batch</span></li>
+      <li><span class="if">Jobs over 15 minutes in Docker</span><span class="arrow">→</span><span class="then">AWS Batch</span></li>
+      <li><span class="if">Cheapest capacity for batch</span><span class="arrow">→</span><span class="then">Spot Instances</span></li>
+      <li><span class="if">Batch charge</span><span class="arrow">→</span><span class="then">Only the underlying compute</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>Lambda</th><th>Batch</th></tr></thead>
+        <tbody>
+          <tr><td><b>Unit</b></td><td>Function</td><td>Docker job in a queue</td></tr>
+          <tr><td><b>Time limit</b></td><td>15 minutes</td><td>None</td></tr>
+          <tr><td><b>Runtime</b></td><td>Supported runtimes / Lambda images</td><td>Any Docker image</td></tr>
+          <tr><td><b>Serverless</b></td><td>Yes</td><td>No (managed, on EC2/Spot or Fargate)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>A 3-hour job in a Docker image: Lambda or Batch?<span class="go">Show answer</span></summary><div class="ans"><p><b>Batch.</b></p></div></details>
+      <details><summary>What do you pay for with Batch?<span class="go">Show answer</span></summary><div class="ans"><p>The <b>EC2, Spot or Fargate</b> resources used.</p></div></details>
+      <details><summary>Is Batch on EC2 serverless?<span class="go">Show answer</span></summary><div class="ans"><p><b>No</b>, managed but runs on instances.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: compute notes "AWS Batch" and "Other Compute Services: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/batch/latest/userguide/what-is-batch.html">What is AWS Batch?</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 20, y: 20, w: 960, h: 385, kind: 'region', label: 'ap-south-1' }, { id: 'ce', x: 480, y: 50, w: 290, h: 340, kind: 'aws', label: 'Compute environment' }],
+    nodes: {
+      sci: { x: 100, y: 110, icon: 'users', kind: 'user', label: 'Researchers', sub: '10,000 jobs' },
+      ecr: { x: 100, y: 320, icon: 'archive', kind: 'storage', label: 'ECR image', sub: 'genome-align' },
+      q: { x: 320, y: 210, icon: 'layers', kind: 'mgmt', label: 'Job queue' },
+      e1: { x: 560, y: 120, icon: 'server', kind: 'compute', label: 'EC2 Spot' },
+      e2: { x: 690, y: 120, icon: 'server', kind: 'compute', label: 'EC2 Spot' },
+      e3: { x: 560, y: 300, icon: 'server', kind: 'compute', label: 'EC2 Spot' },
+      e4: { x: 690, y: 300, icon: 'server', kind: 'compute', label: 'EC2 Spot' },
+      s3: { x: 880, y: 210, icon: 'bucket', kind: 'storage', label: 'S3 results' }
+    },
+    links: [{ a: 'sci', b: 'q', label: 'submit', at: [200, 150] }, { a: 'ecr', b: 'q', kind: 'dash' }, ...['e1', 'e2', 'e3', 'e4'].map(e => ({ a: 'q', b: e, kind: 'priv' })), ...['e2', 'e4'].map(e => ({ a: e, b: 's3' }))]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['sci', 'q'], ['sci', 'q', 'ecr'], ['q', 'e1', 'e2', 'e3', 'e4'], ['e1', 'e2', 'e3', 'e4', 's3'], ['q'], null];
+    net.focus(F[i]);
+    if (i === 0) net.badge('q', '3 hours each', 'info');
+    if (i === 2) net.badge('e2', 'launched for the queue', 'ok');
+    if (i === 3) net.badge('s3', 'then capacity shrinks', 'ok');
+  }
+  const STEPS = [
+    { title: "Lots of jobs with a start and an end",
+      text: ["Researchers need 10,000 genome alignments, each taking about 3 hours.", "These are <b>batch jobs</b>: they start, run and finish (unlike a stream that never ends). Lambda's 15-minute limit rules it out."] },
+    { title: "Jobs as Docker images in a queue",
+      text: ["Each job is a <b>Docker image</b> plus parameters. Jobs are submitted to a <b>job queue</b>."],
+      play: async run => { base(1); for (let j = 0; j < 3; j++) await net.send(['sci', 'q'], { run, label: 'job ' + (j + 1) }); } },
+    { title: "Batch provisions the compute",
+      text: ["<b>AWS Batch</b> launches the right amount of <b>EC2</b> (often <b>Spot</b>) or Fargate capacity for the queue, runs the jobs, and removes the capacity when the queue is empty.", "It uses ECS or EKS underneath to run the containers."],
+      tip: "Batch jobs, any length, Docker, cheapest = AWS Batch on Spot.",
+      play: async run => { base(2); await Promise.all(['e1', 'e2', 'e3', 'e4'].map(e => net.send(['q', e], { run, tone: 'cyan', label: 'run' }))); } },
+    { title: "Results and cost",
+      text: ["Jobs write results to S3. Batch itself is free: you pay for the EC2, Spot or Fargate resources used.", "Spot makes large batch workloads much cheaper."],
+      play: async run => { base(3); await Promise.all(['e2', 'e4'].map(e => net.send([e, 's3'], { run, tone: 'green' }))); } },
+    { title: "Managed, not serverless",
+      text: ["You don't manage the servers, but they are EC2 instances in your account, so Batch on EC2 is <b>managed</b> rather than serverless."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  function pick() {
+    const m = +$('bDur').value, img = $('bImg').checked;
+    $('bDurO').textContent = m < 60 ? m + ' min' : (m / 60).toFixed(1) + ' h';
+    let a, why;
+    if (m > 15) { a = 'AWS Batch'; why = 'Longer than Lambda\'s 15-minute limit; Batch has no time limit and can use Spot.'; }
+    else if (img) { a = 'AWS Batch (or Lambda with a Lambda-compatible image)'; why = 'Short, but packaged as a general Docker image: Batch or ECS/Fargate are the natural fit.'; }
+    else { a = 'AWS Lambda'; why = 'Short and event-driven: a function is simplest and cheapest.'; }
+    $('bOut').innerHTML = `<b>${a}.</b> ${why}`;
+  }
+  ['bDur', 'bImg'].forEach(id => $(id).addEventListener('input', pick)); pick();
+
+})();
+</script>
+</body>
+</html>

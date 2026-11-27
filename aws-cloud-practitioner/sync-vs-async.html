@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>Synchronous vs Asynchronous Communication</title>
+<meta name="description" content="How applications talk to each other: synchronous calls versus asynchronous queues and events, why decoupling absorbs spikes, and the AWS services SQS, SNS and Kinesis, with a spike lab.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html" aria-current="page"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Cloud integrations / 1 · Domain 3 Technology</p>
+    <h1>Synchronous vs Asynchronous Communication</h1>
+    <ul class="lede">
+      <li><b>Synchronous</b>: one app calls another directly and waits. Simple, but <b>tightly coupled</b>.</li>
+      <li><b>Asynchronous</b> (event-based): the sender puts a message in a <b>queue</b> or publishes an event; the receiver handles it later.</li>
+      <li>Decoupling absorbs <b>traffic spikes</b> and lets each side <b>scale independently</b>.</li>
+      <li>AWS: <b>SQS</b> (queues), <b>SNS</b> (pub/sub), <b>Kinesis</b> (real-time streams).</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Synchronous call</span><span class="like">A Web API calling another Web API with <code>HttpClient</code> and awaiting the result</span><span>If the other API is slow, your request is slow.</span></div>
+      <div class="row"><span class="aws">SQS queue</span><span class="like">MSMQ, RabbitMQ or Azure Service Bus queue</span><span>Fully managed; no broker servers.</span></div>
+      <div class="row"><span class="aws">SNS</span><span class="like">A publish/subscribe topic (Service Bus topics)</span><span>One message, many subscribers.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: booking and report services under a spike</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="A booking service calls a report service directly and overloads it, then switches to putting messages in an SQS queue that workers process at their own pace; SNS can publish to the queue"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>Synchronous = direct call, caller waits; <b>tight coupling</b>.</li>
+      <li>Asynchronous = message in a <b>queue</b> or event on a <b>topic</b>; <b>loose coupling</b> (decoupled).</li>
+      <li>Under a spike, a direct call can overwhelm the receiver; a queue holds the backlog.</li>
+      <li>Decoupled services <b>scale independently</b>.</li>
+      <li><b>SQS</b>: queue model. <b>SNS</b>: pub/sub. <b>Kinesis</b>: real-time streaming.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="sH">
+    <h2 class="stage-title" id="sH">What happens in a spike?</h2>
+    <div class="stage-kind">Change the spike and the report service's capacity · illustrative</div>
+    <div class="card">
+      <div class="lab-form">
+        <div class="range"><label for="sp">Requests arriving at once <output id="spO"></output></label><input type="range" id="sp" min="10" max="5000" step="10" value="1000"></div>
+        <div class="range"><label for="cp">Report service capacity <output id="cpO"></output></label><input type="range" id="cp" min="5" max="200" step="5" value="20"></div>
+      </div>
+      <div class="kpis" id="sK"></div>
+      <p class="status-line" id="sSt"></p>
+    </div>
+  </section>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">SQS, SNS or Kinesis?</h2>
+    <div class="stage-kind">Pick the service</div>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Decouple applications</span><span class="arrow">→</span><span class="then">SQS / SNS / Kinesis</span></li>
+      <li><span class="if">Queue messages until processed</span><span class="arrow">→</span><span class="then">SQS</span></li>
+      <li><span class="if">One message to many subscribers</span><span class="arrow">→</span><span class="then">SNS</span></li>
+      <li><span class="if">Real-time data streams</span><span class="arrow">→</span><span class="then">Kinesis</span></li>
+      <li><span class="if">Absorb a traffic spike</span><span class="arrow">→</span><span class="then">A queue (asynchronous)</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>Synchronous</th><th>Asynchronous</th></tr></thead>
+        <tbody>
+          <tr><td><b>How</b></td><td>Direct call, wait for reply</td><td>Queue or event in between</td></tr>
+          <tr><td><b>Coupling</b></td><td>Tight</td><td>Loose</td></tr>
+          <tr><td><b>Under a spike</b></td><td>Receiver overwhelmed, calls fail</td><td>Queue holds the backlog</td></tr>
+          <tr><td><b>Scaling</b></td><td>Together</td><td>Independently</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Why does a queue help during a sudden spike?<span class="go">Show answer</span></summary><div class="ans"><p>It <b>holds</b> the messages so the receiver can process them at its own pace; nothing is lost.</p></div></details>
+      <details><summary>What does "decoupled" mean?<span class="go">Show answer</span></summary><div class="ans"><p>The services don't call each other directly, so one can be slow or down without breaking the other.</p></div></details>
+      <details><summary>Which AWS service is pub/sub?<span class="go">Show answer</span></summary><div class="ans"><p><b>SNS</b>.</p></div></details>
+      <details><summary>Which is for real-time streaming?<span class="go">Show answer</span></summary><div class="ans"><p><b>Kinesis</b>.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Lab numbers are illustrative (callers give up after 5 seconds). Sources: integrations note "Cloud Integration: Synchronous vs Asynchronous Communication"; <a href="https://aws.amazon.com/sqs/">Amazon SQS</a>; <a href="https://aws.amazon.com/sns/">Amazon SNS</a>; <a href="https://aws.amazon.com/kinesis/">Amazon Kinesis</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 20, y: 20, w: 960, h: 385, kind: 'region', label: 'ap-south-1' }],
+    nodes: {
+      buy: { x: 120, y: 120, icon: 'server', kind: 'compute', label: 'Booking service' },
+      ship: { x: 820, y: 120, icon: 'server', kind: 'compute', label: 'Report service', sub: 'makes PDFs' },
+      q: { x: 470, y: 300, icon: 'layers', kind: 'mgmt', label: 'Queue (SQS)' },
+      w1: { x: 820, y: 260, icon: 'server', kind: 'compute', label: 'Worker' },
+      w2: { x: 820, y: 360, icon: 'server', kind: 'compute', label: 'Worker' },
+      sns: { x: 120, y: 340, icon: 'bolt', kind: 'mgmt', label: 'SNS topic', sub: 'pub/sub' }
+    },
+    links: [{ a: 'buy', b: 'ship', label: 'direct call, waits', at: [470, 110] }, { a: 'buy', b: 'q' }, { a: 'q', b: 'w1' }, { a: 'q', b: 'w2' }, { a: 'sns', b: 'q', kind: 'dash' }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['buy', 'ship'], ['buy', 'ship'], ['buy', 'q', 'w1', 'w2'], ['buy', 'q', 'w1', 'w2'], ['buy', 'q', 'w1', 'w2', 'sns'], null];
+    net.focus(F[i]);
+    if (i === 0) net.badge('buy', 'waits for the reply', 'info');
+    if (i === 1) { net.state('ship', 'down'); net.badge('ship', '1,000 requests: overloaded', 'bad'); }
+    if (i === 2) net.badge('q', 'holds the messages', 'ok');
+    if (i === 3) net.badge('q', 'backlog: 950 → 0', 'info');
+  }
+  const STEPS = [
+    { title: "Synchronous: call and wait",
+      text: ["The booking service calls the report service <b>directly</b> and <b>waits</b> for the answer.", "Simple, but the two are <b>tightly coupled</b>: if the report service is slow or down, booking suffers too."],
+      play: async run => { base(0); await net.send(['buy', 'ship'], { run, label: 'make PDF' }); await net.send(['ship', 'buy'], { run, label: 'done', tone: 'green' }); } },
+    { title: "A sudden spike",
+      text: ["Usually 10 reports a minute arrive; one morning 1,000 arrive at once.", "The report service is overwhelmed and many calls <b>fail or time out</b>, and the booking service fails with them."],
+      play: async run => { base(1); for (let j = 0; j < 3; j++) await net.send(['buy', 'ship'], { run, label: 'make PDF', tone: 'red' }); } },
+    { title: "Asynchronous: put it in a queue",
+      text: ["Instead, the booking service drops a message into a <b>queue</b> and carries on at once.", "Workers take messages from the queue <b>at their own pace</b>. The two services are <b>decoupled</b>."],
+      tip: "Absorb spikes, decouple services = a queue (SQS).",
+      play: async run => { base(2); for (let j = 0; j < 3; j++) await net.send(['buy', 'q'], { run, label: 'msg', tone: 'cyan' }); await Promise.all([net.send(['q', 'w1'], { run }), net.send(['q', 'w2'], { run })]); } },
+    { title: "The queue absorbs the spike",
+      text: ["The 1,000 messages wait safely in the queue; workers work through them. Nothing is lost and booking stays fast.", "Each side <b>scales independently</b>: add workers when the queue grows (an Auto Scaling group can follow the queue length)."] },
+    { title: "AWS services for decoupling",
+      text: ["<b>SQS</b> (Simple Queue Service): a queue that holds messages until a consumer reads them.", "<b>SNS</b> (Simple Notification Service): publish once, deliver to many subscribers (pub/sub).", "<b>Kinesis</b>: real-time streaming of continuous data."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ---------- spike lab ---------- */
+  function sim() {
+    const spike = +$('sp').value, cap = +$('cp').value;
+    $('spO').textContent = spike.toLocaleString() + ' requests'; $('cpO').textContent = cap + ' per second';
+    const okSync = Math.min(spike, cap * 5);
+    const failSync = spike - okSync;
+    const drain = Math.ceil(spike / cap);
+    $('sK').innerHTML = [['Synchronous: failed', failSync.toLocaleString(), failSync ? 'bad' : 'good'], ['Asynchronous: lost', '0', 'good'], ['Asynchronous: peak backlog', Math.max(0, spike - cap).toLocaleString(), 'accent'], ['Asynchronous: all done after', drain + ' s', '']]
+      .map(([l, v, c]) => `<div class="${c}"><b>${v}</b><span>${l}</span></div>`).join('');
+    $('sSt').innerHTML = failSync ? `The report service can only answer ${cap} requests a second and callers time out after 5 s, so <b>${failSync.toLocaleString()}</b> direct calls fail. With a queue, every request is processed, just later.` : 'This load fits the capacity: both designs cope. The queue still protects you against the next spike.';
+  }
+  ['sp', 'cp'].forEach(id => $(id).addEventListener('input', sim)); sim();
+
+  K.pick($('pick'), [
+    { q: 'Hold orders until the shipping service can process them.', a: 'SQS', why: 'A queue.' },
+    { q: 'Send one "appointment booked" event to email, SMS and billing.', a: 'SNS', why: 'Pub/sub fan-out.' },
+    { q: 'Process a continuous stream of heart-monitor readings in real time.', a: 'Kinesis', why: 'Real-time streaming.' },
+    { q: 'Absorb a sudden spike of video-encoding jobs.', a: 'SQS', why: 'Queue the work.' },
+    { q: 'Notify many subscribers at once.', a: 'SNS', why: 'Publish to a topic.' }
+  ], ['SQS', 'SNS', 'Kinesis']);
+
+})();
+</script>
+</body>
+</html>

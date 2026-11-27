@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>Amazon Lightsail</title>
+<meta name="description" content="Amazon Lightsail bundles servers, databases and networking at a predictable monthly price for beginners and simple sites, and when to choose EC2 instead, with a compute chooser.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+  .layer rect { stroke-width: 2; transition: fill .35s, stroke .35s; }
+  .layer.aws rect { fill: var(--teal-wash); stroke: var(--teal); }
+  .layer.you rect { fill: var(--panel); stroke: var(--accent-text); }
+  .layer text { fill: var(--fg); font-size: 14px; font-weight: 600; }
+  .layer .who { font-family: var(--mono); font-size: 11px; font-weight: 400; text-anchor: end; }
+  .layer.aws .who { fill: var(--good-text); }
+  .layer.you .who { fill: var(--accent-text); }
+  .env rect { fill: var(--panel-2); stroke: var(--line); stroke-width: 2; transition: fill .25s, stroke .25s, opacity .3s; }
+  .env.busy rect { fill: var(--teal-wash); stroke: var(--cyan); }
+  .env.cold rect { stroke: var(--yellow); }
+  .env text { fill: var(--fg); font-family: var(--mono); font-size: 12px; text-anchor: middle; }
+  .svc rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .svc text { fill: var(--fg); font-size: 13px; font-weight: 700; text-anchor: middle; }
+  .svc .sm { fill: var(--muted); font-family: var(--mono); font-size: 12px; font-weight: 400; }
+  .svc.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .svc.fade text { opacity: .45; }
+  .hostbox { fill: var(--panel); stroke: var(--accent-text); stroke-width: 1.5; stroke-dasharray: 6 4; }
+  .oslayer { fill: var(--panel-2); stroke: var(--accent-text); }
+  .ctr { fill: var(--teal-wash); stroke: var(--teal); stroke-width: 2; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html" aria-current="page"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Other compute / 8 · Domain 3 Technology</p>
+    <h1>Amazon Lightsail</h1>
+    <ul class="lede">
+      <li><b>Lightsail</b> offers virtual servers, databases, storage and networking in <b>one simple console</b>.</li>
+      <li><b>Low, predictable monthly prices</b>; one-click WordPress, LAMP, Node.js…</li>
+      <li>For users with <b>little cloud experience</b>, simple sites and dev/test.</li>
+      <li>No auto scaling and limited AWS integration: usually a <b>distractor</b> in exam questions.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Lightsail</span><span class="like">Shared or VPS hosting from a web host</span><span>Same simplicity, on AWS, with an upgrade path to EC2.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: a WordPress site for a small clinic</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="A clinic owner runs WordPress on a Lightsail instance with a managed database, load balancer and DNS, compared with the full EC2, RDS, ELB and Route 53 setup"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>Lightsail = simple bundles of servers, storage, databases and networking.</li>
+      <li><b>Predictable</b> monthly pricing (from about $5 with IPv4).</li>
+      <li>Use cases: simple web apps and websites (WordPress, LAMP), dev/test.</li>
+      <li>High availability possible, <b>no auto scaling</b>, limited AWS integrations.</li>
+      <li>Exam: correct only for "beginner / simple / predictable price".</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="pickH">
+    <h2 class="stage-title" id="pickH">Pick the compute service</h2>
+    <div class="stage-kind">Pick a scenario · it lands on the service</div>
+    <div class="card">
+      <div class="chips" id="scChips"></div>
+      <div class="scroll"><svg class="diagram" id="pick" viewBox="0 0 1000 250" aria-label="Compute services from most control to least management"></svg></div>
+      <p class="status-line" id="pickStatus">Pick a scenario.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">No cloud experience, simple WordPress site</span><span class="arrow">→</span><span class="then">Lightsail</span></li>
+      <li><span class="if">Low, predictable monthly price</span><span class="arrow">→</span><span class="then">Lightsail</span></li>
+      <li><span class="if">Needs auto scaling</span><span class="arrow">→</span><span class="then">Not Lightsail: EC2 + ASG</span></li>
+      <li><span class="if">Full AWS integration</span><span class="arrow">→</span><span class="then">EC2, RDS, ELB…</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>Lightsail</th><th>EC2 and friends</th></tr></thead>
+        <tbody>
+          <tr><td><b>Audience</b></td><td>Beginners, simple apps</td><td>Anyone needing control</td></tr>
+          <tr><td><b>Pricing</b></td><td>Fixed monthly bundles</td><td>Pay as you go</td></tr>
+          <tr><td><b>Auto scaling</b></td><td>No</td><td>Yes</td></tr>
+          <tr><td><b>AWS integration</b></td><td>Limited</td><td>Full</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>A beginner wants WordPress online quickly at a fixed price. Which service?<span class="go">Show answer</span></summary><div class="ans"><p><b>Lightsail.</b></p></div></details>
+      <details><summary>Does Lightsail auto scale?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b></p></div></details>
+      <details><summary>An app needs auto scaling and deep AWS integration.<span class="go">Show answer</span></summary><div class="ans"><p><b>EC2</b> with an Auto Scaling group (and other services), not Lightsail.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Prices are from the Lightsail pricing page and change over time. Sources: compute notes "Amazon Lightsail (Theory + Hands-On)" and "Other Compute Services: CLF-C02 Exam Summary"; <a href="https://aws.amazon.com/lightsail/pricing/">Lightsail pricing</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'ls', x: 260, y: 40, w: 460, h: 340, kind: 'aws', label: 'Lightsail: one console, one monthly price' }],
+    nodes: {
+      own: { x: 110, y: 210, icon: 'user', kind: 'user', label: 'Clinic owner', sub: 'no cloud experience' },
+      vm: { x: 380, y: 130, icon: 'server', kind: 'compute', label: 'Instance', sub: 'WordPress' },
+      db: { x: 600, y: 130, icon: 'db', kind: 'db', label: 'Managed DB' },
+      lb: { x: 380, y: 300, icon: 'lb', kind: 'net', label: 'Load balancer' },
+      dns: { x: 600, y: 300, icon: 'dns', kind: 'net', label: 'DNS + static IP' },
+      ec2: { x: 860, y: 210, icon: 'layers', kind: 'plain', label: 'EC2, RDS, ELB, Route 53', sub: 'full AWS' }
+    },
+    links: [{ a: 'own', b: 'vm' }, { a: 'vm', b: 'db' }, { a: 'vm', b: 'lb', kind: 'dash' }, { a: 'vm', b: 'dns', kind: 'dash' }, { a: 'ec2', b: 'db', kind: 'dash' }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['own', 'vm', 'db', 'lb', 'dns'], ['vm'], ['vm', 'db', 'lb', 'dns'], ['ec2', 'vm'], null];
+    net.focus(F[i]);
+    if (i === 1) net.badge('vm', 'from $5 / month', 'ok');
+    if (i === 3) net.badge('ec2', 'auto scaling, everything', 'info');
+  }
+  const STEPS = [
+    { title: "For people new to the cloud",
+      text: ["The clinic owner wants a WordPress site online today, with no idea what a VPC or a security group is.", "<b>Amazon Lightsail</b> bundles servers, databases, storage and networking in one simple console."] },
+    { title: "Predictable monthly price",
+      text: ["Pick a bundle (CPU, memory, SSD, data transfer) for a <b>fixed monthly price</b>, from about $5 a month with a public IPv4 address ($3.50 IPv6-only).", "Blueprints install WordPress, LAMP, Node.js, Nginx and others in one click."] },
+    { title: "Everything in one place",
+      text: ["Managed databases, load balancers, static IPs, DNS, snapshots and object storage are all in the Lightsail console.", "High availability is possible, but there is <b>no auto scaling</b> and only limited integration with other AWS services."] },
+    { title: "When to move on",
+      text: ["As needs grow, move to <b>EC2, RDS, ELB and Route 53</b> for full control, auto scaling and every AWS feature.", "In exam questions Lightsail is usually a <b>distractor</b>: it is right only for \"beginner, quick start, simple, predictable price\"."],
+      tip: "No cloud experience + predictable monthly price = Lightsail." }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+  /* ========== 3. Chooser ========== */
+  const pk = $('pick');
+  const SV = {
+    ls: { t: 'Lightsail', s: 'fixed monthly bundle', x: 110, y: 70 },
+    ec2: { t: 'EC2', s: 'full control', x: 330, y: 70 },
+    ecs: { t: 'ECS', s: 'Docker on AWS', x: 550, y: 70 },
+    eks: { t: 'EKS', s: 'Kubernetes', x: 770, y: 70 },
+    bat: { t: 'Batch', s: 'job queue, Spot', x: 110, y: 180 },
+    far: { t: 'Fargate', s: 'serverless containers', x: 330, y: 180 },
+    lam: { t: 'Lambda', s: 'event-driven functions', x: 550, y: 180 },
+    apl: { t: 'API Gateway + Lambda', s: 'serverless API', x: 800, y: 180 }
+  };
+  const sE = {};
+  for (const k in SV) { const o = SV[k], g = K.el('g', { class: 'svc' }, pk); K.el('rect', { x: o.x - 95, y: o.y - 28, width: k === 'apl' ? 220 : 190, height: 56, rx: 12 }, g); if (k === 'apl') g.querySelector('rect').setAttribute('x', o.x - 110); K.text(g, o.x, o.y - 3, o.t, ''); K.text(g, o.x, o.y + 15, o.s, 'sm'); sE[k] = g; }
+  const pP = K.el('g', {}, pk);
+  const SC = [
+    ['WordPress site, no cloud experience, fixed price', 'ls', 'Lightsail: simple bundles at a predictable monthly price.'],
+    ['Legacy app needs a custom kernel module', 'ec2', 'Full OS control means EC2.'],
+    ['Containers, AWS-native, team manages instances', 'ecs', 'ECS on EC2: AWS orchestrates, you run the instances.'],
+    ['Existing Kubernetes manifests', 'eks', 'Kubernetes → EKS (nodes on EC2 or Fargate).'],
+    ['Thousands of 3-hour genome jobs, cheapest', 'bat', 'Batch queues the jobs and launches Spot capacity; no 15-minute limit.'],
+    ['Containers, least operational overhead', 'far', 'Fargate: no servers, pay per vCPU and GB per second.'],
+    ['Make a thumbnail when a scan is uploaded', 'lam', 'S3 event → Lambda: runs only when needed.'],
+    ['Serverless REST backend for a mobile app', 'apl', 'API Gateway handles HTTP, auth and throttling; Lambda runs the logic.']
+  ];
+  $('scChips').innerHTML = SC.map((s, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${s[0]}</button>`).join('');
+  $('scChips').querySelectorAll('button').forEach(b => b.addEventListener('click', async () => {
+    $('scChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    const [n, k, why] = SC[+b.dataset.i];
+    const run = K.newRun('pick'); pP.textContent = '';
+    Object.values(sE).forEach(g => g.setAttribute('class', 'svc'));
+    const p = K.pill(pP, n.length > 28 ? n.slice(0, 27) + '…' : n);
+    try {
+      await K.move(p, [500, 250], [SV[k].x, SV[k].y - 38], 650, run); p.remove();
+      for (const o in sE) sE[o].classList.add(o === k ? 'hit' : 'fade');
+      $('pickStatus').innerHTML = `<b>${SV[k].t}</b>. ${why}`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }));
+
+})();
+</script>
+</body>
+</html>

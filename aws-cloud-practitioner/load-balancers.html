@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>Elastic Load Balancing</title>
+<meta name="description" content="How a load balancer spreads traffic across AZs, health checks, HTTPS termination and the ALB, NLB, GWLB and Classic types, with labs.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); }
+  .kpis b { display: block; font-size: 22px; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lb-tg { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  @media (max-width: 640px) { .lb-tg { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .lb-t { display: grid; gap: 4px; text-align: left; font: inherit; color: var(--fg); background: var(--panel-2); border: 2px solid var(--teal); padding: var(--space-xs) var(--space-sm); cursor: pointer; }
+  .lb-t b { font-size: 15px; } .lb-t .az, .lb-t .sm { font-size: 12px; color: var(--muted); }
+  .lb-t .st, .lb-t .lb { font: 600 12px/1.3 var(--mono); }
+  .lb-t.in .lb { color: var(--good-text); } .lb-t.out .lb { color: var(--bad-text); }
+  .lb-t.crash .st { color: var(--bad-text); }
+  .lb-t.crash.in { border-color: var(--yellow); }
+  .lb-t.out { border-color: var(--red); border-style: dashed; opacity: .85; }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lbbox.legacy text { fill: var(--muted); }
+  .lb-req { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lb-req label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lb-req select, .lb-req input { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .lb-rules { display: grid; margin-top: var(--space-sm); border: 1px solid var(--line); }
+  .lb-rule { display: grid; grid-template-columns: 80px minmax(0, 1fr) minmax(0, 150px); gap: var(--space-sm); padding: var(--space-xs) var(--space-sm); border-top: 1px solid var(--line); font-size: 14px; overflow-wrap: anywhere; }
+  .lb-rule.head { border-top: 0; font-size: 12px; color: var(--muted); font-weight: 600; }
+  .lb-rule.hit { background: var(--teal-wash); font-weight: 600; }
+  .lb-rule.miss { color: var(--muted); text-decoration: line-through; }
+  .lb-rule.skip { color: var(--muted); }
+  @media (max-width: 480px) { .lb-rule { grid-template-columns: 56px minmax(0, 1fr); } .lb-rule span:last-child { grid-column: 2; } }
+</style>
+
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html" aria-current="page"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / ELB &amp; Auto Scaling / 2 · Domain 3 Technology</p>
+    <h1>Elastic Load Balancing</h1>
+    <ul class="lede">
+      <li>A <b>load balancer</b> is one front door (a single DNS name) that spreads requests across many instances in <b>several AZs</b>.</li>
+      <li><b>Health checks</b> find broken instances and stop sending traffic to them.</li>
+      <li>It can end <b>HTTPS</b> for you, and your instances can accept traffic only from the load balancer.</li>
+      <li>Four types: <b>ALB</b> (HTTP, layer 7), <b>NLB</b> (TCP/UDP, layer 4, static IP), <b>GWLB</b> (firewall appliances, layer 3), and the previous-generation <b>Classic</b>.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Elastic Load Balancer</span><span class="like">A hardware load balancer or IIS Application Request Routing in front of a web farm</span><span>AWS runs, patches and scales it, across several data centres, and you pay by the hour and by usage.</span></div>
+      <div class="row"><span class="aws">Health check</span><span class="like">The load balancer's probe of <code>/health</code> on each server</span><span>Same idea; an Auto Scaling group can also use the result to replace the instance.</span></div>
+      <div class="row"><span class="aws">TLS at the load balancer</span><span class="like">Installing the certificate on the load balancer instead of on every IIS server</span><span>The certificate comes from AWS Certificate Manager (ACM), which renews it for you.</span></div>
+      <div class="row"><span class="aws">Target group</span><span class="like">The server pool behind a farm</span><span>Members can be EC2 instances, IP addresses, containers or Lambda functions.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: one front door for the booking site</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="Patients reach an Application Load Balancer, which spreads requests over four EC2 instances in two Availability Zones"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li><b>Elastic Load Balancing (ELB)</b> is a <b>managed</b> service: AWS keeps it running, patches it and scales it. You configure it.</li>
+      <li>It gives <b>one DNS name</b> for the app and <b>spreads the load</b> across instances in several AZs.</li>
+      <li><b>Health checks</b> (for example HTTP <code>GET /health</code> must return 200) stop traffic to unhealthy instances.</li>
+      <li>It can <b>terminate HTTPS</b> (SSL/TLS) with a certificate from <b>ACM</b>, so instances don't each need one.</li>
+      <li>Instances can allow traffic <b>only from the load balancer's security group</b>, so users can't reach them directly.</li>
+      <li><b>ALB</b>: HTTP, HTTPS, gRPC; routes by path, host name, header or query string; targets include EC2, containers, IPs and <b>Lambda</b>.</li>
+      <li><b>NLB</b>: TCP, UDP, TLS; millions of requests per second, ultra-low latency, a <b>static IP per AZ</b> (you can use Elastic IPs).</li>
+      <li><b>GWLB</b>: sends traffic through third-party <b>firewalls or intrusion-detection</b> appliances (GENEVE, port 6081).</li>
+      <li><b>Classic Load Balancer</b>: previous generation, still supported for existing apps; not for new designs.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Break an instance, pick a type, and route some requests.</p>
+
+  <section aria-labelledby="hcH">
+    <h2 class="stage-title" id="hcH">Health checks at work</h2>
+    <div class="stage-kind">Click an instance to crash its app · watch how long the load balancer takes to notice</div>
+    <div class="card">
+      <div class="controls">
+        <button class="btn primary" type="button" id="hcRun">Start traffic</button>
+        <button class="btn" type="button" id="hcFix">Fix every instance</button>
+        <button class="btn" type="button" id="hcReset">Reset</button>
+      </div>
+      <div class="lb-tg" id="hcTg"></div>
+      <div class="kpis" id="hcK"></div>
+      <p class="nf-cap" id="hcCap"></p>
+      <p class="sub" style="margin:0">Settings: check every <b>30 s</b>, <b>unhealthy after 2</b> failed checks, <b>healthy after 5</b> passed checks (the ALB defaults). Time is sped up: one tick = 10 s.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="lbH">
+    <h2 class="stage-title" id="lbH">Which load balancer?</h2>
+    <div class="stage-kind">Pick a requirement · it lands on the right type</div>
+    <div class="card">
+      <div class="chips" id="lbChips"></div>
+      <div class="scroll"><svg class="diagram narrow" id="lb" viewBox="0 0 1000 250" aria-label="Four load balancer types: ALB, NLB, GWLB and Classic"></svg></div>
+      <p class="status-line" id="lbStatus">Pick a requirement.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="rtH">
+    <h2 class="stage-title" id="rtH">ALB routing rules</h2>
+    <div class="stage-kind">Type a request · the first matching rule wins</div>
+    <div class="card">
+      <div class="lb-req">
+        <label>Host <select id="rtHost"><option>www.clinic.test</option><option>api.clinic.test</option></select></label>
+        <label>Path and query <input id="rtPath" value="/appointments" spellcheck="false"></label>
+      </div>
+      <div class="chips" id="rtChips"></div>
+      <div class="lb-rules" id="rtRules"></div>
+      <p class="status-line" id="rtStatus"></p>
+    </div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Create an Application Load Balancer (outline)</summary>
+      <ol>
+        <li>Launch two EC2 instances (Amazon Linux 2023) with a small web server in their user data.</li>
+        <li>EC2 → <b>Target groups</b> → Create: type <b>Instances</b>, protocol HTTP 80, health check path <code>/</code>. Register both instances.</li>
+        <li>EC2 → <b>Load balancers</b> → Create → <b>Application Load Balancer</b>: internet-facing, IPv4, pick <b>at least two AZs</b>.</li>
+        <li>Give it a new security group that allows HTTP 80 from anywhere. Add a <b>listener</b> on HTTP 80 that forwards to the target group.</li>
+        <li>Open the load balancer's <b>DNS name</b> and refresh: the response comes from one instance, then the other.</li>
+        <li>Lock down the instances: change their security group to allow port 80 <b>only from the load balancer's security group</b>.</li>
+        <li>Clean up: delete the load balancer, the target group and the instances (a load balancer is billed by the hour).</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">HTTP or HTTPS, route by path or host name</span><span class="arrow">→</span><span class="then">Application Load Balancer</span></li>
+      <li><span class="if">TCP or UDP, millions of requests, ultra-low latency</span><span class="arrow">→</span><span class="then">Network Load Balancer</span></li>
+      <li><span class="if">Static IP or Elastic IP needed</span><span class="arrow">→</span><span class="then">Network Load Balancer</span></li>
+      <li><span class="if">Run traffic through firewall or IDS appliances</span><span class="arrow">→</span><span class="then">Gateway Load Balancer</span></li>
+      <li><span class="if">Lambda function as a target</span><span class="arrow">→</span><span class="then">Application Load Balancer</span></li>
+      <li><span class="if">Stop sending traffic to broken instances</span><span class="arrow">→</span><span class="then">Health checks</span></li>
+      <li><span class="if">Certificate on the load balancer, not on every server</span><span class="arrow">→</span><span class="then">TLS termination with ACM</span></li>
+      <li><span class="if">"Old" load balancer in an existing app</span><span class="arrow">→</span><span class="then">Classic LB, previous generation</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>Application (ALB)</th><th>Network (NLB)</th><th>Gateway (GWLB)</th><th>Classic (CLB)</th></tr></thead>
+        <tbody>
+          <tr><td><b>OSI layer</b></td><td>7</td><td>4</td><td>3</td><td>4 and 7</td></tr>
+          <tr><td><b>Protocols</b></td><td>HTTP, HTTPS, gRPC</td><td>TCP, UDP, TLS</td><td>IP packets (GENEVE 6081)</td><td>HTTP, HTTPS, TCP, SSL</td></tr>
+          <tr><td><b>Address</b></td><td>DNS name</td><td>Static IP per AZ, Elastic IP possible</td><td>Endpoint in your route tables</td><td>DNS name</td></tr>
+          <tr><td><b>Typical use</b></td><td>Web apps, APIs, microservices</td><td>Games, IoT, very high throughput, fixed IPs</td><td>Firewalls, IDS/IPS appliances</td><td>Existing older apps only</td></tr>
+          <tr><td><b>Special</b></td><td>Path, host, header and query routing; Lambda targets</td><td>Ultra-low latency</td><td>Scales the appliances transparently</td><td>Previous generation</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><p><b>Cross-zone load balancing.</b> With it on, each load balancer node spreads requests across healthy targets in <i>all</i> enabled AZs, not just its own. It is always on for an ALB (it can be switched off per target group) and off by default for NLB and GWLB.</p></div>
+      <div class="note"><p><b>Deregistration delay</b> (connection draining). When an instance is removed, the load balancer stops sending it new requests but lets current ones finish. The default wait is 300 seconds.</p></div>
+      <div class="note"><p><b>Sticky sessions</b> send one user's requests to the same instance using a cookie. They help an app that keeps session state in memory, but they can unbalance the load; storing sessions outside the instance (for example in ElastiCache or DynamoDB) is the cleaner fix.</p></div>
+      <div class="note"><p><b>Pricing.</b> You pay per hour for each load balancer plus a usage charge (load balancer capacity units for ALB and NLB). Delete practice load balancers when you are done.</p></div>
+      <div class="note"><p><b>Often paired with:</b> Route 53 (a friendly domain name pointing at the load balancer), ACM (certificates) and AWS WAF (a web application firewall attached to an ALB).</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Your API needs to send <code>/orders</code> and <code>/payments</code> to different services. Which load balancer?<span class="go">Show answer</span></summary><div class="ans"><p><b>ALB.</b> Path-based routing needs layer 7 (HTTP).</p></div></details>
+      <details><summary>A partner can only allow-list fixed IP addresses. Which load balancer?<span class="go">Show answer</span></summary><div class="ans"><p><b>NLB.</b> It has a static IP per AZ and can use Elastic IPs. ALB gives a DNS name whose IPs change.</p></div></details>
+      <details><summary>An instance's app crashes. What stops users being sent to it?<span class="go">Show answer</span></summary><div class="ans"><p>The load balancer's <b>health check</b> marks it unhealthy and stops routing to it. An Auto Scaling group can then replace it.</p></div></details>
+      <details><summary>How do you stop users bypassing the load balancer and calling the instances directly?<span class="go">Show answer</span></summary><div class="ans"><p>Let the instances' security group allow traffic <b>only from the load balancer's security group</b>.</p></div></details>
+      <details><summary>All traffic must pass through a third-party firewall appliance. Which load balancer?<span class="go">Show answer</span></summary><div class="ans"><p><b>Gateway Load Balancer</b> (layer 3, GENEVE).</p></div></details>
+      <details><summary>Who patches and scales the load balancer itself?<span class="go">Show answer</span></summary><div class="ans"><p><b>AWS.</b> ELB is a managed service; you only configure listeners, rules, target groups and health checks.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Timings in the health-check lab are sped up, and the request counts are illustrative. Sources: ELB and ASG notes "Elastic Load Balancing (ELB) Overview", "Application Load Balancer Hands-On" and "ELB and ASG: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/how-elastic-load-balancing-works.html">How Elastic Load Balancing works</a>; <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/target-group-health-checks.html">ALB health checks</a>; <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/edit-target-group-attributes.html">Target group attributes</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  /* ---------- walkthrough ---------- */
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 300, y: 20, w: 680, h: 385, kind: 'region', label: 'ap-south-1 (Mumbai)' },
+      { id: 'a', x: 560, y: 55, w: 400, h: 160, kind: 'az', label: 'AZ a' }, { id: 'b', x: 560, y: 230, w: 400, h: 160, kind: 'az', label: 'AZ b' }],
+    nodes: {
+      users: { x: 90, y: 210, icon: 'users', kind: 'user', label: 'Patients', sub: 'browser / app' },
+      acm: { x: 410, y: 345, icon: 'lock', kind: 'sec', label: 'ACM', sub: 'certificate' },
+      alb: { x: 410, y: 210, icon: 'lb', kind: 'net', label: 'Application LB', sub: 'one DNS name' },
+      i1: { x: 680, y: 135, icon: 'server', kind: 'compute', label: 'EC2 i-1' },
+      i2: { x: 850, y: 135, icon: 'server', kind: 'compute', label: 'EC2 i-2' },
+      i3: { x: 680, y: 310, icon: 'server', kind: 'compute', label: 'EC2 i-3' },
+      i4: { x: 850, y: 310, icon: 'server', kind: 'compute', label: 'EC2 i-4' }
+    },
+    links: [
+      { a: 'users', b: 'i1', kind: 'pub', via: [[200, 90], [600, 90]] }, { a: 'users', b: 'i3', kind: 'pub', via: [[200, 390], [600, 390]] },
+      { a: 'users', b: 'alb', kind: 'pub', label: 'HTTPS :443', at: [250, 200] },
+      { a: 'alb', b: 'acm', kind: 'dash' },
+      ...['i1', 'i2', 'i3', 'i4'].map(k => ({ a: 'alb', b: k, kind: 'priv' }))
+    ]
+  });
+  const I = ['i1', 'i2', 'i3', 'i4'];
+  function base(i) {
+    net.reset(); net.zones.b.classList.remove('down');
+    const direct = i === 0;
+    net.link('users', 'i1', direct ? '' : 'hide'); net.link('users', 'i3', direct ? '' : 'hide');
+    if (direct) { net.focus(['users', 'i1', 'i3']); net.badge('i1', '203.0.113.10', 'info'); net.badge('i3', '203.0.113.11', 'info'); return; }
+    net.focus(i === 4 ? ['users', 'alb', 'acm', ...I] : ['users', 'alb', ...I]);
+    if (i === 1) net.badge('alb', 'booking-alb…elb.amazonaws.com', 'info');
+    if (i === 2) { net.state('i2', 'down'); net.link('alb', 'i2', 'cut'); net.badge('i2', '2 checks failed', 'bad'); }
+    if (i === 3) { net.state('i2', 'ok'); net.badge('i2', 'healthy again', 'ok'); }
+    if (i === 4) { net.badge('alb', 'HTTPS ends here', 'ok'); I.forEach(k => net.link('alb', k, '')); }
+    if (i === 5) { net.zones.b.classList.add('down'); ['i3', 'i4'].forEach(k => { net.state(k, 'down'); net.link('alb', k, 'cut'); }); net.badge('alb', 'nodes in both AZs', 'info'); }
+    if (i === 6) { I.forEach(k => net.badge(k, 'SG: from ALB only', 'ok')); net.link('users', 'i1', 'cut'); net.focus(['users', 'alb', 'i1', ...I]); }
+    if (i === 7) net.badge('alb', 'ALB · NLB · GWLB', 'info');
+  }
+  const rr = async (run, targets, n, label) => { for (let j = 0; j < n; j++) { const k = targets[j % targets.length]; await net.send(['users', 'alb', k], { run, label }); } };
+  const STEPS = [
+    { title: 'Without a load balancer',
+      text: ['The booking site runs on two instances, each with its own public IP.', 'Patients would need to know both addresses, and nothing spreads the load between them.', 'If one server dies, everyone using its address gets an error.'],
+      play: async run => { base(0); await Promise.all([net.send(['users', 'i1'], { run, label: 'GET' }), net.send(['users', 'i3'], { run, label: 'GET' })]); } },
+    { title: 'One front door',
+      text: ['An <b>Application Load Balancer</b> gets <b>one DNS name</b>. Patients only ever call that name.', 'A <b>listener</b> (for example HTTPS on 443) receives each request and forwards it to a <b>target group</b>: the four instances.', 'Requests are spread across all of them, in both AZs.'],
+      tip: 'One endpoint, load spread across instances = ELB.',
+      play: async run => { base(1); await rr(run, I, 4, 'GET'); } },
+    { title: 'A health check fails',
+      text: ['Every 30 seconds the load balancer calls <code>/health</code> on each instance.', 'The app on <b>i-2</b> has crashed. After <b>2</b> failed checks in a row, i-2 is marked <b>unhealthy</b>.', 'From then on, requests go only to the three healthy instances.'],
+      play: async run => { base(2); await rr(run, ['i1', 'i3', 'i4'], 3, 'GET'); } },
+    { title: 'Back in service',
+      text: ['Someone restarts the app (or an <a href="auto-scaling.html">Auto Scaling group</a> replaces the instance).', 'After <b>5</b> passed checks in a row, i-2 is <b>healthy</b> again and gets traffic.', 'Patients never noticed: they only talk to the load balancer.'],
+      play: async run => { base(3); await rr(run, I, 4, 'GET'); } },
+    { title: 'HTTPS ends at the load balancer',
+      text: ['The load balancer holds the TLS certificate, issued and renewed by <b>AWS Certificate Manager (ACM)</b>.', 'It decrypts the request and forwards it to the instances, so no instance needs its own certificate.', 'This is called <b>SSL/TLS termination</b>.'],
+      play: async run => { base(4); await net.send(['users', 'alb'], { run, label: 'HTTPS', tone: 'green' }); await net.send(['alb', 'i1'], { run, label: 'HTTP' }); } },
+    { title: 'Multi-AZ: an AZ goes down',
+      text: ['The load balancer itself runs in <b>every AZ you enable</b>, so it has no single point of failure.', 'When AZ b fails, its instances fail their health checks and get no more traffic.', 'AZ a carries the load. Together with Auto Scaling, this is <b>high availability</b>.'],
+      tip: 'Load balancer + 2 AZs = survives an AZ failure.',
+      play: async run => { base(5); await rr(run, ['i1', 'i2'], 4, 'GET'); } },
+    { title: 'Lock the back door',
+      text: ['Users should never reach an instance directly.', 'Give the instances a <b>security group</b> that allows port 80 <b>only from the load balancer\'s security group</b>.', 'Now a direct request to an instance\'s IP is dropped.'],
+      play: async run => { base(6); await net.send(['users', 'alb', 'i3'], { run, label: 'via ALB', tone: 'green' }); } },
+    { title: 'Pick the type for the traffic',
+      text: ['<b>ALB</b> reads HTTP, so it can route by path or host name (layer 7).', '<b>NLB</b> forwards TCP and UDP very fast and has a static IP per AZ (layer 4).', '<b>GWLB</b> sends packets through firewall appliances (layer 3). <b>Classic</b> is the previous generation.'] },
+    { title: 'The whole picture',
+      text: ['ELB is <b>managed</b>: one DNS name, load spread across AZs, health checks, HTTPS termination, and instances hidden behind it.', 'The next topic adds the other half: an <a href="auto-scaling.html">Auto Scaling group</a> that adds, removes and replaces the instances.'] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ---------- health-check lab ---------- */
+  const H = { t: 0, timer: null, rr: 0, ok: 0, err: 0, tg: [] };
+  function hcInit() {
+    H.t = 0; H.rr = 0; H.ok = 0; H.err = 0;
+    H.tg = [1, 2, 3, 4].map(n => ({ n, az: n <= 2 ? 'a' : 'b', app: true, healthy: true, fails: 0, passes: 0, served: 0 }));
+  }
+  function hcTick() {
+    H.t += 10;
+    if (H.t % 30 === 0) H.tg.forEach(x => {
+      if (x.app) { x.fails = 0; x.passes++; if (!x.healthy && x.passes >= 5) x.healthy = true; }
+      else { x.passes = 0; x.fails++; if (x.healthy && x.fails >= 2) x.healthy = false; }
+    });
+    const live = H.tg.filter(x => x.healthy);
+    for (let j = 0; j < 8; j++) {
+      if (!live.length) { H.err++; continue; }
+      const x = live[H.rr++ % live.length];
+      if (x.app) { H.ok++; x.served++; } else H.err++;
+    }
+    hcDraw();
+  }
+  function hcDraw() {
+    $('hcTg').innerHTML = H.tg.map((x, i) => {
+      const st = x.healthy ? (x.app ? 'healthy' : 'still in service') : (x.app ? 'recovering' : 'unhealthy');
+      const note = x.healthy ? (x.app ? `${x.served} served` : `failed checks: ${x.fails} of 2`) : (x.app ? `passed checks: ${x.passes} of 5` : 'no traffic');
+      return `<button type="button" class="lb-t ${x.app ? '' : 'crash'} ${x.healthy ? 'in' : 'out'}" data-i="${i}" aria-pressed="${!x.app}">
+        <b>EC2 i-${x.n}</b><span class="az">AZ ${x.az}</span><span class="st">${x.app ? 'app running' : 'app crashed'}</span><span class="lb">LB: ${st}</span><span class="sm">${note}</span></button>`;
+    }).join('');
+    $('hcTg').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { const x = H.tg[+b.dataset.i]; x.app = !x.app; hcDraw(); }));
+    const inSvc = H.tg.filter(x => x.healthy).length;
+    $('hcK').innerHTML = [['Time', H.t + ' s', ''], ['Requests OK', H.ok, 'good'], ['Errors (502)', H.err, H.err ? 'bad' : ''], ['Targets in service', inSvc + ' of 4', inSvc < 4 ? 'accent' : '']]
+      .map(([l, v, c]) => `<div class="${c}"><b>${v}</b><span>${l}</span></div>`).join('');
+    const sick = H.tg.filter(x => !x.app && x.healthy), out = H.tg.filter(x => !x.healthy);
+    let cap;
+    if (!H.timer && H.t === 0) cap = 'Press Start traffic, then click an instance to crash its app.';
+    else if (sick.length) cap = `<span class="bad-text">i-${sick.map(x => x.n).join(', i-')} still gets requests</span>: the load balancer hasn't seen 2 failed checks yet, so some users get errors. This gap is why checks should be frequent and cheap.`;
+    else if (out.length === 4) cap = '<span class="bad-text">No healthy targets.</span> Every request fails. Fix an instance and wait for 5 passed checks.';
+    else if (out.some(x => x.app)) cap = 'Fixed, but not back yet: the instance needs 5 passed checks in a row before it gets traffic again.';
+    else if (out.length) cap = '<span class="ok-text">Errors stopped.</span> The unhealthy instance gets no traffic; the others share the load.';
+    else cap = 'All four instances healthy; requests are spread evenly.';
+    $('hcCap').innerHTML = cap;
+  }
+  function hcStop() { clearInterval(H.timer); H.timer = null; $('hcRun').textContent = 'Start traffic'; }
+  $('hcRun').addEventListener('click', () => {
+    if (H.timer) return hcStop();
+    H.timer = setInterval(hcTick, 700); $('hcRun').textContent = 'Pause traffic'; hcDraw();
+  });
+  $('hcFix').addEventListener('click', () => { H.tg.forEach(x => x.app = true); hcDraw(); });
+  $('hcReset').addEventListener('click', () => { hcStop(); hcInit(); hcDraw(); });
+  hcInit(); hcDraw();
+
+  /* ---------- load balancer picker ---------- */
+  const lb = $('lb');
+  const TYPES = {
+    alb: { t: 'Application LB', s: 'Layer 7 · HTTP/HTTPS/gRPC', x: 140 },
+    nlb: { t: 'Network LB', s: 'Layer 4 · TCP/UDP/TLS', x: 380 },
+    gwlb: { t: 'Gateway LB', s: 'Layer 3 · GENEVE 6081', x: 620 },
+    clb: { t: 'Classic LB', s: 'previous generation', x: 860 }
+  };
+  const lbE = {};
+  for (const k in TYPES) {
+    const o = TYPES[k], gg = K.el('g', { class: 'lbbox' + (k === 'clb' ? ' legacy' : '') }, lb);
+    K.el('rect', { x: o.x - 108, y: 140, width: 216, height: 70, rx: 12 }, gg);
+    K.text(gg, o.x, 170, o.t, ''); K.text(gg, o.x, 192, o.s, 'sm'); lbE[k] = gg;
+  }
+  const lbP = K.el('g', {}, lb);
+  const REQ = [
+    { n: 'Route /api and /images to different services', k: 'alb', why: 'Path-based routing needs to read HTTP: ALB (layer 7). It can also route by host name, header or query string.' },
+    { n: 'Invoke a Lambda function over HTTPS', k: 'alb', why: 'ALB can use Lambda functions as targets.' },
+    { n: 'Partners must allow-list a fixed IP', k: 'nlb', why: 'Only NLB has a static IP (or your Elastic IP) per AZ. ALB gives you a DNS name.' },
+    { n: 'Multiplayer game over UDP, millions of req/s', k: 'nlb', why: 'Non-HTTP traffic, extreme performance, ultra-low latency: NLB (layer 4).' },
+    { n: 'Send all traffic through a third-party firewall', k: 'gwlb', why: 'GWLB deploys and scales inspection appliances (firewalls, IDS/IPS) transparently.' },
+    { n: 'Older app still on the original load balancer', k: 'clb', why: 'Classic LB: previous generation, still supported but not for new designs. Move to ALB or NLB.' }
+  ];
+  $('lbChips').innerHTML = REQ.map((r, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${r.n}</button>`).join('');
+  async function pickLB(r) {
+    const run = K.newRun('lb');
+    lbP.textContent = ''; Object.values(lbE).forEach(e => e.classList.remove('hit'));
+    const p = K.pill(lbP, r.n.length > 30 ? r.n.slice(0, 29) + '…' : r.n);
+    try {
+      await K.move(p, [500, 30], [500, 80], 350, run);
+      await K.move(p, [500, 80], [TYPES[r.k].x, 115], 550, run);
+      p.remove(); lbE[r.k].classList.add('hit');
+      $('lbStatus').innerHTML = `<b>${TYPES[r.k].t}</b>. ${r.why}`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('lbChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('lbChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    pickLB(REQ[+b.dataset.i]);
+  }));
+
+  /* ---------- routing rules ---------- */
+  const RULES = [
+    { p: 1, cond: 'Host is <code>api.clinic.test</code>', test: (h, p) => h === 'api.clinic.test', tg: 'api-tg', what: 'API containers' },
+    { p: 2, cond: 'Path is <code>/images/*</code>', test: (h, p) => p.startsWith('/images/'), tg: 'images-tg', what: 'image service' },
+    { p: 3, cond: 'Path is <code>/reports*</code> and query has <code>format=pdf</code>', test: (h, p) => p.startsWith('/reports') && /[?&]format=pdf\b/.test(p), tg: 'report-lambda', what: 'a Lambda function' },
+    { p: 'default', cond: 'Anything else', test: () => true, tg: 'web-tg', what: 'web servers' }
+  ];
+  const SAMPLES = [['www.clinic.test', '/appointments'], ['www.clinic.test', '/images/logo.png'], ['api.clinic.test', '/images/x.png'], ['www.clinic.test', '/reports/june?format=pdf'], ['www.clinic.test', '/reports/june']];
+  $('rtChips').innerHTML = SAMPLES.map(([h, p], i) => `<button class="chip-btn" type="button" data-i="${i}">${h.split('.')[0]} ${p}</button>`).join('');
+  function route() {
+    const h = $('rtHost').value, p = $('rtPath').value.trim() || '/';
+    const hit = RULES.findIndex(r => r.test(h, p));
+    $('rtRules').innerHTML = `<div class="lb-rule head"><span>Priority</span><span>If</span><span>Forward to</span></div>` + RULES.map((r, i) =>
+      `<div class="lb-rule ${i === hit ? 'hit' : i < hit ? 'miss' : 'skip'}"><span>${r.p}</span><span>${r.cond}</span><span><code>${r.tg}</code></span></div>`).join('');
+    const r = RULES[hit];
+    $('rtStatus').innerHTML = `<b>${r.tg}</b> (${r.what}).` + (hit ? ` Rules ${RULES.slice(0, hit).map(x => x.p).join(', ')} didn't match.` : ' The first rule matched, so the path was never checked.');
+  }
+  $('rtChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { const [h, p] = SAMPLES[+b.dataset.i]; $('rtHost').value = h; $('rtPath').value = p; route(); }));
+  $('rtHost').addEventListener('change', route); $('rtPath').addEventListener('input', route);
+  route();
+})();
+</script>
+</body>
+</html>

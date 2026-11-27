@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>AWS Storage Gateway</title>
+<meta name="description" content="How AWS Storage Gateway lets on-premises servers use S3, Glacier and EBS snapshots through file, volume and tape gateways.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html" aria-current="page"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Amazon S3 / 9 · Domain 3 Technology</p>
+    <h1>AWS Storage Gateway</h1>
+    <ul class="lede">
+      <li><b>Storage Gateway</b> connects on-premises servers to AWS storage: <b>hybrid cloud storage</b>.</li>
+      <li>It runs in your data centre and speaks the protocols your servers already use.</li>
+      <li>Three types: <b>S3 File Gateway</b> (SMB/NFS), <b>Volume Gateway</b> (iSCSI), <b>Tape Gateway</b> (virtual tapes).</li>
+      <li>Data lands in <b>S3</b>, <b>S3 Glacier</b> or as <b>EBS snapshots</b>, with a local cache for speed.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">S3 File Gateway</span><span class="like">A Windows file server whose disk is really S3</span><span>Files written to the share become S3 objects.</span></div>
+      <div class="row"><span class="aws">Volume Gateway</span><span class="like">A SAN LUN mapped over iSCSI</span><span>Backed by S3 with point-in-time EBS snapshots.</span></div>
+      <div class="row"><span class="aws">Tape Gateway</span><span class="like">A tape library for Backup Exec or Veeam</span><span>Virtual tapes, archived in S3 Glacier.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: giving the clinic's old servers cloud storage</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="On-premises file servers, a database server and backup software send data through a Storage Gateway to S3, S3 Glacier and EBS snapshots"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>Storage Gateway = a <b>bridge</b> between on-premises data and AWS storage (hybrid cloud).</li>
+      <li><b>S3 File Gateway</b>: SMB or NFS file shares; files stored as S3 objects.</li>
+      <li><b>Volume Gateway</b>: iSCSI block volumes backed by S3, with EBS snapshots.</li>
+      <li><b>Tape Gateway</b>: a virtual tape library (VTL) for backup software; tapes stored in S3 and S3 Glacier.</li>
+      <li>Runs as a VM on-premises (VMware, Hyper-V, KVM) or as a hardware appliance; keeps a local cache.</li>
+      <li>Use cases: backup and restore, disaster recovery, tiered storage, moving file shares to the cloud.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">Which gateway?</h2>
+    <div class="stage-kind">Match the on-premises need</div>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">On-premises app needs S3 through NFS/SMB</span><span class="arrow">→</span><span class="then">S3 File Gateway</span></li>
+      <li><span class="if">Replace physical tapes</span><span class="arrow">→</span><span class="then">Tape Gateway</span></li>
+      <li><span class="if">iSCSI volumes backed up to AWS</span><span class="arrow">→</span><span class="then">Volume Gateway</span></li>
+      <li><span class="if">Hybrid cloud storage</span><span class="arrow">→</span><span class="then">Storage Gateway</span></li>
+      <li><span class="if">One-off bulk move of data</span><span class="arrow">→</span><span class="then">Not Storage Gateway: DataSync or a Snowball device</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Type</th><th>Your servers see</th><th>Stored in AWS as</th></tr></thead>
+        <tbody>
+          <tr><td><b>S3 File Gateway</b></td><td>SMB / NFS file share</td><td>S3 objects</td></tr>
+          <tr><td><b>Volume Gateway</b></td><td>iSCSI block volume</td><td>S3, with EBS snapshots</td></tr>
+          <tr><td><b>Tape Gateway</b></td><td>Virtual tape library (iSCSI VTL)</td><td>Virtual tapes in S3 and S3 Glacier</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><p><b>Ongoing access vs moving data once.</b> Storage Gateway is for continuous hybrid use. To move a large amount of data once, use AWS DataSync over the network or a physical AWS Snowball device. AWS has announced that Snowball devices will no longer be supported in commercial Regions after 31 December 2026.</p></div>
+      <div class="note"><p><b>FSx File Gateway</b> gives on-premises low-latency access to Amazon FSx for Windows File Server shares.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Backup software writes to tapes. How do you move those backups to AWS without changing the software?<span class="go">Show answer</span></summary><div class="ans"><p><b>Tape Gateway</b>.</p></div></details>
+      <details><summary>An on-premises app must store files in S3 using NFS.<span class="go">Show answer</span></summary><div class="ans"><p><b>S3 File Gateway</b>.</p></div></details>
+      <details><summary>Where does Storage Gateway run?<span class="go">Show answer</span></summary><div class="ans"><p>In your <b>data centre</b>, as a VM or hardware appliance.</p></div></details>
+      <details><summary>Which gateway offers iSCSI block storage?<span class="go">Show answer</span></summary><div class="ans"><p><b>Volume Gateway</b>.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: S3 notes "AWS Storage Gateway: Bridging On-Premises and the Cloud" and "Amazon S3: CLF-C02 Exam Summary"; <a href="https://aws.amazon.com/storagegateway/">AWS Storage Gateway</a>; <a href="https://aws.amazon.com/snowball/">AWS Snowball</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'dc', x: 20, y: 20, w: 400, h: 385, kind: 'onprem', label: 'Clinic data centre' }, { id: 'reg', x: 560, y: 20, w: 420, h: 385, kind: 'region', label: 'ap-south-1' }],
+    nodes: {
+      fs: { x: 110, y: 90, icon: 'server', kind: 'compute', label: 'Windows servers', sub: 'SMB / NFS' },
+      db: { x: 110, y: 215, icon: 'db', kind: 'db', label: 'SQL server', sub: 'iSCSI volume' },
+      bk: { x: 110, y: 340, icon: 'archive', kind: 'compute', label: 'Backup software', sub: 'virtual tapes' },
+      gw: { x: 320, y: 215, icon: 'router', kind: 'net', label: 'Storage Gateway', sub: 'VM or appliance' },
+      s3: { x: 700, y: 90, icon: 'bucket', kind: 'storage', label: 'Amazon S3' },
+      ebs: { x: 880, y: 215, icon: 'disk', kind: 'storage', label: 'EBS snapshots' },
+      gl: { x: 700, y: 340, icon: 'archive', kind: 'storage', label: 'S3 Glacier', sub: 'tape archive' }
+    },
+    links: [{ a: 'fs', b: 'gw' }, { a: 'db', b: 'gw' }, { a: 'bk', b: 'gw' }, { a: 'gw', b: 's3', kind: 'priv', label: 'HTTPS', at: [470, 140] }, { a: 's3', b: 'ebs', kind: 'dash' }, { a: 'gw', b: 'gl', kind: 'priv' }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['fs', 'db', 'bk', 's3'], ['fs', 'db', 'bk', 'gw', 's3', 'gl', 'ebs'], ['fs', 'gw', 's3'], ['db', 'gw', 's3', 'ebs'], ['bk', 'gw', 'gl', 's3'], ['gw'], null];
+    net.focus(F[i]);
+    if (i === 0) net.badge('s3', 'cheap, durable', 'ok');
+    if (i === 2) { net.badge('gw', 'S3 File Gateway', 'info'); net.badge('fs', '\\\\gw\\scans', 'info'); }
+    if (i === 3) { net.badge('gw', 'Volume Gateway', 'info'); }
+    if (i === 4) { net.badge('gw', 'Tape Gateway', 'info'); }
+    if (i === 5) net.badge('gw', 'local cache', 'ok');
+  }
+  const STEPS = [
+    { title: "Old apps, new storage",
+      text: ["The clinic's servers speak <b>file shares</b> (SMB/NFS), <b>block volumes</b> (iSCSI) and <b>tape</b>. None of them can call the S3 API.", "Yet S3 would be far cheaper and more durable than buying more disks and tapes."] },
+    { title: "A gateway in between",
+      text: ["<b>AWS Storage Gateway</b> runs in your data centre as a virtual machine (or a hardware appliance).", "Servers talk to it with the protocols they already use; it stores the data in AWS (S3, S3 Glacier, EBS snapshots).", "This is <b>hybrid cloud storage</b>."],
+      tip: "On-premises apps + AWS storage = Storage Gateway." },
+    { title: "S3 File Gateway",
+      text: ["Servers mount an <b>SMB or NFS share</b>. Each file they write becomes an <b>object in S3</b>.", "Good for moving file shares, backups and archives to S3 without changing the apps."],
+      play: async run => { base(2); await net.send(['fs', 'gw', 's3'], { run, label: 'scan.png' }); } },
+    { title: "Volume Gateway",
+      text: ["Servers see an <b>iSCSI block volume</b>, like a SAN disk.", "Data is stored in S3 and you can take <b>EBS snapshots</b> of it, for backup or to restore into EC2."],
+      play: async run => { base(3); await net.send(['db', 'gw', 's3'], { run, label: 'blocks' }); } },
+    { title: "Tape Gateway",
+      text: ["Backup software sees a <b>virtual tape library</b>, so existing tape backup jobs keep working.", "Virtual tapes are stored in S3 and archived to <b>S3 Glacier</b> classes. No physical tapes."],
+      play: async run => { base(4); await net.send(['bk', 'gw', 'gl'], { run, label: 'tape' }); } },
+    { title: "Fast local access",
+      text: ["The gateway keeps a <b>local cache</b> of recently used data, so reads stay fast on the local network.", "Uses: backup and DR, moving data to the cloud gradually, tiering old data, shared files across sites."] },
+    { title: "The whole picture",
+      text: ["File \u2192 <b>S3 File Gateway</b> (SMB/NFS to S3). Block \u2192 <b>Volume Gateway</b> (iSCSI, EBS snapshots). Tape \u2192 <b>Tape Gateway</b> (VTL to S3 Glacier)."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  K.pick($('pick'), [
+    { q: 'On-premises servers must save files to S3 through an SMB share.', a: 'S3 File Gateway', why: 'SMB/NFS files become S3 objects.' },
+    { q: 'Existing backup software writes to tapes; replace the tapes with AWS.', a: 'Tape Gateway', why: 'Virtual tape library backed by S3 and Glacier.' },
+    { q: 'An on-premises server needs iSCSI disks backed up to AWS as EBS snapshots.', a: 'Volume Gateway', why: 'Block storage over iSCSI.' },
+    { q: 'Linux servers mount an NFS share whose data should end up in S3.', a: 'S3 File Gateway', why: 'NFS is supported too.' },
+    { q: 'Archive years of backups to S3 Glacier without changing the backup jobs.', a: 'Tape Gateway', why: 'Jobs keep writing "tapes".' }
+  ], ['S3 File Gateway', 'Volume Gateway', 'Tape Gateway']);
+
+})();
+</script>
+</body>
+</html>

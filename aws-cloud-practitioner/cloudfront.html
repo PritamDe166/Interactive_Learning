@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>Amazon CloudFront</title>
+<meta name="description" content="Amazon CloudFront CDN: caching at edge locations, cache hits and misses, S3 and ALB origins, Shield and WAF protection, and CloudFront vs S3 replication, with an edge lab.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+  .usr circle { fill: var(--accent-text); }
+  .usr text, .rg text { fill: var(--fg); font-size: 12.5px; font-weight: 600; text-anchor: middle; }
+  .rg rect { fill: var(--panel); stroke: var(--teal); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .rg .sm { fill: var(--muted); font-family: var(--mono); font-size: 12px; font-weight: 400; }
+  .rg.down rect { stroke: var(--red); fill: var(--panel-2); }
+  .rg.hit rect { fill: var(--teal-wash); }
+  .route { fill: none; stroke-width: 2.5; stroke: var(--cyan); opacity: .8; }
+  .route.alt { stroke: var(--accent-text); }
+  .route.bad { stroke: var(--red); stroke-dasharray: 5 4; }
+  .net-pub { fill: none; stroke: var(--muted); stroke-width: 2; stroke-dasharray: 3 5; }
+  .net-aws { fill: none; stroke: var(--teal); stroke-width: 4; opacity: .7; }
+  .svc rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .svc text { fill: var(--fg); font-size: 13px; font-weight: 700; text-anchor: middle; }
+  .svc .sm { fill: var(--muted); font-family: var(--mono); font-size: 12px; font-weight: 400; }
+  .svc.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .svc.fade text { opacity: .45; }
+  .udot { fill: var(--accent-text); }
+  .netpub { stroke: var(--muted); stroke-width: 2; stroke-dasharray: 3 5; }
+  .netaws { stroke: var(--teal); stroke-width: 4; }
+  .ms { fill: var(--accent-text); font-family: var(--mono); font-size: 12px; font-weight: 700; text-anchor: middle; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html" aria-current="page"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Global infrastructure / 3 · Domain 3 Technology</p>
+    <h1>Amazon CloudFront</h1>
+    <ul class="lede">
+      <li><b>CloudFront</b> is AWS's <b>content delivery network (CDN)</b>.</li>
+      <li>It <b>caches</b> content at <b>edge locations</b> near users, so repeat requests are fast.</li>
+      <li>Origins: S3 (private with OAC), ALB/EC2, any HTTP server.</li>
+      <li>Built-in DDoS protection (Shield Standard) and optional WAF.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">CloudFront</span><span class="like">Akamai or Azure Front Door/CDN in front of your IIS site</span><span>Integrated with S3, ALB, Shield and WAF.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: serving scans to Sydney from Mumbai</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="Sydney users request content from a CloudFront edge location that fetches it once from an S3 or ALB origin in Mumbai and then serves it from cache"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>CloudFront = CDN: improves read performance by <b>caching</b> at edge locations.</li>
+      <li>Hundreds of edge locations worldwide.</li>
+      <li>Origins: <b>S3</b> (with origin access control), <b>ALB, EC2</b>, any HTTP backend.</li>
+      <li>DDoS protection with <b>Shield</b>; can attach <b>WAF</b>.</li>
+      <li>Great for static content; also accelerates dynamic content.</li>
+      <li>Different from S3 CRR: cache with TTL at many edges vs full copy in one Region.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="edgeH">
+    <h2 class="stage-title" id="edgeH">A user in Sydney, an app in Mumbai</h2>
+    <div class="card">
+    <div class="seg" id="modeSeg" role="group" aria-label="Delivery">
+      <button type="button" data-v="direct" aria-pressed="false">Public internet only</button>
+      <button type="button" data-v="cf" aria-pressed="true">CloudFront</button>
+      <button type="button" data-v="ga" aria-pressed="false">Global Accelerator</button>
+      <button type="button" data-v="ta" aria-pressed="false">S3 Transfer Acceleration</button>
+    </div>
+    <div class="controls" style="margin-top:10px"><button class="btn primary" type="button" id="send">Send request 1, then request 2</button></div>
+    <div class="scroll">
+      <svg class="diagram" id="edge" viewBox="0 0 1000 260" aria-label="Sydney user, Sydney edge location, and Mumbai origin"></svg>
+    </div>
+    <p class="status-line" id="edgeStatus">Times are illustrative; the pattern is what matters.</p>
+
+    </div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Cache content near users worldwide</span><span class="arrow">→</span><span class="then">CloudFront</span></li>
+      <li><span class="if">HTTPS for an S3 website</span><span class="arrow">→</span><span class="then">CloudFront</span></li>
+      <li><span class="if">Keep S3 private behind the CDN</span><span class="arrow">→</span><span class="then">Origin access control</span></li>
+      <li><span class="if">Copy a whole bucket to another Region</span><span class="arrow">→</span><span class="then">S3 CRR, not CloudFront</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>CloudFront</th><th>S3 Cross-Region Replication</th></tr></thead>
+        <tbody>
+          <tr><td><b>What</b></td><td>Cache at edge locations</td><td>Full copy in another Region</td></tr>
+          <tr><td><b>Where</b></td><td>Hundreds of edge locations</td><td>One chosen Region</td></tr>
+          <tr><td><b>Freshness</b></td><td>Cached for a TTL</td><td>Near real-time copy</td></tr>
+          <tr><td><b>Best for</b></td><td>Static content worldwide</td><td>Low latency in a few Regions, DR, compliance</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Which service caches content at edge locations?<span class="go">Show answer</span></summary><div class="ans"><p><b>CloudFront</b>.</p></div></details>
+      <details><summary>How can an S3 origin stay private?<span class="go">Show answer</span></summary><div class="ans"><p>Origin access control (OAC): only CloudFront may read it.</p></div></details>
+      <details><summary>CloudFront or CRR to copy a bucket to Frankfurt?<span class="go">Show answer</span></summary><div class="ans"><p><b>CRR.</b></p></div></details>
+    </div>
+  </section>
+
+  <footer>Times in the lab are illustrative. Sources: global notes "Amazon CloudFront: Global Content Delivery with Edge Caching" and "CloudFront Hands-On"; <a href="https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html">What is CloudFront?</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'm', x: 680, y: 40, w: 300, h: 360, kind: 'region', label: 'Mumbai (origin)' }],
+    nodes: {
+      u1: { x: 80, y: 90, icon: 'laptop', kind: 'user', label: 'Sydney user 1' },
+      u2: { x: 80, y: 320, icon: 'laptop', kind: 'user', label: 'Sydney user 2' },
+      ed: { x: 360, y: 210, icon: 'edge', kind: 'net', label: 'Edge location', sub: 'Sydney' },
+      s3: { x: 830, y: 120, icon: 'bucket', kind: 'storage', label: 'S3 bucket', sub: 'private + OAC' },
+      alb: { x: 830, y: 310, icon: 'lb', kind: 'net', label: 'ALB / EC2', sub: 'dynamic content' },
+      waf: { x: 360, y: 370, icon: 'shield', kind: 'sec', label: 'Shield + WAF' }
+    },
+    links: [{ a: 'u1', b: 'ed' }, { a: 'u2', b: 'ed' }, { a: 'ed', b: 's3', kind: 'priv' }, { a: 'ed', b: 'alb', kind: 'priv' }, { a: 'waf', b: 'ed', kind: 'dash' }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['u1', 'ed', 's3'], ['u2', 'ed'], ['ed', 's3', 'alb'], ['ed', 'waf'], null];
+    net.focus(F[i]);
+    if (i === 0) net.badge('ed', 'MISS', 'info');
+    if (i === 1) net.badge('ed', 'HIT · ~20 ms', 'ok');
+    if (i === 2) net.badge('s3', 'only CloudFront can read', 'ok');
+    if (i === 3) net.badge('waf', 'DDoS + filtering', 'ok');
+  }
+  const STEPS = [
+    { title: "First request: a miss",
+      text: ["<b>CloudFront</b> is AWS's <b>CDN</b>. A user in Sydney asks for a scan image. The nearest <b>edge location</b> doesn't have it yet, so it fetches it from the <b>origin</b> in Mumbai over the AWS network.", "It keeps a copy for the time-to-live (TTL)."],
+      play: async run => { base(0); await net.send(['u1', 'ed', 's3'], { run, label: 'GET scan.png' }); await net.send(['s3', 'ed', 'u1'], { run, tone: 'green' }); } },
+    { title: "Next requests: a hit",
+      text: ["The next Sydney user gets the cached copy straight from the edge, in milliseconds, and the origin does no work."],
+      tip: "Cache content near users worldwide = CloudFront.",
+      play: async run => { base(1); await net.send(['u2', 'ed'], { run, label: 'GET' }); await net.send(['ed', 'u2'], { run, label: 'HIT', tone: 'green' }); } },
+    { title: "Origins",
+      text: ["Origins can be an <b>S3 bucket</b> (kept private with origin access control), an <b>ALB or EC2</b> app, or any HTTP server, even on-premises.", "It serves static and dynamic content, over HTTPS."] },
+    { title: "Protection at the edge",
+      text: ["CloudFront includes <b>AWS Shield Standard</b> against DDoS attacks and can attach <b>AWS WAF</b> rules. Attack traffic is absorbed far from your servers."] },
+    { title: "CloudFront vs S3 replication",
+      text: ["CloudFront <b>caches</b> popular content at hundreds of edge locations for a while. S3 <b>Cross-Region Replication</b> copies a whole bucket to one other Region, permanently.", "Use CloudFront for fast reads worldwide; CRR for a full copy in a specific Region."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+  /* ========== 2. Edge ========== */
+  const ed = $('edge');
+  const user = K.node(ed, 90, 130, 140, 54, 'Sydney user', 'browser');
+  const edge = K.node(ed, 330, 130, 170, 54, 'Edge location', 'Sydney');
+  const origin = K.node(ed, 880, 130, 170, 54, 'Origin', 'Mumbai · ALB / S3');
+  const netG = K.el('g', {}, ed);
+  const eP = K.el('g', {}, ed);
+  const msT = K.text(ed, 500, 235, '', 'ms');
+  let mode = 'direct';
+  const PUB = 'M160 130 L 250 70 L 360 210 L 470 60 L 580 205 L 690 70 L 795 130';
+  function drawNet() {
+    netG.textContent = '';
+    edge.g.setAttribute('class', 'node' + (mode === 'direct' ? ' dim' : ' teal'));
+    if (mode === 'direct') K.el('path', { d: PUB, class: 'net-pub' }, netG);
+    else { K.el('line', { x1: 160, y1: 130, x2: 245, y2: 130, class: 'net-pub' }, netG); K.el('line', { x1: 415, y1: 130, x2: 795, y2: 130, class: 'net-aws' }, netG); K.text(netG, 600, 118, 'AWS private global network', 'mlabel ok').style.textAnchor = 'middle'; }
+    if (mode === 'direct') K.text(netG, 480, 30, 'many public internet hops', 'mlabel muted').style.textAnchor = 'middle';
+    origin.sub.textContent = mode === 'ta' ? 'Mumbai · S3 bucket' : 'Mumbai · ALB / S3';
+    user.sub.textContent = mode === 'ga' ? 'connects to 2 static anycast IPs' : mode === 'ta' ? 'uploading 2 GB of scans' : 'browser';
+    msT.textContent = '';
+  }
+  const INFO = {
+    direct: 'Every request crosses the public internet the whole way: many hops, variable latency, nothing cached.',
+    cf: 'CloudFront: first request misses and fetches from the origin over AWS\'s network; the edge keeps a copy, so request 2 is served from Sydney.',
+    ga: 'Global Accelerator: no cache, so both requests reach Mumbai, but they ride AWS\'s network from the nearest edge. Works for any TCP/UDP app, with static IPs and fast failover.',
+    ta: 'Transfer Acceleration: the upload goes to the nearest edge, then over AWS\'s network into the bucket. Only for S3, and it helps most over long distances.'
+  };
+  async function sendReq() {
+    const run = K.newRun('edge');
+    eP.textContent = ''; edge.g.classList.remove('ok'); msT.textContent = '';
+    const times = [];
+    try {
+      for (let i = 1; i <= 2; i++) {
+        const label = mode === 'ta' ? `upload ${i}` : `GET /scan.png #${i}`;
+        const p = K.pill(eP, label);
+        let t;
+        if (mode === 'direct') {
+          await K.move(p, [160, 100], [795, 100], 1300, run); p.remove();
+          t = 320 + Math.round(Math.random() * 90);
+        } else {
+          await K.move(p, [160, 100], [330, 100], 350, run);
+          if (mode === 'cf' && i === 2) { p.remove(); edge.g.classList.add('ok'); t = 18 + Math.round(Math.random() * 8); }
+          else { await K.move(p, [330, 100], [795, 100], 650, run); p.remove(); t = mode === 'cf' ? 210 : mode === 'ga' ? 205 + Math.round(Math.random() * 20) : 215; if (mode === 'cf') { edge.sub.textContent = 'Sydney · cached'; } }
+        }
+        const back = K.pill(eP, mode === 'ta' ? 'stored ✓' : mode === 'cf' && i === 2 ? 'HIT' : '200 OK', 'ok');
+        const from = mode === 'cf' && i === 2 ? 330 : 795;
+        await K.move(back, [from, 160], [160, 160], mode === 'direct' ? 1100 : from === 330 ? 300 : 800, run); back.remove();
+        times.push(t);
+        msT.textContent = mode === 'ta' ? times.map((x, j) => `upload ${j + 1}: ${Math.round(x / 5)} s (≈ ${Math.round(x / 5 * 1.5)} s without acceleration)`).join('   ·   ') : times.map((x, j) => `request ${j + 1}: ${x} ms`).join('   ·   ');
+      }
+      $('edgeStatus').textContent = INFO[mode];
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  K.seg($('modeSeg'), v => { mode = v; K.cancel('edge'); eP.textContent = ''; edge.sub.textContent = 'Sydney'; drawNet(); $('edgeStatus').textContent = INFO[v]; });
+  $('send').addEventListener('click', sendReq);
+  drawNet();
+
+  mode = 'cf'; drawNet(); $('edgeStatus').textContent = INFO[mode];
+
+})();
+</script>
+</body>
+</html>

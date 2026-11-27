@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>Amazon ECS, Fargate &amp; ECR</title>
+<meta name="description" content="Amazon ECS runs containers on AWS, Fargate removes the servers, and ECR stores the images: launch types, load balancing, pricing, with a who-manages-what lab.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+  .layer rect { stroke-width: 2; transition: fill .35s, stroke .35s; }
+  .layer.aws rect { fill: var(--teal-wash); stroke: var(--teal); }
+  .layer.you rect { fill: var(--panel); stroke: var(--accent-text); }
+  .layer text { fill: var(--fg); font-size: 14px; font-weight: 600; }
+  .layer .who { font-family: var(--mono); font-size: 11px; font-weight: 400; text-anchor: end; }
+  .layer.aws .who { fill: var(--good-text); }
+  .layer.you .who { fill: var(--accent-text); }
+  .env rect { fill: var(--panel-2); stroke: var(--line); stroke-width: 2; transition: fill .25s, stroke .25s, opacity .3s; }
+  .env.busy rect { fill: var(--teal-wash); stroke: var(--cyan); }
+  .env.cold rect { stroke: var(--yellow); }
+  .env text { fill: var(--fg); font-family: var(--mono); font-size: 12px; text-anchor: middle; }
+  .svc rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .svc text { fill: var(--fg); font-size: 13px; font-weight: 700; text-anchor: middle; }
+  .svc .sm { fill: var(--muted); font-family: var(--mono); font-size: 12px; font-weight: 400; }
+  .svc.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .svc.fade text { opacity: .45; }
+  .hostbox { fill: var(--panel); stroke: var(--accent-text); stroke-width: 1.5; stroke-dasharray: 6 4; }
+  .oslayer { fill: var(--panel-2); stroke: var(--accent-text); }
+  .ctr { fill: var(--teal-wash); stroke: var(--teal); stroke-width: 2; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html" aria-current="page"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Other compute / 2 · Domain 3 Technology</p>
+    <h1>Amazon ECS, Fargate &amp; ECR</h1>
+    <ul class="lede">
+      <li><b>ECR</b> stores your container images.</li>
+      <li><b>ECS</b> runs containers on AWS: with the <b>EC2 launch type</b> you provide and patch the instances.</li>
+      <li><b>Fargate</b> runs the same containers <b>serverless</b>: you only set CPU and memory.</li>
+      <li>ECS integrates with the Application Load Balancer.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">ECS</span><span class="like">A scheduler that decides which server in your farm runs which app, and restarts crashed ones</span><span>Managed by AWS; you describe tasks and services.</span></div>
+      <div class="row"><span class="aws">Fargate</span><span class="like">Azure-style "just run my container" without a VM</span><span>No hosts to see at all.</span></div>
+      <div class="row"><span class="aws">ECR</span><span class="like">A private Docker registry, like a private NuGet feed for images</span><span>Integrated with IAM and scanning.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: running the clinic API in containers</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="Images pushed to ECR are pulled by ECS tasks on EC2 hosts behind an ALB, and by a Fargate task with no hosts"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li><b>ECR</b> = Elastic Container Registry: stores Docker/container images.</li>
+      <li><b>ECS</b> = Elastic Container Service: AWS's container orchestrator; tasks and services; ALB integration.</li>
+      <li>ECS <b>EC2 launch type</b>: you provision and maintain the EC2 instances.</li>
+      <li><b>Fargate</b>: serverless compute for containers; set CPU and RAM per task; works with ECS and EKS.</li>
+      <li>Pricing: ECS on EC2 = instances; Fargate = vCPU and memory per second.</li>
+      <li>Shared responsibility: with Fargate AWS manages the servers and OS; with EC2 launch type you do.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="stackH">
+    <h2 class="stage-title" id="stackH">Who manages what?</h2>
+    <div class="stage-kind">Move from EC2 to Lambda · the line slides up</div>
+    <div class="card">
+      <div class="seg" id="stackSeg" role="group" aria-label="Compute option">
+        <button type="button" data-v="ec2" aria-pressed="false">EC2</button>
+        <button type="button" data-v="ecs" aria-pressed="true">ECS on EC2</button>
+        <button type="button" data-v="far" aria-pressed="false">ECS/EKS on Fargate</button>
+        <button type="button" data-v="lam" aria-pressed="false">Lambda</button>
+      </div>
+      <div class="scroll"><svg class="diagram narrow" id="stack" viewBox="0 0 1000 380" aria-label="Seven layers from hardware to your code, coloured by who manages them"></svg></div>
+      <p class="status-line" id="stackStatus"></p>
+    </div>
+  </section>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">ECS, Fargate or ECR?</h2>
+    <div class="stage-kind">Pick the service</div>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Run a container on Fargate (outline)</summary>
+      <ol>
+        <li>ECR → <b>Create repository</b>, then push an image with the commands the console shows (or use a public image such as <code>nginx</code>).</li>
+        <li>ECS → <b>Create cluster</b> (Fargate only).</li>
+        <li><b>Task definitions</b> → Create: launch type Fargate, 0.5 vCPU, 1 GB, container image and port 80.</li>
+        <li>Cluster → <b>Services</b> → Create: 2 tasks, optionally behind a new Application Load Balancer.</li>
+        <li>Open the load balancer DNS name; then set desired tasks to 0 and delete the service and cluster.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Run Docker containers on AWS</span><span class="arrow">→</span><span class="then">ECS</span></li>
+      <li><span class="if">Containers without managing servers</span><span class="arrow">→</span><span class="then">Fargate</span></li>
+      <li><span class="if">Store container images</span><span class="arrow">→</span><span class="then">ECR</span></li>
+      <li><span class="if">Least operational overhead for containers</span><span class="arrow">→</span><span class="then">Fargate</span></li>
+      <li><span class="if">Who patches ECS EC2 hosts?</span><span class="arrow">→</span><span class="then">You</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>ECS on EC2</th><th>ECS on Fargate</th><th>ECR</th></tr></thead>
+        <tbody>
+          <tr><td><b>What</b></td><td>Orchestrator + your instances</td><td>Orchestrator + serverless compute</td><td>Image registry</td></tr>
+          <tr><td><b>Servers</b></td><td>You manage</td><td>AWS manages</td><td>n/a</td></tr>
+          <tr><td><b>Serverless</b></td><td>No</td><td>Yes</td><td>n/a</td></tr>
+          <tr><td><b>You pay for</b></td><td>EC2 instances</td><td>vCPU + memory per second</td><td>Storage + transfer</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><p><b>Other ECS options.</b> ECS Managed Instances (AWS manages the EC2 instances for you) and ECS Anywhere (your own on-premises servers) also exist; the exam focuses on EC2 vs Fargate.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Which service stores container images?<span class="go">Show answer</span></summary><div class="ans"><p><b>Amazon ECR</b>.</p></div></details>
+      <details><summary>With the ECS EC2 launch type, who patches the instances?<span class="go">Show answer</span></summary><div class="ans"><p><b>You.</b></p></div></details>
+      <details><summary>Containers with no servers to manage?<span class="go">Show answer</span></summary><div class="ans"><p><b>Fargate</b>.</p></div></details>
+      <details><summary>Does Fargate work with EKS?<span class="go">Show answer</span></summary><div class="ans"><p><b>Yes</b>, with both ECS and EKS.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: compute notes "Amazon ECS, Fargate and ECR" and "Other Compute Services: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html">What is Amazon ECS?</a>; <a href="https://aws.amazon.com/fargate/">AWS Fargate</a>; <a href="https://aws.amazon.com/ecr/">Amazon ECR</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 20, y: 20, w: 960, h: 385, kind: 'region', label: 'ap-south-1' }, { id: 'cl', x: 410, y: 85, w: 550, h: 305, kind: 'aws', label: 'ECS cluster' }],
+    nodes: {
+      dev: { x: 100, y: 90, icon: 'code', kind: 'user', label: 'CI / developer' },
+      ecr: { x: 100, y: 320, icon: 'archive', kind: 'storage', label: 'Amazon ECR', sub: 'clinic-api:1.4' },
+      alb: { x: 290, y: 150, icon: 'lb', kind: 'net', label: 'ALB' },
+      h1: { x: 500, y: 160, icon: 'server', kind: 'compute', label: 'EC2 host', sub: 'you patch' },
+      h2: { x: 500, y: 310, icon: 'server', kind: 'compute', label: 'EC2 host', sub: 'you patch' },
+      t1: { x: 660, y: 160, icon: 'box', kind: 'compute', label: 'Task', sub: 'api container' },
+      t2: { x: 660, y: 310, icon: 'box', kind: 'compute', label: 'Task', sub: 'api container' },
+      f1: { x: 870, y: 235, icon: 'box', kind: 'compute', label: 'Fargate task', sub: '0.5 vCPU · 1 GB' }
+    },
+    links: [{ a: 'dev', b: 'ecr', label: 'push', at: [120, 205] }, { a: 'ecr', b: 'h1', kind: 'dash' }, { a: 'ecr', b: 'h2', kind: 'dash' }, { a: 'alb', b: 't1', via: [[290, 62], [660, 62]] }, { a: 'alb', b: 't2', via: [[380, 150], [380, 395], [660, 395]] }, { a: 'h1', b: 't1', kind: 'priv' }, { a: 'h2', b: 't2', kind: 'priv' }, { a: 'alb', b: 'f1', via: [[290, 40], [870, 40]] }, { a: 'ecr', b: 'f1', kind: 'dash', via: [[230, 380], [870, 380]] }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['dev', 'ecr'], ['ecr', 'h1', 'h2', 't1', 't2'], ['h1', 'h2', 't1', 't2'], ['alb', 't1', 't2', 'h1', 'h2'], ['ecr', 'alb', 'f1'], ['ecr', 'alb', 'f1'], null];
+    net.focus(F[i]);
+    if (i === 0) net.badge('ecr', 'private registry', 'info');
+    if (i === 2) { net.badge('h1', 'yours to size + patch', 'bad'); net.badge('t2', 'restarted if it fails', 'ok'); }
+    if (i === 4) net.badge('f1', 'no hosts', 'ok');
+    if (i === 5) net.badge('f1', 'pay vCPU + GB per second', 'info');
+  }
+  const STEPS = [
+    { title: "Images in ECR",
+      text: ["The build pipeline pushes the API's container image to <b>Amazon ECR</b> (Elastic Container Registry), a private registry in your account.", "ECS, EKS, Fargate and Lambda can all pull images from it."],
+      tip: "Store container images = ECR.",
+      play: async run => { base(0); await net.send(['dev', 'ecr'], { run, label: 'docker push' }); } },
+    { title: "ECS runs the containers",
+      text: ["<b>Amazon ECS</b> (Elastic Container Service) is AWS's own container orchestrator. You describe a <b>task</b> (image, CPU, memory, ports) and how many to run.", "ECS places tasks on the cluster, starts and stops them, and restarts failed ones."],
+      tip: "Run Docker containers on AWS = ECS.",
+      play: async run => { base(1); await Promise.all([net.send(['ecr', 'h1'], { run, tone: 'cyan', label: 'pull' }), net.send(['ecr', 'h2'], { run, tone: 'cyan', label: 'pull' })]); } },
+    { title: "EC2 launch type: your instances",
+      text: ["With the <b>EC2 launch type</b>, the cluster is made of EC2 instances that <b>you</b> provision, size, patch and scale.", "AWS handles where containers go; you still own the servers."] },
+    { title: "Load balancing",
+      text: ["ECS registers each task with an <b>Application Load Balancer</b>, so traffic is spread across containers and failed ones are replaced."],
+      play: async run => { base(3); await net.send(['alb', 't1'], { run, label: 'GET' }); await net.send(['alb', 't2'], { run, label: 'GET' }); } },
+    { title: "Fargate: no servers to manage",
+      text: ["With <b>AWS Fargate</b> you run the same tasks with <b>no EC2 instances at all</b>. You only set CPU and memory per task.", "AWS provides and patches the underlying servers. Fargate works with ECS and EKS."],
+      tip: "Containers without managing servers = Fargate.",
+      play: async run => { base(4); await net.send(['ecr', 'f1'], { run, tone: 'cyan', label: 'pull' }); await net.send(['alb', 'f1'], { run, label: 'GET' }); } },
+    { title: "Paying",
+      text: ["ECS on EC2: you pay for the instances (ECS itself adds no charge). Fargate: you pay for the vCPU and memory your tasks request, per second, with no idle servers.", "\"Least operational overhead\" for containers points to <b>Fargate</b>."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+  /* ========== 1. Stack ========== */
+  const LAYERS = ['Your code / function', 'Scaling & capacity', 'Container runtime & orchestration', 'Operating system & patches', 'Server instances (EC2)', 'Virtualisation', 'Physical hardware & data centre'];
+  const YOU = { ec2: 5, ecs: 4, far: 1, lam: 1 }; // how many top layers you manage (ECS: AWS runs the orchestrator, you run instances)
+  const MSG = {
+    ec2: 'EC2: you manage everything from the OS up, including installing a container runtime if you want one, and set up Auto Scaling yourself.',
+    ecs: 'ECS on EC2: AWS runs the orchestrator (placing, starting, stopping containers), but you still provision, patch and scale the EC2 instances.',
+    far: 'Fargate: you define the container image, CPU and memory. AWS runs the servers, OS and capacity. Serverless containers.',
+    lam: 'Lambda: you write the function and set memory. AWS handles everything else, including scaling each request and scaling to zero.'
+  };
+  const st = $('stack');
+  const lEls = LAYERS.map((n, i) => {
+    const y = 20 + i * 50;
+    const g = K.el('g', { class: 'layer aws' }, st);
+    K.el('rect', { x: 150, y, width: 700, height: 42, rx: 10 }, g);
+    K.text(g, 170, y + 27, n, '');
+    const who = K.text(g, 830, y + 27, '', 'who');
+    return { g, who };
+  });
+  function paintStack(v) {
+    const you = YOU[v];
+    lEls.forEach((l, i) => {
+      let mine;
+      if (v === 'ecs') mine = i === 0 || i === 1 || i === 3 || i === 4; // code, scaling, OS, instances; orchestration by AWS
+      else mine = i < you;
+      if (v === 'ec2') mine = i <= 4;
+      if (v === 'far' || v === 'lam') mine = i === 0;
+      l.g.setAttribute('class', 'layer ' + (mine ? 'you' : 'aws'));
+      l.who.textContent = mine ? 'YOU' : 'AWS';
+    });
+    if (v === 'far') lEls[1].who.textContent = 'AWS (you set CPU/RAM)';
+    if (v === 'lam') { lEls[1].who.textContent = 'AWS (you set memory)'; lEls[2].who.textContent = 'AWS (no containers to see)'; }
+    if (v === 'ec2') lEls[2].who.textContent = 'YOU (if any)';
+    $('stackStatus').textContent = MSG[v];
+  }
+  K.seg($('stackSeg'), paintStack); paintStack('ecs');
+
+
+  K.pick($('pick'), [
+    { q: 'Run Docker containers on AWS; the team is happy to manage EC2 instances.', a: 'ECS (EC2 launch type)', why: 'AWS orchestrates; you own the instances.' },
+    { q: 'Run containers with the least operational overhead.', a: 'Fargate', why: 'No servers to provision or patch.' },
+    { q: 'Store private Docker images.', a: 'ECR', why: 'Container registry.' },
+    { q: 'Serverless containers with set CPU and memory per task.', a: 'Fargate', why: 'You only size the task.' },
+    { q: 'Need a specific GPU instance type for containers and full host control.', a: 'ECS (EC2 launch type)', why: 'You choose and manage the instances.' }
+  ], ['ECS (EC2 launch type)', 'Fargate', 'ECR']);
+
+})();
+</script>
+</body>
+</html>

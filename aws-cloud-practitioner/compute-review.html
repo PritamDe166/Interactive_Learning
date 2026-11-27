@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>Other compute: review</title>
+<meta name="description" content="AWS Cloud Practitioner: other compute section review with a one-path recap, section summary, commonly confused pairs, a mixed drill and 20 exam-style questions.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-xs); }
+  .topic-links a { display: block; padding: var(--space-sm) var(--space-sm); border-radius: 0; background: var(--panel); color: var(--fg); text-decoration: none; }
+  .topic-links a:hover { border-color: var(--orange); }
+  .topic-links a span { display: block; font-size: 13px; color: var(--muted); margin-top: var(--space-3xs); }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html" aria-current="page"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Other compute / Section review</p>
+    <h1>Other compute: review</h1>
+    <ul class="lede">
+      <li><b>Containers</b>: images in <b>ECR</b>, run by <b>ECS</b> (AWS) or <b>EKS</b> (Kubernetes), on EC2 or serverless <b>Fargate</b>.</li>
+      <li><b>Serverless</b>: no servers to manage; Lambda, Fargate, S3, DynamoDB, API Gateway.</li>
+      <li><b>Lambda</b>: event-driven functions, 15 min, 10 GB, pay per request + GB-second. <b>API Gateway</b> exposes them as APIs.</li>
+      <li><b>Batch</b>: long Docker jobs on Spot. <b>Lightsail</b>: simple, predictable-price bundles.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="recapH">
+    <h2 class="stage-title" id="recapH">The whole section on one path</h2>
+    <div class="stage-kind">Press play · each hop is one topic</div>
+    <div class="controls"><button class="btn primary" id="recapPlay" type="button">Play the app</button></div>
+    <div class="scroll"><svg class="diagram nf-canvas" id="recapSvg" viewBox="0 0 1000 420" aria-label="A patient app calls API Gateway and Lambda; a developer pushes an image to ECR for ECS on Fargate; EventBridge starts nightly Batch jobs"></svg></div>
+    <p class="nf-cap" id="recapCap">Press <b>Play the app</b>.</p>
+  </section>
+
+  <section aria-labelledby="sumH">
+    <h2 id="sumH">Section summary</h2>
+    <div class="sum-grid">
+      <div class="card"><h3>Containers</h3><ul><li>Docker image → registry → container; shared host OS.</li><li>ECR stores images; ECS runs containers (EC2 launch type = your instances).</li><li>Fargate = serverless containers (ECS and EKS).</li><li>EKS = managed Kubernetes; pods on EC2 or Fargate.</li></ul></div>
+      <div class="card"><h3>Serverless &amp; Lambda</h3><ul><li>Serverless = no servers to see; scales; pay per use.</li><li>Lambda: events (S3, EventBridge, API Gateway…), 15 min max, 128 MB–10 GB.</li><li>Pricing: $0.20 per 1M requests + GB-seconds; free tier 1M + 400,000 GB-s.</li><li>Execution role for permissions; CloudWatch Logs.</li></ul></div>
+      <div class="card"><h3>APIs, batch, simple</h3><ul><li>API Gateway: REST/HTTP/WebSocket, auth, API keys, throttling.</li><li>Batch: Docker jobs in a queue, EC2/Spot or Fargate, no time limit, managed not serverless.</li><li>Lightsail: beginner bundles, predictable price, no auto scaling.</li></ul></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="topH">
+    <h2 id="topH">Topics in this section</h2>
+    <div class="topic-links">
+      <a href="docker.html">Docker &amp; containers<span>Images and registries</span></a>
+      <a href="ecs-fargate-ecr.html">ECS, Fargate &amp; ECR<span>Who manages what</span></a>
+      <a href="eks.html">EKS<span>Kubernetes</span></a>
+      <a href="serverless.html">What is serverless<span>Serverless vs managed</span></a>
+      <a href="lambda.html">Lambda<span>Events, limits, cost</span></a>
+      <a href="api-gateway.html">API Gateway<span>Serverless APIs</span></a>
+      <a href="aws-batch.html">AWS Batch<span>Long jobs on Spot</span></a>
+      <a href="lightsail.html">Lightsail<span>Simple bundles</span></a>
+    </div>
+  </section>
+
+  <section aria-labelledby="pairH">
+    <h2 id="pairH">Commonly confused pairs</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Pair</th><th>The difference</th></tr></thead>
+        <tbody>
+          <tr><td>ECS vs EKS</td><td>AWS's own orchestrator vs managed Kubernetes</td></tr>
+          <tr><td>ECS on EC2 vs Fargate</td><td>You manage instances vs no servers</td></tr>
+          <tr><td>ECS vs ECR</td><td>Runs containers vs stores images</td></tr>
+          <tr><td>Lambda vs Batch</td><td>15-minute functions vs Docker jobs of any length</td></tr>
+          <tr><td>Lambda vs EC2</td><td>Runs per event, billed per use vs always-on server</td></tr>
+          <tr><td>Serverless vs managed</td><td>No servers to see (Lambda, Fargate) vs AWS-run on your instances (ECS on EC2, Batch)</td></tr>
+          <tr><td>API Gateway vs ALB</td><td>Serverless API features (keys, throttling) vs load balancing for EC2/containers</td></tr>
+          <tr><td>Lightsail vs EC2</td><td>Simple fixed bundles vs full control and auto scaling</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="drillH">
+    <h2 class="stage-title" id="drillH">Mixed drill: name it</h2>
+    <div class="card" id="drill"></div>
+  </section>
+
+  <section aria-labelledby="exH">
+    <h2 id="exH">Exam-style questions</h2>
+    <p class="sub">Twenty original questions in the style of CLF-C02 and common practice sets. Pick an answer (two for "Select TWO") to see why.</p>
+    <div id="mcq"></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Section cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Docker on AWS</span><span class="arrow">→</span><span class="then">ECS</span></li>
+      <li><span class="if">No servers for containers</span><span class="arrow">→</span><span class="then">Fargate</span></li>
+      <li><span class="if">Store images</span><span class="arrow">→</span><span class="then">ECR</span></li>
+      <li><span class="if">Kubernetes</span><span class="arrow">→</span><span class="then">EKS</span></li>
+      <li><span class="if">Event-driven code, pay per use</span><span class="arrow">→</span><span class="then">Lambda</span></li>
+      <li><span class="if">Lambda limits</span><span class="arrow">→</span><span class="then">15 min, 10 GB</span></li>
+      <li><span class="if">Serverless API</span><span class="arrow">→</span><span class="then">API Gateway + Lambda</span></li>
+      <li><span class="if">Serverless cron</span><span class="arrow">→</span><span class="then">EventBridge + Lambda</span></li>
+      <li><span class="if">Long Docker batch jobs</span><span class="arrow">→</span><span class="then">Batch</span></li>
+      <li><span class="if">Beginner, fixed price</span><span class="arrow">→</span><span class="then">Lightsail</span></li>
+    </ul>
+  </section>
+
+  <footer>Questions are original, written to the official exam guide (Domain 3 Task 3.3 compute): <a href="https://docs.aws.amazon.com/aws-certification/latest/examguides/cloud-practitioner-02.html">AWS CLF-C02 exam guide</a>, <a href="https://aws.amazon.com/lambda/">AWS Lambda</a>, <a href="https://aws.amazon.com/containers/">Containers on AWS</a>. Section notes: Other Compute Services notes 1 to 10.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('recapSvg'), {
+    zones: [{ id: 'reg', x: 180, y: 20, w: 800, h: 385, kind: 'region', label: 'ap-south-1' }],
+    nodes: {
+      app: { x: 80, y: 120, icon: 'phone', kind: 'user', label: 'Patient app' },
+      dev: { x: 80, y: 320, icon: 'code', kind: 'user', label: 'Developer' },
+      gw: { x: 320, y: 120, icon: 'router', kind: 'net', label: 'API Gateway' },
+      fn: { x: 540, y: 120, icon: 'lambda', kind: 'compute', label: 'Lambda' },
+      ddb: { x: 760, y: 120, icon: 'box', kind: 'db', label: 'DynamoDB' },
+      ecr: { x: 320, y: 320, icon: 'archive', kind: 'storage', label: 'ECR' },
+      far: { x: 540, y: 320, icon: 'box', kind: 'compute', label: 'ECS on Fargate', sub: 'report API' },
+      bat: { x: 760, y: 320, icon: 'layers', kind: 'compute', label: 'Batch', sub: 'nightly jobs' },
+      eb: { x: 900, y: 220, icon: 'clock', kind: 'mgmt', label: 'EventBridge' }
+    },
+    links: [{ a: 'app', b: 'gw' }, { a: 'gw', b: 'fn' }, { a: 'fn', b: 'ddb' }, { a: 'dev', b: 'ecr' }, { a: 'ecr', b: 'far' }, { a: 'ecr', b: 'bat', via: [[320, 395], [760, 395]] }, { a: 'eb', b: 'bat', kind: 'dash' }]
+  });
+  $('recapPlay').addEventListener('click', async () => {
+    const run = K.newRun('r'); net.reset(); const say = h => $('recapCap').innerHTML = h;
+    try {
+      say('The app calls a <b>serverless API</b>: <b>API Gateway</b> → <b>Lambda</b> → DynamoDB.');
+      await net.send(['app', 'gw', 'fn', 'ddb'], { run, label: 'POST /book' });
+      say('A developer pushes a container image to <b>ECR</b>; <b>ECS on Fargate</b> runs it with no servers.');
+      await net.send(['dev', 'ecr', 'far'], { run, tone: 'cyan', label: 'image' });
+      say('At night <b>EventBridge</b> starts <b>Batch</b> jobs longer than Lambda\'s 15 minutes, on Spot capacity.');
+      await net.send(['eb', 'bat'], { run, tone: 'yellow', label: '02:00' });
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  });
+
+  K.pick($('drill'), [{"q": "Run Docker containers on AWS.", "a": "ECS", "why": "AWS-native orchestration."}, {"q": "Containers without servers.", "a": "Fargate", "why": "Serverless containers."}, {"q": "Store container images.", "a": "ECR", "why": "Registry."}, {"q": "Kubernetes.", "a": "EKS", "why": "Managed Kubernetes."}, {"q": "Thumbnail on each S3 upload.", "a": "Lambda", "why": "Event-driven function."}, {"q": "Serverless REST API with throttling.", "a": "API Gateway", "why": "In front of Lambda."}, {"q": "3-hour Docker jobs on Spot.", "a": "Batch", "why": "No time limit."}, {"q": "WordPress for a beginner, fixed price.", "a": "Lightsail", "why": "Simple bundles."}], ["ECS", "Fargate", "ECR", "EKS", "Lambda", "API Gateway", "Batch", "Lightsail"]);
+  K.mcq($('mcq'), [{"q": "A company wants to run Docker containers on AWS without provisioning or managing any EC2 instances. Which service?", "o": ["Amazon ECS on EC2", "AWS Fargate", "Amazon ECR", "Amazon Lightsail"], "a": [1], "why": "Fargate is serverless compute for containers."}, {"q": "Which service stores private Docker images for Amazon ECS?", "o": ["Amazon S3 Glacier", "Docker Hub", "Amazon ECR", "AWS Batch"], "a": [2], "why": "ECR is AWS's container registry."}, {"q": "A team already uses Kubernetes on premises and wants a managed Kubernetes control plane on AWS. Which service?", "o": ["Amazon ECS", "Amazon EKS", "AWS Lambda", "AWS Batch"], "a": [1], "why": "EKS is managed Kubernetes."}, {"q": "Which two factors determine the compute cost of AWS Lambda?", "o": ["Number of requests", "Number of EC2 instances", "Duration × memory allocated", "Data stored in S3", "Number of Availability Zones"], "a": [0, 2], "why": "Requests plus GB-seconds."}, {"q": "A thumbnail must be created whenever an image is uploaded to S3, with the least operational overhead. What should be used?", "o": ["An EC2 instance polling the bucket", "An S3 event that invokes a Lambda function", "Amazon Lightsail", "AWS Batch on Spot"], "a": [1], "why": "Event-driven serverless function."}, {"q": "A nightly data-processing job in a Docker image takes about 3 hours. Which service is most appropriate?", "o": ["AWS Lambda", "AWS Batch", "Amazon API Gateway", "Amazon Lightsail"], "a": [1], "why": "Lambda is limited to 15 minutes."}, {"q": "How can a company expose a Lambda function as a secure REST API with throttling and API keys?", "o": ["Amazon CloudFront alone", "Amazon API Gateway", "Amazon ECR", "An ELB with Auto Scaling"], "a": [1], "why": "API Gateway provides the endpoint, keys and throttling."}, {"q": "Which service suits a small business owner with no cloud experience who wants a WordPress site quickly at a predictable monthly price?", "o": ["EC2 with an Auto Scaling group", "Amazon Lightsail", "Amazon EKS", "AWS Fargate"], "a": [1], "why": "Lightsail bundles."}, {"q": "Which of these are serverless services?", "o": ["AWS Lambda", "Amazon ECS on EC2", "AWS Fargate", "AWS Batch on EC2", "Amazon EC2"], "a": [0, 2], "why": "The others run on instances."}, {"q": "A company wants to run a script every hour without managing servers. Which combination works?", "o": ["Amazon EventBridge schedule + AWS Lambda", "Cron on an EC2 instance", "Amazon ECR + Lightsail", "API Gateway + Amazon ECR"], "a": [0], "why": "A serverless cron job."}, {"q": "A Lambda function must read objects from an S3 bucket. What is the correct way to grant access?", "o": ["Embed IAM user access keys in the code", "Add S3 permissions to the function's IAM execution role", "Make the bucket public", "Open a security group port"], "a": [1], "why": "Use the execution role."}, {"q": "What is the maximum execution time of a standard Lambda invocation?", "o": ["5 minutes", "15 minutes", "1 hour", "Unlimited"], "a": [1], "why": "15 minutes."}, {"q": "Where do you view a Lambda function's logs?", "o": ["AWS CloudTrail", "Amazon CloudWatch Logs", "AWS Config", "Amazon Inspector"], "a": [1], "why": "Functions log to CloudWatch Logs."}, {"q": "With the ECS EC2 launch type, who is responsible for patching the instances?", "o": ["AWS", "The customer", "Docker Inc.", "Nobody, it is serverless"], "a": [1], "why": "You manage the EC2 instances."}, {"q": "Which statement about containers compared with virtual machines is correct?", "o": ["Each container includes a full guest OS", "Containers share the host OS kernel and start faster", "Containers need a hypervisor per app", "Containers cannot run on AWS"], "a": [1], "why": "Containers share the host OS."}, {"q": "What is the maximum memory you can give a Lambda function?", "o": ["512 MB", "3 GB", "10 GB", "64 GB"], "a": [2], "why": "10,240 MB."}, {"q": "A team needs real-time, two-way communication between browsers and a serverless backend. Which API Gateway type?", "o": ["REST API", "WebSocket API", "HTTP API only", "SOAP API"], "a": [1], "why": "WebSocket APIs are bidirectional."}, {"q": "What does AWS Batch charge for?", "o": ["A fee per job", "A monthly Batch licence", "The underlying EC2, Spot or Fargate resources", "Nothing at all, including compute"], "a": [2], "why": "Batch itself is free."}, {"q": "Which service needs the least operational overhead to run containers?", "o": ["ECS on EC2", "EKS with self-managed nodes", "AWS Fargate", "EC2 with Docker installed"], "a": [2], "why": "No servers to manage."}, {"q": "Which statement about Amazon Lightsail is correct?", "o": ["It offers automatic scaling", "It offers predictable monthly pricing for simple workloads", "It is a Kubernetes service", "It is required to use EC2"], "a": [1], "why": "Simple, fixed-price bundles; no auto scaling."}]);
+})();
+</script>
+</body>
+</html>

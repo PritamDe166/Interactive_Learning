@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>DynamoDB Global Tables</title>
+<meta name="description" content="DynamoDB global tables: multi-Region, multi-active replication, low-latency local reads and writes, last-writer-wins conflicts, with a conflict lab.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html" aria-current="page"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Databases &amp; analytics / 6 · Domain 3 Technology</p>
+    <h1>DynamoDB Global Tables</h1>
+    <ul class="lede">
+      <li>A <b>global table</b> keeps a replica of a DynamoDB table in several <b>Regions</b>.</li>
+      <li>Every replica takes <b>reads and writes</b>: <b>active-active</b> (multi-active).</li>
+      <li>Users get <b>low latency</b> locally, and the table survives a Region problem.</li>
+      <li>Concurrent updates resolve as <b>last writer wins</b> by default.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Global table</span><span class="like">SQL Server merge or peer-to-peer replication between offices</span><span>Fully managed by DynamoDB, typically under a second between Regions.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: one Visits table on three continents</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="Replicas of a DynamoDB table in Mumbai, Frankfurt and North Virginia each accept writes and replicate to the others"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>Global tables = <b>multi-Region</b>, <b>multi-active</b> replication of a DynamoDB table.</li>
+      <li>Any replica serves <b>reads and writes</b>; changes replicate asynchronously (typically within a second).</li>
+      <li>Use for <b>low latency</b> worldwide and <b>Region-level resilience</b>.</li>
+      <li>Conflicts: <b>last writer wins</b> by default; a multi-Region strong consistency mode also exists.</li>
+      <li>Compare: an RDS cross-Region read replica is read-only; writes go to one primary.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="gH">
+    <h2 class="stage-title" id="gH">Two Regions, one item, same moment</h2>
+    <div class="stage-kind">Both offices update visit P-1001 / 2026-11-20 · change the values and times</div>
+    <div class="card">
+      <div class="lab-form">
+        <label>Mumbai sets status to <input id="gA" value="checked-in"></label>
+        <div class="range"><label for="tA">Mumbai write time <output id="tAO"></output></label><input type="range" id="tA" min="0" max="2000" step="50" value="1200"></div>
+        <label>Frankfurt sets status to <input id="gB" value="cancelled"></label>
+        <div class="range"><label for="tB">Frankfurt write time <output id="tBO"></output></label><input type="range" id="tB" min="0" max="2000" step="50" value="1450"></div>
+      </div>
+      <p class="status-line" id="gOut"></p>
+    </div>
+  </section>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">Which setup?</h2>
+    <div class="stage-kind">Pick the best fit</div>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Active-active NoSQL across Regions</span><span class="arrow">→</span><span class="then">DynamoDB global tables</span></li>
+      <li><span class="if">Low-latency writes for users worldwide</span><span class="arrow">→</span><span class="then">Global tables</span></li>
+      <li><span class="if">Conflict rule</span><span class="arrow">→</span><span class="then">Last writer wins</span></li>
+      <li><span class="if">Read-only copy of a relational DB in another Region</span><span class="arrow">→</span><span class="then">RDS cross-Region read replica</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>DynamoDB global tables</th><th>RDS cross-Region replica</th></tr></thead>
+        <tbody>
+          <tr><td><b>Writes</b></td><td>In every Region</td><td>Primary only</td></tr>
+          <tr><td><b>Model</b></td><td>Multi-active</td><td>Primary + read-only replica</td></tr>
+          <tr><td><b>Failover</b></td><td>Use another Region directly</td><td>Promote the replica</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Which feature gives active-active, multi-Region DynamoDB?<span class="go">Show answer</span></summary><div class="ans"><p><b>Global tables</b>.</p></div></details>
+      <details><summary>Can users in Frankfurt write to the Frankfurt replica?<span class="go">Show answer</span></summary><div class="ans"><p><b>Yes.</b> Every replica accepts writes.</p></div></details>
+      <details><summary>Two Regions update the same item at once. Default outcome?<span class="go">Show answer</span></summary><div class="ans"><p><b>Last writer wins.</b></p></div></details>
+    </div>
+  </section>
+
+  <footer>Timestamps in the lab are illustrative. Sources: databases notes "DynamoDB Global Tables" and "Databases and Analytics: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GlobalTables.html">DynamoDB global tables</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'm', x: 20, y: 20, w: 300, h: 385, kind: 'region', label: 'ap-south-1' }, { id: 'f', x: 350, y: 20, w: 300, h: 385, kind: 'region', label: 'eu-central-1' }, { id: 'v', x: 680, y: 20, w: 300, h: 385, kind: 'region', label: 'us-east-1' }],
+    nodes: {
+      um: { x: 170, y: 100, icon: 'users', kind: 'user', label: 'Mumbai staff' },
+      uf: { x: 500, y: 100, icon: 'users', kind: 'user', label: 'Frankfurt staff' },
+      uv: { x: 830, y: 100, icon: 'users', kind: 'user', label: 'US staff' },
+      tm: { x: 170, y: 310, icon: 'box', kind: 'db', label: 'Visits replica' },
+      tf: { x: 500, y: 310, icon: 'box', kind: 'db', label: 'Visits replica' },
+      tv: { x: 830, y: 310, icon: 'box', kind: 'db', label: 'Visits replica' }
+    },
+    links: [{ a: 'um', b: 'tm' }, { a: 'uf', b: 'tf' }, { a: 'uv', b: 'tv' }, { a: 'tm', b: 'tf', kind: 'dash' }, { a: 'tf', b: 'tv', kind: 'dash' }, { a: 'tm', b: 'tv', kind: 'dash', via: [[170, 390], [830, 390]] }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['um', 'tm', 'uf', 'uv'], ['tm', 'tf', 'tv'], ['um', 'tm', 'tf', 'tv'], ['uf', 'tf', 'tm', 'tv'], ['um', 'uf', 'tm', 'tf'], ['tm', 'tf', 'tv'], null];
+    net.focus(F[i]);
+    if (i === 0) { net.badge('uf', '250 ms away', 'bad'); }
+    if (i === 2) net.badge('tm', 'write locally', 'ok');
+    if (i === 4) { net.badge('tm', '10:00:01.200', 'info'); net.badge('tf', '10:00:01.450 wins', 'ok'); }
+    if (i === 5) net.badge('tf', 'Region down? others carry on', 'ok');
+  }
+  const STEPS = [
+    { title: "One Region, users everywhere",
+      text: ["A single DynamoDB table in Mumbai is far from staff in Frankfurt and the US: every read and write crosses the world.", "And if the Region has a problem, everyone is affected."],
+      play: async run => { base(0); await net.send(['um', 'tm'], { run, label: 'PUT' }); } },
+    { title: "Global tables: a replica per Region",
+      text: ["A <b>global table</b> keeps a full <b>replica</b> of the table in each Region you choose.", "DynamoDB replicates changes between them automatically."] },
+    { title: "Write anywhere: active-active",
+      text: ["Every replica accepts <b>reads and writes</b>. This is <b>multi-active</b> (active-active) replication.", "A write in Mumbai appears in the other Regions, typically within a second."],
+      tip: "Multi-Region, active-active NoSQL = DynamoDB global tables.",
+      play: async run => { base(2); await net.send(['um', 'tm'], { run, label: 'PUT visit' }); await Promise.all([net.send(['tm', 'tf'], { run, tone: 'cyan' }), net.send(['tm', 'tv'], { run, tone: 'cyan' })]); } },
+    { title: "Low latency for everyone",
+      text: ["Frankfurt staff now read and write their local replica in milliseconds.", "The app in each Region talks to the table in its own Region."],
+      play: async run => { base(3); await net.send(['uf', 'tf'], { run, label: 'GET', tone: 'green' }); } },
+    { title: "Conflicts: last writer wins",
+      text: ["If two Regions update the same item at the same moment, the default mode keeps the write with the latest timestamp: <b>last writer wins</b>.", "A newer option offers multi-Region strong consistency for apps that need it."] },
+    { title: "Resilience",
+      text: ["If one Region is impaired, the others keep serving reads and writes. Point the app to another Region and carry on.", "You pay for storage and writes in each replica Region plus the data transfer between them."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ---------- conflict lab ---------- */
+  function run2() {
+    const a = $('gA').value, b = $('gB').value, ta = +$('tA').value, tb = +$('tB').value;
+    $('tAO').textContent = '10:00:0' + (ta / 1000).toFixed(3); $('tBO').textContent = '10:00:0' + (tb / 1000).toFixed(3);
+    const win = ta === tb ? 'tie' : ta > tb ? 'A' : 'B';
+    const val = win === 'A' ? a : win === 'B' ? b : (a > b ? a : b);
+    $('gOut').innerHTML = `Every replica ends with status = <b>${val}</b>. ${win === 'tie' ? 'Exactly the same time: DynamoDB still picks one deterministically.' : `The ${win === 'A' ? 'Mumbai' : 'Frankfurt'} write was later, so it wins everywhere; the other is overwritten.`}`;
+  }
+  ['gA', 'gB', 'tA', 'tB'].forEach(id => $(id).addEventListener('input', run2)); run2();
+
+  K.pick($('pick'), [
+    { q: 'NoSQL table, users in three continents, writes in every Region.', a: 'Global tables', why: 'Multi-active replication.' },
+    { q: 'Relational database, extra read capacity for EU users.', a: 'RDS cross-Region read replica', why: 'Reads only; writes go to the primary.' },
+    { q: 'NoSQL table, survive an AZ failure in one Region.', a: 'Plain DynamoDB table', why: 'Already replicated across 3 AZs.' },
+    { q: 'Active-active writes in two Regions for a key-value app.', a: 'Global tables', why: 'Any replica accepts writes.' }
+  ], ['Global tables', 'RDS cross-Region read replica', 'Plain DynamoDB table']);
+
+})();
+</script>
+</body>
+</html>

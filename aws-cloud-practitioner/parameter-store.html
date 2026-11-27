@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>Systems Manager Parameter Store</title>
+<meta name="description" content="Parameter Store keeps configuration and secrets centrally: String and SecureString (KMS) parameters, IAM-controlled access, versions and tiers, with a permissions lab.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html" aria-current="page"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Deployment &amp; infrastructure / 13 · Domain 2 Security</p>
+    <h1>Parameter Store</h1>
+    <ul class="lede">
+      <li><b>Parameter Store</b> stores configuration and secrets centrally (part of Systems Manager).</li>
+      <li><b>String</b> for plain values; <b>SecureString</b> encrypted with <b>KMS</b>.</li>
+      <li>Access controlled per parameter with <b>IAM</b>; every change is <b>versioned</b>.</li>
+      <li>Standard tier free; Advanced tier paid.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Parameter Store</span><span class="like">Azure App Configuration / Key Vault, or a central settings database</span><span>Read through IAM-authorised API calls; secrets encrypted with KMS.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: moving the database password out of appsettings.json</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="A clinic API reads a String and a KMS-encrypted SecureString parameter from Parameter Store using its IAM role"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>Parameter Store = secure storage for <b>configuration and secrets</b>.</li>
+      <li>Types: <b>String</b> (plain), StringList, <b>SecureString</b> (encrypted with KMS).</li>
+      <li>Hierarchical names, e.g. <code>/clinic/prod/db-password</code>.</li>
+      <li>Access via <b>IAM</b> (and KMS permissions for SecureString).</li>
+      <li>Each change creates a new <b>version</b>.</li>
+      <li><b>Standard</b> tier free; <b>Advanced</b> tier paid (larger values, parameter policies).</li>
+      <li>Related: AWS Secrets Manager (automatic rotation).</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="psH">
+    <h2 class="stage-title" id="psH">Can the app read it?</h2>
+    <div class="stage-kind">Set the app's permissions, pick a parameter</div>
+    <div class="card">
+      <div class="ptoggles">
+        <label class="toggle" for="psRole"><input type="checkbox" id="psRole" checked> IAM role allows <code>ssm:GetParameter</code> on <code>/clinic/prod/*</code></label>
+        <label class="toggle" for="psKms"><input type="checkbox" id="psKms"> IAM role may use the KMS key (<code>kms:Decrypt</code>)</label>
+      </div>
+      <div class="lab-form"><label>Parameter <select id="psName"><option>/clinic/prod/api-url</option><option>/clinic/prod/db-password</option></select></label></div>
+      <p class="status-line" id="psOut"></p>
+    </div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Store configuration and secrets</span><span class="arrow">→</span><span class="then">Parameter Store</span></li>
+      <li><span class="if">Encrypted parameter</span><span class="arrow">→</span><span class="then">SecureString (KMS)</span></li>
+      <li><span class="if">Control who reads a parameter</span><span class="arrow">→</span><span class="then">IAM</span></li>
+      <li><span class="if">Automatic password rotation</span><span class="arrow">→</span><span class="then">Secrets Manager</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>Standard</th><th>Advanced</th></tr></thead>
+        <tbody>
+          <tr><td><b>Cost</b></td><td>Free</td><td>Monthly fee per parameter</td></tr>
+          <tr><td><b>Max value size</b></td><td>4 KB</td><td>8 KB</td></tr>
+          <tr><td><b>Parameter policies (e.g. expiry)</b></td><td>No</td><td>Yes</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Which parameter type is encrypted?<span class="go">Show answer</span></summary><div class="ans"><p><b>SecureString</b>, with KMS.</p></div></details>
+      <details><summary>What controls access to a parameter?<span class="go">Show answer</span></summary><div class="ans"><p><b>IAM</b> policies (plus KMS for SecureString).</p></div></details>
+      <details><summary>Is the Standard tier free?<span class="go">Show answer</span></summary><div class="ans"><p><b>Yes.</b></p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: deployment note "AWS Systems Manager Parameter Store" and the section exam summary; <a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html">Parameter Store</a>; <a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-advanced-parameters.html">Standard and advanced parameter tiers</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 20, y: 20, w: 960, h: 385, kind: 'region', label: 'ap-south-1' }],
+    nodes: {
+      app: { x: 120, y: 210, icon: 'server', kind: 'compute', label: 'Clinic API', sub: 'IAM role' },
+      ps: { x: 420, y: 210, icon: 'archive', kind: 'mgmt', label: 'Parameter Store' },
+      p1: { x: 760, y: 90, icon: 'doc', kind: 'plain', label: '/clinic/prod/api-url', sub: 'String' },
+      p2: { x: 760, y: 210, icon: 'lock', kind: 'sec', label: '/clinic/prod/db-password', sub: 'SecureString' },
+      kms: { x: 760, y: 340, icon: 'key', kind: 'sec', label: 'KMS key' }
+    },
+    links: [{ a: 'app', b: 'ps' }, { a: 'ps', b: 'p1', kind: 'dash' }, { a: 'ps', b: 'p2', kind: 'dash' }, { a: 'p2', b: 'kms', kind: 'dash' }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['app'], ['ps', 'p1', 'p2'], ['p2', 'kms'], ['app', 'ps', 'p2', 'kms'], ['p1', 'ps'], null];
+    net.focus(F[i]);
+    if (i === 0) net.badge('app', 'password in appsettings.json?', 'bad');
+    if (i === 2) net.badge('p2', 'encrypted', 'ok');
+    if (i === 4) net.badge('p1', 'version 3', 'info');
+  }
+  const STEPS = [
+    { title: "Secrets in config files",
+      text: ["The database password sits in <code>appsettings.json</code> on every server and in Git. Changing it means redeploying everything."] },
+    { title: "One central store",
+      text: ["<b>Parameter Store</b> (part of Systems Manager) keeps configuration and secrets centrally, in a <b>hierarchy</b> such as <code>/clinic/prod/\u2026</code>.", "<b>String</b> parameters hold plain values like URLs."] },
+    { title: "SecureString for secrets",
+      text: ["A <b>SecureString</b> is encrypted with a <b>KMS</b> key. Reading it needs permission to the parameter and to the key."],
+      tip: "Store config and secrets, encrypted with KMS = Parameter Store SecureString." },
+    { title: "Read at runtime with IAM",
+      text: ["The app's IAM role allows <code>ssm:GetParameter</code> on <code>/clinic/prod/*</code>. It reads the values when it starts.", "No secret in the code or on disk."],
+      play: async run => { base(3); await net.send(['app', 'ps', 'p2'], { run, label: 'GetParameter' }); await net.send(['p2', 'ps', 'app'], { run, label: 'decrypted', tone: 'green' }); } },
+    { title: "Versions and tiers",
+      text: ["Every change creates a new <b>version</b>, so you can see history. <b>Standard</b> parameters are free; <b>Advanced</b> ones (bigger values, policies such as expiry) cost a small monthly fee.", "For automatic password rotation, AWS Secrets Manager is the related service."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  function get() {
+    const role = $('psRole').checked, kmsP = $('psKms').checked, name = $('psName').value;
+    const secure = name.endsWith('db-password');
+    let out;
+    if (!role) out = '<span class="bad-text">AccessDeniedException.</span> The app\'s IAM role has no <code>ssm:GetParameter</code> permission for this path.';
+    else if (secure && !kmsP) out = '<span class="bad-text">AccessDeniedException (KMS).</span> It may read the parameter, but not decrypt it: the role also needs permission to use the KMS key.';
+    else if (secure) out = '<span class="ok-text">Value returned, decrypted.</span> Both SSM and KMS permissions were present.';
+    else out = '<span class="ok-text">Value returned.</span> A plain String needs only the SSM permission.';
+    $('psOut').innerHTML = out;
+  }
+  ['psRole', 'psKms', 'psName'].forEach(id => $(id).addEventListener('change', get)); get();
+
+})();
+</script>
+</body>
+</html>

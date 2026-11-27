@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>Amazon EMR</title>
+<meta name="description" content="Amazon EMR managed big-data clusters for Spark and Hadoop: node roles, Spot task nodes, transient clusters and EMR Serverless, with a nodes-versus-time lab.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html" aria-current="page"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Databases &amp; analytics / 8 · Domain 3 Technology</p>
+    <h1>Amazon EMR</h1>
+    <ul class="lede">
+      <li><b>EMR</b> (Elastic MapReduce) runs <b>big-data frameworks</b>: Spark, Hadoop, Hive, Presto, HBase, Flink.</li>
+      <li>It creates a <b>cluster of EC2 instances</b> and configures it for you; data usually lives in S3.</li>
+      <li>More nodes finish sooner; <b>Spot</b> task nodes cut cost; clusters can auto scale and shut down after the job.</li>
+      <li>It processes data; it is not a database.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">EMR</span><span class="like">A Hadoop or Spark cluster your data team would build on dozens of servers</span><span>Ready in minutes, billed per second, gone when the job ends.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: crunching 50 TB of clinic logs</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="An EMR cluster of a primary node, core nodes and Spot task nodes reads logs from S3, processes them in parallel and writes results back to S3"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>EMR = managed <b>Hadoop / Spark</b> big-data platform on EC2 clusters.</li>
+      <li>Node roles: <b>primary</b> (coordinates), <b>core</b> (tasks + HDFS storage), <b>task</b> (tasks only).</li>
+      <li>Integrates with <b>S3</b> for input and output; clusters can be transient.</li>
+      <li><b>Spot Instances</b> and auto scaling reduce cost; EMR Serverless removes cluster management.</li>
+      <li>Uses: log processing, ETL at scale, machine learning, big-data analytics.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="eH">
+    <h2 class="stage-title" id="eH">More nodes, same job</h2>
+    <div class="stage-kind">Process a dataset · illustrative speed of 6 node-hours per TB, $0.40 per node-hour</div>
+    <div class="card">
+      <div class="lab-form">
+        <div class="range"><label for="eTb">Data <output id="eTbO"></output></label><input type="range" id="eTb" min="1" max="200" value="50"></div>
+        <div class="range"><label for="eN">Cluster size <output id="eNO"></output></label><input type="range" id="eN" min="2" max="200" value="20"></div>
+      </div>
+      <label class="toggle" for="eSpot"><input type="checkbox" id="eSpot"> Use Spot Instances (about 65% cheaper here)</label>
+      <div class="kpis" id="eK"></div>
+      <p class="sub" style="margin:8px 0 0">Ten times the nodes: about a tenth of the time, roughly the same node-hours.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">EMR or something else?</h2>
+    <div class="stage-kind">Pick the service</div>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Hadoop, Spark, big-data cluster</span><span class="arrow">→</span><span class="then">EMR</span></li>
+      <li><span class="if">Cheap, interruptible workers for EMR</span><span class="arrow">→</span><span class="then">Spot Instances (task nodes)</span></li>
+      <li><span class="if">Spark without managing a cluster</span><span class="arrow">→</span><span class="then">EMR Serverless</span></li>
+      <li><span class="if">Serverless SQL on S3</span><span class="arrow">→</span><span class="then">Athena, not EMR</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Node</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td><b>Primary</b></td><td>Coordinates the cluster and tracks tasks</td></tr>
+          <tr><td><b>Core</b></td><td>Runs tasks and stores data in HDFS</td></tr>
+          <tr><td><b>Task</b></td><td>Runs tasks only; good on Spot</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Which service runs managed Hadoop and Spark clusters?<span class="go">Show answer</span></summary><div class="ans"><p><b>EMR</b>.</p></div></details>
+      <details><summary>Which EMR nodes are safest to run on Spot?<span class="go">Show answer</span></summary><div class="ans"><p><b>Task nodes</b>: they hold no HDFS data.</p></div></details>
+      <details><summary>Is EMR a database?<span class="go">Show answer</span></summary><div class="ans"><p><b>No</b>, it processes data, usually stored in S3.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Speeds and prices in the lab are illustrative. Sources: databases notes "Amazon EMR: Managed Big Data / Hadoop Clusters" and "Databases and Analytics: CLF-C02 Exam Summary"; <a href="https://aws.amazon.com/emr/">Amazon EMR</a>; <a href="https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-master-core-task-nodes.html">Node types</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 20, y: 20, w: 960, h: 385, kind: 'region', label: 'ap-south-1' }, { id: 'cl', x: 300, y: 50, w: 470, h: 340, kind: 'aws', label: 'EMR cluster (EC2 instances)' }],
+    nodes: {
+      s3in: { x: 130, y: 120, icon: 'bucket', kind: 'storage', label: 'S3: raw logs', sub: '50 TB' },
+      pr: { x: 535, y: 110, icon: 'cpu', kind: 'compute', label: 'Primary node', sub: 'coordinates' },
+      c1: { x: 400, y: 250, icon: 'server', kind: 'compute', label: 'Core', sub: 'HDFS + tasks' },
+      c2: { x: 520, y: 250, icon: 'server', kind: 'compute', label: 'Core', sub: 'HDFS + tasks' },
+      t1: { x: 640, y: 330, icon: 'server', kind: 'compute', label: 'Task', sub: 'Spot' },
+      t2: { x: 720, y: 250, icon: 'server', kind: 'compute', label: 'Task', sub: 'Spot' },
+      s3out: { x: 880, y: 210, icon: 'bucket', kind: 'storage', label: 'S3: results' }
+    },
+    links: [{ a: 's3in', b: 'pr' }, ...['c1', 'c2', 't1', 't2'].map(k => ({ a: 'pr', b: k, kind: 'priv' })), { a: 't2', b: 's3out' }, { a: 's3in', b: 'c1', kind: 'dash' }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['s3in'], ['s3in', 'pr', 'c1', 'c2', 't1', 't2'], ['pr', 'c1', 'c2', 't1', 't2'], ['t1', 't2', 'pr'], ['t2', 's3out', 'pr', 'c1', 'c2', 't1'], null];
+    net.focus(F[i]);
+    if (i === 0) net.badge('s3in', 'one server: days', 'bad');
+    if (i === 1) net.badge('pr', 'Spark / Hadoop', 'info');
+    if (i === 3) { net.badge('t1', 'up to 90% off', 'ok'); net.badge('t2', 'can be reclaimed', 'info'); }
+    if (i === 4) net.badge('s3out', 'cluster can shut down', 'ok');
+  }
+  const STEPS = [
+    { title: "Too much data for one server",
+      text: ["50 TB of clinic logs must be cleaned and aggregated. On one server that would take days.", "Big-data frameworks such as <b>Apache Spark</b> and <b>Hadoop</b> split the work across many machines."] },
+    { title: "A managed big-data cluster",
+      text: ["<b>Amazon EMR</b> creates a cluster of EC2 instances with Spark, Hadoop, Hive, Presto, HBase or Flink already set up.", "You choose the frameworks and instance types; EMR provisions, configures and monitors the cluster."],
+      tip: "Hadoop, Spark, big-data cluster = EMR." },
+    { title: "Node roles",
+      text: ["The <b>primary</b> node coordinates the job. <b>Core</b> nodes run tasks and store data (HDFS). <b>Task</b> nodes only run tasks.", "Data usually stays in S3, so the cluster itself can be temporary."],
+      play: async run => { base(2); await Promise.all(['c1', 'c2', 't1', 't2'].map(k => net.send(['pr', k], { run, tone: 'cyan', label: 'task' }))); } },
+    { title: "Cheap capacity with Spot",
+      text: ["Task nodes are ideal for <b>Spot Instances</b>: up to 90% cheaper, and losing one only slows the job.", "EMR can also <b>auto scale</b> the cluster with the workload."] },
+    { title: "Write results, shut down",
+      text: ["Results go back to S3 (or to Redshift, DynamoDB\u2026). A transient cluster then terminates, so you pay only while it runs.", "<b>EMR Serverless</b> runs Spark or Hive jobs without managing a cluster at all."],
+      play: async run => { base(4); await net.send(['t2', 's3out'], { run, label: 'results', tone: 'green' }); } }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  function calc() {
+    const tb = +$('eTb').value, n = +$('eN').value, spot = $('eSpot').checked;
+    $('eTbO').textContent = tb + ' TB'; $('eNO').textContent = n + ' nodes';
+    const hours = Math.max(0.25, tb * 6 / n), price = 0.4 * (spot ? 0.35 : 1);
+    const cost = hours * n * price;
+    $('eK').innerHTML = [['Job time', hours < 1 ? Math.round(hours * 60) + ' min' : hours.toFixed(1) + ' h', ''], ['Cluster cost', '$' + cost.toFixed(0), spot ? 'good' : ''], ['Node-hours', Math.round(hours * n), '']]
+      .map(([l, v, c]) => `<div class="${c}"><b>${v}</b><span>${l}</span></div>`).join('');
+  }
+  ['eTb', 'eN', 'eSpot'].forEach(id => $(id).addEventListener('input', calc)); calc();
+
+  K.pick($('pick'), [
+    { q: 'Run Apache Spark jobs over petabytes in S3.', a: 'EMR', why: 'Managed big-data frameworks.' },
+    { q: 'Ad hoc SQL on S3 files, nothing to manage.', a: 'Athena', why: 'Serverless query.' },
+    { q: 'Existing on-premises Hadoop cluster to move to AWS.', a: 'EMR', why: 'Hadoop on managed EC2 clusters.' },
+    { q: 'BI dashboards for managers.', a: 'QuickSight', why: 'Visualisation.' }
+  ], ['EMR', 'Athena', 'QuickSight']);
+
+})();
+</script>
+</body>
+</html>

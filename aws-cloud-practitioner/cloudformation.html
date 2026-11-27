@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>AWS CloudFormation</title>
+<meta name="description" content="AWS CloudFormation infrastructure as code: declarative templates, stacks created in dependency order, repeatable deployments across Regions, drift detection, with a stack lab.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+  .stage rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .stage text { fill: var(--fg); font-size: 13.5px; font-weight: 700; text-anchor: middle; }
+  .stage .sm { fill: var(--muted); font-family: var(--mono); font-size: 12px; font-weight: 400; }
+  .stage.on rect { stroke: var(--cyan); fill: var(--teal-wash); }
+  .stage.ok rect { stroke: var(--teal); }
+  .stage.bad rect { stroke: var(--red); }
+  .stage.dim { opacity: .45; }
+  .wall { fill: var(--teal-wash); stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 6 5; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html" aria-current="page"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Deployment &amp; infrastructure / 1 · Domain 3 Technology</p>
+    <h1>AWS CloudFormation</h1>
+    <ul class="lede">
+      <li><b>CloudFormation</b> is AWS's <b>infrastructure as code</b>: a <b>template</b> (YAML/JSON) declares your resources.</li>
+      <li>It creates them as a <b>stack</b>, in the right order, and updates or deletes them together.</li>
+      <li>The same template gives <b>identical environments</b> in any Region or account.</li>
+      <li><b>Drift detection</b> finds resources changed by hand.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Template</span><span class="like">An ARM template, or a PowerShell DSC configuration for infrastructure</span><span>Declarative; CloudFormation works out the steps.</span></div>
+      <div class="row"><span class="aws">Stack</span><span class="like">A resource group created from one deployment</span><span>Updated and deleted as a unit.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: from console clicks to a template</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="A template in Git is deployed by CloudFormation as a stack of a security group, server, bucket and database, then the same template creates a copy in another Region"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>CloudFormation = AWS-native <b>infrastructure as code</b> (IaC).</li>
+      <li>Templates in <b>YAML or JSON</b>; <b>declarative</b> (desired end state).</li>
+      <li>A <b>stack</b> = the resources one template created; created in dependency order, deleted together.</li>
+      <li><b>Repeatable</b> across Regions and accounts: dev/test/prod, disaster recovery.</li>
+      <li>Stack resources are tagged, which helps with cost tracking; templates can be cost-estimated.</li>
+      <li><b>Drift detection</b> shows resources that no longer match the template.</li>
+      <li>Free; you pay for the resources created. Beanstalk and the CDK use it underneath.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="cfnH">
+    <h2 class="stage-title" id="cfnH">One template, one stack</h2>
+    <div class="stage-kind">Create the stack, then cause drift, deploy elsewhere or delete</div>
+    <div class="card">
+    <div class="controls">
+      <div class="seg" id="langSeg" role="group" aria-label="Authoring">
+        <button type="button" data-v="cfn" aria-pressed="true">YAML template</button>
+        <button type="button" data-v="cdk" aria-pressed="false">CDK (TypeScript)</button>
+      </div>
+      <button class="btn primary" type="button" id="cCreate">Create stack</button>
+      <button class="btn" type="button" id="cDrift">Someone edits the SG in the console</button>
+      <button class="btn" type="button" id="cDetect">Detect drift</button>
+      <button class="btn" type="button" id="cRegion">Deploy same template to Hyderabad</button>
+      <button class="btn" type="button" id="cDelete">Delete stack</button>
+    </div>
+    <div class="pair">
+      <div><pre class="codeblock" id="tpl"></pre></div>
+      <div class="scroll"><svg class="diagram" id="cfn" style="min-width:0" viewBox="0 0 520 330" aria-label="Stack resources created in dependency order"></svg></div>
+    </div>
+    <p class="status-line" id="cfnStatus">A stack is the set of resources one template created. Create it first.</p>
+
+    </div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Create a stack (outline)</summary>
+      <ol>
+        <li>CloudFormation → <b>Create stack</b> → upload a small template that creates an S3 bucket (or use a sample template).</li>
+        <li>Name the stack and create it; watch <b>Events</b> show CREATE_IN_PROGRESS then CREATE_COMPLETE.</li>
+        <li>Edit the template (add a tag or versioning) and <b>Update</b>: review the change set first.</li>
+        <li>Change the bucket by hand, then <b>Stack actions → Detect drift</b>.</li>
+        <li><b>Delete</b> the stack: every resource it made goes.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Infrastructure as code on AWS</span><span class="arrow">→</span><span class="then">CloudFormation</span></li>
+      <li><span class="if">Same environment in many Regions/accounts</span><span class="arrow">→</span><span class="then">CloudFormation template</span></li>
+      <li><span class="if">Find resources changed by hand</span><span class="arrow">→</span><span class="then">Drift detection</span></li>
+      <li><span class="if">Template formats</span><span class="arrow">→</span><span class="then">YAML or JSON</span></li>
+      <li><span class="if">Delete everything a template created</span><span class="arrow">→</span><span class="then">Delete the stack</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><b>Template</b></td><td>YAML/JSON file declaring resources</td></tr>
+          <tr><td><b>Stack</b></td><td>The resources created from one template</td></tr>
+          <tr><td><b>Change set</b></td><td>Preview of what an update will change</td></tr>
+          <tr><td><b>Drift</b></td><td>Resource differs from its template</td></tr>
+          <tr><td><b>StackSets</b></td><td>Deploy a stack to many accounts and Regions at once</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>What is a CloudFormation stack?<span class="go">Show answer</span></summary><div class="ans"><p>The set of resources created from one <b>template</b>, managed as a unit.</p></div></details>
+      <details><summary>How does CloudFormation know to create the security group first?<span class="go">Show answer</span></summary><div class="ans"><p>From the <b>references</b> in the template; it works out the dependency order.</p></div></details>
+      <details><summary>Someone changed a resource by hand. How do you find out?<span class="go">Show answer</span></summary><div class="ans"><p><b>Drift detection</b>.</p></div></details>
+      <details><summary>Does CloudFormation cost extra?<span class="go">Show answer</span></summary><div class="ans"><p><b>No</b>; you pay for the resources it creates.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: deployment notes "AWS CloudFormation: IaC for S3 and Beyond" and "Deployment and Managing Infrastructure at Scale: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html">What is CloudFormation?</a>; <a href="https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-stack-drift.html">Detecting drift</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 330, y: 20, w: 420, h: 385, kind: 'region', label: 'ap-south-1 · stack web-prod' }, { id: 'h', x: 780, y: 20, w: 200, h: 385, kind: 'region', label: 'ap-south-2' }],
+    nodes: {
+      tpl: { x: 90, y: 110, icon: 'doc', kind: 'plain', label: 'template.yaml', sub: 'in Git' },
+      cfn: { x: 90, y: 300, icon: 'layers', kind: 'mgmt', label: 'CloudFormation' },
+      sg: { x: 440, y: 110, icon: 'shield', kind: 'sec', label: 'WebSG' },
+      ec2: { x: 640, y: 110, icon: 'server', kind: 'compute', label: 'WebServer' },
+      s3: { x: 440, y: 300, icon: 'bucket', kind: 'storage', label: 'ScansBucket' },
+      db: { x: 640, y: 300, icon: 'db', kind: 'db', label: 'Database' },
+      copy: { x: 880, y: 210, icon: 'layers', kind: 'mgmt', label: 'Same stack', sub: 'DR / staging' }
+    },
+    links: [{ a: 'tpl', b: 'cfn' }, { a: 'cfn', b: 'sg' }, { a: 'cfn', b: 's3' }, { a: 'sg', b: 'ec2', kind: 'dash', label: '!Ref', at: [540, 100] }, { a: 'cfn', b: 'db' }, { a: 'cfn', b: 'copy', via: [[90, 395], [880, 395]] }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['sg', 'ec2', 's3', 'db'], ['tpl', 'cfn'], ['cfn', 'sg', 'ec2', 's3', 'db'], ['sg', 'ec2', 's3', 'db'], ['cfn', 'copy'], ['sg', 'ec2'], null];
+    net.focus(F[i]);
+    if (i === 0) net.badge('ec2', 'clicked by hand', 'bad');
+    if (i === 1) net.badge('tpl', 'YAML / JSON', 'info');
+    if (i === 2) net.badge('sg', 'created first', 'ok');
+    if (i === 3) net.badge('db', 'tagged: web-prod', 'info');
+    if (i === 5) net.badge('sg', 'DRIFTED', 'bad');
+  }
+  const STEPS = [
+    { title: "Clicking in the console doesn't scale",
+      text: ["The production environment was built by hand: a security group, a server, a bucket, a database.", "Rebuilding it exactly for staging, or after a disaster, means remembering every click."] },
+    { title: "Describe it in a template",
+      text: ["<b>CloudFormation</b> is AWS's <b>infrastructure as code</b> (IaC) service. A <b>template</b> (YAML or JSON) declares the resources you want.", "It is <b>declarative</b>: you describe the end state, not the steps. The template lives in Git and is reviewed like code."],
+      tip: "Infrastructure as code, templates, repeatable = CloudFormation.",
+      play: async run => { base(1); await net.send(['tpl', 'cfn'], { run, label: 'create-stack' }); } },
+    { title: "CloudFormation works out the order",
+      text: ["It creates the resources as one <b>stack</b>, in the right order: the security group before the server that references it.", "Every resource gets tagged with the stack name."],
+      play: async run => { base(2); await net.send(['cfn', 'sg'], { run, tone: 'cyan' }); await Promise.all([net.send(['cfn', 's3'], { run, tone: 'cyan' }), net.send(['cfn', 'db'], { run, tone: 'cyan' })]); } },
+    { title: "One unit to update, cost or delete",
+      text: ["Change the template and CloudFormation updates only what changed. Delete the stack and every resource goes, in reverse order.", "Stack tags make the stack's cost easy to see; you can also estimate a template's cost before creating it."] },
+    { title: "Same template, anywhere",
+      text: ["Deploy the same template to another <b>Region</b> or <b>account</b> for staging, testing or disaster recovery: identical every time."],
+      play: async run => { base(4); await net.send(['cfn', 'copy'], { run, label: 'same template', tone: 'green' }); } },
+    { title: "Drift",
+      text: ["If someone changes a resource by hand, it no longer matches the template: <b>drift</b>.", "<b>Drift detection</b> reports it; you fix it by reverting the change or updating the template. CloudFormation doesn't repair it by itself."] },
+    { title: "Under other services",
+      text: ["Elastic Beanstalk and the AWS CDK both use CloudFormation underneath. The CloudFormation <b>Application Composer</b> (Infrastructure Composer) shows a template as a diagram.", "CloudFormation itself is free; you pay for the resources it creates."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+  /* ========== 1. CloudFormation ========== */
+  const YAML = [
+    '<span class="k">Resources:</span>',
+    '  WebSG:  <span class="c"># AWS::EC2::SecurityGroup</span>',
+    '    Ingress: [ tcp 443 from 0.0.0.0/0 ]',
+    '  WebServer:  <span class="c"># AWS::EC2::Instance</span>',
+    '    SecurityGroups: [ !Ref WebSG ]',
+    '  ScansBucket:  <span class="c"># AWS::S3::Bucket</span>',
+    '    Versioning: Enabled'
+  ];
+  const CDK = [
+    '<span class="k">const</span> sg = <span class="k">new</span> ec2.SecurityGroup(this, <span class="s">"WebSG"</span>, { vpc });',
+    'sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(443));',
+    '<span class="k">new</span> ec2.Instance(this, <span class="s">"WebServer"</span>, {',
+    '  vpc, securityGroup: sg, instanceType, machineImage });',
+    '<span class="k">new</span> s3.Bucket(this, <span class="s">"ScansBucket"</span>, {',
+    '  versioned: <span class="k">true</span> });',
+    '<span class="c">// cdk synth → CloudFormation template → deploy</span>'
+  ];
+  let lang = 'cfn';
+  const tpl = $('tpl');
+  function drawTpl() { tpl.innerHTML = (lang === 'cfn' ? YAML : CDK).map(l => `<span class="ln">${l}</span>`).join(''); }
+  drawTpl();
+  const cf = $('cfn');
+  K.el('rect', { x: 10, y: 10, width: 500, height: 310, rx: 14, class: 'zone' }, cf);
+  const stackL = K.text(cf, 22, 30, 'STACK web-prod · ap-south-1', 'zone-label');
+  const R = {
+    sg: K.node(cf, 140, 100, 200, 54, 'WebSG', 'security group'),
+    ec2: K.node(cf, 380, 100, 200, 54, 'WebServer', 'EC2 instance'),
+    s3: K.node(cf, 140, 210, 200, 54, 'ScansBucket', 'S3 bucket')
+  };
+  const dep = K.el('line', { x1: 240, y1: 100, x2: 280, y2: 100, class: 'msg dash' }, cf);
+  const st2 = K.node(cf, 380, 210, 200, 54, 'web-prod (Hyderabad)', 'same template');
+  const cP = K.el('g', {}, cf);
+  let S = { created: false, drift: false };
+  function cReset() { Object.values(R).forEach(n => n.g.setAttribute('class', 'node dim')); st2.g.setAttribute('class', 'node dim'); R.sg.sub.textContent = 'security group'; }
+  cReset();
+  const cst = $('cfnStatus');
+  const lines = () => [...tpl.querySelectorAll('.ln')];
+  async function create() {
+    const run = K.newRun('cfn'); cP.textContent = ''; cReset(); S = { created: false, drift: false };
+    try {
+      if (lang === 'cdk') {
+        const ls = lines(); for (const l of ls) { l.classList.add('on'); await K.sleep(160, run); l.classList.remove('on'); }
+        cst.innerHTML = '<b>cdk synth</b> turned the TypeScript into a CloudFormation template…';
+        await K.sleep(700, run);
+      }
+      const order = [['sg', 1], ['ec2', 3], ['s3', 5]];
+      for (const [k, li] of order) {
+        const l = lines()[lang === 'cfn' ? li : (k === 'sg' ? 0 : k === 'ec2' ? 2 : 4)]; l.classList.add('on');
+        R[k].g.setAttribute('class', 'node');
+        R[k].sub.textContent = 'CREATE_IN_PROGRESS';
+        await K.sleep(600, run);
+        R[k].g.setAttribute('class', 'node ok'); R[k].sub.textContent = 'CREATE_COMPLETE';
+        l.classList.remove('on'); l.classList.add('done');
+        if (k === 'sg') cst.innerHTML = 'The security group goes first because WebServer <b>references</b> it: CloudFormation works out the order.';
+      }
+      S.created = true;
+      cst.innerHTML = '<span class="ok-text">Stack CREATE_COMPLETE.</span> Three resources, one unit: update or delete them together. Resources are tagged with the stack name, so costs are easy to track.';
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  async function drift() {
+    if (!S.created) { cst.textContent = 'Create the stack first.'; return; }
+    const run = K.newRun('cfn');
+    try {
+      const p = K.pill(cP, 'console: open port 22 to all', 'bad');
+      await K.move(p, [140, 300], [140, 140], 600, run); p.remove();
+      S.drift = true; R.sg.sub.textContent = 'port 22 added by hand';
+      cst.innerHTML = 'The running resource no longer matches the template. Nothing warns you yet…';
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  async function detect() {
+    if (!S.created) { cst.textContent = 'Create the stack first.'; return; }
+    const run = K.newRun('cfn');
+    try {
+      for (const k of ['sg', 'ec2', 's3']) { R[k].g.classList.add('on'); await K.sleep(350, run); R[k].g.classList.remove('on'); }
+      if (S.drift) { R.sg.g.setAttribute('class', 'node bad'); R.sg.sub.textContent = 'DRIFTED'; cst.innerHTML = '<span class="bad-text">WebSG has DRIFTED</span> (port 22 isn\'t in the template). Fix it by reverting the change or updating the template; CloudFormation won\'t auto-repair.'; }
+      else cst.innerHTML = '<span class="ok-text">IN_SYNC.</span> Every resource matches the template.';
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  async function region() {
+    const run = K.newRun('cfn');
+    try {
+      const p = K.pill(cP, 'same template', 'alt');
+      await K.move(p, [260, 300], [380, 250], 600, run); p.remove();
+      st2.g.setAttribute('class', 'node ok'); st2.sub.textContent = 'CREATE_COMPLETE';
+      cst.innerHTML = 'Same template, another Region (or account): <b>identical, repeatable</b> environments. That\'s the main IaC win for DR and dev/test/prod.';
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  async function del() {
+    if (!S.created) { cst.textContent = 'Nothing to delete.'; return; }
+    const run = K.newRun('cfn');
+    try {
+      for (const k of ['s3', 'ec2', 'sg']) { R[k].sub.textContent = 'DELETE_IN_PROGRESS'; await K.sleep(450, run); R[k].g.setAttribute('class', 'node dim'); R[k].sub.textContent = 'deleted'; }
+      S = { created: false, drift: false };
+      cst.innerHTML = 'Stack deleted: every resource it created is removed, in reverse dependency order. Nothing left behind to bill you.';
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  K.seg($('langSeg'), v => { lang = v; K.cancel('cfn'); drawTpl(); });
+  $('cCreate').addEventListener('click', create); $('cDrift').addEventListener('click', drift);
+  $('cDetect').addEventListener('click', detect); $('cRegion').addEventListener('click', region); $('cDelete').addEventListener('click', del);
+
+})();
+</script>
+</body>
+</html>

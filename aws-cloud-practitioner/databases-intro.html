@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>Databases on AWS</title>
+<meta name="description" content="Why databases differ from storage, managed vs self-managed databases, relational vs NoSQL, and AWS&#x27;s purpose-built databases, with a who-does-the-chore lab.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html" aria-current="page"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Databases &amp; analytics / 1 · Domain 3 Technology</p>
+    <h1>Databases on AWS</h1>
+    <ul class="lede">
+      <li>A <b>database</b> adds structure, indexes and queries on top of storage.</li>
+      <li><b>Managed</b> databases (RDS, DynamoDB…) hand patching, backups and failover to AWS; on EC2 you do it all.</li>
+      <li><b>Relational</b>: tables, SQL, JOINs. <b>NoSQL</b>: flexible items (often JSON), built to scale out.</li>
+      <li>AWS offers a <b>purpose-built</b> database for each data shape.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Amazon RDS</span><span class="like">SQL Server on a VM that a DBA team runs for you</span><span>AWS is the DBA team for the infrastructure jobs; you keep schema and data.</span></div>
+      <div class="row"><span class="aws">DynamoDB</span><span class="like">A huge, always-on <code>Dictionary&lt;key, JSON&gt;</code></span><span>Serverless, replicated across AZs, no schema to define beyond the key.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: where should the booking data live?</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="A booking app can use SQL Server on EC2 or Amazon RDS; database types are relational, NoSQL, graph, in-memory and warehouse"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>Relational = tables, rows, columns, <b>SQL</b>, JOINs, fixed schema. AWS: <b>RDS</b>, <b>Aurora</b>.</li>
+      <li>NoSQL = non-relational, <b>flexible schema</b>, often JSON; types: key-value, document, graph, in-memory, search.</li>
+      <li>Relational traditionally scales <b>vertically</b>; NoSQL scales <b>horizontally</b>.</li>
+      <li><b>Managed</b> database: AWS handles provisioning, OS and engine patching, backups, monitoring, HA. You cannot SSH into it.</li>
+      <li>Self-managed on EC2: you own patching, backups, HA and scaling.</li>
+      <li>You always own your <b>data</b>, schema, users and network access.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="chH">
+    <h2 class="stage-title" id="chH">Who does the chore?</h2>
+    <div class="stage-kind">Switch between SQL Server on EC2 and Amazon RDS</div>
+    <div class="card">
+      <div class="seg" id="chSeg" role="group" aria-label="Deployment"><button type="button" data-v="ec2" aria-pressed="true">SQL Server on EC2</button><button type="button" data-v="rds" aria-pressed="false">Amazon RDS</button></div>
+      <ul class="checks" id="chOut"></ul>
+      <p class="status-line" id="chSt"></p>
+    </div>
+  </section>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">Relational or NoSQL?</h2>
+    <div class="stage-kind">Pick the model</div>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Least operational overhead for a database</span><span class="arrow">→</span><span class="then">Managed service (RDS, DynamoDB…)</span></li>
+      <li><span class="if">SQL, JOINs, fixed schema</span><span class="arrow">→</span><span class="then">Relational</span></li>
+      <li><span class="if">Flexible schema, JSON documents</span><span class="arrow">→</span><span class="then">NoSQL</span></li>
+      <li><span class="if">Full OS control of the database server</span><span class="arrow">→</span><span class="then">Database on EC2</span></li>
+      <li><span class="if">Who patches RDS?</span><span class="arrow">→</span><span class="then">AWS</span></li>
+      <li><span class="if">Who manages the schema and data?</span><span class="arrow">→</span><span class="then">The customer</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Type</th><th>Shape of data</th><th>AWS service</th></tr></thead>
+        <tbody>
+          <tr><td><b>Relational</b></td><td>Tables and relations</td><td>RDS, Aurora</td></tr>
+          <tr><td><b>Key-value / document</b></td><td>Items or JSON documents</td><td>DynamoDB, DocumentDB</td></tr>
+          <tr><td><b>Graph</b></td><td>Nodes and relationships</td><td>Neptune</td></tr>
+          <tr><td><b>In-memory</b></td><td>Cache, sessions</td><td>ElastiCache</td></tr>
+          <tr><td><b>Time series</b></td><td>Readings over time</td><td>Timestream</td></tr>
+          <tr><td><b>Ledger</b></td><td>Shared, tamper-evident records</td><td>Managed Blockchain</td></tr>
+          <tr><td><b>Data warehouse</b></td><td>Columns for analytics</td><td>Redshift</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><p><b>"Relational never scales out" is too strong.</b> Read replicas and Aurora spread reads, and Aurora storage grows automatically. The exam only expects the general contrast.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Can you SSH into an Amazon RDS instance?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> AWS manages the OS.</p></div></details>
+      <details><summary>Which database type suits data with a flexible, changing schema stored as JSON?<span class="go">Show answer</span></summary><div class="ans"><p><b>NoSQL</b> (key-value or document).</p></div></details>
+      <details><summary>"Least operational overhead" for a relational database?<span class="go">Show answer</span></summary><div class="ans"><p>A managed service: <b>RDS</b> or <b>Aurora</b>.</p></div></details>
+      <details><summary>Who designs the tables in an RDS database?<span class="go">Show answer</span></summary><div class="ans"><p><b>You</b>, the customer.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: databases notes "Introduction to Databases on AWS" and "Databases and Analytics: CLF-C02 Exam Summary"; <a href="https://aws.amazon.com/products/databases/">AWS databases</a>; <a href="https://aws.amazon.com/nosql/">What is NoSQL?</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 260, y: 20, w: 720, h: 385, kind: 'region', label: 'ap-south-1' }],
+    nodes: {
+      app: { x: 100, y: 210, icon: 'server', kind: 'compute', label: 'Booking app' },
+      ec2: { x: 400, y: 100, icon: 'server', kind: 'compute', label: 'EC2 + SQL Server', sub: 'self-managed' },
+      rds: { x: 400, y: 320, icon: 'db', kind: 'db', label: 'Amazon RDS', sub: 'managed' },
+      rel: { x: 660, y: 100, icon: 'db', kind: 'db', label: 'Relational', sub: 'tables + SQL' },
+      kv: { x: 660, y: 220, icon: 'box', kind: 'db', label: 'NoSQL', sub: 'key-value / document' },
+      gr: { x: 860, y: 220, icon: 'branch', kind: 'db', label: 'Graph' },
+      mem: { x: 660, y: 340, icon: 'bolt', kind: 'db', label: 'In-memory' },
+      dw: { x: 860, y: 340, icon: 'chart', kind: 'db', label: 'Warehouse' }
+    },
+    links: [{ a: 'app', b: 'ec2' }, { a: 'app', b: 'rds' }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['app', 'ec2'], ['app', 'ec2'], ['app', 'rds'], ['rel'], ['kv'], ['kv', 'rel'], ['rel', 'kv', 'gr', 'mem', 'dw'], null];
+    net.focus(F[i]);
+    if (i === 0) net.badge('ec2', 'files on EBS', 'info');
+    if (i === 1) net.badge('ec2', 'you patch, back up, fail over', 'bad');
+    if (i === 2) net.badge('rds', 'AWS runs it', 'ok');
+    if (i === 3) net.badge('rel', 'JOINs, fixed schema', 'info');
+    if (i === 4) net.badge('kv', 'JSON, flexible', 'info');
+    if (i === 5) { net.badge('rel', 'scale up', 'info'); net.badge('kv', 'scale out', 'ok'); }
+  }
+  const STEPS = [
+    { title: "Storage vs a database",
+      text: ["EBS, EFS and S3 store bytes and files. A <b>database</b> adds structure: tables or items, indexes, queries, relationships and transactions.", "The booking app needs to ask \"which slots are free on Monday?\", not \"give me file 42\"."] },
+    { title: "Running it yourself on EC2",
+      text: ["You can install SQL Server on an EC2 instance, as you would on-premises.", "Then <b>you</b> patch the OS and engine, schedule backups, set up high availability and scale it. You get full control and full work."] },
+    { title: "Managed databases",
+      text: ["With a managed service such as <b>Amazon RDS</b>, AWS provisions the server, patches it, takes backups, monitors it and handles failover.", "You keep the data, schema, users and network rules. \"Least operational overhead\" in a question points here."],
+      tip: "Least operational overhead = managed or serverless database.",
+      play: async run => { base(2); await net.send(['app', 'rds'], { run, label: 'SELECT' }); } },
+    { title: "Relational databases",
+      text: ["Data in <b>tables</b> with rows and columns, linked by keys and queried with <b>SQL</b> (JOINs, transactions).", "Good when the structure is known and consistency matters: patients, appointments, invoices. AWS: RDS and Aurora."] },
+    { title: "NoSQL databases",
+      text: ["<b>Non-relational</b>: data as items or documents, often <b>JSON</b>, with a <b>flexible schema</b>: items can have different fields.", "Built for huge scale and fast lookups by key, usually without JOINs. AWS: DynamoDB, DocumentDB."] },
+    { title: "How they scale",
+      text: ["Relational databases traditionally scale <b>vertically</b> (a bigger server), helped by read replicas.", "NoSQL databases are designed to scale <b>horizontally</b> (spread data over many servers)."] },
+    { title: "Purpose-built databases",
+      text: ["AWS has a database per data shape: <b>relational</b> (RDS, Aurora), <b>key-value / document</b> (DynamoDB, DocumentDB), <b>graph</b> (Neptune), <b>in-memory</b> (ElastiCache), <b>time series</b> (Timestream), <b>ledger</b> (Managed Blockchain) and a <b>data warehouse</b> (Redshift).", "The rest of this section takes them one by one."] },
+    { title: "Who does what",
+      text: ["Managed: AWS handles hardware, OS, engine patches, backups and HA infrastructure. You handle data, schema, access (security groups, IAM, passwords) and settings such as Multi-AZ.", "Self-managed on EC2: everything above the hypervisor is yours."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ---------- who does the chore ---------- */
+  const CH = [['Replace failed hardware', 'aws', 'aws'], ['Patch the operating system', 'you', 'aws'], ['Patch the database engine', 'you', 'aws'], ['Take automated backups', 'you', 'aws'], ['Set up failover to another AZ', 'you', 'aws (you tick Multi-AZ)'], ['Scale storage', 'you', 'aws (storage autoscaling)'], ['Design tables and indexes', 'you', 'you'], ['Control who can connect', 'you', 'you'], ['Choose encryption', 'you', 'you']];
+  function chores() {
+    const m = $('chSeg').querySelector('[aria-pressed="true"]').dataset.v === 'rds' ? 2 : 1;
+    $('chOut').innerHTML = CH.map(r => `<li class="${r[m].startsWith('aws') ? '' : 'no'}"><b>${r[0]}</b>: ${r[m].startsWith('aws') ? 'AWS' + r[m].slice(3) : 'you'}</li>`).join('');
+    const n = CH.filter(r => r[m] === 'you').length;
+    $('chSt').innerHTML = `You do <b>${n} of ${CH.length}</b> jobs.`;
+  }
+  K.seg($('chSeg'), chores); chores();
+
+  K.pick($('pick'), [
+    { q: 'Invoices with customers, line items and JOINs.', a: 'Relational', why: 'Structured data with relationships and SQL.' },
+    { q: 'Shopping carts stored as JSON, each a little different.', a: 'NoSQL', why: 'Flexible schema, lookup by key.' },
+    { q: 'Millions of requests per second by user ID, no JOINs.', a: 'NoSQL', why: 'Horizontal scale for key lookups.' },
+    { q: 'Accounting system that needs transactions across tables.', a: 'Relational', why: 'ACID transactions and JOINs.' },
+    { q: 'A product catalogue whose fields change every month.', a: 'NoSQL', why: 'Schema can evolve per item.' }
+  ], ['Relational', 'NoSQL']);
+
+})();
+</script>
+</body>
+</html>

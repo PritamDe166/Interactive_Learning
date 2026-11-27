@@ -5,37 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
 <title>Amazon S3</title>
-<meta name="description" content="AWS Cloud Practitioner: who can read an S3 object, how versioning and delete markers work, and which storage class fits each access pattern.">
+<meta name="description" content="This page has been split into one explainer per topic.">
 <link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
 <link rel="stylesheet" href="../assets/css/base.css?v=20261122">
 <link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
 <script src="../assets/js/theme.js?v=20261122"></script>
-<script src="../assets/js/explainer-kit.js?v=20261122"></script>
 <style>
-  .gate rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
-  .gate text { fill: var(--fg); font-size: 13px; font-weight: 600; text-anchor: middle; }
-  .gate .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
-  .gate.on rect { stroke: var(--cyan); fill: var(--teal-wash); }
-  .gate.pass rect { stroke: var(--teal); }
-  .gate.stop rect { stroke: var(--red); }
-  .ptoggles { display: grid; gap: var(--space-xs); }
-  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
-  .ver rect { stroke-width: 2; transition: opacity .25s, transform .25s, background-color .25s, color .25s, border-color .25s, fill .25s, stroke .25s; }
-  .ver.cur rect { fill: var(--teal-wash); stroke: var(--teal); }
-  .ver.old rect { fill: var(--panel); stroke: var(--line); }
-  .ver.marker rect { fill: var(--panel-2); stroke: var(--red); stroke-dasharray: 5 4; }
-  .ver text { fill: var(--fg); font-size: 13px; font-weight: 600; text-anchor: middle; }
-  .ver .sm { fill: var(--muted); font-family: var(--mono); font-size: 12px; font-weight: 400; }
-  .cls rect.bg { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; transition: stroke .2s, fill .2s; }
-  .cls.on rect.bg { stroke: var(--accent-text); fill: var(--panel-2); }
-  .cls rect.cost { fill: var(--cyan); opacity: .75; }
-  .cls text { fill: var(--fg); font-size: 13px; font-weight: 600; }
-  .cls .sm { fill: var(--muted); font-family: var(--mono); font-size: 12px; font-weight: 400; }
-  .bucket-box { fill: var(--panel); stroke: var(--teal); stroke-width: 2; }
-  .obj rect { fill: var(--panel-2); stroke: var(--line); }
-  .obj.marker rect { stroke: var(--red); stroke-dasharray: 5 4; }
-  .obj text { font-size: 11.5px; }
-  .daylbl { fill: var(--accent-text); font-family: var(--mono); font-size: 13px; font-weight: 700; }
+  .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: var(--space-xs); margin-top: var(--space-md); }
+  .topic-links a { display: block; padding: var(--space-sm) var(--space-md); border-radius: 0; background: var(--panel); color: var(--fg); text-decoration: none; font-weight: 600; }
+  .topic-links a:hover { border-color: var(--orange); }
+  .topic-links a span { display: block; font-size: 13px; font-weight: 400; color: var(--muted); margin-top: var(--space-3xs); }
 </style>
 </head>
 <body class="wb">
@@ -88,10 +67,90 @@
 <li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
 <li><a href="storage-review.html"><span class="t">Section review</span></a></li>
 </ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
 </nav></details>
 <nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
 <li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
-<li><a href="index.html" aria-current="true">AWS<span class="n">34</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
 <li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
 <li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
 <li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
@@ -103,422 +162,23 @@
 <a class="back" href="index.html">AWS Cloud Practitioner</a>
     <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
   </div>
-
   <header>
-    <p class="crumbs">AWS CLF-C02 / Section 8 / Domains 2 &amp; 3 (Tasks 2.2, 3.6)</p>
-    <h1>Amazon S3</h1>
-    <ul class="lede">
-      <li><b>Object storage</b>: files (objects) in <b>buckets</b>, reached by API or URL. Virtually unlimited; objects up to ~48.8 TiB.</li>
-      <li>A bucket lives in <b>one Region</b>; its name is globally unique. "Folders" are just key prefixes.</li>
-      <li>Buckets are private by default, and objects are encrypted by default (SSE-S3: server-side encryption with keys that S3 manages). Access comes from IAM policies and bucket policies.</li>
-      <li>Every storage class has 11 nines of durability (99.999999999%: data is almost never lost). The classes differ in price, retrieval speed and availability: cheaper classes are slower to read from.</li>
-    </ul>
+    <p class="crumbs">AWS CLF-C02 / Amazon S3</p>
+    <h1>This page has moved</h1>
+    <ul class="lede"><li>"Amazon S3" is now <b>one page per topic</b>, each with its own walkthrough and labs.</li><li>Pick a topic below.</li></ul>
   </header>
-
-  <section aria-labelledby="whatH">
-    <h2 id="whatH">In terms you already know</h2>
-    <p class="sub">S3 is like a file share with unlimited space, reached over HTTPS instead of SMB.</p>
-    <div class="card analogy">
-      <div class="row head"><span>AWS</span><span>Closest idea you already know</span><span>The difference</span></div>
-      <div class="row"><span class="aws">Bucket</span><span class="like">A top-level shared folder</span><span>Lives in one Region; name unique across all of AWS.</span></div>
-      <div class="row"><span class="aws">Object + key</span><span class="like">A file and its full path</span><span>Folders are just prefixes in the key.</span></div>
-      <div class="row"><span class="aws">Bucket policy</span><span class="like">Folder permissions (ACLs), written as JSON</span><span>JSON resource policy; can grant other accounts or public.</span></div>
-      <div class="row"><span class="aws">Storage classes</span><span class="like">Fast disk vs cheap archive tapes</span><span>Eight classes; lifecycle rules move data automatically.</span></div>
-      <div class="row"><span class="aws">Pre-signed URL</span><span class="like">A download link that expires</span><span>Time-limited access to a private object.</span></div>
-      <div class="row"><span class="aws">Versioning</span><span class="like">Windows "Previous versions" for every file</span><span>Delete adds a marker; old versions kept and billed.</span></div>
-    </div>
-  </section>
-
-  <section aria-labelledby="s3StoryH">
-    <h2 class="stage-title" id="s3StoryH">Walkthrough: storing a clinic's scans</h2>
-    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
-    <div class="story" id="s3Story">
-      <div class="scroll"><svg class="diagram" id="s3StorySvg" style="min-width:0" viewBox="0 0 700 440" aria-label="An S3 bucket with objects in a Region, copies in three AZs, requesters, storage classes and a replica bucket"></svg></div>
-    </div>
-  </section>
-
-  <h2 class="part-title">Try it yourself</h2>
-  <p class="sub">Now break things and watch what changes.</p>
-
-  <section aria-labelledby="accH">
-    <h2 class="stage-title" id="accH">Who can read <span class="mono">scans/xray-0042.png</span>?</h2>
-    <div class="stage-kind">Set the bucket up, then send a request</div>
-    <div class="two">
-      <div class="card">
-        <div class="label">Bucket clinic-imaging (ap-south-1)</div>
-        <div class="ptoggles">
-          <label class="toggle" for="bpa"><input type="checkbox" id="bpa" checked> Block Public Access: ON</label>
-          <label class="toggle" for="pubPol"><input type="checkbox" id="pubPol"> Bucket policy: allow <span class="mono">"Principal": "*"</span> s3:GetObject</label>
-          <label class="toggle" for="xPol"><input type="checkbox" id="xPol"> Bucket policy: allow account 222233334444 (partner lab)</label>
-          <label class="toggle" for="role"><input type="checkbox" id="role" checked> EC2 role policy: allow s3:GetObject on this bucket</label>
-          <label class="toggle" for="denyTls"><input type="checkbox" id="denyTls"> Bucket policy: <b>deny</b> requests without HTTPS</label>
-        </div>
-      </div>
-      <div class="card">
-        <div class="label">Send a request</div>
-        <div class="chips" id="accChips"></div>
-        <p class="status-line" id="accStatus" style="text-align:left;margin-top:12px">Pick a requester.</p>
-      </div>
-    </div>
-    <div class="scroll">
-      <svg class="diagram" id="acc" viewBox="0 0 1000 200" aria-label="Request passes Block Public Access, explicit deny, allow and default deny gates"></svg>
-    </div>
-  </section>
-
-  <section aria-labelledby="verH">
-    <h2 class="stage-title" id="verH">Versioning and the delete marker</h2>
-    <div class="stage-kind">Upload, overwrite, delete, then undo</div>
-    <div class="controls">
-      <label class="toggle" for="verOn"><input type="checkbox" id="verOn" checked> Versioning enabled</label>
-      <button class="btn" type="button" id="vUp">Upload report.pdf</button>
-      <button class="btn" type="button" id="vOver">Overwrite it</button>
-      <button class="btn" type="button" id="vDel">Delete (no version ID)</button>
-      <button class="btn" type="button" id="vUndo">Remove the delete marker</button>
-      <button class="btn" type="button" id="vReset">Reset</button>
-    </div>
-    <div class="scroll">
-      <svg class="diagram narrow" id="ver" viewBox="0 0 1000 230" aria-label="Stack of object versions with the current version on top"></svg>
-    </div>
-    <p class="status-line" id="verStatus">Start by uploading the file.</p>
-  </section>
-
-  <section aria-labelledby="clsH">
-    <h2 class="stage-title" id="clsH">Storage classes and lifecycle</h2>
-    <div class="stage-kind">Pick an access pattern, or play a lifecycle rule</div>
-    <div class="chips" id="clsChips"></div>
-    <div class="controls" style="margin-top:8px"><button class="btn primary" type="button" id="lcPlay">Play the lifecycle rule</button></div>
-    <p class="hint">The rule: Standard, then Standard-IA after 30 days, Glacier Flexible after 90, Deep Archive after 180, deleted after 7 years.</p>
-    <div class="scroll">
-      <svg class="diagram" id="cls" viewBox="0 0 1000 420" aria-label="Eight S3 storage classes from most to least expensive storage price"></svg>
-    </div>
-    <p class="status-line" id="clsStatus">Bar = relative storage price per GB-month (illustrative). Cheaper storage costs more to retrieve and has a minimum duration.</p>
-  </section>
-
-  <section aria-labelledby="cheatH">
-    <h2 id="cheatH">Exam cheat-sheet</h2>
-    <ul class="cheat">
-      <li><span class="if">Unlimited object storage, static files, data lake</span><span class="arrow">→</span><span class="then">S3</span></li>
-      <li><span class="if">Recover a deleted/overwritten file</span><span class="arrow">→</span><span class="then">Versioning</span></li>
-      <li><span class="if">Copy to another Region for compliance/DR</span><span class="arrow">→</span><span class="then">Cross-Region Replication</span></li>
-      <li><span class="if">Unknown access pattern</span><span class="arrow">→</span><span class="then">Intelligent-Tiering</span></li>
-      <li><span class="if">Cheapest archive, hours to restore is fine</span><span class="arrow">→</span><span class="then">Glacier Deep Archive</span></li>
-      <li><span class="if">Make objects public</span><span class="arrow">→</span><span class="then">Block Public Access off + bucket policy</span></li>
-    </ul>
-  </section>
-
-  <section aria-labelledby="moreH">
-    <h2 id="moreH">More S3 you'll be asked about</h2>
-    <div class="cards" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr))">
-      <div class="card"><h3>Replication</h3><p><b>CRR</b> (Cross-Region Replication) copies objects to another Region, for compliance, lower latency, or copying to other accounts. <b>SRR</b> (Same-Region Replication) copies within one Region, for example to collect logs in one place or copy prod data to test. Both need <b>versioning on both buckets</b>. Replication is asynchronous (it happens a little later, not instantly) and copies only new objects; existing objects need <b>S3 Batch Replication</b>.</p></div>
-      <div class="card"><h3>Encryption</h3><p><b>SSE-S3</b>: default on every new object since January 2023, free. <b>SSE-KMS</b>: the keys are kept in KMS (AWS Key Management Service), and every use of a key is recorded in CloudTrail. <b>Client-side</b>: you encrypt before upload. In transit: HTTPS.</p></div>
-      <div class="card"><h3>Static website</h3><p>Turn on website hosting, add <span class="mono">index.html</span>, and make it public (turn Block Public Access off and add a bucket policy). The website endpoint is <b>HTTP only</b>: put <b>CloudFront</b> in front for HTTPS and a custom domain.</p></div>
-      <div class="card"><h3>Storage Gateway</h3><p>Hybrid bridge from on-premises to S3: <b>S3 File Gateway</b> (NFS/SMB), <b>Volume Gateway</b> (iSCSI, EBS snapshots), <b>Tape Gateway</b> (virtual tapes → S3 Glacier).</p></div>
-      <div class="card"><h3>Access checks</h3><p><b>IAM Access Analyzer for S3</b> lists buckets that are public or shared with other accounts. <b>Pre-signed URLs</b> give time-limited access to a private object.</p></div>
-      <div class="card"><h3>Lock it down</h3><p><b>MFA Delete</b>: MFA for permanent deletes (root only). <b>Object Lock</b> / <b>Glacier Vault Lock</b>: write-once-read-many (WORM) for compliance.</p></div>
-    </div>
-    <div class="notes" style="margin-top:14px">
-      <div class="note"><p><b>Maximum object size is 48.8 TiB</b> (multipart, 10,000 parts of up to 5 GiB), not 50 TB; older material says 5 TB. A single PUT is limited to 5 GB, and multipart is recommended from about 100 MB.</p></div>
-      <div class="note"><p><b>Existing objects are replicated with S3 Batch Replication</b>, not "S3 Batch Operations" in general. Replication has no time guarantee unless you pay for <b>Replication Time Control</b> (an SLA, a service-level agreement, of 15 minutes).</p></div>
-      <div class="note"><p><b>Snowball devices reach end of support on 31 December 2026</b> in commercial Regions, and the Snow Family isn't on the CLF-C02 in-scope list. Know it only as "ship a physical device to move huge data".</p></div>
-      <div class="note"><p><b>S3 Express One Zone</b>: single-digit-millisecond latency, up to 10× faster than Standard, request costs up to 80% lower, one AZ, "directory buckets". Bucket names can also live in an <b>account regional namespace</b> that only your account can claim.</p></div>
-      <div class="note"><p><b>Pricing levers:</b> you pay for GB-months stored, requests, retrievals (IA and Glacier) and data transfer <i>out</i>. Data in is free. Every version of an object is billed as a full object, so pair versioning with lifecycle expiration.</p></div>
-    </div>
-  </section>
-
-  <section aria-labelledby="quizH">
-    <h2 id="quizH">Check yourself</h2>
-    <p class="sub">Answer out loud before you open each card.</p>
-    <div class="quiz">
-      <details><summary>Which two things must be true for anonymous users to read objects?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>Block Public Access off</b> AND a <b>bucket policy</b> granting public <span class="mono">s3:GetObject</span>.</p></div></details>
-      <details><summary>Versioning is on and someone deletes a file. How do you get it back?<span class="go">Show answer</span></summary>
-        <div class="ans"><p>The delete only added a <b>delete marker</b>. Remove the marker and the previous version is current again.</p></div></details>
-      <details><summary>Access pattern unknown and changing; no retrieval fees wanted. Which class?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>S3 Intelligent-Tiering</b> (small monitoring fee per object, no retrieval fees).</p></div></details>
-      <details><summary>Cheapest class for records kept 10 years, retrieval within 12 hours is fine?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>S3 Glacier Deep Archive.</b></p></div></details>
-      <details><summary>What must be enabled on both buckets before setting up replication?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>Versioning.</b></p></div></details>
-      <details><summary>Your S3 static website needs HTTPS. What do you add?<span class="go">Show answer</span></summary>
-        <div class="ans"><p><b>Amazon CloudFront</b> in front of the bucket (the website endpoint is HTTP only).</p></div></details>
-    </div>
-  </section>
-
-  <footer>The access flow is simplified (no ACLs, access points or VPC endpoint policies). Relative prices are approximate us-east-1 list prices and change; check the S3 pricing page. Account IDs are examples. Sources: Amazon S3 notes (Overview, Hands-On, Security, Bucket Policy Hands-On, Static Website Hosting and Hands-On, Versioning, Replication, Storage Classes, Encryption, IAM Access Analyzer for S3, Shared Responsibility, Storage Gateway, Full Topic Recap) and "Amazon S3: CLF-C02 Exam Summary".</footer>
+  <div class="topic-links">
+    <a href="s3-basics.html">Buckets &amp; objects<span>Keys, naming, durability</span></a>
+    <a href="s3-security.html">Security &amp; bucket policies<span>IAM, Block Public Access, explicit deny</span></a>
+    <a href="s3-static-website.html">Static website hosting<span>403 and HTTPS via CloudFront</span></a>
+    <a href="s3-versioning.html">Versioning<span>Delete markers</span></a>
+    <a href="s3-replication.html">Replication<span>CRR and SRR</span></a>
+    <a href="s3-storage-classes.html">Storage classes &amp; lifecycle<span>Class picker and cost calculator</span></a>
+    <a href="s3-encryption.html">Encryption<span>SSE-S3, SSE-KMS, client-side</span></a>
+    <a href="iam-access-analyzer.html">IAM Access Analyzer for S3<span>Public and shared buckets</span></a>
+    <a href="storage-gateway.html">Storage Gateway<span>File, Volume, Tape</span></a>
+    <a href="s3-review.html">Section review<span>Recap, drill and 20 exam-style questions</span></a>
+  </div>
 </div>
-
-<script>
-(function () {
-  const K = Kit, $ = K.$;
-
-  /* ========== 0. Guided walkthrough ========== */
-  (function () {
-    const sv = $('s3StorySvg');
-    const E = {}, N = {};
-    const sx = (k, el) => { el.classList.add('sx'); E[k] = el; return el; };
-    const node = (k, x, y, w, h, t, sub) => { const n = K.node(sv, x, y, w, h, t, sub); sx(k, n.g); N[k] = n; return n; };
-    sx('reg', K.el('g', {}, sv));
-    K.el('rect', { x: 150, y: 8, width: 410, height: 300, rx: 14, class: 'zone' }, E.reg);
-    K.text(E.reg, 164, 30, 'REGION ap-south-1 (Mumbai)', 'zone-label');
-    sx('bucket', K.el('g', {}, sv));
-    K.el('rect', { x: 180, y: 44, width: 350, height: 150, rx: 14, class: 'bucket-box' }, E.bucket);
-    const bt = K.text(E.bucket, 355, 68, 'Bucket: clinic-scans', 'n-title'); bt.style.textAnchor = 'middle'; bt.style.fill = 'var(--fg)'; bt.style.fontWeight = '700';
-    const OBJ = [];
-    for (let j = 0; j < 3; j++) {
-      const g = K.el('g', { class: 'obj' }, E.bucket);
-      K.el('rect', { x: 196, y: 82 + j * 36, width: 318, height: 28, rx: 7 }, g);
-      const t = K.text(g, 208, 101 + j * 36, '', 'mlabel'); t.style.textAnchor = 'start';
-      OBJ.push({ g, t });
-    }
-    sx('azs', K.el('g', {}, sv));
-    ['AZ a', 'AZ b', 'AZ c'].forEach((n, j) => { K.node(E.azs, 245 + j * 110, 250, 96, 44, n, 'copy'); });
-    node('web', 72, 70, 124, 46, 'Browser', 'anonymous');
-    node('app', 72, 200, 124, 46, 'EC2 app', 'IAM role');
-    node('rep', 630, 120, 120, 56, 'Bucket', 'Hyderabad');
-    sx('repL', K.el('line', { x1: 530, y1: 120, x2: 570, y2: 120, class: 'msg dash' }, sv));
-    const TIERS = [['Standard', 'ms · $$$$'], ['Standard-IA', 'ms · $$ + retrieval'], ['Glacier Flexible', 'minutes–hours · $'], ['Deep Archive', '12–48 h · ¢']];
-    sx('tiers', K.el('g', {}, sv));
-    K.text(E.tiers, 20, 336, 'STORAGE CLASSES · cheaper to store →, slower/costlier to read', 'zone-label');
-    const TN = TIERS.map(([t, s], j) => K.node(E.tiers, 95 + j * 170, 385, 156, 50, t, s));
-    const P = K.el('g', {}, sv);
-    const VIS = { reg: 0, bucket: 0, azs: 1, web: 2, app: 3, tiers: 5, rep: 6, repL: 6 };
-    const FOCUS = [['reg', 'bucket'], ['bucket', 'azs', 'reg'], ['web', 'bucket'], ['app', 'bucket', 'web'], ['bucket'], ['tiers', 'bucket'], ['bucket', 'rep', 'repL', 'reg'], null];
-    const OBJS = [
-      ['scans/2026/xray-0042.png', 'scans/2026/xray-0043.png', 'reports/june.pdf'],
-      ['scans/2026/xray-0042.png', 'scans/2026/xray-0043.png', 'reports/june.pdf'],
-      ['scans/2026/xray-0042.png', 'scans/2026/xray-0043.png', 'reports/june.pdf'],
-      ['scans/2026/xray-0042.png', 'scans/2026/xray-0043.png', 'reports/june.pdf'],
-      ['reports/june.pdf · v1 (noncurrent)', 'reports/june.pdf · v2 (noncurrent)', 'reports/june.pdf · DELETE MARKER'],
-      ['scans/2026/xray-0042.png', 'scans/2026/xray-0043.png', 'reports/june.pdf'],
-      ['scans/2026/xray-0042.png', 'scans/2026/xray-0043.png', 'reports/june.pdf'],
-      ['scans/2026/xray-0042.png  🔒 SSE-S3', 'scans/2026/xray-0043.png  🔒 SSE-S3', 'reports/june.pdf  🔒 SSE-S3']
-    ];
-    function show(i) {
-      P.textContent = '';
-      for (const k in VIS) { E[k].classList.toggle('gone', i < VIS[k]); E[k].classList.toggle('fade-out', !!FOCUS[i] && !FOCUS[i].includes(k)); }
-      OBJ.forEach((o, j) => { o.t.textContent = OBJS[i][j]; o.g.setAttribute('class', 'obj' + (i === 4 && j === 2 ? ' marker' : '')); });
-      Object.values(N).forEach(n => n.g.classList.remove('ok', 'bad'));
-      TN.forEach(n => n.g.classList.remove('on'));
-      N.web.sub.textContent = 'anonymous'; N.rep.sub.textContent = 'Hyderabad';
-      if (i === 2) { N.web.g.classList.add('bad'); N.web.sub.textContent = '403 Access Denied'; }
-      if (i === 3) { N.app.g.classList.add('ok'); N.web.g.classList.add('bad'); }
-      if (i === 5) TN[3].g.classList.add('on');
-      if (i === 6) { N.rep.g.classList.add('ok'); N.rep.sub.textContent = 'replica (CRR)'; }
-    }
-    const reveal = async (keys, run) => { for (const k of keys) { E[k].classList.remove('gone', 'fade-out'); await K.sleep(220, run); } };
-    const STEPS = [
-      { title: 'S3 stores objects in buckets',
-        text: 'A <b>bucket</b> is a container in one Region; its name is unique across all of AWS. Each file is an <b>object</b> with a <b>key</b> such as <span class="mono">scans/2026/xray-0042.png</span>. The "folders" are just part of the key. Storage is virtually unlimited and you pay per GB.',
-        tip: 'Object storage (whole files via API/URL), not a disk you mount.' },
-      { title: 'Copies in at least three AZs',
-        text: 'Every object is stored redundantly across <b>three or more Availability Zones</b>. That gives <b>11 nines of durability</b> (99.999999999%): lose one object in 10 million every 10,000 years.',
-        play: async run => reveal(['azs'], run) },
-      { title: 'Private by default',
-        text: 'A new bucket is <b>private</b> and <b>Block Public Access</b> is on. An anonymous browser asking for a scan gets <b>403 Access Denied</b>.',
-        play: async run => { await reveal(['web'], run); const p = K.pill(P, 'GET xray-0042', 'bad'); await K.move(p, [134, 70], [180, 70], 450, run); await K.sleep(500, run); p.remove(); } },
-      { title: 'Grant access deliberately',
-        text: 'The app on EC2 reads scans through its <b>IAM role</b> (identity policy). To share with another account or the public, add a <b>bucket policy</b> (resource policy). Public access needs <b>both</b> Block Public Access off <b>and</b> a public policy.',
-        tip: 'Explicit Deny in either policy always wins.',
-        play: async run => { await reveal(['app'], run); const p = K.pill(P, 's3:GetObject', 'ok'); await K.move(p, [134, 200], [200, 100], 550, run); p.remove(); } },
-      { title: 'Versioning undoes mistakes',
-        text: 'With <b>versioning</b> on, overwriting keeps the old version, and a delete only adds a <b>delete marker</b>. Remove the marker and the file is back. Every version is billed, so pair it with lifecycle rules.' },
-      { title: 'Storage classes: pay less for cold data',
-        text: 'Old scans are rarely opened. A <b>lifecycle rule</b> moves them automatically: Standard → <b>Standard-IA</b> after 30 days → <b>Glacier</b> after 90 → <b>Deep Archive</b> after 180. Cheaper to store, slower and costlier to read. Unsure? <b>Intelligent-Tiering</b> moves them for you.',
-        play: async run => {
-          await reveal(['tiers'], run);
-          const p = K.pill(P, 'june.pdf', 'alt');
-          let at = [95, 350];
-          await K.move(p, [355, 170], at, 500, run);
-          for (let j = 1; j < 4; j++) { TN[j - 1].g.classList.add('on'); const to = [95 + j * 170, 350]; await K.move(p, at, to, 500, run); at = to; TN[j - 1].g.classList.remove('on'); }
-          p.remove();
-        } },
-      { title: 'Replicate to another Region',
-        text: '<b>Cross-Region Replication</b> copies new objects to a bucket in another Region (compliance, disaster recovery, lower latency). <b>Same-Region Replication</b> does it within a Region. Both need versioning on.',
-        play: async run => { await reveal(['rep', 'repL'], run); const p = K.pill(P, 'copy', 'ok'); await K.move(p, [530, 100], [600, 100], 450, run); p.remove(); } },
-      { title: 'Encrypted, and more',
-        text: 'Every new object is <b>encrypted at rest by default</b> (SSE-S3); choose SSE-KMS to control and audit keys. S3 can also host a <b>static website</b> (add CloudFront for HTTPS). <b>Storage Gateway</b> lets on-premises servers use S3 as a file share.',
-        tip: 'You configure access, encryption and versioning; AWS runs the storage.' }
-    ];
-    K.story({ root: $('s3Story'), steps: STEPS, show });
-  })();
-
-  /* ========== 1. Access ========== */
-  const acc = $('acc');
-  const GATES = [
-    { k: 'bpa', x: 170, t: 'Block Public Access', s: 'blocks public grants' },
-    { k: 'deny', x: 400, t: 'Explicit Deny?', s: 'any policy' },
-    { k: 'allow', x: 630, t: 'Any Allow?', s: 'IAM or bucket policy' },
-    { k: 'def', x: 860, t: 'Default deny', s: 'private by default' }
-  ];
-  const gE = {};
-  GATES.forEach((g, i) => {
-    const el = K.el('g', { class: 'gate' }, acc);
-    K.el('rect', { x: g.x - 100, y: 55, width: 200, height: 70, rx: 12 }, el);
-    K.text(el, g.x, 85, g.t, ''); K.text(el, g.x, 107, g.s, 'sm'); gE[g.k] = el;
-    if (i < GATES.length - 1) K.el('line', { x1: g.x + 100, y1: 90, x2: GATES[i + 1].x - 100, y2: 90, class: 'msg solid' }, acc);
-  });
-  const aP = K.el('g', {}, acc);
-  const RQ = [
-    { k: 'anon', n: 'Anonymous browser (HTTPS)', pub: true, tls: true },
-    { k: 'anonhttp', n: 'Anonymous, plain HTTP', pub: true, tls: false },
-    { k: 'ec2', n: 'EC2 app with the IAM role', tls: true },
-    { k: 'lab', n: 'Partner lab account', tls: true },
-    { k: 'other', n: 'IAM user, other account', tls: true },
-    { k: 'psu', n: 'Pre-signed URL from the EC2 role', tls: true, psu: true }
-  ];
-  $('accChips').innerHTML = RQ.map(r => `<button class="chip-btn" type="button" data-k="${r.k}" aria-pressed="false">${r.n}</button>`).join('');
-  async function access(r) {
-    const run = K.newRun('acc');
-    aP.textContent = ''; Object.values(gE).forEach(g => g.setAttribute('class', 'gate'));
-    const st = $('accStatus');
-    const bpa = $('bpa').checked, pub = $('pubPol').checked;
-    const p = K.pill(aP, r.n.length > 26 ? r.n.slice(0, 25) + '…' : r.n);
-    const gate = async (k, from) => { await K.move(p, [from, 30], [GATES.find(g => g.k === k).x, 30], 420, run); gE[k].classList.add('on'); await K.sleep(450, run); gE[k].classList.remove('on'); };
-    try {
-      await gate('bpa', 30);
-      if (r.pub && bpa && pub) { gE.bpa.classList.add('stop'); p.remove(); st.innerHTML = '<span class="bad-text">403 AccessDenied.</span> The public bucket policy exists, but Block Public Access overrides it. Both must allow.'; return; }
-      gE.bpa.classList.add('pass');
-      await gate('deny', 170);
-      if ($('denyTls').checked && !r.tls) { gE.deny.classList.add('stop'); p.remove(); st.innerHTML = '<span class="bad-text">403.</span> The explicit Deny for non-HTTPS requests wins over the public Allow.'; return; }
-      gE.deny.classList.add('pass');
-      await gate('allow', 400);
-      let why = '';
-      if (r.pub && pub) why = 'the public bucket policy (and BPA is off)';
-      if (r.k === 'ec2' && $('role').checked) why = 'the IAM role\'s identity policy. No bucket policy needed within the same account';
-      if (r.k === 'psu' && $('role').checked) why = 'the signer\'s permissions (the EC2 role), carried in the URL until it expires';
-      if (r.k === 'lab' && $('xPol').checked) why = 'the bucket policy naming the partner account (their admin must also allow it in IAM)';
-      if (why) { gE.allow.classList.add('pass'); p.remove(); const ok = K.pill(aP, '200 OK', 'ok'); await K.move(ok, [630, 30], [630, 165], 350, run); st.innerHTML = `<span class="ok-text">Allowed</span> by ${why}.`; return; }
-      gE.allow.classList.add('stop');
-      await K.move(p, [630, 30], [860, 30], 380, run); p.remove();
-      gE.def.classList.add('stop');
-      st.innerHTML = `<span class="bad-text">403.</span> Nothing allows this requester, so S3's default (private) applies.${r.pub && !pub && !bpa ? ' Turning off Block Public Access alone doesn\'t make anything public.' : ''}`;
-    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
-  }
-  $('accChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
-    $('accChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-    access(RQ.find(r => r.k === b.dataset.k));
-  }));
-
-  /* ========== 2. Versioning ========== */
-  const vs = $('ver');
-  const vG = K.el('g', {}, vs);
-  K.text(vs, 40, 30, 'clinic-docs / report.pdf', 'zone-label');
-  let V = [], seq = 0;
-  const vid = () => (seq++ === 0 && !$('verOn').checked ? 'null' : Math.random().toString(36).slice(2, 8));
-  function drawV() {
-    vG.textContent = '';
-    if (!V.length) { const t = K.text(vG, 500, 120, 'no object', 'mlabel muted'); t.style.textAnchor = 'middle'; return; }
-    const n = V.length, w = Math.min(190, 900 / n - 16);
-    V.forEach((v, i) => {
-      const x = 60 + i * (w + 16), cur = i === n - 1;
-      const g = K.el('g', { class: 'ver ' + (v.marker ? 'marker' : cur ? 'cur' : 'old') }, vG);
-      K.el('rect', { x, y: 60, width: w, height: 110, rx: 12 }, g);
-      K.text(g, x + w / 2, 100, v.marker ? 'Delete marker' : v.label, '');
-      K.text(g, x + w / 2, 122, 'id ' + v.id, 'sm');
-      K.text(g, x + w / 2, 144, v.marker ? (cur ? 'GET → 404' : 'removed') : cur ? 'current · GET returns this' : 'noncurrent · billed', 'sm');
-    });
-  }
-  const vst = $('verStatus');
-  async function vAct(kind) {
-    const run = K.newRun('ver');
-    const on = $('verOn').checked;
-    const p = K.pill(vG, { up: 'PUT report.pdf', over: 'PUT report.pdf', del: 'DELETE report.pdf', undo: 'DELETE marker id' }[kind], kind === 'del' ? 'bad' : 'alt');
-    try {
-      await K.move(p, [500, 0], [500, 40], 400, run); p.remove();
-      if (kind === 'up' || kind === 'over') {
-        if (!V.length || !on) {
-          const label = V.length && !on ? 'v (replaced)' : 'v1';
-          V = on ? [...V, { id: vid(), label: 'v' + (V.filter(x => !x.marker).length + 1) }] : [{ id: 'null', label }];
-          vst.innerHTML = on ? (kind === 'up' ? 'Uploaded. Each version gets an ID.' : 'Overwritten: a new current version; the old one is kept as noncurrent.') : (V.length ? '<span class="bad-text">Without versioning the overwrite replaced the only copy.</span>' : 'Uploaded.');
-        } else {
-          V.push({ id: vid(), label: 'v' + (V.filter(x => !x.marker).length + 1) });
-          vst.innerHTML = 'Overwritten: <b>v' + V.filter(x => !x.marker).length + '</b> is current; older versions stay (and are billed).';
-        }
-      } else if (kind === 'del') {
-        if (!V.length || V[V.length - 1].marker) { vst.textContent = 'Nothing current to delete.'; drawV(); return; }
-        if (on) { V.push({ id: vid(), marker: true }); vst.innerHTML = 'A <b>delete marker</b> is now current, so GET returns 404. Nothing was actually removed.'; }
-        else { V = []; vst.innerHTML = '<span class="bad-text">Gone for good.</span> Without versioning, a delete is permanent.'; }
-      } else if (kind === 'undo') {
-        if (V.length && V[V.length - 1].marker) { V.pop(); vst.innerHTML = '<span class="ok-text">Restored.</span> Deleting the marker (by its version ID) makes the previous version current again.'; }
-        else vst.textContent = 'There is no delete marker on top.';
-      }
-      drawV();
-    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
-  }
-  $('vUp').addEventListener('click', () => vAct('up'));
-  $('vOver').addEventListener('click', () => vAct('over'));
-  $('vDel').addEventListener('click', () => vAct('del'));
-  $('vUndo').addEventListener('click', () => vAct('undo'));
-  $('vReset').addEventListener('click', () => { K.cancel('ver'); V = []; seq = 0; drawV(); vst.textContent = 'Start by uploading the file.'; });
-  $('verOn').addEventListener('change', () => { if (!$('verOn').checked && V.length) vst.innerHTML = 'Note: once enabled, versioning can only be <b>suspended</b>, never fully turned off. (Here it acts as never-enabled.)'; });
-  drawV();
-
-  /* ========== 3. Classes ========== */
-  const cs = $('cls');
-  const CL = [
-    { k: 'exp', n: 'Express One Zone', p: 0.11, ret: 'single-digit ms', min: '1 h', az: '1 AZ' },
-    { k: 'std', n: 'Standard', p: 0.023, ret: 'ms', min: 'none', az: '≥3 AZ · 99.99%' },
-    { k: 'it', n: 'Intelligent-Tiering', p: 0.023, ret: 'ms (auto tiers)', min: 'none', az: '≥3 AZ · no retrieval fee' },
-    { k: 'ia', n: 'Standard-IA', p: 0.0125, ret: 'ms + retrieval fee', min: '30 d', az: '≥3 AZ · 99.9%' },
-    { k: 'oz', n: 'One Zone-IA', p: 0.01, ret: 'ms + retrieval fee', min: '30 d', az: '1 AZ · 99.5%' },
-    { k: 'gir', n: 'Glacier Instant Retrieval', p: 0.004, ret: 'ms', min: '90 d', az: '≥3 AZ' },
-    { k: 'gfr', n: 'Glacier Flexible Retrieval', p: 0.0036, ret: 'minutes – 12 h', min: '90 d', az: '≥3 AZ' },
-    { k: 'gda', n: 'Glacier Deep Archive', p: 0.00099, ret: '12 – 48 h', min: '180 d', az: '≥3 AZ' }
-  ];
-  const cE = {};
-  const maxLog = Math.log10(0.11 / 0.00099);
-  CL.forEach((c, i) => {
-    const y = 20 + i * 49;
-    const g = K.el('g', { class: 'cls' }, cs);
-    K.el('rect', { x: 20, y, width: 960, height: 42, rx: 10, class: 'bg' }, g);
-    K.text(g, 36, y + 18, c.n, '');
-    K.text(g, 36, y + 34, c.az, 'sm');
-    const w = 20 + 170 * (Math.log10(c.p / 0.00099) / maxLog);
-    K.el('rect', { x: 290, y: y + 13, width: w, height: 16, rx: 4, class: 'cost' }, g);
-    K.text(g, 500, y + 26, 'retrieval: ' + c.ret, 'sm');
-    K.text(g, 700, y + 26, 'min ' + c.min, 'sm');
-    cE[c.k] = { g, y };
-  });
-  const cP = K.el('g', {}, cs);
-  const PAT = [
-    { n: 'Thumbnails viewed all day', k: 'std', why: 'Frequent access: Standard, the default.' },
-    { n: 'Access pattern unknown', k: 'it', why: 'Intelligent-Tiering moves objects between tiers by access, no retrieval fees.' },
-    { n: 'Monthly reports, open fast', k: 'ia', why: 'Infrequent but instant, multi-AZ: Standard-IA.' },
-    { n: 'Re-creatable copy of thumbnails', k: 'oz', why: 'One Zone-IA is cheaper; if the AZ is lost you can regenerate the data.' },
-    { n: 'Old X-rays, rare but must open instantly', k: 'gir', why: 'Archive price with millisecond retrieval: Glacier Instant Retrieval.' },
-    { n: 'Backups, hours to restore is fine', k: 'gfr', why: 'Glacier Flexible Retrieval: minutes (expedited) to hours; bulk retrieval is free.' },
-    { n: '7-year compliance archive', k: 'gda', why: 'Cheapest storage; retrieval within 12 hours (bulk up to 48 h).' },
-    { n: 'ML training, latency-critical', k: 'exp', why: 'Express One Zone: single-digit ms, in one AZ next to your compute.' }
-  ];
-  $('clsChips').innerHTML = PAT.map((p, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${p.n}</button>`).join('');
-  function lightC(k) { for (const c in cE) cE[c].g.classList.toggle('on', c === k); }
-  $('clsChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
-    K.cancel('cls'); cP.textContent = '';
-    $('clsChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
-    const p = PAT[+b.dataset.i]; lightC(p.k);
-    $('clsStatus').innerHTML = `<b>${CL.find(c => c.k === p.k).n}</b>. ${p.why}`;
-  }));
-  $('lcPlay').addEventListener('click', async () => {
-    const run = K.newRun('cls'); cP.textContent = '';
-    $('clsChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', 'false'));
-    const obj = K.pill(cP, 'xray-0042.png', 'alt');
-    const STEPS = [['std', 'Day 0: uploaded to Standard'], ['ia', 'Day 30: → Standard-IA'], ['gfr', 'Day 90: → Glacier Flexible Retrieval'], ['gda', 'Day 180: → Deep Archive'], [null, 'Day 2,555 (7 years): expired, deleted']];
-    let at = [875, cE.std.y + 21];
-    try {
-      for (const [k, label] of STEPS) {
-        if (k) {
-          const to = [875, cE[k].y + 21];
-          await K.move(obj, at, to, 700, run); at = to;
-          lightC(k);
-        } else {
-          obj.remove(); lightC(null);
-        }
-        $('clsStatus').innerHTML = `<b>${label}</b>${k === 'gda' ? '. Storage now costs ~1/23 of Standard.' : k === null ? '. Lifecycle rules handle both <b>transitions</b> and <b>expiration</b>.' : ''}`;
-        await K.sleep(900, run);
-      }
-    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
-  });
-})();
-</script>
 </body>
 </html>

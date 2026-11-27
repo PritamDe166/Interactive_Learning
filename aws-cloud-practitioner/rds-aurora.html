@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>Amazon RDS &amp; Aurora</title>
+<meta name="description" content="Amazon RDS managed relational databases, Aurora&#x27;s cloud-native engine and storage, Aurora Serverless, backups and snapshot actions.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html" aria-current="page"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Databases &amp; analytics / 2 · Domain 3 Technology</p>
+    <h1>Amazon RDS &amp; Aurora</h1>
+    <ul class="lede">
+      <li><b>RDS</b> is a managed relational database: MySQL, PostgreSQL, MariaDB, Oracle, SQL Server, Db2.</li>
+      <li>AWS patches, backs up and monitors it; you can't SSH in. Point-in-time restore is built in.</li>
+      <li><b>Aurora</b> is AWS's cloud-native MySQL/PostgreSQL-compatible engine: faster, with storage copied 6 ways across 3 AZs.</li>
+      <li><b>Aurora Serverless</b> scales capacity automatically and bills per second.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">RDS for SQL Server</span><span class="like">Your SQL Server, but the DBA tasks for patching, backups and failover are done by AWS</span><span>No sysadmin access to the host; some server-level features are limited.</span></div>
+      <div class="row"><span class="aws">Point-in-time restore</span><span class="like">Full backups plus transaction log backups</span><span>Configured by default; restore goes to a new instance.</span></div>
+      <div class="row"><span class="aws">Aurora cluster volume</span><span class="like">A SAN shared by the primary and its replicas</span><span>Spread across 3 AZs and grows by itself.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: from an RDS instance to an Aurora cluster</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="A booking app uses an RDS instance on EBS storage and an Aurora cluster whose writer and readers share storage copied across three Availability Zones"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>RDS engines: <b>MySQL, PostgreSQL, MariaDB, Oracle, SQL Server, Db2</b> (plus Aurora).</li>
+      <li>Managed: provisioning, OS and engine <b>patching</b>, <b>automated backups</b> with point-in-time restore, monitoring, storage autoscaling. <b>No SSH</b>.</li>
+      <li><b>Aurora</b>: MySQL- and PostgreSQL-compatible, cloud-native, higher performance; storage auto-grows (up to 256 TiB), <b>6 copies across 3 AZs</b>; up to 15 replicas.</li>
+      <li><b>Aurora Serverless</b>: automatic capacity scaling, per-second billing; for unpredictable or intermittent workloads.</li>
+      <li>Snapshots: <b>restore</b> creates a new DB; <b>copy</b> across Regions for DR; <b>share</b> with other accounts.</li>
+      <li>Cost: per instance-hour plus storage; Reserved Instances for steady workloads.</li>
+      <li>Credentials: password, IAM database authentication, or AWS Secrets Manager.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">RDS, Aurora or Aurora Serverless?</h2>
+    <div class="stage-kind">Pick the best fit</div>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="snH">
+    <h2 class="stage-title" id="snH">What does each snapshot action do?</h2>
+    <div class="stage-kind">Pick an action</div>
+    <div class="card">
+      <div class="seg" id="snSeg" role="group" aria-label="Snapshot action"><button type="button" data-v="take" aria-pressed="true">Take</button><button type="button" data-v="restore" aria-pressed="false">Restore</button><button type="button" data-v="copy" aria-pressed="false">Copy</button><button type="button" data-v="share" aria-pressed="false">Share</button></div>
+      <p class="status-line" id="snOut" style="text-align:left"></p>
+    </div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Create an RDS database (outline)</summary>
+      <ol>
+        <li>RDS → <b>Create database</b> → Standard create → engine <b>MySQL</b> (or another).</li>
+        <li>Template <b>Free tier</b> or <b>Dev/Test</b> (Single-AZ); <b>Production</b> enables Multi-AZ options.</li>
+        <li>Set the identifier, admin user and password (or let Secrets Manager manage it), instance class <code>db.t4g.micro</code>, 20 GB gp3 storage.</li>
+        <li>Connectivity: choose the VPC and security group; public access only for a quick test.</li>
+        <li>After it is <b>Available</b>, connect with a client to the endpoint, then try <b>Actions → Take snapshot</b> and <b>Restore</b>.</li>
+        <li>Delete the database when done (choose whether to keep a final snapshot).</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Managed relational database, automated backups</span><span class="arrow">→</span><span class="then">RDS</span></li>
+      <li><span class="if">SQL Server or Oracle, managed</span><span class="arrow">→</span><span class="then">RDS</span></li>
+      <li><span class="if">Cloud-native MySQL/PostgreSQL, best performance</span><span class="arrow">→</span><span class="then">Aurora</span></li>
+      <li><span class="if">Relational, unpredictable load, no capacity planning</span><span class="arrow">→</span><span class="then">Aurora Serverless</span></li>
+      <li><span class="if">Restore a snapshot</span><span class="arrow">→</span><span class="then">Creates a new database</span></li>
+      <li><span class="if">DR copy in another Region</span><span class="arrow">→</span><span class="then">Copy the snapshot cross-Region</span></li>
+      <li><span class="if">SSH into RDS</span><span class="arrow">→</span><span class="then">Not possible</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>RDS</th><th>Aurora</th></tr></thead>
+        <tbody>
+          <tr><td><b>Engines</b></td><td>MySQL, PostgreSQL, MariaDB, Oracle, SQL Server, Db2</td><td>MySQL- and PostgreSQL-compatible</td></tr>
+          <tr><td><b>Storage</b></td><td>EBS volume you size (autoscaling optional)</td><td>Cluster volume, grows automatically, 6 copies in 3 AZs</td></tr>
+          <tr><td><b>Read replicas</b></td><td>Yes (limit depends on engine)</td><td>Up to 15, share storage</td></tr>
+          <tr><td><b>Serverless</b></td><td>No</td><td>Aurora Serverless</td></tr>
+          <tr><td><b>Performance</b></td><td>Standard engine</td><td>AWS quotes several times higher throughput</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><p><b>Performance figures move.</b> Older material says Aurora is "5x MySQL and 3x PostgreSQL"; AWS's current page claims more. Remember "faster than the standard engines", not the multiplier.</p></div>
+      <div class="note"><p><b>Aurora Global Database</b> replicates an Aurora cluster to other Regions with typically under a second of lag, for global reads and DR.</p></div>
+      <div class="note"><p><b>RDS Proxy</b> pools database connections for apps with many short connections, such as Lambda functions.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Which RDS engines can you run?<span class="go">Show answer</span></summary><div class="ans"><p>MySQL, PostgreSQL, MariaDB, Oracle, SQL Server, Db2, and Aurora.</p></div></details>
+      <details><summary>Restoring an RDS snapshot: does it overwrite the database?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> It creates a new instance with a new endpoint.</p></div></details>
+      <details><summary>Which engines is Aurora compatible with?<span class="go">Show answer</span></summary><div class="ans"><p><b>MySQL</b> and <b>PostgreSQL</b>.</p></div></details>
+      <details><summary>How many copies of Aurora data, in how many AZs?<span class="go">Show answer</span></summary><div class="ans"><p><b>6 copies across 3 AZs.</b></p></div></details>
+      <details><summary>An intermittent relational workload needs no capacity planning.<span class="go">Show answer</span></summary><div class="ans"><p><b>Aurora Serverless</b>.</p></div></details>
+      <details><summary>Who patches the database engine on RDS?<span class="go">Show answer</span></summary><div class="ans"><p><b>AWS</b>, in your maintenance window.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Instance names and ACU range are examples. Sources: databases notes "Amazon RDS and Aurora", "RDS Hands-On" and "Databases and Analytics: CLF-C02 Exam Summary"; <a href="https://aws.amazon.com/rds/features/">Amazon RDS features</a>; <a href="https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.StorageReliability.html">Aurora storage and reliability</a>; <a href="https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.html">Aurora Serverless v2</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 230, y: 20, w: 750, h: 385, kind: 'region', label: 'ap-south-1' },
+      { id: 'a', x: 480, y: 230, w: 155, h: 160, kind: 'az', label: 'AZ a' }, { id: 'b', x: 650, y: 230, w: 155, h: 160, kind: 'az', label: 'AZ b' }, { id: 'c', x: 820, y: 230, w: 150, h: 160, kind: 'az', label: 'AZ c' }],
+    nodes: {
+      app: { x: 100, y: 150, icon: 'server', kind: 'compute', label: 'Booking app' },
+      rds: { x: 380, y: 100, icon: 'db', kind: 'db', label: 'RDS for SQL Server', sub: 'db.m6i.large' },
+      ebs: { x: 380, y: 300, icon: 'disk', kind: 'storage', label: 'EBS storage', sub: 'autoscaling' },
+      aw: { x: 640, y: 100, icon: 'db', kind: 'db', label: 'Aurora writer', sub: 'PostgreSQL-compatible' },
+      ar: { x: 860, y: 100, icon: 'db', kind: 'db', label: 'Aurora reader', sub: 'up to 15' },
+      va: { x: 557, y: 330, icon: 'disk', kind: 'storage', label: '2 copies' },
+      vb: { x: 727, y: 330, icon: 'disk', kind: 'storage', label: '2 copies' },
+      vc: { x: 895, y: 330, icon: 'disk', kind: 'storage', label: '2 copies' },
+      snap: { x: 100, y: 330, icon: 'camera', kind: 'storage', label: 'Snapshot', sub: 'in S3' }
+    },
+    links: [{ a: 'app', b: 'rds' }, { a: 'rds', b: 'ebs', kind: 'priv' }, { a: 'app', b: 'aw', via: [[230, 60], [640, 60]] }, { a: 'aw', b: 'ar', kind: 'dash' },
+      ...['va', 'vb', 'vc'].map(v => ({ a: 'aw', b: v, kind: 'priv' })), { a: 'ar', b: 'vc', kind: 'priv' }, { a: 'ebs', b: 'snap', kind: 'dash' }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['app', 'rds', 'ebs'], ['app', 'rds', 'ebs'], ['app', 'rds', 'ebs', 'snap'], ['app', 'aw', 'va', 'vb', 'vc'], ['aw', 'ar', 'va', 'vb', 'vc'], ['app', 'aw'], ['rds', 'ebs', 'snap'], null];
+    net.focus(F[i]);
+    if (i === 0) net.badge('rds', 'no SSH', 'info');
+    if (i === 1) net.badge('rds', 'patched by AWS', 'ok');
+    if (i === 2) net.badge('snap', 'restore to any second', 'ok');
+    if (i === 3) net.badge('vb', '6 copies in 3 AZs', 'ok');
+    if (i === 4) net.badge('ar', 'shares the volume', 'info');
+    if (i === 5) { net.node('aw').sub('Serverless v2: 0.5 → 64 ACU'); net.badge('aw', 'scales per second', 'ok'); } else net.node('aw').sub('PostgreSQL-compatible');
+    if (i === 6) net.badge('snap', 'restore = new DB', 'info');
+  }
+  const STEPS = [
+    { title: "Amazon RDS: a managed database server",
+      text: ["<b>RDS</b> runs a relational engine for you: <b>MySQL, PostgreSQL, MariaDB, Oracle, SQL Server, Db2</b>, or Aurora.", "You pick the engine, instance size and storage; the app connects to an endpoint (a DNS name).", "You can't SSH into it: AWS manages the OS."],
+      play: async run => { base(0); await net.send(['app', 'rds', 'ebs'], { run, label: 'INSERT' }); } },
+    { title: "What RDS does for you",
+      text: ["Provisioning, OS and engine <b>patching</b> in a maintenance window, <b>monitoring</b>, <b>storage autoscaling</b>.", "One checkbox for <b>Multi-AZ</b> high availability and a few clicks for <b>read replicas</b> (next topic)."] },
+    { title: "Backups and point-in-time restore",
+      text: ["<b>Automated backups</b> (daily snapshot plus transaction logs) let you restore to any second within the retention period.", "Manual <b>snapshots</b> are kept until you delete them."] },
+    { title: "Aurora: AWS's own engine",
+      text: ["<b>Aurora</b> is compatible with <b>MySQL</b> and <b>PostgreSQL</b> but built for the cloud. AWS quotes several times the throughput of the standard engines.", "Its storage is a shared <b>cluster volume</b> with <b>6 copies across 3 AZs</b>; it grows automatically (up to 256 TiB on supported versions) and you pay for what you use."],
+      tip: "Cloud-native, MySQL/PostgreSQL-compatible, high performance = Aurora.",
+      play: async run => { base(3); await net.send(['app', 'aw'], { run, label: 'INSERT' }); await Promise.all(['va', 'vb', 'vc'].map(v => net.send(['aw', v], { run, tone: 'cyan' }))); } },
+    { title: "Aurora readers",
+      text: ["Up to <b>15 Aurora replicas</b> read from the same cluster volume, so they barely lag behind.", "A reader endpoint spreads read queries across them; one is promoted if the writer fails."] },
+    { title: "Aurora Serverless",
+      text: ["Capacity is measured in <b>ACUs</b> and scales up and down with load automatically (v2 can even scale to zero).", "Billed <b>per second</b> of capacity used: good for unpredictable or intermittent workloads, with no capacity planning."],
+      tip: "Relational + unpredictable load + no capacity planning = Aurora Serverless." },
+    { title: "Snapshot actions",
+      text: ["<b>Restore</b> a snapshot: always creates a <b>new</b> database instance with a new endpoint.", "<b>Copy</b> it to another Region for disaster recovery. <b>Share</b> it with another AWS account."] },
+    { title: "RDS or Aurora?",
+      text: ["RDS: the engine you already use (SQL Server, Oracle\u2026), predictable size and cost.", "Aurora: MySQL/PostgreSQL apps that need more performance, fast replicas, auto-growing storage or serverless. Both: you manage data, schema and access; AWS manages the rest."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  K.pick($('pick'), [
+    { q: 'Existing app needs Microsoft SQL Server, managed by AWS.', a: 'RDS', why: 'Aurora supports only MySQL and PostgreSQL compatibility.' },
+    { q: 'MySQL app needs higher throughput and storage that grows automatically.', a: 'Aurora', why: 'Cloud-native engine with an auto-growing cluster volume.' },
+    { q: 'Internal tool used a few hours a week, relational, no capacity planning.', a: 'Aurora Serverless', why: 'Scales with load and bills per second.' },
+    { q: 'Oracle database with a licence you bring.', a: 'RDS', why: 'RDS for Oracle.' },
+    { q: 'PostgreSQL app that needs up to 15 low-lag read replicas.', a: 'Aurora', why: 'Replicas share the cluster volume.' },
+    { q: 'New app with spiky, unknown traffic, PostgreSQL-compatible.', a: 'Aurora Serverless', why: 'No capacity to plan.' }
+  ], ['RDS', 'Aurora', 'Aurora Serverless']);
+
+  /* ---------- snapshot actions ---------- */
+  const SN = {
+    take: ['Take a snapshot', 'A point-in-time copy of the whole DB instance, stored in S3 (managed by RDS). Manual snapshots stay until you delete them.'],
+    restore: ['Restore', 'Creates a <b>new</b> DB instance with a new endpoint. The original is untouched; update the app\'s connection string.'],
+    copy: ['Copy to another Region', 'For disaster recovery: you can restore in that Region if this one fails. Cross-Region transfer and storage are charged.'],
+    share: ['Share with another account', 'The other account can restore its own copy. Encrypted snapshots also need the KMS key shared.']
+  };
+  K.seg($('snSeg'), k => { $('snOut').innerHTML = `<b>${SN[k][0]}.</b> ${SN[k][1]}`; }); $('snOut').innerHTML = `<b>${SN.take[0]}.</b> ${SN.take[1]}`;
+
+})();
+</script>
+</body>
+</html>

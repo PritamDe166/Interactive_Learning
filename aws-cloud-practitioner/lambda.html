@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>AWS Lambda</title>
+<meta name="description" content="AWS Lambda event-driven functions: S3 and EventBridge triggers, limits, execution roles, CloudWatch Logs, automatic scaling and pricing, with an events and cost lab.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+  .layer rect { stroke-width: 2; transition: fill .35s, stroke .35s; }
+  .layer.aws rect { fill: var(--teal-wash); stroke: var(--teal); }
+  .layer.you rect { fill: var(--panel); stroke: var(--accent-text); }
+  .layer text { fill: var(--fg); font-size: 14px; font-weight: 600; }
+  .layer .who { font-family: var(--mono); font-size: 11px; font-weight: 400; text-anchor: end; }
+  .layer.aws .who { fill: var(--good-text); }
+  .layer.you .who { fill: var(--accent-text); }
+  .env rect { fill: var(--panel-2); stroke: var(--line); stroke-width: 2; transition: fill .25s, stroke .25s, opacity .3s; }
+  .env.busy rect { fill: var(--teal-wash); stroke: var(--cyan); }
+  .env.cold rect { stroke: var(--yellow); }
+  .env text { fill: var(--fg); font-family: var(--mono); font-size: 12px; text-anchor: middle; }
+  .svc rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .svc text { fill: var(--fg); font-size: 13px; font-weight: 700; text-anchor: middle; }
+  .svc .sm { fill: var(--muted); font-family: var(--mono); font-size: 12px; font-weight: 400; }
+  .svc.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .svc.fade text { opacity: .45; }
+  .hostbox { fill: var(--panel); stroke: var(--accent-text); stroke-width: 1.5; stroke-dasharray: 6 4; }
+  .oslayer { fill: var(--panel-2); stroke: var(--accent-text); }
+  .ctr { fill: var(--teal-wash); stroke: var(--teal); stroke-width: 2; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html" aria-current="page"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Other compute / 5 · Domain 3 Technology</p>
+    <h1>AWS Lambda</h1>
+    <ul class="lede">
+      <li><b>Lambda</b> runs your code as <b>functions</b> when an <b>event</b> happens: no servers, scales automatically.</li>
+      <li>Limits: <b>15 minutes</b> per run, <b>128 MB–10 GB</b> memory.</li>
+      <li>Permissions come from an <b>IAM execution role</b>; logs go to <b>CloudWatch</b>.</li>
+      <li>You pay per <b>request</b> and per <b>GB-second</b> of run time; idle costs nothing.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Lambda function</span><span class="like">An Azure Function or a Windows service that only wakes up for an event</span><span>No host to manage; each event can run in parallel.</span></div>
+      <div class="row"><span class="aws">Execution role</span><span class="like">The app pool identity of an IIS site</span><span>An IAM role that grants exactly what the function needs.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: making thumbnails when scans arrive</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="An S3 upload triggers a Lambda function that writes a thumbnail to S3 and metadata to DynamoDB, logs to CloudWatch, uses an IAM role, and also runs on an EventBridge schedule"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>Lambda = <b>event-driven</b> functions; <b>serverless</b>; pay only when code runs.</li>
+      <li>Max run time <b>15 minutes</b>; memory <b>128 MB to 10,240 MB</b>; <code>/tmp</code> 512 MB to 10 GB.</li>
+      <li>Runtimes: Node.js, Python, Java, C#/.NET, Ruby, custom runtime API.</li>
+      <li>Pricing: <b>requests</b> ($0.20 per 1M) + <b>duration</b> in GB-seconds; free tier 1M requests + 400,000 GB-s per month.</li>
+      <li>Triggers: S3, API Gateway, EventBridge (schedules), DynamoDB, SQS, SNS and more.</li>
+      <li>Permissions via an <b>IAM execution role</b>; monitoring via <b>CloudWatch Logs</b>.</li>
+      <li>Long jobs or general Docker workloads: use <b>Batch</b>, ECS or Fargate.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="lamH">
+    <h2 class="stage-title" id="lamH">Events in, functions out</h2>
+    <div class="stage-kind">Fire one event, or a burst · watch environments appear and vanish</div>
+    <div class="card">
+      <div class="chips" id="evChips"></div>
+      <div class="scroll"><svg class="diagram" id="lam" viewBox="0 0 1000 330" aria-label="Event sources on the left, Lambda execution environments in the middle, targets on the right"></svg></div>
+      <p class="status-line" id="lamStatus">Each event runs in an execution environment. A brand-new one takes a little longer to start (a cold start); a warm one is reused and starts faster.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="costH">
+    <h2 class="stage-title" id="costH">What would it cost?</h2>
+    <div class="stage-kind">Monthly bill after the free tier · x86 list prices</div>
+    <div class="card">
+      <div class="lab-form">
+        <div class="range"><label for="inv">Invocations per month <output id="invO"></output></label><input type="range" id="inv" min="0" max="40" value="6"></div>
+        <div class="range"><label for="mem">Memory <output id="memO"></output></label><input type="range" id="mem" min="0" max="6" value="2"></div>
+        <div class="range"><label for="dur">Average duration <output id="durO"></output></label><input type="range" id="dur" min="1" max="60" value="4"></div>
+      </div>
+      <div class="kpis" id="costK"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Create a function (outline)</summary>
+      <ol>
+        <li>Lambda → <b>Create function</b> → Author from scratch, runtime <b>.NET 8</b> or Python, default execution role (it can write to CloudWatch Logs).</li>
+        <li><b>Test</b> with a sample event; look at the duration, billed duration and memory used.</li>
+        <li>Open <b>Monitor → View CloudWatch logs</b> to see the output.</li>
+        <li>Add a trigger, for example S3 (object created) or an EventBridge schedule; add S3 permissions to the execution role.</li>
+        <li>Delete the function and its log group when done.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Run code without servers, event-driven</span><span class="arrow">→</span><span class="then">Lambda</span></li>
+      <li><span class="if">Max Lambda run time</span><span class="arrow">→</span><span class="then">15 minutes</span></li>
+      <li><span class="if">Lambda pricing</span><span class="arrow">→</span><span class="then">Requests + duration (GB-seconds)</span></li>
+      <li><span class="if">Give Lambda access to S3</span><span class="arrow">→</span><span class="then">IAM execution role</span></li>
+      <li><span class="if">Lambda logs</span><span class="arrow">→</span><span class="then">CloudWatch Logs</span></li>
+      <li><span class="if">Job longer than 15 minutes</span><span class="arrow">→</span><span class="then">Batch / ECS / Fargate</span></li>
+      <li><span class="if">Expose Lambda as an HTTP API</span><span class="arrow">→</span><span class="then">API Gateway</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>EC2</th><th>Lambda</th></tr></thead>
+        <tbody>
+          <tr><td><b>Model</b></td><td>Virtual server, always on</td><td>Function, runs on events</td></tr>
+          <tr><td><b>Scaling</b></td><td>Auto Scaling group you configure</td><td>Automatic</td></tr>
+          <tr><td><b>Billing</b></td><td>While running, even idle</td><td>Per request + duration</td></tr>
+          <tr><td><b>Limits</b></td><td>The instance you pick</td><td>15 min, 10 GB memory</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><p><b>GB-seconds.</b> 512 MB running 2 seconds = 1 GB-second. More memory costs more per second but often finishes sooner.</p></div>
+      <div class="note"><p><b>Cold starts.</b> The first request to a new execution environment takes longer; later requests reuse warm environments.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>What is the maximum run time of a Lambda function?<span class="go">Show answer</span></summary><div class="ans"><p><b>15 minutes.</b></p></div></details>
+      <details><summary>Which two things does Lambda bill for?<span class="go">Show answer</span></summary><div class="ans"><p>Number of <b>requests</b> and <b>duration × memory</b> (GB-seconds).</p></div></details>
+      <details><summary>How does a function get permission to write to DynamoDB?<span class="go">Show answer</span></summary><div class="ans"><p>Through its <b>IAM execution role</b>.</p></div></details>
+      <details><summary>Where do you read a function's logs?<span class="go">Show answer</span></summary><div class="ans"><p><b>CloudWatch Logs</b>.</p></div></details>
+      <details><summary>A 3-hour Docker job: Lambda?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> Use Batch, ECS or Fargate.</p></div></details>
+      <details><summary>Run a function every night at 02:00 with no server?<span class="go">Show answer</span></summary><div class="ans"><p><b>EventBridge schedule + Lambda</b>.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Lab prices are x86 list prices; the free tier is applied monthly. Sources: compute notes "AWS Lambda (Theory + Hands-On)" and "Other Compute Services: CLF-C02 Exam Summary"; <a href="https://aws.amazon.com/lambda/pricing/">Lambda pricing</a>; <a href="https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html">Lambda quotas</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 20, y: 20, w: 960, h: 385, kind: 'region', label: 'ap-south-1' }],
+    nodes: {
+      up: { x: 110, y: 110, icon: 'laptop', kind: 'user', label: 'Doctor uploads', sub: 'xray.png' },
+      s3: { x: 320, y: 110, icon: 'bucket', kind: 'storage', label: 'S3: scans' },
+      fn: { x: 540, y: 210, icon: 'lambda', kind: 'compute', label: 'make-thumbnail', sub: 'Lambda · .NET 8' },
+      th: { x: 820, y: 90, icon: 'bucket', kind: 'storage', label: 'S3: thumbnails' },
+      ddb: { x: 820, y: 210, icon: 'box', kind: 'db', label: 'DynamoDB', sub: 'metadata' },
+      cw: { x: 820, y: 330, icon: 'chart', kind: 'mgmt', label: 'CloudWatch Logs' },
+      role: { x: 320, y: 330, icon: 'idcard', kind: 'sec', label: 'Execution role', sub: 'IAM' },
+      eb: { x: 110, y: 330, icon: 'clock', kind: 'mgmt', label: 'EventBridge', sub: 'every day 02:00' }
+    },
+    links: [{ a: 'up', b: 's3' }, { a: 's3', b: 'fn', label: 'event', at: [420, 150] }, { a: 'fn', b: 'th' }, { a: 'fn', b: 'ddb' }, { a: 'fn', b: 'cw', kind: 'dash' }, { a: 'role', b: 'fn', kind: 'dash' }, { a: 'eb', b: 'fn', via: [[110, 395], [540, 395]] }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['up', 's3', 'fn'], ['up', 's3', 'fn', 'th', 'ddb'], ['fn'], ['fn', 'role', 'cw'], ['eb', 'fn'], ['fn'], null];
+    net.focus(F[i]);
+    if (i === 0) net.badge('fn', 'idle: $0', 'ok');
+    if (i === 2) net.badge('fn', '128 MB – 10 GB · ≤ 15 min', 'info');
+    if (i === 3) net.badge('role', 'S3 + DynamoDB + Logs', 'info');
+    if (i === 5) net.badge('fn', '1,000 copies at once', 'ok');
+  }
+  const STEPS = [
+    { title: "Code that waits for an event",
+      text: ["<b>AWS Lambda</b> runs a function only when something happens. Between events nothing runs and you pay nothing.", "Here: a doctor uploads an X-ray to S3, and S3 sends an <b>event</b> to the function."],
+      play: async run => { base(0); await net.send(['up', 's3'], { run, label: 'PUT xray.png' }); await net.send(['s3', 'fn'], { run, label: 'event', tone: 'cyan' }); } },
+    { title: "The function does its job",
+      text: ["The function makes a thumbnail, saves it to another bucket, and writes the scan's details to DynamoDB. Then it stops.", "This S3 \u2192 Lambda pattern is a classic exam scenario."],
+      tip: "React to an S3 upload = S3 event \u2192 Lambda.",
+      play: async run => { base(1); await Promise.all([net.send(['fn', 'th'], { run, label: 'thumb.png', tone: 'green' }), net.send(['fn', 'ddb'], { run, label: 'PutItem', tone: 'green' })]); } },
+    { title: "Limits and runtimes",
+      text: ["Memory from <b>128 MB to 10 GB</b>; CPU and network grow with memory. A run can last at most <b>15 minutes</b>.", "Runtimes: Node.js, Python, Java, <b>C#/.NET</b>, Ruby, plus custom runtimes (Rust, Go). Container images work if they follow the Lambda Runtime API."] },
+    { title: "Permissions and logs",
+      text: ["The function gets AWS permissions from its <b>IAM execution role</b>, never from stored keys.", "Output and errors go to <b>CloudWatch Logs</b> for monitoring and debugging."] },
+    { title: "Serverless cron",
+      text: ["An <b>EventBridge</b> schedule can invoke a function every day at 02:00: a cron job with no server."],
+      tip: "Run a script on a schedule, serverless = EventBridge + Lambda.",
+      play: async run => { base(4); await net.send(['eb', 'fn'], { run, label: '02:00', tone: 'cyan' }); } },
+    { title: "Scales by itself",
+      text: ["A thousand uploads at once? Lambda runs a thousand copies in parallel, then scales back to zero.", "No Auto Scaling group, no capacity to plan."] },
+    { title: "How you pay",
+      text: ["<b>Requests</b>: $0.20 per million. <b>Duration</b>: memory \u00d7 time in GB-seconds (about $1 per 60,000 GB-seconds).", "Free tier every month: 1 million requests and 400,000 GB-seconds."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+  /* ========== 2. Lambda ========== */
+  const lm = $('lam');
+  K.el('rect', { x: 330, y: 20, width: 340, height: 290, rx: 14, class: 'zone' }, lm);
+  K.text(lm, 342, 40, 'LAMBDA · execution environments', 'zone-label');
+  const SRC = { s3: K.node(lm, 140, 70, 200, 52, 'S3 upload', 'scans/*.png'), api: K.node(lm, 140, 165, 200, 52, 'API Gateway', 'GET /appointments'), cron: K.node(lm, 140, 260, 200, 52, 'EventBridge', 'every day 02:00') };
+  const DST = { s3: K.node(lm, 860, 70, 200, 52, 'S3 thumbnails', '+ metadata'), ddb: K.node(lm, 860, 165, 200, 52, 'DynamoDB', 'appointments'), cw: K.node(lm, 860, 260, 200, 52, 'CloudWatch Logs', 'every run') };
+  const SLOTS = [];
+  for (let i = 0; i < 8; i++) {
+    const x = 375 + (i % 4) * 75, y = 80 + Math.floor(i / 4) * 95;
+    const g = K.el('g', { class: 'env' }, lm); g.style.opacity = 0;
+    K.el('rect', { x: x - 30, y: y - 26, width: 60, height: 52, rx: 8 }, g);
+    const t = K.text(g, x, y + 4, '', '');
+    SLOTS.push({ g, t, x, y, state: 'none' });
+  }
+  const conc = K.text(lm, 500, 292, 'concurrency: 0', 'mlabel'); conc.style.textAnchor = 'middle';
+  const lP = K.el('g', {}, lm);
+  let invocations = 0, reapTimer = 0;
+  const setConc = () => { conc.textContent = `concurrency: ${SLOTS.filter(s => s.state === 'busy').length} · environments: ${SLOTS.filter(s => s.state !== 'none').length}`; };
+  async function invoke(src, dst, run, label) {
+    let s = SLOTS.find(x => x.state === 'idle'), cold = false;
+    if (!s) { s = SLOTS.find(x => x.state === 'none'); cold = true; }
+    if (!s) return 'throttled';
+    s.state = 'busy'; s.g.style.opacity = 1; s.g.setAttribute('class', 'env busy' + (cold ? ' cold' : '')); s.t.textContent = cold ? 'cold' : 'warm';
+    setConc();
+    const p = K.pill(lP, label, 'alt');
+    await K.move(p, [240, SRC[src].g.querySelector('rect').y.baseVal.value + 26], [s.x, s.y - 34], 450, run); p.remove();
+    if (cold) await K.sleep(500, run);
+    s.t.textContent = 'running';
+    await K.sleep(350, run);
+    const q = K.pill(lP, 'result', 'ok');
+    await K.move(q, [s.x, s.y + 34], [760, DST[dst].g.querySelector('rect').y.baseVal.value + 26], 450, run); q.remove();
+    s.state = 'idle'; s.g.setAttribute('class', 'env'); s.t.textContent = 'idle';
+    invocations++; setConc();
+    return cold ? 'cold' : 'warm';
+  }
+  function scheduleReap() {
+    clearTimeout(reapTimer);
+    reapTimer = setTimeout(() => { SLOTS.forEach(s => { if (s.state === 'idle') { s.state = 'none'; s.g.style.opacity = 0; } }); setConc(); $('lamStatus').innerHTML = 'Idle environments were reclaimed: <b>scaled to zero</b>. Nothing runs, nothing is billed.'; }, 6000 / K.speed);
+  }
+  const EVS = [
+    { k: 'one', n: 'Upload one scan' },
+    { k: 'api', n: 'API call: GET /appointments' },
+    { k: 'burst', n: 'Burst: 6 scans at once' },
+    { k: 'cron', n: 'Nightly schedule fires' }
+  ];
+  $('evChips').innerHTML = EVS.map(e => `<button class="chip-btn" type="button" data-k="${e.k}" aria-pressed="false">${e.n}</button>`).join('');
+  async function fire(k) {
+    const run = K.newRun('lam'); clearTimeout(reapTimer);
+    try {
+      if (k === 'one') { const r = await invoke('s3', 's3', run, 'PutObject event'); $('lamStatus').innerHTML = r === 'cold' ? 'A <b>cold start</b>: Lambda created an environment first. Fire again quickly and it reuses the warm one.' : 'Reused a <b>warm</b> environment: faster start.'; }
+      if (k === 'api') { const r = await invoke('api', 'ddb', run, 'HTTPS request'); $('lamStatus').innerHTML = `API Gateway turned the HTTP request into an event; Lambda queried DynamoDB and returned JSON (${r} start). Lambda isn't an HTTP endpoint on its own.`; }
+      if (k === 'cron') { await invoke('cron', 'cw', run, 'scheduled event'); $('lamStatus').innerHTML = 'EventBridge on a schedule + Lambda = a <b>serverless cron job</b>. Logs land in CloudWatch.'; }
+      if (k === 'burst') {
+        const rs = await Promise.all([0, 1, 2, 3, 4, 5].map(i => K.sleep(i * 90, run).then(() => invoke('s3', 's3', run, 'event ' + (i + 1)))));
+        $('lamStatus').innerHTML = `Six events ran <b>in parallel</b>: ${rs.filter(r => r === 'cold').length} new environments were created automatically. No Auto Scaling group to configure.`;
+      }
+      scheduleReap();
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('evChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('evChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    fire(b.dataset.k);
+  }));
+  setConc();
+
+  // cost
+  const MEMS = [128, 256, 512, 1024, 2048, 4096, 10240];
+  const fmtN = n => n >= 1e6 ? (n / 1e6).toLocaleString('en-US', { maximumFractionDigits: 1 }) + 'M' : n.toLocaleString('en-US');
+  function cost() {
+    const inv = +$('inv').value * 500000, mem = MEMS[+$('mem').value], dur = +$('dur').value * 50;
+    $('invO').textContent = fmtN(inv); $('memO').textContent = mem >= 1024 ? mem / 1024 + ' GB' : mem + ' MB'; $('durO').textContent = dur + ' ms';
+    const gbs = inv * dur / 1000 * mem / 1024;
+    const req = Math.max(0, inv - 1e6) * 0.20 / 1e6;
+    const comp = Math.max(0, gbs - 400000) * 0.0000166667;
+    const tot = req + comp;
+    $('costK').innerHTML = [
+      ['GB-seconds used', Math.round(gbs).toLocaleString('en-US'), ''],
+      ['Request charge', '$' + req.toFixed(2), ''],
+      ['Compute charge', '$' + comp.toFixed(2), ''],
+      ['Monthly total', '$' + tot.toFixed(2), tot === 0 ? 'good' : 'accent']
+    ].map(([l, v, c]) => `<div class="kpi ${c}"><b>${v}</b><span>${l}</span></div>`).join('');
+  }
+  ['inv', 'mem', 'dur'].forEach(id => $(id).addEventListener('input', cost)); cost();
+
+})();
+</script>
+</body>
+</html>

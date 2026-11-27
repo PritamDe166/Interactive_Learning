@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>Amazon DynamoDB &amp; DAX</title>
+<meta name="description" content="Amazon DynamoDB, the serverless NoSQL key-value database: items, partition and sort keys, query vs scan, capacity modes, and the DAX cache, with a query-or-scan lab.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+
+  .itm rect { fill: var(--panel-2); stroke: var(--line); stroke-width: 1.5; transition: opacity .2s, stroke .2s; }
+  .itm text { fill: var(--fg); font-size: 13px; font-weight: 600; }
+  .itm .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .itm.hit rect { stroke: var(--teal); fill: var(--teal-wash); stroke-width: 2.5; }
+  .itm.fade { opacity: .35; }
+  .itm.scanned rect { stroke: var(--red); stroke-dasharray: 5 4; }
+  .ss-kpi { fill: var(--fg); font-family: var(--mono); font-size: 14px; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html" aria-current="page"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Databases &amp; analytics / 5 · Domain 3 Technology</p>
+    <h1>Amazon DynamoDB &amp; DAX</h1>
+    <ul class="lede">
+      <li><b>DynamoDB</b> is a <b>serverless</b>, fully managed <b>NoSQL key-value and document</b> database with <b>single-digit millisecond</b> latency at any scale.</li>
+      <li>You define only the <b>primary key</b> (partition key, optional sort key); items can have different attributes. No JOINs.</li>
+      <li>Capacity is <b>on-demand</b> or <b>provisioned</b>; data is replicated across 3 AZs.</li>
+      <li><b>DAX</b> is an in-memory cache for DynamoDB only, with <b>microsecond</b> reads.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Table + partition key</span><span class="like">A huge <code>Dictionary&lt;string, List&lt;Visit&gt;&gt;</code> keyed by patient</span><span>Spread over many servers automatically; you never see them.</span></div>
+      <div class="row"><span class="aws">Query vs Scan</span><span class="like">An index seek vs a full table scan in SQL Server</span><span>Same idea, and a scan on a big table is just as costly.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: storing patient visits in DynamoDB</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram" id="stSvg" viewBox="0 0 1000 400" aria-label="A DynamoDB table of visit items spread over three partitions by patient ID; queries by key read one partition, scans read everything"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>DynamoDB = <b>serverless</b>, fully managed <b>NoSQL</b> (key-value and document); <b>single-digit ms</b> at any scale.</li>
+      <li>Table → items → attributes; max item size 400 KB; items can differ (flexible schema).</li>
+      <li>Primary key = <b>partition key</b> (+ optional <b>sort key</b>). Query by key is fast; other lookups need a scan or a secondary index.</li>
+      <li>No JOINs or relational features.</li>
+      <li>Capacity: <b>on-demand</b> (pay per request) or <b>provisioned</b> (+ auto scaling). Table classes: <b>Standard</b>, <b>Standard-IA</b>.</li>
+      <li>Replicated across 3 AZs; access controlled with IAM.</li>
+      <li><b>DAX</b>: DynamoDB Accelerator, in-memory cache, microsecond reads, DynamoDB only.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="qH">
+    <h2 class="stage-title" id="qH">Query or scan?</h2>
+    <div class="stage-kind">Pick how you search the Visits table</div>
+    <div class="card">
+      <div class="lab-form">
+        <label>Search by <select id="qBy"><option value="pk">patientId (partition key)</option><option value="pksk">patientId + visitDate from</option><option value="attr">any other attribute (e.g. doctor)</option></select></label>
+        <label>Value <input id="qV" value="P-1001" spellcheck="false"></label>
+      </div>
+      <div class="kpis" id="qK"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">DynamoDB, DAX or relational?</h2>
+    <div class="stage-kind">Pick the best fit</div>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Create a table and add items (outline)</summary>
+      <ol>
+        <li>DynamoDB → <b>Create table</b>: name <code>Visits</code>, partition key <code>patientId</code> (String), sort key <code>visitDate</code> (String). Default settings use on-demand capacity.</li>
+        <li><b>Explore items</b> → Create item: add attributes; create a second item with different attributes.</li>
+        <li>Run a <b>Query</b> on one patientId, then a <b>Scan</b> with a filter, and compare items read.</li>
+        <li>Delete the table.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Serverless NoSQL, single-digit ms</span><span class="arrow">→</span><span class="then">DynamoDB</span></li>
+      <li><span class="if">Key-value at massive scale</span><span class="arrow">→</span><span class="then">DynamoDB</span></li>
+      <li><span class="if">Microsecond cache for DynamoDB</span><span class="arrow">→</span><span class="then">DAX</span></li>
+      <li><span class="if">Need JOINs</span><span class="arrow">→</span><span class="then">Not DynamoDB: RDS/Aurora</span></li>
+      <li><span class="if">Pay per request, unpredictable traffic</span><span class="arrow">→</span><span class="then">On-demand capacity</span></li>
+      <li><span class="if">Rarely read table, cheaper storage</span><span class="arrow">→</span><span class="then">Standard-IA table class</span></li>
+      <li><span class="if">Multi-Region active-active</span><span class="arrow">→</span><span class="then">Global tables</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td><b>Item</b></td><td>One record, up to 400 KB</td></tr>
+          <tr><td><b>Partition key</b></td><td>Decides where the item lives; required</td></tr>
+          <tr><td><b>Sort key</b></td><td>Orders items within a partition key; optional</td></tr>
+          <tr><td><b>Query</b></td><td>Reads items by key; efficient</td></tr>
+          <tr><td><b>Scan</b></td><td>Reads the whole table; slow and costly when large</td></tr>
+          <tr><td><b>On-demand / provisioned</b></td><td>Pay per request / pre-set capacity with auto scaling</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><p><b>DynamoDB vs DocumentDB.</b> Both store JSON-like data. DynamoDB is AWS's own serverless key-value database; DocumentDB is for MongoDB-compatible workloads.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Which AWS database is serverless NoSQL with single-digit ms latency?<span class="go">Show answer</span></summary><div class="ans"><p><b>DynamoDB</b>.</p></div></details>
+      <details><summary>Can a DynamoDB query JOIN two tables?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b></p></div></details>
+      <details><summary>What must every item in a table have?<span class="go">Show answer</span></summary><div class="ans"><p>The <b>primary key</b> attributes (partition key, plus sort key if defined).</p></div></details>
+      <details><summary>Which service speeds DynamoDB reads to microseconds?<span class="go">Show answer</span></summary><div class="ans"><p><b>DAX</b>.</p></div></details>
+      <details><summary>Traffic is unpredictable and you want no capacity planning.<span class="go">Show answer</span></summary><div class="ans"><p><b>On-demand</b> capacity mode.</p></div></details>
+    </div>
+  </section>
+
+  <footer>The sample table is illustrative. Sources: databases notes "Amazon DynamoDB and DAX" and "Databases and Analytics: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.CoreComponents.html">DynamoDB core components</a>; <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.html">DynamoDB Accelerator</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const sv = $('stSvg');
+  const ITEMS = [
+    { pk: 'P-1001', sk: '2026-03-02', a: 'doctor: Rao · type: checkup' },
+    { pk: 'P-1001', sk: '2026-06-14', a: 'doctor: Iyer · type: x-ray · scanKey: xray-0042.png' },
+    { pk: 'P-1001', sk: '2026-11-20', a: 'doctor: Rao · type: follow-up · notes: [...]' },
+    { pk: 'P-2040', sk: '2026-05-09', a: 'doctor: Rao · type: vaccine · batch: B77' },
+    { pk: 'P-2040', sk: '2026-09-30', a: 'doctor: Shah · type: checkup' },
+    { pk: 'P-3311', sk: '2026-08-01', a: 'doctor: Iyer · type: surgery · ward: 4B · nights: 2' }
+  ];
+  const parts = { 'P-1001': 0, 'P-2040': 1, 'P-3311': 2 };
+  K.text(sv, 30, 30, 'Table: Visits · partition key: patientId · sort key: visitDate', 'zone-label');
+  const PG = [];
+  for (let p = 0; p < 3; p++) {
+    const x = 30 + p * 320;
+    K.el('rect', { x, y: 50, width: 300, height: 300, rx: 12, class: 'zone' }, sv);
+    K.text(sv, x + 12, 72, 'partition ' + (p + 1), 'zone-label');
+  }
+  const rows = ITEMS.map((it, i) => {
+    const p = parts[it.pk], idx = ITEMS.filter((x, j) => j < i && x.pk === it.pk).length;
+    const x = 40 + p * 320, y = 86 + idx * 84;
+    const g = K.el('g', { class: 'itm' }, sv);
+    K.el('rect', { x, y, width: 280, height: 74, rx: 8 }, g);
+    const t1 = K.text(g, x + 10, y + 22, it.pk + ' · ' + it.sk, ''); t1.style.textAnchor = 'start';
+    const words = []; it.a.split(' · ').forEach(w => { if (words.length && (words[words.length - 1] + ' · ' + w).length <= 36) words[words.length - 1] += ' · ' + w; else words.push(w); });
+    words.forEach((w, k) => { const t = K.text(g, x + 10, y + 44 + k * 16, w, 'sm'); t.style.textAnchor = 'start'; });
+    return g;
+  });
+  const cap = K.text(sv, 30, 385, '', 'ss-kpi'); cap.style.textAnchor = 'start';
+  function light(f, label) { rows.forEach((g, i) => g.setAttribute('class', 'itm' + (f ? (f(ITEMS[i]) ? ' hit' : ' fade') : ''))); cap.textContent = label || ''; }
+  function base(i) {
+    [() => light(null, 'Items in one table can have different attributes.'),
+     () => light(null, 'patientId decides the partition; visitDate sorts items inside it.'),
+     () => light(it => it.pk === 'P-1001', 'Query patientId = P-1001 → reads 3 items from one partition'),
+     () => light(it => it.pk === 'P-1001' && it.sk >= '2026-06', 'Query P-1001, visitDate ≥ 2026-06 → 2 items'),
+     () => { light(it => it.a.includes('Rao'), 'Scan for doctor = Rao → reads all 6 items to return 3'); rows.forEach((g, i) => { if (!ITEMS[i].a.includes('Rao')) g.setAttribute('class', 'itm scanned'); }); },
+     () => light(null, 'Capacity: on-demand (pay per request) or provisioned (+ auto scaling)'),
+     () => light(null, 'DAX: microsecond reads from memory, DynamoDB only'),
+     () => light(null, '')][i]();
+  }
+  const STEPS = [
+    { title: "A table of items",
+      text: ["<b>DynamoDB</b> stores <b>items</b> (like rows) in <b>tables</b>. Each item is a set of attributes, much like a JSON document, up to 400 KB.", "Items in the same table can have <b>different attributes</b>: an x-ray visit has a scanKey, a surgery has a ward.", "There are no JOINs between tables."] },
+    { title: "The primary key",
+      text: ["You only define the <b>primary key</b>: a <b>partition key</b> (here <code>patientId</code>) and optionally a <b>sort key</b> (<code>visitDate</code>).", "DynamoDB hashes the partition key to spread items over many partitions, which is how it scales horizontally."] },
+    { title: "Query by key: fast",
+      text: ["\"All visits for P-1001\" is a <b>Query</b>: DynamoDB goes straight to one partition.", "It stays at <b>single-digit milliseconds</b> whether the table has a thousand or a billion items."] },
+    { title: "Narrow with the sort key",
+      text: ["Add a condition on the sort key, such as visits since June, and DynamoDB reads only that range.", "Design keys around the questions your app asks."] },
+    { title: "Other questions need a scan",
+      text: ["\"All visits by Dr Rao\" is not a key, so it needs a <b>Scan</b> that reads every item, slow and costly on a big table.", "Fix it with a <b>secondary index</b> keyed on doctor."] },
+    { title: "Serverless capacity",
+      text: ["No servers or instances: data is replicated across <b>3 AZs</b> automatically.", "<b>On-demand</b> mode bills per request and scales instantly; <b>provisioned</b> mode sets read/write capacity (with auto scaling) for steady traffic. A <b>Standard-IA</b> table class lowers storage cost for rarely read tables."] },
+    { title: "DAX for microseconds",
+      text: ["<b>DynamoDB Accelerator (DAX)</b> is an in-memory cache built for DynamoDB: reads in <b>microseconds</b> with almost no code change.", "It works only with DynamoDB; for other databases use ElastiCache."],
+      tip: "Microsecond reads for DynamoDB = DAX." },
+    { title: "When to choose DynamoDB",
+      text: ["Serverless, key-value or document data, huge scale, predictable single-digit-ms latency: carts, sessions, IoT readings, user profiles.", "Not for complex JOINs or ad hoc reporting; use a relational database or a warehouse for those. Access is controlled with IAM."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ---------- query or scan ---------- */
+  function q() {
+    const by = $('qBy').value, v = $('qV').value.trim();
+    let hits, read, kind;
+    if (by === 'pk') { hits = ITEMS.filter(i => i.pk === v); read = hits.length; kind = 'Query'; }
+    else if (by === 'pksk') { const [p, d] = v.split(/\s+/); hits = ITEMS.filter(i => i.pk === p && i.sk >= (d || '')); read = hits.length; kind = 'Query'; }
+    else { hits = ITEMS.filter(i => i.a.toLowerCase().includes(v.toLowerCase())); read = ITEMS.length; kind = 'Scan'; }
+    const big = Math.round(read / ITEMS.length * 10000000);
+    $('qK').innerHTML = [['Operation', kind, kind === 'Query' ? 'good' : 'bad'], ['Items read', read + ' of ' + ITEMS.length, ''], ['Items returned', hits.length, ''], ['Same on 10 million items', kind === 'Query' ? 'a few items read' : '10,000,000 read', kind === 'Query' ? 'good' : 'bad']]
+      .map(([l, x, c]) => `<div class="${c}"><b>${x}</b><span>${l}</span></div>`).join('');
+  }
+  const EX = { pk: 'P-1001', pksk: 'P-1001 2026-06', attr: 'Rao' };
+  $('qBy').addEventListener('change', () => { $('qV').value = EX[$('qBy').value]; q(); }); $('qV').addEventListener('input', q); q();
+
+  K.pick($('pick'), [
+    { q: 'Shopping carts for millions of users, serverless, ms latency.', a: 'DynamoDB', why: 'Key-value at scale.' },
+    { q: 'Monthly finance report joining five tables.', a: 'RDS / Aurora', why: 'JOINs and SQL.' },
+    { q: 'Cut DynamoDB read latency to microseconds.', a: 'DAX', why: 'DynamoDB-specific in-memory cache.' },
+    { q: 'IoT sensor readings keyed by device ID, unpredictable traffic.', a: 'DynamoDB', why: 'On-demand capacity, scales out.' },
+    { q: 'Existing SQL Server app.', a: 'RDS / Aurora', why: 'Relational engine.' }
+  ], ['DynamoDB', 'DAX', 'RDS / Aurora']);
+
+})();
+</script>
+</body>
+</html>

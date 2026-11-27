@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>ELB &amp; Auto Scaling: review</title>
+<meta name="description" content="AWS Cloud Practitioner: ELB and Auto Scaling section review with a one-path recap, section summary, commonly confused pairs, a mixed drill and 20 exam-style questions.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-xs); }
+  .topic-links a { display: block; padding: var(--space-sm) var(--space-sm); border-radius: 0; background: var(--panel); color: var(--fg); text-decoration: none; }
+  .topic-links a:hover { border-color: var(--orange); }
+  .topic-links a span { display: block; font-size: 13px; color: var(--muted); margin-top: var(--space-3xs); }
+</style>
+
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html" aria-current="page"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <p class="crumbs">AWS CLF-C02 / ELB &amp; Auto Scaling / Section review</p>
+    <h1>ELB &amp; Auto Scaling: review</h1>
+    <ul class="lede">
+      <li><b>Vertical</b> scaling = bigger instance; <b>horizontal</b> = more instances; <b>elasticity</b> = more or fewer automatically; <b>high availability</b> = 2+ AZs.</li>
+      <li>A <b>load balancer</b> gives one DNS name, spreads requests across AZs, health-checks targets and can end HTTPS.</li>
+      <li>An <b>Auto Scaling group</b> keeps between min and max instances, launches them from a launch template, replaces unhealthy ones and registers them with the load balancer.</li>
+      <li><b>Scaling policies</b> decide when: simple, step, target tracking, scheduled or predictive.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="recapH">
+    <h2 class="stage-title" id="recapH">The whole section on one path</h2>
+    <div class="stage-kind">Press play · each hop is one topic</div>
+    <div class="controls"><button class="btn primary" id="recapPlay" type="button">Play the morning rush</button></div>
+    <div class="scroll"><svg class="diagram nf-canvas" id="recapSvg" viewBox="0 0 1000 420" aria-label="Patients reach an Application Load Balancer that spreads requests over an Auto Scaling group in two Availability Zones; a CloudWatch alarm triggers scale-out"></svg></div>
+    <p class="nf-cap" id="recapCap">Press <b>Play the morning rush</b>.</p>
+  </section>
+
+  <section aria-labelledby="sumH">
+    <h2 id="sumH">Section summary</h2>
+    <div class="sum-grid">
+      <div class="card"><h3>HA, scalability, elasticity</h3><ul><li>Vertical: bigger instance (scale up), has a ceiling.</li><li>Horizontal: more instances (scale out), needs a stateless app.</li><li>Elasticity: automatic scale out and in, pay for what you use.</li><li>High availability: at least 2 AZs. Agility: resources in minutes (a distractor).</li></ul></div>
+      <div class="card"><h3>Elastic Load Balancing</h3><ul><li>Managed; one DNS name; spreads load across AZs.</li><li>Health checks stop traffic to broken instances.</li><li>TLS termination with ACM; instances allow traffic only from the load balancer's security group.</li><li>ALB layer 7 (HTTP, path/host routing, Lambda). NLB layer 4 (TCP/UDP, static IP, extreme performance). GWLB layer 3 (firewall appliances). Classic: previous generation.</li></ul></div>
+      <div class="card"><h3>Auto Scaling groups</h3><ul><li>Min, desired, max; launch template = what to launch.</li><li>Registers new instances with the target group; deregisters before removing.</li><li>Replaces unhealthy instances (turn on ELB health checks for app failures).</li><li>Multi-AZ; free, you pay for the instances.</li></ul></div>
+      <div class="card"><h3>Scaling strategies</h3><ul><li>Simple: alarm → fixed change, then cooldown. Step: change sized by the breach.</li><li>Target tracking: keep a metric (CPU 50%) steady. Recommended first.</li><li>Scheduled: known times. Predictive: machine-learning forecast, scales ahead.</li></ul></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="topH">
+    <h2 id="topH">Topics in this section</h2>
+    <div class="topic-links">
+      <a href="ha-scalability.html">HA, scalability &amp; elasticity<span>Vertical, horizontal, multi-AZ</span></a>
+      <a href="load-balancers.html">Elastic Load Balancing<span>Health checks, ALB, NLB, GWLB</span></a>
+      <a href="auto-scaling.html">Auto Scaling groups<span>Min, desired, max, self-healing</span></a>
+      <a href="scaling-strategies.html">Scaling strategies<span>Target tracking, scheduled, predictive</span></a>
+    </div>
+  </section>
+
+  <section aria-labelledby="pairH">
+    <h2 id="pairH">Commonly confused pairs</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Pair</th><th>The difference</th></tr></thead>
+        <tbody>
+          <tr><td>Vertical vs horizontal scaling</td><td>A bigger instance vs more instances</td></tr>
+          <tr><td>Scalability vs elasticity</td><td>Can handle more load vs adjusts capacity automatically, both ways, with demand</td></tr>
+          <tr><td>Elasticity vs agility</td><td>Capacity follows demand vs resources are available in minutes</td></tr>
+          <tr><td>High availability vs scalability</td><td>Survives a data-centre failure (2+ AZs) vs handles more load</td></tr>
+          <tr><td>Load balancer vs Auto Scaling group</td><td>Routes each request to a healthy instance vs decides how many instances exist and replaces broken ones</td></tr>
+          <tr><td>ALB vs NLB</td><td>Layer 7 HTTP with smart routing and a DNS name vs layer 4 TCP/UDP, extreme performance and a static IP</td></tr>
+          <tr><td>NLB vs GWLB</td><td>Forwards traffic to your app vs passes traffic through security appliances first</td></tr>
+          <tr><td>EC2 vs ELB health checks in an ASG</td><td>Instance and hardware problems only vs also replaces instances whose app fails the load balancer's check</td></tr>
+          <tr><td>Simple vs step scaling</td><td>One fixed change then a cooldown vs a change sized by how far the alarm is breached</td></tr>
+          <tr><td>Scheduled vs predictive scaling</td><td>Times you set vs times machine learning forecasts</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="drillH">
+    <h2 class="stage-title" id="drillH">Mixed drill: name it</h2>
+    <div class="card" id="drill"></div>
+  </section>
+
+  <section aria-labelledby="exH">
+    <h2 id="exH">Exam-style questions</h2>
+    <p class="sub">Twenty original questions in the style of CLF-C02 and common practice sets. Pick an answer (two for "Select TWO") to see why.</p>
+    <div id="mcq"></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Section cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Bigger instance</span><span class="arrow">→</span><span class="then">Vertical scaling</span></li>
+      <li><span class="if">More instances</span><span class="arrow">→</span><span class="then">Horizontal scaling</span></li>
+      <li><span class="if">Automatically match capacity to demand</span><span class="arrow">→</span><span class="then">Elasticity: Auto Scaling group</span></li>
+      <li><span class="if">Survive an AZ failure</span><span class="arrow">→</span><span class="then">Multi-AZ load balancer + ASG</span></li>
+      <li><span class="if">HTTP path or host routing, Lambda targets</span><span class="arrow">→</span><span class="then">ALB</span></li>
+      <li><span class="if">TCP/UDP, static IP, millions of requests</span><span class="arrow">→</span><span class="then">NLB</span></li>
+      <li><span class="if">Third-party firewall appliances</span><span class="arrow">→</span><span class="then">GWLB</span></li>
+      <li><span class="if">Replace failed instances automatically</span><span class="arrow">→</span><span class="then">ASG</span></li>
+      <li><span class="if">Keep CPU at 50%</span><span class="arrow">→</span><span class="then">Target tracking</span></li>
+      <li><span class="if">Known event at a known time</span><span class="arrow">→</span><span class="then">Scheduled scaling</span></li>
+      <li><span class="if">Forecast with machine learning</span><span class="arrow">→</span><span class="then">Predictive scaling</span></li>
+      <li><span class="if">Resources in minutes instead of weeks</span><span class="arrow">→</span><span class="then">Agility</span></li>
+    </ul>
+  </section>
+
+  <footer>Questions are original, written to the official exam guide (Domain 1 cloud concepts and Domain 3 Task 3.3 compute) and the scenario patterns of public practice sets: <a href="https://docs.aws.amazon.com/aws-certification/latest/examguides/cloud-practitioner-02.html">AWS CLF-C02 exam guide</a>, <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/what-is-load-balancing.html">What is Elastic Load Balancing?</a>, <a href="https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html">What is Amazon EC2 Auto Scaling?</a>. Section notes: ELB and ASG notes 1 to 8.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  const net = K.net($('recapSvg'), {
+    zones: [{ id: 'reg', x: 300, y: 20, w: 680, h: 385, kind: 'region', label: 'ap-south-1' },
+      { id: 'a', x: 560, y: 55, w: 400, h: 160, kind: 'az', label: 'AZ a' }, { id: 'b', x: 560, y: 230, w: 400, h: 160, kind: 'az', label: 'AZ b' }],
+    nodes: {
+      users: { x: 80, y: 130, icon: 'users', kind: 'user', label: 'Patients' },
+      alb: { x: 410, y: 130, icon: 'lb', kind: 'net', label: 'ALB', sub: 'health checks' },
+      cw: { x: 80, y: 320, icon: 'chart', kind: 'mgmt', label: 'CloudWatch', sub: 'CPU 50% target' },
+      lt: { x: 410, y: 320, icon: 'doc', kind: 'mgmt', label: 'ASG', sub: 'launch template' },
+      a1: { x: 680, y: 135, icon: 'server', kind: 'compute', label: 'EC2' }, a2: { x: 850, y: 135, icon: 'server', kind: 'compute', label: 'EC2' },
+      b1: { x: 680, y: 310, icon: 'server', kind: 'compute', label: 'EC2' }, b2: { x: 850, y: 310, icon: 'server', kind: 'compute', label: 'EC2' }
+    },
+    links: [{ a: 'users', b: 'alb' }, { a: 'cw', b: 'lt', kind: 'dash' }, ...['a1', 'a2', 'b1', 'b2'].map(k => ({ a: 'alb', b: k, kind: 'priv', via: k === 'a2' ? [[765, 78]] : undefined })), ...['a2', 'b2'].map(k => ({ a: 'lt', b: k, kind: 'dash' }))]
+  });
+  const idle = () => { net.reset(); ['a2', 'b2'].forEach(k => { net.link('alb', k, 'hide'); net.link('lt', k, 'hide'); }); net.focus(['users', 'alb', 'cw', 'lt', 'a1', 'b1']); };
+  idle();
+  $('recapPlay').addEventListener('click', async () => {
+    const run = K.newRun('r'); idle(); const say = h => $('recapCap').innerHTML = h;
+    try {
+      say('Two instances in two AZs: <b>high availability</b>. Patients call one DNS name: the <b>load balancer</b>.');
+      await net.send(['users', 'alb', 'a1'], { run, label: 'GET' }); await net.send(['users', 'alb', 'b1'], { run, label: 'GET' });
+      say('The morning rush pushes CPU up. <b>Target tracking</b> asks the <b>Auto Scaling group</b> for more instances.'); net.badge('cw', 'CPU 85%', 'bad');
+      await net.send(['cw', 'lt'], { run, tone: 'red', label: 'scale out' });
+      say('Two instances launch from the <b>launch template</b> (<b>horizontal scaling</b>) and register with the target group.');
+      ['a2', 'b2'].forEach(k => net.link('lt', k, '')); net.focus(null);
+      await Promise.all(['a2', 'b2'].map(k => net.send(['lt', k], { run, tone: 'cyan', label: 'launch' })));
+      ['a2', 'b2'].forEach(k => { net.link('lt', k, 'hide'); net.link('alb', k, ''); net.badge(k, 'new', 'ok'); }); net.badge('cw', 'CPU 50%', 'ok');
+      say('The <b>ALB</b> now spreads requests over four instances.');
+      for (const k of ['a1', 'a2', 'b1', 'b2']) await net.send(['users', 'alb', k], { run, label: 'GET' });
+      say('One app fails its <b>health check</b>: the ALB skips it and the ASG replaces it. Tonight the group scales in again: <b>elasticity</b>.');
+      net.state('b2', 'down'); net.link('alb', 'b2', 'cut'); net.badge('b2', 'unhealthy', 'bad');
+      await net.send(['users', 'alb', 'a2'], { run, label: 'GET' });
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  });
+
+  K.pick($('drill'), [
+    { q: 'Change t3.large to t3.2xlarge.', a: 'Vertical scaling', why: 'A bigger instance.' },
+    { q: 'Keep the site up when one data centre fails.', a: 'Multi-AZ', why: 'High availability needs 2+ AZs.' },
+    { q: 'Route /api and /images to different target groups.', a: 'ALB', why: 'Layer 7 path routing.' },
+    { q: 'Give partners a fixed IP address to allow-list.', a: 'NLB', why: 'Static IP per AZ, Elastic IP possible.' },
+    { q: 'Inspect all traffic with a third-party firewall.', a: 'GWLB', why: 'Layer 3, GENEVE.' },
+    { q: 'Replace an instance that failed its health check.', a: 'Auto Scaling group', why: 'Self-healing.' },
+    { q: 'Defines the AMI and instance type for new instances.', a: 'Launch template', why: 'The ASG launches from it.' },
+    { q: 'Keep average CPU at 50%.', a: 'Target tracking', why: 'A metric and a target.' },
+    { q: 'Scale before the regular 09:00 peak using past traffic.', a: 'Predictive scaling', why: 'Machine-learning forecast.' },
+    { q: 'A test environment ready in ten minutes.', a: 'Agility', why: 'Speed of getting resources.' }
+  ], ['Vertical scaling', 'Multi-AZ', 'ALB', 'NLB', 'GWLB', 'Auto Scaling group', 'Launch template', 'Target tracking', 'Predictive scaling', 'Agility']);
+
+  K.mcq($('mcq'), [
+    { q: 'A company replaces a <code>t3.medium</code> instance with an <code>m6i.2xlarge</code> to handle more users. What is this?', o: ['Horizontal scaling', 'Vertical scaling', 'Elasticity', 'High availability'], a: [1], why: 'Making one instance bigger is vertical scaling (scale up).' },
+    { q: 'Which design gives a web application high availability?', o: ['One large instance in one AZ', 'Instances in at least two Availability Zones behind a load balancer', 'Several instances in one AZ', 'A bigger EBS volume'], a: [1], why: 'High availability means surviving the loss of an AZ, so instances must run in at least two AZs.' },
+    { q: 'Which benefit of the cloud means a company only pays for capacity it needs at each moment, because capacity is added and removed automatically?', o: ['Agility', 'Elasticity', 'Fault tolerance', 'Global reach'], a: [1], why: 'Elasticity: automatic scale out and in with demand.' },
+    { q: 'A team can now create a full test environment in minutes instead of waiting weeks for hardware. Which cloud benefit is this?', o: ['Elasticity', 'High availability', 'Agility', 'Scalability'], a: [2], why: 'Agility is the speed of getting resources and experimenting.' },
+    { q: 'Which AWS service spreads incoming application traffic across EC2 instances in several Availability Zones?', o: ['Amazon Route 53', 'Elastic Load Balancing', 'Amazon EC2 Auto Scaling', 'Amazon CloudFront'], a: [1], why: 'Elastic Load Balancing distributes traffic across targets in multiple AZs.' },
+    { q: 'An application must route <code>/orders</code> and <code>/payments</code> to different microservices. Which load balancer should it use?', o: ['Network Load Balancer', 'Gateway Load Balancer', 'Application Load Balancer', 'Classic Load Balancer'], a: [2], why: 'Path-based routing needs layer 7 (HTTP): the Application Load Balancer.' },
+    { q: 'A gaming company needs a load balancer for UDP traffic with ultra-low latency and a static IP address. Which should it choose?', o: ['Application Load Balancer', 'Network Load Balancer', 'Gateway Load Balancer', 'Amazon CloudFront'], a: [1], why: 'NLB handles TCP and UDP at layer 4 with extreme performance and a static IP per AZ.' },
+    { q: 'A security team must send all traffic through a fleet of third-party firewall appliances. Which load balancer helps deploy and scale them?', o: ['Gateway Load Balancer', 'Application Load Balancer', 'Network Load Balancer', 'Classic Load Balancer'], a: [0], why: 'GWLB is built for security appliances (layer 3, GENEVE).' },
+    { q: 'How does a load balancer avoid sending requests to an instance whose application has stopped responding?', o: ['It uses health checks', 'It uses AWS Shield', 'It reboots the instance', 'It uses sticky sessions'], a: [0], why: 'Health checks mark the target unhealthy, and the load balancer stops routing to it.' },
+    { q: 'Which statements about Elastic Load Balancing are correct?', o: ['It is a managed service that AWS maintains and scales', 'It can terminate HTTPS using a certificate from AWS Certificate Manager', 'It launches new EC2 instances when CPU is high', 'It can only send traffic to instances in one AZ', 'It replaces the need for security groups'], a: [0, 1], why: 'ELB is managed and can end TLS with an ACM certificate. Launching instances is the ASG\'s job, and ELB spans several AZs.' },
+    { q: 'What is the main purpose of an Amazon EC2 Auto Scaling group?', o: ['To spread traffic across instances', 'To add or remove EC2 instances automatically to match demand', 'To back up EBS volumes', 'To give instances static IP addresses'], a: [1], why: 'An ASG scales the number of instances out and in.' },
+    { q: 'An ASG has minimum 2, desired 4 and maximum 6. Two instances are terminated by a hardware failure. What does the ASG do?', o: ['Nothing, because 2 is the minimum', 'Launches 2 instances to return to 4', 'Launches 4 instances to reach the maximum', 'Lowers desired capacity to 2'], a: [1], why: 'The ASG keeps the running count at desired capacity, so it launches 2 replacements.' },
+    { q: 'Where does an Auto Scaling group get the AMI, instance type and security groups for new instances?', o: ['From the load balancer', 'From a launch template', 'From AWS Config', 'From the target group'], a: [1], why: 'A launch template describes the instances the ASG launches. Launch configurations are the deprecated older form.' },
+    { q: 'An application on an instance hangs, but EC2 status checks still pass. How can the ASG replace that instance automatically?', o: ['Turn on Elastic Load Balancing health checks for the ASG', 'Increase the maximum capacity', 'Use a scheduled action', 'Enable detailed monitoring'], a: [0], why: 'With ELB health checks, an instance that fails the load balancer\'s check counts as unhealthy and is replaced.' },
+    { q: 'How much does Amazon EC2 Auto Scaling itself cost?', o: ['A fixed monthly fee per group', 'A fee per scaling action', 'Nothing; you pay for the resources it launches', 'A percentage of EC2 spend'], a: [2], why: 'There is no charge for the ASG; you pay for the EC2 instances and other resources.' },
+    { q: 'Which scaling policy keeps the average CPU utilization of a group at 40%?', o: ['Scheduled scaling', 'Target tracking scaling', 'Simple scaling', 'Manual scaling'], a: [1], why: 'Target tracking keeps a chosen metric at a target value.' },
+    { q: 'A retailer knows a sale starts at 09:00 next Friday. What is the simplest way to have extra capacity ready?', o: ['Predictive scaling', 'Scheduled scaling', 'Step scaling', 'Vertical scaling'], a: [1], why: 'A known date and time calls for a scheduled action.' },
+    { q: 'Which scaling policy uses machine learning on historical traffic to launch capacity before a recurring peak?', o: ['Target tracking', 'Step scaling', 'Predictive scaling', 'Simple scaling'], a: [2], why: 'Predictive scaling forecasts load and scales ahead of it.' },
+    { q: 'Which services together let a web application scale automatically and survive an AZ failure?', o: ['Elastic Load Balancing', 'Amazon EC2 Auto Scaling', 'AWS Snowball', 'Amazon S3 Glacier', 'AWS Budgets'], a: [0, 1], why: 'A multi-AZ load balancer plus a multi-AZ Auto Scaling group.' },
+    { q: 'What is the Classic Load Balancer\'s status today?', o: ['It is the recommended choice for new applications', 'It is the previous generation; use ALB or NLB for new designs', 'It only supports UDP', 'It replaced the Application Load Balancer'], a: [1], why: 'The Classic Load Balancer is the previous generation, still supported for existing apps.' }
+  ]);
+})();
+</script>
+</body>
+</html>

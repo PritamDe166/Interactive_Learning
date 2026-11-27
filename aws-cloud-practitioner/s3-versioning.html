@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>S3 Versioning</title>
+<meta name="description" content="How S3 versioning keeps every version of an object: overwrites, delete markers, permanent deletes, cost and suspension, with an upload-and-delete lab.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+
+  .ver rect { stroke-width: 2; }
+  .ver.cur rect { fill: var(--teal-wash); stroke: var(--teal); }
+  .ver.old rect { fill: var(--panel); stroke: var(--line); }
+  .ver.marker rect { fill: var(--panel-2); stroke: var(--red); stroke-dasharray: 5 4; }
+  .ver text { fill: var(--fg); font-size: 14px; font-weight: 600; text-anchor: middle; }
+  .ver .sm { fill: var(--muted); font-family: var(--mono); font-size: 12px; font-weight: 400; }
+  #stSvg .mlabel { font-size: 15px; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html" aria-current="page"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Amazon S3 / 4 · Domain 3 Technology</p>
+    <h1>S3 Versioning</h1>
+    <ul class="lede">
+      <li><b>Versioning</b> keeps every version of an object, so overwrites and deletes can be undone.</li>
+      <li>A normal delete adds a <b>delete marker</b>; removing the marker brings the object back.</li>
+      <li>Deleting a <b>specific version ID</b> is permanent.</li>
+      <li>Each version is billed as a full object. Versioning can be <b>suspended</b> but not turned off, and replication needs it.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Versioning</span><span class="like">SharePoint version history, or Volume Shadow Copies on a file share</span><span>Kept per object for ever (until you expire or delete versions), and every version is billed.</span></div>
+      <div class="row"><span class="aws">Delete marker</span><span class="like">Moving a file to the Recycle Bin</span><span>Nothing is removed; the object just stops appearing.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: saving a report three times, then deleting it</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram" id="stSvg" viewBox="0 0 1000 400" aria-label="A stack of versions of report.pdf grows with each upload; a delete marker hides it; removing the marker restores it"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>Versioning is enabled <b>per bucket</b>. States: unversioned (default), <b>Enabled</b>, <b>Suspended</b>.</li>
+      <li>An overwrite creates a <b>new version</b>; the previous one becomes <b>noncurrent</b> and is kept.</li>
+      <li>DELETE without a version ID adds a <b>delete marker</b>: GET returns 404, but the data is still there. Remove the marker to restore.</li>
+      <li>DELETE <b>with a version ID</b> permanently removes that version.</li>
+      <li>Objects uploaded before versioning was enabled have version ID <b>null</b>.</li>
+      <li>Every version is <b>billed</b>; lifecycle rules can expire noncurrent versions.</li>
+      <li><b>MFA Delete</b> requires a second factor for permanent deletes and versioning changes.</li>
+      <li>Versioning is <b>required for replication</b>.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="verH">
+    <h2 class="stage-title" id="verH">Upload, overwrite, delete, undo</h2>
+    <div class="stage-kind">Try it with versioning on, then off</div>
+    <div class="card">
+      <div class="controls">
+        <label class="toggle" for="verOn"><input type="checkbox" id="verOn" checked> Versioning enabled</label>
+        <button class="btn" type="button" id="vUp">Upload / overwrite report.pdf</button>
+        <button class="btn" type="button" id="vDel">Delete (no version ID)</button>
+        <button class="btn" type="button" id="vUndo">Remove the delete marker</button>
+        <button class="btn" type="button" id="vReset">Reset</button>
+      </div>
+      <div class="scroll"><svg class="diagram narrow" id="ver" viewBox="0 0 1000 200" aria-label="Stack of object versions with the current version on the right"></svg></div>
+      <p class="status-line" id="verStatus">Start by uploading the file.</p>
+      <p class="sub" id="vCost" style="margin:0"></p>
+    </div>
+  </section>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">What happens?</h2>
+    <div class="stage-kind">Predict the result</div>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Turn on versioning and restore a deleted file (outline)</summary>
+      <ol>
+        <li>Bucket → <b>Properties</b> → Bucket Versioning → <b>Edit</b> → Enable.</li>
+        <li>Upload <code>index.html</code>, edit it locally, and upload it again.</li>
+        <li>Turn on <b>Show versions</b>: you see both versions with their IDs.</li>
+        <li>Delete the object (versions hidden): with Show versions on, a <b>Delete marker</b> appears. Delete the marker and the file is back.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Recover an accidentally deleted or overwritten object</span><span class="arrow">→</span><span class="then">Versioning</span></li>
+      <li><span class="if">Versioned delete without a version ID</span><span class="arrow">→</span><span class="then">Delete marker (GET = 404)</span></li>
+      <li><span class="if">Undo a delete</span><span class="arrow">→</span><span class="then">Delete the delete marker</span></li>
+      <li><span class="if">Permanent delete in a versioned bucket</span><span class="arrow">→</span><span class="then">Delete with a version ID</span></li>
+      <li><span class="if">Turn versioning off</span><span class="arrow">→</span><span class="then">Only Suspend</span></li>
+      <li><span class="if">Prerequisite for replication</span><span class="arrow">→</span><span class="then">Versioning</span></li>
+      <li><span class="if">Extra protection for permanent deletes</span><span class="arrow">→</span><span class="then">MFA Delete</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Action</th><th>Versioning off</th><th>Versioning on</th></tr></thead>
+        <tbody>
+          <tr><td><b>PUT same key</b></td><td>Replaces the object</td><td>Adds a new current version</td></tr>
+          <tr><td><b>DELETE key</b></td><td>Permanently deleted</td><td>Adds a delete marker</td></tr>
+          <tr><td><b>DELETE key + version ID</b></td><td>n/a</td><td>Permanently deletes that version</td></tr>
+          <tr><td><b>GET key</b></td><td>The object</td><td>The current version (404 if a delete marker is current)</td></tr>
+          <tr><td><b>Storage cost</b></td><td>One copy</td><td>Every version</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><p><b>Object Lock</b> (WORM: write once, read many) can stop versions being deleted or overwritten for a retention period, for compliance. It needs versioning.</p></div>
+      <div class="note"><p><b>Lifecycle for versions.</b> A lifecycle rule can move noncurrent versions to a cheaper class and expire them after a number of days.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>A user deletes a file in a versioned bucket. Is it gone?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> A delete marker was added; remove it to restore the file.</p></div></details>
+      <details><summary>How do you delete a version for good?<span class="go">Show answer</span></summary><div class="ans"><p>DELETE with its <b>version ID</b>.</p></div></details>
+      <details><summary>What version ID do objects that existed before versioning have?<span class="go">Show answer</span></summary><div class="ans"><p><code>null</code>.</p></div></details>
+      <details><summary>Does versioning change your bill?<span class="go">Show answer</span></summary><div class="ans"><p><b>Yes.</b> Every stored version is billed as a full object.</p></div></details>
+      <details><summary>Can you turn versioning off again?<span class="go">Show answer</span></summary><div class="ans"><p><b>No</b>, only <b>suspend</b> it. Existing versions remain.</p></div></details>
+      <details><summary>Which feature requires versioning on both buckets?<span class="go">Show answer</span></summary><div class="ans"><p><b>Replication</b> (CRR and SRR).</p></div></details>
+    </div>
+  </section>
+
+  <footer>Version IDs in the diagrams are shortened examples. Sources: S3 notes "Amazon S3 Versioning and Hands-On" and "Amazon S3: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/versioning-workflows.html">How S3 Versioning works</a>; <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/DeleteMarker.html">Working with delete markers</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const sv = $('stSvg');
+  K.text(sv, 40, 34, 'clinic-docs / report.pdf', 'zone-label');
+  const st = K.text(sv, 40, 60, '', 'mlabel muted'); st.style.textAnchor = 'start';
+  const G = K.el('g', {}, sv), P = K.el('g', {}, sv);
+  const S = [
+    { s: 'Versioning: never enabled', v: [{ l: 'v1 → replaced', id: 'null', k: 'cur', n: 'the only copy' }], ghost: 'old content lost' },
+    { s: 'Versioning: Enabled', v: [{ l: 'v1', id: 'null', k: 'cur', n: 'existed before: ID null' }] },
+    { s: 'Versioning: Enabled', v: [{ l: 'v1', id: 'null', k: 'old', n: 'noncurrent · billed' }, { l: 'v2', id: 'K7f2a', k: 'cur', n: 'current' }, { l: 'v3', id: 'Qm91c', k: 'cur', n: 'current' }] },
+    { s: 'Versioning: Enabled', v: [{ l: 'v1', id: 'null', k: 'old' }, { l: 'v2', id: 'K7f2a', k: 'old' }, { l: 'v3', id: 'Qm91c', k: 'old', n: 'still stored' }, { l: 'Delete marker', id: 'Zx08p', k: 'marker', n: 'GET → 404' }] },
+    { s: 'Versioning: Enabled', v: [{ l: 'v1', id: 'null', k: 'old' }, { l: 'v2', id: 'K7f2a', k: 'old' }, { l: 'v3', id: 'Qm91c', k: 'cur', n: 'current again' }] },
+    { s: 'Versioning: Enabled', v: [{ l: 'v1', id: 'null', k: 'old' }, { l: 'v3', id: 'Qm91c', k: 'cur' }], ghost: 'v2 deleted for good' },
+    { s: 'Versioning: Enabled', v: [{ l: 'v1', id: 'null', k: 'old', n: 'billed' }, { l: 'v3', id: 'Qm91c', k: 'cur', n: 'billed' }] },
+    { s: 'Versioning: Suspended', v: [{ l: 'v1', id: 'null', k: 'old', n: 'kept' }, { l: 'v3', id: 'Qm91c', k: 'old', n: 'kept' }, { l: 'v4', id: 'null', k: 'cur', n: 'new writes: ID null' }] }
+  ];
+  function draw(i) {
+    G.textContent = ''; P.textContent = '';
+    const s = S[i]; st.textContent = s.s;
+    const v = s.v.map((x, j) => ({ ...x, k: j === s.v.length - 1 && x.k !== 'marker' ? 'cur' : x.k === 'cur' ? 'old' : x.k }));
+    const n = v.length, w = Math.min(200, 880 / n - 20);
+    v.forEach((x, j) => {
+      const X = 60 + j * (w + 20);
+      const g = K.el('g', { class: 'ver ' + x.k }, G);
+      K.el('rect', { x: X, y: 110, width: w, height: 130, rx: 12 }, g);
+      K.text(g, X + w / 2, 160, x.l, '');
+      K.text(g, X + w / 2, 186, 'id ' + x.id, 'sm');
+      K.text(g, X + w / 2, 212, x.n || (x.k === 'cur' ? 'current' : x.k === 'marker' ? 'GET → 404' : 'noncurrent'), 'sm');
+    });
+    if (s.ghost) { const t = K.text(G, 500, 300, s.ghost, 'mlabel bad'); }
+    const t2 = K.text(G, 500, 380, i === 6 ? 'Each version is a full object: 2 × 4 MB billed' : i === 3 ? 'GET report.pdf → 404, but nothing was removed' : '', 'mlabel muted');
+  }
+  function base(i) { draw(i); }
+  const req = async (run, label, tone, to) => { const p = K.pill(P, label, tone); await K.move(p, [500, 70], [to || 500, 100], 500, run); p.remove(); };
+  const STEPS = [
+    { title: "Without versioning, an overwrite is final",
+      text: ["A bucket starts with versioning <b>off</b>. Uploading <code>report.pdf</code> again <b>replaces</b> the object.", "A delete is permanent too. There is no recycle bin."],
+      play: async run => { base(0); await req(run, 'PUT report.pdf', 'bad'); } },
+    { title: "Turn versioning on",
+      text: ["Versioning is a <b>bucket</b> setting. Once enabled, every write keeps the previous copy.", "Objects that were already there keep the version ID <code>null</code>."] },
+    { title: "Every overwrite adds a version",
+      text: ["Two more uploads create <b>v2</b> and <b>v3</b>, each with its own version ID.", "The latest is the <b>current</b> version that a normal GET returns; older ones become <b>noncurrent</b> and are kept."],
+      play: async run => { base(2); await req(run, 'PUT report.pdf', 'alt'); } },
+    { title: "Delete adds a delete marker",
+      text: ["A DELETE without a version ID doesn't remove anything. S3 adds a <b>delete marker</b> on top.", "A normal GET now returns <b>404</b>, so the object looks deleted."],
+      play: async run => { base(3); await req(run, 'DELETE report.pdf', 'bad'); } },
+    { title: "Undo: remove the marker",
+      text: ["Delete the <b>delete marker</b> itself (by its version ID) and the previous version is current again.", "This is how you recover from an accidental delete."],
+      tip: "Recover an accidental delete or overwrite = versioning.",
+      play: async run => { base(4); await req(run, 'DELETE marker Zx08p', 'ok'); } },
+    { title: "Deleting a version is permanent",
+      text: ["A DELETE <b>with a version ID</b> removes that version for good.", "MFA Delete can require a second factor for this and for changing the versioning state."],
+      play: async run => { base(5); await req(run, 'DELETE ?versionId=K7f2a', 'bad'); } },
+    { title: "Every version is billed",
+      text: ["Each version is a full object, so a 4 MB file saved 50 times costs 200 MB of storage.", "Use <b>lifecycle rules</b> to expire noncurrent versions after, say, 90 days."] },
+    { title: "Suspend, never fully off",
+      text: ["Once enabled, versioning can only be <b>suspended</b>. Existing versions stay; new writes get the ID <code>null</code>.", "Versioning is required for <b>replication</b> (next topic)."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ---------- versioning lab ---------- */
+  const vs = $('ver');
+  const vG = K.el('g', {}, vs);
+  K.text(vs, 40, 30, 'clinic-docs / report.pdf', 'zone-label');
+  let V = [], seq = 0;
+  const vid = () => (seq++ === 0 && !$('verOn').checked ? 'null' : Math.random().toString(36).slice(2, 7));
+  function drawV() {
+    vG.textContent = '';
+    if (!V.length) { K.text(vG, 500, 120, 'no object', 'mlabel muted'); return; }
+    const n = V.length, w = Math.min(190, 900 / n - 16);
+    V.forEach((v, i) => {
+      const x = 60 + i * (w + 16), cur = i === n - 1;
+      const g = K.el('g', { class: 'ver ' + (v.marker ? 'marker' : cur ? 'cur' : 'old') }, vG);
+      K.el('rect', { x, y: 60, width: w, height: 110, rx: 12 }, g);
+      K.text(g, x + w / 2, 100, v.marker ? 'Delete marker' : v.label, '');
+      K.text(g, x + w / 2, 122, 'id ' + v.id, 'sm');
+      K.text(g, x + w / 2, 144, v.marker ? (cur ? 'GET → 404' : 'removed') : cur ? 'current' : 'noncurrent', 'sm');
+    });
+  }
+  const vst = $('verStatus');
+  async function vAct(kind) {
+    const run = K.newRun('ver');
+    const on = $('verOn').checked;
+    const p = K.pill(vG, { up: 'PUT report.pdf', over: 'PUT report.pdf', del: 'DELETE report.pdf', undo: 'DELETE marker id' }[kind], kind === 'del' ? 'bad' : 'alt');
+    try {
+      await K.move(p, [500, 0], [500, 40], 400, run); p.remove();
+      if (kind === 'up' || kind === 'over') {
+        if (!on) {
+          const had = V.length;
+          V = [{ id: 'null', label: had ? 'v (replaced)' : 'v1' }];
+          vst.innerHTML = had ? '<span class="bad-text">Without versioning the upload replaced the only copy.</span>' : 'Uploaded.';
+        } else {
+          V.push({ id: vid(), label: 'v' + (V.filter(x => !x.marker).length + 1) });
+          vst.innerHTML = V.length === 1 ? 'Uploaded. Each version gets an ID.' : 'Overwritten: <b>v' + V.filter(x => !x.marker).length + '</b> is current; older versions stay (and are billed).';
+        }
+      } else if (kind === 'del') {
+        if (!V.length || V[V.length - 1].marker) { vst.textContent = 'Nothing current to delete.'; drawV(); return; }
+        if (on) { V.push({ id: vid(), marker: true }); vst.innerHTML = 'A <b>delete marker</b> is now current, so GET returns 404. Nothing was actually removed.'; }
+        else { V = []; vst.innerHTML = '<span class="bad-text">Gone for good.</span> Without versioning, a delete is permanent.'; }
+      } else if (kind === 'undo') {
+        if (V.length && V[V.length - 1].marker) { V.pop(); vst.innerHTML = '<span class="ok-text">Restored.</span> Deleting the marker makes the previous version current again.'; }
+        else vst.textContent = 'There is no delete marker on top.';
+      }
+      $('vCost').textContent = `Versions stored: ${V.filter(x => !x.marker).length} × 4 MB = ${V.filter(x => !x.marker).length * 4} MB billed`;
+      drawV();
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('vUp').addEventListener('click', () => vAct('up'));
+  $('vDel').addEventListener('click', () => vAct('del'));
+  $('vUndo').addEventListener('click', () => vAct('undo'));
+  $('vReset').addEventListener('click', () => { K.cancel('ver'); V = []; seq = 0; drawV(); vst.textContent = 'Start by uploading the file.'; $('vCost').textContent = ''; });
+  $('verOn').addEventListener('change', () => { if (!$('verOn').checked && V.length) vst.innerHTML = 'In real S3, once enabled, versioning can only be <b>suspended</b>. Here the bucket now acts as if it never had versioning.'; });
+  drawV();
+
+  K.pick($('pick'), [
+    { q: 'A user overwrote last month\'s report. Can you get it back?', a: 'Yes, if versioning was on', why: 'The old copy is a noncurrent version.' },
+    { q: 'Versioned bucket: DELETE report.pdf (no version ID). What happens?', a: 'Delete marker added', why: 'GET returns 404; the data is still there.' },
+    { q: 'DELETE report.pdf?versionId=K7f2a', a: 'Permanently deleted', why: 'Deleting a specific version is permanent.' },
+    { q: 'Versioning was never enabled and someone deletes a file.', a: 'Permanently deleted', why: 'Without versioning there is no previous copy.' },
+    { q: 'You remove the delete marker.', a: 'Yes, if versioning was on', why: 'The previous version becomes current again.' }
+  ], ['Yes, if versioning was on', 'Delete marker added', 'Permanently deleted']);
+
+})();
+</script>
+</body>
+</html>

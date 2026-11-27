@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>Amazon S3: review</title>
+<meta name="description" content="AWS Cloud Practitioner: S3 section review with a one-path recap, section summary, commonly confused pairs, a mixed drill and 20 exam-style questions.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .topic-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-xs); }
+  .topic-links a { display: block; padding: var(--space-sm) var(--space-sm); border-radius: 0; background: var(--panel); color: var(--fg); text-decoration: none; }
+  .topic-links a:hover { border-color: var(--orange); }
+  .topic-links a span { display: block; font-size: 13px; color: var(--muted); margin-top: var(--space-3xs); }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html" aria-current="page"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Amazon S3 / Section review</p>
+    <h1>Amazon S3: review</h1>
+    <ul class="lede">
+      <li><b>S3</b> stores objects in Regional buckets with globally unique names; 11 nines of durability.</li>
+      <li>Access: IAM policies, bucket policies, <b>Block Public Access</b>; explicit Deny wins. Encrypted at rest by default (<b>SSE-S3</b>).</li>
+      <li><b>Versioning</b> protects against deletes and overwrites; <b>replication</b> (CRR/SRR) copies to other buckets.</li>
+      <li><b>Storage classes</b> and <b>lifecycle rules</b> cut cost; <b>Storage Gateway</b> connects on-premises servers.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="recapH">
+    <h2 class="stage-title" id="recapH">The whole section on one path</h2>
+    <div class="stage-kind">Press play · each hop is one topic</div>
+    <div class="controls"><button class="btn primary" id="recapPlay" type="button">Play an upload</button></div>
+    <div class="scroll"><svg class="diagram nf-canvas" id="recapSvg" viewBox="0 0 1000 420" aria-label="An app uploads a scan through policies to a versioned, encrypted bucket; it is replicated to another Region, on-premises servers write through Storage Gateway, and a lifecycle rule archives old scans to Glacier"></svg></div>
+    <p class="nf-cap" id="recapCap">Press <b>Play an upload</b>.</p>
+  </section>
+
+  <section aria-labelledby="sumH">
+    <h2 id="sumH">Section summary</h2>
+    <div class="sum-grid">
+      <div class="card"><h3>Buckets &amp; objects</h3><ul><li>Object storage, virtually unlimited; max object ~48.8 TiB.</li><li>Bucket in one Region; name unique globally.</li><li>Key = prefix + name; no real folders.</li><li>Pre-signed URL for temporary access.</li></ul></div>
+      <div class="card"><h3>Security</h3><ul><li>Private by default.</li><li>Allowed if IAM <b>or</b> bucket policy allows and nothing denies.</li><li>Public = BPA off + public bucket policy.</li><li>Access Analyzer finds public and cross-account buckets.</li></ul></div>
+      <div class="card"><h3>Website, versioning, replication</h3><ul><li>Static website: HTTP endpoint, index document; 403 = not public; CloudFront for HTTPS.</li><li>Versioning: delete marker, permanent version delete, every version billed.</li><li>Replication: versioning on both, async, not retroactive; CRR vs SRR.</li></ul></div>
+      <div class="card"><h3>Classes, encryption, hybrid</h3><ul><li>Standard, Intelligent-Tiering, Standard-IA, One Zone-IA, Glacier Instant / Flexible / Deep Archive, Express One Zone.</li><li>Lifecycle: transitions and expiration.</li><li>SSE-S3 default, SSE-KMS audited, SSE-C, client-side.</li><li>Storage Gateway: File, Volume, Tape.</li></ul></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="topH">
+    <h2 id="topH">Topics in this section</h2>
+    <div class="topic-links">
+      <a href="s3-basics.html">Buckets &amp; objects<span>Keys, naming, durability</span></a>
+      <a href="s3-security.html">Security &amp; bucket policies<span>IAM, BPA, explicit deny</span></a>
+      <a href="s3-static-website.html">Static website hosting<span>403, HTTPS via CloudFront</span></a>
+      <a href="s3-versioning.html">Versioning<span>Delete markers</span></a>
+      <a href="s3-replication.html">Replication<span>CRR and SRR</span></a>
+      <a href="s3-storage-classes.html">Storage classes<span>Lifecycle and cost</span></a>
+      <a href="s3-encryption.html">Encryption<span>SSE-S3, SSE-KMS, client-side</span></a>
+      <a href="iam-access-analyzer.html">IAM Access Analyzer<span>Public and shared buckets</span></a>
+      <a href="storage-gateway.html">Storage Gateway<span>File, Volume, Tape</span></a>
+    </div>
+  </section>
+
+  <section aria-labelledby="pairH">
+    <h2 id="pairH">Commonly confused pairs</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Pair</th><th>The difference</th></tr></thead>
+        <tbody>
+          <tr><td>S3 vs EBS vs EFS</td><td>Object storage over HTTPS vs a block disk for one instance vs a shared NFS file system</td></tr>
+          <tr><td>Bucket policy vs IAM policy</td><td>Attached to the bucket (can name other accounts or everyone) vs attached to a user or role</td></tr>
+          <tr><td>Block Public Access vs bucket policy</td><td>A safety override that stops public grants vs the grant itself</td></tr>
+          <tr><td>Versioning vs replication</td><td>Older versions inside one bucket vs copies in another bucket (needs versioning)</td></tr>
+          <tr><td>CRR vs SRR</td><td>Copy to another Region vs another bucket in the same Region</td></tr>
+          <tr><td>Standard-IA vs One Zone-IA</td><td>Multi-AZ, 99.9% vs one AZ, 99.5%, for re-creatable data</td></tr>
+          <tr><td>Glacier Instant vs Flexible vs Deep Archive</td><td>Milliseconds vs minutes to hours vs within 12 hours (cheapest)</td></tr>
+          <tr><td>Intelligent-Tiering vs lifecycle rules</td><td>Moves objects by actual access vs by age on your schedule</td></tr>
+          <tr><td>SSE-S3 vs SSE-KMS</td><td>S3 manages the keys (default) vs you control keys in KMS with CloudTrail audit</td></tr>
+          <tr><td>Storage Gateway vs DataSync / Snowball</td><td>Ongoing hybrid access vs moving data once</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="drillH">
+    <h2 class="stage-title" id="drillH">Mixed drill: name it</h2>
+    <div class="card" id="drill"></div>
+  </section>
+
+  <section aria-labelledby="exH">
+    <h2 id="exH">Exam-style questions</h2>
+    <p class="sub">Twenty original questions in the style of CLF-C02 and common practice sets. Pick an answer (two for "Select TWO") to see why.</p>
+    <div id="mcq"></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Section cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Object storage, virtually unlimited</span><span class="arrow">→</span><span class="then">S3</span></li>
+      <li><span class="if">Recover deleted or overwritten objects</span><span class="arrow">→</span><span class="then">Versioning</span></li>
+      <li><span class="if">Copy to another Region</span><span class="arrow">→</span><span class="then">CRR (needs versioning)</span></li>
+      <li><span class="if">Aggregate logs in the same Region</span><span class="arrow">→</span><span class="then">SRR</span></li>
+      <li><span class="if">Unknown access pattern</span><span class="arrow">→</span><span class="then">Intelligent-Tiering</span></li>
+      <li><span class="if">Infrequent, instant, multi-AZ</span><span class="arrow">→</span><span class="then">Standard-IA</span></li>
+      <li><span class="if">Archive in milliseconds</span><span class="arrow">→</span><span class="then">Glacier Instant Retrieval</span></li>
+      <li><span class="if">Cheapest archive</span><span class="arrow">→</span><span class="then">Glacier Deep Archive</span></li>
+      <li><span class="if">Prevent public exposure</span><span class="arrow">→</span><span class="then">Block Public Access</span></li>
+      <li><span class="if">Cross-account or public grant</span><span class="arrow">→</span><span class="then">Bucket policy</span></li>
+      <li><span class="if">Encrypted at rest by default</span><span class="arrow">→</span><span class="then">SSE-S3</span></li>
+      <li><span class="if">HTTPS for an S3 website</span><span class="arrow">→</span><span class="then">CloudFront</span></li>
+      <li><span class="if">On-premises access to S3</span><span class="arrow">→</span><span class="then">Storage Gateway</span></li>
+    </ul>
+  </section>
+
+  <footer>Questions are original, written to the official exam guide (Domain 2 security and Domain 3 Task 3.6 storage): <a href="https://docs.aws.amazon.com/aws-certification/latest/examguides/cloud-practitioner-02.html">AWS CLF-C02 exam guide</a>, <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html">Amazon S3 User Guide</a>, <a href="https://aws.amazon.com/s3/storage-classes/">S3 storage classes</a>. Section notes: Amazon S3 notes 1 to 13.</footer>
+</div>
+
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('recapSvg'), {
+    zones: [{ id: 'm', x: 300, y: 20, w: 420, h: 385, kind: 'region', label: 'ap-south-1' }, { id: 'f', x: 760, y: 20, w: 220, h: 385, kind: 'region', label: 'eu-central-1' }, { id: 'dc', x: 20, y: 250, w: 250, h: 155, kind: 'onprem', label: 'On-premises' }],
+    nodes: {
+      app: { x: 100, y: 90, icon: 'server', kind: 'compute', label: 'Clinic app', sub: 'IAM role' },
+      gw: { x: 140, y: 340, icon: 'router', kind: 'net', label: 'Storage Gateway' },
+      pol: { x: 390, y: 90, icon: 'shield', kind: 'sec', label: 'Policies + BPA' },
+      b: { x: 560, y: 200, icon: 'bucket', kind: 'storage', label: 'clinic-imaging', sub: 'versioned · SSE-S3' },
+      gl: { x: 560, y: 345, icon: 'archive', kind: 'storage', label: 'Glacier', sub: 'lifecycle' },
+      dr: { x: 870, y: 200, icon: 'bucket', kind: 'storage', label: 'DR copy', sub: 'CRR' }
+    },
+    links: [{ a: 'app', b: 'pol' }, { a: 'pol', b: 'b' }, { a: 'gw', b: 'b', via: [[400, 340], [400, 200]] }, { a: 'b', b: 'gl', kind: 'dash' }, { a: 'b', b: 'dr', kind: 'priv' }]
+  });
+  $('recapPlay').addEventListener('click', async () => {
+    const run = K.newRun('r'); net.reset(); const say = h => $('recapCap').innerHTML = h;
+    try {
+      say('The app uploads a scan. Its <b>IAM role</b> allows it; the bucket policy and <b>Block Public Access</b> keep everyone else out.');
+      await net.send(['app', 'pol', 'b'], { run, label: 'PUT scan' }); net.badge('b', 'SSE-S3 at rest', 'ok');
+      say('<b>Versioning</b> keeps every version; <b>replication</b> copies it to another Region (CRR).');
+      await net.send(['b', 'dr'], { run, tone: 'cyan', label: 'copy' }); net.badge('dr', 'replica', 'ok');
+      say('On-premises servers write through <b>Storage Gateway</b>.');
+      await net.send(['gw', 'b'], { run, label: 'file' });
+      say('After 90 days a <b>lifecycle rule</b> moves old scans to a <b>Glacier</b> class.');
+      await net.send(['b', 'gl'], { run, tone: 'yellow', label: 'day 90' }); net.badge('gl', 'cheap archive', 'ok');
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  });
+
+  K.pick($('drill'), [{"q": "Recover an overwritten object.", "a": "Versioning", "why": "Older versions are kept."}, {"q": "Copy objects to another Region automatically.", "a": "CRR", "why": "Cross-Region Replication."}, {"q": "Prevent any bucket in the account from becoming public.", "a": "Block Public Access", "why": "Account-level setting."}, {"q": "Let another AWS account read a bucket.", "a": "Bucket policy", "why": "Resource-based policy naming the account."}, {"q": "Unknown access pattern, no retrieval fees.", "a": "Intelligent-Tiering", "why": "Automatic tiering."}, {"q": "Cheapest archive, 12 hours is fine.", "a": "Glacier Deep Archive", "why": "Lowest storage price."}, {"q": "Control and audit encryption keys.", "a": "SSE-KMS", "why": "Keys in KMS, use logged in CloudTrail."}, {"q": "Find buckets shared publicly or with other accounts.", "a": "Access Analyzer", "why": "IAM Access Analyzer for S3."}, {"q": "On-premises backup software writes virtual tapes to AWS.", "a": "Storage Gateway", "why": "Tape Gateway."}, {"q": "Temporary link to a private object.", "a": "Pre-signed URL", "why": "Signed with the creator's permissions."}], ["Versioning", "CRR", "Block Public Access", "Bucket policy", "Intelligent-Tiering", "Glacier Deep Archive", "SSE-KMS", "Access Analyzer", "Storage Gateway", "Pre-signed URL"]);
+  K.mcq($('mcq'), [{"q": "Images are accessed unpredictably. The company wants automatic cost savings, no retrieval fees and no tiering work. Which storage class?", "o": ["S3 Standard-IA", "S3 Glacier Deep Archive", "S3 Intelligent-Tiering", "S3 One Zone-IA"], "a": [2], "why": "Intelligent-Tiering moves objects by access and charges no retrieval fees."}, {"q": "Which actions are both required to make objects in a new bucket publicly readable?", "o": ["Turn off Block Public Access", "Enable versioning", "Add a bucket policy allowing public s3:GetObject", "Enable Cross-Region Replication", "Enable SSE-KMS"], "a": [0, 2], "why": "Block Public Access must be off and a policy must grant public read."}, {"q": "A user deleted an object in a bucket with versioning enabled. How can it be restored?", "o": ["It is gone; restore from Glacier", "Delete the delete marker", "Replication restores it", "Contact AWS Support"], "a": [1], "why": "The delete added a delete marker; removing it makes the previous version current."}, {"q": "What must be enabled on both buckets before configuring S3 Replication?", "o": ["Object Lock", "Versioning", "Static website hosting", "Transfer Acceleration"], "a": [1], "why": "Replication requires versioning on the source and the destination."}, {"q": "A company must keep a copy of its data in another AWS Region for compliance. Which feature?", "o": ["Same-Region Replication", "Cross-Region Replication", "Lifecycle rules", "Intelligent-Tiering"], "a": [1], "why": "CRR copies objects to a bucket in another Region."}, {"q": "Compliance records must be kept for 10 years at the lowest cost; retrieval within 12 hours is acceptable. Which class?", "o": ["S3 Standard", "Glacier Instant Retrieval", "Glacier Flexible Retrieval", "Glacier Deep Archive"], "a": [3], "why": "Deep Archive is the cheapest, with retrieval within about 12 hours."}, {"q": "An EC2 instance must read objects from a private bucket. What is the best practice?", "o": ["Store an IAM user's access keys on the instance", "Attach an IAM role to the instance", "Make the bucket public", "Use an ACL for anonymous users"], "a": [1], "why": "A role gives temporary credentials without stored keys."}, {"q": "Which statement about S3 durability is correct?", "o": ["It differs greatly by storage class", "All storage classes are designed for 11 nines of durability", "One Zone-IA has the highest durability", "Only Standard is durable"], "a": [1], "why": "Durability is the same; availability differs."}, {"q": "A static website on S3 must be served over HTTPS with a custom domain. What should sit in front of the bucket?", "o": ["AWS Storage Gateway", "Amazon CloudFront", "Amazon EFS", "AWS DMS"], "a": [1], "why": "The website endpoint is HTTP only; CloudFront adds HTTPS."}, {"q": "Which feature moves objects to cheaper classes after 30 and 90 days automatically?", "o": ["S3 Replication", "S3 Lifecycle rules", "Versioning", "IAM Access Analyzer"], "a": [1], "why": "Lifecycle transition actions."}, {"q": "Which tool helps identify buckets that are accessible publicly or by other AWS accounts?", "o": ["Amazon EBS", "IAM Access Analyzer for S3", "S3 Replication metrics", "AWS Storage Gateway"], "a": [1], "why": "It reports public and cross-account access."}, {"q": "By default, how are new objects encrypted at rest in S3?", "o": ["They are not encrypted", "With SSE-S3", "Client-side only", "Only if a bucket policy requires it"], "a": [1], "why": "SSE-S3 has applied to all new objects since January 2023."}, {"q": "An on-premises backup application needs to write to AWS using virtual tapes. Which service?", "o": ["Amazon EFS", "AWS Storage Gateway", "Amazon EBS", "Amazon Athena"], "a": [1], "why": "Tape Gateway presents a virtual tape library backed by S3 and Glacier."}, {"q": "Which statements about S3 One Zone-IA are true?", "o": ["Data is stored in a single Availability Zone", "It has the highest availability of all classes", "It suits data that can be re-created", "It stores copies in three AZs", "It has no minimum storage duration"], "a": [0, 2], "why": "One AZ, 99.5% availability, 30-day minimum; for re-creatable data."}, {"q": "Which is the customer's responsibility for S3 under the shared responsibility model?", "o": ["Physical security of data centres", "Configuring bucket policies and Block Public Access", "Patching the servers behind S3", "Replacing failed disks"], "a": [1], "why": "You configure access and data protection; AWS runs the infrastructure."}, {"q": "What version ID do objects have that existed before versioning was enabled?", "o": ["0", "null", "A generated ID", "They are deleted"], "a": [1], "why": "Pre-existing objects keep version ID null."}, {"q": "How does enabling versioning affect the bill?", "o": ["No change", "Every stored version is billed as a separate object", "Only the latest version is billed", "It is billed per request only"], "a": [1], "why": "Each version is a full object."}, {"q": "Which data best fits S3 Glacier Instant Retrieval?", "o": ["Data accessed several times a day", "Archive data rarely accessed but needed within milliseconds", "Data that can wait hours", "Temporary scratch data"], "a": [1], "why": "Archive pricing with millisecond access."}, {"q": "A company needs single-digit millisecond object storage in one AZ, next to its compute, for ML training. Which option?", "o": ["S3 Standard-IA", "S3 Express One Zone", "Glacier Flexible Retrieval", "S3 Intelligent-Tiering"], "a": [1], "why": "Express One Zone uses directory buckets in one AZ."}, {"q": "Which statement about the S3 static website endpoint is correct?", "o": ["It supports HTTPS natively", "It serves static content over HTTP", "It runs server-side code", "It needs an EC2 instance"], "a": [1], "why": "Static files only, over HTTP."}]);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>Amazon EKS</title>
+<meta name="description" content="Amazon EKS managed Kubernetes: AWS-run control plane, pods on EC2 nodes or Fargate, and when to choose EKS over ECS.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html" aria-current="page"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Other compute / 3 · Domain 3 Technology</p>
+    <h1>Amazon EKS</h1>
+    <ul class="lede">
+      <li><b>EKS</b> is managed <b>Kubernetes</b> on AWS.</li>
+      <li>AWS runs the <b>control plane</b>; pods run on <b>EC2 nodes</b> or on <b>Fargate</b>.</li>
+      <li>Kubernetes is open source and <b>cloud-agnostic</b>: good for portability and hybrid setups.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">EKS</span><span class="like">An on-premises Kubernetes cluster whose master nodes someone else operates</span><span>AWS keeps the control plane available and patched.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: Kubernetes without running the masters</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="An AWS-managed Kubernetes control plane schedules pods onto EC2 worker nodes and onto Fargate"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>EKS = Elastic <b>Kubernetes</b> Service: managed Kubernetes clusters.</li>
+      <li>Kubernetes deploys, scales and manages containers, which run as <b>pods</b>.</li>
+      <li>Control plane managed by AWS; workers on <b>EC2</b> (you) or <b>Fargate</b> (serverless).</li>
+      <li>Use for existing Kubernetes, multi-cloud or hybrid portability.</li>
+      <li>Exam trigger: <b>"Kubernetes"</b> → EKS.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">EKS or ECS?</h2>
+    <div class="stage-kind">Pick the orchestrator</div>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Kubernetes</span><span class="arrow">→</span><span class="then">EKS</span></li>
+      <li><span class="if">AWS-native container orchestration</span><span class="arrow">→</span><span class="then">ECS</span></li>
+      <li><span class="if">Kubernetes pods without nodes</span><span class="arrow">→</span><span class="then">EKS on Fargate</span></li>
+      <li><span class="if">Portable across clouds</span><span class="arrow">→</span><span class="then">Kubernetes / EKS</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>ECS</th><th>EKS</th></tr></thead>
+        <tbody>
+          <tr><td><b>Orchestrator</b></td><td>AWS-native</td><td>Kubernetes (open source)</td></tr>
+          <tr><td><b>Unit</b></td><td>Task</td><td>Pod</td></tr>
+          <tr><td><b>Portability</b></td><td>AWS only</td><td>Any Kubernetes environment</td></tr>
+          <tr><td><b>Compute</b></td><td>EC2 or Fargate</td><td>EC2 or Fargate</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Which service runs managed Kubernetes?<span class="go">Show answer</span></summary><div class="ans"><p><b>EKS</b>.</p></div></details>
+      <details><summary>Where can EKS pods run?<span class="go">Show answer</span></summary><div class="ans"><p>On <b>EC2 nodes</b> or on <b>Fargate</b>.</p></div></details>
+      <details><summary>Why choose EKS over ECS?<span class="go">Show answer</span></summary><div class="ans"><p>Existing <b>Kubernetes</b> use, portability, open-source tooling.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: compute notes "Amazon EKS (Elastic Kubernetes Service)" and "Other Compute Services: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html">What is Amazon EKS?</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 20, y: 20, w: 960, h: 385, kind: 'region', label: 'ap-south-1' }, { id: 'cp', x: 50, y: 60, w: 250, h: 310, kind: 'aws', label: 'Control plane (AWS-managed)' }, { id: 'ng', x: 340, y: 60, w: 380, h: 310, kind: 'vpc', label: 'Node group (EC2, you)' }, { id: 'fg', x: 750, y: 60, w: 210, h: 310, kind: 'vpc', label: 'Fargate (no nodes)' }],
+    nodes: {
+      api: { x: 175, y: 140, icon: 'gear', kind: 'mgmt', label: 'Kubernetes API', sub: 'kubectl' },
+      etcd: { x: 175, y: 300, icon: 'db', kind: 'mgmt', label: 'Cluster state' },
+      n1: { x: 440, y: 150, icon: 'server', kind: 'compute', label: 'Node' },
+      n2: { x: 620, y: 150, icon: 'server', kind: 'compute', label: 'Node' },
+      p1: { x: 440, y: 300, icon: 'box', kind: 'compute', label: 'Pod' },
+      p2: { x: 620, y: 300, icon: 'box', kind: 'compute', label: 'Pod' },
+      p3: { x: 855, y: 220, icon: 'box', kind: 'compute', label: 'Pod', sub: 'on Fargate' }
+    },
+    links: [{ a: 'api', b: 'etcd', kind: 'dash' }, { a: 'api', b: 'n1' }, { a: 'api', b: 'n2', via: [[440, 92], [620, 92]] }, { a: 'n1', b: 'p1', kind: 'priv' }, { a: 'n2', b: 'p2', kind: 'priv' }, { a: 'api', b: 'p3', via: [[300, 30], [855, 30]] }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['api', 'n1', 'n2', 'p1', 'p2'], ['api', 'etcd'], ['n1', 'n2', 'p1', 'p2'], ['api', 'p3'], null];
+    net.focus(F[i]);
+    if (i === 1) net.badge('api', 'AWS runs + scales it', 'ok');
+    if (i === 2) net.badge('n2', 'you manage nodes', 'info');
+    if (i === 3) net.badge('p3', 'serverless pod', 'ok');
+  }
+  const STEPS = [
+    { title: "Kubernetes",
+      text: ["<b>Kubernetes</b> is the open-source standard for deploying, scaling and managing containers. Containers run inside <b>pods</b> on worker <b>nodes</b>.", "Teams that already use Kubernetes elsewhere want the same tools on AWS."],
+      play: async run => { base(0); await Promise.all([net.send(['api', 'n1', 'p1'], { run, tone: 'cyan' }), net.send(['api', 'n2', 'p2'], { run, tone: 'cyan' })]); } },
+    { title: "EKS runs the control plane",
+      text: ["<b>Amazon EKS</b> (Elastic Kubernetes Service) runs the Kubernetes <b>control plane</b> for you across several AZs: the API server and cluster state.", "You use normal Kubernetes tools such as <code>kubectl</code> and Helm."],
+      tip: "\"Kubernetes\" in the question = EKS." },
+    { title: "Worker nodes on EC2",
+      text: ["Pods run on EC2 <b>worker nodes</b> (managed node groups make adding and updating them easier).", "You pay for the nodes plus a per-cluster charge."] },
+    { title: "Or pods on Fargate",
+      text: ["Pods can also run on <b>Fargate</b>, with no nodes to manage."] },
+    { title: "Why pick EKS over ECS",
+      text: ["Kubernetes is <b>cloud-agnostic</b>: the same manifests run on-premises or in other clouds. Choose EKS for existing Kubernetes skills, portability or hybrid setups.", "Choose ECS for a simpler, AWS-native orchestrator."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+  K.pick($('pick'), [
+    { q: 'The team already deploys with Kubernetes manifests and Helm.', a: 'EKS', why: 'Managed Kubernetes.' },
+    { q: 'Simplest AWS-native way to orchestrate containers.', a: 'ECS', why: 'AWS\'s own orchestrator.' },
+    { q: 'Open-source orchestration portable to other clouds.', a: 'EKS', why: 'Kubernetes is cloud-agnostic.' },
+    { q: 'Run Kubernetes pods without managing nodes.', a: 'EKS on Fargate', why: 'Fargate supports EKS pods.' }
+  ], ['EKS', 'ECS', 'EKS on Fargate']);
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>AWS Elastic Beanstalk</title>
+<meta name="description" content="AWS Elastic Beanstalk as platform as a service: upload code and get EC2, load balancing, Auto Scaling and monitoring built for you, with an IaaS vs PaaS lab.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html" aria-current="page"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Deployment &amp; infrastructure / 4 · Domain 3 Technology</p>
+    <h1>AWS Elastic Beanstalk</h1>
+    <ul class="lede">
+      <li><b>Elastic Beanstalk</b> is <b>PaaS</b>: you upload code; it builds and runs the infrastructure.</li>
+      <li>It creates <b>EC2, a load balancer, an Auto Scaling group</b> and monitoring (via CloudFormation).</li>
+      <li>Supports .NET, Java, Node.js, Python, PHP, Ruby, Go and Docker.</li>
+      <li>Free itself; you pay for the underlying resources.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Elastic Beanstalk</span><span class="like">Azure App Service, or "Web Deploy and forget the servers"</span><span>The EC2 instances still exist in your account and you can see them.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: deploying the clinic web app without building servers</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="A developer uploads app code to Elastic Beanstalk, which creates a load balancer, EC2 instances in an Auto Scaling group and health monitoring"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>Beanstalk = <b>PaaS</b>: developer-centric way to deploy web apps.</li>
+      <li>Handles capacity provisioning, load balancing, auto scaling, health monitoring.</li>
+      <li>Platforms: .NET, Java, Node.js, Python, PHP, Ruby, Go, Docker.</li>
+      <li>Uses <b>CloudFormation</b> underneath; you can still access the resources.</li>
+      <li>No extra charge; pay for EC2, ELB, etc.</li>
+      <li>Responsibility: you own the code; AWS manages the platform.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="lH">
+    <h2 class="stage-title" id="lH">Who runs what?</h2>
+    <div class="stage-kind">Compare IaaS, PaaS and SaaS</div>
+    <div class="card">
+      <div class="seg" id="lSeg" role="group" aria-label="Model"><button type="button" data-v="iaas" aria-pressed="false">EC2 (IaaS)</button><button type="button" data-v="paas" aria-pressed="true">Beanstalk (PaaS)</button><button type="button" data-v="saas" aria-pressed="false">SaaS</button></div>
+      <ul class="checks" id="lOut"></ul>
+      <p class="status-line" id="lSt"></p>
+    </div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Deploy a web app quickly, least infrastructure work</span><span class="arrow">→</span><span class="then">Elastic Beanstalk</span></li>
+      <li><span class="if">PaaS on AWS</span><span class="arrow">→</span><span class="then">Elastic Beanstalk</span></li>
+      <li><span class="if">Beanstalk charge</span><span class="arrow">→</span><span class="then">Only the underlying resources</span></li>
+      <li><span class="if">What runs under Beanstalk?</span><span class="arrow">→</span><span class="then">CloudFormation, EC2, ELB, ASG</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Deployment policy</th><th>What happens</th></tr></thead>
+        <tbody>
+          <tr><td><b>All at once</b></td><td>Every instance updated together (brief downtime)</td></tr>
+          <tr><td><b>Rolling</b></td><td>Batches updated in turn</td></tr>
+          <tr><td><b>Rolling with additional batch</b></td><td>Extra batch keeps full capacity</td></tr>
+          <tr><td><b>Immutable</b></td><td>New instances, then swap</td></tr>
+          <tr><td><b>Traffic splitting</b></td><td>Send a share of traffic to the new version first</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Which service is AWS's PaaS for web apps?<span class="go">Show answer</span></summary><div class="ans"><p><b>Elastic Beanstalk</b>.</p></div></details>
+      <details><summary>What does Beanstalk cost?<span class="go">Show answer</span></summary><div class="ans"><p>Nothing extra; you pay for the <b>resources</b> it creates.</p></div></details>
+      <details><summary>What does Beanstalk use underneath?<span class="go">Show answer</span></summary><div class="ans"><p><b>CloudFormation</b>.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: deployment notes "AWS Elastic Beanstalk: PaaS for Application Deployment" and the section exam summary; <a href="https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/Welcome.html">What is Elastic Beanstalk?</a>; <a href="https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/using-features.deploy-existing-version.html">Deployment policies</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 240, y: 20, w: 740, h: 385, kind: 'region', label: 'ap-south-1 · environment clinic-web-prod' }],
+    nodes: {
+      dev: { x: 100, y: 210, icon: 'code', kind: 'user', label: 'Developer', sub: 'app.zip' },
+      eb: { x: 360, y: 210, icon: 'layers', kind: 'mgmt', label: 'Elastic Beanstalk', sub: 'via CloudFormation' },
+      alb: { x: 560, y: 110, icon: 'lb', kind: 'net', label: 'Load balancer' },
+      e1: { x: 760, y: 110, icon: 'server', kind: 'compute', label: 'EC2', sub: '.NET on Linux' },
+      e2: { x: 900, y: 110, icon: 'server', kind: 'compute', label: 'EC2' },
+      asg: { x: 830, y: 300, icon: 'layers', kind: 'compute', label: 'Auto Scaling group' },
+      cw: { x: 560, y: 310, icon: 'chart', kind: 'mgmt', label: 'Health + monitoring' }
+    },
+    links: [{ a: 'dev', b: 'eb', label: 'upload', at: [230, 200] }, { a: 'eb', b: 'alb' }, { a: 'alb', b: 'e1' }, { a: 'alb', b: 'e2', via: [[830, 60]] }, { a: 'asg', b: 'e1', kind: 'dash' }, { a: 'asg', b: 'e2', kind: 'dash' }, { a: 'eb', b: 'cw', kind: 'dash' }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['dev', 'eb'], ['eb', 'alb', 'e1', 'e2', 'asg', 'cw'], ['eb', 'e1', 'e2'], ['eb', 'cw', 'asg'], null];
+    net.focus(F[i]);
+    if (i === 0) net.badge('dev', 'just the code', 'ok');
+    if (i === 2) net.badge('e1', 'v2 rolling out', 'info');
+  }
+  const STEPS = [
+    { title: "Upload the code",
+      text: ["A developer uploads a zip of the web app (or a Docker image) to <b>Elastic Beanstalk</b> and picks a platform: .NET, Java, Node.js, Python, PHP, Ruby, Go or Docker."],
+      play: async run => { base(0); await net.send(['dev', 'eb'], { run, label: 'app.zip' }); } },
+    { title: "Beanstalk builds the environment",
+      text: ["It provisions the <b>EC2</b> instances, a <b>load balancer</b>, an <b>Auto Scaling group</b>, security groups and monitoring, using CloudFormation underneath.", "You still have access to those resources if you need them."],
+      tip: "Upload code, AWS handles the infrastructure = Elastic Beanstalk (PaaS).",
+      play: async run => { base(1); await Promise.all([net.send(['eb', 'alb'], { run, tone: 'cyan' }), net.send(['eb', 'cw'], { run, tone: 'cyan' })]); } },
+    { title: "Deploy new versions",
+      text: ["Upload v2 and choose a deployment policy: all at once, rolling, rolling with an extra batch, immutable, or traffic splitting."] },
+    { title: "Health and scaling",
+      text: ["Beanstalk monitors environment health and scales with the Auto Scaling group.", "Beanstalk itself is free; you pay for the EC2, load balancer and other resources. You own the code; AWS manages the platform."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+  const LAY = ['Your application code', 'Runtime / platform (.NET, Java…)', 'Load balancer, Auto Scaling, monitoring', 'EC2 instances and OS patching', 'Hardware and data centre'];
+  const W = { iaas: [1, 1, 1, 1, 0], paas: [1, 0, 0, 0, 0], saas: [0, 0, 0, 0, 0] };
+  function lay(v) {
+    $('lOut').innerHTML = LAY.map((l, i) => `<li class="${W[v][i] ? 'no' : ''}"><b>${l}</b>: ${W[v][i] ? 'you' : 'AWS'}</li>`).join('');
+    $('lSt').innerHTML = { iaas: '<b>EC2 (IaaS)</b>: you build and run everything above the hardware.', paas: '<b>Elastic Beanstalk (PaaS)</b>: you bring the code; AWS runs the platform.', saas: '<b>SaaS</b> (e.g. a hosted product): you just use the software.' }[v];
+  }
+  K.seg($('lSeg'), lay); lay('paas');
+
+})();
+</script>
+</body>
+</html>

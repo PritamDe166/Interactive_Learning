@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>AWS Glue</title>
+<meta name="description" content="AWS Glue serverless ETL and the Glue Data Catalog: crawlers, transform jobs and how Athena and Redshift use the catalog, with an analytics pipeline lab.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+  .svc rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s, opacity .2s; }
+  .svc text { fill: var(--fg); font-size: 13px; font-weight: 700; text-anchor: middle; }
+  .svc .sm { fill: var(--muted); font-family: var(--mono); font-size: 12px; font-weight: 400; }
+  .svc.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .svc.path rect { stroke: var(--cyan); fill: var(--teal-wash); }
+  .svc.fade text { opacity: .45; }
+  .svc.fade rect { stroke: var(--line); }
+  .cat { fill: var(--muted); font-family: var(--display); font-size: 13px; }
+  .link { stroke: var(--line); stroke-width: 2; fill: none; transition: stroke .2s; }
+  .link.on { stroke: var(--cyan); stroke-width: 3; }
+  .chore rect { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; transition: fill .3s, stroke .3s; }
+  .chore.you rect { stroke: var(--accent-text); }
+  .chore.aws rect { stroke: var(--teal); fill: var(--teal-wash); }
+  .chore.you text:last-child { fill: var(--accent-text); font-weight: 700; }
+  .chore.aws text:last-child { fill: var(--good-text); font-weight: 700; }
+  .zone.down { stroke: var(--red); }
+  .ptoggles { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html" aria-current="page"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Databases &amp; analytics / 15 · Domain 3 Technology</p>
+    <h1>AWS Glue</h1>
+    <ul class="lede">
+      <li><b>Glue</b> is a <b>serverless ETL</b> service: extract, transform and load data for analytics.</li>
+      <li><b>Crawlers</b> discover data and record its schema in the <b>Glue Data Catalog</b>.</li>
+      <li>Athena, Redshift Spectrum and EMR use the catalog to query the data.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Glue ETL job</span><span class="like">An SSIS package</span><span>Serverless and Spark-based; no Integration Services server to run.</span></div>
+      <div class="row"><span class="aws">Data Catalog</span><span class="like">A central list of table definitions, like a metadata repository</span><span>Shared by Athena, Redshift and EMR.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: turning raw exports into query-ready data</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="A crawler records raw S3 files in the Glue Data Catalog; an ETL job combines them with RDS data into curated Parquet files for Athena and Redshift"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>Glue = managed, <b>serverless ETL</b> (extract, transform, load).</li>
+      <li><b>Crawlers</b> infer schemas; the <b>Data Catalog</b> stores table metadata.</li>
+      <li>The Data Catalog is used by <b>Athena</b>, <b>Redshift Spectrum</b> and <b>EMR</b>.</li>
+      <li>Typical job: clean, join and convert data to Parquet for cheaper queries.</li>
+      <li>Glue prepares data; <b>DMS</b> migrates databases.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="anaH">
+    <h2 class="stage-title" id="anaH">The analytics pipeline</h2>
+    <div class="stage-kind">Pick a job · the data takes its path</div>
+    <div class="card">
+      <div class="chips" id="anChips"></div>
+      <div class="scroll"><svg class="diagram" id="an" viewBox="0 0 1000 330" aria-label="Sources, ingestion, S3 data lake, Glue, query engines and QuickSight"></svg></div>
+      <p class="status-line" id="anStatus">Pick a job.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">Glue, DMS or Athena?</h2>
+    <div class="stage-kind">Pick the service</div>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">ETL</span><span class="arrow">→</span><span class="then">Glue</span></li>
+      <li><span class="if">Prepare data for analytics</span><span class="arrow">→</span><span class="then">Glue</span></li>
+      <li><span class="if">Metadata catalog for Athena</span><span class="arrow">→</span><span class="then">Glue Data Catalog</span></li>
+      <li><span class="if">Discover schemas automatically</span><span class="arrow">→</span><span class="then">Glue crawler</span></li>
+      <li><span class="if">Migrate a database</span><span class="arrow">→</span><span class="then">DMS, not Glue</span></li>
+      <li><span class="if">Streaming data ingestion</span><span class="arrow">→</span><span class="then">Kinesis</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Part</th><th>Job</th></tr></thead>
+        <tbody>
+          <tr><td><b>Crawler</b></td><td>Scans data and infers the schema</td></tr>
+          <tr><td><b>Data Catalog</b></td><td>Stores table definitions</td></tr>
+          <tr><td><b>ETL job</b></td><td>Transforms and loads data (serverless Spark or Python)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><p><b>Kinesis</b> (in scope, mentioned in the pipeline lab) ingests real-time streaming data; Firehose can deliver it to S3 for Glue and Athena.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Which service is serverless ETL?<span class="go">Show answer</span></summary><div class="ans"><p><b>AWS Glue</b>.</p></div></details>
+      <details><summary>Where does Athena find table definitions?<span class="go">Show answer</span></summary><div class="ans"><p>In the <b>Glue Data Catalog</b>.</p></div></details>
+      <details><summary>Glue or DMS to move Oracle to Aurora?<span class="go">Show answer</span></summary><div class="ans"><p><b>DMS</b>.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: databases notes "AWS Glue: Managed ETL and Data Catalog" and "Databases and Analytics: CLF-C02 Exam Summary"; <a href="https://aws.amazon.com/glue/">AWS Glue</a>; <a href="https://docs.aws.amazon.com/glue/latest/dg/catalog-and-crawler.html">Data Catalog and crawlers</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 20, y: 20, w: 960, h: 385, kind: 'region', label: 'ap-south-1' }],
+    nodes: {
+      raw: { x: 110, y: 110, icon: 'bucket', kind: 'storage', label: 'S3: raw CSV', sub: 'messy' },
+      rds: { x: 110, y: 310, icon: 'db', kind: 'db', label: 'RDS bookings' },
+      cr: { x: 340, y: 110, icon: 'eye', kind: 'mgmt', label: 'Crawler', sub: 'reads schemas' },
+      cat: { x: 560, y: 110, icon: 'doc', kind: 'mgmt', label: 'Data Catalog', sub: 'tables + columns' },
+      job: { x: 340, y: 310, icon: 'gear', kind: 'compute', label: 'Glue ETL job', sub: 'serverless Spark' },
+      cur: { x: 560, y: 310, icon: 'bucket', kind: 'storage', label: 'S3: curated Parquet' },
+      at: { x: 820, y: 110, icon: 'code', kind: 'compute', label: 'Athena' },
+      rs: { x: 820, y: 310, icon: 'chart', kind: 'db', label: 'Redshift' }
+    },
+    links: [{ a: 'raw', b: 'cr' }, { a: 'cr', b: 'cat' }, { a: 'raw', b: 'job' }, { a: 'rds', b: 'job' }, { a: 'job', b: 'cur' }, { a: 'cat', b: 'at' }, { a: 'cur', b: 'at' }, { a: 'cur', b: 'rs' }, { a: 'cat', b: 'cur', kind: 'dash' }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['raw', 'rds'], ['raw', 'cr', 'cat'], ['raw', 'rds', 'job', 'cur'], ['cat', 'cur', 'at', 'rs'], null];
+    net.focus(F[i]);
+    if (i === 0) net.badge('raw', 'dates in 3 formats', 'bad');
+    if (i === 2) net.badge('job', 'no servers', 'ok');
+  }
+  const STEPS = [
+    { title: "Data that isn't ready",
+      text: ["Raw exports land in S3 with inconsistent dates and extra columns; bookings live in RDS.", "Before analysis they must be found, described, cleaned and combined."] },
+    { title: "Crawlers fill the Data Catalog",
+      text: ["A Glue <b>crawler</b> reads the files and records their tables, columns and types in the <b>Glue Data Catalog</b>.", "Athena, Redshift Spectrum and EMR all use this catalog to know what the data looks like."],
+      play: async run => { base(1); await net.send(['raw', 'cr', 'cat'], { run, label: 'schema', tone: 'cyan' }); } },
+    { title: "ETL jobs transform the data",
+      text: ["A Glue <b>ETL job</b> (extract, transform, load) reads the sources, fixes formats, joins bookings, and writes clean <b>Parquet</b> files.", "It is <b>serverless</b>: you write the job (or design it visually) and Glue provides the compute."],
+      tip: "ETL, prepare data for analytics, data catalog = Glue.",
+      play: async run => { base(2); await Promise.all([net.send(['raw', 'job'], { run }), net.send(['rds', 'job'], { run })]); await net.send(['job', 'cur'], { run, label: 'Parquet', tone: 'green' }); } },
+    { title: "Ready for queries",
+      text: ["The curated data is cheap and fast to query with <b>Athena</b>, or load into <b>Redshift</b> for BI."] },
+    { title: "Glue vs DMS",
+      text: ["Glue <b>prepares</b> data for analytics. DMS <b>moves a database</b> to a new home. Different jobs."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+  /* ========== 3. Analytics pipeline ========== */
+  const an = $('an');
+  const A = {
+    app: { t: 'Clickstream / IoT', s: 'events', x: 100, y: 60 },
+    odb: { t: 'On-prem Oracle', s: 'source DB', x: 100, y: 270 },
+    kin: { t: 'Kinesis', s: 'Data Streams / Firehose', x: 300, y: 60 },
+    s3: { t: 'S3 data lake', s: 'raw + curated', x: 300, y: 165 },
+    dms: { t: 'DMS + SCT', s: 'migrate, convert schema', x: 300, y: 270 },
+    glue: { t: 'Glue', s: 'ETL + Data Catalog', x: 500, y: 165 },
+    aur: { t: 'Aurora', s: 'target DB', x: 500, y: 270 },
+    ath: { t: 'Athena', s: 'SQL on S3, per TB', x: 700, y: 60 },
+    red: { t: 'Redshift', s: 'warehouse', x: 700, y: 165 },
+    emr: { t: 'EMR', s: 'Spark / Hadoop', x: 700, y: 270 },
+    qs: { t: 'QuickSight', s: 'dashboards', x: 900, y: 165 }
+  };
+  const LINKS = [['app', 'kin'], ['kin', 's3'], ['s3', 'glue'], ['glue', 'ath'], ['glue', 'red'], ['s3', 'emr'], ['ath', 'qs'], ['red', 'qs'], ['odb', 'dms'], ['dms', 'aur'], ['s3', 'ath']];
+  const lE = {};
+  LINKS.forEach(([a, b]) => { lE[a + b] = K.el('line', { x1: A[a].x, y1: A[a].y, x2: A[b].x, y2: A[b].y, class: 'link' }, an); });
+  const aE = {};
+  for (const k in A) {
+    const o = A[k], g = K.el('g', { class: 'svc' }, an);
+    K.el('rect', { x: o.x - 88, y: o.y - 28, width: 176, height: 56, rx: 12 }, g);
+    K.text(g, o.x, o.y - 3, o.t, ''); K.text(g, o.x, o.y + 15, o.s, 'sm'); aE[k] = g;
+  }
+  const anP = K.el('g', {}, an);
+  const JOBS = [
+    ['Ad hoc SQL on load-balancer logs', ['s3', 'glue', 'ath', 'qs'], 'Glue crawls the files into the Data Catalog, Athena queries them in place (pay per TB scanned), QuickSight charts the result.'],
+    ['Real-time app clickstream', ['app', 'kin', 's3', 'glue', 'ath'], 'Kinesis ingests events in real time; Firehose lands them in S3 for later analysis.'],
+    ['Nightly BI on billing history', ['s3', 'glue', 'red', 'qs'], 'Glue transforms and loads into Redshift; analysts run heavy SQL and QuickSight dashboards on it.'],
+    ['Spark job over 50 TB of scans metadata', ['s3', 'emr'], 'EMR spins up a Spark/Hadoop cluster (Spot friendly) over data in S3.'],
+    ['Move Oracle on-prem to Aurora', ['odb', 'dms', 'aur'], 'SCT converts the schema; DMS copies the data and keeps replicating while the source stays live.']
+  ];
+  $('anChips').innerHTML = JOBS.map((j, i) => `<button class="chip-btn" type="button" data-i="${i}" aria-pressed="false">${j[0]}</button>`).join('');
+  $('anChips').querySelectorAll('button').forEach(b => b.addEventListener('click', async () => {
+    $('anChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    const [, path, why] = JOBS[+b.dataset.i];
+    const run = K.newRun('an');
+    anP.textContent = '';
+    Object.values(aE).forEach(g => g.setAttribute('class', 'svc fade'));
+    Object.values(lE).forEach(l => l.setAttribute('class', 'link'));
+    $('anStatus').textContent = 'Data flowing…';
+    const p = K.pill(anP, 'data', 'alt');
+    try {
+      aE[path[0]].setAttribute('class', 'svc path');
+      for (let i = 1; i < path.length; i++) {
+        const a = A[path[i - 1]], c = A[path[i]];
+        (lE[path[i - 1] + path[i]] || lE[path[i] + path[i - 1]]).setAttribute('class', 'link on');
+        await K.move(p, [a.x, a.y - 40], [c.x, c.y - 40], 550, run);
+        aE[path[i]].setAttribute('class', 'svc path');
+      }
+      p.remove();
+      $('anStatus').innerHTML = why;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }));
+
+
+  K.pick($('pick'), [
+    { q: 'Clean CSV exports and convert them to Parquet nightly.', a: 'Glue', why: 'Serverless ETL.' },
+    { q: 'Keep table definitions for files in S3.', a: 'Glue', why: 'Glue Data Catalog.' },
+    { q: 'Move an on-premises Oracle database to Aurora.', a: 'DMS', why: 'Database migration.' },
+    { q: 'Run SQL on the curated files.', a: 'Athena', why: 'Query engine.' }
+  ], ['Glue', 'DMS', 'Athena']);
+
+})();
+</script>
+</body>
+</html>

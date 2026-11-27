@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>Auto Scaling Strategies</title>
+<meta name="description" content="Simple, step, target tracking, scheduled and predictive scaling compared on one day of traffic, plus a day simulator.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .slot { fill: var(--panel-2); stroke: var(--line); stroke-width: 1.5; stroke-dasharray: 4 4; }
+  .inst { transition: fill .25s, opacity .25s; }
+  .inst.ok { fill: var(--teal); }
+  .inst.pending { fill: var(--yellow); opacity: .65; }
+  .inst.bad { fill: var(--red); }
+  .inst.off { opacity: 0; }
+  .inst-l { fill: var(--ink); font-family: var(--mono); font-size: 10px; text-anchor: middle; pointer-events: none; }
+  .dot { fill: var(--cyan); }
+  .dot.drop { fill: var(--red); }
+  .chart-bg { fill: var(--panel); stroke: var(--line); }
+  .ln-d { fill: none; stroke: var(--accent-text); stroke-width: 2.5; }
+  .ln-c { fill: none; stroke: var(--teal); stroke-width: 2.5; }
+  .now { stroke: var(--muted); stroke-dasharray: 3 4; }
+  .legend { font-family: var(--display); font-size: 11px; }
+  .legend .d { fill: var(--accent-text); }
+  .legend .c { fill: var(--teal); }
+  .zone.down { stroke: var(--red); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .ss-grid { stroke: var(--line); stroke-width: 1; }
+  .ss-hot { fill: color-mix(in srgb, var(--red) 14%, transparent); }
+  .ss-title { fill: var(--fg); font-family: var(--display); font-size: 16px; font-weight: 700; }
+  .ss-kpi { fill: var(--fg); font-family: var(--mono); font-size: 14px; }
+  .ln-d, .ln-c { stroke-linejoin: round; }
+</style>
+
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html" aria-current="page"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / ELB &amp; Auto Scaling / 4 · Domain 3 Technology</p>
+    <h1>Auto Scaling Strategies</h1>
+    <ul class="lede">
+      <li>A <b>scaling policy</b> decides <b>when</b> an Auto Scaling group changes its desired capacity.</li>
+      <li><b>Dynamic</b> policies react to a metric: <b>simple</b> and <b>step</b> scaling follow CloudWatch alarms; <b>target tracking</b> keeps a metric (for example CPU 50%) steady.</li>
+      <li><b>Scheduled</b> scaling changes capacity at set times; <b>predictive</b> scaling forecasts daily patterns with machine learning and scales ahead of them.</li>
+      <li>Real setups often <b>combine</b> them: predictive for the known pattern, target tracking for surprises.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>Policy</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Target tracking</span><span class="like">A thermostat set to 21 °C</span><span>It keeps a metric such as average CPU at the value you choose, adding or removing instances as needed.</span></div>
+      <div class="row"><span class="aws">Scheduled scaling</span><span class="like">A Windows Task Scheduler job that starts extra servers at 8 am</span><span>Built into the ASG; it changes min, desired or max at the times you set.</span></div>
+      <div class="row"><span class="aws">Simple / step scaling</span><span class="like">A monitoring alert that runs a script to add a server</span><span>A CloudWatch alarm triggers the ASG directly; step scaling adds more when the breach is bigger.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: one day, seven ways to scale</h2>
+    <div class="stage-kind">Same traffic each step · compare the stepped capacity line with the smooth curve of what is needed</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram" id="ch" viewBox="0 0 1000 420" aria-label="A 24-hour chart of the instances needed by a clinic booking site and the capacity each scaling policy provides"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li><b>Manual</b> (or fixed): you set desired capacity yourself. Fine for steady load; wasteful or overloaded otherwise.</li>
+      <li><b>Simple scaling</b>: a CloudWatch alarm (for example CPU above 70%) adds or removes a set number of instances, then waits for a cooldown before acting again.</li>
+      <li><b>Step scaling</b>: like simple scaling, but the size of the change depends on how far the alarm is breached (+1 above 70%, +3 above 90%).</li>
+      <li><b>Target tracking</b>: pick a metric and a target (average CPU 50%, requests per target 1,000) and the ASG keeps it there. The easiest to set up and the one AWS recommends first.</li>
+      <li><b>Scheduled</b>: change capacity at known times (for example 8 instances from 08:00 on weekdays). For predictable events.</li>
+      <li><b>Predictive</b>: machine learning forecasts load from at least a day of history and launches capacity <b>before</b> the peak.</li>
+      <li>New instances need time to boot and warm up, so reactive policies always lag a little; scheduled and predictive scaling get ahead of known peaks.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Run a whole day with each policy and compare failed requests and cost.</p>
+
+  <section aria-labelledby="simH" class="sim-sec">
+    <h2 class="stage-title" id="simH">A day in an Auto Scaling group</h2>
+    <div class="stage-kind">Clinic booking traffic · pick a scaling policy, then break things</div>
+    <div class="card">
+    <div class="controls">
+      <div class="seg" id="polSeg" role="group" aria-label="Scaling policy">
+        <button type="button" data-v="fixed" aria-pressed="false">Fixed size</button>
+        <button type="button" data-v="target" aria-pressed="true">Target tracking (CPU 50%)</button>
+        <button type="button" data-v="sched" aria-pressed="false">Scheduled (08 to 22 h)</button>
+        <button type="button" data-v="pred" aria-pressed="false">Predictive</button>
+      </div>
+    </div>
+    <div class="ranges">
+      <div class="range"><label for="minR">Minimum <output id="minO"></output></label><input type="range" id="minR" min="1" max="4" value="2"></div>
+      <div class="range"><label for="desR">Desired (fixed policy) <output id="desO"></output></label><input type="range" id="desR" min="1" max="10" value="4"></div>
+      <div class="range"><label for="maxR">Maximum <output id="maxO"></output></label><input type="range" id="maxR" min="4" max="10" value="10"></div>
+    </div>
+    <div class="controls" style="margin-top:12px">
+      <button class="btn" type="button" id="spikeB">Traffic spike (TV advert)</button>
+      <button class="btn" type="button" id="failB">An instance fails</button>
+      <label class="toggle" for="azOut"><input type="checkbox" id="azOut"> AZ b outage</label>
+      <button class="btn" type="button" id="resetB">Restart the day</button>
+    </div>
+    <div class="scroll">
+      <svg class="diagram" id="sim" viewBox="0 0 1000 440" aria-label="Load balancer in front of instances in two Availability Zones, with a 24-hour chart of demand and capacity"></svg>
+    </div>
+    <div class="kpis" id="simK"></div>
+    <p class="status-line" id="simStatus"></p>
+    </div>
+
+  </section>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">Name the policy</h2>
+    <div class="stage-kind">Which scaling policy fits?</div>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Add scaling policies to an Auto Scaling group (outline)</summary>
+      <ol>
+        <li>EC2 → <b>Auto Scaling groups</b> → pick the group → <b>Automatic scaling</b> tab.</li>
+        <li><b>Create dynamic scaling policy</b> → <b>Target tracking</b>: metric "Average CPU utilization", target value 50. The ASG creates the CloudWatch alarms for you.</li>
+        <li>For step or simple scaling, first create a CloudWatch alarm, then choose it in the policy and set the adjustments.</li>
+        <li><b>Create scheduled action</b>: for example desired 8, min 4 every weekday at 08:00 (cron), and desired 2 at 22:00.</li>
+        <li><b>Create predictive scaling policy</b>: start in <b>forecast only</b> mode to check the forecast, then switch to <b>forecast and scale</b>.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Keep average CPU around 40%</span><span class="arrow">→</span><span class="then">Target tracking</span></li>
+      <li><span class="if">CloudWatch alarm adds 2 instances when CPU &gt; 70%</span><span class="arrow">→</span><span class="then">Simple (or step) scaling</span></li>
+      <li><span class="if">Bigger breach, bigger change</span><span class="arrow">→</span><span class="then">Step scaling</span></li>
+      <li><span class="if">Known event: sale starts Friday 9 am</span><span class="arrow">→</span><span class="then">Scheduled scaling</span></li>
+      <li><span class="if">Repeating daily or weekly pattern, scale before it</span><span class="arrow">→</span><span class="then">Predictive scaling (machine learning)</span></li>
+      <li><span class="if">Steady load that never changes</span><span class="arrow">→</span><span class="then">Fixed / manual capacity</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Policy</th><th>Trigger</th><th>Good for</th><th>Weak spot</th></tr></thead>
+        <tbody>
+          <tr><td><b>Manual / fixed</b></td><td>You change desired</td><td>Steady load, tests</td><td>No reaction at all</td></tr>
+          <tr><td><b>Simple scaling</b></td><td>One CloudWatch alarm, one adjustment</td><td>Basic setups</td><td>Waits for a cooldown between actions</td></tr>
+          <tr><td><b>Step scaling</b></td><td>CloudWatch alarm, adjustment sized by the breach</td><td>Sharp rises</td><td>You tune the steps and alarms</td></tr>
+          <tr><td><b>Target tracking</b></td><td>Keeps a metric at a target</td><td>Most web apps</td><td>Reacts after load rises (boot time)</td></tr>
+          <tr><td><b>Scheduled</b></td><td>Date and time (one-off or cron)</td><td>Known events, office hours</td><td>Blind to surprises</td></tr>
+          <tr><td><b>Predictive</b></td><td>Machine-learning forecast from history</td><td>Repeating daily or weekly cycles</td><td>Can't foresee one-off spikes</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><p><b>Good metrics to scale on:</b> average CPU, requests per target (from the ALB), average network in or out, or a custom CloudWatch metric such as queue length.</p></div>
+      <div class="note"><p><b>Cooldown and warm-up.</b> After a simple-scaling action the group waits (300 seconds by default) before another one. Target tracking and step scaling use an instance warm-up time instead, so a booting instance isn't counted too early.</p></div>
+      <div class="note"><p><b>Several policies at once.</b> When policies disagree, the ASG uses the one that gives the <b>largest</b> capacity, so the app is never under-provisioned by a cautious policy.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>"Keep average CPU at 40%." Which policy?<span class="go">Show answer</span></summary><div class="ans"><p><b>Target tracking.</b></p></div></details>
+      <details><summary>A ticket sale starts every Friday at 09:00. How do you have capacity ready in time?<span class="go">Show answer</span></summary><div class="ans"><p><b>Scheduled scaling</b> (raise capacity shortly before 09:00 on Fridays). Predictive scaling could also learn a regular weekly pattern.</p></div></details>
+      <details><summary>Which policy uses machine learning?<span class="go">Show answer</span></summary><div class="ans"><p><b>Predictive scaling</b>: it forecasts load from history and scales ahead of it.</p></div></details>
+      <details><summary>What is the difference between simple and step scaling?<span class="go">Show answer</span></summary><div class="ans"><p>Simple scaling makes one fixed change per alarm and then waits. Step scaling makes a bigger change for a bigger breach.</p></div></details>
+      <details><summary>Why does a reactive policy still let CPU spike briefly?<span class="go">Show answer</span></summary><div class="ans"><p>It acts after the metric rises, and new instances need a few minutes to boot and warm up.</p></div></details>
+      <details><summary>A TV advert causes a sudden one-off spike. Which policy can't foresee it?<span class="go">Show answer</span></summary><div class="ans"><p><b>Predictive</b> (and scheduled) scaling: neither has seen it before. Target tracking or step scaling react to it.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Both the chart and the simulator are simplified models with illustrative traffic, boot times and an illustrative $0.10 per instance-hour. Sources: ELB and ASG notes "Auto Scaling Groups: Scaling Strategies" and "ELB and ASG: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/autoscaling/ec2/userguide/scale-your-group.html">Scale your Auto Scaling group</a>; <a href="https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-predictive-scaling.html">Predictive scaling</a>; <a href="https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-simple-step.html">Step and simple scaling</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+  /* ---------- walkthrough chart ---------- */
+  const sv = $('ch');
+  const X0 = 70, X1 = 960, Y0 = 50, Y1 = 330, YMAX = 12, MIN = 2, MAX = 11;
+  const gs = (x, m, s) => Math.exp(-((x - m) ** 2) / (2 * s * s));
+  const load = (h, spike) => 1 + 3.4 * gs(h, 10, 1.5) + 2.4 * gs(h, 19, 1.3) + (spike ? 1.9 * gs(h, 15, 0.35) : 0);
+  const H = []; for (let h = 0; h <= 24.001; h += 0.25) H.push(+h.toFixed(2));
+  const need = H.map(h => load(h, true) / 0.5);           // instances needed at 50% CPU
+  const xOf = h => X0 + (X1 - X0) * h / 24, yOf = v => Y1 - (Y1 - Y0) * Math.min(v, YMAX) / YMAX;
+  const clamp = v => Math.max(MIN, Math.min(MAX, v));
+  function series(kind) {
+    const out = []; let cap = 2, cool = 0, pend = [];
+    H.forEach((h, i) => {
+      const cpu = load(h, true) / cap;                    // 1 = 100%
+      pend = pend.filter(p => { if (p.at <= i) { cap = clamp(cap + p.n); return false; } return true; });
+      if (kind === 'fixed') cap = 4;
+      else if (kind === 'simple') { if (cool > 0) cool--; else if (cpu > 0.7) { pend.push({ n: 1, at: i + 1 }); cool = 4; } else if (cpu < 0.3 && cap > MIN) { cap--; cool = 4; } }
+      else if (kind === 'step') { if (cool > 0) cool--; else if (cpu > 0.9) { pend.push({ n: 3, at: i + 1 }); cool = 1; } else if (cpu > 0.7) { pend.push({ n: 1, at: i + 1 }); cool = 1; } else if (cpu < 0.3 && cap > MIN) { cap--; cool = 1; } }
+      else if (kind === 'target') { const want = clamp(Math.ceil(need[Math.max(0, i - 1)] - 0.05)); if (want > cap) cap = want; else if (want < cap) cap = Math.max(want, cap - 1); }
+      else if (kind === 'sched') cap = h >= 8 && h < 22 ? 8 : 2;
+      else if (kind === 'pred' || kind === 'combo') {
+        let f = 0; for (let k = 0; k <= 2; k++) f = Math.max(f, load(Math.min(24, h + k * 0.25), false) / 0.5);
+        cap = clamp(Math.ceil(f - 0.05));
+        if (kind === 'combo') cap = Math.max(cap, clamp(Math.ceil(need[Math.max(0, i - 1)] - 0.05)));
+      }
+      out.push(cap);
+    });
+    return out;
+  }
+  // axes
+  K.el('rect', { x: X0, y: Y0, width: X1 - X0, height: Y1 - Y0, class: 'chart-bg' }, sv);
+  for (let v = 0; v <= YMAX; v += 2) { K.el('line', { x1: X0, x2: X1, y1: yOf(v), y2: yOf(v), class: 'ss-grid' }, sv); const t = K.text(sv, X0 - 10, yOf(v) + 4, String(v), 'mlabel muted'); t.style.textAnchor = 'end'; }
+  for (let h = 0; h <= 24; h += 3) K.text(sv, xOf(h), Y1 + 20, String(h).padStart(2, '0') + ':00', 'mlabel muted');
+  const yl = K.text(sv, 22, (Y0 + Y1) / 2, 'instances', 'mlabel muted'); yl.setAttribute('transform', `rotate(-90 22 ${(Y0 + Y1) / 2})`);
+  const shade = K.el('g', {}, sv);
+  const nd = K.el('polyline', { class: 'ln-d', points: H.map((h, i) => `${xOf(h)},${yOf(need[i])}`).join(' ') }, sv);
+  const cp = K.el('polyline', { class: 'ln-c', points: '' }, sv);
+  const title = K.text(sv, X0, 32, '', 'ss-title'); title.style.textAnchor = 'start';
+  const lg = K.el('g', { class: 'legend' }, sv);
+  const l1 = K.text(lg, X1 - 330, 32, '— needed (CPU 50%)', 'd'); l1.style.textAnchor = 'start';
+  const l2 = K.text(lg, X1 - 160, 32, '— capacity', 'c'); l2.style.textAnchor = 'start';
+  const kp = K.text(sv, X0, 380, '', 'ss-kpi'); kp.style.textAnchor = 'start';
+  const spikeT = K.text(sv, xOf(15), yOf(need[60]) - 14, 'TV advert', 'mlabel accent');
+  const pts = (s, upto) => H.slice(0, upto + 1).map((h, i) => `${xOf(h)},${yOf(s[i])} ${xOf(H[i + 1] ?? h)},${yOf(s[i])}`).join(' ');
+  function stats(s) {
+    let over = 0, ih = 0; H.forEach((h, i) => { if (i === H.length - 1) return; ih += s[i] * 0.25; if (load(h, true) / s[i] > 0.85) over += 0.25; });
+    return { over, ih };
+  }
+  function drawShade(s, upto) {
+    shade.textContent = '';
+    for (let i = 0; i < Math.min(upto, H.length - 1); i++) if (load(H[i], true) / s[i] > 0.85)
+      K.el('rect', { x: xOf(H[i]), y: Y0, width: xOf(H[i + 1]) - xOf(H[i]), height: Y1 - Y0, class: 'ss-hot' }, shade);
+  }
+  const KINDS = [null, 'fixed', 'simple', 'step', 'target', 'sched', 'pred', 'combo', 'combo'];
+  const NAMES = { fixed: 'Fixed at 4 instances', simple: 'Simple scaling: CPU > 70% → +1, then cooldown', step: 'Step scaling: > 70% → +1, > 90% → +3', target: 'Target tracking: average CPU 50%', sched: 'Scheduled: 8 from 08:00 to 22:00, else 2', pred: 'Predictive: forecast from past days', combo: 'Predictive + target tracking' };
+  const SER = {}; Object.keys(NAMES).forEach(k => SER[k] = series(k));
+  function base(i, upto) {
+    const k = KINDS[i];
+    title.textContent = k ? NAMES[k] : 'What the site needs over one day';
+    spikeT.style.opacity = i === 0 || i >= 6 ? 1 : 0;
+    if (!k) { cp.setAttribute('points', ''); shade.textContent = ''; kp.textContent = 'Peaks at 10:00 and 19:00, quiet at night, and a surprise spike at 15:00.'; return; }
+    const s = SER[k], u = upto === undefined ? H.length - 1 : upto;
+    cp.setAttribute('points', pts(s, u)); drawShade(s, u);
+    const st = stats(s);
+    kp.textContent = `CPU over 85% for ${st.over.toFixed(1)} h · ${Math.round(st.ih)} instance-hours`;
+  }
+  const play = i => async run => { for (let u = 0; u < H.length; u += 2) { base(i, u); await K.sleep(35, run); } base(i); };
+  const STEPS = [
+    { title: 'The same day, every step',
+      text: ['The smooth curve is how many instances the booking site needs to keep CPU at about 50%.', 'Two daily peaks (10:00 and 19:00) repeat every day. At 15:00 a TV advert causes a <b>one-off spike</b>.', 'Each next step runs this day with a different policy. Red shading = CPU above 85%.'] },
+    { title: 'Fixed capacity',
+      text: ['Four instances all day, set by hand.', 'At night most of them sit idle and cost money; at both peaks they are overloaded.', 'Fixed capacity only suits load that never changes.'], play: play(1) },
+    { title: 'Simple scaling',
+      text: ['A CloudWatch alarm fires when CPU passes 70% and the ASG adds <b>one</b> instance.', 'Then it waits for a <b>cooldown</b> before it can act again, so it climbs slowly and stays overloaded during the rise.'], play: play(2) },
+    { title: 'Step scaling',
+      text: ['Same alarm, but the change depends on the size of the breach: <b>+1 above 70%</b>, <b>+3 above 90%</b>.', 'It catches up with sharp rises much faster than simple scaling.'], play: play(3) },
+    { title: 'Target tracking',
+      text: ['You set one number: <b>average CPU 50%</b>. The ASG adds and removes instances to stay near it, like a thermostat.', 'It follows the load closely, a little behind because instances take time to boot.'],
+      tip: '"Keep CPU at X%" = target tracking.', play: play(4) },
+    { title: 'Scheduled scaling',
+      text: ['8 instances from 08:00 to 22:00, 2 overnight.', 'No delay at the morning peak, but it pays for 8 instances during the quiet afternoon and knows nothing about the spike.'],
+      tip: 'Known time or event = scheduled.', play: play(5) },
+    { title: 'Predictive scaling',
+      text: ['Machine learning studies past days and <b>launches capacity before</b> each regular peak.', 'It can\'t predict the TV advert: that spike never happened before, so 15:00 is overloaded.'],
+      tip: 'Machine learning / forecast = predictive.', play: play(6) },
+    { title: 'Combine them',
+      text: ['Use <b>predictive</b> for the regular pattern and <b>target tracking</b> for surprises.', 'When policies disagree, the ASG takes the one asking for <b>more</b> capacity, so the spike is covered too.'], play: play(7) },
+    { title: 'The whole picture',
+      text: ['<b>Dynamic</b>: simple, step and target tracking react to metrics. <b>Scheduled</b>: set times. <b>Predictive</b>: forecasts.', 'Every policy only changes <b>desired</b>, always between the group\'s min and max.'] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: i => base(i) });
+
+  /* ---------- day simulator ---------- */
+  (function () {
+  /* ========== 1. ASG simulation ========== */
+  const sv = $('sim');
+  const HRS_PER_SEC = 0.6;           // one simulated day ≈ 40 s at 1×
+  const WARM = 0.25, FAILREPLACE = 0.3, TARGET = 0.5;
+  const g = (x, m, s) => Math.exp(-((x - m) ** 2) / (2 * s * s));
+  const base = h => 0.9 + 3.8 * g(h, 10.5, 1.8) + 2.6 * g(h, 19, 1.5) + 0.6 * g(h, 14.5, 1.2);
+
+  K.el('rect', { x: 30, y: 105, width: 460, height: 150, rx: 14, class: 'zone', id: 'zA' }, sv);
+  K.text(sv, 44, 125, 'AZ ap-south-1a', 'zone-label');
+  const zB = K.el('rect', { x: 510, y: 105, width: 460, height: 150, rx: 14, class: 'zone' }, sv);
+  const zBl = K.text(sv, 524, 125, 'AZ ap-south-1b', 'zone-label');
+  const alb = K.node(sv, 500, 45, 230, 56, 'Application Load Balancer', 'one DNS name · health checks');
+  alb.g.classList.add('solid');
+  const users = K.node(sv, 110, 45, 150, 46, 'Patients', 'booking app');
+  K.el('line', { x1: 185, y1: 45, x2: 385, y2: 45, class: 'msg solid' }, sv);
+  const SLOTS = [];
+  ['a', 'b'].forEach((az, zi) => {
+    for (let i = 0; i < 5; i++) {
+      const x = 30 + zi * 480 + 40 + i * 84, y = 160;
+      K.el('rect', { x, y, width: 66, height: 52, rx: 8, class: 'slot' }, sv);
+      const r = K.el('rect', { x, y, width: 66, height: 52, rx: 8, class: 'inst off' }, sv);
+      const l = K.text(sv, x + 33, y + 31, '', 'inst-l');
+      SLOTS.push({ az, x: x + 33, y: y + 26, r, l, inst: null });
+    }
+  });
+  const dotsG = K.el('g', {}, sv);
+  // chart
+  const CX = 60, CW = 880, CY = 290, CH = 120;
+  K.el('rect', { x: CX - 10, y: CY - 10, width: CW + 20, height: CH + 30, rx: 10, class: 'chart-bg' }, sv);
+  for (const h of [6, 12, 18, 24, 30]) { const t = K.text(sv, CX + CW * (h - 6) / 24, CY + CH + 14, String(h % 24).padStart(2, '0') + ':00', 'mlabel muted'); t.style.textAnchor = 'middle'; }
+  const lnD = K.el('polyline', { class: 'ln-d', points: '' }, sv);
+  const lnC = K.el('polyline', { class: 'ln-c', points: '' }, sv);
+  const nowL = K.el('line', { x1: CX, y1: CY, x2: CX, y2: CY + CH, class: 'now' }, sv);
+  const lg = K.el('g', { class: 'legend' }, sv);
+  K.text(lg, CX + 500, CY + 6, '— needed at 50% CPU', 'd');
+  K.text(lg, CX + 690, CY + 6, '— in service', 'c');
+  const yOf = v => CY + CH - Math.min(10.5, v) / 10.5 * (CH - 12);
+
+  let S, policy = 'target', nextId = 1;
+  function reset() {
+    S = { t: 6, inst: [], desired: 2, spikeUntil: -1, hist: [], served: 0, demanded: 0, ih: 0, evalAt: 0, histAt: 0, msg: '' };
+    nextId = 1;
+    for (let i = 0; i < 2; i++) launch(true);
+    dotsG.textContent = '';
+  }
+  const demand = t => base(t % 24) + (t < S.spikeUntil ? 3.2 : 0);
+  const mm = () => ({ min: +$('minR').value, max: Math.max(+$('maxR').value, +$('minR').value) });
+  function healthyAZs() { return $('azOut').checked ? ['a'] : ['a', 'b']; }
+  function launch(instant) {
+    const azs = healthyAZs();
+    const live = S.inst.filter(i => i.state !== 'bad');
+    const az = azs.reduce((best, z) => live.filter(i => i.az === z).length < live.filter(i => i.az === best).length ? z : best, azs[0]);
+    if (S.inst.filter(i => i.az === az).length >= 5) { const other = azs.find(z => S.inst.filter(i => i.az === z).length < 5); if (!other) return false; return launchIn(other, instant); }
+    return launchIn(az, instant);
+  }
+  function launchIn(az, instant) { S.inst.push({ id: nextId++, az, state: instant ? 'ok' : 'pending', t0: S.t }); return true; }
+  function wantDesired() {
+    const { min, max } = mm();
+    const ok = S.inst.filter(i => i.state === 'ok').length;
+    const d = demand(S.t);
+    let want = S.desired;
+    if (policy === 'fixed') want = +$('desR').value;
+    else if (policy === 'sched') { const h = S.t % 24; want = (h >= 8 && h < 22) ? 8 : 2; }
+    else if (policy === 'pred') { want = Math.ceil(Math.max(base(S.t % 24), base((S.t + 0.75) % 24)) / TARGET); }
+    else if (policy === 'target') {
+      const cpu = ok ? d / ok : 9;
+      if (cpu > TARGET + 0.05) want = Math.ceil(d / TARGET);
+      else if (cpu < TARGET - 0.12) want = Math.max(Math.ceil(d / TARGET), S.desired - 1);
+    }
+    return Math.max(min, Math.min(max, want));
+  }
+  function step(dt) {
+    const h = dt * HRS_PER_SEC;
+    if (!h) return;
+    if (S.t >= 30) { S.done = true; return; }
+    S.t = Math.min(30, S.t + h);
+    // AZ outage
+    if ($('azOut').checked) S.inst.forEach(i => { if (i.az === 'b' && i.state !== 'bad') { i.state = 'bad'; i.bt = S.t; } });
+    // warm-up and replacement
+    S.inst.forEach(i => { if (i.state === 'pending' && S.t - i.t0 >= WARM) i.state = 'ok'; });
+    S.inst = S.inst.filter(i => !(i.state === 'bad' && S.t - i.bt >= FAILREPLACE));
+    // policy evaluation every 5 simulated minutes
+    if (S.t >= S.evalAt) { S.desired = wantDesired(); S.evalAt = S.t + 1 / 12; }
+    const live = S.inst.filter(i => i.state !== 'bad');
+    if (live.length < S.desired) launch(false);
+    else if (live.length > S.desired) {
+      const victim = live.slice().sort((a, b) => (a.state === 'pending' ? -1 : 0) - (b.state === 'pending' ? -1 : 0) || b.t0 - a.t0)[0];
+      S.inst = S.inst.filter(i => i !== victim);
+    }
+    // traffic
+    const ok = S.inst.filter(i => i.state === 'ok').length;
+    const d = demand(S.t);
+    S.demanded += d * h; S.served += Math.min(d, ok) * h;
+    S.ih += S.inst.filter(i => i.state !== 'bad').length * h;
+    if (S.t >= S.histAt) { S.hist.push([S.t, d / TARGET, ok]); S.histAt = S.t + 0.1; }
+  }
+  let dotAcc = 0; const dots = [];
+  function spawnDots(dt) {
+    if (K.reduce) return;
+    const ok = S.inst.filter(i => i.state === 'ok');
+    const d = demand(S.t);
+    dotAcc += dt * d * 2.2;
+    while (dotAcc >= 1) {
+      dotAcc -= 1;
+      const over = ok.length ? Math.max(0, 1 - ok.length / d) : 1;
+      const drop = Math.random() < over;
+      const okSlots = SLOTS.filter(s => s.inst && s.inst.state === 'ok');
+      if (!drop && !okSlots.length) continue;
+      const slot = drop ? null : okSlots[Math.floor(Math.random() * okSlots.length)];
+      const c = K.el('circle', { r: 4, class: 'dot' + (drop ? ' drop' : ''), cx: 500, cy: 73 }, dotsG);
+      dots.push({ c, a: [500, 73], b: drop ? [500 + (Math.random() * 60 - 30), 98] : [slot.x, slot.y - 20], t: 0, dur: drop ? 0.35 : 0.6 });
+    }
+    for (let i = dots.length - 1; i >= 0; i--) {
+      const o = dots[i]; o.t += dt / o.dur;
+      if (o.t >= 1) { o.c.remove(); dots.splice(i, 1); continue; }
+      o.c.setAttribute('cx', o.a[0] + (o.b[0] - o.a[0]) * o.t); o.c.setAttribute('cy', o.a[1] + (o.b[1] - o.a[1]) * o.t);
+    }
+  }
+  function render() {
+    SLOTS.forEach(s => s.inst = null);
+    ['a', 'b'].forEach(az => {
+      const mine = S.inst.filter(i => i.az === az);
+      const free = SLOTS.filter(s => s.az === az);
+      mine.forEach((inst, k) => { if (free[k]) free[k].inst = inst; });
+    });
+    SLOTS.forEach(s => {
+      const i = s.inst;
+      s.r.setAttribute('class', 'inst ' + (i ? i.state : 'off'));
+      s.l.textContent = i ? (i.state === 'pending' ? 'warming' : i.state === 'bad' ? 'unhealthy' : 'i-' + String(i.id).padStart(2, '0')) : '';
+    });
+    zB.classList.toggle('down', $('azOut').checked); zBl.textContent = $('azOut').checked ? 'AZ ap-south-1b · OUTAGE' : 'AZ ap-south-1b';
+    const xs = r => CX + CW * ((r[0] - 6) / 24);
+    lnD.setAttribute('points', S.hist.map(r => `${xs(r)},${yOf(r[1])}`).join(' '));
+    lnC.setAttribute('points', S.hist.map(r => `${xs(r)},${yOf(r[2])}`).join(' '));
+    const nx = CX + CW * ((S.t - 6) / 24); nowL.setAttribute('x1', nx); nowL.setAttribute('x2', nx);
+    const ok = S.inst.filter(i => i.state === 'ok').length;
+    const d = demand(S.t), cpu = ok ? Math.min(1, d / ok) : 1;
+    const hh = Math.floor(S.t % 24), mi = Math.floor((S.t % 1) * 60);
+    const dropped = S.demanded ? (1 - S.served / S.demanded) * 100 : 0;
+    $('simK').innerHTML = [
+      ['Time', `${String(hh).padStart(2, '0')}:${String(mi).padStart(2, '0')}`, ''],
+      ['In service / desired', `${ok} / ${S.desired}`, ''],
+      ['Average CPU', Math.round(cpu * 100) + '%', cpu >= 0.95 ? 'bad' : cpu <= 0.6 ? 'good' : 'accent'],
+      ['Requests failed today', dropped.toFixed(1) + '%', dropped > 2 ? 'bad' : 'good'],
+      ['Instance-hours cost', '$' + (S.ih * 0.10).toFixed(2), '']
+    ].map(([l, v, c]) => `<div class="kpi ${c}"><b>${v}</b><span>${l}</span></div>`).join('');
+    const h = S.t % 24;
+    let st;
+    if (S.done) st = 'Day complete. Compare failed requests and cost across policies, then press Restart the day.';
+    else if ($('azOut').checked) st = 'AZ b is down: its instances fail health checks, the ALB stops using them, and the ASG relaunches capacity in AZ a. That only works because the group spans two AZs.';
+    else if (S.t < S.spikeUntil) st = policy === 'pred' ? 'A spike predictive scaling never saw in the history: it can\'t forecast this, so pair it with target tracking in real life.' : policy === 'sched' || policy === 'fixed' ? 'The spike hits a fixed plan: no policy reacts, so CPU pegs and requests fail.' : 'Target tracking sees CPU above 50% and launches instances; they need ~15 minutes to warm up.';
+    else if (S.lastFail !== undefined && S.t - S.lastFail < 1.2) st = 'Health check failed: the ALB stops sending traffic to it immediately, and the ASG terminates and replaces it (self-healing).';
+    else st = { fixed: 'Fixed size: the ASG holds desired capacity all day. Over-provisioned at night, overloaded at the peaks.', target: 'Target tracking: like a thermostat, it adds instances when CPU passes 50% and removes them as load falls. Elasticity.', sched: 'Scheduled: 8 instances from 08:00 to 22:00, 2 overnight. Great for known patterns, blind to surprises.', pred: 'Predictive: ML forecasts the daily pattern from history and launches capacity before each peak.' }[policy];
+    $('simStatus').textContent = st;
+  }
+  let lastT = null, visible = true;
+  new IntersectionObserver(es => { visible = es[0].isIntersecting; }).observe(sv);
+  function frame(now) {
+    const dt = K.tick(lastT === null ? 0 : Math.min(0.1, (now - lastT) / 1000)); lastT = now;
+    if (visible) { step(dt); spawnDots(dt); render(); }
+    requestAnimationFrame(frame);
+  }
+  K.seg($('polSeg'), v => { policy = v; S.evalAt = 0; });
+  const outs = () => { $('minO').textContent = $('minR').value; $('desO').textContent = $('desR').value; $('maxO').textContent = $('maxR').value; S.evalAt = 0; };
+  ['minR', 'desR', 'maxR'].forEach(id => $(id).addEventListener('input', outs));
+  $('spikeB').addEventListener('click', () => { S.spikeUntil = S.t + 2.5; });
+  $('failB').addEventListener('click', () => { const ok = S.inst.filter(i => i.state === 'ok'); if (ok.length) { const v = ok[Math.floor(Math.random() * ok.length)]; v.state = 'bad'; v.bt = S.t; S.lastFail = S.t; } });
+  $('resetB').addEventListener('click', () => { reset(); });
+  reset(); outs(); render(); requestAnimationFrame(frame);
+
+  })();
+
+  K.pick($('pick'), [
+    { q: 'Keep the average CPU of the group at 40%.', a: 'Target tracking', why: 'One metric, one target value.' },
+    { q: 'Black Friday sale starts at 00:00 on a known date.', a: 'Scheduled', why: 'A known date and time.' },
+    { q: 'Use the last weeks of traffic to scale before the daily peak.', a: 'Predictive', why: 'Machine-learning forecast from history.' },
+    { q: 'Add 1 instance when CPU > 70%, add 4 when CPU > 90%.', a: 'Step scaling', why: 'The change grows with the size of the breach.' },
+    { q: 'A CloudWatch alarm adds 2 instances, then the group waits 300 s.', a: 'Simple scaling', why: 'One adjustment per alarm, then a cooldown.' },
+    { q: 'Keep about 1,000 requests per instance from the load balancer.', a: 'Target tracking', why: 'ALB request count per target is a target tracking metric.' },
+    { q: 'Office app: 6 instances on weekdays 09:00 to 18:00.', a: 'Scheduled', why: 'Fixed working hours.' }
+  ], ['Simple scaling', 'Step scaling', 'Target tracking', 'Scheduled', 'Predictive']);
+})();
+</script>
+</body>
+</html>

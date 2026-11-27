@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>S3 Encryption</title>
+<meta name="description" content="How S3 encrypts data in transit and at rest: SSE-S3 by default, SSE-KMS, DSSE-KMS, SSE-C and client-side encryption, with a who-holds-the-key comparison.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html" aria-current="page"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Amazon S3 / 7 · Domain 2 Security</p>
+    <h1>S3 Encryption</h1>
+    <ul class="lede">
+      <li><b>In transit</b>, S3 uses HTTPS (TLS). <b>At rest</b>, every new object is encrypted with <b>SSE-S3</b> by default since January 2023.</li>
+      <li><b>SSE-KMS</b> uses keys you control in AWS KMS, with every use logged in CloudTrail.</li>
+      <li><b>SSE-C</b>: S3 encrypts with a key you send. <b>Client-side</b>: you encrypt before uploading.</li>
+      <li>A bucket policy can force HTTPS or a particular encryption.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">SSE-S3</span><span class="like">SQL Server TDE with a certificate the DBA never sees</span><span>Fully automatic, free and always on for new objects.</span></div>
+      <div class="row"><span class="aws">SSE-KMS</span><span class="like">TDE with keys in your own HSM or key vault</span><span>Keys live in AWS KMS; access is controlled by key policies and logged.</span></div>
+      <div class="row"><span class="aws">Client-side</span><span class="like">Encrypting a file with BitLocker or PGP before copying it to a share</span><span>Same idea: the storage only holds ciphertext.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: uploading a scan, four ways to encrypt it</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="A clinic app uploads a file to S3 over HTTPS; S3 encrypts it at rest with an S3-managed key or a KMS key, or the app encrypts it first with its own key"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li><b>In transit</b>: HTTPS/TLS to S3 endpoints. A bucket policy can deny non-HTTPS requests.</li>
+      <li><b>SSE-S3</b> (AES-256, S3-managed keys) is applied to all new objects by default since <b>5 Jan 2023</b>, at no cost, and can't be disabled.</li>
+      <li><b>SSE-KMS</b>: keys in AWS KMS; you control access and rotation; usage is audited in <b>CloudTrail</b>; KMS charges apply.</li>
+      <li><b>DSSE-KMS</b>: two layers of KMS encryption for strict compliance.</li>
+      <li><b>SSE-C</b>: you supply the key in every request; S3 doesn't store it; HTTPS only.</li>
+      <li><b>Client-side</b>: you encrypt before upload; you manage keys and process.</li>
+      <li>Shared responsibility: AWS provides the encryption; you choose the method and manage your keys.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="mH">
+    <h2 class="stage-title" id="mH">Who holds the key?</h2>
+    <div class="stage-kind">Pick a method</div>
+    <div class="card">
+      <div class="seg" id="mSeg" role="group" aria-label="Encryption method">
+        <button type="button" data-v="sse" aria-pressed="true">SSE-S3</button>
+        <button type="button" data-v="kms" aria-pressed="false">SSE-KMS</button>
+        <button type="button" data-v="ssec" aria-pressed="false">SSE-C</button>
+        <button type="button" data-v="cse" aria-pressed="false">Client-side</button>
+      </div>
+      <div class="kpis" id="mOut"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">Pick the encryption</h2>
+    <div class="stage-kind">Which option fits?</div>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Check and change encryption (outline)</summary>
+      <ol>
+        <li>Upload a file, open it → <b>Properties</b> → Server-side encryption: <b>SSE-S3</b> is already applied.</li>
+        <li>Bucket → <b>Properties</b> → Default encryption → <b>Edit</b>: switch to SSE-KMS and pick a KMS key (the AWS-managed <code>aws/s3</code> key or your own). Leave Bucket Key enabled.</li>
+        <li>Upload another file: it now shows SSE-KMS. Earlier objects keep SSE-S3 until copied.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Encrypted at rest by default</span><span class="arrow">→</span><span class="then">SSE-S3</span></li>
+      <li><span class="if">Control and audit encryption keys</span><span class="arrow">→</span><span class="then">SSE-KMS</span></li>
+      <li><span class="if">Encrypt before upload</span><span class="arrow">→</span><span class="then">Client-side encryption</span></li>
+      <li><span class="if">Your key, S3 encrypts, AWS never stores it</span><span class="arrow">→</span><span class="then">SSE-C</span></li>
+      <li><span class="if">Protect data moving to S3</span><span class="arrow">→</span><span class="then">HTTPS / TLS</span></li>
+      <li><span class="if">Force HTTPS on a bucket</span><span class="arrow">→</span><span class="then">Bucket policy: Deny aws:SecureTransport false</span></li>
+      <li><span class="if">Find sensitive data in buckets</span><span class="arrow">→</span><span class="then">Amazon Macie</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Method</th><th>Who encrypts</th><th>Who manages keys</th><th>Note</th></tr></thead>
+        <tbody>
+          <tr><td><b>SSE-S3</b></td><td>S3</td><td>S3</td><td>Default, free</td></tr>
+          <tr><td><b>SSE-KMS</b></td><td>S3</td><td>You, in KMS</td><td>CloudTrail audit, KMS charges</td></tr>
+          <tr><td><b>DSSE-KMS</b></td><td>S3 (two layers)</td><td>You, in KMS</td><td>For multi-layer compliance</td></tr>
+          <tr><td><b>SSE-C</b></td><td>S3</td><td>You, outside AWS</td><td>Key sent with each request</td></tr>
+          <tr><td><b>Client-side</b></td><td>You</td><td>You</td><td>S3 stores ciphertext only</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><p><b>Existing objects.</b> Default encryption applies to new uploads. Objects stored before 2023 without encryption stay that way until you copy them (S3 Batch Operations can do it in bulk).</p></div>
+      <div class="note"><p><b>KMS is its own service.</b> AWS Key Management Service creates and controls keys used by many services (EBS, RDS, S3…). It is covered in the security section.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>A new object is uploaded with no encryption settings. Is it encrypted?<span class="go">Show answer</span></summary><div class="ans"><p><b>Yes</b>, with SSE-S3, the default since January 2023.</p></div></details>
+      <details><summary>Auditors must see every use of the encryption key. Which option?<span class="go">Show answer</span></summary><div class="ans"><p><b>SSE-KMS</b>: key use is logged in CloudTrail.</p></div></details>
+      <details><summary>Data must be encrypted before it leaves your data centre.<span class="go">Show answer</span></summary><div class="ans"><p><b>Client-side encryption</b>.</p></div></details>
+      <details><summary>How do you protect data in transit to S3?<span class="go">Show answer</span></summary><div class="ans"><p>Use <b>HTTPS</b>; a bucket policy can reject plain HTTP.</p></div></details>
+      <details><summary>With SSE-C, does AWS keep your key?<span class="go">Show answer</span></summary><div class="ans"><p><b>No.</b> It is used for the request and discarded.</p></div></details>
+      <details><summary>Who is responsible for choosing the encryption method?<span class="go">Show answer</span></summary><div class="ans"><p><b>The customer</b>; AWS provides the capability.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: S3 notes "Amazon S3 Encryption: Server-Side vs. Client-Side" and "Amazon S3: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/default-encryption-faq.html">Default encryption FAQ</a>; <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/serv-side-encryption.html">Protecting data with server-side encryption</a>; <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingClientSideEncryption.html">Client-side encryption</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 330, y: 20, w: 650, h: 385, kind: 'region', label: 'ap-south-1' }, { id: 'you', x: 20, y: 20, w: 280, h: 385, kind: 'onprem', label: 'Your side' }],
+    nodes: {
+      app: { x: 160, y: 120, icon: 'server', kind: 'compute', label: 'Clinic app', sub: 'uploads scans' },
+      ck: { x: 160, y: 310, icon: 'key', kind: 'sec', label: 'Your own key', sub: 'client-side / SSE-C' },
+      s3: { x: 560, y: 120, icon: 'bucket', kind: 'storage', label: 'S3', sub: 'clinic-imaging' },
+      disk: { x: 860, y: 120, icon: 'disk', kind: 'storage', label: 'Stored data', sub: 'at rest' },
+      sk: { x: 560, y: 310, icon: 'lock', kind: 'sec', label: 'S3-managed key', sub: 'SSE-S3' },
+      kms: { x: 800, y: 310, icon: 'key', kind: 'sec', label: 'AWS KMS key', sub: 'SSE-KMS' }
+    },
+    links: [{ a: 'app', b: 's3', label: 'HTTPS (TLS)', at: [360, 108] }, { a: 's3', b: 'disk' }, { a: 's3', b: 'sk', kind: 'dash' }, { a: 's3', b: 'kms', kind: 'dash' }, { a: 'app', b: 'ck', kind: 'dash' }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['app', 's3', 'disk'], ['app', 's3', 'disk', 'sk'], ['app', 's3', 'disk', 'kms'], ['app', 's3', 'disk', 'kms'], ['app', 's3', 'disk', 'ck'], ['app', 's3', 'disk', 'ck'], ['app', 's3', 'disk'], null];
+    net.focus(F[i]);
+    if (i === 0) { net.badge('app', 'in transit', 'info'); net.badge('disk', 'at rest', 'info'); }
+    if (i === 1) { net.badge('sk', 'default · free', 'ok'); net.badge('disk', 'AES-256', 'ok'); }
+    if (i === 2) net.badge('kms', 'logged in CloudTrail', 'info');
+    if (i === 3) net.badge('kms', 'two layers', 'info');
+    if (i === 4) net.badge('ck', 'sent with each request', 'info');
+    if (i === 5) { net.badge('ck', 'encrypt before upload', 'ok'); net.badge('s3', 'sees ciphertext only', 'info'); }
+    if (i === 6) net.badge('s3', 'Deny if not HTTPS', 'bad');
+  }
+  const up = (run, label, tone) => net.send(['app', 's3', 'disk'], { run, label, tone });
+  const STEPS = [
+    { title: "Two places to protect data",
+      text: ["<b>In transit</b>: between your app and S3. S3 endpoints use <b>HTTPS (TLS)</b>.", "<b>At rest</b>: on S3's disks. Choose who encrypts and who manages the key."],
+      play: async run => { base(0); await up(run, 'scan.png'); } },
+    { title: "SSE-S3: on by default",
+      text: ["Since <b>5 January 2023</b> every new object is encrypted at rest with <b>SSE-S3</b> automatically.", "S3 owns and rotates the keys (AES-256). It is <b>free</b>, needs no setup and can't be turned off.", "Objects uploaded before 2023 weren't changed; copy them to encrypt them."],
+      tip: "Encrypted at rest by default = SSE-S3.",
+      play: async run => { base(1); await up(run, 'scan.png', 'green'); } },
+    { title: "SSE-KMS: you control the key",
+      text: ["S3 encrypts with a key you manage in <b>AWS KMS</b>.", "You decide who may use the key (key policy), can disable or rotate it, and every use is recorded in <b>CloudTrail</b>.", "KMS charges per request; <b>S3 Bucket Keys</b> cut that cost."],
+      tip: "Control and audit the key = SSE-KMS.",
+      play: async run => { base(2); await net.send(['s3', 'kms'], { run, label: 'use key', tone: 'cyan' }); await net.send(['s3', 'disk'], { run, tone: 'green' }); } },
+    { title: "DSSE-KMS: two layers",
+      text: ["<b>Dual-layer</b> server-side encryption applies two separate layers of encryption with KMS keys.", "For workloads whose compliance rules ask for multiple layers."] },
+    { title: "SSE-C: your key, S3 does the work",
+      text: ["You send your <b>own key</b> with every upload and download (over HTTPS only).", "S3 encrypts with it and then throws the key away; it keeps only a hash to check the next request.", "Lose the key and the data is unreadable."] },
+    { title: "Client-side encryption",
+      text: ["Your app encrypts the file <b>before</b> uploading it and decrypts after downloading.", "S3 only ever sees ciphertext. You manage the keys and the process."],
+      tip: "Encrypt before it leaves our network = client-side.",
+      play: async run => { base(5); await net.send(['ck', 'app'], { run, label: 'encrypt', tone: 'cyan' }); await up(run, 'ciphertext'); } },
+    { title: "Enforcing it",
+      text: ["The bucket's <b>default encryption</b> setting picks SSE-S3 or SSE-KMS for every upload.", "A <b>bucket policy</b> can deny any request that doesn't use HTTPS (<code>aws:SecureTransport</code> false) or that asks for the wrong encryption."] },
+    { title: "The whole picture",
+      text: ["<b>SSE-S3</b>: S3 encrypts, S3 manages keys (default). <b>SSE-KMS</b>: S3 encrypts, you manage keys in KMS. <b>SSE-C</b>: S3 encrypts with the key you send. <b>Client-side</b>: you encrypt, you manage keys.", "In transit: always HTTPS."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ---------- who holds the key ---------- */
+  const M = {
+    sse: ['S3, on AWS servers', 'S3 (AWS-owned keys)', 'No per-key audit trail', 'Free, the default'],
+    kms: ['S3, on AWS servers', 'You, in AWS KMS', 'Every key use in CloudTrail', 'KMS request charges'],
+    ssec: ['S3, with the key you send', 'You, outside AWS', 'You track your own keys', 'No KMS charges'],
+    cse: ['Your app, before upload', 'You (any tool, or KMS)', 'Your own logs', 'Your effort']
+  };
+  const L = ['Where encryption happens', 'Who manages the key', 'Audit', 'Cost'];
+  function show(k) { $('mOut').innerHTML = M[k].map((v, i) => `<div><b>${v}</b><span>${L[i]}</span></div>`).join(''); }
+  K.seg($('mSeg'), show); show('sse');
+
+  K.pick($('pick'), [
+    { q: 'Encrypt at rest with no setup and no cost.', a: 'SSE-S3', why: 'It is the default for all new objects.' },
+    { q: 'Security team must control the key and audit every use.', a: 'SSE-KMS', why: 'KMS key policies plus CloudTrail logs.' },
+    { q: 'Data must be encrypted before it leaves the hospital network.', a: 'Client-side', why: 'You encrypt before upload.' },
+    { q: 'You want S3 to do the encryption but with your own key that AWS never stores.', a: 'SSE-C', why: 'The key travels with each request and is discarded.' },
+    { q: 'Protect data while it travels to S3.', a: 'HTTPS', why: 'Encryption in transit (TLS).' },
+    { q: 'Disable a key to make all objects encrypted with it unreadable.', a: 'SSE-KMS', why: 'You control the KMS key\'s state.' }
+  ], ['SSE-S3', 'SSE-KMS', 'SSE-C', 'Client-side', 'HTTPS']);
+
+})();
+</script>
+</body>
+</html>

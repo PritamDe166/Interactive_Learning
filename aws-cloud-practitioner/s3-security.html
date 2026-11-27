@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>S3 Security &amp; Bucket Policies</title>
+<meta name="description" content="How S3 decides who can read an object: IAM policies, bucket policies, Block Public Access, explicit deny and ACLs, with an access lab and a policy reader.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+
+  .gate rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .gate text { fill: var(--fg); font-size: 13px; font-weight: 600; text-anchor: middle; }
+  .gate .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .gate.on rect { stroke: var(--cyan); fill: var(--teal-wash); }
+  .gate.pass rect { stroke: var(--teal); }
+  .gate.stop rect { stroke: var(--red); }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html" aria-current="page"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Amazon S3 / 2 · Domain 2 Security</p>
+    <h1>S3 Security &amp; Bucket Policies</h1>
+    <ul class="lede">
+      <li>Buckets are <b>private by default</b>. Access is granted by <b>IAM policies</b> (on users and roles) or a <b>bucket policy</b> (on the bucket).</li>
+      <li>A request is allowed if <b>either</b> policy allows it and <b>no policy explicitly denies</b> it.</li>
+      <li><b>Block Public Access</b> is on by default and overrides any public grant.</li>
+      <li>Making a bucket public needs <b>both</b>: Block Public Access off <b>and</b> a public-read bucket policy.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">IAM policy</span><span class="like">Permissions on an Active Directory user or group</span><span>Follows the identity to every resource it calls.</span></div>
+      <div class="row"><span class="aws">Bucket policy</span><span class="like">The NTFS permissions on a share</span><span>Written as JSON on the bucket; can name other AWS accounts or "everyone".</span></div>
+      <div class="row"><span class="aws">Block Public Access</span><span class="like">A Group Policy that forbids "Everyone" on any share</span><span>Overrides any public grant, per bucket or for the whole account.</span></div>
+      <div class="row"><span class="aws">Explicit Deny</span><span class="like">A Deny entry in NTFS</span><span>Same rule: Deny beats Allow.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: who can read the clinic's scans?</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="Requests from the internet, a partner account and an EC2 role reach a private bucket through Block Public Access, a bucket policy or an IAM policy"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>Security layers: <b>IAM policies</b> (identity-based), <b>bucket policies</b> (resource-based), <b>ACLs</b> (legacy, disabled by default), <b>Block Public Access</b>, and <b>encryption</b>.</li>
+      <li>A request is allowed if an IAM policy <b>or</b> the bucket policy allows it, and there is <b>no explicit Deny</b>. Explicit Deny always wins.</li>
+      <li>Bucket policy parts: <b>Principal</b>, <b>Effect</b>, <b>Action</b>, <b>Resource</b> (and optional <b>Condition</b>).</li>
+      <li>Use a bucket policy to grant <b>public</b> access, <b>cross-account</b> access, or to <b>force</b> HTTPS or encryption.</li>
+      <li><b>Block Public Access</b> is on by default and overrides public grants. It can be set per bucket or for the whole account.</li>
+      <li>An EC2 instance that needs S3 gets an <b>IAM role</b>, never stored access keys.</li>
+      <li>Shared responsibility: you configure policies, Block Public Access and encryption; AWS secures the service.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="accH">
+    <h2 class="stage-title" id="accH">Who can read <span class="mono">scans/xray-0042.png</span>?</h2>
+    <div class="stage-kind">Set the bucket up, then send a request through the checks</div>
+    <div class="card">
+      <div class="ptoggles">
+        <label class="toggle" for="bpa"><input type="checkbox" id="bpa" checked> Block Public Access: <b id="bpaL">ON</b></label>
+        <label class="toggle" for="pubPol"><input type="checkbox" id="pubPol"> Bucket policy: allow <span class="mono">"Principal": "*"</span> s3:GetObject</label>
+        <label class="toggle" for="xPol"><input type="checkbox" id="xPol"> Bucket policy: allow account 222233334444 (partner lab)</label>
+        <label class="toggle" for="role"><input type="checkbox" id="role" checked> EC2 role policy: allow s3:GetObject on this bucket</label>
+        <label class="toggle" for="denyTls"><input type="checkbox" id="denyTls"> Bucket policy: <b>deny</b> requests without HTTPS</label>
+      </div>
+      <div class="chips" id="accChips"></div>
+      <div class="scroll"><svg class="diagram" id="acc" viewBox="0 0 1000 200" aria-label="A request passes Block Public Access, explicit deny, allow and default deny checks"></svg></div>
+      <p class="status-line" id="accStatus">Pick a requester.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="polH">
+    <h2 class="stage-title" id="polH">Read a bucket policy</h2>
+    <div class="stage-kind">Pick a policy · read the JSON, then the plain-English meaning</div>
+    <div class="card">
+      <div class="seg" id="polSeg" role="group" aria-label="Policy">
+        <button type="button" data-v="pub" aria-pressed="true">Public read</button>
+        <button type="button" data-v="xacct" aria-pressed="false">Another account</button>
+        <button type="button" data-v="tls" aria-pressed="false">HTTPS only</button>
+        <button type="button" data-v="kms" aria-pressed="false">Force KMS encryption</button>
+      </div>
+      <pre class="codebox" id="polJson" style="margin-top:12px"></pre>
+      <p class="status-line" id="polSay"></p>
+    </div>
+  </section>
+
+  <section aria-labelledby="coH">
+    <h2 id="coH">In the console</h2>
+    <details class="console-steps"><summary>Make a bucket publicly readable with a policy (outline)</summary>
+      <ol>
+        <li>Create a bucket and upload an image. Open its <b>Object URL</b>: <code>AccessDenied</code>.</li>
+        <li>Bucket → <b>Permissions</b> → Block public access → <b>Edit</b>, untick <b>Block all public access</b>, confirm.</li>
+        <li><b>Bucket policy</b> → Edit: allow <code>s3:GetObject</code> for Principal <code>*</code> on <code>arn:aws:s3:::your-bucket/*</code> (the AWS Policy Generator can write it).</li>
+        <li>Reload the Object URL: the image now opens. Turn Block Public Access back on afterwards; the URL fails again.</li>
+      </ol>
+    </details>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Grant another AWS account access</span><span class="arrow">→</span><span class="then">Bucket policy</span></li>
+      <li><span class="if">Prevent buckets becoming public by mistake</span><span class="arrow">→</span><span class="then">Block Public Access</span></li>
+      <li><span class="if">EC2 needs to read S3</span><span class="arrow">→</span><span class="then">IAM role</span></li>
+      <li><span class="if">Public read needs…</span><span class="arrow">→</span><span class="then">BPA off + public bucket policy</span></li>
+      <li><span class="if">Deny and Allow both match</span><span class="arrow">→</span><span class="then">Deny wins</span></li>
+      <li><span class="if">Force HTTPS on a bucket</span><span class="arrow">→</span><span class="then">Bucket policy Deny on aws:SecureTransport false</span></li>
+      <li><span class="if">Find public or shared buckets</span><span class="arrow">→</span><span class="then">IAM Access Analyzer</span></li>
+      <li><span class="if">Who configures bucket policies?</span><span class="arrow">→</span><span class="then">The customer</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th>Control</th><th>Attached to</th><th>Good for</th></tr></thead>
+        <tbody>
+          <tr><td><b>IAM policy</b></td><td>User, group or role</td><td>Your own users and apps</td></tr>
+          <tr><td><b>Bucket policy</b></td><td>The bucket</td><td>Public access, other accounts, forcing HTTPS or encryption</td></tr>
+          <tr><td><b>Block Public Access</b></td><td>Bucket or whole account</td><td>A safety net against public exposure</td></tr>
+          <tr><td><b>ACL</b></td><td>Bucket or object</td><td>Legacy; disabled on new buckets</td></tr>
+          <tr><td><b>Pre-signed URL</b></td><td>One object, for a limited time</td><td>Sharing without an AWS account</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="notes" style="margin-top:14px">
+      <div class="note"><p><b>Cross-account needs two yeses.</b> The bucket policy must allow the other account, and that account's administrator must also allow their user or role in IAM.</p></div>
+      <div class="note"><p><b>403 on a "public" URL</b> almost always means Block Public Access is still on, or there is no bucket policy granting public read.</p></div>
+      <div class="note"><p><b>Amazon Macie</b> can scan buckets for sensitive data such as personal information; <b>IAM Access Analyzer</b> reports buckets shared publicly or with other accounts.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>You add a public-read bucket policy but the URL still says AccessDenied. Why?<span class="go">Show answer</span></summary><div class="ans"><p><b>Block Public Access</b> is still on, and it overrides public grants.</p></div></details>
+      <details><summary>How do you let another AWS account read your bucket?<span class="go">Show answer</span></summary><div class="ans"><p>With a <b>bucket policy</b> naming that account (and their admin allows it in IAM).</p></div></details>
+      <details><summary>An IAM policy allows a read, and the bucket policy denies it. Result?<span class="go">Show answer</span></summary><div class="ans"><p><b>Denied.</b> An explicit Deny always wins.</p></div></details>
+      <details><summary>An app on EC2 needs to upload to S3. What is the best practice?<span class="go">Show answer</span></summary><div class="ans"><p>Attach an <b>IAM role</b> to the instance.</p></div></details>
+      <details><summary>What are the four main elements of a bucket policy statement?<span class="go">Show answer</span></summary><div class="ans"><p><b>Principal, Effect, Action, Resource</b> (plus an optional Condition).</p></div></details>
+      <details><summary>Who is responsible for a bucket being accidentally public?<span class="go">Show answer</span></summary><div class="ans"><p><b>The customer.</b> Configuring access is your side of the shared responsibility model.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Account numbers and bucket names are examples. Sources: S3 notes "Amazon S3 Security", "Making an S3 Bucket Public with a Bucket Policy" and "Amazon S3: CLF-C02 Exam Summary"; <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html">Blocking public access</a>; <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-policies.html">Bucket policies</a>; <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/about-object-ownership.html">Object Ownership</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 300, y: 20, w: 680, h: 385, kind: 'region', label: 'Account 111122223333 · ap-south-1' }],
+    nodes: {
+      anon: { x: 90, y: 110, icon: 'globe', kind: 'user', label: 'Anyone', sub: 'internet' },
+      partner: { x: 90, y: 210, icon: 'building', kind: 'user', label: 'Partner lab', sub: 'account 2222…' },
+      ec2: { x: 90, y: 340, icon: 'server', kind: 'compute', label: 'Clinic app', sub: 'EC2 + IAM role' },
+      bpa: { x: 410, y: 110, icon: 'shield', kind: 'sec', label: 'Block Public Access', sub: 'on by default' },
+      pol: { x: 600, y: 210, icon: 'doc', kind: 'sec', label: 'Bucket policy', sub: 'resource-based' },
+      role: { x: 410, y: 340, icon: 'idcard', kind: 'sec', label: 'IAM policy', sub: 'identity-based' },
+      b: { x: 850, y: 210, icon: 'bucket', kind: 'storage', label: 'clinic-imaging', sub: 'private by default' }
+    },
+    links: [{ a: 'anon', b: 'bpa' }, { a: 'bpa', b: 'pol' }, { a: 'partner', b: 'pol' }, { a: 'pol', b: 'b' }, { a: 'ec2', b: 'role' }, { a: 'role', b: 'b', via: [[850, 340]] }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['anon', 'bpa', 'pol', 'b'], ['ec2', 'role', 'b'], ['partner', 'pol', 'b'], ['anon', 'bpa', 'pol', 'b'], ['anon', 'bpa', 'pol', 'b'], ['anon', 'bpa', 'pol', 'b'], ['b', 'pol'], null];
+    net.focus(F[i]);
+    if (i === 0) net.badge('b', '403 AccessDenied', 'bad');
+    if (i === 1) net.badge('role', 'Allow s3:GetObject', 'ok');
+    if (i === 2) net.badge('pol', 'Allow account 2222…', 'ok');
+    if (i === 3) { net.badge('pol', 'Principal: *', 'info'); net.badge('bpa', 'blocks it', 'bad'); net.link('bpa', 'pol', 'cut'); }
+    if (i === 4) { net.badge('pol', 'Principal: *', 'info'); net.badge('bpa', 'off', 'ok'); }
+    if (i === 5) { net.badge('pol', 'Deny if not HTTPS', 'bad'); }
+    if (i === 6) net.badge('b', 'ACLs disabled', 'info');
+  }
+  const STEPS = [
+    { title: "Private by default",
+      text: ["A new bucket and everything in it are <b>private</b>: only the account that owns it can reach it.", "An anonymous request from the internet gets <b>403 AccessDenied</b>.", "Every permission you add is a deliberate <b>Allow</b>."],
+      play: async run => { base(0); await net.send(['anon', 'bpa', 'pol', 'b'], { run, label: 'GET', tone: 'red' }); } },
+    { title: "IAM policies: what a user or role may do",
+      text: ["An <b>IAM policy</b> is attached to a user, group or role (identity-based).", "The clinic app runs on EC2 with an <b>IAM role</b> whose policy allows <code>s3:GetObject</code> on this bucket, so its requests succeed.", "Never put access keys on an instance: use a role."],
+      play: async run => { base(1); await net.send(['ec2', 'role', 'b'], { run, label: 'GET', tone: 'green' }); } },
+    { title: "Bucket policies: who may use this bucket",
+      text: ["A <b>bucket policy</b> is a JSON document attached to the bucket itself (resource-based).", "It names a <b>Principal</b> (who), <b>Effect</b> (Allow or Deny), <b>Action</b> (e.g. <code>s3:GetObject</code>) and <b>Resource</b> (<code>arn:aws:s3:::clinic-imaging/*</code>).", "It is how you grant access to <b>another AWS account</b> such as the partner lab."],
+      tip: "Cross-account or public access = bucket policy.",
+      play: async run => { base(2); await net.send(['partner', 'pol', 'b'], { run, label: 'GET', tone: 'green' }); } },
+    { title: "Public read is blocked by default",
+      text: ["A bucket policy with <code>\"Principal\": \"*\"</code> would make objects public.", "But <b>Block Public Access</b> is on by default for new buckets, and it <b>overrides</b> any policy that grants public access.", "The request is still refused."],
+      play: async run => { base(3); await net.send(['anon', 'bpa'], { run, label: 'GET', tone: 'red' }); } },
+    { title: "Public needs two changes",
+      text: ["To publish objects (for example a public website) you need <b>both</b>: turn Block Public Access off <b>and</b> add a bucket policy that allows public reads.", "Either one alone keeps the bucket private.", "Block Public Access can also be set for the whole account, to stop anyone opening a bucket by mistake."],
+      play: async run => { base(4); await net.send(['anon', 'bpa', 'pol', 'b'], { run, label: 'GET', tone: 'green' }); } },
+    { title: "An explicit Deny always wins",
+      text: ["Statements can also <b>Deny</b>. A common one: deny any request that doesn't use HTTPS (<code>aws:SecureTransport = false</code>).", "If any policy denies a request, no Allow anywhere can override it.", "Rule: allowed if an IAM policy <b>or</b> the bucket policy allows it, <b>and</b> nothing denies it."],
+      tip: "Explicit Deny > Allow > default deny.",
+      play: async run => { base(5); await net.send(['anon', 'bpa', 'pol'], { run, label: 'http://', tone: 'red' }); } },
+    { title: "ACLs are legacy",
+      text: ["Access control lists (ACLs) are an older way to grant access per bucket or object.", "New buckets have ACLs <b>disabled</b> (Object Ownership: bucket owner enforced); use policies instead."] },
+    { title: "The layers together",
+      text: ["<b>IAM policies</b> for your own users and roles. <b>Bucket policies</b> for other accounts, public access and bucket-wide rules. <b>Block Public Access</b> as the safety net. <b>Encryption</b> for data at rest.", "You configure all of these; AWS secures the infrastructure underneath (shared responsibility)."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  /* ---------- access lab ---------- */
+  const acc = $('acc');
+  const GATES = [
+    { k: 'bpa', x: 170, t: 'Block Public Access', s: 'blocks public grants' },
+    { k: 'deny', x: 400, t: 'Explicit Deny?', s: 'any policy' },
+    { k: 'allow', x: 630, t: 'Any Allow?', s: 'IAM or bucket policy' },
+    { k: 'def', x: 860, t: 'Default deny', s: 'private by default' }
+  ];
+  const gE = {};
+  GATES.forEach((g, i) => {
+    const el = K.el('g', { class: 'gate' }, acc);
+    K.el('rect', { x: g.x - 100, y: 55, width: 200, height: 70, rx: 12 }, el);
+    K.text(el, g.x, 85, g.t, ''); K.text(el, g.x, 107, g.s, 'sm'); gE[g.k] = el;
+    if (i < GATES.length - 1) K.el('line', { x1: g.x + 100, y1: 90, x2: GATES[i + 1].x - 100, y2: 90, class: 'msg solid' }, acc);
+  });
+  const aP = K.el('g', {}, acc);
+  const RQ = [
+    { k: 'anon', n: 'Anonymous browser (HTTPS)', pub: true, tls: true },
+    { k: 'anonhttp', n: 'Anonymous, plain HTTP', pub: true, tls: false },
+    { k: 'ec2', n: 'EC2 app with the IAM role', tls: true },
+    { k: 'lab', n: 'Partner lab account', tls: true },
+    { k: 'other', n: 'IAM user, other account', tls: true },
+    { k: 'psu', n: 'Pre-signed URL from the EC2 role', tls: true, psu: true }
+  ];
+  $('accChips').innerHTML = RQ.map(r => `<button class="chip-btn" type="button" data-k="${r.k}" aria-pressed="false">${r.n}</button>`).join('');
+  async function access(r) {
+    const run = K.newRun('acc');
+    aP.textContent = ''; Object.values(gE).forEach(g => g.setAttribute('class', 'gate'));
+    const st = $('accStatus');
+    const bpa = $('bpa').checked, pub = $('pubPol').checked;
+    const p = K.pill(aP, r.n.length > 26 ? r.n.slice(0, 25) + '…' : r.n);
+    const gate = async (k, from) => { await K.move(p, [from, 30], [GATES.find(g => g.k === k).x, 30], 420, run); gE[k].classList.add('on'); await K.sleep(450, run); gE[k].classList.remove('on'); };
+    try {
+      await gate('bpa', 30);
+      if (r.pub && bpa && pub) { gE.bpa.classList.add('stop'); p.remove(); st.innerHTML = '<span class="bad-text">403 AccessDenied.</span> The public bucket policy exists, but Block Public Access overrides it. Both must allow.'; return; }
+      gE.bpa.classList.add('pass');
+      await gate('deny', 170);
+      if ($('denyTls').checked && !r.tls) { gE.deny.classList.add('stop'); p.remove(); st.innerHTML = '<span class="bad-text">403.</span> The explicit Deny for non-HTTPS requests wins over the public Allow.'; return; }
+      gE.deny.classList.add('pass');
+      await gate('allow', 400);
+      let why = '';
+      if (r.pub && pub) why = 'the public bucket policy (and Block Public Access is off)';
+      if (r.k === 'ec2' && $('role').checked) why = 'the IAM role\'s identity policy. No bucket policy is needed inside the same account';
+      if (r.k === 'psu' && $('role').checked) why = 'the signer\'s permissions (the EC2 role), carried in the URL until it expires';
+      if (r.k === 'lab' && $('xPol').checked) why = 'the bucket policy naming the partner account (their admin must also allow it in their own IAM)';
+      if (why) { gE.allow.classList.add('pass'); p.remove(); const ok = K.pill(aP, '200 OK', 'ok'); await K.move(ok, [630, 30], [630, 165], 350, run); st.innerHTML = `<span class="ok-text">Allowed</span> by ${why}.`; return; }
+      gE.allow.classList.add('stop');
+      await K.move(p, [630, 30], [860, 30], 380, run); p.remove();
+      gE.def.classList.add('stop');
+      st.innerHTML = `<span class="bad-text">403.</span> Nothing allows this requester, so the bucket stays private.${r.pub && !pub && !bpa ? ' Turning off Block Public Access alone doesn\'t make anything public.' : ''}${r.psu ? ' A pre-signed URL only works if its signer is allowed.' : ''}`;
+    } catch (e) { if (!(e instanceof K.Stop)) throw e; }
+  }
+  $('accChips').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    $('accChips').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    access(RQ.find(r => r.k === b.dataset.k));
+  }));
+  $('bpa').addEventListener('change', () => { $('bpaL').textContent = $('bpa').checked ? 'ON' : 'OFF'; });
+
+  /* ---------- policy reader ---------- */
+  const POL = {
+    pub: { j: { Version: '2012-10-17', Statement: [{ Sid: 'PublicRead', Effect: 'Allow', Principal: '*', Action: 's3:GetObject', Resource: 'arn:aws:s3:::clinic-site/*' }] },
+      say: '<b>Anyone</b> may read every object. Works only if Block Public Access is off. Typical for a public website bucket.' },
+    xacct: { j: { Version: '2012-10-17', Statement: [{ Sid: 'PartnerRead', Effect: 'Allow', Principal: { AWS: 'arn:aws:iam::222233334444:root' }, Action: ['s3:GetObject', 's3:ListBucket'], Resource: ['arn:aws:s3:::clinic-imaging', 'arn:aws:s3:::clinic-imaging/*'] }] },
+      say: 'Account <b>222233334444</b> may list the bucket and read objects. Note the two resources: the bucket itself (for ListBucket) and <code>/*</code> for the objects.' },
+    tls: { j: { Version: '2012-10-17', Statement: [{ Sid: 'HttpsOnly', Effect: 'Deny', Principal: '*', Action: 's3:*', Resource: ['arn:aws:s3:::clinic-imaging', 'arn:aws:s3:::clinic-imaging/*'], Condition: { Bool: { 'aws:SecureTransport': 'false' } } }] },
+      say: '<b>Denies</b> every request that doesn\'t use HTTPS, for everyone. Because it is an explicit Deny, no Allow can override it.' },
+    kms: { j: { Version: '2012-10-17', Statement: [{ Sid: 'RequireKms', Effect: 'Deny', Principal: '*', Action: 's3:PutObject', Resource: 'arn:aws:s3:::clinic-imaging/*', Condition: { StringNotEquals: { 's3:x-amz-server-side-encryption': 'aws:kms' } } }] },
+      say: 'Rejects any upload that doesn\'t ask for <b>SSE-KMS</b> encryption. A way to force a particular encryption on uploads.' }
+  };
+  function showPol(k) { $('polJson').textContent = JSON.stringify(POL[k].j, null, 2); $('polSay').innerHTML = POL[k].say; }
+  K.seg($('polSeg'), showPol); showPol('pub');
+
+})();
+</script>
+</body>
+</html>

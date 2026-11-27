@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>AWS Database Migration Service</title>
+<meta name="description" content="AWS DMS migrates databases to AWS with the source online: full load, ongoing change replication, homogeneous and heterogeneous migrations with schema conversion, with a migration planner.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html" aria-current="page"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Databases &amp; analytics / 16 · Domain 3 Technology</p>
+    <h1>AWS Database Migration Service (DMS)</h1>
+    <ul class="lede">
+      <li><b>DMS</b> migrates databases to AWS (or between databases) while the <b>source stays operational</b>.</li>
+      <li>It copies existing data, then replicates <b>ongoing changes</b>, so downtime is minimal.</li>
+      <li><b>Homogeneous</b> (Oracle → Oracle) or <b>heterogeneous</b> (Oracle → Aurora PostgreSQL); heterogeneous needs <b>schema conversion</b> (SCT).</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">DMS</span><span class="like">Transactional replication used to move a database, then switching the connection string</span><span>Managed, and works across different engines.</span></div>
+      <div class="row"><span class="aws">SCT</span><span class="like">SQL Server Migration Assistant (SSMA)</span><span>Converts schemas and code between engines.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: Oracle on-premises to Aurora PostgreSQL</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="Schema Conversion converts the Oracle schema; DMS copies data and ongoing changes from on-premises Oracle to Aurora PostgreSQL before the app cuts over"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>DMS = migrate databases <b>quickly and securely</b>; the source <b>remains operational</b>.</li>
+      <li>Full load + <b>ongoing replication</b> (change data capture) → minimal downtime.</li>
+      <li><b>Homogeneous</b>: same engine. <b>Heterogeneous</b>: different engines, schema converted with <b>SCT</b> (or DMS Schema Conversion).</li>
+      <li>DMS moves the data; SCT converts the schema.</li>
+      <li>Sources/targets: on-premises, EC2, RDS, Aurora, S3, Redshift and more.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="mH">
+    <h2 class="stage-title" id="mH">Plan a migration</h2>
+    <div class="stage-kind">Pick source, target and whether to replicate changes</div>
+    <div class="card">
+      <div class="lab-form">
+        <label>Source <select id="mS"><option value="oracle">Oracle (on-premises)</option><option value="sqlserver">SQL Server (on-premises)</option><option value="mysql">MySQL (on EC2)</option><option value="postgres">PostgreSQL (on-premises)</option></select></label>
+        <label>Target <select id="mT"><option value="aurora-pg">Aurora PostgreSQL</option><option value="aurora-mysql">Aurora MySQL</option><option value="rds-oracle">RDS for Oracle</option><option value="rds-sqlserver">RDS for SQL Server</option></select></label>
+      </div>
+      <label class="toggle" for="mLive"><input type="checkbox" id="mLive" checked> Replicate ongoing changes (CDC)</label>
+      <ol class="checks" id="mOut"></ol>
+    </div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">Migrate a database with minimal downtime</span><span class="arrow">→</span><span class="then">DMS</span></li>
+      <li><span class="if">Convert schema between different engines</span><span class="arrow">→</span><span class="then">SCT</span></li>
+      <li><span class="if">Same engine migration</span><span class="arrow">→</span><span class="then">Homogeneous: DMS only</span></li>
+      <li><span class="if">Different engines</span><span class="arrow">→</span><span class="then">Heterogeneous: SCT + DMS</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>Homogeneous</th><th>Heterogeneous</th></tr></thead>
+        <tbody>
+          <tr><td><b>Example</b></td><td>Oracle → RDS for Oracle</td><td>Oracle → Aurora PostgreSQL</td></tr>
+          <tr><td><b>Schema conversion</b></td><td>Not needed</td><td>SCT / DMS Schema Conversion</td></tr>
+          <tr><td><b>Data movement</b></td><td>DMS</td><td>DMS</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Which service migrates a database while the source keeps running?<span class="go">Show answer</span></summary><div class="ans"><p><b>DMS</b>.</p></div></details>
+      <details><summary>SQL Server to Aurora MySQL: what converts the schema?<span class="go">Show answer</span></summary><div class="ans"><p><b>SCT</b> (Schema Conversion Tool).</p></div></details>
+      <details><summary>How does DMS keep downtime short?<span class="go">Show answer</span></summary><div class="ans"><p>It replicates <b>ongoing changes</b> after the full load.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: databases notes "AWS Database Migration Service (DMS)" and "Databases and Analytics: CLF-C02 Exam Summary"; <a href="https://aws.amazon.com/dms/">AWS DMS</a>; <a href="https://docs.aws.amazon.com/SchemaConversionTool/latest/userguide/CHAP_Welcome.html">AWS Schema Conversion Tool</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'dc', x: 20, y: 20, w: 260, h: 385, kind: 'onprem', label: 'Clinic data centre' }, { id: 'reg', x: 320, y: 20, w: 660, h: 385, kind: 'region', label: 'ap-south-1' }],
+    nodes: {
+      app: { x: 150, y: 90, icon: 'server', kind: 'compute', label: 'Booking app', sub: 'still running' },
+      src: { x: 150, y: 290, icon: 'db', kind: 'db', label: 'Oracle', sub: 'source' },
+      sct: { x: 460, y: 90, icon: 'code', kind: 'mgmt', label: 'Schema Conversion', sub: 'SCT' },
+      dms: { x: 460, y: 290, icon: 'router', kind: 'net', label: 'DMS', sub: 'replication instance' },
+      tgt: { x: 800, y: 290, icon: 'db', kind: 'db', label: 'Aurora PostgreSQL', sub: 'target' },
+      app2: { x: 800, y: 90, icon: 'server', kind: 'compute', label: 'App (after cutover)' }
+    },
+    links: [{ a: 'app', b: 'src' }, { a: 'src', b: 'dms' }, { a: 'dms', b: 'tgt' }, { a: 'src', b: 'sct', kind: 'dash', via: [[280, 90]] }, { a: 'sct', b: 'tgt', kind: 'dash' }, { a: 'app2', b: 'tgt' }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['app', 'src', 'tgt'], ['src', 'sct', 'tgt'], ['app', 'src', 'dms', 'tgt'], ['app', 'src', 'dms', 'tgt'], ['app2', 'tgt'], null];
+    net.focus(F[i]);
+    if (i === 1) net.badge('sct', 'tables, procedures', 'info');
+    if (i === 2) net.badge('dms', 'full load', 'info');
+    if (i === 3) net.badge('dms', 'ongoing changes (CDC)', 'ok');
+    if (i === 4) net.badge('tgt', 'minutes of downtime', 'ok');
+  }
+  const STEPS = [
+    { title: "Move a live database",
+      text: ["The clinic wants to move its on-premises Oracle database to Aurora PostgreSQL, without closing bookings for a weekend."] },
+    { title: "Different engines? Convert the schema",
+      text: ["Oracle and PostgreSQL differ in data types and procedural code. The <b>Schema Conversion Tool (SCT)</b> (or DMS Schema Conversion) converts tables, views and procedures.", "This is a <b>heterogeneous</b> migration. Oracle to Oracle would be <b>homogeneous</b> and needs no conversion."],
+      play: async run => { base(1); await net.send(['src', 'sct', 'tgt'], { run, label: 'schema', tone: 'cyan' }); } },
+    { title: "Full load",
+      text: ["<b>AWS DMS</b> (Database Migration Service) runs a replication instance that copies all existing data to the target.", "The source stays <b>fully operational</b> during the migration."],
+      play: async run => { base(2); await net.send(['src', 'dms', 'tgt'], { run, label: 'rows' }); } },
+    { title: "Keep changes flowing",
+      text: ["While the copy runs, bookings keep changing. DMS then streams <b>ongoing changes</b> (change data capture) so the target stays in sync."],
+      tip: "Migrate a database with minimal downtime = DMS.",
+      play: async run => { base(3); await net.send(['app', 'src', 'dms', 'tgt'], { run, label: 'INSERT', tone: 'green' }); } },
+    { title: "Cut over",
+      text: ["When the target has caught up, point the app at Aurora. Downtime is only the switch-over."] },
+    { title: "Also used for",
+      text: ["Continuous replication between databases, consolidating databases, moving data into S3 or Redshift for analytics.", "Sources and targets can be on-premises, on EC2 or in RDS."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  function plan() {
+    const s = $('mS').value, t = $('mT').value, live = $('mLive').checked;
+    const fam = { oracle: 'oracle', sqlserver: 'sqlserver', mysql: 'mysql', postgres: 'postgres', 'aurora-mysql': 'mysql', 'aurora-pg': 'postgres', 'rds-oracle': 'oracle', 'rds-sqlserver': 'sqlserver' };
+    const homo = fam[s] === fam[t];
+    const steps = [];
+    if (!homo) steps.push('<li>Convert the schema and code with <b>SCT</b> / DMS Schema Conversion (heterogeneous migration).</li>');
+    else steps.push('<li>No schema conversion needed: same engine family (homogeneous migration).</li>');
+    steps.push('<li><b>DMS</b> full load of the existing data, source stays online.</li>');
+    steps.push(live ? '<li>DMS keeps replicating <b>ongoing changes</b> until you cut over: downtime is just the switch.</li>' : '<li>Without change replication, writes must stop during the copy: downtime lasts the whole load.</li>');
+    $('mOut').innerHTML = steps.join('');
+  }
+  ['mS', 'mT', 'mLive'].forEach(id => $(id).addEventListener('change', plan)); plan();
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="../assets/img/logo.svg?v=1" type="image/svg+xml">
+<title>AWS Outposts</title>
+<meta name="description" content="AWS Outposts brings AWS-managed racks into your data centre for low latency, local processing and data residency, with the same APIs as the Region.">
+<link rel="stylesheet" href="../assets/css/theme.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/base.css?v=20261122">
+<link rel="stylesheet" href="../assets/css/explainer.css?v=20261122">
+<script src="../assets/js/theme.js?v=20261122"></script>
+<script src="../assets/js/explainer-kit.js?v=20261122"></script>
+<style>
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-xs); margin-top: var(--space-sm); }
+  .kpis > div { padding: var(--space-xs) var(--space-sm); background: var(--panel-2); min-width: 0; }
+  .kpis b { display: block; font-size: 22px; overflow-wrap: anywhere; } .kpis span { font-size: 12px; color: var(--muted); }
+  .kpis .good b { color: var(--good-text); } .kpis .bad b { color: var(--bad-text); } .kpis .accent b { color: var(--accent-text); }
+  .lbbox rect { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: stroke .2s, fill .2s; }
+  .lbbox text { fill: var(--fg); font-size: 14px; font-weight: 700; text-anchor: middle; }
+  .lbbox .sm { fill: var(--muted); font-family: var(--mono); font-size: 11px; font-weight: 400; }
+  .lbbox.hit rect { stroke: var(--accent-text); fill: var(--panel-2); }
+  .lab-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: var(--space-sm); margin-bottom: var(--space-sm); }
+  .lab-form label { display: grid; gap: var(--space-2xs); font-size: 13px; color: var(--muted); }
+  .lab-form input:not([type=checkbox]):not([type=range]), .lab-form select { font: 14px var(--mono); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); padding: var(--space-xs); min-width: 0; }
+  .ptoggles { display: grid; gap: var(--space-xs); margin-bottom: var(--space-sm); }
+  .ptoggles .toggle { justify-content: flex-start; font-weight: 500; line-height: 1.35; }
+  .checks { list-style: none; padding: 0; margin: var(--space-sm) 0 0; display: grid; gap: 6px; font-size: 14px; }
+  .checks li::before { content: '✓ '; color: var(--good-text); font-weight: 700; }
+  .checks li.no::before { content: '✗ '; color: var(--bad-text); }
+  .codebox { font: 13px/1.5 var(--mono); background: var(--code-bg); color: var(--code-fg); padding: var(--space-sm); white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+  .range label { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .range input[type=range] { width: 100%; }
+</style>
+</head>
+<body class="wb">
+<!-- shell:start -->
+<aside class="wb-side" aria-label="Site">
+<a class="wb-mark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<details class="wb-pages" open data-wb-pages>
+<summary>AWS pages</summary>
+<nav aria-label="AWS pages">
+<a class="wb-road" href="index.html">AWS roadmap</a>
+<details class="wb-g"><summary>Cloud &amp; AWS overview</summary><ul>
+<li><a href="traditional-it.html"><span class="t">Traditional IT: how a website is served</span></a></li>
+<li><a href="what-is-cloud.html"><span class="t">What is cloud computing</span></a></li>
+<li><a href="cloud-service-models.html"><span class="t">IaaS, PaaS, SaaS &amp; pricing</span></a></li>
+<li><a href="regions-azs-edge.html"><span class="t">Regions, AZs &amp; edge locations</span></a></li>
+<li><a href="shared-responsibility.html"><span class="t">Shared responsibility model</span></a></li>
+<li><a href="overview-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>IAM</summary><ul>
+<li><a href="iam-users-groups.html"><span class="t">IAM users &amp; groups</span></a></li>
+<li><a href="iam-root-vs-user.html"><span class="t">Root account vs IAM user</span></a></li>
+<li><a href="iam-policies.html"><span class="t">IAM policies</span></a></li>
+<li><a href="iam-access-methods.html"><span class="t">Console, CLI, SDK &amp; access keys</span></a></li>
+<li><a href="iam-cloudshell.html"><span class="t">AWS CloudShell</span></a></li>
+<li><a href="iam-roles.html"><span class="t">IAM roles for services</span></a></li>
+<li><a href="iam-security-tools.html"><span class="t">IAM security tools</span></a></li>
+<li><a href="iam-best-practices.html"><span class="t">IAM best practices &amp; shared responsibility</span></a></li>
+<li><a href="iam-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2</summary><ul>
+<li><a href="aws-budgets.html"><span class="t">AWS Budgets &amp; billing alerts</span></a></li>
+<li><a href="ec2-basics.html"><span class="t">EC2 basics</span></a></li>
+<li><a href="ec2-user-data.html"><span class="t">Launching a web server with user data</span></a></li>
+<li><a href="ec2-instance-types.html"><span class="t">EC2 instance types</span></a></li>
+<li><a href="security-groups.html"><span class="t">Security groups &amp; classic ports</span></a></li>
+<li><a href="ssh.html"><span class="t">SSH into EC2</span></a></li>
+<li><a href="ec2-instance-connect.html"><span class="t">EC2 Instance Connect</span></a></li>
+<li><a href="ec2-iam-roles.html"><span class="t">IAM roles for EC2</span></a></li>
+<li><a href="purchasing-options.html"><span class="t">EC2 purchasing options</span></a></li>
+<li><a href="ec2-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>EC2 instance storage</summary><ul>
+<li><a href="ebs.html"><span class="t">EBS volumes</span></a></li>
+<li><a href="ebs-snapshots.html"><span class="t">EBS snapshots</span></a></li>
+<li><a href="ami.html"><span class="t">AMIs</span></a></li>
+<li><a href="ec2-image-builder.html"><span class="t">EC2 Image Builder</span></a></li>
+<li><a href="instance-store.html"><span class="t">EC2 instance store</span></a></li>
+<li><a href="efs.html"><span class="t">EFS &amp; EFS-IA</span></a></li>
+<li><a href="fsx.html"><span class="t">Amazon FSx</span></a></li>
+<li><a href="ec2-storage-choices.html"><span class="t">Choosing EC2 storage</span></a></li>
+<li><a href="storage-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>ELB &amp; Auto Scaling</summary><ul>
+<li><a href="ha-scalability.html"><span class="t">High availability, scalability &amp; elasticity</span></a></li>
+<li><a href="load-balancers.html"><span class="t">Elastic Load Balancing</span></a></li>
+<li><a href="auto-scaling.html"><span class="t">Auto Scaling groups</span></a></li>
+<li><a href="scaling-strategies.html"><span class="t">Scaling strategies</span></a></li>
+<li><a href="elb-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Amazon S3</summary><ul>
+<li><a href="s3-basics.html"><span class="t">S3 buckets &amp; objects</span></a></li>
+<li><a href="s3-security.html"><span class="t">S3 security &amp; bucket policies</span></a></li>
+<li><a href="s3-static-website.html"><span class="t">S3 static website hosting</span></a></li>
+<li><a href="s3-versioning.html"><span class="t">S3 versioning</span></a></li>
+<li><a href="s3-replication.html"><span class="t">S3 replication</span></a></li>
+<li><a href="s3-storage-classes.html"><span class="t">S3 storage classes</span></a></li>
+<li><a href="s3-encryption.html"><span class="t">S3 encryption</span></a></li>
+<li><a href="iam-access-analyzer.html"><span class="t">IAM Access Analyzer for S3</span></a></li>
+<li><a href="storage-gateway.html"><span class="t">AWS Storage Gateway</span></a></li>
+<li><a href="s3-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Databases &amp; analytics</summary><ul>
+<li><a href="databases-intro.html"><span class="t">Databases on AWS</span></a></li>
+<li><a href="rds-aurora.html"><span class="t">RDS &amp; Aurora</span></a></li>
+<li><a href="rds-deployments.html"><span class="t">Read replicas, Multi-AZ &amp; Multi-Region</span></a></li>
+<li><a href="elasticache.html"><span class="t">ElastiCache</span></a></li>
+<li><a href="dynamodb.html"><span class="t">DynamoDB &amp; DAX</span></a></li>
+<li><a href="dynamodb-global-tables.html"><span class="t">DynamoDB global tables</span></a></li>
+<li><a href="redshift.html"><span class="t">Redshift</span></a></li>
+<li><a href="emr.html"><span class="t">EMR</span></a></li>
+<li><a href="athena.html"><span class="t">Athena</span></a></li>
+<li><a href="quicksight.html"><span class="t">QuickSight</span></a></li>
+<li><a href="documentdb.html"><span class="t">DocumentDB</span></a></li>
+<li><a href="neptune.html"><span class="t">Neptune</span></a></li>
+<li><a href="timestream.html"><span class="t">Timestream</span></a></li>
+<li><a href="managed-blockchain.html"><span class="t">Managed Blockchain</span></a></li>
+<li><a href="glue.html"><span class="t">AWS Glue</span></a></li>
+<li><a href="dms.html"><span class="t">Database Migration Service</span></a></li>
+<li><a href="db-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Other compute services</summary><ul>
+<li><a href="docker.html"><span class="t">Docker basics</span></a></li>
+<li><a href="ecs-fargate-ecr.html"><span class="t">ECS, Fargate &amp; ECR</span></a></li>
+<li><a href="eks.html"><span class="t">EKS</span></a></li>
+<li><a href="serverless.html"><span class="t">What is serverless</span></a></li>
+<li><a href="lambda.html"><span class="t">AWS Lambda</span></a></li>
+<li><a href="api-gateway.html"><span class="t">API Gateway</span></a></li>
+<li><a href="aws-batch.html"><span class="t">AWS Batch</span></a></li>
+<li><a href="lightsail.html"><span class="t">Lightsail</span></a></li>
+<li><a href="compute-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Deployment &amp; infrastructure at scale</summary><ul>
+<li><a href="cloudformation.html"><span class="t">CloudFormation</span></a></li>
+<li><a href="cdk.html"><span class="t">AWS CDK</span></a></li>
+<li><a href="cdk-vs-terraform.html"><span class="t">CDK vs Terraform</span></a></li>
+<li><a href="elastic-beanstalk.html"><span class="t">Elastic Beanstalk</span></a></li>
+<li><a href="iac-choices.html"><span class="t">CloudFormation vs CDK vs Beanstalk</span></a></li>
+<li><a href="codecommit.html"><span class="t">CodeCommit</span></a></li>
+<li><a href="codebuild.html"><span class="t">CodeBuild</span></a></li>
+<li><a href="codedeploy.html"><span class="t">CodeDeploy</span></a></li>
+<li><a href="codepipeline.html"><span class="t">CodePipeline</span></a></li>
+<li><a href="codeartifact.html"><span class="t">CodeArtifact</span></a></li>
+<li><a href="systems-manager.html"><span class="t">Systems Manager</span></a></li>
+<li><a href="session-manager.html"><span class="t">Session Manager</span></a></li>
+<li><a href="parameter-store.html"><span class="t">Parameter Store</span></a></li>
+<li><a href="deploy-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g" open><summary>Global infrastructure</summary><ul>
+<li><a href="why-global.html"><span class="t">Why go global</span></a></li>
+<li><a href="route53.html"><span class="t">Route 53</span></a></li>
+<li><a href="cloudfront.html"><span class="t">CloudFront</span></a></li>
+<li><a href="s3-transfer-acceleration.html"><span class="t">S3 Transfer Acceleration</span></a></li>
+<li><a href="global-accelerator.html"><span class="t">Global Accelerator</span></a></li>
+<li><a href="outposts.html" aria-current="page"><span class="t">AWS Outposts</span></a></li>
+<li><a href="wavelength.html"><span class="t">AWS Wavelength</span></a></li>
+<li><a href="local-zones.html"><span class="t">AWS Local Zones</span></a></li>
+<li><a href="global-architectures.html"><span class="t">Global application architectures</span></a></li>
+<li><a href="global-review.html"><span class="t">Section review</span></a></li>
+</ul></details>
+<details class="wb-g"><summary>Cloud integrations</summary><ul>
+<li><a href="sync-vs-async.html"><span class="t">Synchronous vs asynchronous communication</span></a></li>
+</ul></details>
+</nav></details>
+<nav class="wb-subjects" aria-label="Subjects"><h2>Subjects</h2><ul>
+<li><a href="../system-design/index.html">System Design<span class="n">38</span></a></li>
+<li><a href="index.html" aria-current="true">AWS<span class="n">100</span></a></li>
+<li><a href="../python-fundamentals/index.html">Python<span class="n">20</span></a></li>
+<li><a href="../angular/index.html">Angular<span class="n">15</span></a></li>
+<li><span class="soon">AI<span class="n">Soon</span></span></li></ul></nav>
+</aside>
+<!-- shell:end -->
+<div class="wrap explainer">
+  <div class="topbar">
+    <a class="wordmark" href="../index.html" aria-label="See How It Works, home"><span>See How</span><span>It Works</span></a>
+<a class="back" href="index.html">AWS Cloud Practitioner</a>
+    <button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch theme"></button>
+  </div>
+  <header>
+    <p class="crumbs">AWS CLF-C02 / Global infrastructure / 6 · Domain 3 Technology</p>
+    <h1>AWS Outposts</h1>
+    <ul class="lede">
+      <li><b>Outposts</b> puts AWS-managed <b>racks or servers in your own data centre</b>.</li>
+      <li>Same AWS services, APIs and console on-premises: a consistent <b>hybrid cloud</b>.</li>
+      <li>For low latency to local systems, local data processing and <b>data residency</b>.</li>
+      <li>You are responsible for the physical security of the Outpost.</li>
+    </ul>
+  </header>
+  <div class="aws-trail"></div>
+
+  <section aria-labelledby="anH">
+    <h2 id="anH">In terms you know</h2>
+    <div class="card analogy">
+      <div class="row head"><span>AWS</span><span>Closest thing you know</span><span>The difference</span></div>
+      <div class="row"><span class="aws">Outposts</span><span class="like">Azure Stack, or a vendor-managed private cloud in your server room</span><span>Run by AWS and connected to a Region.</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="stH">
+    <h2 class="stage-title" id="stH">Walkthrough: bringing AWS into a hospital</h2>
+    <div class="stage-kind">Use Next ▶ to go one step at a time, or Play all</div>
+    <div class="story wide" id="story">
+      <div class="scroll"><svg class="diagram nf-canvas" id="stSvg" viewBox="0 0 1000 420" aria-label="A Region with AZs, a Local Zone in Delhi, a Wavelength Zone in a 5G network, and an Outposts rack in a hospital data centre, all managed from the parent Region"></svg></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rmH">
+    <h2 id="rmH">Points to remember</h2>
+    <div class="remember"><ol>
+      <li>Outposts = server racks with the same AWS infrastructure, services, APIs and tools, <b>in your data centre</b>.</li>
+      <li>AWS sets up and manages them; you get a consistent <b>hybrid</b> experience.</li>
+      <li>Benefits: low-latency access to on-premises systems, local data processing, <b>data residency</b>, easier migration.</li>
+      <li>Services include EC2, EBS, S3, RDS, ECS, EKS, EMR.</li>
+      <li>Customer is responsible for <b>physical security</b> of the Outposts rack.</li>
+    </ol></div>
+  </section>
+
+  <h2 class="part-title">Try it yourself</h2>
+  <p class="sub">Change the inputs and watch what happens.</p>
+
+  <section aria-labelledby="pkH">
+    <h2 class="stage-title" id="pkH">Which one?</h2>
+    <div class="stage-kind">Outposts, Wavelength, Local Zone or a Region?</div>
+    <div class="card" id="pick"></div>
+  </section>
+
+  <section aria-labelledby="cheatH">
+    <h2 id="cheatH">Cheat-sheet</h2>
+    <ul class="cheat">
+      <li><span class="if">AWS services in your own data centre</span><span class="arrow">→</span><span class="then">Outposts</span></li>
+      <li><span class="if">Data must stay on-premises, same AWS APIs</span><span class="arrow">→</span><span class="then">Outposts</span></li>
+      <li><span class="if">Who secures the Outposts rack physically?</span><span class="arrow">→</span><span class="then">The customer</span></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="refH">
+    <h2 id="refH">Reference</h2>
+    <div class="scroll card table-card">
+      <table>
+        <thead><tr><th></th><th>Outposts</th><th>Wavelength</th><th>Local Zones</th></tr></thead>
+        <tbody>
+          <tr><td><b>Runs in</b></td><td>Your data centre</td><td>Telecom 5G networks</td><td>A metro area, extending a Region</td></tr>
+          <tr><td><b>Serves</b></td><td>On-premises apps (hybrid)</td><td>Mobile / 5G devices</td><td>Users in that city</td></tr>
+          <tr><td><b>Why</b></td><td>Low latency to local systems, data residency, local processing</td><td>Ultra-low latency for mobile</td><td>Single-digit ms near a city</td></tr>
+          <tr><td><b>Physical security</b></td><td>You (your premises)</td><td>AWS / carrier</td><td>AWS</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="quizH">
+    <h2 id="quizH">Check yourself</h2>
+    <p class="sub">Answer out loud before you open each card.</p>
+    <div class="quiz">
+      <details><summary>Where do Outposts run?<span class="go">Show answer</span></summary><div class="ans"><p>In <b>your</b> data centre.</p></div></details>
+      <details><summary>Who is responsible for physical security of an Outpost?<span class="go">Show answer</span></summary><div class="ans"><p><b>You</b>, the customer.</p></div></details>
+    </div>
+  </section>
+
+  <footer>Sources: global note "AWS Outposts: AWS Infrastructure Inside Your Own Data Center" and the section summary; <a href="https://aws.amazon.com/outposts/">AWS Outposts</a>.</footer>
+</div>
+<script src="topics.js"></script>
+<script>
+(function () {
+  const K = Kit, $ = K.$;
+
+  const net = K.net($('stSvg'), {
+    zones: [{ id: 'reg', x: 20, y: 20, w: 300, h: 385, kind: 'region', label: 'ap-south-1 (Mumbai)' }, { id: 'lz', x: 360, y: 20, w: 190, h: 170, kind: 'az', label: 'Local Zone: Delhi' }, { id: 'wl', x: 360, y: 230, w: 190, h: 175, kind: 'net', label: 'Wavelength: 5G network' }, { id: 'op', x: 590, y: 20, w: 390, h: 385, kind: 'onprem', label: 'Hospital data centre' }],
+    nodes: {
+      az: { x: 170, y: 120, icon: 'server', kind: 'compute', label: 'EC2 in AZs' },
+      cp: { x: 170, y: 310, icon: 'gear', kind: 'mgmt', label: 'Region services', sub: 'S3, IAM, console' },
+      lz: { x: 455, y: 110, icon: 'server', kind: 'compute', label: 'EC2', sub: 'near Delhi users' },
+      wl: { x: 455, y: 320, icon: 'server', kind: 'compute', label: 'EC2', sub: 'at the 5G edge' },
+      op: { x: 700, y: 210, icon: 'layers', kind: 'compute', label: 'Outposts rack', sub: 'EC2, EBS, S3…' },
+      mri: { x: 900, y: 110, icon: 'cpu', kind: 'plain', label: 'MRI scanner' },
+      db: { x: 900, y: 320, icon: 'db', kind: 'db', label: 'Local records DB' }
+    },
+    links: [{ a: 'cp', b: 'az', kind: 'dash' }, { a: 'cp', b: 'lz', kind: 'dash' }, { a: 'cp', b: 'wl', kind: 'dash' }, { a: 'cp', b: 'op', kind: 'dash', via: [[170, 395], [700, 395]] }, { a: 'mri', b: 'op' }, { a: 'db', b: 'op' }]
+  });
+  function base(i) {
+    net.reset();
+    const F = [['op', 'mri', 'db'], ['op', 'cp'], ['op', 'mri', 'db'], ['op'], null];
+    net.focus(F[i]);
+  }
+  const STEPS = [
+    { title: "When data can't leave the building",
+      text: ["An MRI scanner produces huge images that must be processed instantly, and some records must stay on the hospital's premises.", "Sending everything to a Region is too slow or not allowed."] },
+    { title: "AWS racks on-premises",
+      text: ["AWS delivers, installs and manages <b>Outposts</b> racks (or smaller servers) in your data centre, connected to your <b>parent Region</b>.", "You use the same console, APIs and tools as in the Region."],
+      tip: "AWS infrastructure in your own data centre = Outposts.",
+      play: async run => { base(1); await net.send(['cp', 'op'], { run, label: 'same APIs', tone: 'cyan' }); } },
+    { title: "What runs there",
+      text: ["EC2, EBS, S3 on Outposts, RDS, ECS, EKS, EMR and more, right next to your systems.", "Uses: low-latency access to on-premises systems, local data processing, data residency, and a stepping stone for migration."],
+      play: async run => { base(2); await net.send(['mri', 'op'], { run, label: 'scan', tone: 'green' }); } },
+    { title: "Who does what",
+      text: ["AWS installs, monitors, patches and replaces the hardware. Because it sits in <b>your</b> building, <b>physical security is your responsibility</b>."] }
+  ];
+  K.story({ root: $('story'), steps: STEPS, show: base });
+
+  K.pick($('pick'), [
+    { q: 'Run AWS services inside our own data centre, next to an MRI scanner.', a: 'Outposts', why: 'AWS racks on-premises.' },
+    { q: 'Patient data must stay in our building but we want the AWS APIs.', a: 'Outposts', why: 'Data residency on-premises.' },
+    { q: 'AR app for 5G phones needs ultra-low latency.', a: 'Wavelength', why: 'Compute inside the 5G network.' },
+    { q: 'Single-digit ms latency for users in Delhi; the Region is Mumbai.', a: 'Local Zone', why: 'Extension of a Region in a metro.' },
+    { q: 'A normal web app with users across India.', a: 'Region', why: 'Regions and AZs are enough.' },
+    { q: 'Connected-car data processed at the mobile edge.', a: 'Wavelength', why: '5G edge.' }
+  ], ['Outposts', 'Wavelength', 'Local Zone', 'Region']);
+
+})();
+</script>
+</body>
+</html>

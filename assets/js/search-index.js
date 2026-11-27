@@ -345,6 +345,38 @@ window.SEARCH_INDEX = [
 "w": "An AMI is the template an EC2 instance is launched from: OS, installed software, configuration. Sources: public (e.g. Amazon Linux from AWS), your own custom AMIs, or AWS Marketplace (vendors, sometimes paid). A custom AMI = EBS snapshots of the instance's volumes + launch metadata. When the software is already installed in the AMI, new instances start up faster. An AMI belongs to one Region : use it in any AZ there; copy it to use in another Region. AMIs: Amazon Machine Images Walkthrough: bake"
 },
 {
+"t": "Amazon API Gateway",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/api-gateway.html",
+"d": "Amazon API Gateway publishes serverless REST, HTTP and WebSocket APIs in front of Lambda, with authentication, API keys, throttling and monitoring, with a throttling lab.",
+"w": "API Gateway creates, publishes, secures and monitors APIs , fully managed and serverless. It gives Lambda functions an HTTPS endpoint: API Gateway + Lambda = a serverless API. Adds authentication , API keys , throttling and monitoring. Supports REST/HTTP and WebSocket APIs. Walkthrough: a serverless bookings API Throttling and API keys"
+},
+{
+"t": "Amazon Athena",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/athena.html",
+"d": "Amazon Athena serverless SQL on files in S3: Glue Data Catalog tables, $5 per TB scanned, and how Parquet, compression and partitions cut cost, with a cost lab.",
+"w": "Athena runs SQL directly on files in S3 : no loading, no servers. Tables over the files are defined in the Glue Data Catalog . You pay per data scanned : $5 per TB . Compression , columnar formats (Parquet, ORC) and partitions cut both cost and time. Walkthrough: querying load balancer logs in S3 What does a query cost?"
+},
+{
+"t": "EC2 Auto Scaling Groups",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/auto-scaling.html",
+"d": "How an Auto Scaling group launches, registers, replaces and removes EC2 instances across AZs, with a min/desired/max lab.",
+"w": "An Auto Scaling group (ASG) keeps the right number of EC2 instances running: it adds them when load rises and removes them when it falls. You set a minimum , a desired and a maximum count; a launch template says what each new instance looks like. It replaces unhealthy instances and spreads them across Availability Zones . New instances are registered with the load balancer automatically. The ASG itself is free; you pay for the instances. Walkthrough: an Auto Scaling group through a busy day Be t"
+},
+{
+"t": "AWS Batch",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/aws-batch.html",
+"d": "AWS Batch runs batch jobs at any scale: Docker jobs in a queue, EC2 Spot or Fargate capacity provisioned for you, and how it differs from Lambda.",
+"w": "Batch runs batch jobs (a start and an end) at any scale. Jobs are Docker images submitted to a job queue . Batch launches EC2 / Spot or Fargate capacity to match the queue, then shrinks it. No time limit (unlike Lambda); Batch itself is free. Walkthrough: 10,000 three-hour research jobs Lambda or Batch?"
+},
+{
 "t": "AWS Budgets and billing alerts",
 "s": "AWS",
 "k": "",
@@ -353,12 +385,28 @@ window.SEARCH_INDEX = [
 "w": "Before launching anything, create a budget so AWS emails you when spending crosses a threshold. IAM users can't see billing until the root user activates IAM access to billing (a root-only task). The Bills page shows charges by service ; the Free Tier page shows usage against free limits. EC2 costs are not just the instance: EBS volumes, Elastic IPs, NAT Gateways, load balancers and snapshots bill too. AWS Budgets & billing alerts Walkthrough: where the money goes, and who tells you A month with"
 },
 {
+"t": "CDK vs Terraform",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/cdk-vs-terraform.html",
+"d": "Choosing an infrastructure-as-code tool: the AWS-only CDK that generates CloudFormation versus multi-cloud Terraform with HCL and its own state.",
+"w": "Both are infrastructure as code . CDK : AWS only, real programming languages, deploys via CloudFormation. Terraform : multi-cloud, declarative HCL , its own state file, huge provider ecosystem. Walkthrough: two ways to code the same infrastructure Which tool?"
+},
+{
+"t": "AWS CDK",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/cdk.html",
+"d": "The AWS Cloud Development Kit defines infrastructure in TypeScript, Python, C# and other languages, synthesises CloudFormation templates and deploys them through CloudFormation.",
+"w": "The CDK defines infrastructure in a programming language : TypeScript, Python, Java, C#/.NET, Go. It synthesises a CloudFormation template; CloudFormation still does the deploying. Good for developer productivity: loops, types, reuse, tests. AWS Cloud Development Kit (CDK) Walkthrough: from C# code to a running stack One template, one stack"
+},
+{
 "t": "Cloud Computing Basics",
 "s": "AWS",
 "k": "",
 "h": "aws-cloud-practitioner/cloud-basics.html",
 "d": "This page has been split into one explainer per topic.",
-"w": "\"Cloud Computing Basics\" is now one page per topic , each built around a request travelling through the infrastructure. Pick a topic below. This page has moved"
+"w": "\"Cloud Computing Basics\" is now one page per topic , each built around a request travelling through the infrastructure. Pick a topic below."
 },
 {
 "t": "IaaS, PaaS, SaaS and pricing",
@@ -369,28 +417,156 @@ window.SEARCH_INDEX = [
 "w": "Every app runs on a stack of layers , from networking up to your data. The models differ in who manages which layers . IaaS (Amazon EC2): AWS runs the hardware and virtualisation; you manage the OS and up . PaaS (AWS Elastic Beanstalk): you bring code and data ; the platform runs everything else. SaaS (Gmail, Zoom): you just use the finished app , but your users, settings and data are still yours. Cloud pricing charges for compute , storage and data transfer out ; data coming in is generally fre"
 },
 {
-"t": "Containers & Serverless",
+"t": "AWS CloudFormation",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/cloudformation.html",
+"d": "AWS CloudFormation infrastructure as code: declarative templates, stacks created in dependency order, repeatable deployments across Regions, drift detection, with a stack lab.",
+"w": "CloudFormation is AWS's infrastructure as code : a template (YAML/JSON) declares your resources. It creates them as a stack , in the right order, and updates or deletes them together. The same template gives identical environments in any Region or account. Drift detection finds resources changed by hand. Walkthrough: from console clicks to a template One template, one stack"
+},
+{
+"t": "Amazon CloudFront",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/cloudfront.html",
+"d": "Amazon CloudFront CDN: caching at edge locations, cache hits and misses, S3 and ALB origins, Shield and WAF protection, and CloudFront vs S3 replication, with an edge lab.",
+"w": "CloudFront is AWS's content delivery network (CDN) . It caches content at edge locations near users, so repeat requests are fast. Origins: S3 (private with OAC), ALB/EC2, any HTTP server. Built-in DDoS protection (Shield Standard) and optional WAF. Walkthrough: serving scans to Sydney from Mumbai A user in Sydney, an app in Mumbai"
+},
+{
+"t": "AWS CodeArtifact",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/codeartifact.html",
+"d": "AWS CodeArtifact managed package repository for NuGet, npm, pip, Maven and Gradle: private packages and cached public dependencies.",
+"w": "CodeArtifact is a managed package repository for your dependencies and your own packages. Works with NuGet, npm, yarn, pip, twine, Maven and Gradle . It can proxy public registries and cache what you use. Restore a package"
+},
+{
+"t": "AWS CodeBuild",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/codebuild.html",
+"d": "AWS CodeBuild serverless builds: buildspec, fresh build environments, artifacts and logs, pay per build minute, with a cost lab.",
+"w": "CodeBuild compiles code, runs tests and produces packages: a fully managed, serverless build service. Steps are defined in a buildspec.yml file. You pay only for build minutes ; no build servers to run. What does a month of builds cost?"
+},
+{
+"t": "AWS CodeCommit",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/codecommit.html",
+"d": "AWS CodeCommit, the managed private Git repository service: IAM security, pipeline integration and its 2025 return to general availability.",
+"w": "CodeCommit is a managed, private Git repository service on AWS. Code stays in your AWS account, secured with IAM and encrypted. It feeds CodeBuild and CodePipeline. After pausing new sign-ups in 2024, it returned to full availability in November 2025. Where does it go?"
+},
+{
+"t": "AWS CodeDeploy",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/codedeploy.html",
+"d": "AWS CodeDeploy upgrades applications on EC2 and on-premises servers with an agent, in place or blue/green, with a deployment-speed lab.",
+"w": "CodeDeploy deploys new versions to EC2 instances and on-premises servers (also Lambda and ECS). It is hybrid : a CodeDeploy agent on each server pulls and installs the new version. Servers must already exist; CodeDeploy only upgrades the app. How fast, how safe?"
+},
+{
+"t": "AWS CodePipeline",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/codepipeline.html",
+"d": "AWS CodePipeline orchestrates CI/CD from source through build, test and deploy stages, calling other services at each step, with a commit-to-production lab.",
+"w": "CodePipeline orchestrates CI/CD : it moves each change through source, build, test and deploy stages. It doesn't build or deploy itself; it calls CodeBuild, CodeDeploy, Beanstalk, CloudFormation, GitHub, Jenkins… A failed stage stops the release. Commit to production"
+},
+{
+"t": "Other compute: review",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/compute-review.html",
+"d": "AWS Cloud Practitioner: other compute section review with a one-path recap, section summary, commonly confused pairs, a mixed drill and 20 exam-style questions.",
+"w": "Containers : images in ECR , run by ECS (AWS) or EKS (Kubernetes), on EC2 or serverless Fargate . Serverless : no servers to manage; Lambda, Fargate, S3, DynamoDB, API Gateway. Lambda : event-driven functions, 15 min, 10 GB, pay per request + GB-second. API Gateway exposes them as APIs. Batch : long Docker jobs on Spot. Lightsail : simple, predictable-price bundles. Containers Serverless & Lambda APIs, batch, simple"
+},
+{
+"t": "Other compute services",
 "s": "AWS",
 "k": "",
 "h": "aws-cloud-practitioner/containers-serverless.html",
-"d": "AWS Cloud Practitioner: who manages what on EC2, ECS, Fargate and Lambda; how Lambda scales with events and what it costs; and how to pick a compute service.",
-"w": "Containers package an app with its dependencies. Amazon ECR (Elastic Container Registry) stores the container images. Amazon ECS (Elastic Container Service, AWS's own container service) or Amazon EKS (Elastic Kubernetes Service) runs them. Fargate runs those containers with no servers to manage . Lambda runs short functions on events, scales automatically, and costs nothing when idle. API Gateway turns Lambda into an HTTP API. AWS Batch runs long jobs. Amazon Lightsail is the simple option with "
+"d": "This page has been split into one explainer per topic.",
+"w": "\"Other compute services\" is now one page per topic , each with its own walkthrough and labs. Pick a topic below."
 },
 {
-"t": "Databases & Analytics",
+"t": "Databases & analytics",
 "s": "AWS",
 "k": "",
 "h": "aws-cloud-practitioner/databases-analytics.html",
-"d": "AWS Cloud Practitioner: RDS Multi-AZ vs read replicas under failure, choosing the right AWS database, and how data flows through Kinesis, Glue, Athena, Redshift, EMR and QuickSight.",
-"w": "Managed databases : AWS runs the hardware, OS, patching, backups and failover; you own the data, schema and access. Relational (SQL, joins): RDS and Aurora. NoSQL (flexible schema, scales out): DynamoDB, DocumentDB, Neptune. Multi-AZ gives high availability: a standby copy takes over if the main database fails. Read replicas give read scaling: extra copies answer read queries. Don't confuse the two. Analytics : Kinesis streams data in, Glue prepares it, Athena, Redshift or EMR query it, and Quic"
+"d": "This page has been split into one explainer per topic.",
+"w": "\"Databases & analytics\" is now one page per topic , each with its own walkthrough and labs. Pick a topic below."
 },
 {
-"t": "Deployment & Infrastructure as Code",
+"t": "Databases on AWS",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/databases-intro.html",
+"d": "Why databases differ from storage, managed vs self-managed databases, relational vs NoSQL, and AWS's purpose-built databases, with a who-does-the-chore lab.",
+"w": "A database adds structure, indexes and queries on top of storage. Managed databases (RDS, DynamoDB…) hand patching, backups and failover to AWS; on EC2 you do it all. Relational : tables, SQL, JOINs. NoSQL : flexible items (often JSON), built to scale out. AWS offers a purpose-built database for each data shape. Walkthrough: where should the booking data live? Who does the chore? Relational or NoSQL?"
+},
+{
+"t": "Databases & analytics: review",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/db-review.html",
+"d": "AWS Cloud Practitioner: databases and analytics section review with a one-path recap, section summary, commonly confused pairs, a mixed drill and 20 exam-style questions.",
+"w": "Relational : RDS (six engines) and Aurora (cloud-native, Serverless). Multi-AZ for HA, read replicas for reads. NoSQL : DynamoDB (serverless key-value, DAX, global tables), DocumentDB (MongoDB), Neptune (graph). In-memory : ElastiCache. Other : Timestream (time series), Managed Blockchain. Analytics : Redshift (warehouse), Athena (SQL on S3), EMR (Spark/Hadoop), Glue (ETL), QuickSight (dashboards). Migration : DMS (+ SCT). Relational NoSQL & in-memory Analytics Migration & responsibility"
+},
+{
+"t": "Deployment & infrastructure: review",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/deploy-review.html",
+"d": "AWS Cloud Practitioner: deployment and infrastructure-at-scale section review with a one-path recap, summary, confused pairs, a drill and 20 exam-style questions.",
+"w": "IaC : CloudFormation templates; the CDK generates them from code. PaaS : Elastic Beanstalk. CI/CD : CodeCommit (Git), CodeBuild (build), CodeDeploy (deploy, hybrid), CodePipeline (orchestrate), CodeArtifact (packages). Operations : Systems Manager (hybrid, SSM agent), Session Manager (no SSH), Parameter Store (config and secrets). Infrastructure as code Platform Developer tools Operations"
+},
+{
+"t": "Deployment & infrastructure at scale",
 "s": "AWS",
 "k": "",
 "h": "aws-cloud-practitioner/deployment-iac.html",
-"d": "AWS Cloud Practitioner: CloudFormation stacks and drift, a CodePipeline from commit to deploy, and reaching EC2 with SSH, Instance Connect or Session Manager.",
-"w": "Infrastructure as Code : describe resources in a file, and let AWS create, change and delete them in order. CloudFormation (templates) or CDK (real code that becomes templates). Elastic Beanstalk : PaaS. Upload code; it builds the EC2, load balancer and Auto Scaling for you. CodePipeline runs the stages in order: CodeCommit holds the code, CodeBuild builds and tests it, and CodeDeploy deploys it. CodeArtifact stores packages. Systems Manager manages fleets (groups of many servers) on AWS and on-"
+"d": "This page has been split into one explainer per topic.",
+"w": "\"Deployment & infrastructure at scale\" is now one page per topic , each with its own walkthrough and labs. Pick a topic below."
+},
+{
+"t": "AWS Database Migration Service",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/dms.html",
+"d": "AWS DMS migrates databases to AWS with the source online: full load, ongoing change replication, homogeneous and heterogeneous migrations with schema conversion, with a migration planner.",
+"w": "DMS migrates databases to AWS (or between databases) while the source stays operational . It copies existing data, then replicates ongoing changes , so downtime is minimal. Homogeneous (Oracle → Oracle) or heterogeneous (Oracle → Aurora PostgreSQL); heterogeneous needs schema conversion (SCT). AWS Database Migration Service (DMS) Walkthrough: Oracle on-premises to Aurora PostgreSQL Plan a migration"
+},
+{
+"t": "Docker & Containers",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/docker.html",
+"d": "What a container is, how a Dockerfile becomes an image in a registry and runs anywhere, and why containers are lighter than VMs, with a packing lab.",
+"w": "A container packages an app with its runtime and libraries, so it runs the same everywhere. A Dockerfile builds an image ; images live in a registry (Docker Hub, Amazon ECR); hosts run them as containers. Containers share the host OS , so they are lighter and faster than VMs. Background for ECS, EKS, Fargate, ECR and Batch. Walkthrough: from \"works on my machine\" to containers How many apps fit on one server?"
+},
+{
+"t": "Amazon DocumentDB",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/documentdb.html",
+"d": "Amazon DocumentDB, the managed MongoDB-compatible document database: JSON documents, storage across 3 AZs, and how it compares with DynamoDB.",
+"w": "DocumentDB is a managed document database compatible with MongoDB . It stores JSON documents ; storage is replicated across 3 AZs and grows automatically. Think \"Aurora, but for MongoDB\". Walkthrough: moving a MongoDB app Which database?"
+},
+{
+"t": "DynamoDB Global Tables",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/dynamodb-global-tables.html",
+"d": "DynamoDB global tables: multi-Region, multi-active replication, low-latency local reads and writes, last-writer-wins conflicts, with a conflict lab.",
+"w": "A global table keeps a replica of a DynamoDB table in several Regions . Every replica takes reads and writes : active-active (multi-active). Users get low latency locally, and the table survives a Region problem. Concurrent updates resolve as last writer wins by default. Walkthrough: one Visits table on three continents Two Regions, one item, same moment Which setup?"
+},
+{
+"t": "Amazon DynamoDB & DAX",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/dynamodb.html",
+"d": "Amazon DynamoDB, the serverless NoSQL key-value database: items, partition and sort keys, query vs scan, capacity modes, and the DAX cache, with a query-or-scan lab.",
+"w": "DynamoDB is a serverless , fully managed NoSQL key-value and document database with single-digit millisecond latency at any scale. You define only the primary key (partition key, optional sort key); items can have different attributes. No JOINs. Capacity is on-demand or provisioned ; data is replicated across 3 AZs. DAX is an in-memory cache for DynamoDB only, with microsecond reads. Walkthrough: storing patient visits in DynamoDB Query or scan? DynamoDB, DAX or relational?"
 },
 {
 "t": "EBS snapshots",
@@ -470,7 +646,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/ec2-storage.html",
 "d": "This page has been split into one explainer per topic.",
-"w": "\"EC2 Instance Storage\" is now one page per topic , each built around data travelling between instances and storage. Pick a topic below. This page has moved"
+"w": "\"EC2 Instance Storage\" is now one page per topic , each built around data travelling between instances and storage. Pick a topic below."
 },
 {
 "t": "EC2 user data and instance lifecycle",
@@ -481,6 +657,14 @@ window.SEARCH_INDEX = [
 "w": "User data is a script you paste at launch. It runs once , at the first boot , as root : perfect for installing a web server. An instance moves through states: pending → running → stopping → stopped , and shutting-down → terminated . Stop : compute billing ends, the EBS disk is kept, and the public IP is released (you get a new one on start). Terminate is permanent: the instance and (by default) its root volume are deleted. Launching a web server with user data Walkthrough: the life of an instanc"
 },
 {
+"t": "Amazon ECS, Fargate & ECR",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/ecs-fargate-ecr.html",
+"d": "Amazon ECS runs containers on AWS, Fargate removes the servers, and ECR stores the images: launch types, load balancing, pricing, with a who-manages-what lab.",
+"w": "ECR stores your container images. ECS runs containers on AWS: with the EC2 launch type you provide and patch the instances. Fargate runs the same containers serverless : you only set CPU and memory. ECS integrates with the Application Load Balancer. Walkthrough: running the clinic API in containers Who manages what? ECS, Fargate or ECR?"
+},
+{
 "t": "EFS and EFS-IA",
 "s": "AWS",
 "k": "",
@@ -489,12 +673,52 @@ window.SEARCH_INDEX = [
 "w": "Amazon EFS (Elastic File System) is a managed NFS network file system : one shared folder for many instances. Hundreds of Linux instances in different AZs mount it at once and see the same files. No capacity planning : it grows and shrinks, and you pay per GB actually stored (pricier per GB than EBS). A lifecycle policy moves cold files (files nobody has opened for a while) to EFS-IA (Infrequent Access, up to 95% cheaper) and to Archive . Apps do not notice the move. Walkthrough: one folder, thr"
 },
 {
-"t": "Elastic Load Balancing & Auto Scaling",
+"t": "Amazon EKS",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/eks.html",
+"d": "Amazon EKS managed Kubernetes: AWS-run control plane, pods on EC2 nodes or Fargate, and when to choose EKS over ECS.",
+"w": "EKS is managed Kubernetes on AWS. AWS runs the control plane ; pods run on EC2 nodes or on Fargate . Kubernetes is open source and cloud-agnostic : good for portability and hybrid setups. Walkthrough: Kubernetes without running the masters EKS or ECS?"
+},
+{
+"t": "AWS Elastic Beanstalk",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/elastic-beanstalk.html",
+"d": "AWS Elastic Beanstalk as platform as a service: upload code and get EC2, load balancing, Auto Scaling and monitoring built for you, with an IaaS vs PaaS lab.",
+"w": "Elastic Beanstalk is PaaS : you upload code; it builds and runs the infrastructure. It creates EC2, a load balancer, an Auto Scaling group and monitoring (via CloudFormation). Supports .NET, Java, Node.js, Python, PHP, Ruby, Go and Docker. Free itself; you pay for the underlying resources. Walkthrough: deploying the clinic web app without building servers Who runs what?"
+},
+{
+"t": "Amazon ElastiCache",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/elasticache.html",
+"d": "Amazon ElastiCache as an in-memory cache in front of a database: cache-aside, hits and misses, TTL, session storage, with a load-and-latency lab.",
+"w": "ElastiCache is a managed in-memory data store (Valkey, Redis OSS or Memcached) with sub-millisecond reads. Put it in front of a database to cut load from repeated reads, or use it as a shared session store . The app checks the cache first and fills it on a miss ( cache-aside ); you write that logic. AWS handles patching, monitoring, failure recovery and backups. Walkthrough: taking load off the booking database What does the cache buy you? Cache or database?"
+},
+{
+"t": "ELB & Auto Scaling",
 "s": "AWS",
 "k": "",
 "h": "aws-cloud-practitioner/elb-asg.html",
-"d": "AWS Cloud Practitioner: run a day of traffic through an Auto Scaling group behind a load balancer, pick ALB, NLB or GWLB, and separate scalability, elasticity, agility and high availability.",
-"w": "Load balancer (ELB) : one entry point that spreads traffic and skips unhealthy targets. Auto Scaling group (ASG) : decides how many instances run, between a min and a max, and replaces failed ones. Together, across two or more AZs , they give high availability and elasticity . The ideas behind them are in System Design: scaling , proxies and load balancers , algorithms . Walkthrough: keeping a booking site up at peak time A day in an Auto Scaling group Which load balancer? Four words the exam mi"
+"d": "This page has been split into one explainer per topic.",
+"w": "\"ELB & Auto Scaling\" is now one page per topic , each with its own walkthrough and labs. Pick a topic below."
+},
+{
+"t": "ELB & Auto Scaling: review",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/elb-review.html",
+"d": "AWS Cloud Practitioner: ELB and Auto Scaling section review with a one-path recap, section summary, commonly confused pairs, a mixed drill and 20 exam-style questions.",
+"w": "Vertical scaling = bigger instance; horizontal = more instances; elasticity = more or fewer automatically; high availability = 2+ AZs. A load balancer gives one DNS name, spreads requests across AZs, health-checks targets and can end HTTPS. An Auto Scaling group keeps between min and max instances, launches them from a launch template, replaces unhealthy ones and registers them with the load balancer. Scaling policies decide when: simple, step, target tracking, scheduled or predictive. HA, scala"
+},
+{
+"t": "Amazon EMR",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/emr.html",
+"d": "Amazon EMR managed big-data clusters for Spark and Hadoop: node roles, Spot task nodes, transient clusters and EMR Serverless, with a nodes-versus-time lab.",
+"w": "EMR (Elastic MapReduce) runs big-data frameworks : Spark, Hadoop, Hive, Presto, HBase, Flink. It creates a cluster of EC2 instances and configures it for you; data usually lives in S3. More nodes finish sooner; Spot task nodes cut cost; clusters can auto scale and shut down after the job. It processes data; it is not a database. Walkthrough: crunching 50 TB of clinic logs More nodes, same job EMR or something else?"
 },
 {
 "t": "Amazon FSx",
@@ -505,12 +729,68 @@ window.SEARCH_INDEX = [
 "w": "Amazon FSx runs well-known third-party file systems as a managed service, for when EFS or S3 don't fit. FSx for Windows File Server : a Windows share ( SMB , NTFS) joined to Active Directory , reachable from AWS and on-premises. FSx for Lustre (the name comes from Linux + cluster): file storage for high performance computing , ML (machine learning) and analytics. It is often linked to an S3 bucket that holds the source data. Also FSx for NetApp ONTAP and FSx for OpenZFS for teams moving those sy"
 },
 {
-"t": "Global Infrastructure",
+"t": "AWS Global Accelerator",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/global-accelerator.html",
+"d": "AWS Global Accelerator: two static anycast IPs, traffic onto the AWS network at the nearest edge, TCP and UDP support and fast regional failover, compared with CloudFront.",
+"w": "Global Accelerator gives an app two static anycast IPs worldwide. Traffic enters the AWS network at the nearest edge location: better availability and performance. Works for any TCP/UDP app; health checks give fast failover between Regions. No caching (that is CloudFront). Walkthrough: a multiplayer game with players worldwide A game player in Sydney, servers in Mumbai"
+},
+{
+"t": "Global Application Architectures",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/global-architectures.html",
+"d": "Four global architectures from single Region single AZ to multi-Region active-active, and what each gives for availability, read latency and write latency, with a chooser.",
+"w": "Single Region, single AZ : simple, no HA. Single Region, multi-AZ : HA, no global latency benefit. Multi-Region active-passive : fast reads worldwide, writes in one Region. Multi-Region active-active : fast reads and writes everywhere; hardest (e.g. DynamoDB global tables). Walkthrough: from one AZ to active-active Which architecture do you need?"
+},
+{
+"t": "Global infrastructure",
 "s": "AWS",
 "k": "",
 "h": "aws-cloud-practitioner/global-infrastructure.html",
-"d": "AWS Cloud Practitioner: Route 53 routing policies with users around the world, CloudFront vs Global Accelerator vs S3 Transfer Acceleration, and picking the right global service.",
-"w": "Going global gives lower latency , disaster recovery and resilience against attacks. Route 53 (DNS) decides which Region a user is sent to. CloudFront caches content at edge locations. Global Accelerator carries traffic over AWS's own network. It does not cache anything, and it gives you two static IP addresses. S3 Transfer Acceleration speeds up long-distance uploads to one bucket via the nearest edge. Regions, AZs and edge locations themselves are on Regions, AZs & edge locations ; DNS basics "
+"d": "This page has been split into one explainer per topic.",
+"w": "\"Global infrastructure\" is now one page per topic , each with its own walkthrough and labs. Pick a topic below."
+},
+{
+"t": "Global infrastructure: review",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/global-review.html",
+"d": "AWS Cloud Practitioner: global infrastructure section review with a one-path recap, summary, confused pairs, a drill and 20 exam-style questions.",
+"w": "Route users : Route 53 (DNS, routing policies, failover for DR). Speed up delivery : CloudFront (cache), S3 Transfer Acceleration (uploads to one bucket), Global Accelerator (static IPs, TCP/UDP, failover). Move AWS closer : Local Zones (city), Wavelength (5G), Outposts (your data centre). Architectures : single AZ → multi-AZ → active-passive → active-active. Routing Delivery speed Closer to users Architectures"
+},
+{
+"t": "AWS Glue",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/glue.html",
+"d": "AWS Glue serverless ETL and the Glue Data Catalog: crawlers, transform jobs and how Athena and Redshift use the catalog, with an analytics pipeline lab.",
+"w": "Glue is a serverless ETL service: extract, transform and load data for analytics. Crawlers discover data and record its schema in the Glue Data Catalog . Athena, Redshift Spectrum and EMR use the catalog to query the data. Walkthrough: turning raw exports into query-ready data The analytics pipeline Glue, DMS or Athena?"
+},
+{
+"t": "High Availability, Scalability and Elasticity",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/ha-scalability.html",
+"d": "Vertical vs horizontal scaling, elasticity, high availability across AZs, and agility, with an outage lab.",
+"w": "Scalability means the app can handle more load. Vertical scaling uses a bigger instance (scale up). Horizontal scaling adds more instances (scale out). Elasticity means scaling happens automatically as demand changes, so you pay only for what runs. High availability means running in at least two Availability Zones , so losing one data centre doesn't stop the app. Agility is a different benefit: new resources in minutes instead of weeks. The exam uses it as a distractor. Walkthrough: one booking "
+},
+{
+"t": "CloudFormation vs CDK vs Beanstalk",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/iac-choices.html",
+"d": "Choosing between CloudFormation, the AWS CDK and Elastic Beanstalk by control, developer productivity and effort, with a scenario drill.",
+"w": "CloudFormation : most control, templates, repeatable everywhere. CDK : the same, written in a programming language. Beanstalk : least effort for a standard web app (PaaS). Walkthrough: from most control to least effort Which tool?"
+},
+{
+"t": "IAM Access Analyzer for S3",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/iam-access-analyzer.html",
+"d": "How IAM Access Analyzer for S3 finds buckets that are public or shared with other accounts, and how to review findings, with a predict-the-finding drill.",
+"w": "IAM Access Analyzer for S3 shows which buckets are public or shared with other AWS accounts . It analyses bucket policies, ACLs and access point policies; you first create an analyzer in IAM for the Region. You review each finding: archive it if intended, fix it if not (one-click Block Public Access). It reports; it never changes permissions itself. Walkthrough: finding the buckets that leak Predict the finding"
 },
 {
 "t": "Console, CLI, SDK and access keys",
@@ -590,7 +870,7 @@ window.SEARCH_INDEX = [
 "k": "",
 "h": "aws-cloud-practitioner/iam.html",
 "d": "This page has been split into one explainer per topic.",
-"w": "\"IAM: Users, Groups, Policies & Roles\" is now one page per topic , each built around a request travelling through the infrastructure. Pick a topic below. This page has moved"
+"w": "\"IAM: Users, Groups, Policies & Roles\" is now one page per topic , each built around a request travelling through the infrastructure. Pick a topic below."
 },
 {
 "t": "AWS Cloud Practitioner Explainers",
@@ -609,12 +889,76 @@ window.SEARCH_INDEX = [
 "w": "An instance store is a disk physically inside the host server your instance runs on, not a network drive. No network in the way, so it is extremely fast (millions of IOPS on storage-optimized types like I3). It is ephemeral : data is lost on stop, terminate or host failure (it survives a reboot). Use it for cache, buffers, scratch data ; backups and replication are your job . Walkthrough: fast, until the instance moves What survives? EBS volume Instance store How much faster? EBS or instance sto"
 },
 {
+"t": "AWS Lambda",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/lambda.html",
+"d": "AWS Lambda event-driven functions: S3 and EventBridge triggers, limits, execution roles, CloudWatch Logs, automatic scaling and pricing, with an events and cost lab.",
+"w": "Lambda runs your code as functions when an event happens: no servers, scales automatically. Limits: 15 minutes per run, 128 MB–10 GB memory. Permissions come from an IAM execution role ; logs go to CloudWatch . You pay per request and per GB-second of run time; idle costs nothing. Walkthrough: making thumbnails when scans arrive Events in, functions out What would it cost?"
+},
+{
+"t": "Amazon Lightsail",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/lightsail.html",
+"d": "Amazon Lightsail bundles servers, databases and networking at a predictable monthly price for beginners and simple sites, and when to choose EC2 instead, with a compute chooser.",
+"w": "Lightsail offers virtual servers, databases, storage and networking in one simple console . Low, predictable monthly prices ; one-click WordPress, LAMP, Node.js… For users with little cloud experience , simple sites and dev/test. No auto scaling and limited AWS integration: usually a distractor in exam questions. Walkthrough: a WordPress site for a small clinic Pick the compute service"
+},
+{
+"t": "Elastic Load Balancing",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/load-balancers.html",
+"d": "How a load balancer spreads traffic across AZs, health checks, HTTPS termination and the ALB, NLB, GWLB and Classic types, with labs.",
+"w": "A load balancer is one front door (a single DNS name) that spreads requests across many instances in several AZs . Health checks find broken instances and stop sending traffic to them. It can end HTTPS for you, and your instances can accept traffic only from the load balancer. Four types: ALB (HTTP, layer 7), NLB (TCP/UDP, layer 4, static IP), GWLB (firewall appliances, layer 3), and the previous-generation Classic . Walkthrough: one front door for the booking site Health checks at work Which lo"
+},
+{
+"t": "AWS Local Zones",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/local-zones.html",
+"d": "AWS Local Zones extend a Region into cities such as Delhi and Kolkata for single-digit millisecond latency.",
+"w": "Local Zones extend a Region into a city , closer to users there. Run latency-sensitive parts (EC2, EBS, ECS, EKS, some RDS…) with single-digit millisecond latency. Available in many cities worldwide, for example Delhi and Kolkata (parent Region Mumbai). Walkthrough: bringing compute closer to Delhi Which one?"
+},
+{
+"t": "Amazon Managed Blockchain",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/managed-blockchain.html",
+"d": "Amazon Managed Blockchain: shared, decentralised ledgers using Hyperledger Fabric and Ethereum without running the infrastructure.",
+"w": "A blockchain is a shared ledger copied to every member, with no central authority. Managed Blockchain runs the network infrastructure for frameworks such as Hyperledger Fabric and Ethereum . Exam trigger only: \"blockchain\" or \"decentralised ledger\". Walkthrough: sharing prescriptions between organisations Blockchain or database?"
+},
+{
+"t": "Amazon Neptune",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/neptune.html",
+"d": "Amazon Neptune, the managed graph database: nodes and edges, multi-hop queries, fraud rings, social networks and recommendations, with a hops lab.",
+"w": "Neptune is a fully managed graph database . Data is nodes (things) and edges (relationships); queries walk the edges. Best for highly connected data: fraud detection, social networks, recommendations, knowledge graphs. Walkthrough: finding a claims fraud ring How far does a connection reach?"
+},
+{
+"t": "AWS Outposts",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/outposts.html",
+"d": "AWS Outposts brings AWS-managed racks into your data centre for low latency, local processing and data residency, with the same APIs as the Region.",
+"w": "Outposts puts AWS-managed racks or servers in your own data centre . Same AWS services, APIs and console on-premises: a consistent hybrid cloud . For low latency to local systems, local data processing and data residency . You are responsible for the physical security of the Outpost. Walkthrough: bringing AWS into a hospital Which one?"
+},
+{
 "t": "Cloud overview review",
 "s": "AWS",
 "k": "",
 "h": "aws-cloud-practitioner/overview-review.html",
 "d": "AWS Cloud Practitioner: review of the cloud and AWS overview section, with a mixed scenario drill, cheat-sheet and quiz.",
-"w": "With traditional IT you own every piece of hardware the request passes through. With cloud computing you rent that hardware when you need it. The service model decides how much of the stack you manage : IaaS, PaaS, SaaS. AWS runs in Regions made of Availability Zones , plus edge locations near users. Security is split: AWS secures the cloud, you secure what you put in it . Cloud & AWS overview: review The whole section on one path Section summary Traditional IT Cloud computing IaaS, PaaS, SaaS &"
+"w": "With traditional IT you own every piece of hardware the request passes through. With cloud computing you rent that hardware when you need it. The service model decides how much of the stack you manage : IaaS, PaaS, SaaS. AWS runs in Regions made of Availability Zones , plus edge locations near users. Security is split: AWS secures the cloud, you secure what you put in it . Cloud & AWS overview: review Traditional IT Cloud computing IaaS, PaaS, SaaS & pricing Regions, AZs & edge Shared responsibi"
+},
+{
+"t": "Systems Manager Parameter Store",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/parameter-store.html",
+"d": "Parameter Store keeps configuration and secrets centrally: String and SecureString (KMS) parameters, IAM-controlled access, versions and tiers, with a permissions lab.",
+"w": "Parameter Store stores configuration and secrets centrally (part of Systems Manager). String for plain values; SecureString encrypted with KMS . Access controlled per parameter with IAM ; every change is versioned . Standard tier free; Advanced tier paid. Parameter Store Walkthrough: moving the database password out of appsettings.json Can the app read it?"
 },
 {
 "t": "EC2 Purchasing Options",
@@ -625,6 +969,38 @@ window.SEARCH_INDEX = [
 "w": "Same instance, different price models : you trade flexibility for discount. On-Demand : no commitment, full price. Reserved Instances / Savings Plans : commit for 1 or 3 years, save up to ~72%. Spot : spare capacity, up to ~90% off, but AWS can take it back. Dedicated and Capacity Reservations solve isolation and capacity, not price. In everyday terms Walkthrough: one server, six ways to pay Which option fits this workload? What does a year cost? A Spot job gets interrupted All eight at a glance"
 },
 {
+"t": "Amazon QuickSight",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/quicksight.html",
+"d": "Amazon QuickSight serverless business intelligence: data sources, interactive dashboards, ML insights and embedding.",
+"w": "QuickSight is serverless business intelligence : interactive dashboards and charts. It connects to RDS, Aurora, Redshift, Athena, S3 and more. It adds ML-powered insights (anomalies, forecasts) and can be embedded in your apps. In the current exam guide it is written \"Amazon Quick Sight\". Walkthrough: a bookings dashboard for clinic managers Query, prepare or show?"
+},
+{
+"t": "Amazon RDS & Aurora",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/rds-aurora.html",
+"d": "Amazon RDS managed relational databases, Aurora's cloud-native engine and storage, Aurora Serverless, backups and snapshot actions.",
+"w": "RDS is a managed relational database: MySQL, PostgreSQL, MariaDB, Oracle, SQL Server, Db2. AWS patches, backs up and monitors it; you can't SSH in. Point-in-time restore is built in. Aurora is AWS's cloud-native MySQL/PostgreSQL-compatible engine: faster, with storage copied 6 ways across 3 AZs. Aurora Serverless scales capacity automatically and bills per second. Walkthrough: from an RDS instance to an Aurora cluster RDS, Aurora or Aurora Serverless? What does each snapshot action do?"
+},
+{
+"t": "RDS Read Replicas, Multi-AZ & Multi-Region",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/rds-deployments.html",
+"d": "RDS Multi-AZ for automatic failover, read replicas for read scaling and cross-Region replicas for disaster recovery, with a lab to write, read and lose an AZ.",
+"w": "Multi-AZ : a synchronous standby in another AZ for high availability and automatic failover. Read replicas : asynchronous, read-only copies to scale reads ; you promote one by hand. Cross-Region replicas : faster reads far away and disaster recovery . They solve different problems and are often combined. Read Replicas, Multi-AZ & Multi-Region Walkthrough: keeping bookings fast and available Write, report, lose an AZ"
+},
+{
+"t": "Amazon Redshift",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/redshift.html",
+"d": "Amazon Redshift data warehouse for OLAP: batch loading, massively parallel processing, columnar storage and Redshift Serverless, with a row-vs-column lab.",
+"w": "Redshift is a data warehouse for analytics (OLAP) , not for day-to-day transactions (OLTP). It stores data in columns and spreads queries over many nodes ( MPP ), scaling to petabytes. Data is loaded in batches from databases and S3; you query it with SQL and BI tools. Run a provisioned cluster or Redshift Serverless . Walkthrough: moving the finance reports off the live database Row store vs column store Warehouse or not?"
+},
+{
 "t": "Regions, AZs and edge locations",
 "s": "AWS",
 "k": "",
@@ -633,12 +1009,100 @@ window.SEARCH_INDEX = [
 "w": "A Region is a geographic area (such as ap-south-1 , Mumbai). Most services are regional : you pick the Region for each resource. Each Region has 3 or more Availability Zones . An AZ is one or more data centres with its own power and network, isolated from the others. Spreading your app across AZs keeps it running when one AZ fails. Edge locations (points of presence) sit in many more cities. You don't run servers there; services like CloudFront cache content there, close to users. Regions, AZs &"
 },
 {
+"t": "Amazon Route 53",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/route53.html",
+"d": "Amazon Route 53 managed DNS: hosted zones, A and Alias records, health checks and the simple, weighted, latency, failover and geolocation routing policies, with a resolve-for-everyone lab.",
+"w": "Route 53 is managed DNS (and a domain registrar), with a 100% availability SLA. Records map names to IPs or, with Alias , to AWS resources such as load balancers. Routing policies decide which answer each user gets: simple, weighted, latency, failover, geolocation… Health checks let it avoid failed endpoints. Walkthrough: sending each user to the right Region Where does each user go?"
+},
+{
+"t": "S3 Buckets & Objects",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/s3-basics.html",
+"d": "What Amazon S3 is: buckets in a Region, globally unique names, objects, keys and prefixes, durability and pre-signed URLs, with a naming lab.",
+"w": "Amazon S3 is object storage : you store whole files (objects) in buckets and reach them over HTTPS. Storage is virtually unlimited; one object can be up to about 48.8 TiB . You pay for what you store and use. A bucket lives in one Region , but its name is unique across all AWS accounts . An object's key is its full name; \"folders\" are only prefixes in the key. Walkthrough: storing a clinic's X-ray scans Name a bucket, build a key S3, EBS or EFS?"
+},
+{
+"t": "S3 Encryption",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/s3-encryption.html",
+"d": "How S3 encrypts data in transit and at rest: SSE-S3 by default, SSE-KMS, DSSE-KMS, SSE-C and client-side encryption, with a who-holds-the-key comparison.",
+"w": "In transit , S3 uses HTTPS (TLS). At rest , every new object is encrypted with SSE-S3 by default since January 2023. SSE-KMS uses keys you control in AWS KMS, with every use logged in CloudTrail. SSE-C : S3 encrypts with a key you send. Client-side : you encrypt before uploading. A bucket policy can force HTTPS or a particular encryption. Walkthrough: uploading a scan, four ways to encrypt it Who holds the key? Pick the encryption"
+},
+{
+"t": "S3 Replication (CRR & SRR)",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/s3-replication.html",
+"d": "How S3 replication copies objects between buckets: Cross-Region and Same-Region Replication, prerequisites, timing, Batch Replication and deletes, with a will-it-replicate lab.",
+"w": "Replication copies new objects to another bucket automatically and asynchronously . CRR (Cross-Region) copies to another Region; SRR (Same-Region) to another bucket in the same Region. Both can cross accounts. It needs versioning on both buckets and an IAM role for S3. It is not retroactive : existing objects need S3 Batch Replication . S3 Replication: CRR & SRR Walkthrough: copying the clinic's scans to Frankfurt Will it replicate? CRR, SRR or versioning?"
+},
+{
+"t": "Amazon S3: review",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/s3-review.html",
+"d": "AWS Cloud Practitioner: S3 section review with a one-path recap, section summary, commonly confused pairs, a mixed drill and 20 exam-style questions.",
+"w": "S3 stores objects in Regional buckets with globally unique names; 11 nines of durability. Access: IAM policies, bucket policies, Block Public Access ; explicit Deny wins. Encrypted at rest by default ( SSE-S3 ). Versioning protects against deletes and overwrites; replication (CRR/SRR) copies to other buckets. Storage classes and lifecycle rules cut cost; Storage Gateway connects on-premises servers. Buckets & objects Security Website, versioning, replication Classes, encryption, hybrid"
+},
+{
+"t": "S3 Security & Bucket Policies",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/s3-security.html",
+"d": "How S3 decides who can read an object: IAM policies, bucket policies, Block Public Access, explicit deny and ACLs, with an access lab and a policy reader.",
+"w": "Buckets are private by default . Access is granted by IAM policies (on users and roles) or a bucket policy (on the bucket). A request is allowed if either policy allows it and no policy explicitly denies it. Block Public Access is on by default and overrides any public grant. Making a bucket public needs both : Block Public Access off and a public-read bucket policy. Walkthrough: who can read the clinic's scans? Who can read scans/xray-0042.png ? Read a bucket policy"
+},
+{
+"t": "S3 Static Website Hosting",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/s3-static-website.html",
+"d": "Serve a static website from an S3 bucket: website endpoint, index and error documents, the 403 trap, and HTTPS through CloudFront, with a go-live lab.",
+"w": "S3 can serve a static website (HTML, CSS, JavaScript, images) with no web server . Enable static website hosting , set an index document , and make the objects publicly readable . 403 Forbidden means the content isn't public yet. The website endpoint is HTTP only ; use CloudFront for HTTPS and a custom domain. Walkthrough: putting the clinic's brochure site online Get the site online Can S3 host it?"
+},
+{
+"t": "S3 Storage Classes & Lifecycle",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/s3-storage-classes.html",
+"d": "The eight S3 storage classes compared by price, availability, retrieval and minimum duration, lifecycle rules and Intelligent-Tiering, with a class picker and cost calculator.",
+"w": "Every class has 11 nines of durability ; they differ in price , availability , retrieval time and fees, and minimum duration . Standard for frequent access, Standard-IA / One Zone-IA for infrequent, three Glacier classes for archives. Intelligent-Tiering moves objects automatically when the access pattern is unknown. Lifecycle rules move objects to cheaper classes as they age and delete them at the end. Walkthrough: an X-ray's life across the storage classes Match the data to a class What would "
+},
+{
+"t": "S3 Transfer Acceleration",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/s3-transfer-acceleration.html",
+"d": "S3 Transfer Acceleration speeds long-distance uploads and downloads to one S3 bucket through edge locations and the AWS network.",
+"w": "S3 Transfer Acceleration speeds up transfers to and from one S3 bucket over long distances. Clients upload to the nearest edge location ; AWS carries the data over its private network. No caching; extra per-GB fee, charged only when it actually helped. Walkthrough: a lab in São Paulo uploading to Mumbai Uploads from far away"
+},
+{
+"t": "S3 Versioning",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/s3-versioning.html",
+"d": "How S3 versioning keeps every version of an object: overwrites, delete markers, permanent deletes, cost and suspension, with an upload-and-delete lab.",
+"w": "Versioning keeps every version of an object, so overwrites and deletes can be undone. A normal delete adds a delete marker ; removing the marker brings the object back. Deleting a specific version ID is permanent. Each version is billed as a full object. Versioning can be suspended but not turned off, and replication needs it. Walkthrough: saving a report three times, then deleting it Upload, overwrite, delete, undo What happens?"
+},
+{
 "t": "Amazon S3",
 "s": "AWS",
 "k": "",
 "h": "aws-cloud-practitioner/s3.html",
-"d": "AWS Cloud Practitioner: who can read an S3 object, how versioning and delete markers work, and which storage class fits each access pattern.",
-"w": "Object storage : files (objects) in buckets , reached by API or URL. Virtually unlimited; objects up to ~48.8 TiB. A bucket lives in one Region ; its name is globally unique. \"Folders\" are just key prefixes. Buckets are private by default, and objects are encrypted by default (SSE-S3: server-side encryption with keys that S3 manages). Access comes from IAM policies and bucket policies. Every storage class has 11 nines of durability (99.999999999%: data is almost never lost). The classes differ i"
+"d": "This page has been split into one explainer per topic.",
+"w": "\"Amazon S3\" is now one page per topic , each with its own walkthrough and labs. Pick a topic below."
+},
+{
+"t": "Auto Scaling Strategies",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/scaling-strategies.html",
+"d": "Simple, step, target tracking, scheduled and predictive scaling compared on one day of traffic, plus a day simulator.",
+"w": "A scaling policy decides when an Auto Scaling group changes its desired capacity. Dynamic policies react to a metric: simple and step scaling follow CloudWatch alarms; target tracking keeps a metric (for example CPU 50%) steady. Scheduled scaling changes capacity at set times; predictive scaling forecasts daily patterns with machine learning and scales ahead of them. Real setups often combine them: predictive for the known pattern, target tracking for surprises. Walkthrough: one day, seven ways "
 },
 {
 "t": "Security groups and classic ports",
@@ -647,6 +1111,22 @@ window.SEARCH_INDEX = [
 "h": "aws-cloud-practitioner/security-groups.html",
 "d": "AWS Cloud Practitioner: EC2 security groups as a stateful, allow-only firewall in front of instances; inbound vs outbound, CIDR and security-group sources, timeout vs connection refused, and the classic ports 21, 22, 80, 443, 3389.",
 "w": "A security group is a virtual firewall around EC2 instances, with inbound and outbound rules. It has allow rules only . Inbound is blocked by default ; outbound is allowed by default . Replies to allowed traffic flow back automatically ( stateful ). A rule has a protocol, a port and a source . The source is an IP range ( 0.0.0.0/0 is every IPv4 address; 203.0.113.10/32 is one address) or another security group . Timeout = blocked by the security group. Connection refused means the traffic got th"
+},
+{
+"t": "What is Serverless",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/serverless.html",
+"d": "What serverless means on AWS, which services are serverless, why it lowers operational work, and how it differs from merely managed services.",
+"w": "Serverless : you don't provision, manage or see servers. They still exist. It scales automatically and you pay for what you use. Examples: Lambda, Fargate, S3, DynamoDB, API Gateway . Managed ≠ serverless : ECS on EC2 and Batch on EC2 still use instances. Walkthrough: a patient app with no servers Serverless or not?"
+},
+{
+"t": "Systems Manager Session Manager",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/session-manager.html",
+"d": "Session Manager gives a secure shell to EC2 and on-premises servers with no SSH keys, no bastion and no open port 22, with a three-ways-to-connect lab.",
+"w": "Session Manager opens a shell on EC2 or on-premises servers with no SSH keys , no bastion and port 22 closed . Needs the SSM agent and an IAM role ( AmazonSSMManagedInstanceCore ). IAM controls access; sessions can be logged to S3 or CloudWatch. Session Manager Walkthrough: a shell without opening port 22 Three ways to get a shell"
 },
 {
 "t": "Shared Responsibility Model",
@@ -665,12 +1145,44 @@ window.SEARCH_INDEX = [
 "w": "SSH (Secure Shell) opens a remote terminal on a Linux instance over port 22 . It uses a key pair : AWS puts the public key on the instance; you keep the private key ( .pem , or .ppk for PuTTY). AWS can't give it to you again. Command: ssh -i key.pem ec2-user@<public-ip> . On macOS/Linux, first run chmod 400 key.pem . Windows instances use RDP on 3389 instead. No terminal at all? Use EC2 Instance Connect in the browser (next topic). Walkthrough: from your laptop to a shell on the instance SSH tro"
 },
 {
+"t": "AWS Storage Gateway",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/storage-gateway.html",
+"d": "How AWS Storage Gateway lets on-premises servers use S3, Glacier and EBS snapshots through file, volume and tape gateways.",
+"w": "Storage Gateway connects on-premises servers to AWS storage: hybrid cloud storage . It runs in your data centre and speaks the protocols your servers already use. Three types: S3 File Gateway (SMB/NFS), Volume Gateway (iSCSI), Tape Gateway (virtual tapes). Data lands in S3 , S3 Glacier or as EBS snapshots , with a local cache for speed. Walkthrough: giving the clinic's old servers cloud storage Which gateway?"
+},
+{
 "t": "EC2 storage review",
 "s": "AWS",
 "k": "",
 "h": "aws-cloud-practitioner/storage-review.html",
 "d": "AWS Cloud Practitioner: EC2 instance storage section review with a one-path recap, section summary, commonly confused pairs, a drill and 20 exam-style questions.",
-"w": "EBS is the network disk of one instance in one AZ; snapshots back it up and move it. AMIs are launch templates built on snapshots; EC2 Image Builder automates them. Instance store is the fastest disk but disappears on stop/terminate. Shared file storage: EFS (Linux), FSx for Windows (SMB/AD), FSx for Lustre (HPC). EC2 instance storage: review The whole section on one path Section summary EBS volumes Snapshots AMIs & Image Builder Instance store EFS FSx & responsibility Topics in this section Com"
+"w": "EBS is the network disk of one instance in one AZ; snapshots back it up and move it. AMIs are launch templates built on snapshots; EC2 Image Builder automates them. Instance store is the fastest disk but disappears on stop/terminate. Shared file storage: EFS (Linux), FSx for Windows (SMB/AD), FSx for Lustre (HPC). EC2 instance storage: review EBS volumes Snapshots AMIs & Image Builder Instance store EFS FSx & responsibility"
+},
+{
+"t": "Synchronous vs Asynchronous Communication",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/sync-vs-async.html",
+"d": "How applications talk to each other: synchronous calls versus asynchronous queues and events, why decoupling absorbs spikes, and the AWS services SQS, SNS and Kinesis, with a spike lab.",
+"w": "Synchronous : one app calls another directly and waits. Simple, but tightly coupled . Asynchronous (event-based): the sender puts a message in a queue or publishes an event; the receiver handles it later. Decoupling absorbs traffic spikes and lets each side scale independently . AWS: SQS (queues), SNS (pub/sub), Kinesis (real-time streams). Walkthrough: booking and report services under a spike What happens in a spike? SQS, SNS or Kinesis?"
+},
+{
+"t": "AWS Systems Manager",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/systems-manager.html",
+"d": "AWS Systems Manager manages EC2 and on-premises servers together: the SSM agent, Run Command, Patch Manager and the rest of the toolbox, with a feature drill.",
+"w": "Systems Manager manages EC2 and on-premises servers at scale: a hybrid service. Each server runs the SSM agent and needs permission (an IAM role on EC2). Run commands, patch the fleet, open shells, store parameters, collect inventory. AWS Systems Manager (SSM) Walkthrough: patching a hybrid fleet Which Systems Manager feature?"
+},
+{
+"t": "Amazon Timestream",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/timestream.html",
+"d": "Amazon Timestream, the managed time-series database for IoT and monitoring data, and the current status of its LiveAnalytics and InfluxDB options.",
+"w": "Timestream is a managed time-series database : measurements with timestamps, arriving fast. Built for IoT telemetry, monitoring metrics and real-time analytics. Timestream for LiveAnalytics no longer takes new customers; Timestream for InfluxDB is the recommended option. Walkthrough: watching vaccine fridges Time series or not?"
 },
 {
 "t": "Traditional IT",
@@ -681,12 +1193,28 @@ window.SEARCH_INDEX = [
 "w": "A server is a computer with CPU (compute), RAM (memory) and storage , usually backed by a database . To open a website, the browser asks DNS for the server's IP address . Then the request travels over the internet to a router, then a switch, then the server. In traditional IT you buy every one of those machines yourself, mount them in racks, and pay for their power, cooling and the staff to run them. Its limits (big upfront cost, slow to grow, one failure takes you down) are why cloud computing "
 },
 {
+"t": "AWS Wavelength",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/wavelength.html",
+"d": "AWS Wavelength places AWS compute inside telecom 5G networks for ultra-low-latency mobile applications.",
+"w": "Wavelength places AWS compute and storage inside telecom providers' 5G networks . Traffic from 5G devices reaches your app without leaving the carrier's network: ultra-low latency . For AR/VR, real-time gaming, connected vehicles, smart cities, live video. Walkthrough: an AR app on 5G phones Which one?"
+},
+{
 "t": "What is cloud computing",
 "s": "AWS",
 "k": "",
 "h": "aws-cloud-practitioner/what-is-cloud.html",
 "d": "AWS Cloud Practitioner: what cloud computing is, its five characteristics, the six advantages AWS lists, and private, public and hybrid cloud.",
 "w": "Cloud computing = on-demand delivery of compute, storage, databases and other IT resources over the internet , with pay-as-you-go pricing. The provider (AWS) owns and runs the hardware; you ask for what you need through a website or API and get it in minutes. Five characteristics: on-demand self-service, broad network access, resource pooling, rapid elasticity, measured service . Three deployment models: private , public (AWS) and hybrid (some on-premises, some in the cloud). Walkthrough: the sa"
+},
+{
+"t": "Why Go Global",
+"s": "AWS",
+"k": "",
+"h": "aws-cloud-practitioner/why-global.html",
+"d": "Why build a global application on AWS: lower latency for distant users, disaster recovery across Regions and attack resilience, using Regions and edge locations, with a latency lab.",
+"w": "Distance adds latency : users far from your Region wait longer for every request. Deploying in several Regions cuts latency and gives disaster recovery . Edge locations speed things up without full deployments. Building blocks: Regions, AZs, edge locations, Local Zones, Wavelength, Outposts. Walkthrough: serving patients on four continents Where should the app run?"
 },
 {
 "t": "Built-in functions toolbox",
